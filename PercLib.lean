@@ -22,6 +22,7 @@ public import PercLib.Analysis.RegularVariation.Algebra
 public import PercLib.Analysis.RegularVariation.Defs
 public import PercLib.Analysis.RegularVariation.GeneralInverse
 public import PercLib.Analysis.RegularVariation.Karamata
+public import PercLib.Analysis.RegularVariation.LevelInverse
 public import PercLib.Analysis.RegularVariation.LogErrorTransforms
 public import PercLib.Analysis.RegularVariation.LogErrorTransformsTail
 public import PercLib.Analysis.RegularVariation.LogODE
