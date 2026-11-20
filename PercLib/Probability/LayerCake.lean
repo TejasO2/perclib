@@ -47,6 +47,7 @@ theorem measurableSet_natCast_le (hT : Measurable T) (n : ℕ) :
 /-! ### First moments -/
 
 /-- **Tail sum.** `∫⁻ T = ∑_{n ≥ 0} μ {n + 1 ≤ T}`. -/
+@[tag "CSY8"]
 theorem lintegral_toENNReal_eq_tsum (hT : Measurable T) :
     ∫⁻ ω, (T ω : ℝ≥0∞) ∂μ = ∑' n : ℕ, μ {ω | ((n + 1 : ℕ) : ℕ∞) ≤ T ω} := by
   have hpt : ∀ ω, (T ω : ℝ≥0∞) = ∑' n : ℕ,

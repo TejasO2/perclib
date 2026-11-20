@@ -7,6 +7,7 @@ copied, no definition is added and no Input is introduced.
 -/
 module
 
+public import PercLib.Meta.Tag
 public import Mathlib.Analysis.InnerProductSpace.PiL2
 public import Mathlib.Analysis.Normed.Lp.MeasurableSpace
 public import Mathlib.MeasureTheory.Integral.Bochner.Set
@@ -75,6 +76,7 @@ theorem exists_bump (R : ℝ) :
 
 /-- **WGQ7, no weak limit.** On `EuclideanSpace ℝ (Fin d)` with `d ≥ 1`, the point masses at
 `n e₁` (as finite measures) have no weakly convergent subsequence. -/
+@[tag "WGQ7"]
 theorem not_tendsto_dirac_smul (hd : 0 < d) (φ : ℕ → ℕ) (hφ : StrictMono φ)
     (μ : FiniteMeasure (EuclideanSpace ℝ (Fin d))) :
     ¬ Tendsto (β := FiniteMeasure (EuclideanSpace ℝ (Fin d))) (fun n => ⟨Measure.dirac

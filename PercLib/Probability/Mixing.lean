@@ -41,6 +41,7 @@ variable {ι : Type*}
 
 /-- Every measurable event is approximated in measure by an event depending on finitely many
 coordinates. -/
+@[tag "DK14"]
 theorem exists_finset_measure_symmDiff_lt (μ : Measure (Set ι)) [IsFiniteMeasure μ]
     {A : Set (Set ι)} (hA : MeasurableSet A) {ε : ℝ≥0∞} (hε : 0 < ε) :
     ∃ (F : Finset ι) (S : Set (F → Prop)), MeasurableSet S ∧
@@ -103,6 +104,7 @@ theorem inter_symmDiff_inter_subset' (A A' C C' : Set (Set ι)) :
   tauto
 
 /-- **Mixing.** Relabellings that preserve the law and separate finite sets are mixing. -/
+@[tag "MJD2"]
 theorem prodBernoulli_tendsto_inter_preimage (p : ι → unitInterval) (e : ℕ → ι ≃ ι)
     (hpres : ∀ n, MeasurePreserving (fun ω : Set ι => e n '' ω)
       (prodBernoulli p) (prodBernoulli p))

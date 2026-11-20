@@ -7,6 +7,7 @@ No upstream proof is copied.
 -/
 module
 
+public import PercLib.Meta.Tag
 public import PercLib.Analysis.Elementary
 public import Mathlib.MeasureTheory.Integral.Lebesgue.Markov
 public import Mathlib.MeasureTheory.Measure.Typeclasses.Probability
@@ -223,6 +224,7 @@ end HPE6
 /-- **MBV2.** Let `p_n ≥ 0` be nonincreasing on `n ≥ 1`, `∑_{k=1}^N p_k ≥ c√N` for `N ≥ N₀`,
 and `p_n ≤ C/√n` for `n ≥ 1`. For an integer `A ≥ 2` with `c√A ≥ 4C`,
 `p_n ≥ c/(2√A) · n^{-1/2}` for every `n ≥ N₀`. -/
+@[tag "MBV2"]
 theorem le_of_sum_ge_sqrt {p : ℕ → ℝ} {c C : ℝ} {N₀ A : ℕ} (hN₀ : 1 ≤ N₀)
     (hp0 : ∀ n, 0 ≤ p n) (hmono : ∀ m n, 1 ≤ m → m ≤ n → p n ≤ p m)
     (hsum : ∀ N, N₀ ≤ N → c * Real.sqrt N ≤ ∑ k ∈ Icc 1 N, p k)

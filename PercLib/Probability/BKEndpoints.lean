@@ -53,6 +53,7 @@ theorem prodBernoulli_deterministic_real [Fintype E] (u : Set E) (A : Set (Set E
     simp [measureReal_def, Measure.dirac_apply' _ (Set.toFinite A).measurableSet, indicator, h]
 
 /-- New mixed zero/one specialization: deterministic BK for arbitrary finite events. -/
+@[tag "E7HI"]
 theorem bk_deterministic [Fintype E] (u : Set E) (A B : Set (Set E)) :
     (prodBernoulli (fun e => if e ∈ u then 1 else 0)).real (disjointOccurrence A B) ≤
       (prodBernoulli (fun e => if e ∈ u then 1 else 0)).real A *

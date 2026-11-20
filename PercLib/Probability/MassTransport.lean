@@ -35,7 +35,7 @@ namespace PercLib.Probability
 
 /-- **Mass-transport principle on a group** (IHJ3). If `F (g * x) (g * y) = F x y` for all
 `g x y`, then `∑' x, F 1 x = ∑' x, F x 1`. -/
-@[to_additive tsum_mass_transport_add /-- **Mass-transport principle on an additive group** (IHJ3). If
+@[tag "IHJ3", to_additive tsum_mass_transport_add /-- **Mass-transport principle on an additive group** (IHJ3). If
 `F (g + x) (g + y) = F x y` for all `g x y`, then `∑' x, F 0 x = ∑' x, F x 0`. -/]
 theorem tsum_mass_transport {Γ : Type*} [Group Γ] (F : Γ → Γ → ℝ≥0∞)
     (hF : ∀ g x y, F (g * x) (g * y) = F x y) :
@@ -47,7 +47,7 @@ theorem tsum_mass_transport {Γ : Type*} [Group Γ] (F : Γ → Γ → ℝ≥0�
 
 /-- **Mass-transport principle for an invariant random transport** (K5ZX), with the action
 given as a family of measure-preserving maps `act g`. No group-action axioms are needed. -/
-@[to_additive lintegral_mass_transport_add /-- **Mass-transport principle for an invariant random transport** (K5ZX),
+@[tag "X5NY", to_additive lintegral_mass_transport_add /-- **Mass-transport principle for an invariant random transport** (K5ZX),
 additive version. -/]
 theorem lintegral_mass_transport {Γ Ω : Type*} [Group Γ] [Countable Γ] [MeasurableSpace Ω]
     {μ : Measure Ω} (act : Γ → Ω → Ω) (hact : ∀ g, MeasurePreserving (act g) μ μ)
@@ -62,7 +62,7 @@ theorem lintegral_mass_transport {Γ Ω : Type*} [Group Γ] [Countable Γ] [Meas
   simp only [hinv]
 
 /-- K5ZX for a measure-preserving `MulAction`. -/
-@[to_additive /-- K5ZX for a measure-preserving `AddAction`. -/]
+@[tag "K5ZX", to_additive /-- K5ZX for a measure-preserving `AddAction`. -/]
 theorem lintegral_mass_transport_smul {Γ Ω : Type*} [Group Γ] [Countable Γ]
     [MeasurableSpace Ω] [MulAction Γ Ω] {μ : Measure Ω}
     (hact : ∀ g : Γ, MeasurePreserving (fun ω : Ω => g • ω) μ μ)

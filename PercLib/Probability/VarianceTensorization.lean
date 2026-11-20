@@ -202,6 +202,7 @@ theorem variance_le_sum_on (q : E → ℝ) (hq : ∀ e, q e ∈ Set.Icc (0 : ℝ
 /-- **Efron–Stein inequality for finite Bernoulli profiles** (R428). For a profile with
 values in `[0,1]`, endpoints allowed, the variance `E_q[f²] - (E_q f)²` is at most
 `∑ₑ qₑ(1-qₑ) E_q[(Δₑ f)²]`. -/
+@[tag "R428"]
 theorem variance_le_sum_difference_sq (q : E → ℝ) (hq : ∀ e, q e ∈ Set.Icc (0 : ℝ) 1)
     (f : (E → Bool) → ℝ) :
     expectation q (fun ω => f ω ^ 2) - expectation q f ^ 2 ≤
@@ -274,6 +275,7 @@ private lemma prodBernoulli_real_eq_expectation (r : E → unitInterval) (A : Se
 
 /-- **GI8Q**, probability form: with `F(u) = P_u(A)` for the homogeneous product law
 (extended outside `[0,1]` by clamping), `p(1-p) F'(p) ≥ F(p)(1-F(p))` for `0 < p < 1`. -/
+@[tag "GI8Q"]
 theorem prodBernoulli_event_variance_le_deriv {A : Set (Set E)} (hA : IsUpperSet A) {p : ℝ}
     (hp : p ∈ Set.Ioo (0 : ℝ) 1) :
     (prodBernoulli (fun _ : E => Set.projIcc 0 1 zero_le_one p)).real A *
