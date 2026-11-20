@@ -10,7 +10,9 @@ commit's file headers and `third_party/critical-lrp/NOTICE.md`; upstream
 `yujinhkim/Critical-Long-range-percolation` at `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf`.
 Modified: the source's `mean`, `secMoment`, `sbMean` and `sizeBiasedLaw` are written out as
 the size-biased law `(P.withDensity fun ω => ENNReal.ofReal (X ω / ∫ X ∂P)).map (X / a)` of
-`PercLib/Probability/SizeBiasLimits.lean`; the source's kernel `kern` (value `0` at `0`) is
+`PercLib/Probability/SizeBiasLimits.lean`, and the source's change of variables
+`integral_sizeBiasedLaw` is `integral_withDensity_ofReal_div` of
+`PercLib/Probability/ChiSquareMoments.lean` composed with `integral_map`; the source's kernel `kern` (value `0` at `0`) is
 replaced by the kernel `f_λ` of that file (value `λ` at `0`), and the source's kernel lemmas
 by `laplaceKernel_mem_Icc` and `abs_laplaceKernel_sub_le`; the identities are stated for a
 random variable `X ≥ 0` a.e. on any measure space and any scale `a > 0`, with the source's
@@ -19,7 +21,7 @@ lines are removed.
 -/
 module
 
-public import PercLib.Probability.SizeBiasLimits
+public import PercLib.Probability.ChiSquareMoments
 
 /-! # Size-biased Laplace identities and the fixed-rate cut-off limit
 
@@ -30,8 +32,7 @@ under the size-biased measure `(X / m) P`,
 
 ## Main results
 
-* `integral_map_withDensity_ofReal_div`: change of variables,
-  `∫ g dQ = m⁻¹ ∫ X g(X / a) dP`.
+* `map_withDensity_ofReal_div_Iio_zero`: `Q` is carried by `[0, ∞)`.
 * `isProbabilityMeasure_withDensity_ofReal_div_integral`: the size-biased measure is a
   probability measure.
 * `integral_one_sub_exp_eq_mul_integral_laplaceKernel`: `E[1 - e^{-hX}] = (m / a) ∫ f_{ha} dQ`.
@@ -59,20 +60,6 @@ open PercLib.Probability
 variable {Ω : Type*} [MeasurableSpace Ω]
 
 /-! ### The size-biased law -/
-
-/-- **Size-biased change of variables.** With `Q` the law of `X / a` under `(X / m) P`,
-`∫ g dQ = m⁻¹ ∫ X g(X / a) dP` for measurable `g`. -/
-theorem integral_map_withDensity_ofReal_div (P : Measure Ω) {X : Ω → ℝ} (hXm : Measurable X)
-    (hX0 : 0 ≤ᵐ[P] X) {m : ℝ} (hm : 0 ≤ m) (a : ℝ) {g : ℝ → ℝ} (hg : Measurable g) :
-    ∫ y, g y ∂((P.withDensity fun ω => ENNReal.ofReal (X ω / m)).map fun ω => X ω / a) =
-      m⁻¹ * ∫ ω, X ω * g (X ω / a) ∂P := by
-  rw [integral_map (hXm.div_const a).aemeasurable hg.aestronglyMeasurable,
-    integral_withDensity_eq_integral_toReal_smul (hXm.div_const m).ennreal_ofReal
-      (Eventually.of_forall fun _ => ENNReal.ofReal_lt_top), ← integral_const_mul]
-  refine integral_congr_ae ?_
-  filter_upwards [hX0] with ω hω
-  rw [smul_eq_mul, ENNReal.toReal_ofReal (div_nonneg hω hm)]
-  ring
 
 /-- The law of `X / a` under `(X / m) P` is carried by `[0, ∞)`. -/
 theorem map_withDensity_ofReal_div_Iio_zero (P : Measure Ω) {X : Ω → ℝ} (hXm : Measurable X)
@@ -119,8 +106,8 @@ theorem integral_one_sub_exp_eq_mul_integral_laplaceKernel (P : Measure Ω) {X :
     ∫ ω, (1 - exp (-(h * X ω))) ∂P =
       (∫ ω, X ω ∂P) / a * ∫ y, (if y = 0 then h * a else (1 - exp (-(h * a * y))) / y)
         ∂((P.withDensity fun ω => ENNReal.ofReal (X ω / ∫ ω, X ω ∂P)).map fun ω => X ω / a) := by
-  rw [integral_map_withDensity_ofReal_div P hXm hX0 hm.le a
-    (continuous_laplaceKernel (h * a)).measurable]
+  rw [integral_map (hXm.div_const a).aemeasurable
+    (continuous_laplaceKernel (h * a)).aestronglyMeasurable, integral_withDensity_ofReal_div P hXm hX0]
   have hpt : ∀ ω, X ω * (if X ω / a = 0 then h * a else
       (1 - exp (-(h * a * (X ω / a)))) / (X ω / a)) = a * (1 - exp (-(h * X ω))) := by
     intro ω
@@ -141,8 +128,8 @@ theorem integral_mul_exp_neg_eq_mul_integral (P : Measure Ω) {X : Ω → ℝ} (
     ∫ ω, X ω * exp (-(c * X ω)) ∂P =
       (∫ ω, X ω ∂P) * ∫ y, exp (-(c * a * y))
         ∂((P.withDensity fun ω => ENNReal.ofReal (X ω / ∫ ω, X ω ∂P)).map fun ω => X ω / a) := by
-  rw [integral_map_withDensity_ofReal_div P hXm hX0 hm.le a (by fun_prop), ← mul_assoc,
-    mul_inv_cancel₀ hm.ne', one_mul]
+  rw [integral_map (hXm.div_const a).aemeasurable (by fun_prop),
+    integral_withDensity_ofReal_div P hXm hX0, mul_div_cancel₀ _ hm.ne']
   refine integral_congr_ae (Eventually.of_forall fun ω => ?_)
   simp only
   rw [show c * a * (X ω / a) = c * X ω by field_simp]
