@@ -105,6 +105,7 @@ public import PercLib.Percolation.Bond.BoundaryContraction
 public import PercLib.Percolation.Bond.BoundarySusceptibility
 public import PercLib.Percolation.Bond.ClosedCertificates
 public import PercLib.Percolation.Bond.ClusterCorrelation.Defs
+public import PercLib.Percolation.Bond.ClusterCorrelation.CovarianceGap
 public import PercLib.Percolation.Bond.ClusterCorrelation.Inequalities
 public import PercLib.Percolation.Bond.ClusterCorrelation.Restoration
 public import PercLib.Percolation.Bond.ClusterCorrelation.TwoClusterGap
