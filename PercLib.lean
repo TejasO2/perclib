@@ -23,6 +23,7 @@ public import PercLib.Analysis.RegularVariation.LogODE
 public import PercLib.Analysis.RegularVariation.LogScaling
 public import PercLib.Analysis.RegularVariation.PotterODE
 public import PercLib.Analysis.RegularVariation.UniformConvergence
+public import PercLib.Analysis.RiccatiBootstrap
 public import PercLib.Analysis.RiccatiComparison
 public import PercLib.Basic
 public import PercLib.Combinatorics.DoubleFactorialConvolution
