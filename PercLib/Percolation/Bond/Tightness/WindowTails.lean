@@ -7,7 +7,7 @@ No source text or code is copied.
 -/
 module
 
-public import PercLib.Percolation.Bond.Tightness.FromBK
+public import PercLib.Percolation.Bond.Tightness.BKStep
 public import PercLib.Percolation.Bond.WindowPartition
 public import Mathlib.Analysis.SpecialFunctions.Gamma.Basic
 public import Mathlib.Analysis.SpecialFunctions.Gaussian.GaussianIntegral
@@ -16,7 +16,7 @@ public import Mathlib.Analysis.SpecialFunctions.Pow.Integral
 /-! # Window tails with damping, fractional moments, and exponent relations
 
 * MJEP, `law_le_clusterIntersection_le_damped` and `lintegral_rpow_clusterIntersection_le`:
-  under `UniversalTightness V` and a window tail `P(n ≤ X) ≤ A n^(-θ)` (`0 ≤ θ < 1`),
+  by universal tightness, under a window tail `P(n ≤ X) ≤ A n^(-θ)` (`0 ≤ θ < 1`),
   `P(n ≤ X) ≤ e A (18/n)^θ e^(-n/(18M))` for `n ≥ 1`, and for real `p > θ`
   `E X^p ≤ e A 18^p p Γ(p-θ) M^(p-θ)`.
 * 7VCS, `dimension_bounds_of_hyperscaling`: exponent inequalities from the WRHL bounds,
@@ -47,10 +47,10 @@ theorem rpow_le_exp_self {x θ : ℝ} (hx : 0 ≤ x) (hθ0 : 0 ≤ θ) (hθ1 : �
       _ ≤ x + 1 := by linarith
       _ ≤ Real.exp x := Real.add_one_le_exp x
 
-/-- **MJEP, tail.** Under `UniversalTightness V`, if `P(n ≤ X_u) ≤ A n^(-θ)` for all
+/-- **MJEP, tail.** By universal tightness, if `P(n ≤ X_u) ≤ A n^(-θ)` for all
 `n ≥ 1`, with `A ≥ 0` and `0 ≤ θ < 1`, then for `n ≥ 1`
 `P(n ≤ X_u) ≤ e A (18/n)^θ e^(-n/(18M))`, `M = tightnessScale q Λ`. -/
-theorem law_le_clusterIntersection_le_damped [Countable V] (hUT : UniversalTightness V)
+theorem law_le_clusterIntersection_le_damped [Countable V]
     (q : Sym2 V → unitInterval) {Λ : Finset V} (hΛ : Λ.Nonempty) (u : V) {A θ : ℝ}
     (hA : 0 ≤ A) (hθ0 : 0 ≤ θ) (hθ1 : θ < 1)
     (htail : ∀ n : ℕ, 1 ≤ n →
@@ -98,7 +98,7 @@ theorem law_le_clusterIntersection_le_damped [Countable V] (hUT : UniversalTight
       · intro h; exact_mod_cast h
       · intro h; exact_mod_cast h
     rw [hev]
-    refine ((hUT q Λ hΛ).2.2 u a ha1).trans ?_
+    refine (law_mul_tightnessScale_le_clusterIntersection_le q hΛ u ha1).trans ?_
     have hMt := htail M (by omega)
     calc ENNReal.ofReal (Real.exp 1) * law q {ω | M ≤ clusterIntersection Λ ω u} *
           ENNReal.ofReal (Real.exp (-a / 9))
@@ -136,7 +136,7 @@ theorem law_le_clusterIntersection_le_damped [Countable V] (hUT : UniversalTight
 /-- **MJEP, fractional moments.** Under the hypotheses of
 `law_le_clusterIntersection_le_damped`, for every real `p > θ`,
 `E X_u^p ≤ e A 18^p p Γ(p-θ) M^(p-θ)`. -/
-theorem lintegral_rpow_clusterIntersection_le [Countable V] (hUT : UniversalTightness V)
+theorem lintegral_rpow_clusterIntersection_le [Countable V]
     (q : Sym2 V → unitInterval) {Λ : Finset V} (hΛ : Λ.Nonempty) (u : V) {A θ : ℝ}
     (hA : 0 ≤ A) (hθ0 : 0 ≤ θ) (hθ1 : θ < 1)
     (htail : ∀ n : ℕ, 1 ≤ n →
@@ -174,7 +174,7 @@ theorem lintegral_rpow_clusterIntersection_le [Countable V] (hUT : UniversalTigh
         {ω | n ≤ clusterIntersection Λ ω u} := by
       ext ω; simp only [Set.mem_ofPred_eq, hn, Nat.ceil_le]
     rw [hev]
-    have h1 := law_le_clusterIntersection_le_damped hUT q hΛ u hA hθ0 hθ1 htail n hn1
+    have h1 := law_le_clusterIntersection_le_damped q hΛ u hA hθ0 hθ1 htail n hn1
     refine (mul_le_mul' h1 le_rfl).trans ?_
     rw [← ENNReal.ofReal_mul (by positivity), ← ENNReal.ofReal_mul hc0]
     refine ENNReal.ofReal_le_ofReal ?_
@@ -484,14 +484,14 @@ example (q : Sym2 Unit → unitInterval) (n : ℕ) (hn : 1 ≤ n) :
     law q {ω | n ≤ clusterIntersection {()} ω ()} ≤
       ENNReal.ofReal (Real.exp 1 * 1 * (18 / (n : ℝ)) ^ (0 : ℝ) *
         Real.exp (-(n : ℝ) / (18 * tightnessScale q {()}))) :=
-  law_le_clusterIntersection_le_damped universalTightness_unit q (Finset.singleton_nonempty _)
+  law_le_clusterIntersection_le_damped q (Finset.singleton_nonempty _)
     () zero_le_one le_rfl zero_lt_one (window_tail_one q _ ()) n hn
 
 example (q : Sym2 Unit → unitInterval) :
     ∫⁻ ω, ENNReal.ofReal ((clusterIntersection {()} ω () : ℝ) ^ (2 : ℝ)) ∂(law q) ≤
       ENNReal.ofReal (Real.exp 1 * 1 * 18 ^ (2 : ℝ) * 2 * Real.Gamma (2 - 0) *
         (tightnessScale q {()} : ℝ) ^ ((2 : ℝ) - 0)) :=
-  lintegral_rpow_clusterIntersection_le universalTightness_unit q
+  lintegral_rpow_clusterIntersection_le q
     (Finset.singleton_nonempty _) () zero_le_one le_rfl zero_lt_one (window_tail_one q _ ())
     (by norm_num)
 

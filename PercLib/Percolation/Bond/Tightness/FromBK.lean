@@ -11,10 +11,17 @@ public import PercLib.Percolation.Bond.ClusterTails
 
 /-! # Universal tightness from the BK step
 
-`TightnessBK V → UniversalTightness V` for every countable `V`. With `M` the quantile
+The three bounds of `UniversalTightness`, each deduced for fixed `q` and `Λ` from the
+corresponding BK bound of `TightnessBK` written out as a hypothesis. With `M` the quantile
 scale, the BK step at `λ = M` gives the upper and rooted tails, and the BK step at
 `λ = ε M` together with `P(max ≥ M - 1) > e⁻¹` gives the lower tail. The definitions
 in `Tightness/Defs.lean` are used unchanged (reading `k ≥ 1` of issue 52).
+
+## Main results
+
+* `law_mul_tightnessScale_le_maxClusterIntersection_le_of_bk`: the upper tail.
+* `law_maxClusterIntersection_lt_mul_tightnessScale_le_of_bk`: the lower tail.
+* `law_mul_tightnessScale_le_clusterIntersection_le_of_bk`: the rooted tail.
 -/
 
 @[expose] public section
@@ -99,9 +106,14 @@ private theorem exists_pow_three_bracket (a : ℝ) :
     rw [Nat.sub_add_cancel h] at hmin
     exact not_lt.1 hmin
 
-/-- The upper tail. -/
-private theorem upper_tail_of_bk [Countable V] (hBK : TightnessBK V)
-    (q : Sym2 V → unitInterval) {Λ : Finset V} (hΛ : Λ.Nonempty) {a : ℝ} (ha : 1 ≤ a) :
+/-- **The upper tail from the BK step.** If the first BK bound (the first conjunct of
+`TightnessBK`) holds for `q` and `Λ`, then `P(max ≥ a M) ≤ exp(-a/9)` for `a ≥ 1`, where
+`M` is the quantile scale. -/
+theorem law_mul_tightnessScale_le_maxClusterIntersection_le_of_bk [Countable V]
+    (q : Sym2 V → unitInterval) {Λ : Finset V} (hΛ : Λ.Nonempty)
+    (hBK : ∀ l : ℝ, 1 ≤ l → ∀ k : ℕ, 1 ≤ k →
+      law q {ω | (3 : ℝ) ^ k * l ≤ (maxClusterIntersection Λ ω : ℝ)} ≤
+        law q {ω | l ≤ (maxClusterIntersection Λ ω : ℝ)} ^ (3 ^ (k - 1) + 1)) {a : ℝ} (ha : 1 ≤ a) :
     law q {ω | a * (tightnessScale q Λ : ℝ) ≤ (maxClusterIntersection Λ ω : ℝ)} ≤
       ENNReal.ofReal (Real.exp (-a / 9)) := by
   set M := tightnessScale q Λ with hM
@@ -124,7 +136,7 @@ private theorem upper_tail_of_bk [Countable V] (hBK : TightnessBK V)
     have hexp : Real.exp (-1) ≤ Real.exp (-a / 9) := Real.exp_le_exp.2 (by linarith)
     exact (measure_mono hsub).trans (hMtail.trans (ENNReal.ofReal_le_ofReal hexp))
   · obtain ⟨hk, hk2⟩ := hk2
-    have hbk := (hBK q Λ hΛ (M : ℝ) (by linarith) k hk).1
+    have hbk := hBK (M : ℝ) (by linarith) k hk
     have hsub : {ω : Config V | a * (M : ℝ) ≤ (maxClusterIntersection Λ ω : ℝ)} ⊆
         {ω | (3 : ℝ) ^ k * (M : ℝ) ≤ (maxClusterIntersection Λ ω : ℝ)} :=
       fun ω (hω : a * (M : ℝ) ≤ _) =>
@@ -140,10 +152,16 @@ private theorem upper_tail_of_bk [Countable V] (hBK : TightnessBK V)
     rw [h3] at hk1
     linarith
 
-/-- The rooted tail. -/
-private theorem rooted_tail_of_bk [Countable V] (hBK : TightnessBK V)
-    (q : Sym2 V → unitInterval) {Λ : Finset V} (hΛ : Λ.Nonempty) (u : V) {a : ℝ}
-    (ha : 1 ≤ a) :
+/-- **The rooted tail from the BK step.** If the second BK bound (the second conjunct of
+`TightnessBK`) holds for `q`, `Λ` and `u`, then
+`P(|K_u ∩ Λ| ≥ a M) ≤ e · P(|K_u ∩ Λ| ≥ M) · exp(-a/9)` for `a ≥ 1`. -/
+theorem law_mul_tightnessScale_le_clusterIntersection_le_of_bk [Countable V]
+    (q : Sym2 V → unitInterval) {Λ : Finset V} (hΛ : Λ.Nonempty) (u : V)
+    (hBK : ∀ l : ℝ, 1 ≤ l → ∀ k : ℕ, 1 ≤ k →
+      law q {ω | (3 : ℝ) ^ k * l ≤ (clusterIntersection Λ ω u : ℝ)} ≤
+        law q {ω | l ≤ (maxClusterIntersection Λ ω : ℝ)} ^ (3 ^ (k - 1)) *
+          law q {ω | l ≤ (clusterIntersection Λ ω u : ℝ)})
+    {a : ℝ} (ha : 1 ≤ a) :
     law q {ω | a * (tightnessScale q Λ : ℝ) ≤ (clusterIntersection Λ ω u : ℝ)} ≤
       ENNReal.ofReal (Real.exp 1) *
         law q {ω | tightnessScale q Λ ≤ clusterIntersection Λ ω u} *
@@ -185,7 +203,7 @@ private theorem rooted_tail_of_bk [Countable V] (hBK : TightnessBK V)
         have ha3 : a < 3 := by simpa using hk1
         linarith
   · obtain ⟨hk, hk2⟩ := hk2
-    have hbk := (hBK q Λ hΛ (M : ℝ) (by linarith) k hk).2 u
+    have hbk := hBK (M : ℝ) (by linarith) k hk
     rw [hLev] at hbk
     have hsub : {ω : Config V | a * (M : ℝ) ≤ (clusterIntersection Λ ω u : ℝ)} ⊆
         {ω | (3 : ℝ) ^ k * (M : ℝ) ≤ (clusterIntersection Λ ω u : ℝ)} :=
@@ -203,10 +221,13 @@ private theorem rooted_tail_of_bk [Countable V] (hBK : TightnessBK V)
     rw [h3] at hk1
     linarith
 
-/-- The lower tail. -/
-private theorem lower_tail_of_bk [Countable V] (hBK : TightnessBK V)
-    (q : Sym2 V → unitInterval) {Λ : Finset V} (hΛ : Λ.Nonempty) {ε : ℝ} (hε : 0 < ε)
-    (_hε1 : ε ≤ 1) :
+/-- **The lower tail from the BK step.** If the first BK bound (the first conjunct of
+`TightnessBK`) holds for `q` and `Λ`, then `P(max < ε M) ≤ 27 ε` for `0 < ε ≤ 1`. -/
+theorem law_maxClusterIntersection_lt_mul_tightnessScale_le_of_bk [Countable V]
+    (q : Sym2 V → unitInterval) {Λ : Finset V} (hΛ : Λ.Nonempty)
+    (hBK : ∀ l : ℝ, 1 ≤ l → ∀ k : ℕ, 1 ≤ k →
+      law q {ω | (3 : ℝ) ^ k * l ≤ (maxClusterIntersection Λ ω : ℝ)} ≤
+        law q {ω | l ≤ (maxClusterIntersection Λ ω : ℝ)} ^ (3 ^ (k - 1) + 1)) {ε : ℝ} (hε : 0 < ε) (_hε1 : ε ≤ 1) :
     law q {ω | (maxClusterIntersection Λ ω : ℝ) < ε * (tightnessScale q Λ : ℝ)} ≤
       ENNReal.ofReal (27 * ε) := by
   set M := tightnessScale q Λ with hM
@@ -261,7 +282,7 @@ private theorem lower_tail_of_bk [Countable V] (hBK : TightnessBK V)
       have hM0 : (0 : ℝ) ≤ M := by linarith
       nlinarith
     linarith
-  have hbk := (hBK q Λ hΛ l hsmall k hk).1
+  have hbk := hBK l hsmall k hk
   set n := 3 ^ (k - 1) + 1 with hn
   have hlt : ENNReal.ofReal (Real.exp (-1)) < ENNReal.ofReal (p ^ n) := by
     rw [ENNReal.ofReal_pow hp0, ← hlawA]
@@ -284,14 +305,6 @@ private theorem lower_tail_of_bk [Countable V] (hBK : TightnessBK V)
   rw [hcompl, prob_compl_eq_one_sub hAm, hlawA, ← ENNReal.ofReal_one,
     ← ENNReal.ofReal_sub _ hp0]
   exact ENNReal.ofReal_le_ofReal hfinal
-
-/-- **Universal tightness from the BK step** (T-6, deduction of Theorem 2.2 from
-Theorem 2.3 of arXiv:2008.11197v2, on the reading `k ≥ 1` of issue 52). -/
-theorem universalTightness_of_tightnessBK [Countable V] (hBK : TightnessBK V) :
-    UniversalTightness V := fun q _Λ hΛ =>
-  ⟨fun _a ha => upper_tail_of_bk hBK q hΛ ha,
-    fun _ε hε hε1 => lower_tail_of_bk hBK q hΛ hε hε1,
-    fun u _a ha => rooted_tail_of_bk hBK q hΛ u ha⟩
 
 /-! ### Non-vacuity (D-5): one vertex -/
 
@@ -331,7 +344,12 @@ theorem tightnessBK_unit : TightnessBK Unit := by
     rw [this, measure_empty]; exact zero_le
 
 /-- Hence universal tightness holds on one vertex. -/
-theorem universalTightness_unit : UniversalTightness Unit :=
-  universalTightness_of_tightnessBK tightnessBK_unit
+theorem universalTightness_unit : UniversalTightness Unit := fun q _Λ hΛ =>
+  ⟨fun _a ha => law_mul_tightnessScale_le_maxClusterIntersection_le_of_bk q hΛ
+      (fun l hl k hk => (tightnessBK_unit q _ hΛ l hl k hk).1) ha,
+    fun _ε hε hε1 => law_maxClusterIntersection_lt_mul_tightnessScale_le_of_bk q hΛ
+      (fun l hl k hk => (tightnessBK_unit q _ hΛ l hl k hk).1) hε hε1,
+    fun u _a ha => law_mul_tightnessScale_le_clusterIntersection_le_of_bk q hΛ u
+      (fun l hl k hk => (tightnessBK_unit q _ hΛ l hl k hk).2 u) ha⟩
 
 end PercLib.Percolation.Bond
