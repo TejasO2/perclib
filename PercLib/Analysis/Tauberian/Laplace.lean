@@ -3,7 +3,7 @@ Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
 The Laplace-transform half of the Tauberian chain for Theorem I.2.11 of T. Hutchcroft,
 *Critical long-range percolation I*, arXiv:2508.18807v1, p. 26 (citing Feller XIII.5.2).
 
-Adapted from pull request 488 (contributor `yujinhkim`): repository `yujinhkim/lrp`, branch
+Adapted from the repository `yujinhkim/lrp`, branch
 `critical-lrp-1`, commit `d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, file
 `PercLib/CriticalLRP/Analysis/TauberianLaplace.lean`; licence Apache-2.0 as declared in that
 commit's file headers and `third_party/critical-lrp/NOTICE.md`; upstream

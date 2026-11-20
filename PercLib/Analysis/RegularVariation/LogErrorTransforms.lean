@@ -6,7 +6,7 @@ Lemma I.4.13 of T. Hutchcroft, *Critical long-range percolation I*, arXiv:2508.1
 logarithmically integrable error function `h` are again logarithmically integrable error
 functions.
 
-Ported from pull request 488 (contributor `yujinhkim`): repository `yujinhkim/lrp`, branch
+Ported from the repository `yujinhkim/lrp`, branch
 `critical-lrp-1`, commit `d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, file
 `PercLib/CriticalLRP/Analysis/Lemma_I_4_13.lean`; licence Apache-2.0 as declared in that
 commit's file headers and `third_party/critical-lrp/NOTICE.md`; upstream

@@ -1,11 +1,11 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Package `lrp-rv-geninv` (D-33): the generalized inverse of a measurable regularly varying
+The generalized inverse of a measurable regularly varying
 function of positive index (Bingham–Goldie–Teugels, Theorem 1.5.12), the inverse/scale layer
 of Proposition I.3.2, and Karamata integration on a positive tail, for T. Hutchcroft,
 *Critical long-range percolation I*, arXiv:2508.18807v1.
 
-Ported from pull request 488 (contributor `yujinhkim`): repository `yujinhkim/lrp`, branch
+Ported from the repository `yujinhkim/lrp`, branch
 `critical-lrp-1`, commit `d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, files
 `PercLib/CriticalLRP/Analysis/GeneralInverse.lean` (all of it except `genInv`, `genInv_def`,
 which are in `PercLib/Analysis/RegularVariation/Defs.lean`) and
