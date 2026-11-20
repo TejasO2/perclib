@@ -225,4 +225,190 @@ theorem tendsto_karamataPrimitive_of_locallyBounded {h : ℝ → ℝ} {b r₀ : 
   tendsto_karamataPrimitive_tail hb hmeas hrv
     (intervalIntegrable_div_of_locallyBounded_tail hr₀ hmeas hbdd)
 
+/-! ### The primitive as a little-`o` perturbation, and its regular variation -/
+
+/-- If `u / h → c` along a filter on which `h` is eventually non-zero, then `u - c h = o(h)`. -/
+theorem isLittleO_sub_const_mul_of_tendsto_div {α : Type*} {l : Filter α} {u h : α → ℝ} {c : ℝ}
+    (hne : ∀ᶠ x in l, h x ≠ 0) (hK : Tendsto (fun x => u x / h x) l (𝓝 c)) :
+    (fun x => u x - c * h x) =o[l] h := by
+  rw [Asymptotics.isLittleO_iff_tendsto' (hne.mono fun x hx h0 => absurd h0 hx)]
+  have h2 := hK.sub_const c
+  rw [sub_self] at h2
+  refine h2.congr' ?_
+  filter_upwards [hne] with x hx
+  field_simp
+
+/-- The Karamata primitive differs from `h / b` by `o(h)`: the form
+`∫_{r₀}^r h s / s ds = (1 ± o(1)) (1/b) h r` used in the proof of Lemma I.5.26. -/
+theorem isLittleO_karamataPrimitive {h : ℝ → ℝ} {b r₀ : ℝ}
+    (hb : 0 < b) (hr₀ : 0 < r₀) (hmeas : Measurable h) (hrv : RegularlyVarying b h)
+    (hloc : LocallyIntegrableOn (fun s => h s / s) (Ioi 0)) :
+    (fun r => (∫ s in r₀..r, h s / s) - (1 / b) * h r) =o[atTop] h :=
+  isLittleO_sub_const_mul_of_tendsto_div (hrv.eventually_pos.mono fun _ hx => hx.ne')
+    (tendsto_karamataPrimitive hb hr₀ hmeas hrv hloc)
+
+/-- **The Karamata primitive is regularly varying of the same index `b`** (tail-integrability
+form), because it is asymptotic to `h / b`. -/
+theorem regularlyVarying_karamataPrimitive_of_tail {h : ℝ → ℝ} {b r₀ : ℝ}
+    (hb : 0 < b) (hmeas : Measurable h) (hrv : RegularlyVarying b h)
+    (hloc : ∀ x y : ℝ, r₀ ≤ x → x ≤ y → IntervalIntegrable (fun s => h s / s) volume x y) :
+    RegularlyVarying b (fun r => ∫ s in r₀..r, h s / s) := by
+  refine (hrv.const_mul (one_div_pos.2 hb)).of_tendsto_div ?_
+    ⟨r₀, measurable_restrict_Ici_primitive hloc⟩
+  have hmul := (tendsto_karamataPrimitive_tail hb hmeas hrv hloc).const_mul b
+  rw [mul_one_div_cancel hb.ne'] at hmul
+  refine hmul.congr' ?_
+  filter_upwards [hrv.eventually_pos] with r hr
+  field_simp
+
+/-- **The Karamata primitive is regularly varying of the same index `b`**
+(local-integrability form). -/
+theorem regularlyVarying_karamataPrimitive {h : ℝ → ℝ} {b r₀ : ℝ}
+    (hb : 0 < b) (hr₀ : 0 < r₀) (hmeas : Measurable h) (hrv : RegularlyVarying b h)
+    (hloc : LocallyIntegrableOn (fun s => h s / s) (Ioi 0)) :
+    RegularlyVarying b (fun r => ∫ s in r₀..r, h s / s) :=
+  regularlyVarying_karamataPrimitive_of_tail hb hmeas hrv fun x y hx hxy =>
+    (hloc.integrableOn_compact_subset (fun z hz => lt_of_lt_of_le (lt_of_lt_of_le hr₀ hx) (by
+      rw [uIcc_of_le hxy] at hz; exact hz.1)) isCompact_uIcc).intervalIntegrable
+
+/-! ### The shift `f_λ = f + λ P` -/
+
+/-- **Positivity of a shifted function**: if `P / h → κ` with `h` eventually positive,
+`|f| ≤ C h` eventually and `C < λ κ`, then `f + λ P` is eventually positive. -/
+theorem eventually_pos_add_const_mul_of_tendsto_div {α : Type*} {l : Filter α}
+    {f h P : α → ℝ} {κ C lam : ℝ} (hC : C < lam * κ) (hpos : ∀ᶠ x in l, 0 < h x)
+    (hK : Tendsto (fun x => P x / h x) l (𝓝 κ)) (hf : ∀ᶠ x in l, |f x| ≤ C * h x) :
+    ∀ᶠ x in l, 0 < f x + lam * P x := by
+  have hev : ∀ᶠ x in l, C < lam * (P x / h x) :=
+    (hK.const_mul lam).eventually (eventually_gt_nhds hC)
+  filter_upwards [hev, hpos, hf] with x hx hhx hfx
+  have hshift : C * h x < lam * P x := by
+    have := mul_lt_mul_of_pos_right hx hhx
+    rwa [mul_assoc, div_mul_cancel₀ _ hhx.ne'] at this
+  linarith [neg_abs_le (f x)]
+
+/-- **Removing the shift**: if `P / h → κ` and `(f + λ P) / h → c`, then `f / h → c - λ κ`. -/
+theorem tendsto_div_of_tendsto_add_const_mul_div {α : Type*} {l : Filter α}
+    {f h P : α → ℝ} {κ lam c : ℝ}
+    (hK : Tendsto (fun x => P x / h x) l (𝓝 κ))
+    (hf : Tendsto (fun x => (f x + lam * P x) / h x) l (𝓝 c)) :
+    Tendsto (fun x => f x / h x) l (𝓝 (c - lam * κ)) := by
+  refine (hf.sub (hK.const_mul lam)).congr fun x => ?_
+  rw [add_div, mul_div_assoc]
+  ring
+
+/-- **Positivity of the shifted function** (the choice of `λ` in the proof of Lemma I.5.26,
+tail-integrability form): if `|f| ≤ C h` eventually and `C b < λ`, then
+`f + λ ∫_{r₀}^r h s / s ds` is eventually positive. -/
+theorem eventually_pos_add_const_mul_karamataPrimitive_of_tail {f h : ℝ → ℝ} {b r₀ C lam : ℝ}
+    (hb : 0 < b) (hC : C * b < lam) (hmeas : Measurable h) (hrv : RegularlyVarying b h)
+    (hloc : ∀ x y : ℝ, r₀ ≤ x → x ≤ y → IntervalIntegrable (fun s => h s / s) volume x y)
+    (hf : ∀ᶠ r in atTop, |f r| ≤ C * h r) :
+    ∀ᶠ r in atTop, 0 < f r + lam * ∫ s in r₀..r, h s / s :=
+  eventually_pos_add_const_mul_of_tendsto_div (κ := 1 / b)
+    (by rw [mul_one_div, lt_div_iff₀ hb]; exact hC) hrv.eventually_pos
+    (tendsto_karamataPrimitive_tail hb hmeas hrv hloc) hf
+
+/-- **Positivity of the shifted function** (local-integrability form). -/
+theorem eventually_pos_add_const_mul_karamataPrimitive {f h : ℝ → ℝ} {b r₀ C lam : ℝ}
+    (hb : 0 < b) (hr₀ : 0 < r₀) (hC : C * b < lam) (hmeas : Measurable h)
+    (hrv : RegularlyVarying b h) (hloc : LocallyIntegrableOn (fun s => h s / s) (Ioi 0))
+    (hf : ∀ᶠ r in atTop, |f r| ≤ C * h r) :
+    ∀ᶠ r in atTop, 0 < f r + lam * ∫ s in r₀..r, h s / s :=
+  eventually_pos_add_const_mul_of_tendsto_div (κ := 1 / b)
+    (by rw [mul_one_div, lt_div_iff₀ hb]; exact hC) hrv.eventually_pos
+    (tendsto_karamataPrimitive hb hr₀ hmeas hrv hloc) hf
+
+/-- **Removing the shift** (the final algebraic step of Lemma I.5.26, tail-integrability
+form): if `(f + λ ∫_{r₀}^r h s / s ds) / h → c`, then `f / h → c - λ / b`. -/
+theorem tendsto_div_of_tendsto_add_const_mul_karamataPrimitive_of_tail {f h : ℝ → ℝ}
+    {b r₀ lam c : ℝ} (hb : 0 < b) (hmeas : Measurable h) (hrv : RegularlyVarying b h)
+    (hloc : ∀ x y : ℝ, r₀ ≤ x → x ≤ y → IntervalIntegrable (fun s => h s / s) volume x y)
+    (hf : Tendsto (fun r => (f r + lam * ∫ s in r₀..r, h s / s) / h r) atTop (𝓝 c)) :
+    Tendsto (fun r => f r / h r) atTop (𝓝 (c - lam / b)) := by
+  simpa [div_eq_mul_inv] using
+    tendsto_div_of_tendsto_add_const_mul_div (tendsto_karamataPrimitive_tail hb hmeas hrv hloc) hf
+
+/-- **Removing the shift** (local-integrability form). -/
+theorem tendsto_div_of_tendsto_add_const_mul_karamataPrimitive {f h : ℝ → ℝ} {b r₀ lam c : ℝ}
+    (hb : 0 < b) (hr₀ : 0 < r₀) (hmeas : Measurable h) (hrv : RegularlyVarying b h)
+    (hloc : LocallyIntegrableOn (fun s => h s / s) (Ioi 0))
+    (hf : Tendsto (fun r => (f r + lam * ∫ s in r₀..r, h s / s) / h r) atTop (𝓝 c)) :
+    Tendsto (fun r => f r / h r) atTop (𝓝 (c - lam / b)) := by
+  simpa [div_eq_mul_inv] using
+    tendsto_div_of_tendsto_add_const_mul_div (tendsto_karamataPrimitive hb hr₀ hmeas hrv hloc) hf
+
+/-- **The Karamata step of Lemma I.5.26** (local-integrability form): for `|f| ≤ C h` with
+`C b < λ`, the shifted function `f_λ = f + λ ∫ h s / s ds` is eventually positive, and if
+`f_λ / h → c` then `f / h → c - λ / b`. -/
+theorem eventually_pos_and_tendsto_div_of_tendsto_add_const_mul_karamataPrimitive
+    {f h : ℝ → ℝ} {b r₀ C lam c : ℝ} (hb : 0 < b) (hr₀ : 0 < r₀) (hC : C * b < lam)
+    (hmeas : Measurable h) (hrv : RegularlyVarying b h)
+    (hloc : LocallyIntegrableOn (fun s => h s / s) (Ioi 0))
+    (hf : ∀ᶠ r in atTop, |f r| ≤ C * h r)
+    (hflam : Tendsto (fun r => (f r + lam * ∫ s in r₀..r, h s / s) / h r) atTop (𝓝 c)) :
+    (∀ᶠ r in atTop, 0 < f r + lam * ∫ s in r₀..r, h s / s) ∧
+      Tendsto (fun r => f r / h r) atTop (𝓝 (c - lam / b)) :=
+  ⟨eventually_pos_add_const_mul_karamataPrimitive hb hr₀ hC hmeas hrv hloc hf,
+    tendsto_div_of_tendsto_add_const_mul_karamataPrimitive hb hr₀ hmeas hrv hloc hflam⟩
+
+/-- **The Karamata step of Lemma I.5.26** (tail-integrability form). -/
+theorem eventually_pos_and_tendsto_div_of_tendsto_add_const_mul_karamataPrimitive_of_tail
+    {f h : ℝ → ℝ} {b r₀ C lam c : ℝ} (hb : 0 < b) (hC : C * b < lam)
+    (hmeas : Measurable h) (hrv : RegularlyVarying b h)
+    (hloc : ∀ x y : ℝ, r₀ ≤ x → x ≤ y → IntervalIntegrable (fun s => h s / s) volume x y)
+    (hf : ∀ᶠ r in atTop, |f r| ≤ C * h r)
+    (hflam : Tendsto (fun r => (f r + lam * ∫ s in r₀..r, h s / s) / h r) atTop (𝓝 c)) :
+    (∀ᶠ r in atTop, 0 < f r + lam * ∫ s in r₀..r, h s / s) ∧
+      Tendsto (fun r => f r / h r) atTop (𝓝 (c - lam / b)) :=
+  ⟨eventually_pos_add_const_mul_karamataPrimitive_of_tail hb hC hmeas hrv hloc hf,
+    tendsto_div_of_tendsto_add_const_mul_karamataPrimitive_of_tail hb hmeas hrv hloc hflam⟩
+
+/-- **The arithmetic identity behind the choice of `λ`** in Lemma I.5.26:
+`(1/(b-a)) (A + (b-a) λ / b) - λ / b = A / (b-a)`, independently of `λ`. -/
+theorem one_div_sub_mul_add_mul_div_sub_div_eq {a b A lam : ℝ} (hb : b ≠ 0) (hab : a ≠ b) :
+    (1 / (b - a)) * (A + (b - a) * lam / b) - lam / b = A / (b - a) := by
+  have hd : b - a ≠ 0 := sub_ne_zero.2 hab.symm
+  field_simp
+  ring
+
+/-- **The conclusion of Lemma I.5.26**, `f r = (A/(b-a) + o(1)) h r`, from the output of the
+positive ODE Lemma I.4.21 for the shifted function `f_λ = f + λ ∫ h s / s ds`
+(local-integrability form). `hI421` is that output, taken as a hypothesis:
+`f_λ / h → (1/(b-a)) (A + (b-a) λ / b)`. -/
+theorem tendsto_div_of_tendsto_shift_div_karamataPrimitive {f h : ℝ → ℝ} {a b A r₀ lam : ℝ}
+    (ha : 0 < a) (hab : a < b) (hr₀ : 0 < r₀) (hmeas : Measurable h)
+    (hrv : RegularlyVarying b h) (hloc : LocallyIntegrableOn (fun s => h s / s) (Ioi 0))
+    (hI421 : Tendsto (fun r => (f r + lam * ∫ s in r₀..r, h s / s) / h r) atTop
+      (𝓝 ((1 / (b - a)) * (A + (b - a) * lam / b)))) :
+    Tendsto (fun r => f r / h r) atTop (𝓝 (A / (b - a))) := by
+  have hb : 0 < b := ha.trans hab
+  have h := tendsto_div_of_tendsto_add_const_mul_karamataPrimitive hb hr₀ hmeas hrv hloc hI421
+  rwa [one_div_sub_mul_add_mul_div_sub_div_eq hb.ne' hab.ne] at h
+
+/-- **The conclusion of Lemma I.5.26** (tail-integrability form), with the output of
+Lemma I.4.21 for the shifted function as a hypothesis. -/
+theorem tendsto_div_of_tendsto_shift_div_karamataPrimitive_of_tail {f h : ℝ → ℝ}
+    {a b A r₀ lam : ℝ} (ha : 0 < a) (hab : a < b) (hmeas : Measurable h)
+    (hrv : RegularlyVarying b h)
+    (hloc : ∀ x y : ℝ, r₀ ≤ x → x ≤ y → IntervalIntegrable (fun s => h s / s) volume x y)
+    (hI421 : Tendsto (fun r => (f r + lam * ∫ s in r₀..r, h s / s) / h r) atTop
+      (𝓝 ((1 / (b - a)) * (A + (b - a) * lam / b)))) :
+    Tendsto (fun r => f r / h r) atTop (𝓝 (A / (b - a))) := by
+  have hb : 0 < b := ha.trans hab
+  have h := tendsto_div_of_tendsto_add_const_mul_karamataPrimitive_of_tail hb hmeas hrv hloc
+    hI421
+  rwa [one_div_sub_mul_add_mul_div_sub_div_eq hb.ne' hab.ne] at h
+
+/-- **The shift `f_λ = f + λ ∫_{r₀}^r h s / s ds` is differentiable**, with derivative
+`f' + λ h r / r`; only continuity of `h` at the evaluation point is needed. -/
+theorem hasDerivAt_add_const_mul_karamataPrimitive {f f' h : ℝ → ℝ} {r₀ lam r : ℝ}
+    (hf : HasDerivAt f (f' r) r) (hint : IntervalIntegrable (fun s => h s / s) volume r₀ r)
+    (hmeas : Measurable h) (hcont : ContinuousAt h r) (hr : r ≠ 0) :
+    HasDerivAt (fun x => f x + lam * ∫ s in r₀..x, h s / s) (f' r + lam * (h r / r)) r := by
+  have hc : ContinuousAt (fun s : ℝ => h s / s) r := hcont.div continuousAt_id hr
+  have hsm : StronglyMeasurableAtFilter (fun s : ℝ => h s / s) (𝓝 r) volume :=
+    (hmeas.div measurable_id).stronglyMeasurable.stronglyMeasurableAtFilter
+  exact hf.add ((intervalIntegral.integral_hasDerivAt_right hint hsm hc).const_mul lam)
+
 end PercLib.Analysis
