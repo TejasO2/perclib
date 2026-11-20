@@ -1,14 +1,21 @@
 # Status
 
-Kept by LEAD under D-34. Last updated 20 November 2026, second LEAD resumption (prover wave 1 briefed).
+Kept by LEAD under D-34. Last updated 20 November 2026, third LEAD resumption (first link batch merged).
 A new LEAD resumes from this file, [COORDINATION.md](COORDINATION.md) and D-34 in
 [DECISIONS.md](DECISIONS.md).
 
 ## Gate
 
-**Latest: green on `eb09ac5`** (`scripts/gate.sh`; build, axiom audit, closure, scan,
-tests, extract; change classified proof-only against `4c72765`). Kernel replay last run on
-the baseline below.
+**Latest: green on `fc917ec`** (`scripts/gate.sh`: build, axiom audit of 4,865 constants,
+closure of 262 modules, forbidden scan, tests, extract). It merges `hier-translate`,
+`attach-analysis`, `attach-longrange` and the root imports. Interface change (27 tags),
+approved by the fresh audits `audit-link-analysis` and `audit-link-longrange`; LEAD
+spot-checked wrappers 6PGV and JK7V against the audit text. Kernel replay last run on the
+baseline below. Earlier: green on `eb09ac5`.
+
+**Manifest after this batch** (private repository, from the `fc917ec` extract): 92
+`proved`, 6 `statement-only`, 1,303 `unformalised` (was 65 / 6 / 1,330); 99 `@[tag]`
+attributes in `PercLib/`. Preliminary frontier (authored `proof_uses`): 135.
 
 **Baseline green** on `4c72765` (integration branch `claude/zen-lovelace-rvlcw2`;
 its Lean tree is identical to the snapshot `f849aa9`). Local verification, not CI:
@@ -69,34 +76,40 @@ Package ids from the first session (`pub-*`, `link-*`, scouts) are as listed in 
 previous version of this file.
 
 **Merged**
-- `hygiene-info` (`99f189f`, merged `eb09ac5`): four `Try this` messages removed.
-  Proof-only against `4c72765`; gate passed on `eb09ac5`.
-- `pub-scan` (lrp `dc23231`, merged lrp `5a2943b`): `scripts/draft_overlap.py` and
-  `wiki-overlap-hits.json` in the private repository.
+- `hygiene-info` (`99f189f`, merged `eb09ac5`).
+- `pub-scan` (lrp `dc23231`, merged lrp `5a2943b`).
+- `hier-translate` (H3, `273ee65`, merged `d31df2d`): non-radial R11/R12 and the Prop 2.10
+  reduction, `PercLib/Models/HierarchicalTranslation.lean`, proof-only.
+- `attach-analysis` (`835e077`, merged `3688361`): 9 tags attached, 8 wrappers in
+  `PercLib/Analysis/Tags/`.
+- `attach-longrange` (`acf3acb`, merged `422070e`): 2 tags attached, 8 wrappers in
+  `PercLib/Models/LongRange/Tags/`.
 
-**Finished, reports read**: `salvage-scan`, `hier-map` (the hierarchical programme as
-packages H0–H9), `link-longrange`, `link-analysis` (awaiting their audits).
+**Finished scouting**: `salvage-scan`, `hier-map`, `d33-map` (32 port packages, 14
+startable), all six `link-*`, audits `audit-link-analysis`, `audit-link-longrange`,
+`audit-link-bond-sub`, `pub-audit`.
 
-**Running (wave 1)**: `d33-map`, `link-bond-core`, `link-bond-sub`, `link-probability`,
-`link-models`, `pub-audit`, `audit-link-longrange`, `audit-link-analysis`.
+**Running**: provers `hier-sibling` (H6), `hier-kernel` (H1), `hier-quantile-finite` (H2),
+`salvage-analysis`; `attach-bond-sub`; auditors `audit-link-models`,
+`audit-link-probability`, `audit-link-bond-core`; `pub-move` (perclib `work/pub-move`;
+LEAD reruns the overlap scan and greps on its tree before any merge).
 
-**Prover wave 1, briefs ready** (disjoint new files, proof-only):
+**Briefs ready** in `/home/user/reports/briefs/` (disjoint files, none overlapping running
+work):
 
-| Id | Files | Target |
-|---|---|---|
-| `hier-kernel` (H1) | `Models/HierarchicalPowerKernel.lean` | power-law kernel row bounds, `β_c ≥ (L^α-1)/(C(1-L^{-d}))`, transitivity hypotheses |
-| `hier-translate` (H3) | `Models/HierarchicalTranslation.lean` | non-radial R11/R12 and the Prop 2.10 reduction |
-| `hier-sibling` (H6) | `Models/HierarchicalSibling.lean`, `Percolation/Bond/CrossEdge.lean` | Lemma 2.8 (655W recursion); critical path |
-| `salvage-analysis` | `Analysis/LaplaceUniqueness.lean`, `Probability/ChiSquareDeterminacy.lean`, `Analysis/RiccatiBootstrap.lean` | rebase three private branches (Q-188, Q-154, Q-149) |
+| Id | Kind | Files | Target |
+|---|---|---|---|
+| `hier-stmt` (H0) | interface | `Models/Hierarchical/Defs.lean`, `…/Witness.lean` | `Prop` statements of Theorem 1.1 and W498 (tagged), D-5 witness; needs audit |
+| `lrp-rv-geninv` | D-33 port 1 | `Analysis/RegularVariation/GeneralInverse.lean` | inverse regular variation, Karamata tail |
+| `lrp-tauber-laplace` | D-33 port 9 | `Analysis/Tauberian/Laplace.lean` | Laplace half of the Tauberian chain to I.2.11 |
+| `lrp-I413` | D-33 port 4 | `Analysis/RegularVariation/LogErrorTransforms.lean` | Lemma I.4.13 |
+| `nm-analysis` | near-miss | `Analysis/Tags/MarginalODETail.lean`, `Combinatorics/Tags/ForestConnections.lean` | K58A, 4K33 in full; needs audit |
+| `nm-longrange` | near-miss | `Models/LongRange/Tags/CutsAndRows.lean` | ZH13, R01V in full; needs audit |
 
-**Startable next, brief ready**: `hier-quantile-finite` (H2,
-`Percolation/Bond/Tightness/RestrictQuantile.lean`).
-
-**Queued** (hierarchical dependency order from `hier-map`): H0 `hier-stmt` (interface:
-`Prop` statements of Theorem 1.1 and W498 in `Models/Hierarchical/Defs.lean`, needs an
-audit and a new wiki tag for Theorem 1.1); H4 `hier-runaway` after H1; H5
+**Queued** (hierarchical dependency order from `hier-map`): H4 `hier-runaway` after H1; H5
 `hier-endpoint` after H1, H2, H4; H7 after H5, H6; H8 Theorem 1.1 after H0, H3, H5–H7;
-H9 W498 after H8. Then salvage tier 2 (Q-211, Q-195, Q-194, restated for the
+H9 W498 after H8. D-33 next: packages 2, 23 and 29 wait for `salvage-analysis` (Q-154 and
+Q-149 overlap them), 25, 26, 19. Then salvage tier 2 (Q-211, Q-195, Q-194, restated for the
 `Seminorm` kernel API), `attach-<area>` after each link audit, and `pub-move` after
 `pub-audit`.
 
