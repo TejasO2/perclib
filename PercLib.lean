@@ -28,6 +28,7 @@ public import PercLib.Analysis.Tags.IntegratedSusceptibility
 public import PercLib.Analysis.Tags.MarginalODE
 public import PercLib.Analysis.Tags.MesoscopicTailTransfer
 public import PercLib.Analysis.Tags.SpatialCutoffMoments
+public import PercLib.Analysis.Tauberian.Laplace
 public import PercLib.Basic
 public import PercLib.Combinatorics.DoubleFactorialConvolution
 public import PercLib.Combinatorics.ForestBranching
