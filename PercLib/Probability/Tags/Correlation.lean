@@ -10,6 +10,22 @@ public import PercLib.Meta.Tag
 public import PercLib.Probability.HarrisDecreasing
 public import PercLib.Probability.FKG
 
+/-!
+# Correlation inequalities: statement forms
+
+Each theorem restates, as one conjunction, results proved under their own names in the
+imported modules.
+
+## Main results
+
+* `prodBernoulli_complement_duality`
+* `prodBernoulli_harris_lower_and_mixed`
+* `prodBernoulli_lintegral_harris`
+* `prodBernoulli_integral_harris`
+* `layer_cake_product_representations`
+* `fkg_function_and_event_forms`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set
@@ -62,9 +78,7 @@ theorem prodBernoulli_lintegral_harris (q : ι → unitInterval) {f g : Set ι �
     · exact prodBernoulli_lintegral_mul_le_of_antitone q hf hg hfm hgm
   · rintro (⟨hf, hg⟩ | ⟨hf, hg⟩)
     · exact prodBernoulli_lintegral_mul_le_of_monotone_of_antitone q hf hg hfm hgm
-    · have h := prodBernoulli_lintegral_mul_le_of_monotone_of_antitone q hg hf hgm hfm
-      simp_rw [mul_comm (g _) (f _)] at h
-      rwa [mul_comm (∫⁻ ω, g ω ∂prodBernoulli q)] at h
+    · exact prodBernoulli_lintegral_mul_le_of_antitone_of_monotone q hf hg hfm hgm
 
 /-- Harris inequalities for bounded measurable real functions, written as the sign of the
 covariance. -/
@@ -89,10 +103,8 @@ theorem prodBernoulli_integral_harris (q : ι → unitInterval) {f g : Set ι �
   · rintro (⟨hf, hg⟩ | ⟨hf, hg⟩)
     · exact sub_nonpos.2
         (prodBernoulli_integral_mul_le_of_monotone_of_antitone q hf hg hfm hgm hf' hg')
-    · have h := prodBernoulli_integral_mul_le_of_monotone_of_antitone q hg hf hgm hfm hg' hf'
-      simp_rw [mul_comm (g _) (f _)] at h
-      rw [mul_comm (∫ ω, g ω ∂prodBernoulli q)] at h
-      exact sub_nonpos.2 h
+    · exact sub_nonpos.2
+        (prodBernoulli_integral_mul_le_of_antitone_of_monotone q hf hg hfm hgm hf' hg')
 
 end Configuration
 

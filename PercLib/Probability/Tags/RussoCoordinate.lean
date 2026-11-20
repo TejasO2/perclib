@@ -10,6 +10,18 @@ public import PercLib.Meta.Tag
 public import PercLib.Probability.RussoCylinder
 public import PercLib.Probability.Coordinate
 
+/-!
+# Cylinder Russo formula and one-coordinate structure: statement forms
+
+Each theorem restates, as one conjunction, results proved under their own names in the
+imported modules.
+
+## Main results
+
+* `cylinder_russo_formula`
+* `prodBernoulli_one_coordinate`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set Function
@@ -64,11 +76,10 @@ theorem prodBernoulli_one_coordinate [DecidableEq ι] (q : ι → unitInterval) 
     (∀ A : Set (Set ι), MeasurableSet A → IsUpperSet A →
       (prodBernoulli q).real {ω | insert e ω ∈ A} -
           (prodBernoulli q).real {ω | ω \ {e} ∈ A} =
-        (prodBernoulli q).real {ω | insert e ω ∈ A ∧ ω \ {e} ∉ A}) := by
-  refine ⟨prodBernoulli_map_insert q e, prodBernoulli_map_diff_singleton q e, fun t => ?_,
-    fun A hA t => prodBernoulli_update_real_eq q e hA t,
-    fun A hA hup => prodBernoulli_real_insert_sub_diff_eq_pivotal q e hA hup⟩
-  have h := prodBernoulli_eq_smul_add_smul (update q e t) e
-  rwa [update_self, update_idem, update_idem] at h
+        (prodBernoulli q).real {ω | insert e ω ∈ A ∧ ω \ {e} ∉ A}) :=
+  ⟨prodBernoulli_map_insert q e, prodBernoulli_map_diff_singleton q e,
+    prodBernoulli_update_eq_smul_add_smul q e,
+    fun _ hA t => prodBernoulli_update_real_eq q e hA t,
+    fun _ hA hup => prodBernoulli_real_insert_sub_diff_eq_pivotal q e hA hup⟩
 
 end PercLib.Probability

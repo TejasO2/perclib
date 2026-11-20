@@ -10,6 +10,19 @@ public import PercLib.Meta.Tag
 public import PercLib.Probability.VarianceTensorization
 public import PercLib.Probability.CovarianceRusso
 
+/-!
+# Finite-profile odds ratios and covariances: statement forms
+
+Each theorem restates, as one conjunction, results proved under their own names in the
+imported modules.
+
+## Main results
+
+* `odds_ratio_monotonicity`
+* `covariance_coordinate_identity`
+* `intensity_russo_covariance`
+-/
+
 @[expose] public section
 noncomputable section
 open Finset
@@ -35,41 +48,10 @@ theorem odds_ratio_monotonicity {A : Set (Set E)} (hA : IsUpperSet A) (hne : A.N
       (prodBernoulli (fun _ : E => a)).real A * b * (1 - a) /
           ((prodBernoulli (fun _ : E => a)).real A * b * (1 - a) +
             (1 - (prodBernoulli (fun _ : E => a)).real A) * a * (1 - b)) ≤
-        (prodBernoulli (fun _ : E => b)).real A) := by
-  refine ⟨fun a b ha hab hb => prodBernoulli_odds_ratio_le hA hne hnu ha hab hb,
-    odds_ratio_monotoneOn hA hne hnu, fun a b ha hab hb => ?_⟩
-  have h := prodBernoulli_odds_ratio_le hA hne hnu ha hab hb
-  have hreal : ∀ r : unitInterval, (prodBernoulli (fun _ : E => r)).real A =
-      expectation (fun _ : E => (r : ℝ)) (eventValue A) := by
-    intro r
-    rw [← MeasureTheory.integral_indicator_one (Set.toFinite A).measurableSet,
-      integral_prodBernoulli_eq_expectation]
-    rfl
-  have hmem : ∀ r : unitInterval, 0 < (r : ℝ) → (r : ℝ) < 1 →
-      0 < (prodBernoulli (fun _ : E => r)).real A ∧
-        (prodBernoulli (fun _ : E => r)).real A < 1 := by
-    intro r h0 h1
-    rw [hreal]
-    exact ⟨expectation_eventValue_pos (fun _ => ⟨h0, h1⟩) hA hne,
-      expectation_eventValue_lt_one (fun _ => ⟨h0, h1⟩) hA hnu⟩
-  obtain ⟨hFa0, hFa1⟩ := hmem a ha (hab.trans hb)
-  obtain ⟨hFb0, hFb1⟩ := hmem b (ha.trans hab) hb
-  set Fa := (prodBernoulli (fun _ : E => a)).real A
-  set Fb := (prodBernoulli (fun _ : E => b)).real A
-  have ha1 : (0 : ℝ) < 1 - a := by linarith
-  have hb1 : (0 : ℝ) < 1 - b := by linarith
-  have hb0 : (0 : ℝ) < b := ha.trans hab
-  have hX : 0 < Fa * b * (1 - a) := by positivity
-  have hY : 0 < (1 - Fa) * a * (1 - b) := by
-    have : 0 < 1 - Fa := by linarith
-    positivity
-  have hkey : Fa / (1 - Fa) * (b * (1 - a) / (a * (1 - b))) =
-      (Fa * b * (1 - a)) / ((1 - Fa) * a * (1 - b)) := by
-    have : (1 - Fa) ≠ 0 := by linarith
-    field_simp
-  rw [hkey, div_le_div_iff₀ hY (by linarith)] at h
-  rw [div_le_iff₀ (by linarith)]
-  nlinarith
+        (prodBernoulli (fun _ : E => b)).real A) :=
+  ⟨fun _ _ ha hab hb => prodBernoulli_odds_ratio_le hA hne hnu ha hab hb,
+    odds_ratio_monotoneOn hA hne hnu,
+    fun _ _ ha hab hb => prodBernoulli_odds_solved_le hA hne hnu ha hab hb⟩
 
 /-- Covariance of an observable with a coordinate indicator equals `qₑ(1-qₑ) E_q[Δₑ f]`,
 and is nonnegative for an increasing observable. -/

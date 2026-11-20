@@ -9,6 +9,17 @@ module
 public import PercLib.Meta.Tag
 public import PercLib.Probability.SplitCoordinate
 
+/-!
+# Splitting a coordinate in a disjoint occurrence: statement form
+
+Each theorem restates, as one conjunction, results proved under their own names in the
+imported modules.
+
+## Main results
+
+* `prodBernoulli_split_coordinate`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set

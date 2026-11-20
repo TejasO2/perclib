@@ -14,6 +14,22 @@ public import PercLib.Probability.DeterminedIndependence
 public import PercLib.Probability.DeterministicModification
 public import PercLib.Probability.Transport.Pullback
 
+/-!
+# Transformations of Bernoulli configurations: statement forms
+
+Each theorem restates, as one conjunction, results proved under their own names in the
+imported modules.
+
+## Main results
+
+* `prodBernoulli_deterministic_dirac`
+* `prodBernoulli_characterization`
+* `prodBernoulli_pullback_injective`
+* `prodBernoulli_deterministic_modification`
+* `prodBernoulli_thinning_superposition`
+* `prodBernoulli_determined_events`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set
@@ -37,18 +53,10 @@ theorem prodBernoulli_deterministic_dirac {E : Type*} (u : Set E) :
     (∀ f : Set E → ℝ, Integrable f (prodBernoulli (fun e => if e ∈ u then 1 else 0)) →
       ∫ ω, f ω ∂prodBernoulli (fun e => if e ∈ u then 1 else 0) = f u) ∧
     (∀ [Fintype E], ∀ f : Set E → ℝ,
-      finiteExpectation 0 f = f ∅ ∧ finiteExpectation 1 f = f Set.univ) := by
-  refine ⟨prodBernoulli_deterministic u, fun A hA => ?_, fun f hf => ?_,
+      finiteExpectation 0 f = f ∅ ∧ finiteExpectation 1 f = f Set.univ) :=
+  ⟨prodBernoulli_deterministic u, fun _ hA => prodBernoulli_deterministic_apply u hA,
+    fun _ hf => integral_prodBernoulli_deterministic u hf,
     fun f => ⟨finiteExpectation_zero f, finiteExpectation_one f⟩⟩
-  · rw [prodBernoulli_deterministic, Measure.dirac_apply' _ hA]
-  · rw [prodBernoulli_deterministic] at hf ⊢
-    have hae := hf.aestronglyMeasurable
-    rw [integral_congr_ae hae.ae_eq_mk,
-      integral_dirac' _ _ hae.stronglyMeasurable_mk]
-    by_contra hne
-    have h0 : Measure.dirac u {ω | f ω ≠ hae.mk f ω} = 0 := hae.ae_eq_mk
-    rw [Measure.dirac_apply_of_mem (show u ∈ {ω | f ω ≠ hae.mk f ω} from Ne.symm hne)] at h0
-    exact one_ne_zero h0
 
 section Characterization
 variable {ι κ : Type*}
@@ -88,7 +96,7 @@ theorem prodBernoulli_pullback_injective (p : I → unitInterval) {g : J → I}
     (∀ (X : Type u) [MeasurableSpace X] (μ : I → Measure X) [∀ i, IsProbabilityMeasure (μ i)],
       (Measure.infinitePi μ).map (fun P : I → X => fun j => P (g j)) =
         Measure.infinitePi fun j => μ (g j)) :=
-  ⟨Measurable.of_mem fun j => (measurableSet_mem (g j)).mem, prodBernoulli_map_preimage p hg,
+  ⟨measurable_preimage_set g, prodBernoulli_map_preimage p hg,
     fun _ hA => prodBernoulli_preimage_preimage p hg hA,
     fun _ _ μ _ => infinitePi_map_comp_injective μ hg⟩
 
@@ -111,12 +119,12 @@ theorem prodBernoulli_deterministic_modification (q : ι → unitInterval) (E : 
     ∀ A : Set (Set ι), IsUpperSet A → MeasurableSet A →
       prodBernoulli (fun i => if i ∈ E then q i else 0) A ≤ prodBernoulli q A ∧
       prodBernoulli q A ≤ prodBernoulli (fun i => if i ∈ E then 1 else q i) A ∧
-      prodBernoulli (fun i => if i ∈ E then 0 else q i) A ≤ prodBernoulli q A := by
-  refine ⟨by fun_prop, by fun_prop, by fun_prop, prodBernoulli_map_inter q E,
-    prodBernoulli_map_union q E, prodBernoulli_map_sdiff q E, fun A hA hm =>
-      ⟨prodBernoulli_inter_profile_le q E hA hm, prodBernoulli_le_union_profile q E hA hm, ?_⟩⟩
-  rw [← prodBernoulli_map_sdiff q E, Measure.map_apply (by fun_prop) hm]
-  exact measure_mono fun _ h => hA Set.sdiff_subset h
+      prodBernoulli (fun i => if i ∈ E then 0 else q i) A ≤ prodBernoulli q A :=
+  ⟨measurable_id.inter measurable_const, measurable_id.union measurable_const,
+    measurable_id.sdiff measurable_const, prodBernoulli_map_inter q E,
+    prodBernoulli_map_union q E, prodBernoulli_map_sdiff q E, fun _ hA hm =>
+      ⟨prodBernoulli_inter_profile_le q E hA hm, prodBernoulli_le_union_profile q E hA hm,
+        prodBernoulli_sdiff_profile_le q E hA hm⟩⟩
 
 /-- Thinning and superposition: the intersection of independent Bernoulli configurations
 has profile `p r`, and their union has profile `1 - (1 - p)(1 - r)`. -/
@@ -140,12 +148,9 @@ theorem prodBernoulli_determined_events (p : ι → unitInterval) :
     (∀ (m : ℕ) (S : Fin m → Set ι) (A : Fin m → Set (Set ι)),
       Pairwise (Function.onFun Disjoint S) → (∀ j, MeasurableSet (A j)) →
       (∀ j ω ω', ω ∩ S j = ω' ∩ S j → (ω ∈ A j ↔ ω' ∈ A j)) →
-      prodBernoulli p (⋂ j, A j) = ∏ j, prodBernoulli p (A j)) := by
-  refine ⟨fun S A hAm hAS => ⟨_, hAm.preimage (measurable_image_val S),
-    eq_preimage_restrict_of_determined hAS⟩, fun m S A hS hAm hA => ?_⟩
-  have h := prodBernoulli_biInter_of_determined p (Finset.univ : Finset (Fin m))
-    (P := S) (fun i _ j _ hij => hS hij) (fun k _ => hAm k) hA
-  simpa only [Finset.mem_univ, iInter_true] using h
+      prodBernoulli p (⋂ j, A j) = ∏ j, prodBernoulli p (A j)) :=
+  ⟨fun _ _ hAm hAS => exists_measurableSet_eq_preimage_of_determined hAm hAS,
+    fun _ _ _ hS hAm hA => prodBernoulli_iInter_fin_of_determined p hS hAm hA⟩
 
 end Modification
 

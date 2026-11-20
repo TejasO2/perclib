@@ -9,6 +9,18 @@ module
 public import PercLib.Meta.Tag
 public import PercLib.Probability.GhostTransform
 
+/-!
+# Ghost-field transform: statement forms
+
+Each theorem restates, as one conjunction, results proved under their own names in the
+imported modules.
+
+## Main results
+
+* `ghost_series_and_bounds`
+* `ghost_small_field_limits`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Filter Set

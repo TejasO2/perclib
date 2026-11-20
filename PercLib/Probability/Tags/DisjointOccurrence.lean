@@ -9,6 +9,21 @@ public import PercLib.Meta.Tag
 public import PercLib.Probability.CountableBK
 public import PercLib.Probability.DisjointOccurrenceAlgebra
 
+/-!
+# Disjoint occurrence: statement forms
+
+Each theorem restates, as one conjunction, results proved under their own names in the
+imported modules.
+
+## Main results
+
+* `countable_bk_measurable_and_bound`
+* `disjointOccurrence_basic_properties`
+* `disjointOccurrence_open_witness_and_upper`
+* `disjointOccurrence_union_distrib`
+* `disjointOccurrence_three_witness_and_assoc`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set

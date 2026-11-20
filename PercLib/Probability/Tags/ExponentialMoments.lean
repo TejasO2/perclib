@@ -11,6 +11,19 @@ public import PercLib.Meta.Tag
 public import PercLib.Probability.ExponentialMoments
 public import PercLib.Probability.BernoulliDivergence
 
+/-!
+# Exponential moments and divergence bounds: statement forms
+
+Each theorem restates, as one conjunction, results proved under their own names in the
+imported modules.
+
+## Main results
+
+* `exponential_moments_of_moment_bounds`
+* `tail_bounds_of_moment_bounds`
+* `bernoulliDivergence_intensity_bound`
+-/
+
 @[expose] public section
 noncomputable section
 open Real Filter MeasureTheory Set
@@ -64,11 +77,7 @@ theorem bernoulliDivergence_intensity_bound {J β₁ β₂ : ℝ} (hJ : 0 ≤ J)
         (1 - (1 - exp (-(β₁ * J)))) *
           log ((1 - (1 - exp (-(β₁ * J)))) / (1 - (1 - exp (-(β₂ * J))))) ≤
       J * (β₁ * log (β₁ / β₂) - β₁ + β₂) ∧
-    J * (β₁ * log (β₁ / β₂) - β₁ + β₂) ≤ J * (β₁ - β₂) ^ 2 / (2 * min β₁ β₂) := by
-  refine ⟨?_, mul_poissonDivergence_le hJ h₁ h₂⟩
-  rcases hJ.eq_or_lt with h0 | hpos
-  · subst h0
-    rw [bernoulliDivergence_exp_zero, zero_mul]
-  · exact bernoulliDivergence_exp_le hpos h₁ h₂
+    J * (β₁ * log (β₁ / β₂) - β₁ + β₂) ≤ J * (β₁ - β₂) ^ 2 / (2 * min β₁ β₂) :=
+  ⟨bernoulliDivergence_exp_le_of_nonneg hJ h₁ h₂, mul_poissonDivergence_le hJ h₁ h₂⟩
 
 end PercLib.Probability

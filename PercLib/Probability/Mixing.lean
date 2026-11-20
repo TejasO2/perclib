@@ -238,6 +238,18 @@ theorem prodBernoulli_ae_eq_const_of_invariant (p : ι → unitInterval) (e : �
   rw [← this, measure_univ] at hu
   exact one_ne_zero hu
 
+/-- **Ergodicity for observables, probability form.** A measurable `ℕ∞`-valued observable
+invariant under every relabelling takes some value with probability one. -/
+theorem prodBernoulli_exists_measure_eq_one_of_invariant (p : ι → unitInterval)
+    (e : ℕ → ι ≃ ι)
+    (hpres : ∀ n, MeasurePreserving (fun ω : Set ι => e n '' ω)
+      (prodBernoulli p) (prodBernoulli p))
+    (hsep : ∀ F G : Finset ι, ∀ᶠ n in atTop, ∀ i ∈ F, e n i ∉ G)
+    {f : Set ι → ℕ∞} (hf : Measurable f) (hinv : ∀ n ω, f (e n '' ω) = f ω) :
+    ∃ c : ℕ∞, prodBernoulli p {ω | f ω = c} = 1 := by
+  obtain ⟨c, hc⟩ := prodBernoulli_ae_eq_const_of_invariant p e hpres hsep hf hinv
+  exact ⟨c, (prob_compl_eq_zero_iff (hf (measurableSet_singleton c))).1 (ae_iff.1 hc)⟩
+
 /-! ### A criterion for separation -/
 
 /-- Separation holds when each coordinate is sent to each coordinate only finitely often. -/

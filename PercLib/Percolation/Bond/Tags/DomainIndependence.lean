@@ -8,6 +8,17 @@ module
 public import PercLib.Meta.Tag
 public import PercLib.Percolation.Bond.DomainIndependence
 
+/-!
+# Independence on disjoint vertex domains: statement form
+
+Each theorem restates, as one conjunction, results proved under their own names in the
+imported modules.
+
+## Main results
+
+* `law_disjoint_domains_independent`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set PercLib.Probability

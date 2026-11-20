@@ -12,6 +12,20 @@ public import PercLib.Probability.SizeBiasLimits
 public import PercLib.Probability.MixedSpatialMoments
 public import PercLib.Probability.TailComparison
 
+/-!
+# Truncated moments, size-biased limits and random-set tails: statement forms
+
+Each theorem restates, as one conjunction, results proved under their own names in the
+imported modules.
+
+## Main results
+
+* `truncated_mean_lower_bounds`
+* `sizeBias_limit_tail_and_laplace`
+* `mixed_spatial_moment_bounds`
+* `random_set_tail_comparison`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set Filter Finset
