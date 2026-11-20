@@ -14,6 +14,7 @@ public import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
 public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
 public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import PercLib.Meta.Tag
 
 /-!
 # Reciprocal differential inequalities, truncated means and a logarithmic upgrade
@@ -308,6 +309,7 @@ theorem integral_neg_div_mul_log_sq {r s C : ℝ} (hr : 1 < r) (hrs : r ≤ s) :
 /-- **TJXV.** Let `R₀ > 1` and `c > 0`. Suppose `W` is absolutely continuous on every
 `[R₀, R]`, `W(r) ≥ c/√(log r)` and `W'(r) ≥ -C/(r (log r)²)` for almost every `r ≥ R₀`.
 Then `W` is eventually bounded below by a positive constant. -/
+@[tag "TJXV"]
 theorem exists_pos_le_of_log_deriv {W : ℝ → ℝ} {R₀ c C : ℝ} (hR₀ : 1 < R₀) (hc : 0 < c)
     (hW : ∀ R, R₀ ≤ R → AbsolutelyContinuousOnInterval W R₀ R)
     (hlow : ∀ r, R₀ ≤ r → c / Real.sqrt (Real.log r) ≤ W r)

@@ -22,6 +22,7 @@ public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 public import Mathlib.MeasureTheory.Integral.Prod
 public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
+public import PercLib.Meta.Tag
 
 /-!
 # Radial (homogeneous) integration on a finite-dimensional real normed space
@@ -175,6 +176,7 @@ For `P` nonnegative, measurable and homogeneous of degree `k` (`P (c • x) = c 
 
 This is the "polar coordinates free" radial computation underlying the moments of the Lévy
 measure `Π₁` of (I.5.16) and the Green function (Riesz kernel) bounds. -/
+@[tag "MWLQ"]
 theorem lintegral_ball_hom_rpow (μ : Measure E) [μ.IsAddHaarMeasure] [Nontrivial E]
     {P : E → ℝ} (hP : ∀ x, 0 ≤ P x) (hPm : Measurable P) {k s : ℝ}
     (hhom : ∀ (c : ℝ), 0 < c → ∀ x, P (c • x) = c ^ k * P x)

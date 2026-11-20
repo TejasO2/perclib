@@ -10,6 +10,7 @@ public import Mathlib.Analysis.Matrix.Spectrum
 public import Mathlib.Analysis.Matrix.PosDef
 public import Mathlib.LinearAlgebra.Matrix.Hadamard
 public import Mathlib.Algebra.Order.Star.Real
+public import PercLib.Meta.Tag
 
 /-!
 # Entrywise products of powers of a positive semidefinite matrix
@@ -107,6 +108,7 @@ theorem hadamard_pow_sub_eq {S : Matrix n n ℝ} (hS : S.IsHermitian) :
 
 /-- **CS16.** For a real positive semidefinite `S`, `S ⊙ S³ - S² ⊙ S²` is positive
 semidefinite: `S² ⊙ S² ≤ S ⊙ S³` in the Loewner order. -/
+@[tag "CS16"]
 theorem posSemidef_hadamard_pow_sub {S : Matrix n n ℝ} (hS : S.PosSemidef) :
     (S ⊙ (S ^ 3) - (S ^ 2) ⊙ (S ^ 2)).PosSemidef := by
   rw [hadamard_pow_sub_eq hS.isHermitian]
