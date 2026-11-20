@@ -257,6 +257,142 @@ example : (∅ : Config Bool) ∉ conn false true := by
 example : (cluster (∅ : Config Bool) false).encard = 1 := by
   rw [cluster_empty, Set.encard_singleton]
 
+/-! ### Row sums
+
+The row sum of an edge weight `a : Sym2 V → ℝ≥0∞` at `v` sums `a s(v, w)` over the
+vertices `w ≠ v`. The diagonal is excluded because a profile `q` is arbitrary on the
+diagonal: the open graph discards loops. The named map `unitInterval.toENNReal` turns a
+profile into an edge weight. -/
+
+section RowSum
+
+/-- A probability, as an extended nonnegative real. -/
+def _root_.unitInterval.toENNReal (p : unitInterval) : ℝ≥0∞ :=
+  (unitInterval.toNNReal p : ℝ≥0∞)
+
+theorem _root_.unitInterval.toENNReal_apply (p : unitInterval) :
+    unitInterval.toENNReal p = (unitInterval.toNNReal p : ℝ≥0∞) :=
+  rfl
+
+theorem _root_.unitInterval.coe_toNNReal_eq_toENNReal (p : unitInterval) :
+    (unitInterval.toNNReal p : ℝ≥0∞) = unitInterval.toENNReal p :=
+  rfl
+
+@[simp]
+theorem _root_.unitInterval.toENNReal_zero : unitInterval.toENNReal 0 = 0 := by
+  simp [unitInterval.toENNReal_apply]
+
+@[simp]
+theorem _root_.unitInterval.toENNReal_one : unitInterval.toENNReal 1 = 1 := by
+  simp [unitInterval.toENNReal_apply]
+
+@[simp]
+theorem _root_.unitInterval.toENNReal_ne_top (p : unitInterval) :
+    unitInterval.toENNReal p ≠ ⊤ :=
+  ENNReal.coe_ne_top
+
+@[simp]
+theorem _root_.unitInterval.toENNReal_lt_top (p : unitInterval) :
+    unitInterval.toENNReal p < ⊤ :=
+  ENNReal.coe_lt_top
+
+@[simp]
+theorem _root_.unitInterval.toENNReal_le_one (p : unitInterval) :
+    unitInterval.toENNReal p ≤ 1 := by
+  rw [unitInterval.toENNReal_apply, ENNReal.coe_le_one_iff, ← NNReal.coe_le_coe,
+    unitInterval.coe_toNNReal, NNReal.coe_one]
+  exact p.2.2
+
+@[simp]
+theorem _root_.unitInterval.toENNReal_toReal (p : unitInterval) :
+    (unitInterval.toENNReal p).toReal = p :=
+  rfl
+
+@[simp]
+theorem _root_.unitInterval.toENNReal_le_toENNReal {p p' : unitInterval} :
+    unitInterval.toENNReal p ≤ unitInterval.toENNReal p' ↔ p ≤ p' := by
+  rw [unitInterval.toENNReal_apply, unitInterval.toENNReal_apply, ENNReal.coe_le_coe,
+    ← NNReal.coe_le_coe, unitInterval.coe_toNNReal, unitInterval.coe_toNNReal]
+  rfl
+
+theorem _root_.unitInterval.toENNReal_mono : Monotone unitInterval.toENNReal :=
+  fun _ _ h => unitInterval.toENNReal_le_toENNReal.2 h
+
+/-- The row sum of an edge weight `a` at `v`: the sum of `a s(v, w)` over `w ≠ v`.
+
+The diagonal term is excluded: a profile `q : Sym2 V → unitInterval` is arbitrary
+on the diagonal, because the open graph discards loops, so `a s(v, v)` never enters. For
+a profile the weight is `fun e => unitInterval.toENNReal (q e)` (`rowSum_toENNReal`). -/
+def rowSum (a : Sym2 V → ℝ≥0∞) (v : V) : ℝ≥0∞ := by
+  classical
+  exact ∑' w, if w = v then 0 else a s(v, w)
+
+/-- Unfolding `rowSum`, for any decidability instance on `V`. -/
+theorem rowSum_def [DecidableEq V] (a : Sym2 V → ℝ≥0∞) (v : V) :
+    rowSum a v = ∑' w, if w = v then 0 else a s(v, w) := by
+  simp only [rowSum]
+  exact tsum_congr fun w => by congr
+
+/-- The row sum is the sum over the vertices other than `v`. -/
+theorem rowSum_eq_tsum_ne (a : Sym2 V → ℝ≥0∞) (v : V) :
+    rowSum a v = ∑' w : {w // w ≠ v}, a s(v, w.1) := by
+  classical
+  rw [rowSum_def]
+  symm
+  refine (tsum_subtype {w | w ≠ v} (fun w => a s(v, w))).trans ?_
+  refine tsum_congr fun w => ?_
+  by_cases h : w = v <;> simp [h]
+
+/-- The row sum depends only on the weight off the diagonal. -/
+theorem rowSum_congr_offDiag {a b : Sym2 V → ℝ≥0∞} {v : V}
+    (h : ∀ w, w ≠ v → a s(v, w) = b s(v, w)) : rowSum a v = rowSum b v := by
+  simp only [rowSum_eq_tsum_ne]
+  exact tsum_congr fun w => h w.1 w.2
+
+/-- Comparison off the diagonal suffices for comparing row sums. -/
+theorem rowSum_le_rowSum {a b : Sym2 V → ℝ≥0∞} {v : V}
+    (h : ∀ w, w ≠ v → a s(v, w) ≤ b s(v, w)) : rowSum a v ≤ rowSum b v := by
+  simp only [rowSum_eq_tsum_ne]
+  exact ENNReal.tsum_le_tsum fun w => h w.1 w.2
+
+theorem rowSum_mono {a b : Sym2 V → ℝ≥0∞} (h : a ≤ b) (v : V) :
+    rowSum a v ≤ rowSum b v :=
+  rowSum_le_rowSum fun w _ => h s(v, w)
+
+@[simp]
+theorem rowSum_zero (v : V) : rowSum (0 : Sym2 V → ℝ≥0∞) v = 0 := by
+  simp [rowSum_eq_tsum_ne]
+
+@[simp]
+theorem rowSum_fun_zero (v : V) : rowSum (fun _ : Sym2 V => (0 : ℝ≥0∞)) v = 0 :=
+  rowSum_zero v
+
+theorem rowSum_add (a b : Sym2 V → ℝ≥0∞) (v : V) :
+    rowSum (a + b) v = rowSum a v + rowSum b v := by
+  simp only [rowSum_eq_tsum_ne, Pi.add_apply]
+  exact ENNReal.tsum_add
+
+theorem rowSum_const_mul (c : ℝ≥0∞) (a : Sym2 V → ℝ≥0∞) (v : V) :
+    rowSum (fun e => c * a e) v = c * rowSum a v := by
+  simp only [rowSum_eq_tsum_ne]
+  exact ENNReal.tsum_mul_left
+
+/-- Transport of a row sum along a bijection of the vertices. -/
+theorem rowSum_comp_equiv {W : Type*} (σ : V ≃ W) (a : Sym2 W → ℝ≥0∞) (v : V) :
+    rowSum (a ∘ Sym2.map σ) v = rowSum a (σ v) := by
+  classical
+  rw [rowSum_def, rowSum_def, ← σ.tsum_eq]
+  refine tsum_congr fun w => ?_
+  simp [σ.injective.eq_iff]
+
+/-- The row sum of a profile, unfolded to the explicit `∑'` spelling. -/
+theorem rowSum_toENNReal [DecidableEq V] (q : Sym2 V → unitInterval) (v : V) :
+    rowSum (fun e => unitInterval.toENNReal (q e)) v =
+      ∑' w, if w = v then 0 else (unitInterval.toNNReal (q s(v, w)) : ℝ≥0∞) :=
+  rowSum_def _ v
+
+end RowSum
+
 end PercLib.Percolation.Bond
 
 end
