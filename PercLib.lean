@@ -18,6 +18,7 @@ public import PercLib.Analysis.QuadraticRecursion
 public import PercLib.Analysis.ReciprocalODE
 public import PercLib.Analysis.RegularVariation.Algebra
 public import PercLib.Analysis.RegularVariation.Defs
+public import PercLib.Analysis.RegularVariation.GeneralInverse
 public import PercLib.Analysis.RegularVariation.Karamata
 public import PercLib.Analysis.RegularVariation.LogODE
 public import PercLib.Analysis.RegularVariation.LogScaling
