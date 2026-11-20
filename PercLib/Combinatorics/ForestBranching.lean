@@ -121,6 +121,52 @@ theorem tree_card_branch_le_card_sub_two (T : SimpleGraph W) [DecidableRel T.Adj
   have hb := tree_card_branch_add_two_le_leaves T hT
   omega
 
+/-- In a finite graph, an isolated vertex is alone in its connected component, so there are at
+most as many isolated vertices as connected components. -/
+theorem _root_.SimpleGraph.ncard_isIsolated_le_card_connectedComponent {V : Type*} [Finite V]
+    (G : SimpleGraph V) : {v | G.IsIsolated v}.ncard ≤ Nat.card G.ConnectedComponent := by
+  rw [← Nat.card_coe_set_eq]
+  refine Nat.card_le_card_of_injective (fun v => G.connectedComponentMk v.1) ?_
+  rintro ⟨u, hu⟩ ⟨v, hv⟩ (huv : G.connectedComponentMk u = G.connectedComponentMk v)
+  obtain ⟨p⟩ := SimpleGraph.ConnectedComponent.eq.mp huv
+  cases p with
+  | nil => rfl
+  | cons hadj _ => exact absurd hadj (hu _)
+
+/-- A finite graph has at most as many degree-zero vertices as connected components. -/
+theorem card_degree_eq_zero_le_card_connectedComponent (T : SimpleGraph W) [DecidableRel T.Adj] :
+    (univ.filter fun v => T.degree v = 0).card ≤ Nat.card T.ConnectedComponent := by
+  have h : (univ.filter fun v => T.degree v = 0).card = {v | T.IsIsolated v}.ncard := by
+    rw [← Set.ncard_coe_finset]
+    congr 1
+    ext v
+    simp [SimpleGraph.degree_eq_zero]
+  rw [h]
+  exact T.ncard_isIsolated_le_card_connectedComponent
+
+/-- Sharp finite-forest branch bound: with `c` components and `i` isolated vertices,
+`|B| ≤ |L| - 2(c - i)` (signed subtraction). -/
+theorem forest_card_branch_le_leaves_sub_two_mul (T : SimpleGraph W) [DecidableRel T.Adj]
+    (hT : T.IsAcyclic) :
+    ((univ.filter fun v => 3 ≤ T.degree v).card : ℤ) ≤
+      (univ.filter fun v => T.degree v = 1).card -
+        2 * ((Nat.card T.ConnectedComponent : ℤ) - (univ.filter fun v => T.degree v = 0).card) := by
+  -- pointwise: `[deg ≥ 3] - [deg = 1] - 2 [deg = 0] ≤ deg - 2`
+  have hpoint (v : W) : (if 3 ≤ T.degree v then (1 : ℤ) else 0) -
+      (if T.degree v = 1 then 1 else 0) - 2 * (if T.degree v = 0 then 1 else 0) ≤
+      (T.degree v : ℤ) - 2 := by
+    split_ifs <;> omega
+  have hle := sum_le_sum (s := (univ : Finset W)) (fun v _ => hpoint v)
+  rw [forest_sum_degree_sub_two T hT, sum_sub_distrib, sum_sub_distrib, ← mul_sum] at hle
+  have hb : (∑ v : W, if 3 ≤ T.degree v then (1 : ℤ) else 0) =
+      (univ.filter fun v => 3 ≤ T.degree v).card := by simp
+  have hl : (∑ v : W, if T.degree v = 1 then (1 : ℤ) else 0) =
+      (univ.filter fun v => T.degree v = 1).card := by simp
+  have hi : (∑ v : W, if T.degree v = 0 then (1 : ℤ) else 0) =
+      (univ.filter fun v => T.degree v = 0).card := by simp
+  rw [hb, hl, hi] at hle
+  linarith
+
 -- The empty forest and singleton tree have no branch vertices; neither has leaves.
 example : (univ.filter fun v : Empty => 3 ≤ (⊥ : SimpleGraph Empty).degree v).card = 0 := by simp
 example : (∑ v : Unit, (((⊥ : SimpleGraph Unit).degree v : ℤ)-2)) = -2 := by simp

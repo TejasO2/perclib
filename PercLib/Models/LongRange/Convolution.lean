@@ -6,6 +6,7 @@ hypothesis, not an assertion about power-law convergence at exponent zero.
 -/
 module
 
+public import PercLib.Meta.Tag
 public import Mathlib.Analysis.SpecialFunctions.Pow.NNReal
 public import Mathlib.Topology.Algebra.InfiniteSum.ENNReal
 public import Mathlib.Analysis.PSeries
@@ -24,7 +25,7 @@ namespace PercLib.Models
 
 /-- A doubling kernel has convolution bounded by twice its doubling constant times
 its mass. No symmetry of the kernel or of the gauge is needed. -/
-theorem tsum_mul_le_of_doubling {G : Type*} [AddCommGroup G] (ρ : G → ℝ≥0)
+@[tag "4Q21"] theorem tsum_mul_le_of_doubling {G : Type*} [AddCommGroup G] (ρ : G → ℝ≥0)
     (htri : ∀ u v, ρ (u + v) ≤ ρ u + ρ v)
     (k : G → ℝ≥0∞) (hk0 : k 0 = 0) {D M : ℝ≥0∞}
     (hD : ∀ u w, u ≠ 0 → w ≠ 0 → ρ w ≤ 2 * ρ u → k u ≤ D * k w)
@@ -88,7 +89,7 @@ theorem powerKernel_doubling {G : Type*} [NormedAddCommGroup G]
   exact nnnorm_rpow_neg_le_of_le_twice hs hw h
 
 /-- Power-law convolution on any normed abelian group, under its explicit mass bound. -/
-theorem tsum_powerKernel_mul_le {G : Type*} [NormedAddCommGroup G]
+@[tag "ZXLF"] theorem tsum_powerKernel_mul_le {G : Type*} [NormedAddCommGroup G]
     {s : ℝ} (hs : 0 ≤ s) {M : ℝ≥0∞}
     (hM : ∑' z : G, (if z = 0 then 0 else (‖z‖₊ ^ (-s) : ℝ≥0∞)) ≤ M)
     {x y : G} (hxy : x ≠ y) :

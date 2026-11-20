@@ -7,8 +7,9 @@ Fails if any Lean file under ROOT, outside comments and string literals, uses a
 construct that leaves a proof unchecked, adds an axiom, or can run code at
 elaboration time: `sorry`, `admit`, `native_decide`, `axiom`, `by_elab`, `run_tac`,
 `run_cmd`, `run_elab`, `#eval`, `elab`, `macro`, `syntax`, `initialize`, `unsafe`,
-`implemented_by`, `extern`, `skipKernelTC` (however quoted), or a `set_option` outside
-a short allowlist. The tag attribute itself (`PercLib/Meta/Tag.lean`) is the one file
+`implemented_by`, `extern`, `skipKernelTC` (however quoted), `addDecl`, `command_elab`,
+`term_elab`, `tactic_elab`, or a `set_option` outside a short allowlist (D-35: no
+`maxHeartbeats` and no `linter.*`). The tag attribute itself (`PercLib/Meta/Tag.lean`) is the one file
 allowed to declare syntax and an initializer, and only those.
 
 This is a second line behind the axiom audit and the kernel replay; it fails closed.
@@ -25,9 +26,11 @@ from check_proof_pr import code_without_literals  # noqa: E402
 
 FORBIDDEN = set('sorry admit native_decide axiom axioms by_elab run_tac run_cmd run_elab '
                 'elab elab_rules macro macro_rules syntax initialize builtin_initialize '
-                'unsafe implemented_by extern skipKernelTC decide_kernel debug'.split())
-ALLOWED_OPTIONS = re.compile(r'(maxHeartbeats|synthInstance\.maxHeartbeats|maxRecDepth|'
-                             r'linter\.[\w.]+|backward\.isDefEq\.respectTransparency|'
+                'unsafe implemented_by extern skipKernelTC debug addDecl command_elab term_elab '
+                'tactic_elab'.split())
+# D-35: maxHeartbeats, synthInstance.maxHeartbeats and linter.* are not allowed; a real
+# need is an audited exception added here with its reason.
+ALLOWED_OPTIONS = re.compile(r'(maxRecDepth|backward\.isDefEq\.respectTransparency|'
                              r'pp\.[\w.]+)$')
 EXEMPT = {'PercLib/Meta/Tag.lean': {'syntax', 'initialize'}}
 

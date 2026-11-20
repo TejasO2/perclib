@@ -64,6 +64,7 @@ theorem prodBernoulli_real_open_pivotal (p : E → unitInterval) (A : Set (Set E
 /-- The probability along any C¹ real profile curve has the integral Russo formula.
 The supplied interval-valued profile only has to agree with the real curve on the
 integration interval, including its endpoints. -/
+@[tag "VYTC"]
 theorem prodBernoulli_sub_eq_integral_profile (q dq : E → ℝ → ℝ)
     (hq : ∀ e t, HasDerivAt (q e) (dq e t) t) (hdq : ∀ e, Continuous (dq e))
     (p : ℝ → E → unitInterval) (a b : ℝ)

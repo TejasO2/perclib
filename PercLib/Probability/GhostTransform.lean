@@ -391,6 +391,7 @@ theorem ceil_one_div_bounds {h : ℝ} (hh : 0 < h) (h1 : h ≤ 1) :
 
 /-- **3C2F.** For `0 < α < 1`, `P(T ≥ n) ≍ n^{-α}` as `n → ∞` if and only if
 `M(h) ≍ h^α` as `h ↓ 0` (two-sided bounds by positive constants). -/
+@[tag "3C2F"]
 theorem tail_asymp_iff_ghost_asymp (hT : Measurable T) {α : ℝ} (hα : 0 < α) (hα1 : α < 1) :
     (∃ c > 0, ∃ C > 0, ∃ N : ℕ, ∀ n : ℕ, N ≤ n → 1 ≤ n →
       c * (n : ℝ) ^ (-α) ≤ (μ {ω | (n : ℕ∞) ≤ T ω}).toReal ∧
@@ -570,6 +571,7 @@ theorem lipschitzOnWith_rpow_Icc {p : ℝ} (hp : 1 ≤ p) :
 /-- **CVCN.** Let `m : (0, ∞) → [0, 1]` be nondecreasing and absolutely continuous on every
 `[a, b] ⊆ (0, ∞)`, with `A m^r m' ≥ 1 - m^q` almost everywhere (`A, r, q > 0`). Then for
 every `a ∈ (0, 1)` and `h > 0`, `m(h) ≥ min(a, ((r+1)(1 - a^q) h / A)^{1/(r+1)})`. -/
+@[tag "CVCN"]
 theorem min_le_of_ghost_ode {m : ℝ → ℝ} {A r q : ℝ} (hA : 0 < A) (hr : 0 < r) (hq : 0 < q)
     (hm01 : ∀ s, 0 < s → 0 ≤ m s ∧ m s ≤ 1) (hmono : MonotoneOn m (Ioi 0))
     (hac : ∀ a b, 0 < a → a ≤ b → AbsolutelyContinuousOnInterval m a b)

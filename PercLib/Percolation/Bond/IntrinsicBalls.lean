@@ -194,6 +194,7 @@ private theorem sqrt_bounds (n : ℕ) (hn : 1 ≤ n) :
 /-- **J1V5.** Under any measure on configurations of a countable vertex type, if the
 sphere probabilities satisfy `Q_r = μ(S_ω(o,r) ≠ ∅) ≤ A/r` and the ball volumes satisfy
 `E|B_ω(o,r)| ≤ B r` for `r ≥ 1`, then `μ(|K_o| ≥ n) ≤ (A + 2B)/√n` for every `n ≥ 1`. -/
+@[tag "J1V5"]
 theorem measure_encard_cluster_ge_le [Countable V] (μ : Measure (Config V)) (o : V)
     (A B : ℝ≥0∞)
     (hQ : ∀ r : ℕ, 1 ≤ r → μ {ω | ∃ y, (openGraph ω).edist o y = r} ≤ A / r)

@@ -335,6 +335,7 @@ theorem hasDerivWithinAt_finiteChi_le (J : Sym2 V → ℝ≥0) (o : (S : Set V))
 
 /-- **TAVM.** At every `β > 0` the finite-volume susceptibility `β ↦ χ_S(o)` has a
 derivative `D` with `0 ≤ D ≤ R_S χ_S(o) M_S`. -/
+@[tag "TAVM"]
 theorem hasDerivAt_finiteChi_le (J : Sym2 V → ℝ≥0) (o : (S : Set V)) {β : ℝ}
     (hβ : 0 < β) :
     ∃ D, HasDerivAt (fun b : ℝ => ∑ y : (S : Set V),

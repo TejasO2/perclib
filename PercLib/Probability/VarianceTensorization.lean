@@ -202,6 +202,7 @@ theorem variance_le_sum_on (q : E → ℝ) (hq : ∀ e, q e ∈ Set.Icc (0 : ℝ
 /-- **Efron–Stein inequality for finite Bernoulli profiles** (R428). For a profile with
 values in `[0,1]`, endpoints allowed, the variance `E_q[f²] - (E_q f)²` is at most
 `∑ₑ qₑ(1-qₑ) E_q[(Δₑ f)²]`. -/
+@[tag "R428"]
 theorem variance_le_sum_difference_sq (q : E → ℝ) (hq : ∀ e, q e ∈ Set.Icc (0 : ℝ) 1)
     (f : (E → Bool) → ℝ) :
     expectation q (fun ω => f ω ^ 2) - expectation q f ^ 2 ≤
@@ -274,6 +275,7 @@ private lemma prodBernoulli_real_eq_expectation (r : E → unitInterval) (A : Se
 
 /-- **GI8Q**, probability form: with `F(u) = P_u(A)` for the homogeneous product law
 (extended outside `[0,1]` by clamping), `p(1-p) F'(p) ≥ F(p)(1-F(p))` for `0 < p < 1`. -/
+@[tag "GI8Q"]
 theorem prodBernoulli_event_variance_le_deriv {A : Set (Set E)} (hA : IsUpperSet A) {p : ℝ}
     (hp : p ∈ Set.Ioo (0 : ℝ) 1) :
     (prodBernoulli (fun _ : E => Set.projIcc 0 1 zero_le_one p)).real A *
@@ -407,6 +409,42 @@ theorem prodBernoulli_odds_ratio_le {A : Set (Set E)} (hA : IsUpperSet A) (hne :
       (prodBernoulli (fun _ : E => b)).real A / (1 - (prodBernoulli (fun _ : E => b)).real A) := by
   simp only [prodBernoulli_real_eq_expectation]
   exact odds_ratio_le hA hne hnu ha hab hb
+
+/-- **Odds-ratio bound, solved form.** For a nontrivial increasing event and `0 < a < b < 1`, the odds
+inequality bounds `P_b(A)` below by `F b (1-a) / (F b (1-a) + (1-F) a (1-b))`, `F = P_a(A)`. -/
+theorem prodBernoulli_odds_solved_le {A : Set (Set E)} (hA : IsUpperSet A) (hne : A.Nonempty)
+    (hnu : A ≠ Set.univ) {a b : unitInterval} (ha : 0 < (a : ℝ)) (hab : (a : ℝ) < b)
+    (hb : (b : ℝ) < 1) :
+    (prodBernoulli (fun _ : E => a)).real A * b * (1 - a) /
+        ((prodBernoulli (fun _ : E => a)).real A * b * (1 - a) +
+          (1 - (prodBernoulli (fun _ : E => a)).real A) * a * (1 - b)) ≤
+      (prodBernoulli (fun _ : E => b)).real A := by
+  have h := prodBernoulli_odds_ratio_le hA hne hnu ha hab hb
+  have hmem : ∀ r : unitInterval, 0 < (r : ℝ) → (r : ℝ) < 1 →
+      0 < (prodBernoulli (fun _ : E => r)).real A ∧
+        (prodBernoulli (fun _ : E => r)).real A < 1 := by
+    intro r h0 h1
+    rw [prodBernoulli_real_eq_expectation]
+    exact ⟨expectation_eventValue_pos (fun _ => ⟨h0, h1⟩) hA hne,
+      expectation_eventValue_lt_one (fun _ => ⟨h0, h1⟩) hA hnu⟩
+  obtain ⟨hFa0, hFa1⟩ := hmem a ha (hab.trans hb)
+  obtain ⟨hFb0, hFb1⟩ := hmem b (ha.trans hab) hb
+  set Fa := (prodBernoulli (fun _ : E => a)).real A
+  set Fb := (prodBernoulli (fun _ : E => b)).real A
+  have ha1 : (0 : ℝ) < 1 - a := by linarith
+  have hb1 : (0 : ℝ) < 1 - b := by linarith
+  have hb0 : (0 : ℝ) < b := ha.trans hab
+  have hX : 0 < Fa * b * (1 - a) := by positivity
+  have hY : 0 < (1 - Fa) * a * (1 - b) := by
+    have : 0 < 1 - Fa := by linarith
+    positivity
+  have hkey : Fa / (1 - Fa) * (b * (1 - a) / (a * (1 - b))) =
+      (Fa * b * (1 - a)) / ((1 - Fa) * a * (1 - b)) := by
+    have : (1 - Fa) ≠ 0 := by linarith
+    field_simp
+  rw [hkey, div_le_div_iff₀ hY (by linarith)] at h
+  rw [div_le_iff₀ (by linarith)]
+  nlinarith
 
 /-! ### Non-vacuity witnesses (D-5) -/
 

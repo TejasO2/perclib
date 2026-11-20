@@ -5,6 +5,7 @@ infimum; no upstream probability foundation is copied.
 -/
 module
 
+public import PercLib.Meta.Tag
 public import PercLib.Percolation.Bond.Basic
 public import Mathlib.Analysis.SpecialFunctions.Exp
 
@@ -38,6 +39,7 @@ def intensityProfile (J : Sym2 V → ℝ≥0) (β : ℝ≥0) : Sym2 V → unitIn
 
 /-- Infimum of finite parameters giving a positive probability of an infinite
 cluster at the specified root. No percolation assertion at the infimum is implied. -/
+@[tag "8DAH"]
 def rootCriticalIntensity (J : Sym2 V → ℝ≥0) (x : V) : ℝ≥0∞ :=
   sInf {b | ∃ β : ℝ≥0, (β : ℝ≥0∞) = b ∧
     0 < law (intensityProfile J β) {ω | (cluster ω x).Infinite}}

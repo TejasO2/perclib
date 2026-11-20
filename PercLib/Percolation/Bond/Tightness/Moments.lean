@@ -19,7 +19,7 @@ With `Z = maxClusterIntersection Λ`, `M = tightnessScale q Λ`, `Λ` finite non
 
 * `lintegral_maxClusterIntersection_ge` (unconditional):
   `(M - 1) e⁻¹ ≤ E Z` and `M / (2e) ≤ E Z`.
-* `lintegral_maxClusterIntersection_pow_le` (assuming `UniversalTightness V`): for every
+* `lintegral_maxClusterIntersection_pow_le` (from universal tightness): for every
   `k`, `E Z^k ≤ C_k M^k` with the explicit constant `C_k = 20 · 18^k · k!`.
 
 The second bound is proved for every `k : ℕ`, which includes the requested `k ≥ 1`.
@@ -114,16 +114,17 @@ private theorem tsum_geometric_le :
   rw [this]
   exact ENNReal.ofReal_le_ofReal (by linarith)
 
-/-- **Higher moments** (wiki tag 2FN1): assuming universal tightness on `V`, for every
+/-- **Higher moments** (wiki tag 2FN1): by universal tightness, for every
 profile, every finite nonempty `Λ` and every `k`,
 `E Z^k ≤ C_k M^k` with `C_k = 20 · 18^k · k!`, independent of `V`, `q` and `Λ`. -/
-theorem lintegral_maxClusterIntersection_pow_le [Countable V] (hUT : UniversalTightness V)
+theorem lintegral_maxClusterIntersection_pow_le [Countable V]
     (q : Sym2 V → unitInterval) {Λ : Finset V} (hΛ : Λ.Nonempty) (k : ℕ) :
     ∫⁻ ω, (maxClusterIntersection Λ ω : ℝ≥0∞) ^ k ∂(law q) ≤
       (20 * 18 ^ k * k ! : ℝ≥0∞) * (tightnessScale q Λ : ℝ≥0∞) ^ k := by
   set M := tightnessScale q Λ with hM
   have hM2 := two_le_tightnessScale q hΛ
-  have hupper := (hUT q Λ hΛ).1
+  have hupper := fun a (ha : 1 ≤ a) =>
+    law_mul_tightnessScale_le_maxClusterIntersection_le q hΛ ha
   -- the layers `S j = {(j + 1) M ≤ Z}`
   have hS : ∀ j : ℕ, MeasurableSet {ω : Config V | (j + 1) * M ≤ maxClusterIntersection Λ ω} :=
     fun j => measurableSet_le_maxClusterIntersection Λ _
@@ -230,7 +231,7 @@ example (q : Sym2 Unit → unitInterval) :
 example (q : Sym2 Unit → unitInterval) (k : ℕ) :
     ∫⁻ ω, (maxClusterIntersection {()} ω : ℝ≥0∞) ^ k ∂(law q) ≤
       (20 * 18 ^ k * k ! : ℝ≥0∞) * (tightnessScale q {()} : ℝ≥0∞) ^ k :=
-  lintegral_maxClusterIntersection_pow_le universalTightness_unit q
+  lintegral_maxClusterIntersection_pow_le q
     (Finset.singleton_nonempty _) k
 
 end PercLib.Percolation.Bond

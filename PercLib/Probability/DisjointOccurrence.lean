@@ -38,6 +38,7 @@ def ForcesOn (A : Set (Set ι)) (ω F : Set ι) : Prop :=
   ∀ η : Set ι, (∀ i ∈ F, i ∈ η ↔ i ∈ ω) → η ∈ A
 
 /-- Disjoint occurrence with two disjoint finite universal forcing certificates. -/
+@[tag "OQN6"]
 def disjointOccurrence (A B : Set (Set ι)) : Set (Set ι) :=
   {ω | ∃ F H : Set ι, F.Finite ∧ H.Finite ∧ Disjoint F H ∧
     ForcesOn A ω F ∧ ForcesOn B ω H}

@@ -263,6 +263,7 @@ theorem law_forall_conn_le [Countable V] [DecidableEq ι] (q : Sym2 V → unitIn
 
 /-- **The tree-graph inequality** (L82Q): for every countable vertex type and every
 profile, `P(x ↔ y, x ↔ z) ≤ ∑_w τ(x, w) τ(w, y) τ(w, z)`. -/
+@[tag "L82Q"]
 theorem treeGraphInequality (V : Type*) [Countable V] : TreeGraphInequality V := by
   classical
   intro q x y z

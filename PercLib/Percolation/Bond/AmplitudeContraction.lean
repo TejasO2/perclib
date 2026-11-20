@@ -60,6 +60,7 @@ theorem nat_mul_le_tsum {p : ℕ → ℝ} (hanti : ∀ m n : ℕ, 1 ≤ m → m 
     _ ≤ ∑' k, p k := hsum.sum_le_tsum _ fun k _ => hp0 k
 
 /-- **Amplitude contraction** (the analytic core of C9N6). -/
+@[tag "C9N6"]
 theorem amplitude_contraction {d α C₀ θ D B : ℝ} {r₀ : ℕ} (hd : 0 < d) (hα : 0 < α)
     (hαd : α < d) (hC₀ : 0 < C₀) (hr₀ : 1 ≤ r₀) (hθ : θ = (d - α) / (2 * d + α))
     (hD : D = C₀ * (((r₀ : ℝ) + 1) ^ (α / 2) + 1)) (hB : B = max 1 (D ^ ((1 + θ) / (2 * θ))))

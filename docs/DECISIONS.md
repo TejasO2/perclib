@@ -899,3 +899,94 @@ anchors, personal email addresses and old private issue or pull request links ar
 reduced to plain locators or removed. Only what passes is copied to `perclib/wiki/`;
 anything in doubt is withheld and listed for Tom. The built site is not committed.
 After the move the wiki build is part of the gate for wiki changes.
+
+### D-35. Reusable Lean: names, API, generality, and what the audit checks
+Decided 20 November 2026 by ARCHITECT, after Tom asked whether the project follows Scott
+Armstrong's guidance on reusable agent-written Lean. A scout read his
+`LeanAutoformalizationSkills` repository in full (unchanged since commit `1837b95`) and
+sampled nine files of this library against it; his blog posts could not be fetched from
+the build environment and are not relied on here. Finding: on statement fidelity and
+verification the library meets or exceeds that guidance (kernel replay, axiom audit, no
+`…Input`, no `Prop` target used as a hypothesis, non-vacuity witnesses, fresh-auditor
+review). On reusability it does not: recurring notions are spelled out instead of named
+(the row sum 123 times in 77 files), there are 8 `@[simp]` and no `@[ext]` attributes in
+75,000 lines, tagged conjunctions serve as public surface, general results sit under
+project names, signatures reach 21 hypotheses, and 187 of 272 file headers carry package,
+issue or agent labels. These follow from D-23 and D-24, which measured lines and made
+definitions expensive, and from the absence of any naming or API rule.
+
+- **The measure changes.** D-23's measure, lines merged per day, is withdrawn. Progress is
+  reported as wiki assertions proved, with the number of tagged statements audited, and
+  never as lines. A line that restates what a named definition or an existing lemma would
+  give is a cost.
+- **Search covers lemmas.** Before writing a lemma that does not mention percolation, a
+  worker searches mathlib by name and by type and searches this library, and reports
+  what it searched. A private copy of a lemma that exists elsewhere in the library is
+  rejected; import it.
+- **Generality when it is free.** A lemma is stated at the generality its proof supports
+  when that costs nothing: an arbitrary index type or measure rather than
+  `prodBernoulli`, a general profile rather than the power law, a `SimpleGraph` rather
+  than a configuration. The wiki-facing form is a corollary. A notion mathlib has is used
+  through mathlib's API and is not re-encoded as an ad hoc hypothesis. Generalising
+  beyond what a consumer needs is not asked for.
+- **A definition lands with its API.** Membership and evaluation lemmas, `@[simp]` where
+  they are in normal form, `ext` for structures, monotonicity and the trivial case, in
+  the same package. The auditor checks this.
+- **The third use gets a name.** D-24 is relaxed in this respect: a worker whose
+  statement would spell out the same predicate or quantity for a third time proposes a
+  definition for it in the directory's `Defs.lean` or `Basic.lean` as a small interface
+  package, and this is encouraged, not penalised. A theorem with more than ten
+  hypotheses is reported with the reason; a recurring group of hypotheses becomes a
+  structure.
+- **Names follow mathlib.** The name describes the conclusion, hypotheses are added with
+  `_of_`, and the namespace is the most specific one that gives dot notation. A lemma
+  about graphs, finsets or measures that does not mention percolation goes under a
+  mathlib-shaped name in the matching namespace. A tag, package or work-item identifier
+  never appears in a declaration name.
+- **`Tags/` files are a correspondence layer, not API.** A tagged statement there
+  restates library lemmas and adds no mathematics. Each conjunct of a tagged conjunction
+  is also a named lemma in the area file, and downstream code uses that lemma, never the
+  tagged conjunction.
+- **Narrowing is for helpers only.** A tagged statement or a definition it uses is never
+  narrowed to make a proof close. The worker stops and reports. Every brief names the
+  owned files, the exact target, the allowed inputs, the stop condition and the
+  hand-off.
+- **The interface audit is a binder table.** For every tagged statement the auditor
+  lists each binder, including the fields of any project structure it unfolds to, as
+  SOURCE (a premise of the wiki assertion or cited source), TYPING, RULED (a recorded
+  erratum, with its identifier) or EXCESS. Any EXCESS fails. The order of the
+  existential quantifiers is checked against every parameter the source says a constant
+  does not depend on. An unused underscore-named hypothesis passes only as SOURCE.
+- **Gate additions.** (i) No tagged `Prop`-valued definition is the type of a binder, and
+  every theorem whose type is a tagged `Prop` definition carries the same tag (D-16);
+  the untagged proof of PVA8 is fixed by this. (ii) `maxHeartbeats`,
+  `synthInstance.maxHeartbeats` and `linter.*` leave the allowed `set_option` list; a
+  real need is an audited exception. (iii) `addDecl`, `command_elab`, `term_elab` and
+  `tactic_elab` join the forbidden list. (iv) A new file fails the gate if its header
+  matches a package, issue or agent label; headers carry provenance and the mathematical
+  reference only. (v) New files begin with a module docstring giving the title and main
+  results.
+- **Three migrations, each run alone.** They touch many files, so each runs in a window
+  when no other Lean branch is open, and is mechanical and proof-preserving:
+  1. *Row sum.* Add to `PercLib/Percolation/Bond/Basic.lean`
+     `rowSum (a : Sym2 V → ℝ≥0∞) (v : V) : ℝ≥0∞ := ∑' w, if w = v then 0 else a s(v, w)`,
+     with its API and the lemma relating it to a `unitInterval`-valued `q`, and a named
+     coercion for `q` into `ℝ≥0∞`. This amends D-2's spelling of the row-sum hypothesis,
+     not its meaning: the definition unfolds to the old spelling. Then migrate every
+     site. The definition itself is added at once, before the migration, so that new
+     work uses it.
+  2. *Linters.* Turn on mathlib's standard linter set in `lakefile.toml` and clear the
+     fallout: module docstrings, line length, `Classical` scoped per declaration.
+  3. *Headers.* Remove package, issue, agent and decision labels from every header and
+     module docstring.
+- **Mathlib candidates.** A scout keeps `docs/MATHLIB_CANDIDATES.md`, starting with the
+  Harris inequality for arbitrary products, the regular-variation theorems and tree
+  splitting. Such a lemma carries the docstring line `Mathlib candidate.` and lives in a
+  file with no project import beyond the tag attribute. Nothing is proposed to mathlib
+  without Tom.
+- **Open for ARCHITECT.** Whether the long-range norm (D-33 amendment: a seminorm with a
+  separation hypothesis repeated in every statement) becomes a one-field structure or a
+  normed-group instance on a type synonym. Decided after migration 1, on a scout's
+  comparison of the two against the ported statements.
+- **Deferred.** Mutation tests for each guard, audit fixtures an auditor must reject, a
+  deviations section in each errata page, and a record of the slowest files per gate run.

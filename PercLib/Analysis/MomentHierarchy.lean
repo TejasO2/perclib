@@ -13,6 +13,7 @@ public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 public import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
 public import Mathlib.Analysis.Asymptotics.AsymptoticEquivalent
+public import PercLib.Meta.Tag
 
 /-!
 # Double-factorial asymptotics from a closed power-law moment hierarchy (5O1G)
@@ -321,6 +322,7 @@ and let `m₁, …, m_P > 0` on `[r₀, ∞)` be absolutely continuous on every 
 `m₁ ~ B r^α`, `m₂ ~ C r^{3α}`, `a ~ (α/B) r^{−α−1}`, and for `3 ≤ p ≤ P` there are `ε_p → 0`
 with `m_p' = (1 + ε_p) a ∑_{ℓ=0}^{p−1} C(p,ℓ) m_{ℓ+1} m_{p−ℓ}` a.e. on `[r₀, ∞)`. Then
 `m_p ~ (2p−3)‼ (m₂/m₁)^{p−1} m₁` for every `1 ≤ p ≤ P` (with `(−1)‼ = 1`). -/
+@[tag "5O1G"]
 theorem isEquivalent_moment_hierarchy {P : ℕ} {r₀ α B C : ℝ} (hr₀ : 0 < r₀) (hα : 0 < α)
     (hB : 0 < B) (hC : 0 < C) {m : ℕ → ℝ → ℝ} {a : ℝ → ℝ} {ε : ℕ → ℝ → ℝ}
     (hm_pos : ∀ p, 1 ≤ p → p ≤ P → ∀ r, r₀ ≤ r → 0 < m p r)

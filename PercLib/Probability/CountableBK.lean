@@ -241,6 +241,7 @@ theorem countable_bk [Countable ι] (p : unitInterval) {A B : Set (Set ι)}
 /-- **Product bound for finitely many disjoint increasing events.** Iterated disjoint
 occurrence `(⋯((A □ B₁) □ B₂) ⋯) □ Bₖ` of increasing events on a countable index set has
 probability at most the product of their probabilities, for every profile. -/
+@[tag "AUUG"]
 theorem countable_profile_bk_foldl [Countable ι] (p : ι → unitInterval)
     (Bs : List (Set (Set ι))) (hBs : ∀ B ∈ Bs, IsUpperSet B) {A : Set (Set ι)}
     (hA : IsUpperSet A) :
