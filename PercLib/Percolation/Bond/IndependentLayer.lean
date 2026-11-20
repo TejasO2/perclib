@@ -216,6 +216,7 @@ theorem lintegral_ghost_union_le [Countable V] (q₀ s : Sym2 V → I) (o : V) {
 /-- **BEJT.** If the `q₀`-cluster `X` of `o` is finite almost surely, then
 `E[1 - e^{-hX}] ≤ G_o(h) ≤ E[1 - e^{-hX}] + δ · E[X e^{-hX}] · G*(h)`, where
 `δ = ⨆ u, ∑'_{v ≠ u} s(u, v)` and `G*(h) = ⨆ v, G_v(h)`. -/
+@[tag "BEJT"]
 theorem lintegral_ghost_le_layer [Countable V] (q₀ s : Sym2 V → I) (o : V) {h : ℝ}
     (hh : 0 < h) (hfin : ∀ᵐ ω ∂(law q₀), (cluster ω o).Finite) :
     ∫⁻ ω, (1 - EReal.exp (-((h : EReal) * (((cluster ω o).encard : ℝ≥0∞) : EReal))))
@@ -305,6 +306,7 @@ theorem tendsto_mul_exp_neg_div (m : ℕ) :
 /-! ### MLLO -/
 
 /-- A finite susceptibility makes the cluster finite almost surely. -/
+@[tag "INZI"]
 theorem ae_cluster_finite_of_chi_lt_top [Countable V] {q : Sym2 V → I} {v : V}
     (h : chi q v < ⊤) : ∀ᵐ ω ∂(law q), (cluster ω v).Finite := by
   have hmeas : Measurable (fun ω : Config V => ((cluster ω v).encard : ℝ≥0∞)) :=
@@ -434,6 +436,7 @@ theorem chi_union_le_of_bounds [Countable V] (q₀ s : Sym2 V → I) {δ M : ℝ
 
 /-- **MLLO.** If `M = ⨆ v, χ_{q₀}(v) < ⊤` and `δ M < 1`, where
 `δ = ⨆ u, ∑'_{v ≠ u} s(u, v)`, then `χ_r(v) ≤ χ_{q₀}(v) / (1 - δM)` for every `v`. -/
+@[tag "MLLO"]
 theorem chi_union_le [Countable V] (q₀ s : Sym2 V → I) (hM : ⨆ v, chi q₀ v < ⊤)
     (hδM : (⨆ u, ∑' w, if w = u then 0 else (unitInterval.toNNReal (s s(u, w)) : ℝ≥0∞)) *
       (⨆ v, chi q₀ v) < 1) (v : V) :

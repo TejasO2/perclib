@@ -46,6 +46,7 @@ theorem tau_mono [Countable V] {q q' : Sym2 V → unitInterval} (h : q ≤ q') (
   prodBernoulli_mono_event q q' h (measurableSet_conn x y) (isUpperSet_conn x y)
 
 /-- The susceptibility is monotone in the profile. -/
+@[tag "EDWA"]
 theorem chi_mono [Countable V] {q q' : Sym2 V → unitInterval} (h : q ≤ q') (x : V) :
     chi q x ≤ chi q' x :=
   lintegral_prodBernoulli_mono q q' h

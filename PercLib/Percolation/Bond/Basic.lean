@@ -71,6 +71,7 @@ instance instIsProbabilityMeasureLaw (q : Sym2 V → unitInterval) :
 def openGraph (ω : Config V) : SimpleGraph V := SimpleGraph.fromEdgeSet ω
 
 /-- The event that `x` and `y` are joined by a path of open edges. -/
+@[tag "T90E"]
 def conn (x y : V) : Set (Config V) := {ω | (openGraph ω).Reachable x y}
 
 /-- The open cluster of `x`: the vertices joined to `x` by a path of open edges.
@@ -200,6 +201,7 @@ theorem conn_eq_iUnion (x y : V) :
     exact List.relationReflTransGen_of_exists_isChain_cons l hl hy
 
 /-- The connection event is measurable when there are countably many vertices. -/
+@[tag "7QJG"]
 theorem measurableSet_conn [Countable V] (x y : V) :
     MeasurableSet (conn x y : Set (Config V)) := by
   rw [conn_eq_iUnion]
@@ -230,6 +232,7 @@ theorem cluster_infinite_eq_iInter (x : V) :
 
 /-- The event that the cluster of `x` is infinite is measurable when there are countably
 many vertices. -/
+@[tag "5SII"]
 theorem measurableSet_cluster_infinite [Countable V] (x : V) :
     MeasurableSet {ω : Config V | (cluster ω x).Infinite} := by
   rw [cluster_infinite_eq_iInter]
