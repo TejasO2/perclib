@@ -8,6 +8,7 @@ public import PercLib.Analysis.GoodScales
 public import PercLib.Analysis.GyrationODE
 public import PercLib.Analysis.HadamardPowers
 public import PercLib.Analysis.HomogeneousBallIntegrals
+public import PercLib.Analysis.LaplaceUniqueness
 public import PercLib.Analysis.LinearODEAsymptotics
 public import PercLib.Analysis.LogExponent
 public import PercLib.Analysis.LogarithmicCorrections
