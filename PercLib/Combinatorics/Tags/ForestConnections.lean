@@ -8,32 +8,25 @@ module
 public import PercLib.Meta.Tag
 public import PercLib.Combinatorics.ForestBranching
 
+/-!
+# Branch vertices and leaves of a finite forest
+
+Restates results of `PercLib.Combinatorics.ForestBranching` as one tagged conjunction.
+
+## Main results
+
+* `PercLib.forest_degree_excess_and_branch_bounds`: the signed degree-excess identity of a finite
+  forest, the bound `|B| ≤ |L| - 2(c - i) ≤ |L|`, and the two finite-tree bounds.
+-/
+
 @[expose] public section
 noncomputable section
 
 open Finset
-open scoped Classical
 
 namespace PercLib
 
 variable {W : Type*} [Fintype W]
-
-/-- An isolated vertex is alone in its connected component, so there are at most as many
-isolated vertices as components. -/
-theorem card_isolated_le_card_connectedComponent (T : SimpleGraph W) [DecidableRel T.Adj] :
-    (univ.filter fun v => T.degree v = 0).card ≤ Nat.card T.ConnectedComponent := by
-  let : Fintype T.ConnectedComponent := Fintype.ofFinite _
-  rw [Nat.card_eq_fintype_card, ← card_univ]
-  refine card_le_card_of_injOn (fun v => T.connectedComponentMk v)
-    (fun _ _ => mem_coe.2 (mem_univ _)) ?_
-  intro u hu v _ huv
-  obtain ⟨p⟩ := SimpleGraph.ConnectedComponent.eq.mp huv
-  cases p with
-  | nil => rfl
-  | cons hadj _ =>
-    have h0 := (mem_filter.mp (mem_coe.mp hu)).2
-    have hp := (T.degree_pos_iff_exists_adj _).mpr ⟨_, hadj⟩
-    omega
 
 /-- **4K33.** Let `T` be a finite forest with `c` connected components and `i` isolated vertices,
 let `L` be its set of degree-one vertices and `B` its set of vertices of degree at least three.
@@ -54,28 +47,12 @@ theorem forest_degree_excess_and_branch_bounds (T : SimpleGraph W) [DecidableRel
       (univ.filter fun v => 3 ≤ T.degree v).card + 2 ≤
         (univ.filter fun v => T.degree v = 1).card) ∧
     (T.IsTree → ∀ A : Finset W, (∀ v, T.degree v = 1 → v ∈ A) → 2 ≤ A.card →
-      (univ.filter fun v => 3 ≤ T.degree v).card ≤ A.card - 2) := by
-  refine ⟨fun hT => ?_, fun hT hW => ?_, fun hT A hA hcard =>
-    tree_card_branch_le_card_sub_two T hT A hA hcard⟩
-  · have hsum := forest_sum_degree_sub_two T hT
-    have hic := card_isolated_le_card_connectedComponent T
-    refine ⟨hsum, ?_, by omega⟩
-    -- pointwise: `[deg ≥ 3] - [deg = 1] - 2 [deg = 0] ≤ deg - 2`
-    have hpoint (v : W) : (if 3 ≤ T.degree v then (1 : ℤ) else 0) -
-        (if T.degree v = 1 then 1 else 0) - 2 * (if T.degree v = 0 then 1 else 0) ≤
-        (T.degree v : ℤ) - 2 := by
-      split_ifs <;> omega
-    have hle := sum_le_sum (s := (univ : Finset W)) (fun v _ => hpoint v)
-    rw [hsum, sum_sub_distrib, sum_sub_distrib, ← mul_sum] at hle
-    have hb : (∑ v : W, if 3 ≤ T.degree v then (1 : ℤ) else 0) =
-        (univ.filter fun v => 3 ≤ T.degree v).card := by simp
-    have hl : (∑ v : W, if T.degree v = 1 then (1 : ℤ) else 0) =
-        (univ.filter fun v => T.degree v = 1).card := by simp
-    have hi : (∑ v : W, if T.degree v = 0 then (1 : ℤ) else 0) =
-        (univ.filter fun v => T.degree v = 0).card := by simp
-    rw [hb, hl, hi] at hle
-    linarith
-  · have : Nontrivial W := Fintype.one_lt_card_iff_nontrivial.mp (by omega)
-    exact tree_card_branch_add_two_le_leaves T hT
+      (univ.filter fun v => 3 ≤ T.degree v).card ≤ A.card - 2) :=
+  ⟨fun hT => ⟨forest_sum_degree_sub_two T hT, forest_card_branch_le_leaves_sub_two_mul T hT,
+      by have := card_degree_eq_zero_le_card_connectedComponent T; omega⟩,
+    fun hT hW =>
+      have : Nontrivial W := Fintype.one_lt_card_iff_nontrivial.mp (by omega)
+      tree_card_branch_add_two_le_leaves T hT,
+    fun hT A hA hcard => tree_card_branch_le_card_sub_two T hT A hA hcard⟩
 
 end PercLib
