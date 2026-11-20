@@ -1,0 +1,32 @@
+{
+  "schema": "perclib-article-records-v1",
+  "article": "regular-variation",
+  "collections": [
+    {
+      "collection": "methods",
+      "order": 9
+    }
+  ],
+  "sourceOccurrences": [
+    {
+      "source": "perclib-shared-elementary",
+      "order": 0,
+      "label": "Shared elementary analytic estimates",
+      "locator": "Explicit public declaration start lines: 38, 47, 68, 86",
+      "relationship": "Source-inspected exposition with scope boundaries",
+      "status": "pending",
+      "note": "Four existing estimates are collected in one module, retaining their positivity and integrability hypotheses. Source pin: f51f639c15d742034cc6e2058008c79f48392873."
+    },
+    {
+      "source": "perclib-train10-analysis-regularvariation-defs",
+      "order": 0,
+      "label": "Regular-variation and logarithmic-error interfaces",
+      "locator": "Explicit public theorem start lines: 59, 64, 72, 86, 90, 94, 97, 99, 102, 105, 108, 112, 128, 142, 178, 194, 199, 213, 257, 261, 264, 269, 291, 299, 303, 308, 313, 319, 323, 342",
+      "relationship": "Source-inspected exposition with scope boundaries",
+      "status": "pending",
+      "note": "Complete source read at dfbc5b4f4e964374431189c682520bff85e008e6; definitions and source attribution are inventoried separately."
+    }
+  ],
+  "occursIn": [],
+  "proofUses": []
+}

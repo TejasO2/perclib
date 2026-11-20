@@ -1,0 +1,13 @@
+{
+  "schema": "perclib-article-records-v1",
+  "article": "ghost-exploration",
+  "collections": [
+    {
+      "collection": "methods",
+      "order": 17
+    }
+  ],
+  "sourceOccurrences": [],
+  "occursIn": [],
+  "proofUses": []
+}

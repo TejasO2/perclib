@@ -1,0 +1,23 @@
+{
+  "schema": "perclib-article-records-v1",
+  "article": "entropy-comparison",
+  "collections": [
+    {
+      "collection": "methods",
+      "order": 11
+    }
+  ],
+  "sourceOccurrences": [
+    {
+      "source": "perclib-bernoulli-divergence",
+      "order": 0,
+      "label": "Scalar Bernoulli divergence inequalities",
+      "locator": "Named public declaration start lines: 20, 33, 43, 85, 129, 148, 197, 208, 226, 235",
+      "relationship": "Source-inspected exposition with explicit scope distinctions",
+      "status": "pending",
+      "note": "The source proves the positive-intensity scalar bounds in KHB7, the zero-weight case, and the interior two-point inequality used by 58HC. Event-level data processing and extended-divergence endpoint conventions remain separate."
+    }
+  ],
+  "occursIn": [],
+  "proofUses": []
+}

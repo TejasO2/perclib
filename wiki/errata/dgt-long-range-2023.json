@@ -1,0 +1,34 @@
+{
+  "schema": "perclib-source-errata-v1",
+  "source": "dgt-long-range-2023",
+  "entries": [
+    {
+      "id": "block-square-integral",
+      "title": "The square integral in the block-joining estimate",
+      "status": "provisional",
+      "locator": "arXiv:2011.04642v2, section 2.3, proof of Lemma 2, PDF p. 4; unnumbered integral before (7), HTML equation (12). Versioned HTML and PDF text compared; no visual PDF check.",
+      "claim": "The displayed square integral is evaluated as log(1 + 2A/(8K)), leading to a joining estimate with numerator 8.",
+      "problem": "The correct integral is log((8K+A)^2 / (8K(8K+2A))). At A=8K it equals log(4/3), whereas the displayed expression is log 3.",
+      "correction": "PAFY proves the exact integral and a discrete bound retaining the integer floor. Numerator 64 gives a valid summable bound with the same exponent; enlarge the minimum separation constant. This repairs this estimate only.",
+      "tags": [
+        "PAFY",
+        "JZG4"
+      ],
+      "issues": [],
+      "leanImpact": "Use the corrected integral identity and an explicit integer truncation. The comparison and summable-tail argument are written in PAFY, but no compiled declaration or full renormalization proof is supplied. The published theorem is not contradicted by this numerical error.",
+      "resolution": {
+        "status": "found",
+        "summary": "Evaluate the block integral correctly and enlarge the separation constant.",
+        "scale": "local",
+        "impact": "The summable bound keeps its exponent; this repairs the cited estimate only."
+      }
+    }
+  ],
+  "versionAudit": {
+    "checkedVersion": "arXiv:2011.04642v2",
+    "checkedUrl": "https://arxiv.org/html/2011.04642v2",
+    "method": "The reported passages were checked in versioned HTML and extracted PDF text, as recorded in the individual locators. This summary consolidates the existing entry locators and reading records; it is not a fresh primary-text or visual-PDF audit.",
+    "scope": "Reports are confined to the stated preprint passages. No comparison establishing whether these issues persist in the published article or a later revision is recorded here. All reports remain provisional; repair availability and Lean status are separate.",
+    "comparisons": []
+  }
+}

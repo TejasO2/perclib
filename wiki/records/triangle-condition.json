@@ -1,0 +1,32 @@
+{
+  "schema": "perclib-article-records-v1",
+  "article": "triangle-condition",
+  "collections": [
+    {
+      "collection": "critical-theory",
+      "order": 1
+    }
+  ],
+  "sourceOccurrences": [
+    {
+      "source": "heydenreich-hofstad",
+      "order": 2,
+      "label": "Critical exponents and the triangle condition",
+      "locator": "Author manuscript · Chapter 4",
+      "relationship": "Source theorem family",
+      "status": "pending",
+      "note": "The abstract implications and the later lace-expansion verification occupy different pages."
+    },
+    {
+      "source": "hutchcroft-triangle-2021",
+      "order": 0,
+      "label": "Quantitative mean-field implications",
+      "locator": "Susceptibility inequalities and diagram comparison",
+      "relationship": "Alternative proof route",
+      "status": "pending",
+      "note": "Finite triangle control and slowly divergent triangle control yield different quantitative conclusions."
+    }
+  ],
+  "occursIn": [],
+  "proofUses": []
+}
