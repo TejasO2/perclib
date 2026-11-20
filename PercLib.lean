@@ -178,6 +178,7 @@ public import PercLib.Percolation.Bond.Tightness.FromBK
 public import PercLib.Percolation.Bond.Tightness.Hyperscaling
 public import PercLib.Percolation.Bond.Tightness.MomentRatio
 public import PercLib.Percolation.Bond.Tightness.Moments
+public import PercLib.Percolation.Bond.Tightness.RestrictQuantile
 public import PercLib.Percolation.Bond.Tightness.TruncatedMean
 public import PercLib.Percolation.Bond.Tightness.WindowTails
 public import PercLib.Percolation.Bond.Transport
