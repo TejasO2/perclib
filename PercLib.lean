@@ -94,6 +94,7 @@ public import PercLib.Percolation.Bond.ClusterTails
 public import PercLib.Percolation.Bond.ConnectionKernel
 public import PercLib.Percolation.Bond.ConvolutionBound
 public import PercLib.Percolation.Bond.CorrelationLength
+public import PercLib.Percolation.Bond.CrossEdge
 public import PercLib.Percolation.Bond.Degree
 public import PercLib.Percolation.Bond.DegreeGenerating
 public import PercLib.Percolation.Bond.Diagonal.Probability
