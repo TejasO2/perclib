@@ -26,7 +26,7 @@ public import Mathlib.Topology.ContinuousMap.StoneWeierstrass
 
 /-! # Moment determinacy and weak convergence from moment convergence
 
-Let `Y` be a compact Hausdorff space. By Stone--Weierstrass, a subalgebra `A` of `C(Y, ℝ)` that
+Let `Y` be a compact space. By Stone--Weierstrass, a subalgebra `A` of `C(Y, ℝ)` that
 separates points is dense, so
 
 * two finite measures on `Y` whose integrals agree on `A` are equal, and
@@ -151,7 +151,7 @@ lemma ContinuousMap.continuous_integral_of_compactSpace (ν : Measure Y) [IsFini
   simpa [Measure.real, ENNReal.coe_toNNReal_eq_toReal] using
     ContinuousMap.dist_integral_le_of_compactSpace ν a b
 
-/-- Two finite measures on a compact Hausdorff space whose integrals agree on a subalgebra of
+/-- Two finite measures on a compact space whose integrals agree on a subalgebra of
 `C(Y, ℝ)` that separates points are equal. -/
 theorem Measure.ext_of_forall_mem_subalgebra_integral_eq_of_compactSpace [BorelSpace Y]
     [HasOuterApproxClosed Y] {ν₁ ν₂ : Measure Y} [IsFiniteMeasure ν₁] [IsFiniteMeasure ν₂]
@@ -167,7 +167,7 @@ theorem Measure.ext_of_forall_mem_subalgebra_integral_eq_of_compactSpace [BorelS
     trivial
   exact hcl hmem
 
-/-- Probability measures on a compact Hausdorff space converge weakly as soon as their integrals
+/-- Probability measures on a compact space converge weakly as soon as their integrals
 against every element of a separating subalgebra of `C(Y, ℝ)` converge. -/
 theorem ProbabilityMeasure.tendsto_of_forall_mem_subalgebra_integral_tendsto_of_compactSpace
     {ι : Type*} {l : Filter ι} {μ : ι → ProbabilityMeasure Y} {μ₀ : ProbabilityMeasure Y}
@@ -246,7 +246,7 @@ lemma tendsto_integral_of_mem_adjoin_of_forall_moment_tendsto {ι : Type*} {l : 
   · intro n f
     simpa using h n f
 
-/-- **Moment determinacy.** Two finite measures on a compact Hausdorff space with the same
+/-- **Moment determinacy.** Two finite measures on a compact space with the same
 moments `∫ ∏ i, Φ (f i)` against a separating family `Φ` are equal. -/
 theorem Measure.ext_of_forall_moment_integral_eq [BorelSpace Y] [HasOuterApproxClosed Y]
     {ν₁ ν₂ : Measure Y} [IsFiniteMeasure ν₁] [IsFiniteMeasure ν₂]
@@ -257,7 +257,7 @@ theorem Measure.ext_of_forall_moment_integral_eq [BorelSpace Y] [HasOuterApproxC
     (Subalgebra.separatesPoints_adjoin_range hΦ)
     fun _ ha => integral_eq_of_mem_adjoin_of_forall_moment_integral_eq h ha
 
-/-- **Method of moments.** Probability measures on a compact Hausdorff space whose moments
+/-- **Method of moments.** Probability measures on a compact space whose moments
 `∫ ∏ i, Φ (f i)` against a separating family `Φ` all converge to those of `μ₀` converge weakly
 to `μ₀`. -/
 theorem ProbabilityMeasure.tendsto_of_forall_moment_tendsto {ι : Type*} {l : Filter ι}
