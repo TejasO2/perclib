@@ -1,7 +1,7 @@
 # Status
 
 Handoff file for the coordinator (the LEAD role of D-34). Last updated 20 November 2026,
-23:10 UTC, at the end of the first LEAD agent's session. A coordinator with no memory
+23:30 UTC, at the end of coordinator round 1 (the round after the first LEAD agent's session). A coordinator with no memory
 resumes from this file, [COORDINATOR.md](COORDINATOR.md) (the procedure for one round),
 [COORDINATION.md](COORDINATION.md) (worker rules), [DECISIONS.md](DECISIONS.md) (D-34,
 D-35) and `/home/user/reports/RULINGS.md` (container-local rulings; obey them).
@@ -10,14 +10,15 @@ D-35) and `/home/user/reports/RULINGS.md` (container-local rulings; obey them).
 
 - Branch `claude/zen-lovelace-rvlcw2` in both repositories; nothing else is ever pushed
   (ruling 5).
-- **Last gate passed: `57593c8`** (`scripts/gate.sh 13a999b`, run by this LEAD after the
-  other agent's concurrent gate finished): build, axiom audit of 5,289 constants (only
-  `propext`, `Classical.choice`, `Quot.sound`), import closure of 302 modules, forbidden
-  scan, classifier tests, extract, D-35 checks. It covers `lrp-I413-premises`,
-  `attach-bond-core` and its imports, `COORDINATOR.md`, and the exemption of the 12
-  bond-core Tags files written before D-35 (they lack module docstrings; `mig-headers`
-  fixes them). Earlier green: `13a999b`, `ce8ccd5`, `a11470b`, `711c330`, `fc917ec`,
-  `eb09ac5`. Local verification, not CI.
+- **Last gate passed: `fa0dc2b`** (`scripts/gate.sh cf0733c`, round 1): build (3,905
+  jobs), axiom audit of 5,525 constants (only `propext`, `Classical.choice`,
+  `Quot.sound`), import closure of 312 modules, forbidden scan, classifier tests, extract,
+  D-35 checks (no exemption left in `scripts/d35_exceptions.txt`; the 12 bond-core Tags
+  files now carry module docstrings, so their temporary `legacy_headers.txt` entries were
+  dropped). No saved extract for base `cf0733c`, so the classifier treated the batch as
+  interface; the only interface change in it is `nm-analysis` (K58A, 4K33), approved by
+  `audit-nm-analysis-r2`. Pushed: `origin/claude/zen-lovelace-rvlcw2` = `fa0dc2b`.
+  Earlier green: `57593c8`, `13a999b`, `ce8ccd5`, `a11470b`. Local verification, not CI.
 - Kernel replay (`scripts/kernel_replay.sh`) last passed on the baseline `4c72765` (249
   modules, 14 min, peak 9.7 GB at batch 12). Due before the next milestone report; run
   `scripts/kernel_replay.sh 6` when no build is running.
@@ -38,13 +39,14 @@ report a false interface, never a false proof-only.
 
 ## Progress (D-35 measure)
 
-Manifest from the `57593c8` extract: **229 assertions proved**, 4 statement-only, 1,168
-unformalised, of 1,401 (start of 20 November: 65 / 6 / 1,330). 233 distinct tags in
-`PercLib/`. Every tag added on 20 November
-was approved by a fresh auditor (link audits for analysis, longrange, bond-sub,
-probability, bond-core; `audit-hier-stmt`), except the five D-16 proof tags PVA8, MQNP,
-LF50, 6YYS, L82Q, which repeat the tag of an already audited statement. Preliminary
-frontier from the wiki's authored `proof_uses`: 150 assertions at `13a999b` (recompute).
+Manifest from the `fa0dc2b` extract (`build_manifest.py` in lrp): **231 assertions
+proved**, 4 statement-only, 1,166 unformalised, of 1,401 (start of 20 November: 65 / 6 /
+1,330; after the first LEAD session: 229 / 4 / 1,168). 235 distinct tags in `PercLib/`.
+Tagged statements audited this round: 2 approved (K58A, 4K33 by `audit-nm-analysis-r2`),
+2 reviewed on `work/nm-longrange` (ZH13 approved, R01V approve-with-change), 1 definition
+package reviewed (`audit-rowsum-def`: approve with changes). Every merged tag has a fresh
+audit (link audits; `audit-hier-stmt`; `audit-nm-analysis-r2`) except the five D-16 proof
+tags PVA8, MQNP, LF50, 6YYS, L82Q.
 
 ## Merged on 20 November (gated)
 
@@ -59,6 +61,12 @@ and W498), H1 `hier-kernel`, H2 `hier-quantile-finite`, H3 `hier-translate`, H6
 `RiccatiBootstrap`; D-33 ports `lrp-tauber-laplace`, `lrp-rv-geninv`, `lrp-I413`,
 `lrp-I413-premises`; tags `attach-analysis`, `attach-longrange`, `attach-bond-sub`,
 `attach-probability`, `attach-bond-core`.
+Round 1 (gated on `fa0dc2b`): `nm-analysis` (K58A, 4K33, audited), `hier-runaway` (H4:
+Prop 2.2 for β < β_c, Cor 2.3 `β_c ≤ A/4`), `hier-avg-to-pointwise` (averaged bounds imply
+pointwise bounds, the W498 step), D-33 ports `lrp-first-moment-a`, `lrp-rv-levelinv`,
+`lrp-chisquare`, `lrp-tauber-converse`, and `d35-binders` (no declaration assumes the
+tagged Props C5Q9/JGZB any more; `universalTightness_of_tightnessBK` replaced by three
+`_of_bk` lemmas; tagged statements unchanged).
 Private repository: the wiki draft of 20 November (`1fe07bc`), `pub-scan` (`5a2943b`).
 
 Lemma I.4.13 (*Critical long-range percolation I*): the faithful form of the second half
@@ -75,46 +83,77 @@ lemma.
   regenerate with `/home/user/reports/pub-move-transform.py` from the current lrp wiki if
   the wiki moved, re-run the overlap scan (`/home/user/lrp/scripts/draft_overlap.py`)
   and the greps of the re-scan file, then merge and push. Irreversible.
-- `work/rowsum-def` (9561ac5): `rowSum` and `unitInterval.toENNReal` with API in
-  `Bond/Basic.lean`. Interface: waits for `audit-rowsum-def` (claimed).
-- `work/hier-runaway` (H4; done marker present): not yet read or merged.
-- `work/nm-analysis` (tags K58A, 4K33): revised after the first audit; re-audit queued
-  as `006-audit-nm-analysis-r2`.
+- `work/rowsum-def` (now 3147f8b): `rowSum`, `unitInterval.toENNReal` and API.
+  `audit-rowsum-def` approved with two changes; `fix-rowsum-def` applied them (report
+  `/home/user/reports/fix-rowsum-def.md`). **Next round: check `git diff 9561ac5..3147f8b`
+  against the audit's "Required changes" (docstring labels; `rowSum_fun_zero`), then merge
+  on the gate.** Merging it is the precondition of the migration window.
+- `work/nm-longrange` (e4e9b59; ZH13, R01V): audit approves ZH13 and asks for R01V in an
+  ordered-pair form plus moving nine lemmas out of the Tags file. The coordinator adopted
+  the audit's form (no erratum). Fix brief `HOLD-fix-nm-longrange` waits for
+  `attach-models` to merge (both edit `Models/TranslationInvariant.lean`); then a fresh
+  re-audit of R01V. Audit finding 3 proposes an `IsCut` definition (45 spelled-out sites):
+  a future small interface package, after the migrations.
+- `work/lrp-cov-gap` (4f4d4ce): D-33 port 28, proof-only per its report (one new file
+  `Bond/ClusterCorrelation/CovarianceGap.lean`, no def/tag by grep). Finished after this
+  round's batch: merge on the gate next round.
+- `work/wiki-hier-thm11` in lrp (a795d41): new wiki tag **J98J** for Theorem 1.1. Items 1-3
+  done; `npm run build` blocked by the W-1 frozen-article check (`migration-baseline.json`
+  digests and the hard-coded count 65 in `wiki/tests/tags.test.mjs`). The worker left a
+  patch `/home/user/reports/wiki-hier-thm11-baseline.patch`. Next round: review the patch
+  (it is the "explicit review" the wiki README asks for), apply, build, merge into lrp's
+  integration branch; then brief the J98J tag on `HierarchicalTwoPointAveraged`
+  (interface, with audit).
 
 ## In flight (outside or inside the queue)
 
-Started by ARCHITECT before the queue existed (reports appear as
-`/home/user/reports/<id>.md`): `attach-models`, `hier-avg-to-pointwise`,
-`lrp-chisquare`, `lrp-rv-levelinv`. Claimed from the queue: `audit-rowsum-def`.
-Worktrees are `/home/user/wt/<id>`; claims in `/home/user/reports/claims/`.
+Claims without a done marker at 23:30: `hier-endpoint` (H5), `lrp-karamata-prim`,
+`lrp-moment-conv`, `lrp-sb-mgf`; outside the queue: `attach-models` (worktree
+`/home/user/wt/attach-models`, commit 3928d90 plus uncommitted work, no report yet).
+Workers finish packages in minutes, so expect several done markers at the start of the next
+round. Worktrees are `/home/user/wt/<id>`; claims in `/home/user/reports/claims/`.
 
 ## Queue (`/home/user/reports/queue/`)
 
-Startable: `005-audit-rowsum-def` (claimed), `006-audit-nm-analysis-r2`,
-`070-lrp-first-moment-a`, `080-nm-longrange`, `090-d35-binders`, `100-wiki-hier-thm11`
-(private repository: tag for Theorem 1.1), `110-lrp-tauber-converse`, `120-lrp-cov-gap`,
-`130-lrp-moment-conv`, `140-lrp-sb-mgf`.
-Held: `HOLD-audit-nm-longrange` (start when `nm-longrange` is done),
-`HOLD-mig-rowsum`, `HOLD-mig-headers`, `HOLD-mig-linters`.
+Claimed briefs stay in the queue directory (never delete a claimed brief); a brief is
+startable when it has no `HOLD-` prefix and no `claims/<id>`.
+Startable at 23:30: `170-lrp-driven-ode` (D-33 package 5), `180-lrp-tauber-endpoints` (10),
+`190-lrp-first-moment-b` (30), `200-nm-bond-core` (ZAIH, NEM5, 6HJ9, CKJQ),
+`210-lrp-I41-mt` (25), `220-lrp-spatial-russo-a` (26), `230-lrp-levy-measures` (19),
+`240-nm-probability` (KB49, W90W, QH7Q). Owned files are pairwise disjoint and disjoint
+from claimed work.
+Held: `HOLD-audit-nm-bond-core`, `HOLD-audit-nm-probability` (start when the target is
+done), `HOLD-fix-nm-longrange` (after `attach-models` merges), `HOLD-mig-rowsum` (dot
+notation corrected per the audit: `unitInterval.toENNReal (q e)`), `HOLD-mig-headers`,
+`HOLD-mig-linters`.
 
 **Migration window (D-35).** Open it when `rowsum-def` has merged and the work claimed
-at that moment has finished and merged: stop queueing other briefs, rename
+at that moment has finished and merged: stop queueing other briefs (prefix every
+unclaimed startable brief with `HOLD-` so that no worker takes it), rename
 `HOLD-mig-rowsum` to `001-mig-rowsum`, gate and merge it; then `mig-headers`, gate; then
 `mig-linters` if time; then refill the queue. Briefs queued before the window that
 spell row sums are migrated afterwards by a small follow-up, not held.
 
-Next packages to brief when slots free: hierarchical H5 `hier-endpoint` (after H4 merges;
-needs H1, H2, H4), H7 (after H5, H6), H8 Theorem 1.1, H9 (`hier-map.md` §(c));
-the tag for `HierarchicalTwoPointAveraged` after `wiki-hier-thm11`; D-33 packages from
-`d33-map.md` dependency order (next: 3 after 2, 5 and 8 after 1, 10, 12 after 10-11,
-19, 25, 26, 29-30 after first-moment-a); near-misses in the `link-*.md` reports;
+Next packages to brief when slots free: hierarchical H7 `hier-restricted-susc` (after H5
+`hier-endpoint` merges; H6 is merged), then H8 Theorem 1.1, H9 (`hier-map.md` §(c); note
+`hier-avg-to-pointwise` already did the averaged-to-pointwise step of H9); the J98J tag on
+`HierarchicalTwoPointAveraged` after `wiki-hier-thm11` lands; D-33 packages (next: 8 after
+5, 12 after 10, 13/14 after `lrp-sb-mgf`, 20 after 19, 27 after 26, 31/32 optional, 15
+lowest); near-misses in the `link-*.md` reports;
 salvage tier 2 (Q-211, Q-195, Q-194, restated for the `Seminorm` kernel API).
 
 ## For ARCHITECT
 
 - Open under D-35: the long-range norm (structure versus type synonym), after migration 1.
-- Two agents merged into the same checkout during this session's last round (both ran
-  `gate.sh` concurrently; one was stopped). One coordinator at a time per checkout.
+- Two coordinators again overlapped at the start of round 1: the round-1 coordinator was
+  started while the first LEAD was still writing its handoff (COORDINATOR.md existed,
+  tree clean, no gate running, so the start test passed). No harm resulted (merges were
+  disjoint), but the start test should also require that STATUS.md's tip equals
+  `origin/claude/zen-lovelace-rvlcw2` and has been pushed, or the launcher should start a
+  coordinator only after its predecessor has returned.
+- Round 1 adopted, under its own authority, the audit's ordered-pair form for R01V (the
+  `Sym2` form forces inversion-even kernels); object if a D-2 `Sym2` form with an erratum
+  is preferred.
 - Coming up, the coordinator's decision unless ARCHITECT objects: salvage branches Q-81
   (Galton–Watson definitions) and Q-10 (uniqueness definitions) add definitions; take
   them only with a fresh audit and if no existing notion covers them.
@@ -154,3 +193,10 @@ salvage tier 2 (Q-211, Q-195, Q-194, restated for the `Seminorm` kernel API).
 - **Tags inside `to_additive`:** write `@[tag "XXXX", to_additive …]`; a separate
   `@[tag]` after `@[to_additive]` breaks the translation.
 - **One coordinator per checkout**, and never two `gate.sh` runs at once.
+- **Removing worktrees:** "branch is an ancestor of the tip" is true of a worker's branch
+  before its first commit. Round 1 removed with `--force` the fresh worktrees of
+  `hier-endpoint`, `lrp-moment-conv`, `lrp-sb-mgf` (claimed, not done) this way; the
+  workers re-created them, but uncommitted work may have been lost — read those reports for
+  a mention. Remove a worktree only if `done/<id>` exists and its branch is merged.
+- **Speed:** workers finish a package in 3-15 minutes. Keep a dozen startable briefs and
+  expect most of them claimed within a round.
