@@ -7,6 +7,7 @@ proof is copied and no definition is added.
 -/
 module
 
+public import PercLib.Meta.Tag
 public import PercLib.Percolation.Bond.IndependentLayer.AddedVolume
 
 /-!
@@ -182,6 +183,7 @@ end Two
 susceptibility of the union law is at most `χ₊`, then for every measurable functional
 `f ≥ 0` of the original cluster, `E[|K⁺| f(C)] ≤ (1 + ε χ₊) E[|C| f(C)]` (extended values
 allowed). -/
+@[tag "F4RR"]
 theorem lintegral_encard_union_mul_le [Countable V] (q₀ s : Sym2 V → I) (o : V)
     {ε χ : ℝ≥0∞}
     (hε : ∀ u, (∑' w, if w = u then 0 else (unitInterval.toNNReal (s s(u, w)) : ℝ≥0∞)) ≤ ε)

@@ -8,6 +8,7 @@ upper-critical dimension", arXiv:2008.11197v2, §2.1, Theorem 2.2 and Theorem 2.
 -/
 module
 
+public import PercLib.Meta.Tag
 public import PercLib.Percolation.Bond.Basic
 public import Mathlib.Analysis.SpecialFunctions.Exp
 public import Mathlib.Data.Set.Card
@@ -61,12 +62,14 @@ def clusterIntersection (Λ : Finset V) (ω : Config V) (u : V) : ℕ :=
   (cluster ω u ∩ (Λ : Set V)).ncard
 
 /-- The source's scale `M`: the least `n` with `P(max_{v ∈ Λ} |K_v ∩ Λ| ≥ n) ≤ e⁻¹`. -/
+@[tag "GJIW"]
 def tightnessScale (q : Sym2 V → unitInterval) (Λ : Finset V) : ℕ :=
   sInf {n : ℕ | law q {ω | n ≤ maxClusterIntersection Λ ω} ≤ ENNReal.ofReal (Real.exp (-1))}
 
 /-- **Universal tightness** (Hutchcroft, arXiv:2008.11197v2, Theorem 2.2): for every
 profile on a countable vertex type, every finite nonempty `Λ`, every root `u`, every
 `a ≥ 1` and every `0 < ε ≤ 1`. -/
+@[tag "C5Q9"]
 def UniversalTightness (V : Type*) [Countable V] : Prop :=
   ∀ (q : Sym2 V → unitInterval) (Λ : Finset V), Λ.Nonempty →
     (∀ a : ℝ, 1 ≤ a →
@@ -86,6 +89,7 @@ def UniversalTightness (V : Type*) [Countable V] : Prop :=
 `k ≥ 1`:
 `P(max ≥ 3^k λ) ≤ P(max ≥ λ)^(3^(k-1) + 1)` and
 `P(|K_u ∩ Λ| ≥ 3^k λ) ≤ P(max ≥ λ)^(3^(k-1)) · P(|K_u ∩ Λ| ≥ λ)`. -/
+@[tag "JGZB"]
 def TightnessBK (V : Type*) [Countable V] : Prop :=
   ∀ (q : Sym2 V → unitInterval) (Λ : Finset V), Λ.Nonempty →
     ∀ (l : ℝ), 1 ≤ l → ∀ k : ℕ, 1 ≤ k →
