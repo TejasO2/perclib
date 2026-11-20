@@ -8,6 +8,7 @@ public import PercLib.Analysis.GoodScales
 public import PercLib.Analysis.GyrationODE
 public import PercLib.Analysis.HadamardPowers
 public import PercLib.Analysis.HomogeneousBallIntegrals
+public import PercLib.Analysis.LaplaceUniqueness
 public import PercLib.Analysis.LinearODEAsymptotics
 public import PercLib.Analysis.LogExponent
 public import PercLib.Analysis.LogarithmicCorrections
@@ -22,6 +23,7 @@ public import PercLib.Analysis.RegularVariation.LogODE
 public import PercLib.Analysis.RegularVariation.LogScaling
 public import PercLib.Analysis.RegularVariation.PotterODE
 public import PercLib.Analysis.RegularVariation.UniformConvergence
+public import PercLib.Analysis.RiccatiBootstrap
 public import PercLib.Analysis.RiccatiComparison
 public import PercLib.Analysis.Tags.CriticalExponents
 public import PercLib.Analysis.Tags.IntegratedSusceptibility
@@ -201,6 +203,7 @@ public import PercLib.Probability.BKEndpoints
 public import PercLib.Probability.BKLowDensity
 public import PercLib.Probability.BernoulliDivergence
 public import PercLib.Probability.Characterization
+public import PercLib.Probability.ChiSquareDeterminacy
 public import PercLib.Probability.Concentration
 public import PercLib.Probability.Coordinate
 public import PercLib.Probability.CountableBK
