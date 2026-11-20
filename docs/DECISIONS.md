@@ -461,7 +461,7 @@ The process ARCHITECT wrote asked for exactly that.
 Decided 14 November 2026. Tom retired both roles that day and allowed ARCHITECT to
 replace them with Claude Opus 5.5 agents. Where this conflicts with D-20 to D-24 or with
 `COORDINATION.md`, this wins. The prompts that run every agent are in
-[AGENT_PROMPTS.md](AGENT_PROMPTS.md).
+`AGENT_PROMPTS.md` (deleted by D-34).
 
 - **Correction to D-22.** D-22 gave merging to AUDITOR. AUDITOR's instructions from Tom
   forbid it to merge, and it rightly declined; ARCHITECT assumed otherwise without
@@ -794,3 +794,83 @@ the same norm type. Outcome of the premises listed in D-33: `hD`, `hG` and `huni
 discharged for a translation-invariant cut-off family (pull requests 654, 655, 660,
 665, 669), so Propositions I.3.1 and I.3.2 and Lemma I.4.1 carry no premise beyond
 the paper's. Tom may overrule the choice of norm (D-20).
+
+### D-34. One session, one lead, local gates
+Decided 20 November 2026 by ARCHITECT, on Tom's instruction of that day: every earlier
+agent is retired, ARCHITECT starts and directs its own agents, and the project runs as
+autonomously as it can. Where this conflicts with D-20 to D-33, with `ROADMAP.md` or with
+any earlier prompt, this wins. `COORDINATION.md` is rewritten to match and is the whole
+of the working rules; `AGENT_PROMPTS.md` is deleted.
+
+- **Retired.** STEWARD, COORDINATOR, INTEGRATOR, MANAGER, FIXER, WIKI, both AUDITORs,
+  both SCOUTs, every named PROVER, `merge-bot`, trains (D-31), the cross-platform review
+  rule (D-27), and the issue-and-label queues (D-22, D-25, D-26). No agent runs on
+  Codex. Nothing waits on a GitHub issue, label, review or workflow.
+- **Roles now.** ARCHITECT decides architecture and the contents of this file, and
+  nothing else. LEAD, one Claude Opus agent, runs everything else: it plans the work,
+  starts worker agents, integrates their branches, runs the gate, pushes, and keeps
+  `docs/STATUS.md`. Workers are Claude Opus agents started for one package each, in one
+  of four kinds: prover, auditor, scout, wiki. All run inside one cloud session.
+- **Integration branch.** Each repository has one integration branch, named by the
+  session that runs the project. Workers commit on local branches `work/<package>` in
+  their own git worktree; LEAD merges them. Pull requests to `main` are opened only when
+  Tom asks. Nobody pushes to `main`.
+- **The gate.** A change reaches the integration branch only when, on the merged tree,
+  `lake build --wfail` passes, the axiom audit allows only `propext`,
+  `Classical.choice` and `Quot.sound`, every file under `PercLib/` is in the import
+  closure of `PercLib.lean`, and the forbidden-construct scan of D-29 is clean. The
+  kernel replay of D-29 runs before every push that is reported to Tom as a milestone.
+  These are local verifications. They are reported with the commit and the commands,
+  and are never called CI (D-10).
+- **Review.** D-23 and D-24 stand: statements and definitions are reviewed, proofs are
+  not. An interface change (a definition, structure, instance, notation, or tagged
+  statement) is approved by an auditor agent that did not write it, is started fresh,
+  and is given the diff and the source, not the author's account of it. A proof-only
+  change passes on the gate alone.
+- **Mathematical gaps.** A worker that finds a statement false, vacuous or unprovable
+  as written stops work on it and reports the counterexample or the missing hypothesis
+  to LEAD. LEAD has a fresh agent settle the mathematics as D-30 describes, records it
+  in the errata, and continues on the corrected statement, marked provisional. What was
+  Tom's under D-30 stays Tom's and is listed in `docs/STATUS.md` for him.
+- **Escalation to ARCHITECT.** Only these: a change to the D-2 bond interface or to
+  another definition that more than one area of the library depends on; a choice
+  between two incompatible formalisations of one notion; a change of scope or of
+  priorities among the programmes below; anything irreversible. Everything else LEAD
+  decides and records.
+- **Where things live.** The Lean library, its tooling and the governing documents are
+  in the public repository `perclib`. The wiki, the notes and everything that quotes or
+  locates the notes stay in the private repository, as Tom ruled under D-32, until he
+  rules otherwise. The link between them is the tag (D-12) and a manifest built in the
+  private repository against a named `perclib` commit.
+- **The order of work.** `ROADMAP.md` of 12 November is superseded; Phases 0 to 2 are
+  done and the library has outgrown the rest. Work is now chosen from the wiki, which
+  holds 1,401 tagged assertions against about 70 tagged Lean declarations in some
+  74,000 lines. In order of priority:
+  1. *Baseline.* A green gate on the snapshot in this environment, and the wiki draft
+     of 20 November committed to the private repository.
+  2. *Link what is proved.* Attach tags to existing declarations whose statements match
+     a wiki assertion, each match audited as an interface change. Build the manifest and
+     the frontier: assertions not proved whose prerequisites are proved.
+  3. *Close the frontier, nearest first.* Packages are taken from the frontier in order
+     of how little new theory they need, preferring assertions that many others depend
+     on. Statements before proofs (D-16): a tagged statement may land with its proof
+     outstanding only as a `Prop`-valued definition of the statement, never as a
+     theorem with `sorry`.
+  4. *Programmes.* The hierarchical two-point theorem (Phase 4) and the port of
+     *Critical long-range percolation I* (D-33) continue as the two flagship lines.
+     Sharpness, the triangle condition and the mean-field bounds come next. The lace
+     expansion, planar theory and SLE articles are formalised only where their
+     prerequisites are already in the library or in mathlib; no programme is opened
+     for them yet.
+  LEAD keeps the resulting package list in `docs/STATUS.md` and replaces `ROADMAP.md`
+  with one generated from the frontier.
+- **Wiki.** Wiki work follows the Lean work, not the reverse: after each batch of
+  merges a wiki agent brings the affected articles, errata and reading maps into line
+  and rebuilds the manifest. New articles are written only for material being
+  formalised.
+- **Machine.** Four cores and 15 GB. Worktrees share one copy of mathlib. LEAD measures
+  what the machine carries and sets the number of concurrent provers from that; a full
+  build is never run concurrently with another full build.
+- **Durability.** The container is temporary. LEAD pushes the integration branches
+  after every merged batch. `docs/STATUS.md` always says enough for a new LEAD to
+  resume from the repository alone.

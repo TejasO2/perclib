@@ -1,6 +1,6 @@
 # Working on this Lean project
 
-**Read first, in this order:** [docs/DECISIONS.md](docs/DECISIONS.md) (what is decided), [docs/ROADMAP.md](docs/ROADMAP.md) (what to work on), [docs/COORDINATION.md](docs/COORDINATION.md) (how to claim, build and hand off). Do not start a package until its claim is confirmed.
+**Read first:** [docs/COORDINATION.md](docs/COORDINATION.md) (the working rules), then D-34 and the decisions it cites in [docs/DECISIONS.md](docs/DECISIONS.md), then [docs/STATUS.md](docs/STATUS.md) (current state and package list).
 
 - Use the pinned Lean and mathlib versions in this repository.
 - Keep mathematical statements faithful to the requested result. Report any changed hypotheses or conclusions explicitly.
