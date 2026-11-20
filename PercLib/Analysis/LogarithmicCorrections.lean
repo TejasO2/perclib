@@ -18,6 +18,7 @@ public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 public import Mathlib.Analysis.Asymptotics.AsymptoticEquivalent
 public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 public import Mathlib.Analysis.SpecialFunctions.Sqrt
+public import PercLib.Meta.Tag
 
 /-!
 # Logarithmic corrections from a quadratic differential inequality (6PGV)
@@ -530,6 +531,7 @@ theorem absolutelyContinuousOnInterval_inv {u : ℝ → ℝ} {p q : ℝ} (hpq : 
 
 Then `f/m³ ~ (6 K a₀ c⁴ log r / ν)^{-1/2}` and
 `f ~ c √(ν/(6 K a₀)) r^{3α}/√(log r)`. -/
+@[tag "OP8F"]
 theorem op8f_asymptotics {α a₀ c ν K r₀ : ℝ} (ha₀ : 0 < a₀) (hc : 0 < c)
     (hν : 0 < ν) (hK : 0 < K) (hr₀ : 1 < r₀) {m f a b e₁ e₂ ε : ℝ → ℝ}
     (hm0 : ∀ r, r₀ ≤ r → 0 < m r) (hf0 : ∀ r, r₀ ≤ r → 0 < f r)

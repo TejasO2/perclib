@@ -15,6 +15,7 @@ public import Mathlib.Tactic.Positivity
 public import Mathlib.Tactic.NormNum
 public import Mathlib.Tactic.Ring
 public import Mathlib.Tactic.FinCases
+public import PercLib.Meta.Tag
 
 /-! # Splitting a marked finite connected edge set into connected pieces
 
@@ -659,6 +660,7 @@ theorem exists_connected_split (E : Finset (Sym2 V)) (hdiag : ∀ e ∈ E, ¬ e.
 /-- **The tree case.** A finite tree with `N ≥ 3^k` marked vertices, `k ≥ 1`: its edge set
 is partitioned into at least `3^(k-1) + 1` nonempty connected pieces, each with at least
 `N / 3^k` and fewer than `3 N / 3^k` marked endpoints, covering every vertex. -/
+@[tag "DMI0"]
 theorem exists_connected_split_of_isTree [Fintype V] {T : SimpleGraph V}
     (hT : T.IsTree) (A : Finset V) (k : ℕ) (hk : 1 ≤ k) (hN : 3 ^ k ≤ A.card) :
     ∃ C : Finset (Finset (Sym2 V)),
