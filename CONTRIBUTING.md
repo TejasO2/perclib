@@ -1,20 +1,19 @@
 # Contributing to PercLib
 
-PercLib is a Lean 4 / mathlib library of percolation theory, proved from the axioms,
-with a companion wiki. It is led by Tom Hutchcroft. Most of the work is done by AI
+PercLib is a Lean 4 / mathlib library of percolation theory, proved from the axioms.
+It is led by Tom Hutchcroft. Most of the work is done by AI
 agents, and this page is written so that you can hand it to yours. People are equally
 welcome and follow the same rules.
 
-The repository is `tomhutchcroft/lrp` and will be renamed `perclib`. It is private:
-ask Tom for an invitation first. Never push to `main` or to a branch that is not yours;
-everything reaches `main` by pull request.
+The repository is `tomhutchcroft/perclib` and is public. Outside contributors work in
+their own fork and open pull requests from it. Never push to `main` or to a branch that
+is not yours; everything reaches `main` by pull request.
 
 ## The short version
 
 1. Pick an open issue labelled [`open-to-all`](../../issues?q=is%3Aissue+is%3Aopen+label%3Aopen-to-all).
    Comment `claim — <your agent's name>` on it.
-2. Branch from `main` and write the Lean. Use a fork, or, if you have been invited to
-   the repository, a branch named `work/<your-handle>-<short-name>`.
+2. Fork the repository, branch from `main` in your fork, and write the Lean.
 3. Open a pull request against `main`. CI builds it and audits its axioms.
 4. A pull request that adds only theorems and lemmas merges automatically once CI is
    green and an auditor has approved it. You do not need to ask anyone.
@@ -86,9 +85,7 @@ everything reaches `main` by pull request.
 ## Licence and credit
 
 Lean code and tooling are under Apache-2.0 (see `LICENSE`). By opening a pull request
-you agree that your contribution is licensed on those terms. The lecture notes under
-`sources/notes/` and `docs/sources/notes/` are all rights reserved and are not to be
-copied. Contributors are credited in the file header of what they write and in the
+you agree that your contribution is licensed on those terms. Contributors are credited in the file header of what they write and in the
 commit history.
 
 ## Questions
@@ -100,12 +97,12 @@ comment that begins "ARCHITECT decision".
 ## A prompt you can give your agent
 
 ```text
-You are <NAME>, a prover contributing to PercLib (github.com/tomhutchcroft/lrp), a
+You are <NAME>, a prover contributing to PercLib (github.com/tomhutchcroft/perclib), a
 Lean 4 / mathlib library of percolation theory proved from the axioms. Read
 CONTRIBUTING.md, AGENTS.md and docs/DECISIONS.md in that repository and follow them
 exactly. Then: pick the lowest-numbered open issue labelled `open-to-all` that has no
-claim comment, comment `claim — <NAME>`, and write the Lean it asks for on a branch
-from main named work/<handle>-<short-name> (or in a fork). Never push to main. Build with the pinned toolchain after
+claim comment, comment `claim — <NAME>`, and write the Lean it asks for in your fork,
+on a branch from main named work/<handle>-<short-name>. Never push to main. Build with the pinned toolchain after
 `lake exe cache get`. Open a pull request against main as soon as a file compiles, and
 make exactly the changes any "AUDITOR verdict: CHANGES REQUIRED" review lists. When the
 package is done, take the next one. Never use sorry, admit, axiom or native_decide;

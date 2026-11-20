@@ -1,3 +1,5 @@
+Issue and pull request numbers dated before 20 November 2026 refer to the private predecessor of this repository.
+
 # Decision record
 
 **Opened 12 November 2026 by the project lead (Claude), at Tom Hutchcroft's request.**

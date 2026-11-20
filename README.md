@@ -28,6 +28,6 @@ Add each new proof module to `PercLib.lean` so `lake build` checks it.
 
 ## Automated verification
 
-[GitHub Actions](https://github.com/tomhutchcroft/lrp/actions) builds pushes and pull requests with warnings treated as errors. It also audits the axioms of declarations in namespace `PercLib`, allowing only Lean's standard `propext`, `Classical.choice`, and `Quot.sound` axioms. This rejects `sorry`/`admit` placeholders and additional axioms in completed proofs.
+This public repository has no GitHub Actions workflows yet; continuous integration will be added in a separate pull request. This snapshot was checked before publication: it builds with warnings treated as errors, and an audit of the axioms of declarations in namespace `PercLib` allows only Lean's standard `propext`, `Classical.choice`, and `Quot.sound` axioms. This rejects `sorry`/`admit` placeholders and additional axioms in completed proofs.
 
 The initial inequality is a build check for the environment; no research theorem has been formalised yet.
