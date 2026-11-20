@@ -172,8 +172,12 @@ public import PercLib.Percolation.Bond.SusceptibilityContinuity
 public import PercLib.Percolation.Bond.SusceptibilityDerivative
 public import PercLib.Percolation.Bond.SusceptibilityEndpoint
 public import PercLib.Percolation.Bond.Tags.BoundaryForest
+public import PercLib.Percolation.Bond.Tags.ClusterCorrelation
 public import PercLib.Percolation.Bond.Tags.FiniteVolume
+public import PercLib.Percolation.Bond.Tags.IndependentLayer
 public import PercLib.Percolation.Bond.Tags.SubcriticalBound
+public import PercLib.Percolation.Bond.Tags.Tightness
+public import PercLib.Percolation.Bond.Tags.TreeGraph
 public import PercLib.Percolation.Bond.ThetaSemicontinuity
 public import PercLib.Percolation.Bond.Tightness.BKStep
 public import PercLib.Percolation.Bond.Tightness.Defs
