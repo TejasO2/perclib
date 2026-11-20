@@ -39,18 +39,40 @@ the package list and anything waiting for Tom are in [STATUS.md](STATUS.md).
 
 ## The gate (LEAD)
 
-On the merged tree, before the integration branch moves:
+On the merged tree, before the integration branch moves, from the repository root with
+`~/.elan/bin` on `PATH` (corrected 20 November 2026 against `scripts/` and the old CI
+workflow; every command below was run on this machine):
 
 ```sh
-lake build --wfail
-lake env lean scripts/ExtractManifest.lean   # axiom audit and declaration extract
-python3 scripts/check_import_closure.py
-python3 scripts/check_proof_pr.py            # proof-only or interface
+scripts/gate.sh <integration-tip>      # runs, in order, stopping at the first failure:
+  lake build --wfail
+  lake env lean --run scripts/AxiomAudit.lean          # every constant under PercLib
+  python3 scripts/check_import_closure.py PercLib
+  python3 scripts/check_forbidden.py PercLib           # D-29 forbidden-construct scan
+  python3 scripts/test_proof_pr.py
+  lake env lean --run scripts/ExtractManifest.lean > .lake/manifest-raw.json
+  python3 scripts/check_proof_pr.py --base <tip> --base-raw .lake/gate/<tip>.json
 ```
 
-An interface change also needs an auditor's approval (D-34). The kernel replay of D-29
-runs before each milestone push. Results are recorded in `STATUS.md` with the commit,
-as local verification.
+`AxiomAudit.lean` allows only `propext`, `Classical.choice` and `Quot.sound` and covers
+private declarations (a `sorry` appears as `sorryAx`). `ExtractManifest.lean` is the
+declaration extract; it records axioms of tagged declarations only, so it is not the
+audit. `check_proof_pr.py` classifies the change against the tip: exit 0 proof-only,
+exit 3 interface (needs a fresh auditor's approval, D-34). `gate.sh` saves the extract
+of each clean gated commit as `.lake/gate/<sha>.json`, which is what the next
+classification compares against. Kernel replay (D-29), before every milestone push,
+never alongside a build:
+
+```sh
+scripts/kernel_replay.sh        # leanchecker, 12 modules per process
+```
+
+`lake env leanchecker PercLib` in one process exceeds 15 GB and is killed; do not use
+it. Measured on 20 November 2026 (4 cores, 15 GB): full library build from a warm
+mathlib cache 4 min 23 s; axiom audit 52 s; extract 74 s; kernel replay 14 min 9 s
+with a peak of about 9.7 GB at 12 modules per batch (use `scripts/kernel_replay.sh 6`
+while provers are building); see
+`STATUS.md`. Results are recorded in `STATUS.md` with the commit, as local verification.
 
 ## Reporting
 

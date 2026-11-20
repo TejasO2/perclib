@@ -837,11 +837,14 @@ of the working rules; `AGENT_PROMPTS.md` is deleted.
   between two incompatible formalisations of one notion; a change of scope or of
   priorities among the programmes below; anything irreversible. Everything else LEAD
   decides and records.
-- **Where things live.** The Lean library, its tooling and the governing documents are
-  in the public repository `perclib`. The wiki, the notes and everything that quotes or
-  locates the notes stay in the private repository, as Tom ruled under D-32, until he
-  rules otherwise. The link between them is the tag (D-12) and a manifest built in the
-  private repository against a named `perclib` commit.
+- **Where things live.** The Lean library, its tooling, the governing documents and,
+  under the amendment below, the wiki (`wiki/`) are in the public repository `perclib`.
+  Tom's book draft and the notes (`sources/`, `docs/sources/`) stay in the private
+  repository and never enter `perclib`, verbatim or near-verbatim. The link between the
+  wiki and Lean is the tag (D-12); the manifest and definitions index are built in
+  `perclib`. Until the publication check of the amendment has passed, the wiki stays in
+  the private repository and the manifest is built there against a named `perclib`
+  commit.
 - **The order of work.** `ROADMAP.md` of 12 November is superseded; Phases 0 to 2 are
   done and the library has outgrown the rest. Work is now chosen from the wiki, which
   holds 1,401 tagged assertions against about 70 tagged Lean declarations in some
@@ -874,3 +877,25 @@ of the working rules; `AGENT_PROMPTS.md` is deleted.
 - **Durability.** The container is temporary. LEAD pushes the integration branches
   after every merged batch. `docs/STATUS.md` always says enough for a new LEAD to
   resume from the repository alone.
+
+**Amendment to D-34 and D-32, 20 November 2026 (Tom: 'Wiki goes public but not my book
+draft').** The wiki moves to `perclib/wiki/`, which becomes its only home; `lrp/wiki` is
+frozen once the move is verified. The book draft stays private: `sources/`,
+`docs/sources/`, and any verbatim or near-verbatim text of the draft never enter
+`perclib`. Wiki articles that derive their mathematics from the draft are public; pages
+that only locate passages of the draft (the notes reading maps, the notes sections of
+`COVERAGE.md`, the notes errata) are public only after the check below, with links into
+the private repository rendered as plain locators, not links. The manifest and
+definitions index are now built in `perclib`. The wiki prose licence is still undecided
+(R-2) and stays all rights reserved, stated in a notice in `wiki/`, until Tom rules.
+
+The check before the first public push of any wiki file is a hard gate, because that
+push is irreversible: a mechanical scan, kept in the private repository, lists every run
+of about twelve or more consecutive words (or a long formula with surrounding prose)
+shared between a wiki file and the draft or its notes, after normalising whitespace and
+TeX markup; a fresh auditor classifies each hit and every notes-facing page as fine,
+rewrite or withhold; links to the private repository, the draft's file hash with line
+anchors, personal email addresses and old private issue or pull request links are
+reduced to plain locators or removed. Only what passes is copied to `perclib/wiki/`;
+anything in doubt is withheld and listed for Tom. The built site is not committed.
+After the move the wiki build is part of the gate for wiki changes.
