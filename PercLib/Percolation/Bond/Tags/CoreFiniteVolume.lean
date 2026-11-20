@@ -1,13 +1,14 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Correspondence wrappers for exhaustion by induced domains and the local Harris corollary.
-All mathematical inputs are proved in the imported modules.
 -/
 module
 
 public import PercLib.Meta.Tag
 public import PercLib.Percolation.Bond.FiniteVolume
 public import PercLib.Percolation.Bond.HarrisLocal
+
+/-! Correspondence wrappers for exhaustion by induced domains and the local Harris corollary.
+All mathematical inputs are proved in the imported modules. -/
 
 @[expose] public section
 noncomputable section

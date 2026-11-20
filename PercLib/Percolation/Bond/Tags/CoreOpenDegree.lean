@@ -1,7 +1,5 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Correspondence wrappers for the open-degree laws of independent bond percolation.
-All mathematical inputs are proved in the imported modules.
 -/
 module
 
@@ -10,6 +8,9 @@ public import PercLib.Percolation.Bond.Degree
 public import PercLib.Percolation.Bond.DegreeGenerating
 public import PercLib.Percolation.Bond.InfiniteDegree
 public import PercLib.Percolation.Bond.LocalFiniteness
+
+/-! Correspondence wrappers for the open-degree laws of independent bond percolation.
+All mathematical inputs are proved in the imported modules. -/
 
 @[expose] public section
 noncomputable section

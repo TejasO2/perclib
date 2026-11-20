@@ -1,13 +1,14 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Correspondence wrappers for local finiteness and global connection events.
-All mathematical inputs are proved in the imported modules.
 -/
 module
 
 public import PercLib.Meta.Tag
 public import PercLib.Percolation.Bond.GlobalConnectivity
 public import PercLib.Percolation.Bond.LocalFiniteness
+
+/-! Correspondence wrappers for local finiteness and global connection events.
+All mathematical inputs are proved in the imported modules. -/
 
 @[expose] public section
 noncomputable section

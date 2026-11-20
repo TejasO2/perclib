@@ -1,8 +1,5 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Correspondence wrappers for boundary contraction, the exterior law given a cluster, the
-critical boundary flux, and intrinsic balls.
-All mathematical inputs are proved in the imported modules.
 -/
 module
 
@@ -12,6 +9,10 @@ public import PercLib.Percolation.Bond.ClusterLaw
 public import PercLib.Percolation.Bond.FiniteSetCriterion
 public import PercLib.Percolation.Bond.IntrinsicBalls
 public import Mathlib.Probability.ConditionalProbability
+
+/-! Correspondence wrappers for boundary contraction, the exterior law given a cluster, the
+critical boundary flux, and intrinsic balls.
+All mathematical inputs are proved in the imported modules. -/
 
 @[expose] public section
 noncomputable section

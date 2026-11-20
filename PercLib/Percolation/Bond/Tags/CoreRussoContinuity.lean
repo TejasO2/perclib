@@ -1,8 +1,5 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Correspondence wrappers for the finite-domain intensity Russo formula, the off-diagonal
-convolution bound, and semicontinuity of the percolation probability.
-All mathematical inputs are proved in the imported modules.
 -/
 module
 
@@ -10,6 +7,10 @@ public import PercLib.Meta.Tag
 public import PercLib.Percolation.Bond.ConvolutionBound
 public import PercLib.Percolation.Bond.FiniteVolumeRusso
 public import PercLib.Percolation.Bond.ThetaSemicontinuity
+
+/-! Correspondence wrappers for the finite-domain intensity Russo formula, the off-diagonal
+convolution bound, and semicontinuity of the percolation probability.
+All mathematical inputs are proved in the imported modules. -/
 
 @[expose] public section
 noncomputable section

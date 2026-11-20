@@ -1,8 +1,5 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Correspondence wrappers for deleted-set connection loss, the boundary susceptibility
-bound, and the susceptibility derivative in a transitive intensity model.
-All mathematical inputs are proved in the imported modules.
 -/
 module
 
@@ -10,6 +7,10 @@ public import PercLib.Meta.Tag
 public import PercLib.Percolation.Bond.BoundarySusceptibility
 public import PercLib.Percolation.Bond.SusceptibilityDerivative
 public import PercLib.Percolation.Bond.SusceptibilityEndpoint
+
+/-! Correspondence wrappers for deleted-set connection loss, the boundary susceptibility
+bound, and the susceptibility derivative in a transitive intensity model.
+All mathematical inputs are proved in the imported modules. -/
 
 @[expose] public section
 noncomputable section

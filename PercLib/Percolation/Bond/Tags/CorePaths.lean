@@ -1,8 +1,5 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Correspondence wrappers for path lower bounds, pivotal pairs, walk-length decay, bounded
-degree path counting and path comparison of roots.
-All mathematical inputs are proved in the imported modules.
 -/
 module
 
@@ -13,6 +10,10 @@ public import PercLib.Percolation.Bond.Pivotal
 public import PercLib.Percolation.Bond.RowSumDecay
 public import PercLib.Percolation.Bond.SelfAvoidingChi
 public import PercLib.Percolation.Bond.TreeCounting
+
+/-! Correspondence wrappers for path lower bounds, pivotal pairs, walk-length decay, bounded
+degree path counting and path comparison of roots.
+All mathematical inputs are proved in the imported modules. -/
 
 @[expose] public section
 noncomputable section

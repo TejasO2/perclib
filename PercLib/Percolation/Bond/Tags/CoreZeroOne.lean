@@ -1,14 +1,15 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Correspondence wrappers for the zero-one law of infinite-cluster existence and ergodicity of
-translation-invariant bond laws.
-All mathematical inputs are proved in the imported modules.
 -/
 module
 
 public import PercLib.Meta.Tag
 public import PercLib.Percolation.Bond.Ergodic
 public import PercLib.Percolation.Bond.ZeroOne
+
+/-! Correspondence wrappers for the zero-one law of infinite-cluster existence and ergodicity of
+translation-invariant bond laws.
+All mathematical inputs are proved in the imported modules. -/
 
 @[expose] public section
 noncomputable section
