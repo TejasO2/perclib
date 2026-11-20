@@ -1,45 +1,21 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Correspondence wrappers for internal events of disjoint domains, exhaustion by induced
-domains, and the local Harris corollary.
+Correspondence wrappers for exhaustion by induced domains and the local Harris corollary.
 All mathematical inputs are proved in the imported modules.
 -/
 module
 
 public import PercLib.Meta.Tag
-public import PercLib.Percolation.Bond.DomainIndependence
 public import PercLib.Percolation.Bond.FiniteVolume
 public import PercLib.Percolation.Bond.HarrisLocal
 
 @[expose] public section
 noncomputable section
-open MeasureTheory Set Function
+open MeasureTheory Set
 open scoped ENNReal
 
 namespace PercLib.Percolation.Bond
 variable {V : Type*}
-
-/-- Measurable events determined by the internal pairs of pairwise disjoint domains are
-mutually independent (the empty family included), and in particular internal connection
-events of two disjoint countable domains factor. -/
-@[tag "RDX7"]
-theorem law_iInter_internal_events_and_localConn (q : Sym2 V → unitInterval) :
-    (∀ (m : ℕ) (S : Fin m → Set V), Pairwise (Disjoint on S) →
-      ∀ A : Fin m → Set (Config V), (∀ k, MeasurableSet (A k)) →
-      (∀ k, ∀ ω ω' : Config V,
-        ω ∩ {e | ∀ v ∈ e, v ∈ S k} = ω' ∩ {e | ∀ v ∈ e, v ∈ S k} → (ω ∈ A k ↔ ω' ∈ A k)) →
-      law q (⋂ k, A k) = ∏ k, law q (A k)) ∧
-    (∀ (S T : Set V) [Countable S] [Countable T], Disjoint S T → ∀ (x y : S) (u v : T),
-      law q {ω | ((openGraph ω).induce S).Reachable x y ∧
-          ((openGraph ω).induce T).Reachable u v} =
-        law q {ω | ((openGraph ω).induce S).Reachable x y} *
-          law q {ω | ((openGraph ω).induce T).Reachable u v}) := by
-  refine ⟨fun m S hS A hAm hA => ?_, fun S T _ _ hST x y u v =>
-    law_localConn_inter_eq_mul q hST x y u v⟩
-  have h := law_biInter_of_determined_internalPairs q (Finset.univ : Finset (Fin m))
-    (S := S) (by rw [Finset.coe_univ]; exact hS.set_pairwise _) (A := A)
-    (fun k _ => hAm k) hA
-  simpa only [Finset.mem_univ, iInter_true] using h
 
 /-- Along an increasing sequence of domains covering `V`, the internal clusters increase to
 the cluster with volume the supremum; on countable `V` the susceptibility is the supremum of
