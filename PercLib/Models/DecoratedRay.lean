@@ -709,4 +709,15 @@ theorem exists_decoratedRay :
     · rw [SimpleGraph.mem_edgeSet, hadj]
       exact ⟨by simp, Or.inl (Or.inr ⟨rfl, rfl⟩)⟩
 
+/-- If the root susceptibility is finite exactly for `β < a` (with `a ≥ 0`), the infimum of the
+parameters with infinite root susceptibility is `a`. -/
+theorem sInf_setOf_chi_eq_top_eq {V : Type*} (J : Sym2 V → ℝ≥0) (o : V) {a : ℝ} (ha : 0 ≤ a)
+    (h : ∀ β : ℝ≥0, chi (intensityProfile J β) o < ⊤ ↔ (β : ℝ) < a) :
+    ((sInf {β : ℝ≥0 | chi (intensityProfile J β) o = ⊤} : ℝ≥0) : ℝ) = a := by
+  have hset : {β : ℝ≥0 | chi (intensityProfile J β) o = ⊤} = Set.Ici (Real.toNNReal a) := by
+    ext β
+    simp only [Set.mem_ofPred_eq, Set.mem_Ici, Real.toNNReal_le_iff_le_coe]
+    rw [← not_lt, ← h, lt_top_iff_ne_top, not_not]
+  rw [hset, csInf_Ici, Real.coe_toNNReal _ ha]
+
 end PercLib.Models.DecoratedRay

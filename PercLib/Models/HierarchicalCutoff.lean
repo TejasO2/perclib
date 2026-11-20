@@ -10,6 +10,8 @@ public import PercLib.Models.HierarchicalGeometry
 public import PercLib.Percolation.Bond.Forest
 public import PercLib.Percolation.Bond.IntensityScaling
 public import Mathlib.Combinatorics.SimpleGraph.Connectivity.Connected
+public import PercLib.Percolation.Bond.ZeroOne
+public import PercLib.Percolation.Bond.Diagonal.Probability
 
 /-! # Cutoff clusters on the hierarchical lattice
 
@@ -70,6 +72,57 @@ theorem ae_cluster_eq_singleton_of_offDiagonal (q : Sym2 V → unitInterval)
     exact (SimpleGraph.reachable_bot.1 (SimpleGraph.Reachable.mono hω hy)).symm
   · rintro rfl
     exact mem_cluster_self ω y
+
+/-! ### Kernels that agree off the diagonal -/
+
+omit [Countable V] in
+/-- Kernels that agree off the diagonal give intensity profiles that agree off the diagonal. -/
+theorem intensityProfile_eq_of_offDiagonal {J J' : Sym2 V → ℝ≥0}
+    (h : ∀ x y, x ≠ y → J s(x, y) = J' s(x, y)) (β : ℝ≥0) :
+    ∀ e, ¬ e.IsDiag → intensityProfile J β e = intensityProfile J' β e := by
+  intro e he
+  induction e using Sym2.ind with
+  | h x y =>
+    have hxy : x ≠ y := by simpa using he
+    apply Subtype.ext
+    change 1 - Real.exp (-(β : ℝ) * (J s(x, y) : ℝ)) =
+      1 - Real.exp (-(β : ℝ) * (J' s(x, y) : ℝ))
+    rw [h x y hxy]
+
+omit [Countable V] in
+/-- Configurations that agree off the diagonal have the same open graph. -/
+theorem openGraph_eq_of_sdiff_diagSet_eq {ω ω' : Config V}
+    (h : ω \ Sym2.diagSet = ω' \ Sym2.diagSet) : openGraph ω = openGraph ω' := by
+  rw [← openGraph_sdiff_diagSet ω, h, openGraph_sdiff_diagSet]
+
+/-- The probability of an infinite cluster at `x` is diagonal-insensitive. -/
+theorem law_cluster_infinite_eq_of_offDiagonal (p q : Sym2 V → unitInterval)
+    (hpq : ∀ e, ¬ e.IsDiag → p e = q e) (x : V) :
+    law p {ω | (cluster ω x).Infinite} = law q {ω | (cluster ω x).Infinite} :=
+  law_event_eq_of_offDiagonal p q hpq (measurableSet_cluster_infinite x) fun ω ω' hω => by
+    simp only [Set.mem_ofPred_eq, cluster, openGraph_eq_of_sdiff_diagSet_eq hω]
+
+/-- The probability that some cluster is infinite is diagonal-insensitive. -/
+theorem law_exists_cluster_infinite_eq_of_offDiagonal (p q : Sym2 V → unitInterval)
+    (hpq : ∀ e, ¬ e.IsDiag → p e = q e) :
+    law p {ω | ∃ x, (cluster ω x).Infinite} = law q {ω | ∃ x, (cluster ω x).Infinite} :=
+  law_event_eq_of_offDiagonal p q hpq measurableSet_exists_cluster_infinite fun ω ω' hω => by
+    simp only [Set.mem_ofPred_eq, cluster, openGraph_eq_of_sdiff_diagSet_eq hω]
+
+/-- The root critical intensity depends only on the kernel off the diagonal. -/
+theorem rootCriticalIntensity_eq_of_offDiagonal {J J' : Sym2 V → ℝ≥0}
+    (h : ∀ x y, x ≠ y → J s(x, y) = J' s(x, y)) (x : V) :
+    rootCriticalIntensity J x = rootCriticalIntensity J' x := by
+  unfold rootCriticalIntensity
+  simp_rw [law_cluster_infinite_eq_of_offDiagonal _ _ (intensityProfile_eq_of_offDiagonal h _)]
+
+/-- The global critical intensity depends only on the kernel off the diagonal. -/
+theorem globalCriticalIntensity_eq_of_offDiagonal {J J' : Sym2 V → ℝ≥0}
+    (h : ∀ x y, x ≠ y → J s(x, y) = J' s(x, y)) :
+    globalCriticalIntensity J = globalCriticalIntensity J' := by
+  unfold globalCriticalIntensity
+  simp_rw [law_exists_cluster_infinite_eq_of_offDiagonal _ _
+    (intensityProfile_eq_of_offDiagonal h _)]
 
 end PercLib.Percolation.Bond
 
@@ -276,6 +329,196 @@ theorem hierarchical_of_M_eq_zero (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → 
   have h0 := ENNReal.tsum_eq_zero.1 (nonpos_iff_eq_zero.1 (hrow x)) y
   rw [ite_eq_right (Ne.symm hxy), ENNReal.coe_eq_zero] at h0
   exact h0
+
+/-! ### Kernels prescribed off the diagonal only
+
+The statements above take the radial identity on all pairs, including the diagonal. The
+versions below assume it for distinct pairs only (the diagonal is arbitrary) and transfer
+through the all-pairs kernel of `exists_hierarchical_kernel`. -/
+
+/-- **KL29 (a), every configuration.** If every open pair has level at most `n`, every cluster
+lies in the level-`n` ball of its base vertex and has at most `N^n` vertices. -/
+theorem cluster_subset_level_ball_of_forall (n : ℕ) (ω : Config (ℕ →₀ (Fin d → ZMod L)))
+    (hω : ∀ a b, a ≠ b → s(a, b) ∈ ω → (b - a).support.sup Nat.succ ≤ n)
+    (x : (ℕ →₀ (Fin d → ZMod L))) :
+    cluster ω x ⊆ {y | (y - x).support.sup Nat.succ ≤ n} ∧
+      (cluster ω x).encard ≤ (((L ^ d) ^ n : ℕ) : ℕ∞) := by
+  have hle : openGraph ω ≤ SimpleGraph.fromRel fun a b : (ℕ →₀ (Fin d → ZMod L)) =>
+      (b - a).support.sup Nat.succ ≤ n := by
+    intro a b hab
+    rw [openGraph_adj_iff] at hab
+    rw [SimpleGraph.fromRel_adj]
+    exact ⟨hab.2, Or.inl (hω a b hab.2 hab.1)⟩
+  have hsub : cluster ω x ⊆ {y | (y - x).support.sup Nat.succ ≤ n} := fun y hy =>
+    level_le_of_reachable n (SimpleGraph.Reachable.mono hle hy)
+  exact ⟨hsub, (Set.encard_le_encard hsub).trans_eq (encard_level_ball x n)⟩
+
+omit [NeZero L] in
+private theorem ne_of_lt_level {n : ℕ} {x y : (ℕ →₀ (Fin d → ZMod L))}
+    (h : n < (y - x).support.sup Nat.succ) :
+    x ≠ y := by
+  rintro rfl
+  simp at h
+
+/-- **KL29 (b)** with the kernel prescribed off the diagonal only. -/
+theorem tsum_level_gt_eq_of_ne (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) (C r : ℝ≥0)
+    (hJ : ∀ x y, x ≠ y → J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ)) (n : ℕ)
+    (x : (ℕ →₀ (Fin d → ZMod L))) :
+    (∑' y, if n < (y - x).support.sup Nat.succ then (J s(x, y) : ℝ≥0∞) else 0) =
+      (C : ℝ≥0∞) * ((L ^ d - 1 : ℕ) : ℝ≥0∞) * r / (1 - (L : ℝ≥0∞) ^ d * r) *
+        ((L : ℝ≥0∞) ^ d * r) ^ n := by
+  obtain ⟨J', hJ'⟩ := exists_hierarchical_kernel (d := d) (L := L) C r
+  rw [← tsum_level_gt_eq J' C r hJ' n x]
+  refine tsum_congr fun y => ?_
+  split_ifs with h
+  · rw [hJ x y (ne_of_lt_level h), hJ' x y]
+  · rfl
+
+/-- **KL29 (c)** with the kernel prescribed off the diagonal only. -/
+theorem tsum_level_gt_intensity_le_of_ne (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) (C r : ℝ≥0)
+    (hJ : ∀ x y, x ≠ y → J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ)) (β : ℝ≥0)
+    (n : ℕ) (x : (ℕ →₀ (Fin d → ZMod L))) :
+    (∑' y, if n < (y - x).support.sup Nat.succ then
+        (unitInterval.toNNReal (intensityProfile J β s(x, y)) : ℝ≥0∞) else 0) ≤
+      (β : ℝ≥0∞) * ((C : ℝ≥0∞) * ((L ^ d - 1 : ℕ) : ℝ≥0∞) * r / (1 - (L : ℝ≥0∞) ^ d * r) *
+        ((L : ℝ≥0∞) ^ d * r) ^ n) := by
+  obtain ⟨J', hJ'⟩ := exists_hierarchical_kernel (d := d) (L := L) C r
+  have hJJ' : ∀ x y, x ≠ y → J s(x, y) = J' s(x, y) := fun x y h => by rw [hJ x y h, hJ' x y]
+  refine le_trans (le_of_eq ?_) (tsum_level_gt_intensity_le J' C r hJ' β n x)
+  refine tsum_congr fun y => ?_
+  split_ifs with h
+  · rw [intensityProfile_eq_of_offDiagonal hJJ' β s(x, y) (by simpa using ne_of_lt_level h)]
+  · rfl
+
+/-- **B6KD (a)** with the kernel prescribed off the diagonal only. -/
+theorem chi_intensity_le_hierarchical_sharp_of_ne (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0)
+    (C r : ℝ≥0) (hJ : ∀ x y, x ≠ y → J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ))
+    (hr : (L : ℝ≥0) ^ d * r < 1) (β : ℝ≥0)
+    (hβ : (β : ℝ≥0∞) *
+      ((C * ((L ^ d - 1 : ℕ) : ℝ≥0) * r / (1 - (L : ℝ≥0) ^ d * r) : ℝ≥0) : ℝ≥0∞) < 1)
+    (x : (ℕ →₀ (Fin d → ZMod L))) :
+    chi (intensityProfile J β) x ≤
+      (1 - (β : ℝ≥0∞) *
+        ((C * ((L ^ d - 1 : ℕ) : ℝ≥0) * r / (1 - (L : ℝ≥0) ^ d * r) : ℝ≥0) : ℝ≥0∞))⁻¹ := by
+  obtain ⟨J', hJ'⟩ := exists_hierarchical_kernel (d := d) (L := L) C r
+  have hJJ' : ∀ x y, x ≠ y → J s(x, y) = J' s(x, y) := fun x y h => by rw [hJ x y h, hJ' x y]
+  rw [chi_eq_of_offDiagonal _ _ (intensityProfile_eq_of_offDiagonal hJJ' β) x]
+  exact chi_intensity_le_hierarchical_sharp J' C r hJ' hr β hβ x
+
+/-- **B6KD (a)**, no infinite cluster, with the kernel prescribed off the diagonal only. -/
+theorem law_exists_infinite_hierarchical_eq_zero_of_ne (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0)
+    (C r : ℝ≥0) (hJ : ∀ x y, x ≠ y → J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ))
+    (hr : (L : ℝ≥0) ^ d * r < 1) (β : ℝ≥0)
+    (hβ : (β : ℝ≥0∞) *
+      ((C * ((L ^ d - 1 : ℕ) : ℝ≥0) * r / (1 - (L : ℝ≥0) ^ d * r) : ℝ≥0) : ℝ≥0∞) < 1) :
+    law (intensityProfile J β) {ω | ∃ x, (cluster ω x).Infinite} = 0 := by
+  obtain ⟨J', hJ'⟩ := exists_hierarchical_kernel (d := d) (L := L) C r
+  have hJJ' : ∀ x y, x ≠ y → J s(x, y) = J' s(x, y) := fun x y h => by rw [hJ x y h, hJ' x y]
+  rw [law_exists_cluster_infinite_eq_of_offDiagonal _ _
+    (intensityProfile_eq_of_offDiagonal hJJ' β)]
+  exact law_exists_infinite_hierarchical_eq_zero J' C r hJ' hr β hβ
+
+/-- **B6KD (b)**, global threshold, with the kernel prescribed off the diagonal only. -/
+theorem inv_le_globalCriticalIntensity_hierarchical_sharp_of_ne
+    (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0)
+    (C r : ℝ≥0) (hJ : ∀ x y, x ≠ y → J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ))
+    (hr : (L : ℝ≥0) ^ d * r < 1) :
+    ((C * ((L ^ d - 1 : ℕ) : ℝ≥0) * r / (1 - (L : ℝ≥0) ^ d * r) : ℝ≥0) : ℝ≥0∞)⁻¹ ≤
+      globalCriticalIntensity J := by
+  obtain ⟨J', hJ'⟩ := exists_hierarchical_kernel (d := d) (L := L) C r
+  have hJJ' : ∀ x y, x ≠ y → J s(x, y) = J' s(x, y) := fun x y h => by rw [hJ x y h, hJ' x y]
+  rw [globalCriticalIntensity_eq_of_offDiagonal hJJ']
+  exact inv_le_globalCriticalIntensity_hierarchical_sharp J' C r hJ' hr
+
+/-- **B6KD (b)**, root threshold, with the kernel prescribed off the diagonal only. -/
+theorem inv_le_rootCriticalIntensity_hierarchical_sharp_of_ne
+    (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0)
+    (C r : ℝ≥0) (hJ : ∀ x y, x ≠ y → J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ))
+    (hr : (L : ℝ≥0) ^ d * r < 1) (x : (ℕ →₀ (Fin d → ZMod L))) :
+    ((C * ((L ^ d - 1 : ℕ) : ℝ≥0) * r / (1 - (L : ℝ≥0) ^ d * r) : ℝ≥0) : ℝ≥0∞)⁻¹ ≤
+      rootCriticalIntensity J x := by
+  obtain ⟨J', hJ'⟩ := exists_hierarchical_kernel (d := d) (L := L) C r
+  have hJJ' : ∀ x y, x ≠ y → J s(x, y) = J' s(x, y) := fun x y h => by rw [hJ x y h, hJ' x y]
+  rw [rootCriticalIntensity_eq_of_offDiagonal hJJ']
+  exact inv_le_rootCriticalIntensity_hierarchical_sharp J' C r hJ' hr x
+
+/-- **B6KD (c).** If `M = 0` (with `N r < 1`), every off-diagonal intensity vanishes. -/
+theorem eq_zero_of_hierarchical_M_eq_zero (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) (C r : ℝ≥0)
+    (hJ : ∀ x y, x ≠ y → J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ))
+    (hr : (L : ℝ≥0) ^ d * r < 1)
+    (hM : C * ((L ^ d - 1 : ℕ) : ℝ≥0) * r / (1 - (L : ℝ≥0) ^ d * r) = 0)
+    {x y : (ℕ →₀ (Fin d → ZMod L))} (hxy : x ≠ y) : J s(x, y) = 0 := by
+  have hden : (1 - (L : ℝ≥0) ^ d * r) ≠ 0 := (tsub_pos_of_lt hr).ne'
+  rcases div_eq_zero_iff.1 hM with h | h
+  · rcases mul_eq_zero.1 h with h | h
+    · rcases mul_eq_zero.1 h with hC | hN
+      · rw [hJ x y hxy, hC, zero_mul]
+      · exfalso
+        have hN' : L ^ d - 1 = 0 := by exact_mod_cast hN
+        have hcard : Fintype.card (Fin d → ZMod L) ≤ 1 := by
+          rw [Fintype.card_fun, ZMod.card, Fintype.card_fin]
+          omega
+        have := Fintype.card_le_one_iff_subsingleton.1 hcard
+        exact hxy (Finsupp.ext fun i => Subsingleton.elim _ _)
+    · have hlv : (y - x).support.sup Nat.succ ≠ 0 := by
+        rw [Ne, level_eq_zero_iff, sub_eq_zero]
+        exact fun e => hxy e.symm
+      rw [hJ x y hxy, h, zero_pow hlv, mul_zero]
+  · exact absurd h hden
+
+/-- **B6KD, `M = 0`**, with the kernel prescribed off the diagonal only. -/
+theorem hierarchical_of_M_eq_zero_of_ne (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) (C r : ℝ≥0)
+    (hJ : ∀ x y, x ≠ y → J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ))
+    (hr : (L : ℝ≥0) ^ d * r < 1)
+    (hM : C * ((L ^ d - 1 : ℕ) : ℝ≥0) * r / (1 - (L : ℝ≥0) ^ d * r) = 0) (β : ℝ≥0) :
+    (∀ᵐ ω ∂law (intensityProfile J β), ∀ x, cluster ω x = {x}) ∧
+      (∀ x, chi (intensityProfile J β) x = 1) ∧
+      globalCriticalIntensity J = ⊤ ∧ ∀ x, rootCriticalIntensity J x = ⊤ := by
+  obtain ⟨J', hJ'⟩ := exists_hierarchical_kernel (d := d) (L := L) C r
+  have hJJ' : ∀ x y, x ≠ y → J s(x, y) = J' s(x, y) := fun x y h => by rw [hJ x y h, hJ' x y]
+  obtain ⟨-, hchi, hglob, hroot⟩ := hierarchical_of_M_eq_zero J' C r hJ' hr hM β
+  refine ⟨?_, fun x => ?_, ?_, fun x => ?_⟩
+  · exact ae_cluster_eq_singleton_of_offDiagonal _ fun x y hxy =>
+      intensityProfile_eq_zero_of_eq_zero J
+        (eq_zero_of_hierarchical_M_eq_zero J C r hJ hr hM hxy) β
+  · rw [chi_eq_of_offDiagonal _ _ (intensityProfile_eq_of_offDiagonal hJJ' β) x]
+    exact hchi x
+  · rw [globalCriticalIntensity_eq_of_offDiagonal hJJ']
+    exact hglob
+  · rw [rootCriticalIntensity_eq_of_offDiagonal hJJ']
+    exact hroot x
+
+/-- **B6KD (d)**, `χ`, with `2Nr ≤ 1` and the kernel prescribed off the diagonal only. -/
+theorem chi_intensity_le_hierarchical_of_ne (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) (C r : ℝ≥0)
+    (hJ : ∀ x y, x ≠ y → J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ))
+    (hr : (L : ℝ≥0) ^ d * r * 2 ≤ 1) (β : ℝ≥0)
+    (hβ : (β : ℝ≥0∞) * ((2 * C : ℝ≥0) : ℝ≥0∞) < 1)
+    (x : (ℕ →₀ (Fin d → ZMod L))) :
+    chi (intensityProfile J β) x ≤ (1 - (β : ℝ≥0∞) * ((2 * C : ℝ≥0) : ℝ≥0∞))⁻¹ := by
+  obtain ⟨J', hJ'⟩ := exists_hierarchical_kernel (d := d) (L := L) C r
+  have hJJ' : ∀ x y, x ≠ y → J s(x, y) = J' s(x, y) := fun x y h => by rw [hJ x y h, hJ' x y]
+  rw [chi_eq_of_offDiagonal _ _ (intensityProfile_eq_of_offDiagonal hJJ' β) x]
+  exact chi_intensity_le_hierarchical J' C r hJ' hr β hβ x
+
+/-- **B6KD (d)**, global threshold, with the kernel prescribed off the diagonal only. -/
+theorem inv_le_globalCriticalIntensity_hierarchical_of_ne (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0)
+    (C r : ℝ≥0) (hJ : ∀ x y, x ≠ y → J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ))
+    (hr : (L : ℝ≥0) ^ d * r * 2 ≤ 1) :
+    ((2 * C : ℝ≥0) : ℝ≥0∞)⁻¹ ≤ globalCriticalIntensity J := by
+  obtain ⟨J', hJ'⟩ := exists_hierarchical_kernel (d := d) (L := L) C r
+  have hJJ' : ∀ x y, x ≠ y → J s(x, y) = J' s(x, y) := fun x y h => by rw [hJ x y h, hJ' x y]
+  rw [globalCriticalIntensity_eq_of_offDiagonal hJJ']
+  exact inv_le_globalCriticalIntensity_hierarchical J' C r hJ' hr
+
+/-- **B6KD (d)**, root threshold, with the kernel prescribed off the diagonal only. -/
+theorem inv_le_rootCriticalIntensity_hierarchical_of_ne (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0)
+    (C r : ℝ≥0) (hJ : ∀ x y, x ≠ y → J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ))
+    (hr : (L : ℝ≥0) ^ d * r * 2 ≤ 1) (x : (ℕ →₀ (Fin d → ZMod L))) :
+    ((2 * C : ℝ≥0) : ℝ≥0∞)⁻¹ ≤ rootCriticalIntensity J x := by
+  obtain ⟨J', hJ'⟩ := exists_hierarchical_kernel (d := d) (L := L) C r
+  have hJJ' : ∀ x y, x ≠ y → J s(x, y) = J' s(x, y) := fun x y h => by rw [hJ x y h, hJ' x y]
+  rw [rootCriticalIntensity_eq_of_offDiagonal hJJ']
+  exact inv_le_rootCriticalIntensity_hierarchical J' C r hJ' hr x
 
 end PercLib.Models
 

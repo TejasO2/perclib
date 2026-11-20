@@ -62,6 +62,36 @@ theorem rowSum_le_tsum_of_translationInvariant (J : Sym2 G → ℝ≥0) (k : G �
   rw [rowSum_eq_of_translationInvariant J k hJ v]
   exact ENNReal.tsum_le_tsum fun z => by split_ifs <;> simp
 
+/-- A kernel identity `J(x,y) = k(y - x)` on distinct pairs forces `k` to be even. -/
+theorem neg_eq_of_translationInvariant_of_ne (J : Sym2 G → ℝ≥0) (k : G → ℝ≥0)
+    (hJ : ∀ x y, x ≠ y → J s(x,y) = k (y - x)) (z : G) : k (-z) = k z := by
+  by_cases hz : z = 0
+  · rw [hz, neg_zero]
+  · have h1 := hJ 0 z (Ne.symm hz)
+    have h2 := hJ z 0 hz
+    rw [Sym2.eq_swap, h2, sub_zero, zero_sub] at h1
+    exact h1
+
+/-- The off-diagonal row identity when the kernel identity is assumed on distinct pairs only
+(the diagonal is arbitrary). -/
+theorem rowSum_eq_of_translationInvariant_of_ne (J : Sym2 G → ℝ≥0) (k : G → ℝ≥0)
+    (hJ : ∀ x y, x ≠ y → J s(x,y) = k (y - x)) (v : G) :
+    (∑' w, if w = v then 0 else (J s(v,w) : ℝ≥0∞)) =
+      ∑' z, if z = 0 then 0 else (k z : ℝ≥0∞) := by
+  obtain ⟨J', hJ'⟩ := exists_sym2_kernel k (neg_eq_of_translationInvariant_of_ne J k hJ)
+  rw [← rowSum_eq_of_translationInvariant J' k hJ' v]
+  refine tsum_congr fun w => ?_
+  split_ifs with h
+  · rfl
+  · rw [hJ v w (Ne.symm h), hJ' v w]
+
+/-- The off-diagonal row bound when the kernel identity is assumed on distinct pairs only. -/
+theorem rowSum_le_tsum_of_translationInvariant_of_ne (J : Sym2 G → ℝ≥0) (k : G → ℝ≥0)
+    (hJ : ∀ x y, x ≠ y → J s(x,y) = k (y - x)) (v : G) :
+    (∑' w, if w = v then 0 else (J s(v,w) : ℝ≥0∞)) ≤ ∑' z, (k z : ℝ≥0∞) := by
+  rw [rowSum_eq_of_translationInvariant_of_ne J k hJ v]
+  exact ENNReal.tsum_le_tsum fun z => by split_ifs <;> simp
+
 /-- **P-5 for translation-invariant profiles.** If `q s(x,y) = p (y - x)` and the
 off-diagonal mass of `p` is at most `m < 1`, then `chi q x ≤ (1 - m)⁻¹`. -/
 theorem chi_le_of_translationInvariant [Countable G] (q : Sym2 G → unitInterval)

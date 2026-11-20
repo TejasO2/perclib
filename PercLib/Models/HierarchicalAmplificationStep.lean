@@ -15,6 +15,7 @@ public import PercLib.Probability.DeterminedIndependence
 public import PercLib.Percolation.Bond.SusceptibilityDerivative
 public import PercLib.Probability.DeterministicModification
 public import PercLib.Probability.OpenEventHarris
+public import PercLib.Models.HierarchicalCutoff
 
 /-!
 # Hierarchical block-quantile amplification: the assembly (Q-135, part 2)
@@ -816,6 +817,58 @@ example : ∃ J : Sym2 (ℕ →₀ (Fin 3 → ZMod 2)) → ℝ≥0,
     linarith
   exact tightnessScale_hierarchical_amplification (le_refl 2) one_pos one_pos J hJt hJl
     amplification_scale_example_exp amplification_scale_example_pow (by norm_num) 0 hn
+
+open Classical in
+/-- **Hierarchical block-quantile amplification, translation invariance off the diagonal.**
+The statement of `tightnessScale_hierarchical_amplification` with translation invariance assumed
+for distinct pairs only (the diagonal is arbitrary, D-2). -/
+theorem tightnessScale_hierarchical_amplification_of_ne [NeZero L] (hL : 2 ≤ L) {α c : ℝ}
+    (hc : 0 < c) (hα : 0 < α) (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0)
+    (hJt : ∀ x u v, u ≠ v → J s(u + x, v + x) = J s(u, v))
+    (hJ : ∀ u v, u ≠ v →
+      c * (L : ℝ) ^ (-(((d : ℝ) + α) * (((v - u).support.sup Nat.succ : ℕ) : ℝ))) ≤ J s(u, v))
+    {ℓ : ℕ} (hexp : Real.exp (-((L : ℝ) ^ (d * ℓ) / (8 * Real.exp 1))) ≤ 1 / 4)
+    (hℓ : 16 * Real.exp 1 ^ 2 ≤ (L : ℝ) ^ (((d : ℝ) - α) * ℓ))
+    {β : ℝ≥0} (hβ : 0 < β) (n : ℕ)
+    (hn : (4 / c) * (L : ℝ) ^ (((d : ℝ) + α) * ℓ) * Real.log (2 * ((L : ℝ) ^ (d * ℓ)) ^ 2) /
+        β * (L : ℝ) ^ (((d : ℝ) + α) * n) ≤
+      (tightnessScale (fun e => if e ∈ {z : (ℕ →₀ (Fin d → ZMod L)) |
+        z.support.sup Nat.succ ≤ n}.sym2 then intensityProfile J β e else 0)
+        (finite_level_ball n).toFinset : ℝ) ^ 2) :
+    (4 / c) * (L : ℝ) ^ (((d : ℝ) + α) * ℓ) * Real.log (2 * ((L : ℝ) ^ (d * ℓ)) ^ 2) / β *
+        (L : ℝ) ^ (((d : ℝ) + α) * ((n : ℝ) + ℓ)) ≤
+      (tightnessScale (fun e => if e ∈ {z : (ℕ →₀ (Fin d → ZMod L)) |
+        z.support.sup Nat.succ ≤ n + ℓ}.sym2 then intensityProfile J β e else 0)
+        (finite_level_ball (n + ℓ)).toFinset : ℝ) ^ 2 := by
+  set J' : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0 := fun e => if e.IsDiag then 0 else J e with hJ'def
+  have hJJ' : ∀ u v, u ≠ v → J s(u, v) = J' s(u, v) := fun u v h => by simp [hJ'def, h]
+  have hJt' : ∀ x u v, J' s(u + x, v + x) = J' s(u, v) := by
+    intro x u v
+    by_cases h : u = v
+    · subst h
+      simp [hJ'def]
+    · have h' : u + x ≠ v + x := fun e => h (add_right_cancel e)
+      rw [← hJJ' _ _ h', ← hJJ' _ _ h, hJt x u v h]
+  have hJ'' : ∀ u v, u ≠ v →
+      c * (L : ℝ) ^ (-(((d : ℝ) + α) * (((v - u).support.sup Nat.succ : ℕ) : ℝ))) ≤
+        J' s(u, v) := fun u v h => hJJ' u v h ▸ hJ u v h
+  have hts : ∀ (S : Set (Sym2 (ℕ →₀ (Fin d → ZMod L)))) (Λ : Finset (ℕ →₀ (Fin d → ZMod L))),
+      tightnessScale (fun e => if e ∈ S then intensityProfile J β e else 0) Λ =
+        tightnessScale (fun e => if e ∈ S then intensityProfile J' β e else 0) Λ := by
+    intro S Λ
+    unfold tightnessScale
+    congr 1
+    ext m
+    simp only [Set.mem_ofPred_eq]
+    rw [law_event_eq_of_offDiagonal _ _ ?_ (measurableSet_le_maxClusterIntersection Λ m) ?_]
+    · intro e he
+      simp only [intensityProfile_eq_of_offDiagonal hJJ' β e he]
+    · intro ω ω' h
+      simp only [Set.mem_ofPred_eq, maxClusterIntersection, cluster,
+        openGraph_eq_of_sdiff_diagSet_eq h]
+  rw [hts] at hn ⊢
+  exact tightnessScale_hierarchical_amplification hL hc hα J' hJt' hJ'' hexp hℓ hβ n hn
+
 
 end Hierarchical
 

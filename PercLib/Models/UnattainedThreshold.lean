@@ -370,6 +370,17 @@ theorem encard_positive_neighbours_le_three (v : ℕ × List (Fin 2)) :
 
 end Model
 
+/-- **The unattained threshold.** Some countable intensity model has global threshold `1` while
+every rooted threshold is strictly greater than `1`. -/
+theorem exists_globalCriticalIntensity_eq_one_lt_rootCriticalIntensity :
+    ∃ J : Sym2 (ℕ × List (Fin 2)) → ℝ≥0,
+      globalCriticalIntensity J = 1 ∧ ∀ v, 1 < rootCriticalIntensity J v := by
+  obtain ⟨J, hJ⟩ := exists_kernel
+  refine ⟨J, globalCriticalIntensity_eq_one hJ, fun v => ?_⟩
+  rw [rootCriticalIntensity_eq hJ v, ENNReal.one_lt_ofReal]
+  have : 0 < 1 / ((v.1 : ℝ) + 1) := by positivity
+  linarith
+
 /-! ### Non-vacuity (D-5) -/
 
 /-- The model exists, and at `k = 1` (the tree with index `0`) the root threshold is `2`. -/
