@@ -59,6 +59,7 @@ public import PercLib.Models.Hierarchical.Defs
 public import PercLib.Models.Hierarchical.Witness
 public import PercLib.Models.HierarchicalAmplification
 public import PercLib.Models.HierarchicalAmplificationStep
+public import PercLib.Models.HierarchicalAveragedToPointwise
 public import PercLib.Models.HierarchicalBallSums
 public import PercLib.Models.HierarchicalCutoff
 public import PercLib.Models.HierarchicalGeometry
