@@ -258,8 +258,8 @@ example : (cluster (∅ : Config Bool) false).encard = 1 := by
 
 The row sum of an edge weight `a : Sym2 V → ℝ≥0∞` at `v` sums `a s(v, w)` over the
 vertices `w ≠ v`. The diagonal is excluded because a profile `q` is arbitrary on the
-diagonal (D-2). The named map `unitInterval.toENNReal` turns a profile into an edge
-weight. -/
+diagonal: the open graph discards loops. The named map `unitInterval.toENNReal` turns a
+profile into an edge weight. -/
 
 section RowSum
 
@@ -317,7 +317,7 @@ theorem _root_.unitInterval.toENNReal_mono : Monotone unitInterval.toENNReal :=
 
 /-- The row sum of an edge weight `a` at `v`: the sum of `a s(v, w)` over `w ≠ v`.
 
-The diagonal term is excluded (D-2): a profile `q : Sym2 V → unitInterval` is arbitrary
+The diagonal term is excluded: a profile `q : Sym2 V → unitInterval` is arbitrary
 on the diagonal, because the open graph discards loops, so `a s(v, v)` never enters. For
 a profile the weight is `fun e => unitInterval.toENNReal (q e)` (`rowSum_toENNReal`). -/
 def rowSum (a : Sym2 V → ℝ≥0∞) (v : V) : ℝ≥0∞ := by
@@ -360,6 +360,10 @@ theorem rowSum_mono {a b : Sym2 V → ℝ≥0∞} (h : a ≤ b) (v : V) :
 theorem rowSum_zero (v : V) : rowSum (0 : Sym2 V → ℝ≥0∞) v = 0 := by
   simp [rowSum_eq_tsum_ne]
 
+@[simp]
+theorem rowSum_fun_zero (v : V) : rowSum (fun _ : Sym2 V => (0 : ℝ≥0∞)) v = 0 :=
+  rowSum_zero v
+
 theorem rowSum_add (a b : Sym2 V → ℝ≥0∞) (v : V) :
     rowSum (a + b) v = rowSum a v + rowSum b v := by
   simp only [rowSum_eq_tsum_ne, Pi.add_apply]
@@ -378,7 +382,7 @@ theorem rowSum_comp_equiv {W : Type*} (σ : V ≃ W) (a : Sym2 W → ℝ≥0∞)
   refine tsum_congr fun w => ?_
   simp [σ.injective.eq_iff]
 
-/-- The row sum of a profile, in the explicit spelling of D-2. -/
+/-- The row sum of a profile, unfolded to the explicit `∑'` spelling. -/
 theorem rowSum_toENNReal [DecidableEq V] (q : Sym2 V → unitInterval) (v : V) :
     rowSum (fun e => unitInterval.toENNReal (q e)) v =
       ∑' w, if w = v then 0 else (unitInterval.toNNReal (q s(v, w)) : ℝ≥0∞) :=
