@@ -260,6 +260,7 @@ public import PercLib.Probability.MassTransport
 public import PercLib.Probability.MassTransportTuple
 public import PercLib.Probability.MixedSpatialMoments
 public import PercLib.Probability.Mixing
+public import PercLib.Probability.MomentConvergence
 public import PercLib.Probability.MomentDeterminacy
 public import PercLib.Probability.MomentRatioFromTail
 public import PercLib.Probability.OffspringTransform
