@@ -1,7 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
 Statements (D-16) written on 2026-11-20 for package hier-stmt: Theorem 1.1 and Corollary 1.2
-of T. Hutchcroft, *Critical long-range percolation on the hierarchical lattice*,
+of T. Hutchcroft, *The critical two-point function for long-range percolation on the
+hierarchical lattice*,
 arXiv:2103.17013v1, on the bond interface of D-2. New statements; no upstream code is copied
 and no new notion is introduced (lattice, level, balls, `intensityProfile`,
 `rootCriticalIntensity`, `law`, `tau` and `openGraph` are the library's).
@@ -16,12 +17,17 @@ public import Mathlib.Analysis.SpecialFunctions.Pow.Real
 
 Conventions, as in `PercLib.Models.Hierarchical` and `PercLib.Models.HierarchicalGeometry`:
 the lattice is `V = ℕ →₀ (Fin d → ZMod L)`, the level of `z` is `h z = z.support.sup Nat.succ`
-(so the source's norm is `‖z‖ = L ^ h z`, and `⟨z⟩ = max(1, ‖z‖) = L ^ h z` since `h 0 = 0`),
+(so the source's norm is `‖z‖ = L ^ h z` for `z ≠ 0` and `‖0‖ = 0`, hence
+`⟨z⟩ = max(1, ‖z‖) = L ^ h z` for every `z`),
 the ball of level `n` is `Λ_n = {z | h z ≤ n}` (it has `L ^ (d n)` points, `card_ball`) and the
 shell `Λ_n \ Λ_{n-1}` is `{z | h z = n}`. A kernel is `J : Sym2 V → ℝ≥0`, so it is symmetric by
 construction; the source's `J(x - y)` is a function on the group, which here is translation
 invariance `J s(u + x, v + x) = J s(u, v)`. Bond probabilities at intensity `β` are
-`intensityProfile J β`, and `β_c = rootCriticalIntensity J 0 : ℝ≥0∞`. Since
+`intensityProfile J β`, and `β_c = rootCriticalIntensity J 0 : ℝ≥0∞`. The source's β_c is
+the global threshold (positive probability of some infinite cluster, p. 3). For
+translation-invariant `J` it equals the root threshold by
+`rootCriticalIntensity_eq_globalCriticalIntensity_of_translationInvariant`
+(`PercLib.Models.LongRange.FiniteSusceptibility`). Since
 `intensityProfile` takes a finite intensity, the critical law is evaluated at
 `β_c.toNNReal`; both statements also assert `β_c < ⊤`, so this is the law at `β_c` itself.
 Joining `x` and `y` inside a set `S` is `((openGraph ω).induce S).Reachable ⟨x, hx⟩ ⟨y, hy⟩`.
@@ -50,7 +56,9 @@ namespace PercLib.Models
   ≤ |Λ_n|^{-1} ∑_{h x ≤ n} τ_{β_c}(0,x) ≤ A L^{-(d-α)n}`,
 with `|Λ_n| = L^{dn}`. The shell sum is normalised by the volume of the whole ball, as in the
 source. The law is `law (intensityProfile J β_c.toNNReal)`; this is the law at `β_c` because
-`β_c < ⊤` is part of the conclusion. -/
+`β_c < ⊤` is part of the conclusion. The conjunct `β_c < ⊤` follows from the bounds themselves
+(if `β_c = ⊤` the law is the `β = 0` law and the lower bound fails), so including it does not
+strengthen the source. -/
 def HierarchicalTwoPointAveraged (d L : ℕ) (α c C : ℝ) : Prop :=
   1 ≤ d → 2 ≤ L → 0 < α → α < d → 0 < c → c ≤ C →
   ∃ a A : ℝ, 0 < a ∧ 0 < A ∧
@@ -105,7 +113,10 @@ for `u ≠ v`, the critical intensity `β_c = rootCriticalIntensity J 0` satisfi
 Here `⟨x-y⟩ = L^{h(y-x)}` (`h(y-x) = h(x-y)`, and `⟨0⟩ = 1`), and
 `Λ(x,y) = {z | h(z-x) ≤ h(y-x)}` is the smallest hierarchical ball containing `x` and `y`.
 The law is `law (intensityProfile J β_c.toNNReal)`; this is the law at `β_c` because
-`β_c < ⊤` is part of the conclusion. -/
+`β_c < ⊤` is part of the conclusion. The conjuncts `0 < β_c` (as in W498) and `β_c < ⊤` follow
+from the bounds themselves (if `β_c = 0` or `β_c = ⊤` the law is the `β = 0` law, under which
+`τ(x,y) = 0` for `x ≠ y`, contradicting the lower bound), so including them does not strengthen
+the source. -/
 @[tag "W498"]
 def HierarchicalTwoPointRadial (d L : ℕ) (α c C : ℝ) : Prop :=
   1 ≤ d → 2 ≤ L → 0 < α → α < d → 0 < c → c ≤ C →
