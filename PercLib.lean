@@ -23,6 +23,11 @@ public import PercLib.Analysis.RegularVariation.LogScaling
 public import PercLib.Analysis.RegularVariation.PotterODE
 public import PercLib.Analysis.RegularVariation.UniformConvergence
 public import PercLib.Analysis.RiccatiComparison
+public import PercLib.Analysis.Tags.CriticalExponents
+public import PercLib.Analysis.Tags.IntegratedSusceptibility
+public import PercLib.Analysis.Tags.MarginalODE
+public import PercLib.Analysis.Tags.MesoscopicTailTransfer
+public import PercLib.Analysis.Tags.SpatialCutoffMoments
 public import PercLib.Basic
 public import PercLib.Combinatorics.DoubleFactorialConvolution
 public import PercLib.Combinatorics.ForestBranching
@@ -66,6 +71,12 @@ public import PercLib.Models.LongRange.PowerLaw
 public import PercLib.Models.LongRange.QuantileMoments
 public import PercLib.Models.LongRange.RootIndependence
 public import PercLib.Models.LongRange.SoftCutoff
+public import PercLib.Models.LongRange.Tags.BranchingRandomWalk
+public import PercLib.Models.LongRange.Tags.DisplacementKernels
+public import PercLib.Models.LongRange.Tags.IntegratedSusceptibility
+public import PercLib.Models.LongRange.Tags.Sharpness
+public import PercLib.Models.LongRange.Tags.SizeBiasedLaws
+public import PercLib.Models.LongRange.Tags.Susceptibility
 public import PercLib.Models.NonSummable
 public import PercLib.Models.NormalizedSmallIntensity
 public import PercLib.Models.NormalizedSmallIntensityLine
