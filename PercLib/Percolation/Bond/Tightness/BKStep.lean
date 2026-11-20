@@ -6,6 +6,7 @@ No source text or code is copied.
 -/
 module
 
+public import PercLib.Meta.Tag
 public import PercLib.Percolation.Bond.Tightness.FromBK
 public import PercLib.Probability.CountableBK
 public import PercLib.Combinatorics.TreeSplitting
@@ -230,6 +231,7 @@ theorem mem_foldl_of_three_pow_le_clusterIntersection (Λ : Finset V) (u : V) {l
 
 /-- **The BK step** (Hutchcroft, arXiv:2008.11197v2, Theorem 2.3, reading `k ≥ 1` of
 issue 52) for every countable vertex type and every profile. -/
+@[tag "JGZB"]
 theorem tightnessBK (V : Type*) [Countable V] : TightnessBK V := by
   intro q Λ hΛ l hl k hk
   set Amax : Set (Config V) := {ω | l ≤ (maxClusterIntersection Λ ω : ℝ)} with hAmax
@@ -260,6 +262,7 @@ theorem tightnessBK (V : Type*) [Countable V] : TightnessBK V := by
 
 /-- **Universal tightness** (Hutchcroft, arXiv:2008.11197v2, Theorem 2.2) for every
 countable vertex type and every profile. -/
+@[tag "C5Q9"]
 theorem universalTightness (V : Type*) [Countable V] : UniversalTightness V :=
   universalTightness_of_tightnessBK (tightnessBK V)
 
