@@ -39,7 +39,7 @@ theorem tsum_mul_le_of_doubling {G : Type*} [AddCommGroup G] (ρ : G → ℝ≥0
     · subst z; simp [hk0]
     have htriangle : ρ (y-x) ≤ ρ (z-x) + ρ (y-z) := by
       convert htri (z-x) (y-z) using 1
-      abel
+      abel_nf
     by_cases h : ρ (y-x) ≤ 2 * ρ (z-x)
     · calc
         _ ≤ (D * k (y-x)) * k (y-z) := by gcongr; exact hD _ _ (sub_ne_zero.mpr hz) hw h

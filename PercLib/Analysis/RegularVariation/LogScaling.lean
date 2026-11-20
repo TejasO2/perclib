@@ -269,7 +269,7 @@ theorem regularlyVarying_exp_integral_of_tendsto_zero
     ring
   have hpow : (l : ℝ) ^ a = Real.exp (a * Real.log l) := by
     rw [Real.rpow_def_of_pos hl]
-    ring
+    ring_nf
   calc (l : ℝ) ^ a * Real.exp (-(a * ∫ s in x..l * x, δ s / s))
       = Real.exp (a * Real.log l) * Real.exp (-(a * ∫ s in x..l * x, δ s / s)) := by
         rw [hpow]

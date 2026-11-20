@@ -602,7 +602,7 @@ theorem potter_core {f : ℝ → ℝ} {α : ℝ} (hmeas : Measurable f)
         rw [hwdef]; ring
       rw [← Real.exp_log (div_pos hfxa hfya), h3]
     rw [h1, h2, Real.exp_add, Real.rpow_def_of_pos hxypos, hxylog]
-    ring
+    ring_nf
   have hexp_le : Real.exp w ≤ (x / y) ^ ε' * Real.exp ε' := by
     have h1 : w ≤ (T + 1) * ε' := (abs_le.1 hwabs).2
     have h2 : Real.exp w ≤ Real.exp ((T + 1) * ε') := Real.exp_le_exp.2 h1
