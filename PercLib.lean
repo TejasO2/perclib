@@ -4,9 +4,11 @@ public import PercLib.Analysis.AbelianSums
 public import PercLib.Analysis.DiscreteConvolution
 public import PercLib.Analysis.DominatedDerivative
 public import PercLib.Analysis.Elementary
+public import PercLib.Analysis.FirstMomentBootstrap
 public import PercLib.Analysis.GoodScales
 public import PercLib.Analysis.GyrationODE
 public import PercLib.Analysis.HadamardPowers
+public import PercLib.Analysis.HardyMajorant
 public import PercLib.Analysis.HomogeneousBallIntegrals
 public import PercLib.Analysis.LaplaceUniqueness
 public import PercLib.Analysis.LinearODEAsymptotics
