@@ -38,8 +38,9 @@ public import PercLib.Analysis.Tags.MarginalODETail
 public import PercLib.Analysis.Tags.MesoscopicTailTransfer
 public import PercLib.Analysis.Tags.SpatialCutoffMoments
 public import PercLib.Analysis.Tauberian.Laplace
-public import PercLib.Analysis.VolumeTail.SizeBiasMGF
 public import PercLib.Analysis.Tauberian.Converse
+public import PercLib.Analysis.VolumeTail.ChiSquareConstants
+public import PercLib.Analysis.VolumeTail.SizeBiasMGF
 public import PercLib.Basic
 public import PercLib.Combinatorics.DoubleFactorialConvolution
 public import PercLib.Combinatorics.ForestBranching
