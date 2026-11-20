@@ -186,6 +186,7 @@ public import PercLib.Probability.BKEndpoints
 public import PercLib.Probability.BKLowDensity
 public import PercLib.Probability.BernoulliDivergence
 public import PercLib.Probability.Characterization
+public import PercLib.Probability.ChiSquareDeterminacy
 public import PercLib.Probability.Concentration
 public import PercLib.Probability.Coordinate
 public import PercLib.Probability.CountableBK
