@@ -78,7 +78,7 @@ theorem level_ball_eq_translate (x : ℕ →₀ A) (n : ℕ) :
       (fun z => x + z) '' {z | z.support.sup Nat.succ ≤ n} := by
   ext y
   constructor
-  · intro h; exact ⟨y - x, h, by abel⟩
+  · intro h; exact ⟨y - x, h, by abel_nf⟩
   · rintro ⟨z, hz, rfl⟩; simpa using hz
 
 /-- Intersecting balls of the same level coincide. -/
