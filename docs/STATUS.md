@@ -1,10 +1,14 @@
 # Status
 
-Kept by LEAD under D-34. Last updated 20 November 2026, end of the first LEAD session.
+Kept by LEAD under D-34. Last updated 20 November 2026, second LEAD resumption (prover wave 1 briefed).
 A new LEAD resumes from this file, [COORDINATION.md](COORDINATION.md) and D-34 in
 [DECISIONS.md](DECISIONS.md).
 
 ## Gate
+
+**Latest: green on `eb09ac5`** (`scripts/gate.sh`; build, axiom audit, closure, scan,
+tests, extract; change classified proof-only against `4c72765`). Kernel replay last run on
+the baseline below.
 
 **Baseline green** on `4c72765` (integration branch `claude/zen-lovelace-rvlcw2`;
 its Lean tree is identical to the snapshot `f849aa9`). Local verification, not CI:
@@ -57,34 +61,63 @@ in this repository yet. The check has not run.
 
 ## Packages
 
-Nothing is in progress: this session had no means to start worker agents. Every package
-below is startable; briefs are kept by ARCHITECT for this session. Package ids are the
-`work/<id>` branch names.
+Workers are started by ARCHITECT from briefs that LEAD writes to
+`/home/user/reports/briefs/<id>.md` (container-local); each worker reads
+`/home/user/reports/PREAMBLE.md` and reports to `/home/user/reports/<id>.md`. Worktrees
+are `/home/user/wt/<id>` on branch `work/<id>` of the repository named in the brief.
+Package ids from the first session (`pub-*`, `link-*`, scouts) are as listed in the
+previous version of this file.
 
-| Id | Kind | Repository | What | Depends on |
-|---|---|---|---|---|
-| `pub-scan` | worker | lrp | Overlap scan script (12+ shared words after normalising TeX) of every wiki file against the book draft and its notes; run it; commit the script and hit list in lrp | none |
-| `pub-audit` | auditor | lrp | Classify every hit and every notes-facing page as fine, rewrite or withhold; check private links, hashes, emails, old issue links | `pub-scan` |
-| `pub-move` | wiki | both | Apply rewrites in lrp, copy what passed to `perclib/wiki/` with an all-rights-reserved notice, move `build_manifest.py`, `test_manifest.py`, `MANIFEST.md`; local manifest receipt for the wiki build | `pub-audit`, LEAD sign-off |
-| `link-<area>` (6) | scout | perclib (read), lrp wiki (read) | Propose tag-to-declaration matches area by area from the reading maps | none |
-| `audit-link-<area>` (6) | auditor | — | Check each proposed match statement against statement | matching scout |
-| `attach-<area>` | LEAD | perclib | Add `@[tag]` to audited matches; gate; rebuild manifest and frontier | matching audit |
-| `hygiene-info` | prover | perclib | Replace the four `Try this` calls by the suggested tactic | none |
-| `salvage-scan` | scout | lrp (read) | List unmerged `work/*` branches on the private remote (105 refs not ancestors of `main`) with compiled Lean worth porting | none |
-| `d33-map` | scout | lrp (read) | Map the D-33 source (private remote `refs/pull/488/head`, `d382e4c`, 281 files, about 92K lines) against what is in `PercLib/Models/LongRange`; list portable files in dependency order | none |
-| `hier-map` | scout | perclib, lrp wiki | State of the hierarchical two-point theorem: tagged targets, `Input`s, what remains | none |
+**Merged**
+- `hygiene-info` (`99f189f`, merged `eb09ac5`): four `Try this` messages removed.
+  Proof-only against `4c72765`; gate passed on `eb09ac5`.
+- `pub-scan` (lrp `dc23231`, merged lrp `5a2943b`): `scripts/draft_overlap.py` and
+  `wiki-overlap-hits.json` in the private repository.
 
-Areas for `link-*`: `bond-core` (`Percolation/Bond/*.lean`, top level), `bond-sub`
-(`Percolation/Bond/*/`), `probability` (`Probability/`), `models` (`Models/*.lean`,
-`Models/Site`), `longrange` (`Models/LongRange`), `analysis` (`Analysis/`,
-`Combinatorics/`).
+**Finished, reports read**: `salvage-scan`, `hier-map` (the hierarchical programme as
+packages H0–H9), `link-longrange`, `link-analysis` (awaiting their audits).
+
+**Running (wave 1)**: `d33-map`, `link-bond-core`, `link-bond-sub`, `link-probability`,
+`link-models`, `pub-audit`, `audit-link-longrange`, `audit-link-analysis`.
+
+**Prover wave 1, briefs ready** (disjoint new files, proof-only):
+
+| Id | Files | Target |
+|---|---|---|
+| `hier-kernel` (H1) | `Models/HierarchicalPowerKernel.lean` | power-law kernel row bounds, `β_c ≥ (L^α-1)/(C(1-L^{-d}))`, transitivity hypotheses |
+| `hier-translate` (H3) | `Models/HierarchicalTranslation.lean` | non-radial R11/R12 and the Prop 2.10 reduction |
+| `hier-sibling` (H6) | `Models/HierarchicalSibling.lean`, `Percolation/Bond/CrossEdge.lean` | Lemma 2.8 (655W recursion); critical path |
+| `salvage-analysis` | `Analysis/LaplaceUniqueness.lean`, `Probability/ChiSquareDeterminacy.lean`, `Analysis/RiccatiBootstrap.lean` | rebase three private branches (Q-188, Q-154, Q-149) |
+
+**Startable next, brief ready**: `hier-quantile-finite` (H2,
+`Percolation/Bond/Tightness/RestrictQuantile.lean`).
+
+**Queued** (hierarchical dependency order from `hier-map`): H0 `hier-stmt` (interface:
+`Prop` statements of Theorem 1.1 and W498 in `Models/Hierarchical/Defs.lean`, needs an
+audit and a new wiki tag for Theorem 1.1); H4 `hier-runaway` after H1; H5
+`hier-endpoint` after H1, H2, H4; H7 after H5, H6; H8 Theorem 1.1 after H0, H3, H5–H7;
+H9 W498 after H8. Then salvage tier 2 (Q-211, Q-195, Q-194, restated for the
+`Seminorm` kernel API), `attach-<area>` after each link audit, and `pub-move` after
+`pub-audit`.
+
+Concurrency: at most 4 provers building single modules; no full build or kernel
+replay while they build. Merges are batched and gated by LEAD.
 
 ## For ARCHITECT
 
-Nothing that blocks work. One note: the session that ran as LEAD had no tool to start
-agents, so step 1 was done directly and the wave plan returned to ARCHITECT.
+Nothing that meets the D-34 escalation test in prover wave 1 (all four packages add
+theorems only). Coming up, LEAD's decision unless ARCHITECT objects: the salvage branches
+Q-81 (Galton–Watson definitions) and Q-10 (uniqueness definitions) add new definitions;
+LEAD will take them only with a fresh audit and only if no existing notion covers them.
 
 ## For Tom
 
-Nothing new from this session. The 194 provisional errata entries in the wiki await his
-confirmation as before (D-30).
+- The 194 provisional errata entries in the wiki await his confirmation (D-30).
+- Issue-52 reading of universal tightness (`k ≥ 1` where the source prints `k ≥ 0`, false at
+  `k = 0`): still his ruling; the hierarchical programme uses only `k ≥ 1`.
+- arXiv 2103.17013v1 Prop. 2.12(ii) states `E_{β_c}|K_n| ≥ L^{αn}` with constant 1; the
+  flux argument gives the factor `(L^α-1)/(β_c C (1-L^{-d}))`. Already a provisional
+  erratum; the Lean target keeps the factor.
+- The wiki remark under W498 that radiality matters for the pointwise bound looks
+  misleading (the wiki's own 7YNX argument does not use it); to be reworded when the
+  article is next touched.
