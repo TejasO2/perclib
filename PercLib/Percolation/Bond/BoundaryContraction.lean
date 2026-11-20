@@ -358,6 +358,7 @@ theorem law_reach_not_localConn_le_firstExit [Countable V] (q : Sym2 V → unitI
 finiteness assumed,
 `P(u ↔_A B) ≤ ∑_{x ∈ S} ∑'_{y ∈ A \ S} τ_S(u,x) q(x,y) P(y ↔_A B)`.
 Terms with `x ∉ S` or `y ∉ A` vanish because the events require membership. -/
+@[tag "USAC"]
 theorem law_reach_le_firstExit [Countable V] (q : Sym2 V → unitInterval) {S A B : Set V}
     {u : V} (hu : u ∈ S) (hB : B ⊆ A \ S) :
     law q {ω | ∃ b ∈ B, ∃ hu : u ∈ A, ∃ hb : b ∈ A,

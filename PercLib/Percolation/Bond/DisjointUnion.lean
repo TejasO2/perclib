@@ -40,6 +40,7 @@ variable {V W : Type*}
 /-- **Clusters inside a closed part.** If `f` is injective and no open pair joins its range to
 the outside, the cluster of `f a` is the image of the cluster of `a` for the pulled-back
 configuration. -/
+@[tag "7CR8"]
 theorem cluster_image_of_closed (ω : Config V) {f : W → V} (hf : Function.Injective f)
     (hclosed : ∀ a z, z ∉ range f → s(f a, z) ∉ ω) (a : W) :
     cluster ω (f a) = f '' cluster (Sym2.map f ⁻¹' ω) a := by
