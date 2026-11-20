@@ -62,6 +62,13 @@ theorem eq_preimage_restrict_of_determined {P : Set ι} {A : Set (Set ι)}
   · rintro ⟨⟨hP, hω⟩, -⟩
     exact ⟨hω, hP⟩
 
+/-- A measurable event determined by the coordinates in `P` is the preimage, under
+restriction to `P`, of a measurable event on `P`. -/
+theorem exists_measurableSet_eq_preimage_of_determined {P : Set ι} {A : Set (Set ι)}
+    (hA : MeasurableSet A) (hAP : ∀ ω ω', ω ∩ P = ω' ∩ P → (ω ∈ A ↔ ω' ∈ A)) :
+    ∃ A_P : Set (Set P), MeasurableSet A_P ∧ A = {ω | {i : P | (i : ι) ∈ ω} ∈ A_P} :=
+  ⟨_, hA.preimage (measurable_image_val P), eq_preimage_restrict_of_determined hAP⟩
+
 /-- **Independence of determined events.** Measurable events determined by disjoint sets of
 coordinates are independent. -/
 theorem prodBernoulli_inter_of_determined (p : ι → unitInterval) {P Q : Set ι}
@@ -118,6 +125,16 @@ theorem prodBernoulli_biInter_of_determined (p : ι → unitInterval) {κ : Type
     rw [Set.disjoint_iUnion₂_right]
     intro k hk
     exact hP (by simp) (by simp [hk]) (fun h => has (h ▸ hk))
+
+/-- The same for a family indexed by `Fin m`. -/
+theorem prodBernoulli_iInter_fin_of_determined (p : ι → unitInterval) {m : ℕ}
+    {P : Fin m → Set ι} (hP : Pairwise (Function.onFun Disjoint P))
+    {A : Fin m → Set (Set ι)} (hAm : ∀ j, MeasurableSet (A j))
+    (hA : ∀ j, ∀ ω ω', ω ∩ P j = ω' ∩ P j → (ω ∈ A j ↔ ω' ∈ A j)) :
+    prodBernoulli p (⋂ j, A j) = ∏ j, prodBernoulli p (A j) := by
+  have h := prodBernoulli_biInter_of_determined p (Finset.univ : Finset (Fin m))
+    (fun i _ j _ hij => hP hij) (fun k _ => hAm k) hA
+  simpa only [Finset.mem_univ, iInter_true] using h
 
 /-! ### Non-vacuity -/
 

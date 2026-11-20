@@ -65,6 +65,7 @@ theorem disjointOccurrence_restrict_iff (s : Set ι) (A B : Set (Set s)) (ω : S
       hd.preimage _, hf.restrict_preimage s, hh.restrict_preimage s⟩
 
 /-- The event-level identity used to push finite-cylinder BK bounds to the ambient space. -/
+@[tag "VMVX"]
 theorem disjointOccurrence_preimage_restrict (s : Set ι) (A B : Set (Set s)) :
     disjointOccurrence ((fun ξ : Set ι => Subtype.val ⁻¹' ξ) ⁻¹' A)
       ((fun ξ : Set ι => Subtype.val ⁻¹' ξ) ⁻¹' B) =

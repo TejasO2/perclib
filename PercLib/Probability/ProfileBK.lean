@@ -462,6 +462,7 @@ theorem profileSum_bk [Fintype E] {r : E → ℝ} (hr0 : ∀ e, 0 ≤ r e)
 /-- **Finite BK for arbitrary Bernoulli profiles.** For increasing events on a finite
 index type and any profile, including coordinates equal to zero or one,
 `P(A □ B) ≤ P(A) P(B)`. -/
+@[tag "BNY8"]
 theorem finite_bernoulliProfile_bk [Fintype E] (p : E → unitInterval) (A B : Set (Set E))
     (hA : IsUpperSet A) (hB : IsUpperSet B) :
     (prodBernoulli p).real (disjointOccurrence A B) ≤
