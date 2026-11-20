@@ -49,6 +49,8 @@ public import PercLib.Models.FiniteRangeDecay
 public import PercLib.Models.FreeGroupTree
 public import PercLib.Models.HeavySecondMoment
 public import PercLib.Models.Hierarchical
+public import PercLib.Models.Hierarchical.Defs
+public import PercLib.Models.Hierarchical.Witness
 public import PercLib.Models.HierarchicalAmplification
 public import PercLib.Models.HierarchicalAmplificationStep
 public import PercLib.Models.HierarchicalBallSums
