@@ -5,10 +5,15 @@
 #                  forbidden constructs, classifier tests, manifest extraction, D-35 checks,
 #                  and the proof-only/interface classification against the base commit.
 #                  Its check name, `CI / gate`, is the one to require in branch protection
-#                  and the one the auto-merge workflow reads.
-#   kernel-replay  scripts/kernel_replay.sh 6 after a green gate, on every push and on
-#                  pull requests classified `interface` or labelled `interface`.
-#   scripts        every script test (scripts/ci_script_tests.sh).
+#                  and the one the auto-merge workflow reads. The classification is the
+#                  job output `classification` and a line of the step summary, not a
+#                  GitHub label: setting a label needs a token that can write to pull
+#                  requests, which this workflow never has. It is advisory; the
+#                  auto-merge workflow decides on its own from the API.
+#   kernel-replay  scripts/kernel_replay.sh 6 after a green gate, on every push and every
+#                  pull request (ruling 9d); the auto-merge workflow requires it.
+#   scripts        every script test that needs no Lean (scripts/ci_script_tests.sh);
+#                  scripts/test_manifest.py needs `lake` and runs in the gate job instead.
 #   wiki           the wiki build, only once wiki/package.json exists; skips otherwise.
 #
 # Security (D-31): every job has a read-only token and no secrets; the trigger is
@@ -17,11 +22,17 @@
 # from the pull request); no event field that a contributor controls (titles, branch
 # names, bodies) is interpolated into a command, and the commit ids that are used reach
 # scripts through `env:`. Every third-party action is pinned to a commit.
+#
+# Pull-request runs build PercLib from scratch on purpose: they never restore or save
+# `.lake/build` through the GitHub cache, because an earlier commit of the same pull
+# request could have written forged oleans and traces there. Only push runs use that
+# cache. Mathlib still comes from `lake exe cache get` in every run.
 
 name: CI
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches:
       - main
@@ -65,12 +76,16 @@ jobs:
         run: scripts/ci_install_elan.sh
 
       - name: Restore the library build
+        if: github.event_name == 'push'
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .lake/build
           key: lake-build-${{ runner.os }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.sha }}
           restore-keys: |
             lake-build-${{ runner.os }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+
+      - name: Forbidden-construct scan before any build
+        run: python3 scripts/check_forbidden.py PercLib
 
       - name: Fetch dependencies and the mathlib build cache
         run: |
@@ -101,6 +116,9 @@ jobs:
           BASE: ${{ steps.base.outputs.base }}
         run: scripts/gate.sh ${BASE:+"$BASE"} 2>&1 | tee .lake/gate.log
 
+      - name: Manifest integration tests (need lake and the packages)
+        run: python3 scripts/test_manifest.py
+
       - name: Classify the change
         id: classify
         if: always()
@@ -123,7 +141,7 @@ jobs:
           echo "Classification: $classification"
 
       - name: Save the library build
-        if: success()
+        if: success() && github.event_name == 'push'
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .lake/build
@@ -144,12 +162,13 @@ jobs:
 
   kernel-replay:
     needs: gate
-    # Implicitly also requires the gate to have succeeded. The hosted runner has about
-    # 16 GB; kernel_replay.sh 6 replays six modules per process (about 4 GB each batch).
-    if: >-
-      github.event_name == 'push'
-      || needs.gate.outputs.classification == 'interface'
-      || contains(github.event.pull_request.labels.*.name, 'interface')
+    # Runs on every push and every pull request; `needs` also requires the gate to have
+    # succeeded. The auto-merge workflow requires this job to succeed. On a push it
+    # restores the library build the gate saved; on a pull request it restores nothing
+    # and builds the library itself from scratch (only Mathlib comes from the cache), so
+    # it never replays oleans that an earlier commit of the pull request wrote. The
+    # hosted runner has about 16 GB; kernel_replay.sh 6 replays six modules per process
+    # (about 4 GB each batch).
     runs-on: ubuntu-latest
     timeout-minutes: 360
     steps:
@@ -163,6 +182,7 @@ jobs:
         run: scripts/ci_install_elan.sh
 
       - name: Restore the library build saved by the gate
+        if: github.event_name == 'push'
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .lake/build

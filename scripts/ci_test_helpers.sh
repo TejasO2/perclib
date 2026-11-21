@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Tests of the CI helpers ci_base.sh, ci_classify.sh and ci_base_manifest.sh on a
-# throwaway git repository, with a stub `lake` (no Lean needed). Run by
-# scripts/ci_script_tests.sh.
+# throwaway git repository, with a stub `lake` (no Lean needed), and a test that
+# ci_script_tests.sh passes on a PATH without `lake` (as in the `scripts` CI job). Run by
+# scripts/ci_script_tests.sh; CI_TEST_HELPERS_NESTED marks the nested run of that last
+# test, which skips it so that it does not recurse.
 set -euo pipefail
 
 src="$(cd "$(dirname "$0")" && pwd)"
@@ -12,6 +14,24 @@ fails=0
 check() { # NAME EXPECTED ACTUAL
   if [ "$2" == "$3" ]; then echo "ok   $1"; else echo "FAIL $1: expected '$2', got '$3'"; fails=1; fi
 }
+
+# --- ci_script_tests.sh without lake (before the stub lake below joins PATH)
+if [ -z "${CI_TEST_HELPERS_NESTED:-}" ]; then
+  nolake=""
+  IFS=: read -ra dirs <<< "$PATH"
+  for d in "${dirs[@]}"; do
+    [ -n "$d" ] && [ ! -e "$d/lake" ] && nolake="${nolake:+$nolake:}$d"
+  done
+  check "script tests: PATH has no lake" "" "$(PATH="$nolake" command -v lake || true)"
+  set +e
+  PATH="$nolake" CI_TEST_HELPERS_NESTED=1 bash "$src/ci_script_tests.sh" > "$tmp/script-tests.log" 2>&1
+  rc=$?
+  set -e
+  check "script tests pass without lake" 0 "$rc"
+  [ "$rc" -eq 0 ] || tail -20 "$tmp/script-tests.log"
+  check "script tests skip test_manifest.py" 1 \
+    "$(grep -c '^== scripts/test_manifest.py skipped' "$tmp/script-tests.log" || true)"
+fi
 
 repo="$tmp/repo"
 mkdir -p "$repo/scripts" "$repo/PercLib/Area"
