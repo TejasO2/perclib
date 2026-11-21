@@ -95,18 +95,25 @@ jobs:
             || { echo "Malformed head commit or repository name."; exit 1; }
           runs="repos/$REPO/actions/workflows/ci.yml/runs?event=push&branch=$INTEGRATION_BRANCH&head_sha=$HEAD_SHA&per_page=1"
           run_id=""
+          # A failed API call (5xx, rate limit) counts as "not found yet" and is retried
+          # within the same budget of 90 polls; no run id at the end fails the step.
           for _ in $(seq 90); do
-            run_id=$(gh api "$runs" --jq '.workflow_runs[0].id // empty')
+            run_id=$(gh api "$runs" --jq '.workflow_runs[0].id // empty') || run_id=""
             [ -n "$run_id" ] && break
             sleep 10
           done
           [[ $run_id =~ ^[0-9]+$ ]] || { echo "No push run of CI for $HEAD_SHA on $INTEGRATION_BRANCH."; exit 1; }
           echo "Push run: https://github.com/$REPO/actions/runs/$run_id (job $JOB)"
+          # Each poll reads the run status first and the job list second, so a run seen as
+          # completed is judged from a job list fetched after it completed. A failed API
+          # call is retried after a minute; the job's timeout ends the wait (fail closed).
           while :; do
-            gh api "repos/$REPO/actions/runs/$run_id/jobs?filter=latest&per_page=100" > "$RUNNER_TEMP/jobs.json"
+            run_status=$(gh api "repos/$REPO/actions/runs/$run_id" --jq .status) \
+              && gh api "repos/$REPO/actions/runs/$run_id/jobs?filter=latest&per_page=100" > "$RUNNER_TEMP/jobs.json" \
+              || { echo "GitHub API error; retrying in 60 s."; sleep 60; continue; }
             job=$(jq -c --arg j "$JOB" '[.jobs[] | select(.name == $j)][0] // {}' "$RUNNER_TEMP/jobs.json")
             [ "$(jq -r '.status // ""' <<< "$job")" = completed ] && break
-            [ "$(gh api "repos/$REPO/actions/runs/$run_id" --jq .status)" = completed ] \
+            [ "$run_status" = completed ] \
               && { echo "The push run completed without running job $JOB."; exit 1; }
             sleep 60
           done
@@ -251,18 +258,25 @@ jobs:
             || { echo "Malformed head commit or repository name."; exit 1; }
           runs="repos/$REPO/actions/workflows/ci.yml/runs?event=push&branch=$INTEGRATION_BRANCH&head_sha=$HEAD_SHA&per_page=1"
           run_id=""
+          # A failed API call (5xx, rate limit) counts as "not found yet" and is retried
+          # within the same budget of 90 polls; no run id at the end fails the step.
           for _ in $(seq 90); do
-            run_id=$(gh api "$runs" --jq '.workflow_runs[0].id // empty')
+            run_id=$(gh api "$runs" --jq '.workflow_runs[0].id // empty') || run_id=""
             [ -n "$run_id" ] && break
             sleep 10
           done
           [[ $run_id =~ ^[0-9]+$ ]] || { echo "No push run of CI for $HEAD_SHA on $INTEGRATION_BRANCH."; exit 1; }
           echo "Push run: https://github.com/$REPO/actions/runs/$run_id (job $JOB)"
+          # Each poll reads the run status first and the job list second, so a run seen as
+          # completed is judged from a job list fetched after it completed. A failed API
+          # call is retried after a minute; the job's timeout ends the wait (fail closed).
           while :; do
-            gh api "repos/$REPO/actions/runs/$run_id/jobs?filter=latest&per_page=100" > "$RUNNER_TEMP/jobs.json"
+            run_status=$(gh api "repos/$REPO/actions/runs/$run_id" --jq .status) \
+              && gh api "repos/$REPO/actions/runs/$run_id/jobs?filter=latest&per_page=100" > "$RUNNER_TEMP/jobs.json" \
+              || { echo "GitHub API error; retrying in 60 s."; sleep 60; continue; }
             job=$(jq -c --arg j "$JOB" '[.jobs[] | select(.name == $j)][0] // {}' "$RUNNER_TEMP/jobs.json")
             [ "$(jq -r '.status // ""' <<< "$job")" = completed ] && break
-            [ "$(gh api "repos/$REPO/actions/runs/$run_id" --jq .status)" = completed ] \
+            [ "$run_status" = completed ] \
               && { echo "The push run completed without running job $JOB."; exit 1; }
             sleep 60
           done
