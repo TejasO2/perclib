@@ -187,7 +187,7 @@ theorem tsum_catalan_div_four_pow_tail (n : ℕ) :
 
 /-! ### AAZS -/
 
-/-- **AAZS, point mass.** `a_n(1/2) ~ n^{-3/2}/√π`. -/
+/-- **Point mass.** `a_n(1/2) ~ n^{-3/2}/√π`. -/
 theorem catalan_critical_isEquivalent :
     (fun n : ℕ => (catalan n : ℝ) / 4 ^ n * ((1 - 1 / 2) / (1 / 2)) *
         (4 * (1 / 2) * (1 - 1 / 2)) ^ n) ~[atTop]
@@ -195,7 +195,7 @@ theorem catalan_critical_isEquivalent :
   refine IsEquivalent.congr_left catalan_div_four_pow_isEquivalent ?_
   exact Eventually.of_forall fun n => by norm_num
 
-/-- **AAZS, tail.** `∑_{k ≥ n} a_k(1/2) ~ 2 n^{-1/2}/√π`. -/
+/-- **Tail.** `∑_{k ≥ n} a_k(1/2) ~ 2 n^{-1/2}/√π`. -/
 theorem catalan_critical_tail_isEquivalent :
     (fun n : ℕ => ∑' k : ℕ, (catalan (k + n) : ℝ) / 4 ^ (k + n) *
         ((1 - 1 / 2) / (1 / 2)) * (4 * (1 / 2) * (1 - 1 / 2)) ^ (k + n)) ~[atTop]
@@ -221,7 +221,7 @@ theorem catalan_critical_tail_isEquivalent :
 
 /-! ### V5OZ -/
 
-/-- The V5OZ ratio does not depend on `p ∈ (0,1)`. -/
+/-- The ratio of the uniform asymptotics does not depend on `p ∈ (0,1)`. -/
 theorem catalan_ratio_eq {p : ℝ} (hp0 : 0 < p) (hp1 : p < 1) (n : ℕ) :
     (catalan n : ℝ) / 4 ^ n * ((1 - p) / p) * (4 * p * (1 - p)) ^ n /
         ((1 - p) / (p * √π) * (n : ℝ) ^ (-(3 / 2 : ℝ)) * (4 * p * (1 - p)) ^ n) =
@@ -235,7 +235,7 @@ theorem catalan_ratio_eq {p : ℝ} (hp0 : 0 < p) (hp1 : p < 1) (n : ℕ) :
   · have hr : 0 < (n : ℝ) ^ (-(3 / 2 : ℝ)) := Real.rpow_pos_of_pos (by exact_mod_cast hn) _
     field_simp
 
-/-- **V5OZ, uniform ratio.** The ratio `a_n(p) / [((1-p)/(p√π)) n^{-3/2} (4p(1-p))^n]` tends to
+/-- **Uniform ratio.** The ratio `a_n(p) / [((1-p)/(p√π)) n^{-3/2} (4p(1-p))^n]` tends to
 `1` uniformly in `p ∈ (0,1)`. -/
 theorem catalan_tendstoUniformlyOn_ratio :
     TendstoUniformlyOn (fun (n : ℕ) (p : ℝ) =>
@@ -260,7 +260,7 @@ theorem abs_log_one_sub_add_le {x : ℝ} (hx0 : 0 ≤ x) (hx : x ≤ 1 / 2) :
   rw [div_le_iff₀ (by linarith), show x ^ (1 + 1) = x ^ 2 by norm_num]
   nlinarith [mul_nonneg (sq_nonneg x) (by linarith : (0 : ℝ) ≤ 1 - 2 * x)]
 
-/-- **V5OZ, near-critical point mass.** If `p_n = 1/2 + ε_n` with `ε_n → 0` and
+/-- **Near-critical point mass.** If `p_n = 1/2 + ε_n` with `ε_n → 0` and
 `n ε_n⁴ → 0`, then `a_n(p_n) ~ n^{-3/2} e^{-4 n ε_n²}/√π`. -/
 theorem catalan_nearCritical_isEquivalent (ε : ℕ → ℝ) (hε : Tendsto ε atTop (𝓝 0))
     (hε4 : Tendsto (fun n : ℕ => (n : ℝ) * ε n ^ 4) atTop (𝓝 0)) :
@@ -349,7 +349,7 @@ theorem binaryTree_law_card_eq_half (p : unitInterval) (q : Sym2 (List (Fin 2)) 
   rw [mul_assoc, show ((1 : ℝ) / 2) ^ (m * 2) * 4 ^ m = 1 by rw [pow_mul', ← mul_pow]; norm_num,
     mul_one]
 
-/-- **AAZS on the binary tree, point mass.** At `p = 1/2`,
+/-- **Critical point mass on the binary tree.** At `p = 1/2`,
 `P(|K([])| = n, K([]) finite) ~ n^{-3/2}/√π`. -/
 theorem binaryTree_law_card_isEquivalent (p : unitInterval)
     (q : Sym2 (List (Fin 2)) → unitInterval)
@@ -439,7 +439,7 @@ theorem binaryTree_law_le_encard_eq (p : unitInterval) (q : Sym2 (List (Fin 2)) 
           simp_rw [hk]
       _ ≤ _ := measure_mono Set.subset_union_right
 
-/-- **AAZS on the binary tree, tail.** At `p = 1/2`, `P(|K([])| ≥ n) ~ 2 n^{-1/2}/√π`. -/
+/-- **Critical tail on the binary tree.** At `p = 1/2`, `P(|K([])| ≥ n) ~ 2 n^{-1/2}/√π`. -/
 theorem binaryTree_law_le_encard_isEquivalent (p : unitInterval)
     (q : Sym2 (List (Fin 2)) → unitInterval)
     (hq : ∀ e, ¬ e.IsDiag → q e =
@@ -465,7 +465,7 @@ theorem catalan_div_four_pow_mul_eq {p : ℝ} (hp : p ≠ 0) {n : ℕ} (hn : 1 �
   field_simp
   ring
 
-/-- **V5OZ, uniform asymptotics.** For a family of tree profiles `q p` with parameter `p`,
+/-- **Uniform asymptotics.** For a family of tree profiles `q p` with parameter `p`,
 `P_p(|K| = n) ~ (1-p)/(p√π) n^{-3/2} (4p(1-p))^n` uniformly in `p ∈ (0,1)`. -/
 theorem binaryTree_law_card_tendstoUniformlyOn
     (q : unitInterval → Sym2 (List (Fin 2)) → unitInterval)
@@ -483,7 +483,7 @@ theorem binaryTree_law_card_tendstoUniformlyOn
   simp only [Function.comp_apply]
   rw [binaryTree_law_cluster_card_toReal p (q p) (hq p) hn, catalan_div_four_pow_mul_eq hp0 hn]
 
-/-- **V5OZ, exact ratio.** For `0 < p < 1` and `n ≥ 1`, the ratio of `P_p(|K| = n)` to
+/-- **Exact ratio.** For `0 < p < 1` and `n ≥ 1`, the ratio of `P_p(|K| = n)` to
 `(1-p)/(p√π) n^{-3/2} (4p(1-p))^n` equals `(Cat(n)/4^n) / (n^{-3/2}/√π)`, a function of `n`
 alone. -/
 theorem binaryTree_law_card_ratio_eq (q : unitInterval → Sym2 (List (Fin 2)) → unitInterval)
@@ -497,7 +497,7 @@ theorem binaryTree_law_card_ratio_eq (q : unitInterval → Sym2 (List (Fin 2)) �
   rw [binaryTree_law_cluster_card_toReal p (q p) (hq p) hn,
     ← catalan_div_four_pow_mul_eq hp.1.ne' hn, catalan_ratio_eq hp.1 hp.2 n]
 
-/-- **V5OZ, near-critical window.** If `p_n = 1/2 + ε_n` with `ε_n → 0` and `n ε_n⁴ → 0`,
+/-- **Near-critical window.** If `p_n = 1/2 + ε_n` with `ε_n → 0` and `n ε_n⁴ → 0`,
 then `P_{p_n}(|K| = n) ~ n^{-3/2} e^{-4nε_n²}/√π`. -/
 theorem binaryTree_law_card_nearCritical_isEquivalent (pn : ℕ → unitInterval)
     (q : ℕ → Sym2 (List (Fin 2)) → unitInterval)

@@ -178,7 +178,7 @@ theorem mul_inv_one_sub_eq {a b : ℝ≥0∞} (ha : a < 1) :
   calc b + a * (b * (1 - a)⁻¹) = b * (1 + a * (1 - a)⁻¹) := by ring
     _ = b * (1 - a)⁻¹ := by rw [key]
 
-/-- **R5XZ, spheres.** Under transitivity, `D < ⊤` and `χ_o = ⊤`,
+/-- **Spheres.** Under transitivity, `D < ⊤` and `χ_o = ⊤`,
 `1 ≤ E|S_ω(o, r)|` for every `r`. -/
 theorem one_le_lintegral_encard_sphere [Countable V] (q : Sym2 V → unitInterval)
     (hq : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, q (Sym2.map σ e) = q e) (o : V)
@@ -233,7 +233,7 @@ theorem one_le_lintegral_encard_sphere [Countable V] (q : Sym2 V → unitInterva
   rw [hchi] at this
   exact absurd (lt_of_le_of_lt this hCfin) (lt_irrefl _)
 
-/-- **R5XZ, balls.** Under the same hypotheses, `r + 1 ≤ E|B_ω(o, r)|` for every `r`. -/
+/-- **Balls.** Under the same hypotheses, `r + 1 ≤ E|B_ω(o, r)|` for every `r`. -/
 theorem succ_le_lintegral_encard_ball [Countable V] (q : Sym2 V → unitInterval)
     (hq : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, q (Sym2.map σ e) = q e) (o : V)
     (hD : rowSum (fun e => unitInterval.toENNReal (q e)) o < ⊤)

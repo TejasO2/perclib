@@ -324,7 +324,7 @@ theorem tendsto_transform_root (hm : ∑' k : ℕ, (k : ℝ≥0∞) * p k = 1) (
 
 /-! ### 3. OVG9: `1 - F(s) ~ √(2(1 - s)/σ²)` -/
 
-/-- **OVG9, analytic.** If the offspring law has mean one and `σ² ∈ (0, ∞)`, and `F` solves
+/-- **Analytic.** If the offspring law has mean one and `σ² ∈ (0, ∞)`, and `F` solves
 the transform equation on `[0,1)`, then `1 - F(s) ~ √(2(1 - s)/σ²)` as `s ↑ 1`. -/
 theorem isEquivalent_one_sub_transform_root (hm : ∑' k : ℕ, (k : ℝ≥0∞) * p k = 1) {σ2 : ℝ}
     (hσ : HasSum (fun k : ℕ => (k : ℝ) * ((k : ℝ) - 1) * (p k).toReal) σ2) (hσ0 : 0 < σ2)
@@ -391,7 +391,7 @@ theorem isEquivalent_one_sub_transform_root (hm : ∑' k : ℕ, (k : ℝ≥0∞)
 /-! ### Non-vacuity: the critical binary law -/
 
 /-- The critical binary law `p(0) = p(2) = 1/2` has mean one and `σ² = 1`. Its transform root
-is `F(s) = (1 - √(1 - s²))/s` (with `F(0) = 0`), and OVG9 gives
+is `F(s) = (1 - √(1 - s²))/s` (with `F(0) = 0`), and `isEquivalent_one_sub_transform_root` gives
 `1 - F(s) ~ √(2(1 - s))`. -/
 example : ∃ p : PMF ℕ, ∑' k : ℕ, (k : ℝ≥0∞) * p k = 1 ∧
     HasSum (fun k : ℕ => (k : ℝ) * ((k : ℝ) - 1) * (p k).toReal) 1 ∧

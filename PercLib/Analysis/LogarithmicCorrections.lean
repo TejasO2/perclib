@@ -84,7 +84,7 @@ theorem measurable_inv_three_sq_mul_sq {D : ℝ → ℝ} (hD : Measurable D) :
 
 variable {β₀ βc : ℝ} {χ D : ℝ → ℝ}
 
-/-- **6PGV.** Let `0 ≤ β₀ < β_c`, `χ > 0` nondecreasing and locally absolutely continuous on
+/-- **Integrated susceptibility bound.** Let `0 ≤ β₀ < β_c`, `χ > 0` nondecreasing and locally absolutely continuous on
 `(β₀, β_c)`, `D ≥ 1` measurable and `χ' ≥ (χ - D)₊²/(3β²D²)` a.e. on `(β₀, β_c)`. Then
 `χ(β) ≤ (1 + 2(β_c - β)/(3ββ_c)) (∫_β^{β_c} ds/(3s²D(s)²))⁻¹` for every `β ∈ (β₀, β_c)`. -/
 theorem le_of_deriv_ge_sq_div (hβ₀ : 0 ≤ β₀) (hpos : ∀ β ∈ Ioo β₀ βc, 0 < χ β)
@@ -267,7 +267,7 @@ theorem le_of_deriv_ge_sq_div (hβ₀ : 0 ≤ β₀) (hpos : ∀ β ∈ Ioo β�
   rw [← div_eq_mul_inv, le_div_iff₀ hIpos, mul_comm, ← le_div_iff₀ hχβ]
   exact hIle
 
-/-- **6PGV, logarithmic form.** Under the hypotheses of `le_of_deriv_ge_sq_div`, if moreover
+/-- **Logarithmic form.** Under the hypotheses of `le_of_deriv_ge_sq_div`, if moreover
 `D(β_c - u) ≤ C (log(1/u))^a` for all small `u > 0`, with `C > 0` and `a ≥ 0`, then
 `χ(β_c - ε) = O(ε⁻¹ (log(1/ε))^{2a})` as `ε ↓ 0`. -/
 theorem isBigO_of_deriv_ge_sq_div (hβ₀ : 0 ≤ β₀) (hlt : β₀ < βc)
@@ -701,7 +701,7 @@ theorem op8f_asymptotics {α a₀ c ν K r₀ : ℝ} (ha₀ : 0 < a₀) (hc : 0 
     have : 0 < Real.sqrt (Real.log r) := Real.sqrt_pos.2 hlr
     field_simp
 
-/-- **Non-vacuity witness for OP8F.** Take `α = a₀ = c = ν = K = 1` and `r₀ = 2`, with `m(r) = r`,
+/-- **Non-vacuity witness for `op8f_asymptotics`.** Take `α = a₀ = c = ν = K = 1` and `r₀ = 2`, with `m(r) = r`,
 `a(r) = r^{-2}`, `b(r) = r³`, `e₁ = 0`, `ε = 0`, `f(r) = r³/√(6 log r)` and
 `e₂(r) = 1/(6 log r)`. Every hypothesis holds, and the theorem gives
 `f/m³ ~ (6 log r)^{-1/2}`, which is exact. -/

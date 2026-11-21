@@ -50,7 +50,7 @@ theorem cluster_some_zero_infinite {ω : Config (Option ℤ)}
     (hω : ∀ a : ℤ, s(some a, some (a + 1)) ∈ ω) : (cluster ω (some 0)).Infinite :=
   Set.infinite_of_injective_forall_mem (Option.some_injective ℤ) fun a => reachable_line hω a
 
-/-- **1J3B**, concrete model. On `Option ℤ`, let every line bond `s(some a, some (a+1))` have
+/-- Concrete model. On `Option ℤ`, let every line bond `s(some a, some (a+1))` have
 probability one, let the root bond `s(none, some 0)` have probability `p`, and let every
 other bond at `none` have probability zero. Then an infinite cluster exists almost surely,
 while the root `none` percolates with probability exactly `p`. -/
@@ -135,7 +135,7 @@ theorem setOf_exists_cluster_infinite_eq_empty {V : Type*} [Finite V] :
     {ω : Config V | ∃ v, (cluster ω v).Infinite} = ∅ :=
   Set.eq_empty_of_forall_notMem fun ω ⟨v, hv⟩ => hv (cluster_finite ω v)
 
-/-- **KB1L**, global threshold: on a finite vertex type the global critical intensity of
+/-- Global threshold: on a finite vertex type the global critical intensity of
 every kernel is `⊤`. -/
 theorem globalCriticalIntensity_eq_top_of_finite {V : Type*} [Finite V] (J : Sym2 V → ℝ≥0) :
     globalCriticalIntensity J = ⊤ := by
@@ -145,7 +145,7 @@ theorem globalCriticalIntensity_eq_top_of_finite {V : Type*} [Finite V] (J : Sym
   rw [setOf_exists_cluster_infinite_eq_empty, measure_empty] at hpos
   exact (lt_irrefl _ hpos).elim
 
-/-- **KB1L**, root threshold: on a finite vertex type the root critical intensity of every
+/-- Root threshold: on a finite vertex type the root critical intensity of every
 kernel at every root is `⊤`. -/
 theorem rootCriticalIntensity_eq_top_of_finite {V : Type*} [Finite V] (J : Sym2 V → ℝ≥0)
     (x : V) : rootCriticalIntensity J x = ⊤ := by
@@ -159,12 +159,12 @@ theorem rootCriticalIntensity_eq_top_of_finite {V : Type*} [Finite V] (J : Sym2 
 
 /-! ### Non-vacuity witnesses -/
 
-/-- KB1L on `Fin 3` with the complete unit kernel. -/
+/-- `finite_vertexSet_thresholds` on `Fin 3` with the complete unit kernel. -/
 example : globalCriticalIntensity (fun _ : Sym2 (Fin 3) => (1 : ℝ≥0)) = ⊤ ∧
     ∀ x : Fin 3, rootCriticalIntensity (fun _ : Sym2 (Fin 3) => (1 : ℝ≥0)) x = ⊤ :=
   ⟨globalCriticalIntensity_eq_top_of_finite _, rootCriticalIntensity_eq_top_of_finite _⟩
 
-/-- 1J3B at `p = 1/2`: the root percolates with probability `1/2` while an infinite cluster
+/-- `exists_root_percolation_eq` at `p = 1/2`: the root percolates with probability `1/2` while an infinite cluster
 exists almost surely. -/
 example : ∃ (V : Type) (_ : Countable V) (q : Sym2 V → unitInterval) (o : V),
     law q {ω | ∃ v, (cluster ω v).Infinite} = 1 ∧

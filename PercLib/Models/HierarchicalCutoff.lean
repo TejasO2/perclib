@@ -157,7 +157,7 @@ theorem encard_level_ball (x : ℕ →₀ (Fin d → ZMod L)) (n : ℕ) :
   congr 1
   exact card_ball n
 
-/-- **KL29 (a).** If the profile vanishes on every pair of level above `n` (only bonds of
+/-- **Cutoff clusters are trapped in balls.** If the profile vanishes on every pair of level above `n` (only bonds of
 level at most `n` are retained), then almost surely every cluster lies in the level-`n`
 ball of its base vertex, so its volume is at most `N^n`. Loop probabilities are
 arbitrary. -/
@@ -179,7 +179,7 @@ theorem ae_cluster_subset_ball (q : Sym2 (ℕ →₀ (Fin d → ZMod L)) → uni
 
 /-! ### KL29 (b), (c): the omitted row -/
 
-/-- **KL29 (b).** The kernel mass above level `n` is `C (N − 1) r / (1 − N r) · (N r)^n`.
+/-- **The omitted kernel mass.** The kernel mass above level `n` is `C (N − 1) r / (1 − N r) · (N r)^n`.
 In `ℝ≥0∞` this holds with no hypothesis on `N r`. -/
 theorem tsum_level_gt_eq (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) (C r : ℝ≥0)
     (hJ : ∀ x y, J s(x,y) = C * r ^ ((y - x).support.sup Nat.succ)) (n : ℕ)
@@ -225,7 +225,7 @@ theorem tsum_level_gt_eq (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) 
   rw [ENNReal.tsum_mul_left, ENNReal.tsum_geometric, div_eq_mul_inv]
   ring
 
-/-- **KL29 (c).** In the exponential family the omitted probability row above level `n` is
+/-- **The omitted probability row.** In the exponential family the omitted probability row above level `n` is
 at most `β` times the omitted kernel mass. -/
 theorem tsum_level_gt_intensity_le (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) (C r : ℝ≥0)
     (hJ : ∀ x y, J s(x,y) = C * r ^ ((y - x).support.sup Nat.succ)) (β : ℝ≥0) (n : ℕ)
@@ -266,7 +266,7 @@ theorem rowSum_hierarchical_eq (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ
   push_cast
   rfl
 
-/-- **B6KD, susceptibility.** With `N r < 1` and `β M < 1`, `chi ≤ (1 − β M)⁻¹`. -/
+/-- **Susceptibility.** With `N r < 1` and `β M < 1`, `chi ≤ (1 − β M)⁻¹`. -/
 theorem chi_intensity_le_hierarchical_sharp (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0)
     (C r : ℝ≥0) (hJ : ∀ x y, J s(x,y) = C * r ^ ((y - x).support.sup Nat.succ))
     (hr : (L : ℝ≥0) ^ d * r < 1) (β : ℝ≥0)
@@ -277,7 +277,7 @@ theorem chi_intensity_le_hierarchical_sharp (J : Sym2 (ℕ →₀ (Fin d → ZMo
       ((C * ((L ^ d - 1 : ℕ) : ℝ≥0) * r / (1 - (L : ℝ≥0) ^ d * r) : ℝ≥0) : ℝ≥0∞))⁻¹ :=
   chi_intensity_le J _ (fun v => by convert (rowSum_hierarchical_eq J C r hJ hr v).le) β hβ x
 
-/-- **B6KD, finiteness.** With `N r < 1` and `β M < 1`, almost surely every cluster is
+/-- **Finiteness.** With `N r < 1` and `β M < 1`, almost surely every cluster is
 finite. -/
 theorem law_exists_infinite_hierarchical_eq_zero (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0)
     (C r : ℝ≥0) (hJ : ∀ x y, J s(x,y) = C * r ^ ((y - x).support.sup Nat.succ))
@@ -288,7 +288,7 @@ theorem law_exists_infinite_hierarchical_eq_zero (J : Sym2 (ℕ →₀ (Fin d �
   law_exists_infinite_intensity_eq_zero J _
     (fun v => by convert (rowSum_hierarchical_eq J C r hJ hr v).le) β hβ
 
-/-- **B6KD, global threshold.** With `N r < 1`, the global threshold is at least `M⁻¹`
+/-- **Global threshold.** With `N r < 1`, the global threshold is at least `M⁻¹`
 (and is `⊤` when `M = 0`). -/
 theorem inv_le_globalCriticalIntensity_hierarchical_sharp
     (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) (C r : ℝ≥0)
@@ -298,7 +298,7 @@ theorem inv_le_globalCriticalIntensity_hierarchical_sharp
       globalCriticalIntensity J :=
   inv_le_globalCriticalIntensity J _ fun v => by convert (rowSum_hierarchical_eq J C r hJ hr v).le
 
-/-- **B6KD, root threshold.** With `N r < 1`, every root threshold is at least `M⁻¹`. -/
+/-- **Root threshold.** With `N r < 1`, every root threshold is at least `M⁻¹`. -/
 theorem inv_le_rootCriticalIntensity_hierarchical_sharp
     (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) (C r : ℝ≥0)
     (hJ : ∀ x y, J s(x,y) = C * r ^ ((y - x).support.sup Nat.succ))
@@ -307,7 +307,7 @@ theorem inv_le_rootCriticalIntensity_hierarchical_sharp
       rootCriticalIntensity J x :=
   inv_le_rootCriticalIntensity J _ (fun v => by convert (rowSum_hierarchical_eq J C r hJ hr v).le) x
 
-/-- **B6KD, `M = 0`.** With `N r < 1` and `M = 0`: at every parameter every cluster is
+/-- **`M = 0`.** With `N r < 1` and `M = 0`: at every parameter every cluster is
 almost surely a singleton, `chi = 1`, and both thresholds are `⊤`. -/
 theorem hierarchical_of_M_eq_zero (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) (C r : ℝ≥0)
     (hJ : ∀ x y, J s(x,y) = C * r ^ ((y - x).support.sup Nat.succ))
@@ -335,7 +335,7 @@ The statements above take the radial identity on all pairs, including the diagon
 versions below assume it for distinct pairs only (the diagonal is arbitrary) and transfer
 through the all-pairs kernel of `exists_hierarchical_kernel`. -/
 
-/-- **KL29 (a), every configuration.** If every open pair has level at most `n`, every cluster
+/-- **Cutoff clusters are trapped in balls, every configuration.** If every open pair has level at most `n`, every cluster
 lies in the level-`n` ball of its base vertex and has at most `N^n` vertices. -/
 theorem cluster_subset_level_ball_of_forall (n : ℕ) (ω : Config (ℕ →₀ (Fin d → ZMod L)))
     (hω : ∀ a b, a ≠ b → s(a, b) ∈ ω → (b - a).support.sup Nat.succ ≤ n)
@@ -359,7 +359,7 @@ private theorem ne_of_lt_level {n : ℕ} {x y : (ℕ →₀ (Fin d → ZMod L))}
   rintro rfl
   simp at h
 
-/-- **KL29 (b)** with the kernel prescribed off the diagonal only. -/
+/-- `tsum_level_gt_eq` with the kernel prescribed off the diagonal only. -/
 theorem tsum_level_gt_eq_of_ne (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) (C r : ℝ≥0)
     (hJ : ∀ x y, x ≠ y → J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ)) (n : ℕ)
     (x : (ℕ →₀ (Fin d → ZMod L))) :
@@ -373,7 +373,7 @@ theorem tsum_level_gt_eq_of_ne (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ
   · rw [hJ x y (ne_of_lt_level h), hJ' x y]
   · rfl
 
-/-- **KL29 (c)** with the kernel prescribed off the diagonal only. -/
+/-- `tsum_level_gt_intensity_le` with the kernel prescribed off the diagonal only. -/
 theorem tsum_level_gt_intensity_le_of_ne (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) (C r : ℝ≥0)
     (hJ : ∀ x y, x ≠ y → J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ)) (β : ℝ≥0)
     (n : ℕ) (x : (ℕ →₀ (Fin d → ZMod L))) :
@@ -389,7 +389,7 @@ theorem tsum_level_gt_intensity_le_of_ne (J : Sym2 (ℕ →₀ (Fin d → ZMod L
   · rw [intensityProfile_eq_of_offDiagonal hJJ' β s(x, y) (by simpa using ne_of_lt_level h)]
   · rfl
 
-/-- **B6KD (a)** with the kernel prescribed off the diagonal only. -/
+/-- **Sharp subcritical bound** with the kernel prescribed off the diagonal only. -/
 theorem chi_intensity_le_hierarchical_sharp_of_ne (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0)
     (C r : ℝ≥0) (hJ : ∀ x y, x ≠ y → J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ))
     (hr : (L : ℝ≥0) ^ d * r < 1) (β : ℝ≥0)
@@ -404,7 +404,7 @@ theorem chi_intensity_le_hierarchical_sharp_of_ne (J : Sym2 (ℕ →₀ (Fin d �
   rw [chi_eq_of_offDiagonal _ _ (intensityProfile_eq_of_offDiagonal hJJ' β) x]
   exact chi_intensity_le_hierarchical_sharp J' C r hJ' hr β hβ x
 
-/-- **B6KD (a)**, no infinite cluster, with the kernel prescribed off the diagonal only. -/
+/-- **Sharp subcritical bound**, no infinite cluster, with the kernel prescribed off the diagonal only. -/
 theorem law_exists_infinite_hierarchical_eq_zero_of_ne (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0)
     (C r : ℝ≥0) (hJ : ∀ x y, x ≠ y → J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ))
     (hr : (L : ℝ≥0) ^ d * r < 1) (β : ℝ≥0)
@@ -417,7 +417,7 @@ theorem law_exists_infinite_hierarchical_eq_zero_of_ne (J : Sym2 (ℕ →₀ (Fi
     (intensityProfile_eq_of_offDiagonal hJJ' β)]
   exact law_exists_infinite_hierarchical_eq_zero J' C r hJ' hr β hβ
 
-/-- **B6KD (b)**, global threshold, with the kernel prescribed off the diagonal only. -/
+/-- **Sharp threshold bound**, global threshold, with the kernel prescribed off the diagonal only. -/
 theorem inv_le_globalCriticalIntensity_hierarchical_sharp_of_ne
     (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0)
     (C r : ℝ≥0) (hJ : ∀ x y, x ≠ y → J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ))
@@ -429,7 +429,7 @@ theorem inv_le_globalCriticalIntensity_hierarchical_sharp_of_ne
   rw [globalCriticalIntensity_eq_of_offDiagonal hJJ']
   exact inv_le_globalCriticalIntensity_hierarchical_sharp J' C r hJ' hr
 
-/-- **B6KD (b)**, root threshold, with the kernel prescribed off the diagonal only. -/
+/-- **Sharp threshold bound**, root threshold, with the kernel prescribed off the diagonal only. -/
 theorem inv_le_rootCriticalIntensity_hierarchical_sharp_of_ne
     (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0)
     (C r : ℝ≥0) (hJ : ∀ x y, x ≠ y → J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ))
@@ -441,7 +441,7 @@ theorem inv_le_rootCriticalIntensity_hierarchical_sharp_of_ne
   rw [rootCriticalIntensity_eq_of_offDiagonal hJJ']
   exact inv_le_rootCriticalIntensity_hierarchical_sharp J' C r hJ' hr x
 
-/-- **B6KD (c).** If `M = 0` (with `N r < 1`), every off-diagonal intensity vanishes. -/
+/-- **The case `M = 0`.** If `M = 0` (with `N r < 1`), every off-diagonal intensity vanishes. -/
 theorem eq_zero_of_hierarchical_M_eq_zero (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) (C r : ℝ≥0)
     (hJ : ∀ x y, x ≠ y → J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ))
     (hr : (L : ℝ≥0) ^ d * r < 1)
@@ -465,7 +465,7 @@ theorem eq_zero_of_hierarchical_M_eq_zero (J : Sym2 (ℕ →₀ (Fin d → ZMod 
       rw [hJ x y hxy, h, zero_pow hlv, mul_zero]
   · exact absurd h hden
 
-/-- **B6KD, `M = 0`**, with the kernel prescribed off the diagonal only. -/
+/-- **`M = 0`**, with the kernel prescribed off the diagonal only. -/
 theorem hierarchical_of_M_eq_zero_of_ne (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) (C r : ℝ≥0)
     (hJ : ∀ x y, x ≠ y → J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ))
     (hr : (L : ℝ≥0) ^ d * r < 1)
@@ -487,7 +487,7 @@ theorem hierarchical_of_M_eq_zero_of_ne (J : Sym2 (ℕ →₀ (Fin d → ZMod L)
   · rw [rootCriticalIntensity_eq_of_offDiagonal hJJ']
     exact hroot x
 
-/-- **B6KD (d)**, `χ`, with `2Nr ≤ 1` and the kernel prescribed off the diagonal only. -/
+/-- **Subcritical bound for `2Nr ≤ 1`**, `χ`, with `2Nr ≤ 1` and the kernel prescribed off the diagonal only. -/
 theorem chi_intensity_le_hierarchical_of_ne (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) (C r : ℝ≥0)
     (hJ : ∀ x y, x ≠ y → J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ))
     (hr : (L : ℝ≥0) ^ d * r * 2 ≤ 1) (β : ℝ≥0)
@@ -499,7 +499,7 @@ theorem chi_intensity_le_hierarchical_of_ne (J : Sym2 (ℕ →₀ (Fin d → ZMo
   rw [chi_eq_of_offDiagonal _ _ (intensityProfile_eq_of_offDiagonal hJJ' β) x]
   exact chi_intensity_le_hierarchical J' C r hJ' hr β hβ x
 
-/-- **B6KD (d)**, global threshold, with the kernel prescribed off the diagonal only. -/
+/-- **Subcritical bound for `2Nr ≤ 1`**, global threshold, with the kernel prescribed off the diagonal only. -/
 theorem inv_le_globalCriticalIntensity_hierarchical_of_ne (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0)
     (C r : ℝ≥0) (hJ : ∀ x y, x ≠ y → J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ))
     (hr : (L : ℝ≥0) ^ d * r * 2 ≤ 1) :
@@ -509,7 +509,7 @@ theorem inv_le_globalCriticalIntensity_hierarchical_of_ne (J : Sym2 (ℕ →₀ 
   rw [globalCriticalIntensity_eq_of_offDiagonal hJJ']
   exact inv_le_globalCriticalIntensity_hierarchical J' C r hJ' hr
 
-/-- **B6KD (d)**, root threshold, with the kernel prescribed off the diagonal only. -/
+/-- **Subcritical bound for `2Nr ≤ 1`**, root threshold, with the kernel prescribed off the diagonal only. -/
 theorem inv_le_rootCriticalIntensity_hierarchical_of_ne (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0)
     (C r : ℝ≥0) (hJ : ∀ x y, x ≠ y → J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ))
     (hr : (L : ℝ≥0) ^ d * r * 2 ≤ 1) (x : (ℕ →₀ (Fin d → ZMod L))) :

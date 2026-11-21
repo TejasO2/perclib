@@ -129,7 +129,7 @@ section Core
 
 variable {α c r₀ : ℝ} {S e g : ℝ → ℝ}
 
-/-- **The integrating factor.** Under the hypotheses of GAF9, put `E(r) = ∫_{r₀}^r e` and
+/-- **The integrating factor.** Under the hypotheses of the linear ODE asymptotics, put `E(r) = ∫_{r₀}^r e` and
 `U = S r^{-2α} e^{-E}`. Then `U` is absolutely continuous on every `[r₀, R]` and
 `S = U r^{2α} e^{E}` on `[r₀, ∞)`. Moreover `U' = ψ ≥ 0` a.e. on `[r₀, ∞)`, where
 `ψ(r)/r^{1-α} → c e^{-E(∞)}`. -/
@@ -250,7 +250,7 @@ theorem isEquivalent_of_core {U W : ℝ → ℝ} (hc : 0 < c) (hr₀ : 1 ≤ r�
   field_simp
 
 variable (α c r₀ S e g) in
-/-- The hypotheses of GAF9, other than the regime of `α`. -/
+/-- The hypotheses of the linear ODE asymptotics, other than the regime of `α`. -/
 theorem linearODE_weight_hder {U ψ : ℝ → ℝ} {C : ℝ}
     (hUd : ∀ᵐ r, r₀ ≤ r → deriv U r = ψ r)
     (hψlim : Tendsto (fun r => ψ r / r ^ (1 - α)) atTop (𝓝 C)) :
@@ -269,7 +269,7 @@ theorem linearODE_weight_hder {U ψ : ℝ → ℝ} {C : ℝ}
   rw [e]
   constructor <;> nlinarith
 
-/-- **GAF9, `α < 2`.** `S ~ c r^{α+2}/(2 - α)`. -/
+/-- **Linear ODE asymptotics, `α < 2`.** `S ~ c r^{α+2}/(2 - α)`. -/
 theorem isEquivalent_linearODE_lt (hr₀ : 1 ≤ r₀) (hα2 : α < 2) (hc : 0 < c)
     (hSac : ∀ R, r₀ ≤ R → AbsolutelyContinuousOnInterval S r₀ R)
     (hder : ∀ᵐ r, r₀ ≤ r → deriv S r = (2 * α / r + e r) * S r + g r)
@@ -299,7 +299,7 @@ theorem isEquivalent_linearODE_lt (hr₀ : 1 ≤ r₀) (hα2 : α < 2) (hc : 0 <
   congr 3
   ring
 
-/-- **GAF9, `α = 2`.** `S ~ c r⁴ log r`. -/
+/-- **Linear ODE asymptotics, `α = 2`.** `S ~ c r⁴ log r`. -/
 theorem isEquivalent_linearODE_eq (hr₀ : 1 ≤ r₀) (hα2 : α = 2) (hc : 0 < c)
     (hSac : ∀ R, r₀ ≤ R → AbsolutelyContinuousOnInterval S r₀ R)
     (hder : ∀ᵐ r, r₀ ≤ r → deriv S r = (2 * α / r + e r) * S r + g r)
@@ -327,7 +327,7 @@ theorem isEquivalent_linearODE_eq (hr₀ : 1 ≤ r₀) (hα2 : α = 2) (hc : 0 <
   rw [hα2]
   norm_num
 
-/-- **GAF9, `α > 2`.** `S ~ K r^{2α}` for some `K ∈ (0, ∞)`. This case uses `S ≥ 0`. -/
+/-- **Linear ODE asymptotics, `α > 2`.** `S ~ K r^{2α}` for some `K ∈ (0, ∞)`. This case uses `S ≥ 0`. -/
 theorem exists_isEquivalent_linearODE_gt (hr₀ : 1 ≤ r₀) (hα2 : 2 < α) (hc : 0 < c)
     (hS0 : ∀ r, r₀ ≤ r → 0 ≤ S r)
     (hSac : ∀ R, r₀ ≤ R → AbsolutelyContinuousOnInterval S r₀ R)
@@ -487,7 +487,7 @@ section Ratio
 
 variable {α c r₀ m₀ : ℝ} {S e g m : ℝ → ℝ}
 
-/-- **GAF9, ratio, `α < 2`.** If moreover `m ~ m₀ r^α` with `m₀ > 0`, then `√(S/m) ≍ r`. -/
+/-- **Ratio, `α < 2`.** If moreover `m ~ m₀ r^α` with `m₀ > 0`, then `√(S/m) ≍ r`. -/
 theorem isTheta_sqrt_linearODE_lt (hr₀ : 1 ≤ r₀) (hα2 : α < 2) (hc : 0 < c)
     (hSac : ∀ R, r₀ ≤ R → AbsolutelyContinuousOnInterval S r₀ R)
     (hder : ∀ᵐ r, r₀ ≤ r → deriv S r = (2 * α / r + e r) * S r + g r)
@@ -503,7 +503,7 @@ theorem isTheta_sqrt_linearODE_lt (hr₀ : 1 ≤ r₀) (hα2 : α < 2) (hc : 0 <
   rw [Real.rpow_add hr, Real.rpow_two]
   field_simp
 
-/-- **GAF9, ratio, `α = 2`.** If moreover `m ~ m₀ r^α` with `m₀ > 0`, then
+/-- **Ratio, `α = 2`.** If moreover `m ~ m₀ r^α` with `m₀ > 0`, then
 `√(S/m) ≍ r √(log r)`. -/
 theorem isTheta_sqrt_linearODE_eq (hr₀ : 1 ≤ r₀) (hα2 : α = 2) (hc : 0 < c)
     (hSac : ∀ R, r₀ ≤ R → AbsolutelyContinuousOnInterval S r₀ R)
@@ -527,7 +527,7 @@ theorem isTheta_sqrt_linearODE_eq (hr₀ : 1 ≤ r₀) (hα2 : α = 2) (hc : 0 <
     have : 0 < r := by linarith
     positivity
 
-/-- **GAF9, ratio, `α > 2`.** If moreover `m ~ m₀ r^α` with `m₀ > 0`, then
+/-- **Ratio, `α > 2`.** If moreover `m ~ m₀ r^α` with `m₀ > 0`, then
 `√(S/m) ≍ r^{α/2}`. -/
 theorem isTheta_sqrt_linearODE_gt (hr₀ : 1 ≤ r₀) (hα2 : 2 < α) (hc : 0 < c)
     (hS0 : ∀ r, r₀ ≤ r → 0 ≤ S r)
@@ -551,7 +551,7 @@ end Ratio
 
 /-! ### Non-vacuity: `e ≡ 0`, `g = r^{α+1}`, `r₀ = 1` -/
 
-/-- `α = 1`: `S = r³` solves `S' = (2/r) S + r²`, and GAF9 gives `S ~ r³`. -/
+/-- `α = 1`: `S = r³` solves `S' = (2/r) S + r²`, and `isEquivalent_linearODE_lt` gives `S ~ r³`. -/
 example : (fun r : ℝ => r ^ 3) ~[atTop] fun r => 1 * r ^ ((1 : ℝ) + 2) / (2 - 1) :=
   isEquivalent_linearODE_lt (r₀ := 1) (e := fun _ => 0) (g := fun r => 1 * r ^ ((1 : ℝ) + 1))
     le_rfl (by norm_num) one_pos
@@ -565,7 +565,7 @@ example : (fun r : ℝ => r ^ 3) ~[atTop] fun r => 1 * r ^ ((1 : ℝ) + 2) / (2 
     integrableOn_zero (fun r hr => mul_nonneg zero_le_one (Real.rpow_nonneg (by linarith) _))
     IsEquivalent.refl
 
-/-- `α = 2`: `S = r⁴ log r` solves `S' = (4/r) S + r³`, and GAF9 gives `S ~ r⁴ log r`. -/
+/-- `α = 2`: `S = r⁴ log r` solves `S' = (4/r) S + r³`, and `isEquivalent_linearODE_eq` gives `S ~ r⁴ log r`. -/
 example : (fun r : ℝ => r ^ 4 * Real.log r) ~[atTop] fun r => 1 * r ^ (4 : ℝ) * Real.log r :=
   isEquivalent_linearODE_eq (α := 2) (r₀ := 1) (e := fun _ => 0)
     (g := fun r => 1 * r ^ ((2 : ℝ) + 1)) le_rfl rfl one_pos
@@ -583,7 +583,7 @@ example : (fun r : ℝ => r ^ 4 * Real.log r) ~[atTop] fun r => 1 * r ^ (4 : ℝ
     integrableOn_zero (fun r hr => mul_nonneg zero_le_one (Real.rpow_nonneg (by linarith) _))
     IsEquivalent.refl
 
-/-- `α = 3`: `S = r⁶ - r⁵ ≥ 0` solves `S' = (6/r) S + r⁴`, and GAF9 gives `S ~ K r⁶` with
+/-- `α = 3`: `S = r⁶ - r⁵ ≥ 0` solves `S' = (6/r) S + r⁴`, and `exists_isEquivalent_linearODE_gt` gives `S ~ K r⁶` with
 `K > 0`. -/
 example : ∃ K > 0, (fun r : ℝ => r ^ 6 - r ^ 5) ~[atTop] fun r => K * r ^ (2 * (3 : ℝ)) :=
   exists_isEquivalent_linearODE_gt (α := 3) (r₀ := 1) (e := fun _ => 0)

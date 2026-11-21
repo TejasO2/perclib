@@ -168,7 +168,7 @@ theorem measure_le_div_sqrt_of_bound (hT : Measurable T) {C : ℝ}
   have := hC n hn
   nlinarith
 
-/-- **MIFH, analytic.** If `G(t)/√t → a > 0` as `t ↓ 0`, then `P(T ≥ n) ≍ n^{-1/2}`: there
+/-- **Analytic.** If `G(t)/√t → a > 0` as `t ↓ 0`, then `P(T ≥ n) ≍ n^{-1/2}`: there
 are `C, c > 0` and `N` with `P(T ≥ n) ≤ C/√n` for `n ≥ 1` and `P(T ≥ n) ≥ c/√n` for
 `n ≥ N`. -/
 theorem exists_tail_bounds_of_laplace (hT : Measurable T) {a : ℝ} (ha : 0 < a)

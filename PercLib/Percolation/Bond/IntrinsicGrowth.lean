@@ -74,7 +74,7 @@ theorem law_edist_le_le_tsum_paths [Countable V] (q : Sym2 V → unitInterval) (
         measure_iUnion_le _
     _ = _ := by simp only [law, prodBernoulli_subset]
 
-/-- **R5XZ, upper bound.** If every off-diagonal row sum of `q` is at most `D`, then
+/-- **Upper bound.** If every off-diagonal row sum of `q` is at most `D`, then
 `E|B_ω(o,r)| ≤ ∑_{j ≤ r} D^j`. -/
 theorem lintegral_encard_ball_le_of_rowSum [Countable V] (q : Sym2 V → unitInterval)
     (D : ℝ≥0∞)

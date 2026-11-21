@@ -141,7 +141,7 @@ theorem measurableSet_unexplored_eq [Countable V] (Λ T : Set V) :
     ext ω
     simp [hvΛ, hvT]
 
-/-- **Item 1 of HATE: factorisation.** For a finite domain `Λ`, a finite `T` and
+/-- **Factorisation.** For a finite domain `Λ`, a finite `T` and
 `o, u ∈ T`, `P(S = T, o ↔_T u) = P(S = T) τ_T(o,u)`, where `S` is the set of vertices of
 `Λ` whose cluster stays in `Λ`. No conditioning on null events is involved. -/
 theorem law_unexplored_eq_inter_localConn [Countable V] (q : Sym2 V → unitInterval)

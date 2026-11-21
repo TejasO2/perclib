@@ -123,7 +123,7 @@ theorem hasDerivAt_integral_cluster_functional (lam : ℝ → Sym2 V → ℝ≥0
   push_cast at h2
   linarith
 
-/-- **57RX, finite volume.** For every weight `g : V → ℝ` (for instance
+/-- **Finite volume.** For every weight `g : V → ℝ` (for instance
 `g(z) = ⟨z - o, u⟩²` on a box of `ℤ^d`),
 `d/dt E_t[∑_{z ∈ K_o} g(z)] = ∑_{x, y} w(x, y) E_t[1{x ∈ K_o, y ∉ K_o} ∑_{z ∈ K_y} g(z)]`. -/
 theorem hasDerivAt_integral_sum_cluster (lam : ℝ → Sym2 V → ℝ≥0) (w : Sym2 V → ℝ) (t : ℝ)
@@ -158,7 +158,7 @@ theorem prod_add_sub_prod {ι : Type*} [Fintype ι] [DecidableEq ι] (a b : ι �
   simp only [Finset.prod_empty, one_mul, Finset.sdiff_empty, add_sub_cancel_left]
   exact Finset.sum_congr rfl fun I _ => mul_comm _ _
 
-/-- **1K61, finite volume.** For polynomial functionals `F(A) = ∏_i ∑_{z ∈ A} P_i(z)`,
+/-- **Finite volume.** For polynomial functionals `F(A) = ∏_i ∑_{z ∈ A} P_i(z)`,
 `d/dt E_t F(K_o) = ∑_{x, y} w(x, y) E_t[1{x ∈ K_o, y ∉ K_o}
   ∑_{∅ ≠ I} (∏_{i ∉ I} ∑_{K_o} P_i)(∏_{i ∈ I} ∑_{K_y} P_i)]`. -/
 theorem hasDerivAt_integral_prod_sum_cluster {ι : Type*} [Fintype ι] [DecidableEq ι]

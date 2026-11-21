@@ -247,7 +247,7 @@ theorem lowerSemicontinuous_law_le_encard [Countable V] (o : V) (n : ℕ) :
   simp only [Set.mem_ofPred_eq]
   rw [h]
 
-/-- **Endpoint passage** (C9N6). Let `q β → q b` coordinatewise as `β ↑ b`, `b > 0`. If
+/-- **Endpoint passage**. Let `q β → q b` coordinatewise as `β ↑ b`, `b > 0`. If
 `χ(q β)(o) < ⊤` and the hypothesis of `amplitude_contraction` holds for
 `p_β(n) = P_{q β}(n ≤ |K_o|)` with the same constants, for every `β ∈ (0, b)`, then
 `P_{q b}(n ≤ |K_o|) ≤ B n^(-θ)` for every `n ≥ 1`. -/

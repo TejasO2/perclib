@@ -216,7 +216,7 @@ theorem lintegral_clusterIntersection_min_ge [Countable V] (q : Sym2 V → unitI
 
 /-! ### Item 4: R1, averaged form -/
 
-/-- **R1, averaged.** `M² / (4e) ≤ ∑_{v ∈ Λ} ∫⁻ X_v` (the `p = 1` case of LQ6Y). -/
+/-- **R1, averaged.** `M² / (4e) ≤ ∑_{v ∈ Λ} ∫⁻ X_v` (the `p = 1` case of the lower rooted moments). -/
 theorem le_sum_lintegral_clusterIntersection [Countable V] (q : Sym2 V → unitInterval)
     {Λ : Finset V} (hΛ : Λ.Nonempty) :
     ENNReal.ofReal ((tightnessScale q Λ : ℝ) ^ 2 / (4 * Real.exp 1)) ≤

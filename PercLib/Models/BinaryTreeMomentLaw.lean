@@ -92,7 +92,7 @@ theorem summable_moment_terms {p : ℝ} (hp0 : 0 < p) (hp1 : p < 1) (hp : p ≠ 
         gcongr
     _ = _ := by ring
 
-/-- **GGVG, identification.** On the rooted binary tree with open probability `p ∈ (0,1)`,
+/-- **Identification.** On the rooted binary tree with open probability `p ∈ (0,1)`,
 `p ≠ 1/2`, `E_p[|K|^s; |K| < ∞] = ((1-p)/p) ∑_{n≥1} n^s Cat(n) 4^{-n} e^{-λ(p) n}`. -/
 theorem lintegral_cluster_rpow_eq_moment (p : unitInterval)
     (q : Sym2 (List (Fin 2)) → unitInterval)

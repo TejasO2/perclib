@@ -320,7 +320,7 @@ theorem lintegral_encard_pow_le_branch [Countable V] (q : Sym2 V → unitInterva
 
 /-! ### All moments (Y84V) -/
 
-/-- **All cluster moments under a uniform susceptibility bound** (Y84V). If `χ(x) ≤ M` for
+/-- **All cluster moments under a uniform susceptibility bound**. If `χ(x) ≤ M` for
 every `x`, then for every `m ≥ 1` and every `o`,
 `E|K_o|^m ≤ (2m-3)‼ · χ(o) · M^(2m-2)` (with `(2·1-3)‼ = 0‼ = 1` in `ℕ`). -/
 theorem lintegral_encard_pow_le [Countable V] (q : Sym2 V → unitInterval) {M : ℝ≥0∞}
@@ -380,7 +380,7 @@ theorem lintegral_encard_pow_le [Countable V] (q : Sym2 V → unitInterval) {M :
   rw [hcast]
   ring
 
-/-- Y84V in the issue's form, with `M = ⨆ x, χ(x)`; finiteness of `M` is not needed. -/
+/-- The cluster moment bound with `M = ⨆ x, χ(x)`; finiteness of `M` is not needed. -/
 theorem lintegral_encard_pow_le_iSup [Countable V] (q : Sym2 V → unitInterval) (m : ℕ)
     (hm : 1 ≤ m) (o : V) :
     ∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ^ m ∂law q ≤

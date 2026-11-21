@@ -37,7 +37,7 @@ variable {V : Type*}
 
 /-! ### The first moment from below (unconditional) -/
 
-/-- **First moment from below** (wiki tag AWWZ): `(M - 1) e⁻¹ ≤ E Z`, for every profile on
+/-- **First moment from below**: `(M - 1) e⁻¹ ≤ E Z`, for every profile on
 a countable vertex type and every finite nonempty `Λ`. -/
 theorem lintegral_maxClusterIntersection_ge_sub_one [Countable V]
     (q : Sym2 V → unitInterval) {Λ : Finset V} (hΛ : Λ.Nonempty) :
@@ -60,7 +60,7 @@ theorem lintegral_maxClusterIntersection_ge_sub_one [Countable V]
   rw [hcast, ENNReal.ofReal_mul (Nat.cast_nonneg _), ENNReal.ofReal_natCast]
   gcongr
 
-/-- **First moment from below** (wiki tag AWWZ): `M / (2e) ≤ E Z`. -/
+/-- **First moment from below**: `M / (2e) ≤ E Z`. -/
 theorem lintegral_maxClusterIntersection_ge [Countable V]
     (q : Sym2 V → unitInterval) {Λ : Finset V} (hΛ : Λ.Nonempty) :
     ENNReal.ofReal ((tightnessScale q Λ : ℝ) / (2 * Real.exp 1)) ≤
@@ -113,7 +113,7 @@ private theorem tsum_geometric_le :
   rw [this]
   exact ENNReal.ofReal_le_ofReal (by linarith)
 
-/-- **Higher moments** (wiki tag 2FN1): by universal tightness, for every
+/-- **Higher moments**: by universal tightness, for every
 profile, every finite nonempty `Λ` and every `k`,
 `E Z^k ≤ C_k M^k` with `C_k = 20 · 18^k · k!`, independent of `V`, `q` and `Λ`. -/
 theorem lintegral_maxClusterIntersection_pow_le [Countable V]

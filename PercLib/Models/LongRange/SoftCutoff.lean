@@ -139,7 +139,7 @@ theorem shell_term_eq {r : ℝ} (hr : 0 < r) (A : ℝ) (k : ℕ) :
   field_simp
   rw [mul_assoc, ← mul_pow, mul_one_div_cancel h2α.ne', one_pow, mul_one]
 
-/-- **C4E9, the row of `J - J_r`.** For `r ≥ 1`,
+/-- **The row of `J - J_r`.** For `r ≥ 1`,
 `∑'_{v ≠ u} (J - J_r)(u,v) ≤ A 3^d (1 + 2^d/(1 - 2^{-α})) r^{-α}`. -/
 theorem tsum_cutoff_sub_le (hα : 0 < α) (hA : 0 ≤ A) (hjA : ∀ t, 1 ≤ t → j t ≤ A * t ^ (-(d : ℝ) - α))
     {r : ℝ} (hr : 1 ≤ r) (u : Fin d → ℤ) :
@@ -226,7 +226,7 @@ theorem tsum_cutoff_sub_le (hα : 0 < α) (hA : 0 ≤ A) (hjA : ∀ t, 1 ≤ t �
         congr 1
         ring
 
-/-- **C4E9, the added layer.** At intensity `β ≥ 0` the independent added layer
+/-- **The added layer.** At intensity `β ≥ 0` the independent added layer
 `1 - e^{-β (J - J_r)}` has probability rows at most `β A 3^d (1 + 2^d/(1 - 2^{-α})) r^{-α}`. -/
 theorem tsum_added_layer_le (hα : 0 < α) (hA : 0 ≤ A) (hjA : ∀ t, 1 ≤ t → j t ≤ A * t ^ (-(d : ℝ) - α))
     {r : ℝ} (hr : 1 ≤ r) {β : ℝ} (hβ : 0 ≤ β) (u : Fin d → ℤ) :

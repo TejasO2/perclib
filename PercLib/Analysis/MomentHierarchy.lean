@@ -607,7 +607,7 @@ theorem moment_hierarchy_constant (k : ℕ) {α B C : ℝ} (hα : α ≠ 0) (hB 
   field_simp
   norm_num
 
-/-- **Moment hierarchy with a slowly varying correction (OBTO).** As
+/-- **Moment hierarchy with a slowly varying correction.** As
 `isEquivalent_moment_hierarchy`, but with `m₂ ~ C r^{3α} L(r)`, where `L > 0` is `C¹` on
 `[R_L, ∞)` and `r L'(r)/L(r) → 0`. Then for every `1 ≤ p ≤ P`,
 `m_p ~ (2p−3)‼ C^{p−1} B^{2−p} r^{(2p−1)α} L(r)^{p−1}`. -/

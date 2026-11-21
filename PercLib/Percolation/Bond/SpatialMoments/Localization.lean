@@ -113,7 +113,7 @@ theorem lintegral_encard_diff_ball_eq (q : Sym2 V → unitInterval) (o : V) (N :
       simp [hN]
   · rw [indicator_of_notMem (fun h => hx h.1), indicator_of_notMem hx]
 
-/-- **32GP.** Let `p, r, C > 0` and `C_p ≥ 0`. If
+/-- **Localization from the spatial moment.** Let `p, r, C > 0` and `C_p ≥ 0`. If
 `E[∑_{x ∈ K_o} N(x - o)^p] ≤ (C_p r)^p χ`, then `E|K_o \ B(o, C r)| ≤ (C_p / C)^p χ`. -/
 theorem lintegral_encard_diff_ball_le [Countable V] (q : Sym2 V → unitInterval) (o : V)
     {N : V → ℝ} {p r C Cp : ℝ} (hp : 0 < p) (hr : 0 < r) (hC : 0 < C)
@@ -172,7 +172,7 @@ theorem chi_eq_lintegral_inter_add_diff [Countable V] (q : Sym2 V → unitInterv
   rw [Set.inter_union_sdiff] at h
   rw [h, ENat.toENNReal_add]
 
-/-- **32GP, consequence.** For every `ε > 0` there is `C > 0`, depending only on `p`, `C_p`
+/-- **Consequence.** For every `ε > 0` there is `C > 0`, depending only on `p`, `C_p`
 and `ε`, such that every profile and scale `r > 0` with
 `E[∑_{x ∈ K_o} N(x - o)^p] ≤ (C_p r)^p χ < ∞` satisfy `χ ≤ (1 + ε) E|K_o ∩ B(o, C r)|`. -/
 theorem exists_chi_le_mul_ball [Countable V] {N : V → ℝ} {p Cp : ℝ}
@@ -222,7 +222,7 @@ theorem exists_chi_le_mul_ball [Countable V] {N : V → ℝ} {p Cp : ℝ}
     rw [hδ]; field_simp; ring
   nlinarith
 
-/-- **Markov form.** Under the hypothesis of 32GP, `P(K_o ⊄ B(o, C r)) ≤ (C_p / C)^p χ`. -/
+/-- **Markov form.** Under the hypothesis of `lintegral_encard_diff_ball_le`, `P(K_o ⊄ B(o, C r)) ≤ (C_p / C)^p χ`. -/
 theorem law_not_subset_ball_le [Countable V] (q : Sym2 V → unitInterval) (o : V)
     {N : V → ℝ} {p r C Cp : ℝ} (hp : 0 < p) (hr : 0 < r) (hC : 0 < C)
     (hCp : 0 ≤ Cp)
@@ -256,7 +256,7 @@ theorem law_not_subset_ball_le [Countable V] (q : Sym2 V → unitInterval) (o : 
 
 /-! ### Non-vacuity witness -/
 
-/-- **Non-vacuity witness for 32GP.** On `ℤ` with every pair closed (`q = 0`), `N = |·|`, `p = 1`,
+/-- **Non-vacuity witness for `lintegral_encard_diff_ball_le`.** On `ℤ` with every pair closed (`q = 0`), `N = |·|`, `p = 1`,
 `C_p = r = 1`: the spatial moment is `N(0) = 0`, so the hypothesis holds and the volume
 outside `B(0, C)` has expectation at most `C⁻¹ χ`. -/
 example (C : ℝ) (hC : 0 < C) :
@@ -361,7 +361,7 @@ theorem exists_moment_ratio_bounds {A b L : ℝ} (hA : 0 < A) (hb : 0 < b) (hL :
       _ ≤ L * ((K 2 + K 3 + K 4) * Q ^ 2 * ∫ ω, X ω ^ 2 ∂μ) := by gcongr; linarith
       _ = L * (K 2 + K 3 + K 4) * Q ^ 2 * ∫ ω, X ω ^ 2 ∂μ := by ring
 
-/-- **Non-vacuity witness for 0WAE.** `X = Y = 1` under a point mass, `Q = 1`, `A = e`, `b = 1`,
+/-- **Non-vacuity witness for `exists_moment_ratio_bounds`.** `X = Y = 1` under a point mass, `Q = 1`, `A = e`, `b = 1`,
 `L = 1`: the tail hypothesis holds (`P(Y ≥ t) = 0` for `t > 1`) and so does localization. -/
 example : ∃ D : ℝ, ∫ ω, (fun _ : Unit => (1 : ℝ)) ω ^ 2 ∂(Measure.dirac ()) ≤
     D * 1 * ∫ ω, (fun _ : Unit => (1 : ℝ)) ω ∂(Measure.dirac ()) := by

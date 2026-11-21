@@ -135,7 +135,7 @@ theorem not_tendsto_dirac_smul (hd : 0 < d) (φ : ℕ → ℕ) (hφ : StrictMono
   rw [hmass] at huniv
   exact one_ne_zero huniv
 
-/-- **WGQ7, vague limit.** The point masses at `n e₁` converge vaguely to `0`: for every
+/-- **Vague limit.** The point masses at `n e₁` converge vaguely to `0`: for every
 compactly supported `f`, `∫ f d δ_{n e₁} → 0`. -/
 theorem tendsto_integral_dirac_smul_of_hasCompactSupport (hd : 0 < d)
     {f : EuclideanSpace ℝ (Fin d) → ℝ} (hf : HasCompactSupport f) :
@@ -284,7 +284,7 @@ theorem integral_laplaceKernel_sizeBias {Ω : Type*} [MeasurableSpace Ω] (P : M
     field_simp
     rfl
 
-/-- **7W00, Laplace part.** Let `X_r ≥ 0` with `0 < m_r = E X_r`, scales `a_r > 0`, and let `Q_r`
+/-- **Laplace part.** Let `X_r ≥ 0` with `0 < m_r = E X_r`, scales `a_r > 0`, and let `Q_r`
 be the law of `X_r/a_r` under the size-biased measure `(X_r/m_r) P_r`. If `Q_r → Q` weakly, with
 `Q(-∞,0) = 0`, and `h_r > 0` with `h_r a_r → λ > 0`, then
 `(a_r/m_r) E[1 - e^{-h_r X_r}] → ∫ f_λ dQ`, `f_λ(y) = (1 - e^{-λy})/y`, `f_λ(0) = λ`. -/
@@ -351,7 +351,7 @@ theorem tendsto_laplace_of_sizeBias_tendsto {ι : Type*} {l : Filter ι} {Ω : T
     exact squeeze_zero (fun r => abs_nonneg _) hclose hdiff
   simpa using hsq.add hweak
 
-/-- **Non-vacuity witness for 7W00.** If `X_r ≡ a_r` then `Q_r = δ₁` for every `r`, and the limit
+/-- **Non-vacuity witness for the Laplace limit.** If `X_r ≡ a_r` then `Q_r = δ₁` for every `r`, and the limit
 `Q = δ₁` is supported on `[0, ∞)`; the Laplace limit is `1 - e^{-λ}`. -/
 theorem sizeBias_law_const {Ω : Type*} [MeasurableSpace Ω] (P : Measure Ω)
     [IsProbabilityMeasure P] {a : ℝ} (ha : 0 < a) :
@@ -365,7 +365,7 @@ theorem sizeBias_law_const {Ω : Type*} [MeasurableSpace Ω] (P : Measure Ω)
       measure_univ, one_smul]
   · simp
 
-/-- **Non-vacuity witness for 7W00, instantiated.** With `X_r ≡ a_r = 1` on a point, `h_r = λ`, the
+/-- **Non-vacuity witness for the Laplace limit, instantiated.** With `X_r ≡ a_r = 1` on a point, `h_r = λ`, the
 hypotheses hold with `Q_r = Q = δ₁`, and the theorem gives the constant sequence
 `1 - e^{-λ}`. -/
 theorem tendsto_laplace_const {ι : Type*} (l : Filter ι) {lam : ℝ} (hlam : 0 < lam) :
@@ -614,7 +614,7 @@ theorem integral_indicator_inv_sizeBias {Ω : Type*} [MeasurableSpace Ω] (P : M
   · rw [indicator_of_notMem (show X ω / a ∉ Ici t from fun h => hω ((le_div_iff₀ ha).1 h)),
       indicator_of_notMem (show ω ∉ {ω | t * a ≤ X ω} from hω), mul_zero, mul_zero]
 
-/-- **7W00, tail part.** Let `X_r ≥ 0`, scales `a_r > 0`, and let `Q_r` be the law of `X_r/a_r`
+/-- **Tail part.** Let `X_r ≥ 0`, scales `a_r > 0`, and let `Q_r` be the law of `X_r/a_r`
 under the size-biased measure `(X_r/m_r) P_r`, `m_r = E X_r`. If `Q_r → Q` weakly and `t > 0`
 with `Q{t} = 0`, then `(a_r/m_r) P(X_r ≥ t a_r) → ∫_{[t,∞)} y⁻¹ dQ`. -/
 theorem tendsto_tail_of_sizeBias_tendsto {ι : Type*} {l : Filter ι} {Ω : Type*}

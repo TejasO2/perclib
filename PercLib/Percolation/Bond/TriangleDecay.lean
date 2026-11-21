@@ -227,7 +227,7 @@ theorem tendsto_tau_sq_cofinite [Countable V] (q : Sym2 V → unitInterval)
 
 /-! ### Item 1: decay of the open triangle -/
 
-/-- **96A2, item 1.** If `D = ⨆ x, Δₓ < ⊤`, then for every `o`, `T³(o,x) → 0` as `x` leaves
+/-- **Item 1.** If `D = ⨆ x, Δₓ < ⊤`, then for every `o`, `T³(o,x) → 0` as `x` leaves
 finite sets. -/
 theorem tendsto_triangle_cofinite [Countable V] (q : Sym2 V → unitInterval)
     (hD : (⨆ x, ∑' u, ∑' v, tau q x u * tau q u v * tau q v x) < ⊤) (o : V) :
@@ -287,7 +287,7 @@ theorem tendsto_triangle_cofinite [Countable V] (q : Sym2 V → unitInterval)
     _ ≤ η + η := by gcongr
     _ = ε := ENNReal.add_halves ε
 
-/-- **96A2, item 1, finite-set form.** If `D = ⨆ x, Δₓ < ⊤`, then for every `o` and `ε > 0`
+/-- **Item 1, finite-set form.** If `D = ⨆ x, Δₓ < ⊤`, then for every `o` and `ε > 0`
 there is a finite `E` with `T³(o,x) < ε` for every `x ∉ E`. -/
 theorem exists_finset_triangle_lt [Countable V] (q : Sym2 V → unitInterval)
     (hD : (⨆ x, ∑' u, ∑' v, tau q x u * tau q u v * tau q v x) < ⊤) (o : V) {ε : ℝ≥0∞}
@@ -312,7 +312,7 @@ theorem triangle_map_eq [Countable V] (q : Sym2 V → unitInterval) (σ : V ≃ 
   rw [← σ.tsum_eq]
   exact tsum_congr fun v => by rw [hT, hT, hT]
 
-/-- **96A2, item 2.** Suppose bijections of `V` preserving `q` and a function `d : V → V → ℝ`
+/-- **Item 2.** Suppose bijections of `V` preserving `q` and a function `d : V → V → ℝ`
 act transitively, and `Δ_o < ⊤`. Then `⨆_{d(u,v) ≥ r} T³(u,v) → 0` as `r → ∞` (the empty
 supremum is `0`). -/
 theorem tendsto_iSup_triangle [Countable V] (q : Sym2 V → unitInterval) (d : V → V → ℝ)

@@ -189,7 +189,7 @@ theorem tsum_tau_offDiag_le (J : Sym2 V → ℝ≥0)
     inv_one_sub_eq_one_add β hβ] at hchi
   exact (ENNReal.add_le_add_iff_left ENNReal.one_ne_top).1 hchi
 
-/-- **1EWX, susceptibility bounds.** If every off-diagonal row of `J` sums to exactly one
+/-- **Susceptibility bounds.** If every off-diagonal row of `J` sums to exactly one
 and `0 ≤ β < 1`, then `1 + β - β²/2 ≤ χ(o) ≤ (1 - β)⁻¹` at every root. -/
 theorem chi_bounds (J : Sym2 V → ℝ≥0)
     (hrow : ∀ v, rowSum (fun e => (J e : ℝ≥0∞)) v = 1) (β : ℝ≥0)
@@ -224,7 +224,7 @@ theorem chi_bounds (J : Sym2 V → ℝ≥0)
         · exact ofReal_mul_le_intensityProfile J β _ (hJle y hy)
     _ ≤ chi (intensityProfile J β) o := one_add_rowSum_le_chi _ o
 
-/-- **1EWX, triangle bounds.** If every off-diagonal row of `J` sums to at most one and
+/-- **Triangle bounds.** If every off-diagonal row of `J` sums to at most one and
 `β < 1`, then `1 ≤ Δ ≤ 1 + 3 m² + m³` with `m = β / (1 - β)`, at every root. -/
 theorem triangle_bounds (J : Sym2 V → ℝ≥0)
     (hrow : ∀ v, rowSum (fun e => (J e : ℝ≥0∞)) v ≤ 1) (β : ℝ≥0)

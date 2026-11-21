@@ -184,7 +184,7 @@ theorem cutoffPowerLawDerivative : CutoffPowerLawDerivative := by
 
 /-! ### Witnesses -/
 
-/-- PVA8 at `d = 1`, `α = 1`, the sup norm, `r = 2` and `N(x - y) = 1`: the value is
+/-- The cut-off power-law formula at `d = 1`, `α = 1`, the sup norm, `r = 2` and `N(x - y) = 1`: the value is
 `(1 - 2^{-2})/2`. -/
 example : (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (powerLawProfile (1 / ((1 : ℕ) + 1))
     ((1 : ℕ) + 1)) 2 s(fun _ => 1, 0) : ℝ) = (1 - 2 ^ (-(2 : ℝ))) / 2 := by

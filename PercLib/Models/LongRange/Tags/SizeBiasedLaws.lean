@@ -36,7 +36,7 @@ off-diagonal bond kernels, both zero on the diagonal). Then `0 ≤ J_r ≤ J`; t
 `J - J_r` and of the added layer `1 - e^{-β(J - J_r)}` are at most `C r^{-α}` and
 `β C r^{-α}`, `C = A 3^d (1 + 2^d/(1 - 2^{-α}))`; and if the cutoff root cluster is a.s.
 finite, the ghost transforms satisfy `M_r(h) ≤ M(h) ≤ M_r(h) + β C r^{-α} E_r[X e^{-hX}] M(h)`
-(via the two-layer comparison BEJT and transitivity). -/
+(via the two-layer comparison `lintegral_ghost_le_layer` and transitivity). -/
 @[tag "C4E9"]
 theorem softCutoff_rows_and_ghost_comparison {d : ℕ} {j : ℝ → ℝ} {α A : ℝ}
     (_hd : 1 ≤ d) (hα : 0 < α) (hA : 0 < A)

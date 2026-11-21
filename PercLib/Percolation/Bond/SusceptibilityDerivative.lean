@@ -311,7 +311,7 @@ theorem russo_finiteChi_le (J : Sym2 V → ℝ≥0) (o : (S : Set V)) {β : ℝ}
         rw [← Finset.sum_mul]
         ring
 
-/-- **TAVM, right derivative.** At every `β ≥ 0` the finite-volume susceptibility
+/-- **Right derivative.** At every `β ≥ 0` the finite-volume susceptibility
 `β ↦ χ_S(o) = ∑_{y ∈ S} τ_S(o,y)` has a derivative `D` within `[0, ∞)` with
 `0 ≤ D ≤ R_S χ_S(o) M_S`, where `R_S = max_{u ∈ S} ∑_{v ∈ S, v ≠ u} J(u,v)` and
 `M_S = max_{u ∈ S} χ_S(u)`. -/
@@ -496,7 +496,7 @@ theorem russo_finiteChi_le_rowSum_mul_sq (S : Finset V) (o : (S : Set V)) {β : 
     (mul_nonneg (hR0.trans (Finset.sup'_le _ _ fun u _ => hRS u)) (hχS0.trans (hχS o)))
 
 include hJ in
-/-- **MXGM, integrated form.** For a transitive kernel with finite off-diagonal row sum `R`,
+/-- **Integrated form.** For a transitive kernel with finite off-diagonal row sum `R`,
 if `χ(β) = chi q_β o` is finite for `β ∈ (a,b)`, `0 ≤ a`, then for `a < s ≤ t < b`,
 `χ(t) - χ(s) ≤ R ∫_s^t χ(u)² du`. -/
 theorem chi_sub_le_integral (o : V)
@@ -570,7 +570,7 @@ theorem monotoneOn_toReal_chi (o : V) {A : Set ℝ}
     (chi_mono (fun e => intensityProfile_mono J (Real.toNNReal_le_toNNReal huv) e) o)
 
 include hJ in
-/-- **MXGM, Lipschitz form.** Under the hypotheses of `chi_sub_le_integral`, the
+/-- **Lipschitz form.** Under the hypotheses of `chi_sub_le_integral`, the
 susceptibility is Lipschitz on every `[s,t] ⊆ (a,b)`, with constant `R χ(t)²`. -/
 theorem lipschitzOnWith_chi (o : V)
     (hR : rowSum (fun e => (J e : ℝ≥0∞)) o ≠ ⊤) {a b : ℝ} (ha : 0 ≤ a)
@@ -741,7 +741,7 @@ theorem inv_chi_sub_le (o : V)
   nlinarith [mul_nonneg hR0 hvu, mul_nonneg (mul_nonneg hR0 hvu) hv0.le]
 
 include hJ in
-/-- **MXGM, derivative.** Wherever `β ↦ χ(β)` is differentiable in `(a,b)`, its derivative
+/-- **Derivative.** Wherever `β ↦ χ(β)` is differentiable in `(a,b)`, its derivative
 lies in `[0, R χ(β)²]`. -/
 theorem hasDerivAt_chi_mem_Icc (o : V)
     (hR : rowSum (fun e => (J e : ℝ≥0∞)) o ≠ ⊤) {a b : ℝ} (ha : 0 ≤ a)
@@ -772,7 +772,7 @@ theorem hasDerivAt_chi_mem_Icc (o : V)
     linarith
 
 include hJ in
-/-- **MXGM, almost-everywhere differentiability.** `β ↦ χ(β)` is differentiable at almost
+/-- **Almost-everywhere differentiability.** `β ↦ χ(β)` is differentiable at almost
 every `β ∈ (a,b)` (Rademacher, applied on compact subintervals). -/
 theorem ae_differentiableAt_chi (o : V)
     (hR : rowSum (fun e => (J e : ℝ≥0∞)) o ≠ ⊤) {a b : ℝ} (ha : 0 ≤ a)
@@ -809,7 +809,7 @@ end MXGM
 
 /-! ### Non-vacuity -/
 
-/-- `F = {o}`: `χ_F ≡ 1`, so the derivative of TAVM is `0`. -/
+/-- `F = {o}`: `χ_F ≡ 1`, so the derivative of `hasDerivAt_finiteChi_le` is `0`. -/
 example (J : Sym2 V → ℝ≥0) (o : V) {β : ℝ} (hβ : 0 < β) :
     ∃ D, HasDerivAt (fun b : ℝ => ∑ y : (({o} : Finset V) : Set V),
         (law (intensityProfile J b.toNNReal)).real
@@ -838,7 +838,7 @@ example (J : Sym2 V → ℝ≥0) (o : V) {β : ℝ} (hβ : 0 < β) :
   rw [hconst] at hD
   exact hD.unique (hasDerivAt_const β 1)
 
-/-- Two vertices with one pair of intensity `1`: TAVM applies at every `β > 0`. -/
+/-- Two vertices with one pair of intensity `1`: `hasDerivAt_finiteChi_le` applies at every `β > 0`. -/
 example {β : ℝ} (hβ : 0 < β) :=
   hasDerivAt_finiteChi_le (Finset.univ : Finset Bool)
     (fun e : Sym2 Bool => if e = s(false, true) then 1 else 0)
@@ -879,7 +879,7 @@ example : ∀ᵐ β, β ∈ Ioo (0 : ℝ) 1 → DifferentiableAt ℝ (fun u : �
   ae_differentiableAt_chi _ bool_pair_transitive false (by simp [rowSum_def, tsum_fintype]) le_rfl
     fun β _ => chi_bool_ne_top _ _ _
 
-/-- MXGM on two vertices joined by a pair of intensity `1`: the kernel is transitive (the
+/-- The integrated mean-field inequality on two vertices joined by a pair of intensity `1`: the kernel is transitive (the
 swap of the two vertices), `R = 1`, and every susceptibility is at most `2`, so the
 integrated inequality holds on `(0, b)` for every `b`. -/
 example {s t b : ℝ} (hs : 0 < s) (hst : s ≤ t) (ht : t < b) :

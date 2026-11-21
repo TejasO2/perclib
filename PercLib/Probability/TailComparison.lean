@@ -78,7 +78,7 @@ theorem measurable_encard_inter (hK : ∀ x, MeasurableSet {ω | x ∈ K ω}) (�
     (f := fun x ω => {ω | x ∈ K ω}.indicator (fun _ => (1 : ℝ≥0∞)) ω) _
     fun x _ => measurable_const.indicator (hK x)
 
-/-- **HPE6, finiteness.** `K` is finite almost surely. -/
+/-- **Finiteness.** `K` is finite almost surely. -/
 theorem ae_finite_of_escape (Λ : ℕ → Finset V) {a C₁ : ℝ} (ha : 0 < a)
     (h1 : ∀ r : ℕ, 1 ≤ r → μ {ω | ¬ K ω ⊆ Λ r} ≤ ENNReal.ofReal (C₁ * (r : ℝ) ^ (-a))) :
     ∀ᵐ ω ∂μ, (K ω).Finite := by
@@ -102,7 +102,7 @@ theorem half_le_floor {t : ℝ} (ht : 1 ≤ t) : t / 2 ≤ (⌊t⌋₊ : ℝ) :=
   have h2 : (1 : ℝ) ≤ ⌊t⌋₊ := by exact_mod_cast Nat.one_le_floor_iff t |>.2 ht
   rcases le_total t 2 with h | h <;> linarith
 
-/-- **HPE6, tail bound.** `P(|K| ≥ n) ≤ (2^a C₁ + C₂) n^{-a/(a+b)}` for `n ≥ 1`. -/
+/-- **Tail bound.** `P(|K| ≥ n) ≤ (2^a C₁ + C₂) n^{-a/(a+b)}` for `n ≥ 1`. -/
 theorem measure_le_encard_le (hK : ∀ x, MeasurableSet {ω | x ∈ K ω}) (Λ : ℕ → Finset V)
     {a b C₁ C₂ : ℝ} (ha : 0 < a) (hb : 0 ≤ b) (hC₁ : 0 ≤ C₁) (hC₂ : 0 ≤ C₂)
     (h1 : ∀ r : ℕ, 1 ≤ r → μ {ω | ¬ K ω ⊆ Λ r} ≤ ENNReal.ofReal (C₁ * (r : ℝ) ^ (-a)))
@@ -166,7 +166,7 @@ theorem measure_le_encard_le (hK : ∀ x, MeasurableSet {ω | x ∈ K ω}) (Λ :
     _ ≤ ENNReal.ofReal ((2 ^ a * C₁ + C₂) * (n : ℝ) ^ (-a / (a + b))) :=
         ENNReal.ofReal_le_ofReal (by nlinarith)
 
-/-- **HPE6, exponent.** If `log P(|K| ≥ n)/log n → -1/δ` with `δ > 0`, then
+/-- **Exponent.** If `log P(|K| ≥ n)/log n → -1/δ` with `δ > 0`, then
 `δ ≤ (a+b)/a`. -/
 theorem le_of_log_tail_exponent [IsProbabilityMeasure μ] (hK : ∀ x, MeasurableSet {ω | x ∈ K ω})
     (Λ : ℕ → Finset V) {a b C₁ C₂ : ℝ} (ha : 0 < a) (hb : 0 ≤ b) (hC₁ : 0 ≤ C₁) (hC₂ : 0 ≤ C₂)
@@ -286,7 +286,7 @@ theorem le_of_sum_ge_sqrt {p : ℕ → ℝ} {c C : ℝ} {N₀ A : ℕ} (hN₀ : 
 
 /-! ### Non-vacuity -/
 
-/-- MBV2 with `p_n = n^{-1/2}`, `c = C = 1`, `N₀ = 1`, `A = 16`. -/
+/-- `le_of_sum_ge_sqrt` with `p_n = n^{-1/2}`, `c = C = 1`, `N₀ = 1`, `A = 16`. -/
 example (n : ℕ) (hn : 1 ≤ n) :
     1 / (2 * Real.sqrt (16 : ℕ)) / Real.sqrt n ≤ 1 / Real.sqrt n := by
   refine le_of_sum_ge_sqrt (p := fun k => 1 / Real.sqrt k) (c := 1) (C := 1) (N₀ := 1)
@@ -311,7 +311,7 @@ example (n : ℕ) (hn : 1 ≤ n) :
     rw [this]
     norm_num
 
-/-- HPE6 with `K = {o}` deterministic, `Λ_r = {o}`, `C₁ = 0`, `C₂ = 1`, `b = 0`. -/
+/-- The random-set tail comparison with `K = {o}` deterministic, `Λ_r = {o}`, `C₁ = 0`, `C₂ = 1`, `b = 0`. -/
 example (μ : Measure Unit) [IsProbabilityMeasure μ] (n : ℕ) (hn : 1 ≤ n) :
     μ {_ω | (n : ℕ∞) ≤ (({()} : Set Unit)).encard} ≤
       ENNReal.ofReal ((2 ^ (1 : ℝ) * 0 + 1) * (n : ℝ) ^ (-(1 : ℝ) / (1 + 0))) := by

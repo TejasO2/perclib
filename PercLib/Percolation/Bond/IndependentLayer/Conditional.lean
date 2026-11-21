@@ -47,7 +47,7 @@ theorem union_cutoff_omitted (q : Sym2 V → I) (E₀ : Set (Sym2 V)) :
   · simp [he]
   · simp [he]
 
-/-- The omitted row bound in the form used by BEJT. -/
+/-- The omitted row bound in the form used by `lintegral_ghost_le_layer`. -/
 theorem omitted_row_le (q : Sym2 V → I) (E₀ : Set (Sym2 V)) {δ : ℝ≥0∞}
     (hδ : ∀ u, (∑' w, if w = u ∨ s(u, w) ∈ E₀ then 0 else
       (unitInterval.toNNReal (q s(u, w)) : ℝ≥0∞)) ≤ δ) (u : V) :
@@ -61,7 +61,7 @@ theorem omitted_row_le (q : Sym2 V → I) (E₀ : Set (Sym2 V)) {δ : ℝ≥0∞
       rfl
     · simp [hw, hE]
 
-/-- **FJWB.** If the cut-off cluster `X` of `o` is finite almost surely and the omitted rows
+/-- **Omitted-edge ghost comparison.** If the cut-off cluster `X` of `o` is finite almost surely and the omitted rows
 are at most `δ`, then `M₀(h) ≤ M_o(h) ≤ M₀(h) + δ E[X e^{-hX}] M*(h)`. -/
 theorem lintegral_ghost_cutoff_le [Countable V] (q : Sym2 V → I) (E₀ : Set (Sym2 V)) (o : V)
     {h : ℝ} (hh : 0 < h)
@@ -109,7 +109,7 @@ theorem lintegral_ghost_eq_of_transitive (q : Sym2 V → I)
   rw [lintegral_map_image_sym2Map]
   simp_rw [encard_cluster_image]
 
-/-- **FJWB, transitive form.** When the full profile is transitive, `M* = M_o` and
+/-- **Transitive form.** When the full profile is transitive, `M* = M_o` and
 `M_o(h) ≤ M₀(h) + δ E[X e^{-hX}] M_o(h)`. -/
 theorem lintegral_ghost_cutoff_le_of_transitive [Countable V] (q : Sym2 V → I)
     (hT : ∀ x y : V, ∃ τ : V ≃ V, τ x = y ∧ ∀ e, q (Sym2.map τ e) = q e)
@@ -138,7 +138,7 @@ theorem lintegral_ghost_cutoff_le_of_transitive [Countable V] (q : Sym2 V → I)
 
 /-! ### Non-vacuity witnesses -/
 
-/-- FJWB on `ℤ` with the zero profile and `E₀ = ∅`: the cut-off cluster is `{o}`, the
+/-- `lintegral_ghost_cutoff_le` on `ℤ` with the zero profile and `E₀ = ∅`: the cut-off cluster is `{o}`, the
 omitted rows vanish, and the profile is transitive under translations. -/
 example (h : ℝ) (hh : 0 < h) :
     ∫⁻ ω, (1 - EReal.exp (-((h : EReal) * (((cluster ω (0 : ℤ)).encard : ℝ≥0∞) : EReal))))

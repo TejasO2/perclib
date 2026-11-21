@@ -230,7 +230,7 @@ theorem lintegral_encard_cluster_inter_ball [NeZero L]
   rw [lintegral_indicator_const (measurableSet_conn x y), one_mul]
   simp only [hy', ↓reduceIte, tau]
 
-/-- **V4QQ / YWTU, conditional on two-sided bounds for `τ`.** If
+/-- **Ball sums, conditional on two-sided bounds for `τ`.** If
 `a L^{-h(y-x)(d-α)} ≤ τ(x,y) ≤ A L^{-h(y-x)(d-α)}` for `x ≠ y`, then for every `n ≥ 1`,
 `(a/2) L^{αn} ≤ E|K_x ∩ B(x,n)| ≤ (1 + A L^α / (L^α - 1)) L^{αn}`. -/
 theorem lintegral_encard_cluster_inter_ball_bounds (hL : 2 ≤ L) (hd : 1 ≤ d) {α : ℝ}
@@ -250,8 +250,7 @@ theorem lintegral_encard_cluster_inter_ball_bounds (hL : 2 ≤ L) (hd : 1 ≤ d)
   exact ⟨le_tsum_levelBall hL hd ha (tau q) hlow x hn,
     tsum_levelBall_le hL hα hA (tau q) (fun x => (tau_self q x).le) hup x n⟩
 
-/-- **V4QQ / YWTU, conditional on two-sided bounds for the connection probability inside the
-smallest common ball.** Write `P(x,y)` for the probability that `x` and `y` are joined by an
+/-- **Ball sums, conditional on two-sided bounds for the connection probability inside the smallest common ball.** Write `P(x,y)` for the probability that `x` and `y` are joined by an
 open path inside `B(x, h(y-x))`. If `a L^{-h(y-x)(d-α)} ≤ P(x,y) ≤ A L^{-h(y-x)(d-α)}` for
 `x ≠ y`, then for every `n ≥ 1` the expected number `∑_{y ∈ B(x,n)} P(x,y)` lies between
 `(a/2) L^{αn}` and `(1 + A L^α / (L^α - 1)) L^{αn}`, and `(a/2) L^{αn} ≤ E|K_x ∩ B(x,n)|`. -/

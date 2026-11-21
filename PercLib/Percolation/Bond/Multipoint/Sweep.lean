@@ -245,7 +245,7 @@ theorem sweepProduct_image_smul {E : Type*} [NormedAddCommGroup E] [NormedSpace 
 
 /-! ### Item 4: three points -/
 
-/-- **Item 4 (9YE6), three points.** `S({x, y, z}) = d(x, y) d(y, z) d(z, x)` for distinct
+/-- **Item 4, three points.** `S({x, y, z}) = d(x, y) d(y, z) d(z, x)` for distinct
 `x, y, z`. -/
 theorem threePartDistance_triple {x y z : X} (hxy : x ≠ y) (hyz : y ≠ z) (hxz : x ≠ z) :
     threePartDistance ({x, y, z} : Finset X) = dist x y * dist y z * dist z x := by

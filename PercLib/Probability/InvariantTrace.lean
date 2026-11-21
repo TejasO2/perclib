@@ -48,7 +48,7 @@ theorem invariant_apply_one {R : Type*} (M : Γ → Γ → R)
   have := hM v⁻¹ v 1
   rwa [inv_mul_cancel, mul_one, eq_comm] at this
 
-/-- **Trace step of IZAO / 87W3.** For invariant kernels, `tr₁(MN) = tr₁(NM)`:
+/-- **Trace step.** For invariant kernels, `tr₁(MN) = tr₁(NM)`:
 `∑' v, M 1 v * N v 1 = ∑' v, N 1 v * M v 1`. No summability is needed for the identity of
 the two `tsum`s. -/
 @[to_additive /-- Additive version of the trace identity. -/]
@@ -71,7 +71,7 @@ theorem summable_abs_mul_of_sq (M N : Γ → Γ → ℝ) (hM : Summable fun v =>
   rw [abs_mul]
   nlinarith [sq_abs (M 1 v), sq_abs (N v 1), sq_nonneg (|M 1 v| - |N v 1|)]
 
-/-- **Trace step of IZAO / 87W3, with convergence.** For invariant real kernels with
+/-- **Trace step, with convergence.** For invariant real kernels with
 square-summable rows and columns, both trace series converge absolutely and are equal. -/
 @[to_additive trace_comm_of_invariant_add /-- Additive version of the trace identity with convergence. -/]
 theorem trace_comm_of_invariant (M N : Γ → Γ → ℝ)

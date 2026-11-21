@@ -300,7 +300,7 @@ private theorem coe_toNNReal_eq_ofReal (u : unitInterval) :
   rw [ENNReal.ofReal, Real.toNNReal_of_nonneg (unitInterval.nonneg u)]
   rfl
 
-/-- **PI11**, pointwise. For `q_t = intensityProfile J t` and `0 < α ≤ β`,
+/-- Pointwise. For `q_t = intensityProfile J t` and `0 < α ≤ β`,
 `P_β(x ∈ B_ω(o,r)) ≤ (β/α)^r · P_α(o ↔ x)`. -/
 theorem law_edist_le_le [Countable V] (J : Sym2 V → ℝ≥0) {α β : ℝ≥0} (hα : 0 < α)
     (hαβ : α ≤ β) (o x : V) (r : ℕ) :
@@ -372,7 +372,7 @@ theorem law_edist_le_le [Countable V] (J : Sym2 V → ℝ≥0) {α β : ℝ≥0}
     _ = ((β : ℝ≥0∞) / α) ^ r * (lam ^ r * law (intensityProfile J β) B) := by ring
     _ ≤ _ := mul_le_mul' le_rfl htau
 
-/-- **PI11**, volume form: `E_β|B_ω(o,r)| ≤ (β/α)^r χ_o(α)`. -/
+/-- Volume form: `E_β|B_ω(o,r)| ≤ (β/α)^r χ_o(α)`. -/
 theorem lintegral_ball_le [Countable V] (J : Sym2 V → ℝ≥0) {α β : ℝ≥0} (hα : 0 < α)
     (hαβ : α ≤ β) (o : V) (r : ℕ) :
     ∫⁻ ω, (({y | (openGraph ω).edist o y ≤ r} : Set V).encard : ℝ≥0∞)
@@ -393,7 +393,7 @@ private theorem one_add_inv_pow_le_exp (r : ℕ) (hr : r ≠ 0) :
         congr 1
         field_simp
 
-/-- **PI11**, linear growth. If `b > 0` and `χ_o(b - ε) ≤ C/ε` for all `0 < ε < ε₀`, then
+/-- Linear growth. If `b > 0` and `χ_o(b - ε) ≤ C/ε` for all `0 < ε < ε₀`, then
 `E_b|B_ω(o,r)| ≤ (eC/b)(r+1)` for all large `r`. -/
 theorem eventually_lintegral_ball_le [Countable V] (J : Sym2 V → ℝ≥0) (o : V) {b : ℝ≥0}
     (hb : 0 < b) (C : ℝ≥0∞) {ε₀ : ℝ≥0} (hε₀ : 0 < ε₀)
@@ -463,7 +463,7 @@ theorem eventually_lintegral_ball_le [Countable V] (J : Sym2 V → ℝ≥0) (o :
 
 /-! ### Non-vacuity witnesses -/
 
-/-- PI11 on the two-vertex model at `r = 0` and `r = 1`. -/
+/-- The intrinsic ball bounds on the two-vertex model at `r = 0` and `r = 1`. -/
 example (α β : ℝ≥0) (hα : 0 < α) (hαβ : α ≤ β) :
     law (intensityProfile (fun _ : Sym2 Bool => (1 : ℝ≥0)) β)
         {ω | (openGraph ω).edist false true ≤ (0 : ℕ)} ≤
@@ -473,7 +473,7 @@ example (α β : ℝ≥0) (hα : 0 < α) (hαβ : α ≤ β) :
       ((β : ℝ≥0∞) / α) ^ 1 * tau (intensityProfile (fun _ : Sym2 Bool => (1 : ℝ≥0)) α) false true :=
   ⟨law_edist_le_le _ hα hαβ false true 0, law_edist_le_le _ hα hαβ false true 1⟩
 
-/-- J1V5 for the deterministic singleton cluster: on `Unit` under the point mass at the
+/-- `measure_encard_cluster_ge_le` for the deterministic singleton cluster: on `Unit` under the point mass at the
 empty configuration, `Q_r = 0` and `|B_ω(o,r)| = 1`, so the hypotheses hold with `A = 0`,
 `B = 1`. -/
 example (n : ℕ) (hn : 1 ≤ n) :

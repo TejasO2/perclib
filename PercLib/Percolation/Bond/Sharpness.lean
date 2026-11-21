@@ -282,7 +282,7 @@ theorem one_le_boundaryFlux_of_rootCriticalIntensity_le [Countable V] (J : Sym2 
   exact absurd hβ (not_le.2 (lt_rootCriticalIntensity_of_boundaryFlux_lt_one J hT
     (offDiag_rowSum_lt_top_of_summable J hJ) T hoT β h))
 
-/-- **L0TE, mean-field lower bound (item 3).** Under transitivity and summable rows, for
+/-- **Mean-field lower bound (item 3).** Under transitivity and summable rows, for
 every `β > β_c`, `P_β(|K_o| = ∞) ≥ 1 - β_c/β`. (The hypothesis `β_c < β` forces
 `β_c < ⊤`.) -/
 theorem one_sub_div_le_law_cluster_infinite [Countable V] (J : Sym2 V → ℝ≥0)

@@ -49,7 +49,7 @@ theorem ghost_exp_natCast (h : ℝ) (m : ℕ) :
       ENNReal.ofReal (Real.exp (-h)) ^ m :=
   PercLib.Percolation.Bond.exp_neg_mul_natCast h m
 
-/-- **0NVH, pointwise.** `1 - e^{-hT} = (1 - e^{-h}) ∑_{n ≥ 0} e^{-hn} 1{T ≥ n + 1}`. -/
+/-- **Pointwise.** `1 - e^{-hT} = (1 - e^{-h}) ∑_{n ≥ 0} e^{-hn} 1{T ≥ n + 1}`. -/
 theorem one_sub_ghost_eq_tsum {h : ℝ} (hh : 0 < h) (T : ℕ∞) :
     1 - EReal.exp (-((h : EReal) * ((T : ℝ≥0∞) : EReal))) =
       ENNReal.ofReal (1 - Real.exp (-h)) * ∑' n : ℕ,
@@ -122,7 +122,7 @@ theorem one_sub_exp_le_mul_min_add {h : ℝ} (hh : 0 < h) (N : ℕ) (T : ℕ∞)
 
 variable {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} {T : Ω → ℕ∞}
 
-/-- **0NVH, the series.** `M(h) = (1 - e^{-h}) ∑_{n ≥ 1} e^{-h(n-1)} P(T ≥ n)`, written with
+/-- **The series.** `M(h) = (1 - e^{-h}) ∑_{n ≥ 1} e^{-h(n-1)} P(T ≥ n)`, written with
 `n + 1` in place of `n`. -/
 theorem lintegral_ghost_eq_tsum (hT : Measurable T) {h : ℝ} (hh : 0 < h) :
     ∫⁻ ω, (1 - EReal.exp (-((h : EReal) * ((T ω : ℝ≥0∞) : EReal)))) ∂μ =
@@ -143,14 +143,14 @@ theorem lintegral_ghost_eq_tsum (hT : Measurable T) {h : ℝ} (hh : 0 < h) :
   refine lintegral_congr fun ω => ?_
   simp [Set.indicator]
 
-/-- **0NVH, lower bound.** `(1 - e^{-hN}) P(T ≥ N) ≤ M(h)`. -/
+/-- **Lower bound.** `(1 - e^{-hN}) P(T ≥ N) ≤ M(h)`. -/
 theorem mul_measure_le_lintegral_ghost (hT : Measurable T) {h : ℝ} (hh : 0 < h) (N : ℕ) :
     ENNReal.ofReal (1 - Real.exp (-(h * N))) * μ {ω | (N : ℕ∞) ≤ T ω} ≤
       ∫⁻ ω, (1 - EReal.exp (-((h : EReal) * ((T ω : ℝ≥0∞) : EReal)))) ∂μ :=
   (mul_le_mul_of_nonneg_left (measure_mono fun _ hω => one_sub_exp_ge_of_natCast_le hh hω)
     bot_le).trans (mul_meas_ge_le_lintegral₀ (measurable_one_sub_exp hT _).aemeasurable _)
 
-/-- **0NVH, upper bound.** `M(h) ≤ h E[min(T, N)] + P(T ≥ N)`. -/
+/-- **Upper bound.** `M(h) ≤ h E[min(T, N)] + P(T ≥ N)`. -/
 theorem lintegral_ghost_le (hT : Measurable T) {h : ℝ} (hh : 0 < h) (N : ℕ) :
     ∫⁻ ω, (1 - EReal.exp (-((h : EReal) * ((T ω : ℝ≥0∞) : EReal)))) ∂μ ≤
       ENNReal.ofReal h * ∫⁻ ω, ((min (T ω) N : ℕ∞) : ℝ≥0∞) ∂μ +
@@ -203,7 +203,7 @@ theorem tendsto_one_sub_ghost (t : ℕ∞) :
 
 variable [IsProbabilityMeasure μ]
 
-/-- **8B62, first limit.** `M(h) → P(T = ⊤)` as `h ↓ 0`. -/
+/-- **First limit.** `M(h) → P(T = ⊤)` as `h ↓ 0`. -/
 theorem tendsto_lintegral_ghost (hT : Measurable T) :
     Tendsto (fun h : ℝ => ∫⁻ ω, (1 - EReal.exp (-((h : EReal) * ((T ω : ℝ≥0∞) : EReal)))) ∂μ)
       (𝓝[>] 0) (𝓝 (μ {ω | T ω = ⊤})) := by
@@ -219,7 +219,7 @@ theorem tendsto_lintegral_ghost (hT : Measurable T) :
     (by simp) (Eventually.of_forall fun ω => tendsto_one_sub_ghost (T ω))
 
 omit [IsProbabilityMeasure μ] in
-/-- **8B62, second limit.** `M(h)/h → E T` in `ℝ≥0∞` as `h ↓ 0`. -/
+/-- **Second limit.** `M(h)/h → E T` in `ℝ≥0∞` as `h ↓ 0`. -/
 theorem tendsto_lintegral_ghost_div (hT : Measurable T) :
     Tendsto (fun h : ℝ => (∫⁻ ω, (1 - EReal.exp (-((h : EReal) * ((T ω : ℝ≥0∞) : EReal))))
       ∂μ) / ENNReal.ofReal h) (𝓝[>] 0) (𝓝 (∫⁻ ω, (T ω : ℝ≥0∞) ∂μ)) := by
@@ -333,7 +333,7 @@ theorem ghost_toReal_le (hT : Measurable T) {h : ℝ} (hh : 0 < h) (m : ℕ) :
     (ENNReal.sum_ne_top.2 fun j _ => hfin _)) (hfin _), ENNReal.toReal_mul,
     ENNReal.toReal_ofReal hh.le, ENNReal.toReal_sum fun j _ => hfin _] at this
 
-/-- **Real form of the 0NVH lower bound.** `(1 - e^{-hN}) P(T ≥ N) ≤ M(h)`. -/
+/-- **Real form of the lower bound.** `(1 - e^{-hN}) P(T ≥ N) ≤ M(h)`. -/
 theorem le_ghost_toReal (hT : Measurable T) {h : ℝ} (hh : 0 < h) (N : ℕ) :
     (1 - Real.exp (-(h * N))) * (μ {ω | (N : ℕ∞) ≤ T ω}).toReal ≤
       (∫⁻ ω, (1 - EReal.exp (-((h : EReal) * ((T ω : ℝ≥0∞) : EReal)))) ∂μ).toReal := by

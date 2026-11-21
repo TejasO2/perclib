@@ -71,7 +71,7 @@ theorem expectation_coordinate (q : E → ℝ) (e : E) :
   rw [h]
   simp [expectation, sum_weight]
 
-/-- **VVDC.** `Cov_q(f, Xₑ) = qₑ(1-qₑ) E_q[Δₑ f]`, for every real profile (in particular
+/-- **Covariance with a coordinate.** `Cov_q(f, Xₑ) = qₑ(1-qₑ) E_q[Δₑ f]`, for every real profile (in particular
 every profile in `[0,1]^E`, endpoints included). -/
 theorem covariance_coordinate (q : E → ℝ) (e : E) (f : (E → Bool) → ℝ) :
     expectation q (fun ω => f ω * if ω e then 1 else 0) -
@@ -122,7 +122,7 @@ theorem covariance_coordinate_nonneg {q : E → ℝ} (hq : ∀ e, q e ∈ Set.Ic
       · exact this.1
       · linarith [this.2]
 
-/-- **DUYN**, derivative. For `q_β(e) = 1 - e^{-βJₑ}` with `Jₑ ≥ 0` and `β > 0`, the
+/-- Derivative. For `q_β(e) = 1 - e^{-βJₑ}` with `Jₑ ≥ 0` and `β > 0`, the
 derivative in `β` of `E_β[f]` is `∑_{e ∈ E₊} c_β(e) Cov_β(f, Xₑ)`, where
 `E₊ = {e | Jₑ > 0}` and `c_β(e) = Jₑ/(1 - e^{-βJₑ})`. -/
 theorem expectation_intensity_hasDerivAt_covariance (J : E → ℝ) (hJ : ∀ e, 0 ≤ J e)
@@ -149,7 +149,7 @@ theorem expectation_intensity_hasDerivAt_covariance (J : E → ℝ) (hJ : ∀ e,
   · have : J e = 0 := le_antisymm (not_lt.mp he) (hJ e)
     simp [this]
 
-/-- **DUYN**, coefficient bounds. For `Jₑ > 0` and `β > 0`: `c_β(e) ≥ 1/β`, and
+/-- Coefficient bounds. For `Jₑ > 0` and `β > 0`: `c_β(e) ≥ 1/β`, and
 `0 < Jₑ/(e^{βJₑ} - 1) = e^{-βJₑ} c_β(e) ≤ c_β(e)`. -/
 theorem intensity_coefficient_bounds {J β : ℝ} (hJ : 0 < J) (hβ : 0 < β) :
     1 / β ≤ J / (1 - Real.exp (-β * J)) ∧
@@ -178,7 +178,7 @@ theorem intensity_coefficient_bounds {J β : ℝ} (hJ : 0 < J) (hβ : 0 < β) :
 
 /-! ### Non-vacuity witnesses -/
 
-/-- One coordinate and `f = Xₑ`: VVDC reads `Var = q(1-q)`. -/
+/-- One coordinate and `f = Xₑ`: `covariance_coordinate` reads `Var = q(1-q)`. -/
 example (q : ℝ) :
     expectation (fun _ : Unit => q) (fun ω => (if ω () then (1 : ℝ) else 0) *
         if ω () then 1 else 0) -

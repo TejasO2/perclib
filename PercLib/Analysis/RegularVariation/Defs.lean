@@ -33,15 +33,14 @@ open scoped Topology
 namespace PercLib.Analysis
 
 /-- `L` is **slowly varying at infinity**: `L` is measurable on some tail `[a, ∞)`, eventually
-positive, and `L (c x) / L x → 1` as `x → ∞` for every fixed `c > 0` (BGT §1.2; wiki tag
-3491). -/
+positive, and `L (c x) / L x → 1` as `x → ∞` for every fixed `c > 0` (BGT §1.2). -/
 def SlowlyVarying (L : ℝ → ℝ) : Prop :=
   (∃ a, Measurable ((Ici a).domRestrict L)) ∧ (∀ᶠ x in atTop, 0 < L x) ∧
     ∀ c : ℝ, 0 < c → Tendsto (fun x => L (c * x) / L x) atTop (𝓝 1)
 
 /-- `f` is **regularly varying at infinity with index `ρ`**: `f` is measurable on some tail
 `[a, ∞)`, eventually positive, and `f (c x) / f x → c ^ ρ` as `x → ∞` for every fixed `c > 0`
-(BGT §1.4; wiki tag 3491). The equivalent form `f x = x ^ ρ L x` with `L` slowly varying is
+(BGT §1.4). The equivalent form `f x = x ^ ρ L x` with `L` slowly varying is
 `regularlyVarying_iff_slowlyVarying_div_rpow`. -/
 def RegularlyVarying (ρ : ℝ) (f : ℝ → ℝ) : Prop :=
   (∃ a, Measurable ((Ici a).domRestrict f)) ∧ (∀ᶠ x in atTop, 0 < f x) ∧

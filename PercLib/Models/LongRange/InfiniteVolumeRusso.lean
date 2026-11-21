@@ -443,7 +443,7 @@ theorem integral_sub_eq_integral_flux [Countable V] {F : ℕ∞ → ℝ} {m : �
       (tendsto_integral_window hFm hF o hSm hS id measurable_id _)
   exact tendsto_nhds_unique h6 (h5.congr fun k => (h4 k).symm)
 
-/-! ### The cut-off family 
+/-! ### The cut-off family
 
 For a norm `N` on `ℝ^d` (evaluated on `ℤ^d`), a profile `K ≥ 0`, decreasing and differentiable
 on `(0, ∞)` with derivative `K'`, and an intensity `β`, the cut-off law at scale `r` is

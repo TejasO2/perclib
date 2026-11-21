@@ -273,7 +273,7 @@ lemma event_homogeneous_hasDerivAt (p : ℝ) (A : Set (Set E)) (hA : IsUpperSet 
       (∑ e, expectation (fun _ : E => p) (fun ω => if pivotal A e ω then 1 else 0)) p := by
   simpa using event_hasDerivAt (fun _ u => u) (fun _ => 1) p (fun _ => hasDerivAt_id p) hA
 
-/-- **GI8Q.** For an increasing event and `F(p) = P_p(A)` (as the event polynomial),
+/-- **Variance bound on the Russo derivative.** For an increasing event and `F(p) = P_p(A)` (as the event polynomial),
 `p(1-p) F'(p) ≥ F(p)(1-F(p))`. Holds on the closed interval `[0,1]`. -/
 theorem event_variance_le_deriv {A : Set (Set E)} (hA : IsUpperSet A) {p : ℝ}
     (hp : p ∈ Set.Icc (0 : ℝ) 1) :
@@ -390,7 +390,7 @@ theorem odds_ratio_monotoneOn {A : Set (Set E)} (hA : IsUpperSet A) (hne : A.Non
     rw [key]
     exact div_nonneg (by linarith) (by positivity)
 
-/-- **6ITM.** For an increasing event that is neither empty nor everything, and
+/-- **Odds-ratio monotonicity.** For an increasing event that is neither empty nor everything, and
 `0 < a < b < 1`: `F(b)/(1-F(b)) ≥ F(a)/(1-F(a)) · b(1-a)/(a(1-b))`, with `F` the event
 polynomial. -/
 theorem odds_ratio_le {A : Set (Set E)} (hA : IsUpperSet A) (hne : A.Nonempty)
@@ -416,7 +416,7 @@ theorem odds_ratio_le {A : Set (Set E)} (hA : IsUpperSet A) (hne : A.Nonempty)
     field_simp
   linarith
 
-/-- **6ITM**, probability form for the homogeneous product law. -/
+/-- Probability form for the homogeneous product law. -/
 theorem prodBernoulli_odds_ratio_le {A : Set (Set E)} (hA : IsUpperSet A) (hne : A.Nonempty)
     (hnu : A ≠ Set.univ) {a b : unitInterval} (ha : 0 < (a : ℝ)) (hab : (a : ℝ) < b)
     (hb : (b : ℝ) < 1) :
@@ -483,7 +483,7 @@ private lemma singleton_event (p : ℝ) :
     by_cases hω : ω () <;> simp [hω]
   rw [h, expectation_singleton]
 
-/-- One coordinate and `A = {s | () ∈ s}`: GI8Q is an equality, `p(1-p)·1 = p(1-p)`. -/
+/-- One coordinate and `A = {s | () ∈ s}`: `event_variance_le_deriv` is an equality, `p(1-p)·1 = p(1-p)`. -/
 example (p : ℝ) (hp : p ∈ Set.Icc (0 : ℝ) 1) :
     expectation (fun _ : Unit => p) (eventValue {s : Set Unit | () ∈ s}) *
         (1 - expectation (fun _ : Unit => p) (eventValue {s : Set Unit | () ∈ s})) =
@@ -496,7 +496,7 @@ example (p : ℝ) (hp : p ∈ Set.Icc (0 : ℝ) 1) :
   refine ⟨?_, event_variance_le_deriv (fun _ _ hst h => hst h) hp⟩
   simp only [singleton_event, deriv_id'', mul_one]
 
-/-- One coordinate and `A = {s | () ∈ s}`: 6ITM is an equality, and its hypotheses hold. -/
+/-- One coordinate and `A = {s | () ∈ s}`: `odds_ratio_le` is an equality, and its hypotheses hold. -/
 example (a b : ℝ) (ha : 0 < a) (hab : a < b) (hb : b < 1) :
     expectation (fun _ : Unit => a) (eventValue {s : Set Unit | () ∈ s}) /
         (1 - expectation (fun _ : Unit => a) (eventValue {s : Set Unit | () ∈ s})) *

@@ -314,7 +314,7 @@ theorem add_pow_succ_sub_pow_sub_pow (A B : ℝ) (k : ℕ) :
   rw [Finset.sum_congr rfl h]
   ring
 
-/-- **C9Y8, exact formula.** Let `V` be finite and the intensities `λ_u` invariant under a
+/-- **Exact formula.** Let `V` be finite and the intensities `λ_u` invariant under a
 group acting transitively (`∀ x y, ∃ σ, σ x = y` preserving every `λ_u`), with derivatives
 `w` at `t`. Then for every `k ≥ 0`, `m_k(u) = E_u |K_o|^k` satisfies
 `m_k'(t) = (1/2) ∑_{y ≠ o} w(o, y) E_t[1{o ↮ y} ∑_{j=1}^k C(k+1, j) |K_o|^j |K_y|^{k+1-j}]`. -/
@@ -397,7 +397,7 @@ theorem hasDerivAt_moment_of_transitive (lam : ℝ → Sym2 V → ℝ≥0) (w : 
   rw [Finset.sum_congr rfl hcongr]
   field_simp
 
-/-- **C9Y8, sign.** For nondecreasing intensities (`w ≥ 0`) the derivative in
+/-- **Sign.** For nondecreasing intensities (`w ≥ 0`) the derivative in
 `hasDerivAt_moment_of_transitive` is nonnegative. -/
 theorem moment_derivative_nonneg (w : Sym2 V → ℝ) (hw : ∀ e, 0 ≤ w e)
     (q : Sym2 V → unitInterval) (o : V) (k : ℕ) :

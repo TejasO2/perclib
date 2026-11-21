@@ -395,7 +395,7 @@ section Main
 
 variable {V : Type*} [Countable V]
 
-/-- **Item 2 of HATE, as a derivative within `[0, ∞)`.** For a finite domain `Λ ∋ o` and
+/-- **Derivative of the escape probability, within `[0, ∞)`.** For a finite domain `Λ ∋ o` and
 `J` with summable rows, the escape probability `f(β) = P_β(K_o ⊄ Λ)` has derivative
 `∑_{T ⊆ Λ, o ∈ T} P_β(S = T) ∑_{u ∈ T} τ_{T,β}(o,u) ∑_{v ∉ T} J(u,v)` within `[0, ∞)` at
 every `β ≥ 0`; at `β = 0` this is the right derivative. -/
@@ -488,7 +488,7 @@ theorem hasDerivWithinAt_law_escape (J : Sym2 V → ℝ≥0)
     Finset.sum_finset_coe (fun v => if v ∈ T then P * (τ v * R v) else 0) Λ,
     Finset.sum_ite_mem, Finset.inter_eq_right.2 hT.1, Finset.mul_sum]
 
-/-- **Item 2 of HATE.** At every `β > 0` the escape probability is differentiable with the
+/-- **Derivative of the escape probability.** At every `β > 0` the escape probability is differentiable with the
 derivative of `hasDerivWithinAt_law_escape`. -/
 theorem hasDerivAt_law_escape (J : Sym2 V → ℝ≥0)
     (hJ : ∀ u, Summable fun v => (J s(u, v) : ℝ)) (Λ : Finset V) {o : V} (ho : o ∈ Λ)
@@ -538,7 +538,7 @@ theorem sum_law_unexplored_eq (q : Sym2 V → unitInterval) (Λ : Finset V) {o :
     exact Finset.coe_injective (h.symm.trans h')
   · exact fun T _ => measurableSet_unexplored_eq _ _
 
-/-- **Item 3 of HATE, with an arbitrary lower bound.** If every
+/-- **Finite-size differential inequality, with an arbitrary lower bound.** If every
 `Φ_β(o,T) = ∑_{u ∈ T} τ_{T,β}(o,u) ∑_{v ∉ T} q_β(u,v)` is at least `m`, then
 `f'(β) ≥ (1 - f(β))/β · m`. -/
 theorem law_escape_derivative_ge (J : Sym2 V → ℝ≥0)
@@ -583,7 +583,7 @@ theorem law_escape_derivative_ge (J : Sym2 V → ℝ≥0)
   rw [← tsum_mul_left]
   exact hsq.tsum_le_tsum hle hsJ
 
-/-- **Item 3 of HATE.** For `β > 0`,
+/-- **Finite-size differential inequality.** For `β > 0`,
 `f'(β) ≥ (1 - f(β))/β · min_{T ⊆ Λ, o ∈ T} Φ_β(o,T)`. -/
 theorem deriv_law_escape_ge (J : Sym2 V → ℝ≥0)
     (hJ : ∀ u, Summable fun v => (J s(u, v) : ℝ)) (Λ : Finset V) {o : V} (ho : o ∈ Λ)

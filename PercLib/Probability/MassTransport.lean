@@ -45,7 +45,7 @@ theorem tsum_mass_transport {Γ : Type*} [Group Γ] (F : Γ → Γ → ℝ≥0�
   simp_rw [h]
   exact ((Equiv.inv Γ).tsum_eq (fun x => F 1 x)).symm
 
-/-- **Mass-transport principle for an invariant random transport** (K5ZX), with the action
+/-- **Mass-transport principle for an invariant random transport**, with the action
 given as a family of measure-preserving maps `act g`. No group-action axioms are needed. -/
 @[tag "X5NY", to_additive lintegral_mass_transport_add /-- **Mass-transport principle for an invariant random transport** (K5ZX),
 additive version. -/]

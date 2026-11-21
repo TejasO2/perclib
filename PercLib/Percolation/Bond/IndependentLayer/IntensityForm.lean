@@ -80,7 +80,7 @@ theorem rowSum_eq_root {J : Sym2 V → ℝ≥0} {o : V}
   congr 2
   rw [← hφ s(o, y), Sym2.map_mk]
 
-/-- **5LNL, step.** For a transitive intensity with `L < ⊤`, if `χ_β < ⊤` and
+/-- **Step.** For a transitive intensity with `L < ⊤`, if `χ_β < ⊤` and
 `ε < 1/(L χ_β)`, then `χ_{β+ε} ≤ χ_β / (1 - ε L χ_β)`. -/
 theorem chi_intensity_add_le [Countable V] {J : Sym2 V → ℝ≥0} {o : V}
     (hJ : ∀ x, ∃ φ : V ≃ V, φ o = x ∧ ∀ e, J (Sym2.map φ e) = J e)
@@ -134,7 +134,7 @@ theorem exists_pos_chi_intensity_add_lt_top [Countable V] {J : Sym2 V → ℝ≥
   obtain ⟨ε, hε0, hε⟩ := ENNReal.lt_iff_exists_nnreal_btwn.1 hpos
   exact ⟨ε, by exact_mod_cast hε0, chi_intensity_add_lt_top hJ hL hχ hε⟩
 
-/-- **5LNL, lower bound.** `b_χ = sSup {β | χ_β < ⊤} ≥ 1/L` for a transitive intensity. -/
+/-- **Lower bound.** `b_χ = sSup {β | χ_β < ⊤} ≥ 1/L` for a transitive intensity. -/
 theorem inv_le_chiCriticalIntensity [Countable V] {J : Sym2 V → ℝ≥0} {o : V}
     (hJ : ∀ x, ∃ φ : V ≃ V, φ o = x ∧ ∀ e, J (Sym2.map φ e) = J e)
     (hL : rowSum (fun e => (J e : ℝ≥0∞)) o < ⊤) :

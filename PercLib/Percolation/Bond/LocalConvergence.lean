@@ -313,7 +313,7 @@ end Balls
 
 /-! ### Lower semicontinuity of the threshold (468P) -/
 
-/-- **468P.** Let `G` be connected and locally finite on a countable type, and let every
+/-- **Lower semicontinuity of the threshold under local convergence.** Let `G` be connected and locally finite on a countable type, and let every
 `G_n` be vertex-transitive and locally finite on a countable type. If for every `R` the
 closed balls of radius `R` about `o_n` in `G_n` are eventually isomorphic, as rooted graphs,
 to the closed ball of radius `R` about `o` in `G`, then for homogeneous nearest-neighbour
@@ -376,7 +376,7 @@ example (S : Finset (Fin 1 → ℤ)) (hoS : 0 ∈ S) (r : ℕ∞)
           ℝ≥0∞)) := by
   convert boundaryFlux_eq_of_ballIso SimpleGraph.Iso.refl (fun _ => rfl) S hoS hS β
 
-/-- 468P for the constant sequence `G_n = G = ℤ` (nearest-neighbour line, `zdGraph 1`):
+/-- `rootCriticalIntensity_le_liminf` for the constant sequence `G_n = G = ℤ` (nearest-neighbour line, `zdGraph 1`):
 every hypothesis holds. -/
 example : rootCriticalIntensity ((zdGraph 1).edgeSet.indicator fun _ => (1 : ℝ≥0)) 0 ≤
     liminf (fun _ : ℕ => rootCriticalIntensity

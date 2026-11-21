@@ -33,7 +33,7 @@ namespace PercLib.Percolation.Bond
 
 variable {V : Type*}
 
-/-- **5LNL, right-openness.** If `b_χ = sSup {β | χ_β < ⊤}` is finite, then `χ_{b_χ} = ⊤`. -/
+/-- **Right-openness.** If `b_χ = sSup {β | χ_β < ⊤}` is finite, then `χ_{b_χ} = ⊤`. -/
 theorem chi_intensity_sSup_eq_top [Countable V] {J : Sym2 V → ℝ≥0} {o : V}
     (hJ : ∀ x, ∃ φ : V ≃ V, φ o = x ∧ ∀ e, J (Sym2.map φ e) = J e)
     (hL : rowSum (fun e => (J e : ℝ≥0∞)) o < ⊤)
@@ -96,7 +96,7 @@ theorem exists_chi_gt_of_chi_eq_top [Countable V] (o : V) {a b : ℝ} (ha : 0 �
   exact ENNReal.toReal_mono (hfin t ⟨hs.trans hts.1, hts.2⟩) (finiteChi_le_chi _ (S n) o')
 
 include hJ in
-/-- **MXGM, blow-up.** For a transitive kernel with off-diagonal row sum `0 < R < ∞`, if
+/-- **Blow-up.** For a transitive kernel with off-diagonal row sum `0 < R < ∞`, if
 `χ(β) = chi q_β o` is finite on `(a,b)`, `0 ≤ a`, and `χ(b) = ∞`, then
 `χ(β) ≥ 1/(R (b - β))` for `a < β < b`. -/
 theorem one_div_le_chi_of_chi_eq_top (o : V)

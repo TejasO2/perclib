@@ -184,7 +184,7 @@ theorem integral_ncard_pow_eq_of_transitive (J : Sym2 V → ℝ≥0)
   funext ω
   rw [← hσx, cluster_image, Set.ncard_image_of_injective _ σ.injective]
 
-/-- **C9Y8, bound.** For a transitive family with `w ≥ 0`, the derivative
+/-- **Bound.** For a transitive family with `w ≥ 0`, the derivative
 `m_k'(t)` of `hasDerivAt_moment_of_transitive` satisfies
 `m_k'(t) ≤ (a(t)/2) ∑_{j=1}^k C(k+1, j) m_j(t) m_{k+1-j}(t)`, where
 `a(t) = ∑_{y ≠ o} w(o, y)` and `m_j(t) = E_t|K_o|^j`. -/

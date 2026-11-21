@@ -204,7 +204,7 @@ theorem tsum_tsum_ite_mem_not_mem_le (s : Sym2 V → I) (C : Finset V) {a : ℝ�
         exact Finset.sum_congr rfl fun u hu => by simp [hu]
     _ = (C.card : ℝ≥0∞) * a := by rw [Finset.sum_const, nsmul_eq_mul]
 
-/-- **AYPN.** Let `ω ~ law q₀` and `ξ ~ law s` be independent, `C = K_o(ω)` finite almost
+/-- **Ghost bound for the added mass.** Let `ω ~ law q₀` and `ξ ~ law s` be independent, `C = K_o(ω)` finite almost
 surely, `D = K_o(ω ∪ ξ) \ C`, `a` a bound on the off-diagonal row sums of `s` and
 `M*(h) = ⨆ v, E_r[1 - e^{-h|K_v|}]` for the union law `r`. Then for every measurable
 functional `f ≥ 0` of the original cluster,
@@ -389,7 +389,7 @@ theorem lintegral_ghost_added_mul_le [Countable V] (q₀ s : Sym2 V → I) (o : 
     _ ≤ _ := tsum_law_cluster_eq_finset_mul_le_set q₀ o
         (fun T => min 1 (a * Mx * T.encard) * f T)
 
-/-- **AYPN, tail form.** Under the hypotheses of `lintegral_ghost_added_mul_le`, for every
+/-- **Tail form.** Under the hypotheses of `lintegral_ghost_added_mul_le`, for every
 `t`, `(1 - e^{-ht}) P(|D| ≥ t) ≤ E[min(1, a M*(h) |C|)]`. -/
 theorem law_added_volume_ge_mul_le [Countable V] (q₀ s : Sym2 V → I) (o : V) {h : ℝ}
     (hh : 0 < h) (hfin : ∀ᵐ ω ∂(law q₀), (cluster ω o).Finite) {a : ℝ≥0∞}

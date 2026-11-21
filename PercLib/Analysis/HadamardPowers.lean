@@ -73,7 +73,7 @@ theorem pow_apply_eq_sum {S : Matrix n n ℝ} (hS : S.IsHermitian) (m : ℕ) (i 
       (hS.eigenvectorUnitary : Matrix n n ℝ) j k :=
   apply_eq_sum_of_mulVec_eigenvectorBasis hS _ (pow_mulVec_eigenvectorBasis hS m) i j
 
-/-- **CS16, identity.** For a real symmetric `S`, with `w_{kl} = u_k ⊙ u_l`,
+/-- **Identity.** For a real symmetric `S`, with `w_{kl} = u_k ⊙ u_l`,
 `S ⊙ S³ - S² ⊙ S² = ½ ∑_{k,l} λ_k λ_l (λ_k - λ_l)² w_{kl} w_{kl}ᵀ`. -/
 theorem hadamard_pow_sub_eq {S : Matrix n n ℝ} (hS : S.IsHermitian) :
     S ⊙ (S ^ 3) - (S ^ 2) ⊙ (S ^ 2) = (1 / 2 : ℝ) • ∑ k, ∑ l,

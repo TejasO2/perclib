@@ -101,7 +101,7 @@ theorem exists_bounds_of_isEquivalent {a : ℝ → ℝ} {a₀ α θ : ℝ} (ha�
     have : θ⁻¹ * (a₀ * t ^ (-α - 1)) * θ = a₀ * t ^ (-α - 1) := by field_simp
     nlinarith
 
-/-- **Step 1 of KKGL.** Let `f > 0` be absolutely continuous on `[t, R]` with `f' ≤ a f²`
+/-- **Step 1 of mesoscopic negligibility.** Let `f > 0` be absolutely continuous on `[t, R]` with `f' ≤ a f²`
 almost everywhere there, where `0 ≤ a(u) ≤ a₊ u^{-α-1}` on `[t,R]`. If `f(R) ≥ ε R^α` and
 `t ≤ λ R`, then `f(t) ≥ D t^α` with `D = (a₊/α + λ^α/ε)⁻¹`. -/
 theorem mul_rpow_le_of_reciprocal {f a : ℝ → ℝ} {α ap ε lam t R : ℝ} (hα : 0 < α)
@@ -160,7 +160,7 @@ theorem mul_rpow_le_of_reciprocal {f a : ℝ → ℝ} {α ap ε lam t R : ℝ} (
     linarith
   exact (one_div_le_one_div (hpos t ⟨le_rfl, htR⟩) (by positivity)).1 hT
 
-/-- **Step 2 of KKGL** (arithmetic). If `α ρ ≤ a₋ D`, `a(t) ≥ a₋ t^{-α-1}`,
+/-- **Step 2 of mesoscopic negligibility** (arithmetic). If `α ρ ≤ a₋ D`, `a(t) ≥ a₋ t^{-α-1}`,
 `T ≥ D t^α` and the collision term is at most `(1 - ρ) T`, then
 `3 α ρ² / t ≤ 3 a(t) (T - c)`. -/
 theorem div_le_three_mul_of_bounds {α ρ am D t at' T c : ℝ} (hα : 0 < α) (hρ : 0 < ρ)
@@ -182,7 +182,7 @@ theorem div_le_three_mul_of_bounds {α ρ am D t at' T c : ℝ} (hα : 0 < α) (
     _ = 3 * (am * t ^ (-α - 1)) * (ρ * (D * t ^ α)) := by rw [← hpow]; ring
     _ ≤ 3 * at' * (T - c) := by gcongr
 
-/-- **Step 2 of KKGL** (the collision term). If `0 ≤ C`, `δ = η D q^κ / (C + 1)`,
+/-- **Step 2 of mesoscopic negligibility** (the collision term). If `0 ≤ C`, `δ = η D q^κ / (C + 1)`,
 `q R ≤ t` and `T ≥ D t^α`, then `C δ R^κ t^{α-κ} ≤ η T`. -/
 theorem collision_le {C δ η D q κ α R t T : ℝ} (hC : 0 ≤ C) (hη : 0 ≤ η) (hD : 0 ≤ D)
     (hq : 0 < q)
@@ -214,7 +214,7 @@ theorem collision_le {C δ η D q κ α R t T : ℝ} (hC : 0 ≤ C) (hη : 0 ≤
     _ = η * (D * t ^ α) := by ring
     _ ≤ η * T := by gcongr
 
-/-- Choice of the exponents in KKGL: for `0 < α` and `α + κ < 3α` there are `0 < ρ < θ < 1`
+/-- Choice of the exponents in mesoscopic negligibility: for `0 < α` and `α + κ < 3α` there are `0 < ρ < θ < 1`
 with `ρ < θ²` and `α + κ < 3 α ρ²`. -/
 theorem exists_exponents {α κ : ℝ} (hα : 0 < α) (hκ0 : 0 < κ) (hκ : κ < 2 * α) :
     ∃ ρ θ : ℝ, 0 < ρ ∧ ρ < 1 ∧ 0 < θ ∧ θ < 1 ∧ ρ < θ ^ 2 ∧ α + κ < 3 * α * ρ ^ 2 := by
@@ -228,7 +228,7 @@ theorem exists_exponents {α κ : ℝ} (hα : 0 < α) (hκ0 : 0 < κ) (hκ : κ 
   rw [this]
   exact mul_lt_mul_of_pos_left hρs (by positivity)
 
-/-- Choice of `λ` in KKGL: for `x > 0` there is `0 < λ < 1` with `λ^α ≤ x`. -/
+/-- Choice of `λ` in mesoscopic negligibility: for `x > 0` there is `0 < λ < 1` with `λ^α ≤ x`. -/
 theorem exists_lam {α x : ℝ} (hα : 0 < α) (hx : 0 < x) :
     ∃ lam : ℝ, 0 < lam ∧ lam < 1 ∧ lam ^ α ≤ x := by
   refine ⟨min (1 / 2) (x ^ (1 / α)), lt_min (by norm_num) (rpow_pos_of_pos hx _),
@@ -237,7 +237,7 @@ theorem exists_lam {α x : ℝ} (hα : 0 < α) (hx : 0 < x) :
         rpow_le_rpow (le_min (by norm_num) (rpow_pos_of_pos hx _).le) (min_le_right _ _) hα.le
     _ = x := by rw [← rpow_mul hx.le, one_div_mul_cancel hα.ne', rpow_one]
 
-/-- Choice of `D` in KKGL: if `ρ a₊ < a₋` and `α ρ λ^α ≤ ε (a₋ - ρ a₊)`, then
+/-- Choice of `D` in mesoscopic negligibility: if `ρ a₊ < a₋` and `α ρ λ^α ≤ ε (a₋ - ρ a₊)`, then
 `D = (a₊/α + λ^α/ε)⁻¹` satisfies `α ρ ≤ a₋ D`. -/
 theorem mul_le_mul_one_div {α ρ am ap ε l : ℝ} (hα : 0 < α) (hap : 0 < ap) (hε : 0 < ε)
     (hl : 0 < l) (h : α * ρ * l ≤ ε * (am - ρ * ap)) :
@@ -250,7 +250,7 @@ theorem mul_le_mul_one_div {α ρ am ap ε l : ℝ} (hα : 0 < α) (hap : 0 < ap
   rw [h2]
   linarith
 
-/-- **KKGL, analytic core.** Let `0 < α ≤ κ < 2α`, `r₀ > 0`, `0 < b ≤ B`, `a₀ > 0`, `C ≥ 0`
+/-- **Analytic core.** Let `0 < α ≤ κ < 2α`, `r₀ > 0`, `0 < b ≤ B`, `a₀ > 0`, `C ≥ 0`
 and `ε > 0`. Suppose `b r^{α+κ} ≤ m₂(r) ≤ B r^{α+κ}` for `r ≥ r₀`, `m₂` and every `T_m`
 (`m > 0`) are absolutely continuous on each `[r₀, R]`, `T_m > 0` on `[r₀, ∞)`, `a` is measurable
 with `a ~ a₀ r^{-α-1}`, and for every `m > 0` and almost every `r ≥ r₀`,
@@ -363,7 +363,7 @@ theorem exists_truncation_lt {T : ℝ → ℝ → ℝ} {m₂ a : ℝ → ℝ} {�
   rw [hratio, one_mul, hL] at hdiso
   linarith
 
-/-- **KKGL** (conclusion QMN5, written out). Let `0 < α ≤ κ < 2α` and `r₀ > 0`. For
+/-- **Mesoscopic negligibility** (conclusion written out). Let `0 < α ≤ κ < 2α` and `r₀ > 0`. For
 `r ≥ r₀` let `μ_r` be a probability measure on `ℝ` with integrable identity, and write
 `m₁(r) = ∫ x dμ_r`, `m₂(r) = ∫ x² dμ_r` and `T_m(r) = ∫ min x m dμ_r`. Suppose
 `m₁(r) ≥ c₁ r^α` with `c₁ > 0`, `b r^{α+κ} ≤ m₂(r) ≤ B r^{α+κ}` with `0 < b ≤ B`, `m₂` and
@@ -523,7 +523,7 @@ theorem truncatedMean_div_mean_twoPoint (hακ : α ≤ κ)
     ← rpow_add hr0, sub_add_cancel, mul_div_assoc, div_self (rpow_pos_of_pos hr0 α).ne',
     mul_one]
 
-/-- The differential inequalities of KKGL for the two-point law, with `a(r) = α r^{-α-1}` and
+/-- The differential inequalities of `tendsto_limsup_truncatedMean_div_mean` for the two-point law, with `a(r) = α r^{-α-1}` and
 `C = 1`. -/
 theorem ae_deriv_twoPoint (hα : 0 < α) (hακ : α ≤ κ)
     (hμ : ∀ r, μ r = ENNReal.ofReal (r ^ (α - κ)) • Measure.dirac (r ^ κ) +
@@ -587,7 +587,7 @@ theorem ae_deriv_twoPoint (hα : 0 < α) (hακ : α ≤ κ)
         0 := mul_nonpos_of_nonneg_of_nonpos (by positivity) (by nlinarith)
     exact hlhs.trans (mul_nonneg (by linarith) (inv_nonneg.2 hr0.le))
 
-/-- **Non-vacuity witness for KKGL.** For every `0 < α ≤ κ < 2α`, the two-point family satisfies all
+/-- **Non-vacuity witness for `tendsto_limsup_truncatedMean_div_mean`.** For every `0 < α ≤ κ < 2α`, the two-point family satisfies all
 hypotheses of `tendsto_limsup_truncatedMean_div_mean` with `r₀ = 1`, `a(r) = α r^{-α-1}`,
 `a₀ = α`, `b = B = c₁ = 1` and `C = 1`. Its conclusion also holds directly, since the ratio is
 `min 1 δ` (`truncatedMean_div_mean_twoPoint`). -/
