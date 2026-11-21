@@ -375,7 +375,7 @@
       "locator": "Proposition 4.17, Corollary 4.19, Proposition 6.5 and Lemma 6.11; additional consequences for the discovery comparison",
       "relationship": "Independent Lindeberg verification and an obstruction to variance matching",
       "status": "pending",
-      "note": "VH4M uses transitivity to control squared discovery means, proving that the independent variance is asymptotic to f_(2p) and that its Lyapunov ratio vanishes. Q7QG combines this with the existing two-thirds variance equivalent: the actual squared-mass variance is one third smaller than the independent comparison variance. The previous sufficient criterion therefore does not prove the Gaussian conjecture in this model. Limiting standardized laws remain bounded in convex order by a Gaussian of variance three halves; no new source error is diagnosed."
+      "note": "VH4M uses transitivity to control squared discovery means, proving that the independent variance is asymptotic to f_(2p) and that its Lyapunov ratio vanishes. Q7QG combines this with the existing two-thirds variance equivalent: the actual squared-mass variance is one third smaller than the independent comparison variance. The previous sufficient criterion therefore does not prove the Gaussian conjecture in this model. Limiting standardized laws remain bounded in convex order by a Gaussian of variance three halves; no new source error is diagnosed. Q7QG is original to this wiki; proof not independently checked."
     },
     {
       "source": "hutchcroft-hierarchical-volumes-2022",
@@ -384,7 +384,7 @@
       "locator": "Proposition 4.17, Corollary 4.19, Lemma 6.11 and Remark 6.14; additional deductions from the fixed-order estimates",
       "relationship": "All-order moment compactness without Gaussian identification",
       "status": "pending",
-      "note": "9FO5 proves Gaussian moment convergence for the independent array by set partitions and vanishing aggregate higher moments. V7MP verifies those assumptions for fixed hierarchical powers, transfers uniform integrability of every fixed power to actual fluctuations, and gives convergence of all moments along weakly convergent subsequences. The one-third variance gap persists; a Gaussian distributional limit is not proved. No journal comparison or new source diagnosis is claimed."
+      "note": "9FO5 proves Gaussian moment convergence for the independent array by set partitions and vanishing aggregate higher moments. V7MP verifies those assumptions for fixed hierarchical powers, transfers uniform integrability of every fixed power to actual fluctuations, and gives convergence of all moments along weakly convergent subsequences. The one-third variance gap persists; a Gaussian distributional limit is not proved. No journal comparison or new source diagnosis is claimed. 9FO5 and V7MP are original to this wiki; proof not independently checked."
     },
     {
       "source": "hutchcroft-hierarchical-volumes-2022",
@@ -393,7 +393,7 @@
       "locator": "Section 2 generator and child recursion; Section 6.3, Remark 6.14, p=2 case; additional deduction",
       "relationship": "A centered-moment proof for the actual squared-mass fluctuations",
       "status": "pending",
-      "note": "J0DE combines the exact coalescent generator with existing uniform moment bounds. Higher jump powers and nonlinear drift are negligible; the remaining Gaussian moment equation contracts both within a level and under independent-child gluing. It proves the p=2 distributional and all fixed moment limits for the exact critical hierarchical model with d at least 3 alpha. General powers, joint/process limits, comparable kernels and exponential-moment convergence are outside this conclusion. This is not a source attribution, journal audit or compiled association."
+      "note": "J0DE combines the exact coalescent generator with existing uniform moment bounds. Higher jump powers and nonlinear drift are negligible; the remaining Gaussian moment equation contracts both within a level and under independent-child gluing. It proves the p=2 distributional and all fixed moment limits for the exact critical hierarchical model with d at least 3 alpha. General powers, joint/process limits, comparable kernels and exponential-moment convergence are outside this conclusion. J0DE is original to this wiki; proof not independently checked."
     },
     {
       "source": "hutchcroft-hierarchical-volumes-2022",
@@ -402,7 +402,7 @@
       "locator": "Section 2 generator and child recursion; Section 6.3, Remark 6.14; additional deduction for fixed integer powers",
       "relationship": "Joint centered-moment proof and explicit covariance for the exact model",
       "status": "pending",
-      "note": "MFGT extends J0DE to every fixed finite collection of integer powers at a common intermediate time. A triangular normalized drift and constant limiting jump covariance determine a Gaussian law. A formal power-series identity gives its explicit covariance, and exact child gluing supplies convergence across levels. All fixed mixed and absolute moments converge; noninteger powers, growing indices, several-time or process limits, comparable kernels and exponential moments remain outside scope. Independent mathematical review, the journal comparison and Lean formalisation remain pending."
+      "note": "MFGT extends J0DE to every fixed finite collection of integer powers at a common intermediate time. A triangular normalized drift and constant limiting jump covariance determine a Gaussian law. A formal power-series identity gives its explicit covariance, and exact child gluing supplies convergence across levels. All fixed mixed and absolute moments converge; noninteger powers, growing indices, several-time or process limits, comparable kernels and exponential moments remain outside scope. MFGT is original to this wiki; proof not independently checked. The journal comparison and Lean formalisation remain pending."
     },
     {
       "source": "hutchcroft-hierarchical-volumes-2022",
@@ -411,7 +411,7 @@
       "locator": "Section 2 finite coalescent dynamics; Section 6.3, Remark 6.14; additional finite-dimensional deduction",
       "relationship": "Cross-time Gaussian dependence within one exact-model coalescent layer",
       "status": "pending",
-      "note": "OQV3 proves finite-dimensional convergence for fixed integer powers and finitely many deterministic times, including coincident times. The integrated mean clock tends to minus log(1-(1-L^-alpha)u); a backward polynomial transition argument identifies a stationary Gaussian Markov law with the MFGT drift and covariance. Uniform mixed and absolute moments follow. This is an additional deduction, not a source theorem or journal audit. Path-space tightness, nested-level dependence, comparable kernels, exponential moments and Lean formalisation remain outside the result."
+      "note": "OQV3 proves finite-dimensional convergence for fixed integer powers and finitely many deterministic times, including coincident times. The integrated mean clock tends to minus log(1-(1-L^-alpha)u); a backward polynomial transition argument identifies a stationary Gaussian Markov law with the MFGT drift and covariance. Uniform mixed and absolute moments follow. OQV3 is original to this wiki; proof not independently checked. Path-space tightness, nested-level dependence, comparable kernels, exponential moments and Lean formalisation remain outside the result."
     },
     {
       "source": "hutchcroft-hierarchical-volumes-2022",
@@ -420,7 +420,7 @@
       "locator": "Section 2 finite coalescent dynamics; Section 6.3, Remark 6.14; additional functional-limit deduction",
       "relationship": "Path tightness and Gaussian convergence for fixed integer power sums in the exact critical model",
       "status": "pending",
-      "note": "Q4PO upgrades OQV3 to convergence in Skorokhod J1 on a single level, and to uniform-topology convergence for any refining uniform-grid linear interpolations. A compensated fourth-power identity and Doob inequality give maximal increments of order h squared plus eta times h. A deterministic grid bound completes the argument. The limit is the continuous time-changed stationary Gaussian process already identified in OQV3. Supremum moments converge below order four. Nested levels, noninteger or growing powers, comparable kernels, exponential moments, independent mathematical review and Lean formalisation remain separate. No new source-version audit or erratum is claimed."
+      "note": "Q4PO upgrades OQV3 to convergence in Skorokhod J1 on a single level, and to uniform-topology convergence for any refining uniform-grid linear interpolations. A compensated fourth-power identity and Doob inequality give maximal increments of order h squared plus eta times h. A deterministic grid bound completes the argument. The limit is the continuous time-changed stationary Gaussian process already identified in OQV3. Supremum moments converge below order four. Nested levels, noninteger or growing powers, comparable kernels, exponential moments, independent mathematical review and Lean formalisation remain separate. No new source-version audit or erratum is claimed. Q4PO is original to this wiki; proof not independently checked."
     },
     {
       "source": "hutchcroft-hierarchical-volumes-2022",
@@ -429,7 +429,7 @@
       "locator": "Section 2 independent layers and gluing; Section 6.3, Remark 6.14; additional finite-tree functional-limit deduction",
       "relationship": "Joint Gaussian path law for a fixed tree of exact-model hierarchical blocks",
       "status": "pending",
-      "note": "F7Q2 combines the exact normalized child sum with fresh parent-layer clocks. A backward polynomial argument in the enlarged filtration identifies independent Gaussian parent innovations, without assuming conditional hydrodynamics. Marginal path tightness gives joint convergence on every fixed finite tree, uniform mixed observation moments and supremum moments below order four. An explicit ancestor covariance yields terminal squared-mass correlation L^(-(d+alpha)h/2). Growing depths or power indices, noninteger powers, comparable kernels and full-law block restrictions are excluded. This is an additional deduction; independent review, the journal comparison and Lean formalisation remain pending. No new erratum is claimed."
+      "note": "F7Q2 combines the exact normalized child sum with fresh parent-layer clocks. A backward polynomial argument in the enlarged filtration identifies independent Gaussian parent innovations, without assuming conditional hydrodynamics. Marginal path tightness gives joint convergence on every fixed finite tree, uniform mixed observation moments and supremum moments below order four. An explicit ancestor covariance yields terminal squared-mass correlation L^(-(d+alpha)h/2). Growing depths or power indices, noninteger powers, comparable kernels and full-law block restrictions are excluded. F7Q2 is original to this wiki; proof not independently checked. The journal comparison and Lean formalisation remain pending. No new erratum is claimed."
     },
     {
       "source": "hutchcroft-hierarchical-volumes-2022",
@@ -438,7 +438,7 @@
       "locator": "Section 2 finite coalescent generator; Section 6.3, Remark 6.14; additional maximal-moment deduction",
       "relationship": "Higher-order maximal increments and convergence of polynomially bounded continuous path observables",
       "status": "pending",
-      "note": "NC7F derives the maximal 2m-th increment estimate h^m plus epsilon_n^(m-1) h by interpolating jump rates, the compensated polynomial identity, Doob and Young inequalities. It gives a quantitative mean interpolation error and convergence of every fixed positive supremum moment for one layer and every fixed finite tree. Continuous path observables with polynomial growth also have convergent expectations. Moment order, power cutoff and depth remain fixed; exponential moments and comparable-kernel or full-law block extensions are not claimed. This is an additional deduction with independent review, journal comparison and Lean formalisation pending; no source erratum changes."
+      "note": "NC7F derives the maximal 2m-th increment estimate h^m plus epsilon_n^(m-1) h by interpolating jump rates, the compensated polynomial identity, Doob and Young inequalities. It gives a quantitative mean interpolation error and convergence of every fixed positive supremum moment for one layer and every fixed finite tree. Continuous path observables with polynomial growth also have convergent expectations. Moment order, power cutoff and depth remain fixed; exponential moments and comparable-kernel or full-law block extensions are not claimed. NC7F is original to this wiki; proof not independently checked. The journal comparison and Lean formalisation remain pending; no source erratum changes."
     }
   ],
   "occursIn": [],
