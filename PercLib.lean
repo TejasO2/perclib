@@ -22,6 +22,7 @@ public import PercLib.Analysis.LogarithmicCorrections
 public import PercLib.Analysis.MesoscopicNegligibility
 public import PercLib.Analysis.MomentHierarchy
 public import PercLib.Analysis.QuadraticRecursion
+public import PercLib.Analysis.ReciprocalCutoff
 public import PercLib.Analysis.ReciprocalODE
 public import PercLib.Analysis.RegularVariation.Algebra
 public import PercLib.Analysis.RegularVariation.Defs
@@ -43,6 +44,7 @@ public import PercLib.Analysis.Tags.IntegratedSusceptibility
 public import PercLib.Analysis.Tags.MarginalODE
 public import PercLib.Analysis.Tags.MarginalODETail
 public import PercLib.Analysis.Tags.MesoscopicTailTransfer
+public import PercLib.Analysis.Tags.ReciprocalCutoff
 public import PercLib.Analysis.Tags.SpatialCutoffMoments
 public import PercLib.Analysis.Tauberian.Laplace
 public import PercLib.Analysis.Tauberian.Converse
