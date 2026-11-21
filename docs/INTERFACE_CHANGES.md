@@ -6,9 +6,20 @@ deprecated alias for one release where that is possible.
 
 ## Announced, not yet merged
 
-- `p-b-CUE4` (audited APPROVE, `audit-p-b-CUE4`; held: gate D-35 check (i) fails on `HasMassTransport.tsum_eq`, fix queued): `mobiusCoeff`, `HasNonnegMobiusCoeffs` in new
+- `p-b-CUE4` (audited APPROVE, `audit-p-b-CUE4`; fixed in `p-b-CUE4-fix`: tag N0HM moved to an `Iff.rfl` characterisation): `mobiusCoeff`, `HasNonnegMobiusCoeffs` in new
   `PercLib/Combinatorics/BooleanCoefficients/Defs.lean`; `HasMassTransport` in new
   `PercLib/Probability/MassTransport/Defs.lean`; `poissonTail` in new `PercLib/Probability/PoissonTail/Defs.lean`.
+
+- `frontier-brw-first-moment` (audited APPROVE, `audit-frontier-brw-first-moment`): in new
+  `PercLib/Probability/BranchingRandomWalkMoment.lean`, namespace `PercLib.Probability.BranchingRandomWalk`:
+  `Config` (with `MeasurableSpace`/`DiscreteMeasurableSpace`/`Countable` instances), `Config.ofList`, `Config.toList`,
+  `Config.count`, `iidLaw`, `childLaw`, `stepLaw`, `stepKernel`, `genKernel`, `brwMeasure` (with Markov/probability
+  instances). Additive; no existing name changed.
+- `p-a-EKDO` (audited APPROVE with 3 exact edits applied verbatim, `audit-r14-outside-batch`): in new
+  `PercLib/Models/HierarchicalComparison/Defs.lean`: `DigitHierarchy` and `DigitHierarchy.offset`, `blockIndex`, `block`,
+  `commonLevel`, `childHierarchy`, `translate`; `layerWeight`, `InStrictAncestor`, `InBlockLayer`, `layerKernel`,
+  `blockLayerKernel`, `ancestorKernel`, `restrictedKernel`, `expectedBlockMax`, `blockScale`, `blockPairSum`,
+  `IsGoodBlock`, `IsAncestrallyGood`. Additive; no existing name changed.
 
 
 ## Merged
