@@ -209,3 +209,85 @@ example (d : ℕ) (i : Fin d) (x : Fin d → ℤ) :
     norm_num
 
 end Witnesses
+
+/-! ### Displacement kernels on general groups
+
+On a group `G` written multiplicatively, the displacement convention is
+`J s(x, y) = k (y * x⁻¹)`. The prescription is well defined on unordered pairs exactly when
+`k` is inversion-even (`exists_sym2_kernel_mul_iff`); such a `J` is invariant under
+simultaneous right translation (`apply_mk_mul_right_of_mulTranslationInvariant`), and under
+simultaneous left translation exactly when `k` is conjugation invariant
+(`forall_apply_mk_mul_left_iff_of_mulTranslationInvariant`). The additive statements above are
+the case `Multiplicative G` of these (see the example after `exists_sym2_kernel_mul_iff`). -/
+
+namespace PercLib.Models
+
+section MulGroup
+
+variable {G α : Type*} [Group G]
+
+/-- A kernel identity `J s(x, y) = k (y * x⁻¹)` on unordered pairs forces `k` to be
+inversion-even. -/
+theorem inv_eq_of_mulTranslationInvariant {J : Sym2 G → α} {k : G → α}
+    (hJ : ∀ x y, J s(x, y) = k (y * x⁻¹)) (z : G) : k z⁻¹ = k z := by
+  have h := hJ 1 z
+  rw [Sym2.eq_swap, hJ z 1, inv_one, mul_one, one_mul] at h
+  exact h
+
+/-- Every inversion-even kernel is the displacement kernel `J s(x, y) = k (y * x⁻¹)` of a
+function on unordered pairs, including the repeated pairs `s(x, x)`. -/
+theorem exists_sym2_kernel_mul (k : G → α) (hk : ∀ z, k z⁻¹ = k z) :
+    ∃ J : Sym2 G → α, ∀ x y, J s(x, y) = k (y * x⁻¹) :=
+  ⟨Sym2.lift ⟨fun x y => k (y * x⁻¹), fun x y => by
+      change k (y * x⁻¹) = k (x * y⁻¹)
+      rw [← hk, mul_inv_rev, inv_inv]⟩,
+    fun x y => Sym2.lift_mk _ x y⟩
+
+/-- **Even displacement kernels.** The prescription `J s(x, y) = k (y * x⁻¹)` defines a
+function on unordered pairs if and only if `k` is inversion-even. -/
+theorem exists_sym2_kernel_mul_iff (k : G → α) :
+    (∃ J : Sym2 G → α, ∀ x y, J s(x, y) = k (y * x⁻¹)) ↔ ∀ z, k z⁻¹ = k z :=
+  ⟨fun ⟨_, hJ⟩ => inv_eq_of_mulTranslationInvariant hJ, exists_sym2_kernel_mul k⟩
+
+/-- A displacement kernel `J s(x, y) = k (y * x⁻¹)` is invariant under simultaneous right
+translation. -/
+theorem apply_mk_mul_right_of_mulTranslationInvariant {J : Sym2 G → α} {k : G → α}
+    (hJ : ∀ x y, J s(x, y) = k (y * x⁻¹)) (g x y : G) :
+    J s(x * g, y * g) = J s(x, y) := by
+  rw [hJ, hJ, mul_inv_rev, mul_assoc, mul_inv_cancel_left]
+
+/-- A displacement kernel `J s(x, y) = k (y * x⁻¹)` is invariant under every simultaneous
+left translation if and only if `k` is conjugation invariant. -/
+theorem forall_apply_mk_mul_left_iff_of_mulTranslationInvariant {J : Sym2 G → α} {k : G → α}
+    (hJ : ∀ x y, J s(x, y) = k (y * x⁻¹)) :
+    (∀ g x y, J s(g * x, g * y) = J s(x, y)) ↔ ∀ g z, k (g * z * g⁻¹) = k z := by
+  have hconj : ∀ g x y, J s(g * x, g * y) = k (g * (y * x⁻¹) * g⁻¹) := fun g x y => by
+    rw [hJ, mul_inv_rev, mul_assoc, mul_assoc, mul_assoc]
+  constructor
+  · intro h g z
+    have := h g 1 z
+    rwa [hconj, hJ, inv_one, mul_one] at this
+  · intro h g x y
+    rw [hconj, h, hJ]
+
+/-- The additive statement `exists_sym2_kernel` is the case `Multiplicative G` of
+`exists_sym2_kernel_mul_iff`. -/
+example {A : Type*} [AddGroup A] (k : A → ℝ≥0) (hk : ∀ z, k (-z) = k z) :
+    ∃ J : Sym2 A → ℝ≥0, ∀ x y, J s(x, y) = k (y - x) := by
+  obtain ⟨J, hJ⟩ := (exists_sym2_kernel_mul_iff (G := Multiplicative A) (fun z => k z.toAdd)).2 hk
+  exact ⟨J, fun x y => (hJ (.ofAdd x) (.ofAdd y)).trans (by simp [sub_eq_add_neg])⟩
+
+open Classical in
+/-- A displacement kernel `J s(x, y) = k (y * x⁻¹)` has the same off-diagonal row at every
+vertex: the kernel mass away from the identity. This is the case `Additive G` of
+`rowSum_eq_of_translationInvariant`. -/
+theorem rowSum_eq_of_mulTranslationInvariant (J : Sym2 G → ℝ≥0) (k : G → ℝ≥0)
+    (hJ : ∀ x y, J s(x, y) = k (y * x⁻¹)) (v : G) :
+    rowSum (fun e => (J e : ℝ≥0∞)) v =
+      ∑' z, if z = 1 then 0 else (k z : ℝ≥0∞) :=
+  rowSum_eq_of_translationInvariant (G := Additive G) J (fun z => k z.toMul)
+    (fun x y => (hJ x.toMul y.toMul).trans (by rw [toMul_sub, div_eq_mul_inv])) v
+
+end MulGroup
+
+end PercLib.Models

@@ -67,6 +67,7 @@ public import PercLib.Basic
 public import PercLib.Combinatorics.DoubleFactorialConvolution
 public import PercLib.Combinatorics.ForestBranching
 public import PercLib.Combinatorics.Tags.ForestConnections
+public import PercLib.Combinatorics.Tags.TreeSplitting
 public import PercLib.Combinatorics.TreeSplitting
 public import PercLib.Meta.Tag
 public import PercLib.Models.BinaryTree
@@ -133,6 +134,7 @@ public import PercLib.Models.Tags.BinaryTree
 public import PercLib.Models.Tags.Boundary
 public import PercLib.Models.Tags.FiniteRangeDecay
 public import PercLib.Models.Tags.Hierarchical
+public import PercLib.Models.Tags.KernelsAndSitePaths
 public import PercLib.Models.Tags.Lattice
 public import PercLib.Models.Tags.Line
 public import PercLib.Models.Tags.Site
@@ -237,6 +239,7 @@ public import PercLib.Percolation.Bond.Tags.CoreOpenDegree
 public import PercLib.Percolation.Bond.Tags.CorePaths
 public import PercLib.Percolation.Bond.Tags.CoreRussoContinuity
 public import PercLib.Percolation.Bond.Tags.CoreSymmetries
+public import PercLib.Percolation.Bond.Tags.CoreThresholdsAndSymmetries
 public import PercLib.Percolation.Bond.Tags.CoreZeroOne
 public import PercLib.Percolation.Bond.Tags.DomainIndependence
 public import PercLib.Percolation.Bond.Tags.FiniteVolume

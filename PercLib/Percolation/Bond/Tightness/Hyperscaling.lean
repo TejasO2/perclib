@@ -23,7 +23,7 @@ Fix a finite nonempty `Λ`, write `X_x = |K_x ∩ Λ|`, `Z = max_{x ∈ Λ} X_x`
 
 * `sum_function_clusterIntersection`: `∑_{x ∈ Λ} f(X_x) = ∑_D |D| f(|D|)` for every `f`.
 * OB0A, `avg_lintegral_pow_clusterIntersection` and its window form: under a uniform root,
-  `E X_U^m = |Λ|⁻¹ E ∑_D |D|^(m+1)`.
+  `E X_U^m = |Λ|⁻¹ E ∑_D |D|^(m+1)`, under any measure on configurations.
 * LQ6Y, `lintegral_rpow_max_le_sum` and `le_lintegral_rpow_max`:
   `∑_{x ∈ Λ} E X_x^p ≥ E Z^(p+1) ≥ M^(p+1) / (e 2^(p+1))` for real `p ≥ 0`.
 * `lintegral_clusterIntersection_le_of_tail`: a window tail `P(n ≤ X_u) ≤ A n^(-θ)`,
@@ -63,11 +63,11 @@ theorem sum_function_clusterIntersection {β : Type*} [AddCommMonoid β] (Λ : F
 
 open Classical in
 /-- The expectation form: `∑_{x ∈ Λ} E f(X_x) = E ∑_D |D| f(|D|)`. -/
-theorem sum_lintegral_function_clusterIntersection [Countable V] (q : Sym2 V → unitInterval)
+theorem sum_lintegral_function_clusterIntersection [Countable V] (μ : Measure (Config V))
     (Λ : Finset V) (f : ℕ → ℝ≥0∞) :
-    ∑ x ∈ Λ, ∫⁻ ω, f (clusterIntersection Λ ω x) ∂(law q) =
+    ∑ x ∈ Λ, ∫⁻ ω, f (clusterIntersection Λ ω x) ∂μ =
       ∫⁻ ω, ∑ D ∈ Λ.image (fun x => Λ.filter (· ∈ cluster ω x)),
-        (D.card : ℝ≥0∞) * f D.card ∂(law q) := by
+        (D.card : ℝ≥0∞) * f D.card ∂μ := by
   rw [← lintegral_finsetSum (f := fun x ω => f (clusterIntersection Λ ω x)) _
     fun x _ => measurable_from_nat.comp (measurable_clusterIntersection Λ x)]
   refine lintegral_congr fun ω => ?_
@@ -79,26 +79,26 @@ theorem sum_lintegral_function_clusterIntersection [Countable V] (q : Sym2 V →
 open Classical in
 /-- **Sampled-root moments.** Under a uniform root `U` on `Λ` independent of `ω`,
 `E X_U^m = |Λ|⁻¹ E ∑_D |D|^(m+1)`. -/
-theorem avg_lintegral_pow_clusterIntersection [Countable V] (q : Sym2 V → unitInterval)
+theorem avg_lintegral_pow_clusterIntersection [Countable V] (μ : Measure (Config V))
     (Λ : Finset V) (m : ℕ) :
-    (Λ.card : ℝ≥0∞)⁻¹ * ∑ x ∈ Λ, ∫⁻ ω, (clusterIntersection Λ ω x : ℝ≥0∞) ^ m ∂(law q) =
+    (Λ.card : ℝ≥0∞)⁻¹ * ∑ x ∈ Λ, ∫⁻ ω, (clusterIntersection Λ ω x : ℝ≥0∞) ^ m ∂μ =
       (Λ.card : ℝ≥0∞)⁻¹ * ∫⁻ ω, ∑ D ∈ Λ.image (fun x => Λ.filter (· ∈ cluster ω x)),
-        (D.card : ℝ≥0∞) ^ (m + 1) ∂(law q) := by
-  rw [sum_lintegral_function_clusterIntersection q Λ fun n => (n : ℝ≥0∞) ^ m]
+        (D.card : ℝ≥0∞) ^ (m + 1) ∂μ := by
+  rw [sum_lintegral_function_clusterIntersection μ Λ fun n => (n : ℝ≥0∞) ^ m]
   simp only [pow_succ']
 
 open Classical in
 /-- **Window form.** For `a, b, v ∈ ℝ`, the moment restricted to the window
 `a v ≤ X_U ≤ b v` is `|Λ|⁻¹ E ∑_{D : a v ≤ |D| ≤ b v} |D|^(m+1)`. -/
 theorem avg_lintegral_pow_clusterIntersection_window [Countable V]
-    (q : Sym2 V → unitInterval) (Λ : Finset V) (m : ℕ) (a b v : ℝ) :
+    (μ : Measure (Config V)) (Λ : Finset V) (m : ℕ) (a b v : ℝ) :
     (Λ.card : ℝ≥0∞)⁻¹ * ∑ x ∈ Λ, ∫⁻ ω,
         (if a * v ≤ (clusterIntersection Λ ω x : ℝ) ∧ (clusterIntersection Λ ω x : ℝ) ≤ b * v
-          then (clusterIntersection Λ ω x : ℝ≥0∞) ^ m else 0) ∂(law q) =
+          then (clusterIntersection Λ ω x : ℝ≥0∞) ^ m else 0) ∂μ =
       (Λ.card : ℝ≥0∞)⁻¹ * ∫⁻ ω, ∑ D ∈ Λ.image (fun x => Λ.filter (· ∈ cluster ω x)),
         (if a * v ≤ (D.card : ℝ) ∧ (D.card : ℝ) ≤ b * v
-          then (D.card : ℝ≥0∞) ^ (m + 1) else 0) ∂(law q) := by
-  rw [sum_lintegral_function_clusterIntersection q Λ fun n =>
+          then (D.card : ℝ≥0∞) ^ (m + 1) else 0) ∂μ := by
+  rw [sum_lintegral_function_clusterIntersection μ Λ fun n =>
     if a * v ≤ (n : ℝ) ∧ (n : ℝ) ≤ b * v then (n : ℝ≥0∞) ^ m else 0]
   congr 1
   refine lintegral_congr fun ω => Finset.sum_congr rfl fun D _ => ?_
@@ -122,7 +122,7 @@ theorem lintegral_rpow_max_le_sum [Countable V] (q : Sym2 V → unitInterval) {�
     (hΛ : Λ.Nonempty) {p : ℝ} (hp : 0 ≤ p) :
     ∫⁻ ω, (maxClusterIntersection Λ ω : ℝ≥0∞) ^ (p + 1) ∂(law q) ≤
       ∑ x ∈ Λ, ∫⁻ ω, (clusterIntersection Λ ω x : ℝ≥0∞) ^ p ∂(law q) := by
-  rw [sum_lintegral_function_clusterIntersection q Λ fun n => (n : ℝ≥0∞) ^ p]
+  rw [sum_lintegral_function_clusterIntersection (law q) Λ fun n => (n : ℝ≥0∞) ^ p]
   refine lintegral_mono fun ω => ?_
   obtain ⟨D, hD, hDc⟩ := exists_trace_eq_max Λ hΛ ω
   rw [← hDc, ENNReal.rpow_add_of_nonneg _ _ hp zero_le_one, ENNReal.rpow_one, mul_comm]
@@ -687,6 +687,6 @@ example (q : Sym2 Unit → unitInterval) (m : ℕ) :
       (({()} : Finset Unit).card : ℝ≥0∞)⁻¹ * ∫⁻ ω, ∑ D ∈ ({()} : Finset Unit).image
         (fun x => ({()} : Finset Unit).filter (· ∈ cluster ω x)),
         (D.card : ℝ≥0∞) ^ (m + 1) ∂(law q) :=
-  avg_lintegral_pow_clusterIntersection q {()} m
+  avg_lintegral_pow_clusterIntersection (law q) {()} m
 
 end PercLib.Percolation.Bond
