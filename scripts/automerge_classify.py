@@ -1026,10 +1026,12 @@ def main(argv=None) -> int:
             raise Reject('the file listing is incomplete')
         classify(entries, args.base_dir, args.head_dir, pr.get('title'))
     except Reject as e:
-        print(f'Not merging: {e}')
+        print('Not merging: ' + str(e).encode('unicode_escape').decode('ascii'))
         return 1
     except (OSError, ValueError, KeyError, TypeError, AttributeError) as e:
-        print(f'Not merging: could not evaluate the inputs ({type(e).__name__}: {e})')
+        print('Not merging: '
+              + f'could not evaluate the inputs ({type(e).__name__}: {e})'
+              .encode('unicode_escape').decode('ascii'))
         return 1
     print(f'Merging pull request #{number} at {head} onto {base}.')
     if args.github_output:

@@ -38,8 +38,25 @@ Earlier findings (a `--` inside `«…»`, code inside an interpolated string `s
 refused by both tools: `«…»` is copied whole, and a string containing `{` is rejected.
 
 Every class above except S5 gives a Lean error at the point of desynchronisation.
-`automerge.yml` needs a successful CI run, so it cannot merge such a file. The danger is
+`automerge.yml` needs a successful CI run, and the CI evidence is checked from the API,
+not from the pull request's log, so it cannot merge such a file. The danger is
 that the hidden code runs while CI builds the pull request.
+
+## Untrusted text in the auto-merge log
+
+This is not a lexer class: it concerns who can be merged. The `decide` step of
+`automerge.yml` prints text that comes from the pull request (file names from the
+pull-request files listing, and rejection reasons quoting them) to its log. A file name
+can contain a newline, so without care a line such as `::set-output name=merge::true`
+could reach the runner as a workflow command and forge the step outputs that the `merge`
+job trusts. Two measures neutralise this:
+
+- the step first prints `::stop-commands::` with a fresh random token that is never
+  printed again, so the runner ignores workflow commands for the rest of the step; the
+  outputs are written only to `$GITHUB_OUTPUT`, a file, which is not affected;
+- `scripts/automerge_classify.py` prints every `Not merging: …` message with control
+  characters escaped (`\n` for a newline), so no line of its output starts with text
+  taken from the pull request; `scripts/test_automerge_classify.py` checks this.
 
 ## How a new class is handled
 

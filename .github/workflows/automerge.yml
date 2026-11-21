@@ -100,6 +100,10 @@ jobs:
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
           set -euo pipefail
+          # File names and reasons printed below come from the pull request: switch off
+          # workflow commands (`::set-output` …) for the rest of this step. Outputs are
+          # written only to $GITHUB_OUTPUT.
+          echo "::stop-commands::$(openssl rand -hex 32)"
           no() { echo "Not merging: $*"; exit 0; }
           [[ $RUN_ID =~ ^[0-9]+$ ]] || no "malformed run id"
           [[ $DEFAULT_BRANCH =~ ^[A-Za-z0-9._-]+$ ]] || no "unexpected default branch name"

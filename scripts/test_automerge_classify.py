@@ -814,6 +814,24 @@ class CommandLineTests(unittest.TestCase):
         bad = f.entries + [dict(filename='scripts/x.py', status='modified', patch='')]
         self.assertEqual(self.run_main(['plan', '--pr', str(pr)], json.dumps(bad))[0], 1)
 
+    def test_rejection_message_cannot_print_workflow_commands(self):
+        f = Fixture()
+        pr = f.root / 'pr.json'
+        pr.write_text(json.dumps(dict(title='x')))
+        payload = ('docs/x\n::set-output name=merge::true\n::set-output name=pr::7\r\n'
+                   '::set-output name=head::' + 'a' * 40 + '\nz')
+        listings = [
+            [dict(filename=payload, status='modified', patch='')],
+            [dict(filename=PATH, previous_filename=payload, status='renamed', patch='')],
+        ]
+        for listing in listings:
+            code, text = self.run_main(['plan', '--pr', str(pr)], json.dumps(listing))
+            self.assertEqual(code, 1, text)
+            self.assertTrue(text.startswith('Not merging: '), text)
+            self.assertIn('::set-output', text)
+            for line in text.splitlines():
+                self.assertFalse(line.lstrip().startswith('::'), text)
+
     def test_paginated_listing(self):
         f = Fixture().lean(PATH, BASE_FILE, PROOF_EDIT_CLEAN).lean(
             'PercLib/Other.lean', BASE_FILE, NEW_LEMMA)
