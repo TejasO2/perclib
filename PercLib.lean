@@ -75,6 +75,7 @@ public import PercLib.Combinatorics.BooleanCoefficients
 public import PercLib.Combinatorics.BooleanCoefficients.Defs
 public import PercLib.Combinatorics.DoubleFactorialConvolution
 public import PercLib.Combinatorics.FiniteEdgeChange
+public import PercLib.Combinatorics.Finpartition.Defs
 public import PercLib.Combinatorics.ForestBranching
 public import PercLib.Combinatorics.Tags.BooleanCoefficients
 public import PercLib.Combinatorics.Tags.ForestConnections
@@ -103,6 +104,8 @@ public import PercLib.Models.HierarchicalAmplificationStep
 public import PercLib.Models.HierarchicalAveragedToPointwise
 public import PercLib.Models.HierarchicalBallSums
 public import PercLib.Models.HierarchicalBallSusceptibility
+public import PercLib.Models.HierarchicalBlockLayers
+public import PercLib.Models.HierarchicalBlockLayers.Defs
 public import PercLib.Models.HierarchicalBoundaryScales
 public import PercLib.Models.HierarchicalBoundaryScales.Defs
 public import PercLib.Models.HierarchicalCutoff
@@ -160,6 +163,7 @@ public import PercLib.Models.Tags.DirectionalDecay
 public import PercLib.Models.Tags.FiniteRangeDecay
 public import PercLib.Models.Tags.FiniteRangeExit
 public import PercLib.Models.Tags.Hierarchical
+public import PercLib.Models.Tags.HierarchicalBlockLayers
 public import PercLib.Models.Tags.HierarchicalBoundaryScales
 public import PercLib.Models.Tags.HierarchicalRunaway
 public import PercLib.Models.Tags.HierarchicalTriangle
@@ -241,9 +245,11 @@ public import PercLib.Percolation.Bond.MomentDerivativeBound
 public import PercLib.Percolation.Bond.MomentDerivativeTruncated
 public import PercLib.Percolation.Bond.MomentDerivatives
 public import PercLib.Percolation.Bond.Multipoint.Defs
+public import PercLib.Percolation.Bond.Multipoint.Dilation
 public import PercLib.Percolation.Bond.Multipoint.Geometry
 public import PercLib.Percolation.Bond.Multipoint.ShapeCount
 public import PercLib.Percolation.Bond.Multipoint.Sweep
+public import PercLib.Percolation.Bond.Multipoint.Tags.Dilation
 public import PercLib.Percolation.Bond.Multipoint.Tags.SmallSets
 public import PercLib.Percolation.Bond.Multipoint.Ultrametric
 public import PercLib.Percolation.Bond.PathComparison
@@ -335,8 +341,10 @@ public import PercLib.Probability.ChiSquareLimit
 public import PercLib.Probability.ChiSquareMoments
 public import PercLib.Probability.ClosedProduct
 public import PercLib.Probability.Concentration
+public import PercLib.Probability.ConditionalCorrelation
 public import PercLib.Probability.Coordinate
 public import PercLib.Probability.CountableBK
+public import PercLib.Probability.CountableSuperposition
 public import PercLib.Probability.Coupling.Monotone
 public import PercLib.Probability.CouplingRatio
 public import PercLib.Probability.CovarianceRusso
@@ -365,6 +373,8 @@ public import PercLib.Probability.GhostFieldDerivative
 public import PercLib.Probability.GhostTransform
 public import PercLib.Probability.Harris
 public import PercLib.Probability.HarrisDecreasing
+public import PercLib.Probability.HigherCorrelation
+public import PercLib.Probability.HigherCorrelation.Defs
 public import PercLib.Probability.IntegratedLowerTail
 public import PercLib.Probability.InvariantTrace
 public import PercLib.Probability.KilledGreen
@@ -414,6 +424,7 @@ public import PercLib.Probability.Tags.FourFunctions
 public import PercLib.Probability.Tags.GhostFieldDerivative
 public import PercLib.Probability.Tags.GhostTransform
 public import PercLib.Probability.Tags.Harris
+public import PercLib.Probability.Tags.HigherCorrelation
 public import PercLib.Probability.Tags.IntegratedLowerTail
 public import PercLib.Probability.Tags.MassTransport
 public import PercLib.Probability.Tags.MonotoneCoupling
