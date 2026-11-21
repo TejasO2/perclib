@@ -6,10 +6,10 @@
       "id": "walk-time-boundary",
       "title": "The walk-time convention and the zero-time recurrence need separation",
       "status": "provisional",
-      "locator": "JEMS 19 (2017), Section 3.4, initial directed-edge definition and Lemma 3.11, printed pp.747–748 / PDF indices22–23. Extracted text checked; visual comparison unavailable.",
+      "locator": "Journal version: JEMS 19 (2017), Section 3.4, initial directed-edge definition and Lemma 3.11, printed pp.747–748 / PDF indices22–23; extracted text checked in an earlier reading, visual comparison unavailable, not re-read in this revision. Preprint: arXiv:1201.3953v1 (the only arXiv version), Section 3.4, the same definition and Lemma 3.11, printed p.19; extracted PDF text checked on 21 November 2026. The two versions print different identities; see the problem.",
       "claim": "Lemma 3.11 includes time zero, while its proof uses the ordinary length-t endpoint kernel. The preceding definition observes the second endpoint of an edge already sampled at time zero.",
-      "problem": "Under the length-t convention, P0=I and P1=A/m. At t=0 the claimed recurrence with P(-1)=0 would say m P1/(m-1)=P1. The directed-edge definition as displayed instead advances the endpoint clock by one relative to the path-count proof.",
-      "correction": "Use P0=I and Pn=B_n/[m(m-1)^(n-1)] for n>=1, indexing the first sampled directed edge at time one (or observing the first endpoint at time zero). State the recurrence for t>=1; at t=0 use P1 P0=P1 separately. The special B2=A^2-mI verifies t=1.",
+      "problem": "Under the length-t convention, P0=I and P1=A/m. At t=0 the claimed recurrence with P(-1)=0 would say m P1/(m-1)=P1. The directed-edge definition as displayed instead advances the endpoint clock by one relative to the path-count proof. arXiv v1 prints the identity without the factor m/(m-1), as sum_u p1(0,u)pt(u,z)=p(t+1)(0,z)+p(t-1)(0,z)/(m-1) for t>=0, with the same directed-edge definition. Its left side has total mass one and, for every t>=1, its right side has total mass 1+1/(m-1), so the v1 identity fails for every t>=1 under any convention in which the pt are probability kernels. Under the length-t convention it holds at t=0.",
+      "correction": "Use P0=I and Pn=B_n/[m(m-1)^(n-1)] for n>=1, indexing the first sampled directed edge at time one (or observing the first endpoint at time zero). State the recurrence for t>=1; at t=0 use P1 P0=P1 separately. The special B2=A^2-mI verifies t=1. For arXiv v1 the corrected identity is (m/(m-1)) sum_u p1(0,u)pt(u,z)=p(t+1)(0,z)+p(t-1)(0,z)/(m-1) for t>=1 under the same length-t convention; it follows from A B_t=B_(t+1)+(m-1)B_(t-1) for t>=2 and from B2=A^2-mI for t=1.",
       "tags": [
         "1PM2"
       ],
@@ -19,7 +19,7 @@
         "status": "found",
         "summary": "Align the endpoint clock with path length and exclude zero from the normalized recurrence.",
         "scale": "statement",
-        "impact": "A time convention and one endpoint case are corrected. The positive-time recurrence is proved here; later applications must check their time ranges."
+        "impact": "A time convention and one endpoint case are corrected. The positive-time recurrence is proved here; later applications must check their time ranges. In arXiv v1 the missing factor m/(m-1) must also be restored for every t>=1."
       }
     },
     {
