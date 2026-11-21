@@ -9,8 +9,8 @@ passages show the kind of change and may be improved.
 
 1. **Lead.** One to three paragraphs before the first heading, readable on their own: what the
    object or result is, the main statement informally, why it matters and where it sits, with
-   links. *(The parser in `scripts/articles.mjs` still requires a heading first; a generator
-   change is needed before leads can be written.)*
+   links. The parser accepts the lead as text before the first `## … {#section-…}` heading
+   (see "Lead" in `wiki/README.md`).
    - Before (`hierarchical-two-point`, first line): "The vertex group is $\mathbb H_L^d=\dots$"
    - After: "On the hierarchical lattice, [long-range percolation] with kernel
      $J(x)\asymp\|x\|^{-d-\alpha}$ has critical two-point function of order
