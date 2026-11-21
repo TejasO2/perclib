@@ -92,6 +92,7 @@ public import PercLib.Models.HierarchicalAmplification
 public import PercLib.Models.HierarchicalAmplificationStep
 public import PercLib.Models.HierarchicalAveragedToPointwise
 public import PercLib.Models.HierarchicalBallSums
+public import PercLib.Models.HierarchicalBallSusceptibility
 public import PercLib.Models.HierarchicalCutoff
 public import PercLib.Models.HierarchicalEndpoint
 public import PercLib.Models.HierarchicalGeometry
@@ -99,6 +100,7 @@ public import PercLib.Models.HierarchicalPointwise
 public import PercLib.Models.HierarchicalPowerKernel
 public import PercLib.Models.HierarchicalRestrictedSusc
 public import PercLib.Models.HierarchicalRunaway
+public import PercLib.Models.HierarchicalRunawayInterval
 public import PercLib.Models.HierarchicalSibling
 public import PercLib.Models.HierarchicalSymmetry
 public import PercLib.Models.HierarchicalTranslation
@@ -139,6 +141,7 @@ public import PercLib.Models.Tags.Boundary
 public import PercLib.Models.Tags.FiniteRangeDecay
 public import PercLib.Models.Tags.FiniteRangeExit
 public import PercLib.Models.Tags.Hierarchical
+public import PercLib.Models.Tags.HierarchicalRunaway
 public import PercLib.Models.Tags.KernelsAndSitePaths
 public import PercLib.Models.Tags.Lattice
 public import PercLib.Models.Tags.Line
