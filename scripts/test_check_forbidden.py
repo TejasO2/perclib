@@ -104,6 +104,41 @@ class ForbiddenScanTests(unittest.TestCase):
                 self.assertTrue(flagged(text))
         self.assertFalse(flagged('theorem t : "\\x41\\u0042\\n" = "AB\\n" := rfl'))
 
+    # Finding S2 / GS4: Lean lexes the longest token, so a comment opener or `'` right after a
+    # symbol can continue a token (`<-`, `\\/`, `//`, `]'`, `×'`, `Σ'`, `⊕'`, `''`) and the
+    # text after it is code that runs `run_meta` or `run_tac`.
+    W = "IO.FS.writeFile (toString 'q' ++ toString 'N') (toString 'x')"
+    HEAD = 'import Lean\ntheorem a : True := trivial\n'
+
+    def test_comment_opener_after_symbol_probes(self):
+        pz = ("theorem b : ∃ y : { x : Int //- x < 1 }, y.1 = 0 := ⟨⟨0, by run_tac do "
+              "IO.FS.writeFile (toString 'q' ++ toString 'Z') (toString 'x'); "
+              "Lean.Elab.Tactic.evalTactic (← `(tactic| decide))⟩, rfl⟩ -- -/")
+        for line in [f'theorem b : True := trivial <-- run_meta {self.W}',
+                     f'theorem b : True := trivial \\/- run_meta {self.W} -- -/',
+                     f'theorem b : True := trivial //- run_meta {self.W} -- -/',
+                     pz]:
+            with self.subTest(line=line):
+                self.assertTrue(flagged(self.HEAD + line + '\n'))
+
+    def test_char_literal_after_symbol_probes(self):
+        lines = [f'theorem b : True := trivial {tok}"\' foo " run_meta {self.W} -- "'
+                 for tok in [']\'', '×\'', 'Σ\'', '⊕\'']]  # probes D, E, F, G
+        lines.append(f'theorem b : True := trivial \'\'\'"\' run_meta {self.W} -- "')  # H
+        for line in lines:
+            with self.subTest(line=line):
+                self.assertTrue(flagged(self.HEAD + line + '\n'))
+
+    def test_quote_and_dash_tokens_pass(self):
+        for line in ["theorem t (f : ℕ → ℝ) : ∑' i, f i = ∑' i, f i := rfl",
+                     "theorem t (f : α → β) (s : Set α) : f '' s = f '' s := rfl",
+                     "theorem t (f : α → β) (s : Set β) : (f ⁻¹' s) = f ⁻¹' s := rfl",
+                     "theorem t : ['a', 'b'].length = 2 := rfl",
+                     "theorem t (h' : True) : True := h'",
+                     "theorem t (x : ℕ) : x = x := rfl -- x--c\ntheorem u (x : ℕ) : x = x--c\n  := rfl"]:
+            with self.subTest(line=line):
+                self.assertFalse(flagged(line + '\n'))
+
     def test_elaborator_registering_attributes(self):
         # Finding R1 / GS2: attributes that register elaborator, delaborator or initializer code.
         for text in ['@[tactic X] def evalX : Tactic := fun _ => pure ()',

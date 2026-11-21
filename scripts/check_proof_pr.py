@@ -37,6 +37,10 @@ def _is_id_rest(c):
 # on any other escape Lean abandons the literal and lexes the rest as code.
 ESCAPE = re.compile(r"""\\(?:[\\"'ntr]|x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4})""")
 CHAR_LITERAL = re.compile("'(?:" + ESCAPE.pattern + r"|[^\\])'", re.S)
+# Characters after which a comment opener or `'` cannot continue a Lean token: Lean lexes the
+# longest token in its token table, so `<--`, `//-`, `]'"'` or `∑'` are code, not comments
+# or character literals.
+TOKEN_BOUNDARY = set(' \t\r\n([{⟨,')
 
 
 def code_without_literals(text):
@@ -48,7 +52,10 @@ def code_without_literals(text):
     literal unless it continues an identifier (`h'`). A string literal containing `{` is
     refused, since only its context (`s!`, `m!`, `throwError`, …) tells whether it is
     interpolated, i.e. contains code. An escape outside `ESCAPE` (in a string, also
-    `\\` + newline) is refused, since Lean then abandons the literal and lexes on as code."""
+    `\\` + newline) is refused, since Lean then abandons the literal and lexes on as code.
+    A comment opener directly after a symbol (`<--`, `//-`) is refused, and so is a character
+    literal there (`]'"'`, `'''`), since Lean may read the pair as one longer token; a lone
+    `'` after a symbol (`∑'`, `''`, `⁻¹'`) is kept as code."""
     result, i, depth = [], 0, 0
     while i < len(text):
         if depth:
@@ -61,6 +68,9 @@ def code_without_literals(text):
             else:
                 i += 1
             continue
+        if (text.startswith('/-', i) or text.startswith('--', i)) and i > 0 and not (
+                text[i - 1] in TOKEN_BOUNDARY or _is_id_rest(text[i - 1])):
+            raise ValueError('comment opener directly after a symbol')
         if text.startswith('/-', i):
             depth = 1
             i += 2
@@ -125,6 +135,15 @@ def code_without_literals(text):
             while i < len(text) and text[i].isascii() and (text[i].isalnum() or text[i] == '_'):
                 i += 1
             result.append(text[start:i])
+            continue
+        if text[i] == "'" and (text.startswith("''", i) or i > 0 and not (
+                text[i - 1] in TOKEN_BOUNDARY or text[i - 1].isascii() and text[i - 1].isdigit())):
+            # Lean either continues a token here (`]'`, `∑'`, `''`) or errors and resumes at
+            # the next character; a fitting literal would be read differently, so refuse it.
+            if CHAR_LITERAL.match(text, i) or text.startswith("'\\", i):
+                raise ValueError('character literal directly after a symbol')
+            result.append("'")
+            i += 1
             continue
         if text[i] == "'":
             m = CHAR_LITERAL.match(text, i)
