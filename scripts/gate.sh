@@ -4,8 +4,9 @@
 #
 #   scripts/gate.sh [BASE]        BASE: the integration tip the change is merged onto
 #
-# Steps: full build with warnings as errors; axiom audit of every constant under PercLib;
-# import closure; forbidden-construct scan; unit tests of the proof-only classifier;
+# Steps: forbidden-construct scan, before any of the library is elaborated; full build
+# with warnings as errors; axiom audit of every constant under PercLib; import closure;
+# forbidden-construct scan again; unit tests of the proof-only classifier;
 # manifest extraction (saved as .lake/gate/<HEAD>.json for later comparisons); the D-35
 # checks (tagged statements, headers of new files); and, if
 # BASE is given and its saved extraction exists, the proof-only/interface
@@ -19,6 +20,7 @@ export PATH="$HOME/.elan/bin:$PATH"
 head=$(git rev-parse HEAD)
 dirty=$(git status --porcelain --untracked-files=no -- PercLib PercLib.lean | head -1)
 echo "== gate on $head${dirty:+ (with uncommitted changes)}"
+python3 scripts/check_forbidden.py PercLib
 lake build --wfail
 lake env lean --run scripts/AxiomAudit.lean
 python3 scripts/check_import_closure.py PercLib

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import copy
 import unittest
-from check_proof_pr import check_compiled, check_paths_and_source
+from check_proof_pr import check_compiled, check_paths_and_source, code_without_literals
 
 
 def declaration(name, kind='theorem'):
@@ -49,6 +49,16 @@ class ProofGateTests(unittest.TestCase):
             check_paths_and_source({'PercLib/Proof.lean': 'r#"/-"#\ndef x := 0'})
         with self.assertRaises(ValueError):
             check_paths_and_source({'PercLib/Proof.lean': '/- unclosed'})
+
+    def test_identifiers_and_chars_cannot_hide_real_commands(self):
+        for text in ['theorem a : True := let «x--» := 0; trivial def evil : Nat := 1',
+                     'theorem a : True := let «x/-» := 0; trivial instance : Inhabited Nat := ⟨5⟩',
+                     'theorem a : True := let «x := 0; trivial',
+                     "theorem a : '\"' = '\"' := rfl def evil : Nat := 1",
+                     'theorem a : s!"{ "x" }" = "x" := rfl']:
+            with self.subTest(text=text), self.assertRaises(ValueError):
+                check_paths_and_source({'PercLib/Proof.lean': text})
+        self.assertEqual(code_without_literals("h' «a--b».c '\"' x"), "h' «a--b».c   x")
 
 
 if __name__ == '__main__':

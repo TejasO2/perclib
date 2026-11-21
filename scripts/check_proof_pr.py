@@ -13,8 +13,38 @@ FORBIDDEN = set('def abbrev opaque axiom axioms constant constants inductive coi
                 'run_cmd run_elab run_tac deriving tag'.split())
 
 
+def _is_letter_like(c):
+    """Lean's `isLetterLike`: Greek (without λ, Π, Σ), Coptic, Greek extended,
+    letterlike symbols and mathematical script letters."""
+    n = ord(c)
+    return ((0x3b1 <= n <= 0x3c9 and n != 0x3bb) or (0x391 <= n <= 0x3a9 and n not in (0x3a0, 0x3a3))
+            or 0x3ca <= n <= 0x3fb or 0x1f00 <= n <= 0x1ffe or 0x2100 <= n <= 0x214f
+            or 0x1d49c <= n <= 0x1d59f)
+
+
+def _is_id_first(c):
+    return c.isascii() and c.isalpha() or c == '_' or _is_letter_like(c)
+
+
+def _is_id_rest(c):
+    """Lean's `isIdRest`: ASCII alphanumerics, `_ ' ! ?`, letterlike and subscripts."""
+    n = ord(c)
+    return (c.isascii() and c.isalnum() or c in "_'!?" or _is_letter_like(c)
+            or 0x2080 <= n <= 0x209c or 0x1d62 <= n <= 0x1d6a or n == 0x2c7c)
+
+
+CHAR_LITERAL = re.compile(r"'(?:\\(?:x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4}|.)|[^\\])'", re.S)
+
+
 def code_without_literals(text):
-    """Erase nested comments and string literals before the conservative token check."""
+    """Erase nested comments, string and character literals before the conservative
+    token check, keeping identifiers (including `«…»` ones) verbatim.
+
+    The scan follows Lean's lexer where a mismatch could hide code: inside `«…»` (copied
+    through to the next `»`) `--`, `/-` and `"` open nothing; `'` starts a character
+    literal unless it continues an identifier (`h'`). A string literal containing `{` is
+    refused, since only its context (`s!`, `m!`, `throwError`, …) tells whether it is
+    interpolated, i.e. contains code."""
     result, i, depth = [], 0, 0
     while i < len(text):
         if depth:
@@ -48,12 +78,47 @@ def code_without_literals(text):
         if text[i] == '"':
             i += 1
             while i < len(text) and text[i] != '"':
+                if text[i] == '{':
+                    raise ValueError('String literal containing `{` (possibly interpolated)')
                 i += 2 if text[i] == '\\' else 1
             if i >= len(text):
                 raise ValueError('Unterminated string')
             i += 1
             result.append(' ')
             continue
+        if text[i] == '«' or _is_id_first(text[i]):
+            # An identifier: atoms of letters or `«…»`, joined by `.`.
+            start = i
+            while True:
+                if text[i] == '«':
+                    end = text.find('»', i + 1)
+                    if end < 0:
+                        raise ValueError('Unterminated «')
+                    i = end + 1
+                else:
+                    i += 1
+                    while i < len(text) and _is_id_rest(text[i]):
+                        i += 1
+                if (i + 1 < len(text) and text[i] == '.'
+                        and (text[i + 1] == '«' or _is_id_first(text[i + 1]))):
+                    i += 1
+                    continue
+                break
+            result.append(text[start:i])
+            continue
+        if text[i].isascii() and text[i].isdigit():
+            # A numeral, so that a following `'` starts a character literal, as in Lean.
+            start = i
+            while i < len(text) and text[i].isascii() and (text[i].isalnum() or text[i] == '_'):
+                i += 1
+            result.append(text[start:i])
+            continue
+        if text[i] == "'":
+            m = CHAR_LITERAL.match(text, i)
+            if m:
+                i = m.end()
+                result.append(' ')
+                continue
         result.append(text[i])
         i += 1
     if depth:
