@@ -67,9 +67,26 @@
       "order": 1,
       "tag": "W498",
       "proof_uses": [
+        "J98J",
+        "FF30"
+      ],
+      "reason": "Source route: for a radial kernel the level isometries make both connection probabilities constant on each shell, so the averaged bounds of J98J become pointwise bounds; translation reduces a general pair to the origin. FF30 gives positivity of the critical intensity."
+    },
+    {
+      "order": 2,
+      "tag": "V4QQ",
+      "proof_uses": [
         "J98J"
       ],
-      "reason": "Source route: for a radial kernel the level isometries make both connection probabilities constant on each shell, so the averaged bounds of J98J become pointwise bounds; translation reduces a general pair to the origin."
+      "reason": "For n at least 1, multiplying the averaged chain of J98J by the ball volume gives both bounds on the full-cluster mass in the ball for every symmetric kernel; for n = 0 the sum is 1."
+    },
+    {
+      "order": 3,
+      "tag": "YWTU",
+      "proof_uses": [
+        "J98J"
+      ],
+      "reason": "The first inequality of J98J times the ball volume gives the lower bound for the restricted cluster; the upper bound holds because the restricted cluster is contained in the full cluster."
     }
   ]
 }

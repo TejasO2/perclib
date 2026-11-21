@@ -214,11 +214,11 @@
         },
         "statement": {
           "title": "The critical estimate",
-          "sha256": "dce10bd8235aae0f64ec67dd83fec5651fb99aacf54e2f1913f40e67c67bf379"
+          "sha256": "5e9a5d910f857dea67cd4367529f8e6801573b3cc984bf3bae72ea5ec40cfb3a"
         },
         "consequence": {
           "title": "A ball susceptibility calculation",
-          "sha256": "da4c91fb7d211848a5f17581ef344b9935136f6de80cbaa10f4bec4775b25cd1"
+          "sha256": "1d48de71f7951052b062dace659bd89610cc499371bf2ccccccc9204476cb5e5"
         },
         "position": {
           "title": "Symmetry and further estimates",
