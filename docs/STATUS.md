@@ -1,18 +1,37 @@
 # Status
 
-Handoff file for the coordinator (the LEAD role of D-34). Last updated 21 November 2026, about 14:00 UTC, at the end of coordinator round 7 of the current series (eighteenth coordinator overall;
-the previous file, round 9 of the earlier series, is at `874da60` and older rounds are in
+Handoff file for the coordinator (the LEAD role of D-34). Last updated 21 November 2026, about 16:35 UTC, at the end of coordinator round 1 of a new series (nineteenth coordinator overall;
+the previous handoff, round 7 of the last series, is at `e29bacf`; older rounds are in
 `git log -p docs/STATUS.md`). A coordinator with no memory resumes from this file,
 [COORDINATOR.md](COORDINATOR.md), [COORDINATION.md](COORDINATION.md), [DECISIONS.md](DECISIONS.md)
-(D-34 to D-37) and `/home/user/reports/RULINGS.md` (rulings 1-12b; obey them; 10 and 11a authorise
-pull requests to `main`). Container-local reports and briefs are copied for durability to
-`lrp/docs/reports/` at each round's lrp commit (ruling 9i); `/home/user/reports/` stays the live copy.
+(D-34 to D-37) and `/home/user/reports/RULINGS.md` (rulings 1-13; obey them; 13 is new since the last handoff:
+(a) no GitHub write tool, keep one compare-link line "For Tom", stop reporting it; (b) kernel replay this round and
+after every tenth merged batch, in a separate niced worktree; (c) the workflows merge once an audit finds no hole for
+unlisted authors or write tokens; scanner gaps become documented known limitations). Container-local reports and
+briefs are copied for durability to `lrp/docs/reports/` at each round's lrp commit (ruling 9i).
 
 ## Integration tip and gate
 
-- Branch `claude/zen-lovelace-rvlcw2` in both repositories. **Last gated commit `78ee775`** (pushed;
-  extract `.lake/gate/78ee775….json` saved); the tip is this STATUS commit on top of it (`docs/FRONTIER.md` from
-  `5fb1db4` is still current: no tag changed since). **Next gate: `scripts/gate.sh 78ee775`.**
+- Branch `claude/zen-lovelace-rvlcw2` in both repositories. **Last gated commit `cfef666`** (pushed; extract
+  `.lake/gate/cfef666….json` saved); the tip is this STATUS commit on top of it. **Next gate: `scripts/gate.sh cfef666`.**
+  `docs/FRONTIER.md` from `5fb1db4` is still current (no tag added or removed since).
+- **Round 1 of this series (16:22-16:40): one gated batch, passed, pushed.** `scripts/gate.sh 78ee775` on **`cfef666`**
+  (merge `mig-iscut-fold`, migration (c) last part): build `--wfail` OK (3,932 jobs), axiom audit 6,302 constants only
+  `propext`/`Classical.choice`/`Quot.sound`, import closure 339 modules, forbidden scan 339 files, script tests,
+  "D-35 checks passed", "INTERFACE change against 78ee775147a4: … Tags/CutsAndRows.lean: ['tag']" (expected:
+  `audit-mig-iscut-fold` APPROVE, 50 compiled `@decl`/`Iff.rfl` checks, BQ44/ZH13 binder tables, no EXCESS),
+  "== gate passed on cfef666…". **Migration (c) is complete.**
+- **Kernel replay (ruling 13b): STARTED, NOT FINISHED.** `nice -n 15 scripts/kernel_replay.sh 6` in the detached
+  worktree `/home/user/wt/replay-cfef666` (at `cfef666`, `.lake/packages` symlinked, `.lake/build` copied), started
+  16:27, log `/home/user/reports/replay-cfef666.log` (symlink to the round's scratchpad). It runs slowly beside four
+  worker builds (12/338 modules after 6 minutes). Next coordinator: `tail` the log; "Kernel replay passed: 338
+  modules." means pass at `cfef666` (record it, then `git worktree remove /home/user/wt/replay-cfef666`); a checker
+  error names the module (record it "For ARCHITECT", do not merge further until understood); if the process
+  (`pgrep -f kernel_replay.sh`) is gone with neither line, the run was killed (OOM or container): restart it the same
+  way. Last replay that passed: baseline `4c72765`.
+- **GitHub:** no GitHub MCP tool (ToolSearch), `main` still `1df822a` (`git ls-remote`). Anonymous read 16:30: 0 open
+  pull requests, issue #1 only (fixed on the integration branch). Per ruling 13(a) this is no longer a question for
+  ARCHITECT; the one line for Tom is under "For Tom".
 - **Round 7 (13:15-14:05): seven gated batches, all passed, all pushed.** Batch 7: `scripts/gate.sh 5fb1db4` on
   **`78ee775`** (merge `hier-thm11`): 3,932 jobs, 6,303 constants, 339 modules, "D-35 checks passed", "PROOF-ONLY
   change against 5fb1db4: 2 Lean file(s), no compiled interface change", "== gate passed on 78ee775…". Batches 5 and 6:
@@ -105,6 +124,11 @@ parent). After each gate `git checkout scripts/__pycache__/`; after `frontier.py
 
 ## Progress (D-35 measure)
 
+Round 1 (new series): **0 new assertions proved; 2 tagged statements re-audited and merged** (BQ44, ZH13, respelled by
+`mig-iscut-fold`, meaning unchanged by compiled `Iff.rfl`). Manifest at `cfef666` (perclib script): **275 proved,
+2 statement-only, 1,126 unformalised, of 1,403** (unchanged). Waiting for audits: 18 new tagged statements on finished
+branches (the 8 frontier tags, RU6O/JZN0/1C8G/5LNL/WD2J/H48I, U8CI/K38T/5U4L, RZSW) plus XLWI/YVJT/EZJ7 after fixes.
+
 Round 7: **7 assertions proved in Lean and merged** (R01V, ZH13, CPD6, XSA6, D1CH, DL0X, XRSL), **16 tagged Lean
 statements audited and merged** (those 7 plus the 9 respelled by the fold: USAC, YLZV, R84Z, 5UJQ, 6QN7, 7902, 67GX,
 7BMQ, JTBG), and 3 more audited with small required changes (XLWI, YVJT, EZJ7: fixes queued). Eight further
@@ -141,6 +165,14 @@ D-33 packages 6 (Lemma I.5.5, premises not yet audited), 12 (Tauberian complete)
 Manifest at `caa28bc` (perclib script): **268 proved, 2 statement-only, 1,132 unformalised, of 1,402**.
 Frontier (`docs/FRONTIER.md` regenerated at `caa28bc` by this STATUS commit): 301 ready, 818 blocked,
 15 without recorded prerequisites, 268 proved. Rounds 1-3: 0 proved; 3 wiki tagged statements audited (round 1).
+
+## Merged in round 1 (new series)
+
+- **`mig-iscut-fold`** (`063e197`, merged `cfef666`): `IsCut` respelling in `Models/LongRange/{CutPoints,OneDimensional}.lean`
+  and `Models/LongRange/Tags/{DisplacementKernels,CutsAndRows}.lean`; `measurableSet_cut` deleted (replacement
+  `measurableSet_setOf_isCut`). `audit-mig-iscut-fold` APPROVE (fresh, mechanical: 22 named + 3 anonymous
+  declarations by compiled `@decl` and `Iff.rfl`, two negative controls, census 59 → 58 `IsCut` + 1 deleted). Cosmetic
+  note for a later touch: redundant parentheses in `cut_image_sym2Map_add_iff`. Worktree removed.
 
 ## Merged in round 7
 
@@ -219,130 +251,116 @@ Frontier (`docs/FRONTIER.md` regenerated at `caa28bc` by this STATUS commit): 30
 
 ## Finished, not merged (each waits for the item named)
 
-- **Interface packages awaiting their fresh audits (queued):** `work/frontier-coupling-ratio` (`4fbe172`, KJWA, audit
-  134), `work/frontier-revealment-derivative` (`fd52af5`, 8IGH, 135), `work/frontier-reciprocal-cutoff` (`3000e12`,
-  04ZI, 136), `work/frontier-inverse-square-block` (`b2c8409`, PAFY, 137), `work/frontier-integrated-lower-tail`
-  (`1c5a9ba`, F75G, 144), `work/frontier-rv-composition` (`af2d1f6`, 57FJ, 145), `work/frontier-sqrt-lower-bound`
-  (`a0ca55a`, QW2L, 146), `work/frontier-root-global-percolation` (`4d9f278`, 0YH8, 147). All on new files, based
-  on `a117338` or `5fb1db4`. On APPROVE: merge (conflicts only in `PercLib.lean` import lines), gate.
-- **`work/mig-iscut-fold`** (`063e197` on `a117338`; done 13:51; migration (c) last part, `IsCut` respelling in the
-  four long-range cut files, BQ44/ZH13 respelled, 49 compiled checks by the author's account). Audit
-  **`103-audit-mig-iscut-fold`** released, claimed 13:56. On APPROVE: merge, gate (INTERFACE expected), then
-  migration (d) (window section).
-- **`work/nm-uniform-volume`** (`69ec361`): `audit-nm-uniform-volume` **APPROVE WITH CHANGES** (both statements
-  faithful, no EXCESS; required change 1: a compiled YVJT non-vacuity witness on `LatticeSite d`, outside the Tags
-  file). Fix **`138-fix-nm-uniform-volume`** queued, then `HOLD-audit-nm-uniform-volume-r2` (release with the fixer's
-  `<merge>`/`<fix>`). Afterwards the dedup of the two-parameter exponential-moment lemmas (proof-only).
-- **`work/frontier-four-functions`** (`5ceed9b`): `audit-frontier-four-functions` **APPROVE WITH CHANGES** (EZJ7
-  faithful; drop the untagged powerset corollary from the Tags file). Fix **`139`** queued, then
+- **`work/lrp-I56-gyration`** (`9df1a8b` on `e29bacf`; done 16:31): **proof-only** (two new files
+  `PercLib/Analysis/{CriticalLogODE,GyrationReduction}.lean`, 16 public theorems, no def/tag; D-33 package 7: Lemma
+  I.5.6 and the analytic reduction of Prop. I.5.2). Arrived after this round's single batch: **merge in the next batch
+  on the gate** (conflict only in `PercLib.lean` imports).
+- **`work/frontier-coupling-ratio`** (`4fbe172` on `a117338`, KJWA): `audit-frontier-coupling-ratio` **APPROVE** (16:34,
+  fresh, binder table, no required change; optional docstring note). **Merge in the next batch** with `lrp-I56-gyration`
+  (expected: INTERFACE notice for KJWA), push.
+- **Interface packages awaiting fresh audits (all queued, all on new files or append-only area files):**
+  `work/frontier-revealment-derivative`
+  (`fd52af5`, 8IGH, 135), `work/frontier-reciprocal-cutoff` (`3000e12`, 04ZI, 136), `work/frontier-inverse-square-block`
+  (`b2c8409`, PAFY, 137), `work/frontier-integrated-lower-tail` (`1c5a9ba`, F75G, 144), `work/frontier-rv-composition`
+  (`af2d1f6`, 57FJ, 145), `work/frontier-sqrt-lower-bound` (`a0ca55a`, QW2L, 146), `work/frontier-root-global-percolation`
+  (`4d9f278`, 0YH8, 147); **new this round:** `work/nm-core-wrappers` (`6d43725` on `5fb1db4`; RU6O, JZN0, 1C8G, 5LNL,
+  WD2J, H48I; audit **148**), `work/nm-kernels-sitepaths` (`b6162c0` on `5fb1db4`; U8CI, K38T, 5U4L; audit **149**; it
+  adds an import of `Models/HierarchicalCutoff` to `Models/NonSummable.lean`), `work/nm-tree-split` (`ff0e16c` on
+  `78ee775`; RZSW; audit **152**). On APPROVE: merge (imports only conflict), gate. None of these branches uses a name
+  that migration (d) renames (coordinator's grep of every `+` line, 16:28), so they merge before or after (d).
+- **`work/nm-uniform-volume`** (`69ec361`): audit APPROVE WITH CHANGES (YVJT witness). Fix **held** as
+  `HOLD-138-fix-nm-uniform-volume` during window (d), then `HOLD-audit-nm-uniform-volume-r2`.
+- **`work/frontier-four-functions`** (`5ceed9b`): audit APPROVE WITH CHANGES (drop the untagged powerset corollary
+  from the Tags file). Fix **held** as `HOLD-139-fix-frontier-four-functions` during (d), then
   `HOLD-audit-frontier-four-functions-r2`.
-- **`work/wiki-revise-proof-sections-a`** (`024def9`): `audit-wiki-revise-proof-sections-a` **APPROVE WITH CHANGES**
-  (no tagged statement changed; R1-R3 text fixes). Fix **`140`** queued, then
-  `HOLD-audit-wiki-revise-proof-sections-a-r2`. Reviser's disagreements and mathematical reports are "For Tom".
-  Then a critic re-read; it owns `marginal-ode.md`, so the I.5.5/B5SL and 2KB9 tag packages wait for it.
-- **`work/fix-wiki-67W9-followup`** (merge `0f8d9a2`, fix `f73ebde`; done 13:43): mechanical re-audit **`142`**
-  released. On APPROVE merge (contains `work/wiki-67W9-followup`), wiki test, gate. The possible second DGT erratum
-  (§3.4, FK case) is a later scout item.
-- **`work/wiki-original-marking`** (`168800a` on `a117338`; done 13:41): mechanical audit **`141`** queued. On APPROVE
-  merge, wiki test, gate. Then the NC7F precision fix (below) and correctness audits for Q7QG, V7MP, 9FO5.
-- **Regular-variation, critic r2** (`/home/user/reports/critic/regular-variation-r2.md`): NOT YET PASS, five minor
-  items, one question for Tom (`L` vs `ℓ`), one for the coordinator (renaming the `data-title` of SLGY and LTJ1:
-  **decided yes**, tag metadata only, checked by the mechanical audit). Reviser **`143`** queued, then
-  `HOLD-audit-wiki-revise-regular-variation-r3`, then a third critic read. M4 (tagging candidates for LTJ1 and
-  SLGY's Abelian half from untagged library lemmas) is a later interface package.
-- **Workflows and scanner:** `audit-fix-workflows-r4` **APPROVE WITH CHANGE** for both branches (GS5: classes S3
-  unterminated character literal, S4 raw string after a numeral, S5 file-declared notation token; AM5: S3, S4, S6
-  identifier test). Fixes **`150-fix-scanner-r5`**, **`151-fix-workflows-r5`** queued (told to prefer fail-closed
-  refusals), then `HOLD-audit-fix-workflows-r5`. The workflows must not reach `main` before that approval. This is
-  the fifth round; if r5 finds another class, consider a fail-closed redesign brief (refuse any file the scanner
-  cannot lex with certainty) instead of a sixth patch. Then `work/contrib-docs`, `work/task-board`, the `tasks/`
-  mirror (ruling 9b) and the pages-deploy brief (ruling 12).
-- **Lemma I.5.5** (`CriticalDrivenODE.lean`): PROVED AS STATED; to count it, one interface package (wiki tagged block
-  in `marginal-ode` beside B5SL, `Tags/` restatement, fresh audit), briefed with the B5SL tag after 140's branch
-  merges. **2KB9:** `tendsto_div_of_ae_mul_deriv_eq` (`SignedDrivenODE.lean`) omits four of 2KB9's hypotheses; brief the
-  tag in the same package (restate with the four binders unused, or relax the wiki statement; fresh audit).
-- **Wiki-original results** (ruling 11h): audits a/b CORRECT for J0DE, MFGT, OQV3, Q4PO, F7Q2, NC7F. After 141's merge:
-  NC7F's interpolated-paths clause needs "deterministic grids N_n → ∞ at every node" (tagged-block wording, fresh
-  audit, listed "For Tom"); OQV3's A, Γ and (18)-(22) are defined only inside MFGT's proof (presentational).
+- **`work/wiki-revise-proof-sections-a`** (`024def9`): APPROVE WITH CHANGES; fix **140** queued, then
+  `HOLD-audit-wiki-revise-proof-sections-a-r2`; then a critic re-read; it owns `marginal-ode.md`, so the I.5.5/B5SL and
+  2KB9 tag package waits for it.
+- **`work/fix-wiki-67W9-followup`** (merge `0f8d9a2`, fix `f73ebde`): mechanical re-audit **142** queued. On APPROVE merge,
+  wiki test, gate.
+- **`work/wiki-original-marking`** (`168800a`): mechanical audit **141** queued. On APPROVE merge, wiki test, gate. Then the
+  NC7F precision fix and correctness audits for Q7QG, V7MP, 9FO5.
+- **Regular-variation, critic r2:** reviser **143** queued, then `HOLD-audit-wiki-revise-regular-variation-r3`, then a third
+  critic read.
+- **Workflows and scanner (ruling 13c applied this round):** fixes **150-fix-scanner-r5** and **151-fix-workflows-r5**
+  queued; 151 now also writes `docs/CI_KNOWN_LIMITATIONS.md` (scanner/classifier are lexical approximations, not a
+  security boundary; S1-S6 listed). `HOLD-audit-fix-workflows-r5` now decides only on (A) can an unlisted author's
+  pull request merge without a maintainer, (B) can pull-request code reach a write token or secret; new desync classes
+  that open neither are recorded as known limitations, not required changes. **This is the last scanner round**: on its
+  approval merge `fix-scanner-r5`, then `fix-workflows-r5` (both contain their r4 branches), gate, and then
+  `contrib-docs`, `task-board`, the `tasks/` mirror (ruling 9b) and `pages-deploy` (ruling 12).
+- **Lemma I.5.5** (PROVED AS STATED) and **2KB9**: one tag package after 140's branch merges (unchanged plan).
+- **Wiki-original results** (ruling 11h): unchanged (NC7F wording fix after 141's merge).
 
-## In flight (claims without a done marker at 14:05)
+## In flight (claims without a done marker at 16:35)
 
-`nm-core-wrappers` (13:51), `nm-kernels-sitepaths` (13:51), `audit-mig-iscut-fold` (13:56).
-Worktrees kept (unmerged):
-automerge-workflow, ci-workflow, contrib-docs, task-board, fix-gate-scanner, fix-workflows(-r2,-r3,-r4),
-fix-scanner-r2/-r3/-r4, port-wiki-hier-thm11, fix-port-wiki-hier-thm11, wiki-revise-proof-sections-a,
-wiki-67W9-followup, fix-wiki-67W9-followup, nm-uniform-volume, frontier-four-functions, wiki-original-marking,
-mig-iscut-fold, the eight frontier branches above, and the claimed packages' worktrees.
+`lrp-I32-analytic` (16:22), `nm-multipoint-geometry` (16:22), `mig-law-generality` (16:31; migration (d)),
+`audit-frontier-revealment-derivative` (16:34). Also running: the kernel replay (above).
+Worktrees kept (unmerged): automerge-workflow, ci-workflow, contrib-docs, task-board, fix-gate-scanner,
+fix-workflows(-r2,-r3,-r4), fix-scanner-r2/-r3/-r4, port-wiki-hier-thm11, fix-port-wiki-hier-thm11,
+wiki-revise-proof-sections-a, wiki-67W9-followup, fix-wiki-67W9-followup, nm-uniform-volume, frontier-four-functions,
+wiki-original-marking, the eight frontier branches, nm-core-wrappers, nm-kernels-sitepaths, nm-tree-split,
+lrp-I56-gyration, replay-cfef666, and the claimed packages' worktrees.
 
-## Migration window: (c) nearly done; (d) next; proving open beside the migrations
+## Migration window (d): open since 16:30
 
-**Round 7:** the fold merged (`9fe7989`), so (c) has one part left, `mig-iscut-fold` (done, audit running). Proving
-stays open beside it, as decided in round 5 (ruling 11g balance): every released prover brief is on files disjoint
-from the migrations' owned lists and calls none of the names they rename (checked by grep of the briefs).
+Migration (c) completed with `cfef666`. Window (d) opened this round on the strict reading the launcher asked for:
+**the only startable Lean brief is `100-mig-law-generality`** (claimed 16:31); every other unclaimed Lean brief was renamed
+`HOLD-` (108 hier-cor12, 133 nm-tree-depth, 138, 139, 389; plus the new `HOLD-109-hier-j98j-tag`). Non-Lean work (audits,
+wiki, tooling) stays startable (ruling 11f). Claimed Lean work beside it (lrp-I32-analytic, nm-multipoint-geometry) is on
+files disjoint from (d)'s owned list and calls none of its renamed names; no caller of a renamed name exists outside
+(d)'s owned files at `cfef666` (coordinator's `git grep -lw` of every name). The brief was edited before release:
+ids made consistent (claim/report/done marker `mig-law-generality`; branch and worktree `work/law-generality`), tip and
+fold status updated.
 Next steps, in order:
-1. On `audit-mig-iscut-fold` APPROVE: merge, gate (INTERFACE: BQ44, ZH13), push. (c) is then complete.
-2. **(d):** release `HOLD-mig-law-generality` (prepared round 7: items 1-3 taken out of `HOLD-200`; the held audit
-   `HOLD-audit-mig-law-generality` written). Before release: (i) fix the package-id inconsistency in the brief
-   (header says `mig-law-generality`, setup and hand-off say `law-generality`: make claim, report and done marker
-   `mig-law-generality`, keep the branch `work/law-generality`, which the held audit names); (ii) replace its
-   coordinator note with the current tip and the statement that the fold has merged (`Tags/FiniteVolume.lean` now
-   carries `localConn` spellings); (iii) check every claimed and startable Lean brief for its owned files
-   (`Percolation/Bond/{Basic,Transport,ConnectionKernel,TriangleDecay,ClusterCount,ClusterMoments,Tightness/Hyperscaling,Tags/FiniteVolume,Tags/Tightness}.lean`,
-   `Models/HeavySecondMoment.lean`) and for the names it renames; at round 7's end none overlaps. Either hold the
-   other Lean briefs for the window (strict reading) or keep them open if disjoint (round-5 reading); (d) itself
-   must run alone among migrations and finish within one round, else reopen and retry.
-3. **(e):** `HOLD-mig-model-norm` after (d); release before 371 and 230.
-4. After (d): `HOLD-200` (items 4+ only) and `HOLD-audit-nm-bond-core`; after (e): 210, 220, 230, 370, 371; 240 after
-   its scout edit.
+1. When `done/mig-law-generality` appears: read `authors/mig-law-generality.md` for the head commit only, fill
+   `<head>`/`<base>` in `HOLD-audit-mig-law-generality.md` (`git log work/law-generality`), number it low (e.g. `100-`) and
+   release it. On APPROVE: merge, gate (INTERFACE expected: Q0D1), push.
+2. **Reopen proving** as soon as (d) has merged (or if (d) has not finished within one round: reopen anyway and retry
+   later, ruling 11g): rename back `HOLD-108-hier-cor12`, `HOLD-109-hier-j98j-tag`, `HOLD-133-nm-tree-depth`,
+   `HOLD-138-…`, `HOLD-139-…`, `HOLD-389-…` (drop `HOLD-`), and release `HOLD-200` (items 4+) and `HOLD-audit-nm-bond-core`
+   (they wait for (d)). Then (e) `HOLD-mig-model-norm`, run as its own window the same way; after (e): 210, 220, 230,
+   370, 371; 240 after its scout edit.
 
 ## Queue (`/home/user/reports/queue/`)
 
 A brief is startable when it has no `HOLD-` prefix and no `claims/<id>`; claimed briefs stay in the directory.
-**Startable at 14:05 (23; mutually file-disjoint and disjoint from the claims):**
-- Lean (9): 108 hier-cor12 (H9; new `Models/HierarchicalTwoPointRadial.lean`), 104 lrp-I56-gyration (D-33 package 7, new `Analysis/CriticalLogODE.lean`, `Analysis/GyrationReduction.lean`),
-  105 lrp-I32-analytic (D-33 package 16, new `Analysis/VolumeTail/{Normalizer,MGFAssembly,Endpoint,A3Limit}.lean`),
-  106 nm-tree-split (RZSW; `Combinatorics/TreeSplitting.lean` append, new `Combinatorics/Tags/TreeSplitting.lean`),
-  107 nm-multipoint-geometry (9YE6; `Bond/Multipoint/{Geometry,Sweep}.lean` append, new
-  `Bond/Multipoint/Tags/SmallSets.lean`), 133 nm-tree-depth (`Models/Tree.lean`, `Models/TreeRecursion.lean`, new
-  `Models/Tags/TreeDepth.lean`), 138 fix-nm-uniform-volume, 139 fix-frontier-four-functions, 389
-  frontier-riccati-linear-error.
-- Audits (11): 134-137, 144-147 (eight frontier interface audits, read-only scratch builds), 141
-  audit-wiki-original-marking, 142 audit-wiki-67W9-followup-r2. Wiki (2): 140 fix-wiki-revise-proof-sections-a
-  (owns `branching-random-walk.md`, `size-biased-laws.md`), 143 wiki-revise-regular-variation-r2 (owns
-  `regular-variation.md`). Tooling (2): 150 fix-scanner-r5, 151 fix-workflows-r5.
-**Held:** `HOLD-audit-mig-law-generality`, `HOLD-mig-law-generality`, `HOLD-mig-model-norm`,
-`HOLD-audit-nm-uniform-volume-r2`, `HOLD-audit-frontier-four-functions-r2`,
-`HOLD-audit-wiki-revise-proof-sections-a-r2`, `HOLD-audit-wiki-revise-regular-variation-r3`,
-`HOLD-audit-fix-workflows-r5`, `HOLD-audit-nm-bond-core`, `HOLD-audit-nm-probability`, prover briefs 200, 210, 220,
-230, 240, 370, 371 (conditions above).
-Released this round: 100 audit-mig-localconn-fold, 101 mig-iscut-fold, 102 hier-thm11 (was HOLD-330), 103
-audit-mig-iscut-fold, 124 (2ZI0 r2), 125 wiki-original-marking, 129 (WD31 r2), 130 nm-core-wrappers (HOLD-360), 131
-nm-kernels-sitepaths (HOLD-362), 132 frontier-root-global-percolation (HOLD-383, edited to name the area lemmas,
-never H0OC), 133 nm-tree-depth (HOLD-361), 142 (67W9 r2).
+**Startable at 16:35 (15, mutually file-disjoint and disjoint from the claims):** audits 136-137, 144-147 (six frontier
+interface audits, read-only scratch builds), 148 audit-nm-core-wrappers, 149 audit-nm-kernels-sitepaths, 152
+audit-nm-tree-split (new), 141 audit-wiki-original-marking, 142 audit-wiki-67W9-followup-r2; wiki 140
+fix-wiki-revise-proof-sections-a, 143 wiki-revise-regular-variation-r2; tooling 150 fix-scanner-r5, 151 fix-workflows-r5.
+(Claimed: 100 mig-law-generality, 135 audit-frontier-revealment-derivative; 134 done, APPROVE.)
+**Held:** for window (d): `HOLD-108-hier-cor12`, `HOLD-109-hier-j98j-tag` (new: `@[tag "J98J"]` on the Prop
+`HierarchicalTwoPointAveraged`, dropping `c ≤ C`), `HOLD-133-nm-tree-depth`, `HOLD-138-fix-nm-uniform-volume`,
+`HOLD-139-fix-frontier-four-functions`, `HOLD-389-frontier-riccati-linear-error`; after (d): `HOLD-200-nm-bond-core`,
+`HOLD-audit-nm-bond-core`; (e): `HOLD-mig-model-norm`, then 210, 220, 230, 370, 371, 240 (+`HOLD-audit-nm-probability`);
+re-audits waiting for fixers: `HOLD-audit-mig-law-generality`, `HOLD-audit-nm-uniform-volume-r2`,
+`HOLD-audit-frontier-four-functions-r2`, `HOLD-audit-wiki-revise-proof-sections-a-r2`,
+`HOLD-audit-wiki-revise-regular-variation-r3`, `HOLD-audit-fix-workflows-r5`.
+Lean briefs queued (startable or held): 12, satisfying ruling 11g's 8+ once the window closes.
 
-Next packages to brief, in order: the J98J tag on `hierarchicalTwoPointAveraged` (interface, fresh audit; hierarchical
-line, D-34 first priority); merges as the audits report (eight frontier tags first); (d) after iscut; I.5.5 +
-B5SL + 2KB9 tag package after 140's branch merges; the exponential-moment dedup after `nm-uniform-volume` merges; the
-NC7F precision fix after 141's merge; correctness audits of Q7QG, V7MP, 9FO5 (low priority); critic passes (one at a
-time): proof sections of `integrated-susceptibility`, `finite-random-graphs`, `triangle-condition`,
-`adaptive-three-point`, `critical-exponents`, and `branching-random-walk`/`size-biased-laws`/`marginal-ode` after
-140; near-miss B2ZL (after (e): `PowerLaw.lean` may use the long-range norm) and 32GP; D-33 packages 17-18 after 16;
-the `unusedFintypeInType` clean-up; the
-`op8f_asymptotics` rename; runaway split step 2 and M1/M3/M4/M5; scout-defs D1, D2, D3a, D6 (add the set-level
-pivotal event); the fold's clean-up list; `DrivenODE.normalized_increment_of_driving_ode` dedup;
-`exists_intervalIntegrable_tail_of_regularlyVarying` via `RegularlyVarying.exists_forall_abs_le`; the tasks board
-mirror once `task-board` merges.
+Next packages to brief, in order: audit of `hier-j98j-tag` when done (binder table against `tag-J98J`); audits of
+`lrp-I32-analytic` (if it adds tags) and `nm-multipoint-geometry` (9YE6, interface) when done; I.5.5 + B5SL + 2KB9 tag
+package after 140's branch merges; the exponential-moment dedup after `nm-uniform-volume` merges; the NC7F precision fix
+after 141's merge; correctness audits of Q7QG, V7MP, 9FO5 (low priority); critic passes (one at a time) on the proof
+sections of `integrated-susceptibility`, `finite-random-graphs`, `triangle-condition`, `adaptive-three-point`,
+`critical-exponents`; near-miss B2ZL (after (e)) and 32GP, NM-4 `nm-graph-certificates`, NM-6..NM-9 of
+`scout-nearmiss.md`; D-33 packages 17-18 after 16; hierarchical H10 after hier-cor12 (`hier-map.md`); the definition
+proposals collected (`chiCriticalIntensity`, a transitivity predicate for kernels, off-diagonal agreement with an
+intensity profile, "edge set connected on its endpoints"): one scout-defs pass; moving
+`ae_cluster_eq_singleton_of_offDiagonal`/`ae_openGraph_le_of_offDiagonal` out of `Models/HierarchicalCutoff.lean`
+into `Percolation/Bond`; the `unusedFintypeInType` clean-up; the fold's clean-up list; the tasks board mirror once
+`task-board` merges.
 
 ## For ARCHITECT
 
-- **No GitHub write access in this session.** Rulings 10(1) and 11a ask for a pull request from
-  `claude/zen-lovelace-rvlcw2` to `main` after each gated batch; the launch text says to use the GitHub
-  MCP tools, but none is loaded (ToolSearch finds none) and `gh` reports the `GH_TOKEN` invalid. No pull
-  request was opened, issue #1 was not answered. Anonymous reads work (no open pull requests). Please
-  give the coordinator a working GitHub tool or token; until then `main` stays at `1df822a`. (Rechecked in
-  round 4: still no tool; `main` now lacks everything up to `caa28bc`, six gated batches of this round included.
-  Round 5: unchanged. Round 6: unchanged. Round 7: unchanged; `main` lacks everything up to `5fb1db4`, six
-  more gated batches, among them the fold.)
+- **Window (d) on the strict reading (round 1 of this series).** The launcher asked that, once its preconditions hold,
+  only the migration brief be startable until claimed Lean work merges. Done so: (d) released, six unclaimed Lean
+  briefs held (hier-cor12 among them), audits/wiki/tooling left open (ruling 11f). Lanes therefore take audits until
+  (d) merges; reopening is a rename (steps in the window section). Overrule if you prefer the round-5 reading
+  (disjoint proving open beside the migration), which the previous series used.
+- **One batch per round** (launcher): `lrp-I56-gyration` (proof-only) finished during the round after the gate and is
+  left for the next batch rather than gated a second time beside the kernel replay.
 - **Window (c) closed early for proving (round 5, coordinator's call under 11g).** The fold still runs (phase 1
   of 3 after 22 minutes); fourteen prover briefs on new or disjoint files were released beside it rather than
   let the window run past one round. Overrule if you want the queue kept empty until the fold merges.
@@ -371,12 +389,12 @@ mirror once `task-board` merges.
   windows).** In round 7 the fold merged and the iscut part of (c) ran beside eight prover packages, all on files
   disjoint from it; seven tagged statements were proved and merged and eight more await audit. The same reading is
   proposed for (d) and (e), each still run alone among migrations.
-- **Scanner/classifier, fifth audit round.** Each audit finds a new lexer desynchronisation class (S1-S6). The r5
-  fixers were told to prefer fail-closed refusals; if r5 finds another class, the coordinator intends a redesign
-  brief (refuse anything not lexed with certainty) rather than a sixth patch. Say if you prefer otherwise.
-
 ## For Tom
 
+- **Pull request to `main` (ruling 13a):** open and merge https://github.com/tomhutchcroft/perclib/compare/main...claude/zen-lovelace-rvlcw2
+  when you wish. Last commit that passed both the gate and the kernel replay: the baseline `4c72765`; the tip's last
+  gated commit is `cfef666` (gate passed 16:27, kernel replay of `cfef666` running, result in the next STATUS).
+  `main` is at `1df822a`.
 - **Licence notices (from `mig-linters`).** Six files keep their third-party headers and the header
   linter stays off: `Probability/ProdBernoulli.lean`, `Probability/Harris.lean`,
   `Probability/Cylinder.lean` (adapted from PercolationContinuity, Anthropic PBC), `Models/Site/Basic.lean`,
@@ -406,8 +424,8 @@ mirror once `task-board` merges.
 - **Milestone:** Theorem 1.1 of *Critical percolation on the hierarchical lattice* (arXiv:2103.17013v1), the averaged
   critical two-point bounds with constants uniform in the kernel, is now proved in Lean on the integration branch
   (`PercLib/Models/HierarchicalTwoPointAveraged.lean`, merged `78ee775`), using the corrected Prop. 2.12(ii) constant
-  listed below. Corollary 1.2 (pointwise bounds for radial kernels) is the next package. The kernel replay has not
-  been run since the baseline; it is required before a pull request to `main`.
+  listed below. Corollary 1.2 (pointwise bounds for radial kernels) is the next package. The kernel replay of `cfef666`
+  (which contains it) was started this round; see "Integration tip and gate".
 - **Questions from the wiki revisions (D-19: you judge style).** (1) `regular-variation`: the slowly varying function
   is written `L` (as in Feller, Vol. II, cited first) or `ℓ` (STYLE notation table; Bingham–Goldie–Teugels)? It stays
   `L` with one defining sentence until you decide; `ℓ` would touch the tagged statements 3491 and SLGY (letter
@@ -488,6 +506,13 @@ mirror once `task-board` merges.
   add `/PercLib/**/Tags/` (and area `Defs`) to CODEOWNERS or accept this knowingly. Also check
   once that each action SHA pinned in the workflows is the tag it names (N4).
 ## Lessons
+
+- **Round 1 (new series, 16:22-16:40):** started 2h20 after the predecessor's last STATUS with the tree clean and all
+  four lanes claiming Lean briefs at the same second (16:22): an idle gap, not a running predecessor. Three done markers
+  were waiting (one approved migration, two interface packages): one 4-minute gated batch. The kernel replay niced
+  beside four worker builds runs at about 2 modules a minute (338 modules: hours); start it at the very beginning of a
+  round, right after a gated commit, and leave the log where the next coordinator can read it. Interface reports
+  arrive faster than audits are claimed when lanes are all on Lean: keep the audit template (148/149/152) handy.
 
 - **Round 7, second half (13:36-14:00):** throughput was very high: 20 done markers in 25 minutes, including an
   interface audit of a 30-file migration in 15 minutes and four prover packages within ten minutes of release. The
