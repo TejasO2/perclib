@@ -19,5 +19,20 @@
     }
   ],
   "occursIn": [],
-  "proofUses": []
+  "proofUses": [
+    {
+      "order": 0,
+      "tag": "JZN0",
+      "proof_uses": [
+        "8DAH"
+      ],
+      "reason": "The existence event is the countable union of the rooted infinite-cluster events of 8DAH, so it has positive probability exactly when some rooted percolation probability is positive."
+    },
+    {
+      "order": 1,
+      "tag": "X9N1",
+      "proof_uses": [],
+      "reason": "A definition; it invokes no other wiki assertion."
+    }
+  ]
 }
