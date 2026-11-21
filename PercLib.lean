@@ -336,6 +336,7 @@ public import PercLib.Probability.Harris
 public import PercLib.Probability.HarrisDecreasing
 public import PercLib.Probability.IntegratedLowerTail
 public import PercLib.Probability.InvariantTrace
+public import PercLib.Probability.KilledGreen
 public import PercLib.Probability.LaplaceTail
 public import PercLib.Probability.LayerCake
 public import PercLib.Probability.LayerCakeProduct
