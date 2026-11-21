@@ -28,5 +28,14 @@
     }
   ],
   "occursIn": [],
-  "proofUses": []
+  "proofUses": [
+    {
+      "order": 0,
+      "tag": "L82Q",
+      "proof_uses": [
+        "JRCI"
+      ],
+      "reason": "Two applications of countable BK to the branch-point disjoint occurrence."
+    }
+  ]
 }
