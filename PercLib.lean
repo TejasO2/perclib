@@ -209,6 +209,7 @@ public import PercLib.Percolation.Bond.Multipoint.Defs
 public import PercLib.Percolation.Bond.Multipoint.Geometry
 public import PercLib.Percolation.Bond.Multipoint.ShapeCount
 public import PercLib.Percolation.Bond.Multipoint.Sweep
+public import PercLib.Percolation.Bond.Multipoint.Tags.SmallSets
 public import PercLib.Percolation.Bond.PathComparison
 public import PercLib.Percolation.Bond.PathLowerBounds
 public import PercLib.Percolation.Bond.Pivotal
