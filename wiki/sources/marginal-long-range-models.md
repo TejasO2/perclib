@@ -2,7 +2,7 @@
 
 Source: [Chen–Sakai, arXiv:1808.06789v3](https://arxiv.org/html/1808.06789v3). The setup, examples and main statements were checked in versioned HTML and PDF text. This map distinguishes imported estimates from the deductions written in the wiki; it does not claim a full audit of the paper or its journal version.
 
-- [G12U](../articles/branching-random-walk.md#section-marginal-step-law): cited transition input, locator (1.13)–(1.14).
+- [G12U](../articles/branching-random-walk.md#section-marginal-step-law): transition bound with a written proof from V7FQ, locator (1.13)–(1.14).
 - [V7FQ/CEVT](../articles/branching-random-walk.md#section-marginal-local-limit): written symbol, local-limit and spatial-potential arguments for the concrete law. These include leading constants and the critical convolution case. The early-time estimate remains the cited input.
 - [6ZYT](../articles/branching-random-walk.md#section-marginal-percolation): cited percolation input, locator §1.2.3 and Theorem1.4 (1.36), followed by written global comparison and diagram deductions. The lace-expansion proof remains external.
 - [DTYB](../articles/branching-random-walk.md#section-compound-normalization): written mass calculation and local repair for the provisional [normalization erratum](../errata/chen-sakai-marginal-2019.json), locator (1.15)–(1.17). The other results use a different step law.
@@ -24,9 +24,9 @@ These are further written deductions for the clipped law already mapped here, no
 
 ## Spatial potentials with killing
 
-[C9HG](../articles/branching-random-walk.md#section-marginal-spatial-crossover) combines V7FQ's local limit with the cited transition bound G12U to obtain the spatial crossover profile for every convolution order. At the critical diagram dimension, [4XHU](../articles/branching-random-walk.md#section-marginal-surviving-fraction) gives the fraction of the undamped potential that survives, uniformly over all killing parameters. This distinguishes the scale of first reaching the spatial separation from the longer times that produce the critical logarithmic potential.
+[C9HG](../articles/branching-random-walk.md#section-marginal-spatial-crossover) combines V7FQ's local limit with the transition bound G12U, which has a written proof from V7FQ, to obtain the spatial crossover profile for every convolution order. At the critical diagram dimension, [4XHU](../articles/branching-random-walk.md#section-marginal-surviving-fraction) gives the fraction of the undamped potential that survives, uniformly over all killing parameters. This distinguishes the scale of first reaching the spatial separation from the longer times that produce the critical logarithmic potential.
 
-These are further deductions for the already specified clipped law. G12U remains a cited analytic input; no new source statement, source fault, near-critical percolation comparison or formal verification is asserted.
+These are further deductions for the already specified clipped law. G12U has a written proof from V7FQ; no new source statement, source fault, near-critical percolation comparison or formal verification is asserted.
 
 
 ## Exact critical percolation convolution amplitudes
