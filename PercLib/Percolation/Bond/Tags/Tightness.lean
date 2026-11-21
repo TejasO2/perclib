@@ -363,7 +363,7 @@ theorem exponent_relations_sampled_root [Countable V] (q : ℝ → Sym2 V → un
       (∫⁻ ω, ∑ D ∈ (Λ r).image (fun x => (Λ r).filter (· ∈ cluster ω x)),
         (D.card : ℝ≥0∞) ^ 2 ∂law (q r)).toReal / ((Λ r).card : ℝ) := by
     refine Eventually.of_forall fun r => ?_
-    have h := avg_lintegral_pow_clusterIntersection (q r) (Λ r) 1
+    have h := avg_lintegral_pow_clusterIntersection (law (q r)) (Λ r) 1
     simp only [pow_one, one_add_one_eq_two] at h
     rw [h, ENNReal.toReal_mul, ENNReal.toReal_inv, ENNReal.toReal_natCast, div_eq_inv_mul]
   obtain ⟨h1, h2, h3⟩ := exponent_relations (Λ := fun r => ((Λ r).card : ℝ)) hdf hδ hΛ hv hEN

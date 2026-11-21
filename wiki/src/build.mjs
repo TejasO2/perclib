@@ -2,6 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { createRequire } from "node:module";
+import { execFileSync } from "node:child_process";
 import { checkArticles, checkHistory } from "../scripts/check-articles.mjs";
 import { validateOccurrences, concordancePanel } from "./concordance.mjs";
 import { collectHistory, historyPage, recordedReferenceHistory } from "./history.mjs";
@@ -38,6 +39,7 @@ import {
   railBlock,
   document,
   leadSection,
+  unfinishedNotice,
 } from "./render.mjs";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 // Collapsible blocks and wanted links are expanded once; every later use of
@@ -121,18 +123,194 @@ export function validateLinks(files) {
     }
   }
 }
+// The site may be served under a path prefix (GitHub Pages serves this
+// repository at /perclib/). Pages are generated with root-relative URLs and
+// checked as such; applyBasePath then prefixes every one of them. The value is
+// "/" or "/a/b/" made of URL-safe path segments; anything else is refused.
+export function normalizeBasePath(value) {
+  if (value === undefined || value === null || value === "" || value === "/")
+    return "/";
+  const segments = String(value).replace(/^\/|\/$/g, "").split("/");
+  if (
+    !segments.every(
+      (s) => /^[A-Za-z0-9._~-]+$/.test(s) && s !== "." && s !== "..",
+    )
+  )
+    throw Error(`Invalid base path: ${JSON.stringify(value)}`);
+  return `/${segments.join("/")}/`;
+}
+// Prefix every root-relative URL of the generated site with the base path: the
+// href, src and action attributes and refresh redirects of every page, the
+// search index, and (through data-base on <html>) the search script's fetch.
+export function applyBasePath(files, base) {
+  if (base === "/") return files;
+  const prefix = (url) =>
+    url.startsWith("/") && !url.startsWith("//") ? base + url.slice(1) : url;
+  const result = new Map();
+  for (const [file, content] of files) {
+    if (file.endsWith(".html"))
+      result.set(
+        file,
+        content
+          .replace(
+            /(\s)(href|src|action)="([^"]*)"/g,
+            (_, space, attr, url) => `${space}${attr}="${prefix(url)}"`,
+          )
+          .replace(
+            /content="0;url=([^"]*)"/g,
+            (_, url) => `content="0;url=${prefix(url)}"`,
+          )
+          .replace(/^<!doctype html><html lang="en"/, `$&` + ` data-base="${base}"`),
+      );
+    else if (file === "search-index.json")
+      result.set(
+        file,
+        JSON.stringify(
+          JSON.parse(content).map((row) => ({ ...row, url: prefix(row.url) })),
+        ) + "\n",
+      );
+    else result.set(file, content);
+  }
+  return result;
+}
+// Articles that have been through the critic and restructuring carry no draft
+// marker. The list is src/passed-articles.json (wiki/README.md, "Deployment").
+export async function loadPassedArticles(
+  file = path.join(root, "src/passed-articles.json"),
+  articles,
+) {
+  const ids = JSON.parse(await fs.readFile(file, "utf8"));
+  if (!Array.isArray(ids) || !ids.every((id) => typeof id === "string"))
+    throw Error("passed-articles.json must be an array of article ids");
+  if (new Set(ids).size !== ids.length)
+    throw Error("passed-articles.json lists an article twice");
+  const known = new Set(articles.map((p) => p.id));
+  for (const id of ids)
+    if (!known.has(id)) throw Error(`passed-articles.json: unknown article ${id}`);
+  return new Set(ids);
+}
+export const draftMarker = (id, passed) =>
+  passed.has(id)
+    ? ""
+    : '<p class="draft-marker"><span class="draft-label">Draft</span>Not yet through review and restructuring; see <a href="/about/">About</a>.</p>';
+const count = (n) => n.toLocaleString("en-US");
+// The lead of the home page: the banner's message in one sentence, with the
+// counts of this build. `proved` is null when no manifest was supplied.
+export const homeStatus = ({ articles, assertions, proved }) =>
+  `<p class="home-status">This wiki is unfinished and under active construction, so articles may be incomplete and statements and proofs may contain errors; ${
+    proved === null
+      ? `it has ${count(articles)} articles and ${count(assertions)} assertions, and formal status is not shown in this build`
+      : `of its ${count(articles)} articles and ${count(assertions)} assertions, only the ${count(proved)} marked 'proved' have been checked in Lean`
+  } (see <a href="/about/">About</a>).</p>`;
+// Commit and date of this build, for the About page.
+export function buildInfo({ buildCommit, buildDate } = {}) {
+  let commit = buildCommit ?? process.env.WIKI_BUILD_COMMIT ?? null;
+  if (!commit)
+    try {
+      commit = execFileSync("git", ["rev-parse", "HEAD"], {
+        cwd: root,
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+      }).trim();
+    } catch {
+      commit = null;
+    }
+  if (commit !== null && !/^[a-f0-9]{40}$/.test(commit))
+    throw Error(`Invalid build commit: ${commit}`);
+  const date = buildDate ?? new Date();
+  return {
+    commit,
+    date: date.toISOString().slice(0, 16).replace("T", " ") + " UTC",
+  };
+}
+const repositoryUrl = "https://github.com/tomhutchcroft/perclib";
+// The About page (not an article; it carries no assertion tags).
+export function aboutPage(info, evidence, counts) {
+  const formal = evidence.provenance
+    ? `Formal status on this site comes from the Lean manifest compiled at commit <code>${esc(evidence.provenance.commit)}</code> (<a href="${esc(evidence.provenance.runUrl)}">${esc(evidence.provenance.runLabel ?? "successful CI run")}</a>): ${count(counts.proved)} of ${count(counts.assertions)} assertions are proved in Lean.`
+    : "This build shows no formal status: no compiled Lean manifest was supplied.";
+  const section = (id, title, html) =>
+    `<section class="article-section" id="about-${id}"><h2>${title}</h2>${html}</section>`;
+  return (
+    heading("About this wiki") +
+    section(
+      "project",
+      "What this is",
+      "<p>The Percolation Library is a mathematical reference on percolation theory, arranged like an encyclopedia but with complete proofs, developed together with PercLib, a library of formal proofs in Lean 4 and mathlib. Each citable assertion has a permanent tag; a citation identifies an assertion and does not by itself certify a proof. Where a Lean statement carries the same tag, its formal status is shown with the assertion.</p>",
+    ) +
+    section(
+      "progress",
+      "Work in progress",
+      `<p>${esc(unfinishedNotice.replace(/; see About\.$/, "."))} Articles marked “Draft” have not yet been through critical review and restructuring.</p>`,
+    ) +
+    section(
+      "status",
+      "What the formal statuses mean",
+      "<ul><li><strong>proved</strong>: Lean has checked a proof of the tagged Lean statement, using only the standard axioms (propext, Classical.choice, Quot.sound).</li><li><strong>proved-modulo</strong>: Lean has checked a proof that assumes named results from the literature; those inputs are listed with the assertion and are not proved here.</li><li><strong>stated</strong>: a Lean statement exists and has been reviewed as matching the prose, but it has no proof yet.</li><li><strong>Compiled statement; correspondence pending</strong>: a Lean statement exists, but nobody has yet checked that it says what the prose says.</li><li><strong>unformalised</strong>: no Lean statement is attached to the assertion.</li></ul><p>Only assertions marked “proved” have been checked in Lean. A prose proof without the “proved” mark has not been machine-checked, however complete it looks. Whether a Lean statement matches the prose is reviewed separately, and that review is shown next to the status.</p>",
+    ) +
+    section(
+      "errata",
+      "Errata",
+      '<p>The <a href="/errata/">source errata</a> record problems found in the published literature while this wiki was written, with proposed corrections. Every entry is provisional until Tom Hutchcroft confirms it; confirmed entries say so.</p>',
+    ) +
+    section(
+      "authorship",
+      "How the text was written",
+      "<p>Much of the text was drafted with AI assistance and is being reviewed.</p>",
+    ) +
+    section(
+      "contact",
+      "Responsibility and reporting errors",
+      `<p>Tom Hutchcroft is responsible for this wiki. To report an error, open an issue in the <a href="${repositoryUrl}/issues/new/choose">perclib repository</a> with one of its issue templates: “Mathematical gap” for a statement that is false, vacuous or missing a hypothesis, or a proof that does not work; “Question” for anything else. Please name the article and the assertion tag.</p>`,
+    ) +
+    section(
+      "licence",
+      "Licence",
+      "<p>The Lean code and the tooling that builds this site are licensed under the Apache License, Version 2.0. The wiki prose is © Tom Hutchcroft, all rights reserved for now: it is published for reading only. Mathematics is typeset with KaTeX (MIT licence).</p>",
+    ) +
+    section(
+      "build",
+      "This build",
+      `<p>Built from ${
+        info.commit
+          ? `commit <a href="${repositoryUrl}/commit/${info.commit}"><code>${info.commit}</code></a>`
+          : "an unrecorded commit"
+      } on ${esc(info.date)}. ${formal}</p><p>Every page is rendered before publication, and search runs in your browser over a static index.</p>`,
+    )
+  );
+}
 export async function build(
   output = path.join(root, "dist"),
   evidenceOptions = {},
 ) {
+  const basePath = normalizeBasePath(
+    evidenceOptions.basePath ?? process.env.WIKI_BASE_PATH,
+  );
   const { articles, assertions, baseline } = await checkArticles();
-  await checkHistory();
+  // The tag-history base: an explicit option or WIKI_HISTORY_BASE (the Pages
+  // workflow, whose manual runs have no push base), else checkHistory's default.
+  await checkHistory(
+    undefined,
+    evidenceOptions.historyBase ?? (process.env.WIKI_HISTORY_BASE || undefined),
+  );
   const registry = await readRegistry();
   const evidence = await loadEvidence(assertions, {
     reviewsPath: path.join(root, "reviews/correspondence.json"),
     ...evidenceOptions,
   });
   const records = await loadRecords(root, articles, assertions);
+  const passed = await loadPassedArticles(
+    evidenceOptions.passedArticlesPath,
+    articles,
+  );
+  const counts = {
+    articles: articles.length,
+    assertions: assertions.length,
+    proved: evidence.entries
+      ? [...evidence.entries.values()].filter((e) => e.proof_status === "proved")
+          .length
+      : null,
+  };
   const proofUses = validateProofUses(
     evidenceOptions.proofUsesPath
       ? JSON.parse(await fs.readFile(evidenceOptions.proofUsesPath, "utf8"))
@@ -247,6 +425,7 @@ export async function build(
     });
     const body =
       heading(p.title, p.subtitle || p.summary, p.kind) +
+      draftMarker(p.id, passed) +
       articleErrata(p.id, errata, assertions) +
       articleOpening(p, sections, [
         ["connections", "Connections"],
@@ -319,6 +498,7 @@ export async function build(
       "A mathematical encyclopedia of models, results, and proofs.",
       "The mathematical library",
     ) +
+      homeStatus(counts) +
       `<div class="collection-grid">${collections
         .map(
           (c) =>
@@ -464,14 +644,13 @@ export async function build(
       '<p>Selected revision: <a href="/metrics/library/">Library growth</a> · <a href="/metrics/wiki/">Wiki growth</a> · <a href="/metrics/errata/">Errata history</a></p><p>Recorded reference: <a href="/metrics/reference/library/">Library growth</a> · <a href="/metrics/reference/wiki/">Wiki growth</a> · <a href="/metrics/reference/errata/">Errata history</a></p><p>The reference pages follow their own recorded history, normally the fetched main branch. Growth pages show source counts. Verified status comes only from the separately supplied compiled evidence.</p>' +
       `<p>This site contains ${articles.length} articles and ${assertions.length} active assertion tags. These counts describe this site build, not the number of Lean proofs.</p>` +
       (evidence.provenance
-        ? `<p>Formal evidence comes from <a href="${evidence.provenance.runUrl}">this successful CI run</a>, compiled commit <code>${evidence.provenance.commit}</code>.</p>`
+        ? `<p>Formal evidence comes from <a href="${evidence.provenance.runUrl}">${evidence.provenance.runLabel ? "the " + esc(evidence.provenance.runLabel.toLowerCase()) : "this successful CI run"}</a>, compiled commit <code>${evidence.provenance.commit}</code>.</p>`
         : "<p>No compiled manifest is supplied.</p>"),
   );
   add(
     "about",
-    "About the library",
-    heading("About the library") +
-      '<section class="article-section"><p>A mathematical reference with permanent assertion citations. Article text, hypotheses, and source references are preserved from the initial exposition. A citation identifies an assertion; it does not certify a Lean proof.</p><p>All articles and mathematics are rendered before publication. Search runs in your browser over a static index. The wiki build does not run Lean.</p></section>',
+    "About",
+    aboutPage(buildInfo(evidenceOptions), evidence, counts),
   );
   add(
     "search",
@@ -561,9 +740,10 @@ export async function build(
   );
   const mathLayout = compactMathLayout(files);
   validateLinks(files);
+  const site = applyBasePath(files, basePath);
   // Replace only generated output, after input and link validation succeed.
   await fs.rm(output, { recursive: true, force: true });
-  for (const [file, content] of files) {
+  for (const [file, content] of site) {
     await fs.mkdir(path.dirname(path.join(output, file)), { recursive: true });
     await fs.writeFile(path.join(output, file), content);
   }
@@ -583,7 +763,27 @@ export async function build(
     `Link report (advisory): ${report.noInlineLinks.length} articles without inline links, ${report.unlinkedMentions.length} unlinked concept mentions, ${report.wantedPages.length} wanted pages; see dist/link-report.txt.`,
   );
   if (mathLayout.pages) console.log(`Shared ${mathLayout.styles} math layout styles across ${mathLayout.pages} pages; saved ${mathLayout.bytesSaved} bytes.`);
-  return files;
+  if (basePath !== "/") console.log(`All site URLs are under the base path ${basePath}.`);
+  return site;
 }
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href)
-  await build();
+// Command line: node src/build.mjs [--base-path /perclib/] [output directory].
+// WIKI_BASE_PATH sets the base path when the option is absent.
+export function parseArguments(argv) {
+  const options = {};
+  let output;
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    if (arg === "--base-path") {
+      if (i + 1 >= argv.length) throw Error("--base-path needs a value");
+      options.basePath = argv[++i];
+    } else if (arg.startsWith("--base-path=")) options.basePath = arg.slice(12);
+    else if (arg.startsWith("-") || output !== undefined)
+      throw Error(`Unexpected argument: ${arg}`);
+    else output = path.resolve(arg);
+  }
+  return { output, options };
+}
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const { output, options } = parseArguments(process.argv.slice(2));
+  await build(output, options);
+}

@@ -150,12 +150,13 @@ theorem open_graph_and_singleton_conventions :
     (∀ (ω : Config V), (∀ x y, x ≠ y → s(x,y) ∉ ω) →
       ∀ x, cluster ω x = {x}) ∧
     (∀ (ω : Config V) x y, x ≠ y → s(x,y) ∈ ω → ω ∈ conn x y) ∧
-    (∀ (q : Sym2 V → unitInterval) x y,
-      tau q x x = 1 ∧ tau q x y = tau q y x ∧ 0 ≤ tau q x y ∧ tau q x y ≤ 1) := by
+    (∀ (μ : Measure (Config V)) [IsProbabilityMeasure μ] (x y : V),
+      connProb μ x x = 1 ∧ connProb μ x y = connProb μ y x ∧ 0 ≤ connProb μ x y ∧
+        connProb μ x y ≤ 1) := by
   refine ⟨openGraph_adj_iff, ?_, fun ω x =>
     ⟨mem_cluster_self ω x, one_le_encard_cluster ω x⟩, ?_,
     fun _ _ _ hxy h => mem_conn_of_mem hxy h,
-    fun q x y => ⟨tau_self q x, tau_comm q x y, zero_le, tau_le_one q x y⟩⟩
+    fun μ _ x y => ⟨connProb_self μ x, connProb_comm μ x y, zero_le, connProb_le_one μ x y⟩⟩
   · intro ω ω' h
     exact ⟨openGraph_mono h, fun _ _ hc => conn_mono h hc,
       fun _ _ hc => conn_mono h hc⟩

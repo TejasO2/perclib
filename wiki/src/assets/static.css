@@ -116,3 +116,39 @@
 /* Article lead: the opening paragraphs before the contents box. */
 .article-lead { margin: 18px 0 24px; }
 .article-lead p:last-child { margin-bottom: 0; }
+.unfinished-banner {
+  max-width: 1050px;
+  margin: 0 auto 22px;
+  padding: 10px 14px;
+  border: 1px solid var(--gold);
+  border-left-width: 4px;
+  border-radius: 3px;
+  background: var(--gold-soft);
+  color: var(--ink);
+  font-size: 13px;
+}
+.unfinished-banner p {
+  margin: 0;
+}
+.unfinished-banner a {
+  text-decoration: underline;
+}
+.draft-marker {
+  margin: -6px 0 18px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.draft-label {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 1px 6px;
+  border: 1px solid var(--gold);
+  border-radius: 3px;
+  color: var(--gold);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.home-status {
+  font-size: 15px;
+}

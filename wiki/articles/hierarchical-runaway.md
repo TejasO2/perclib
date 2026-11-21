@@ -2086,7 +2086,7 @@ $$</div>
 \|x\|_*:=\max_{v\in\mathcal T_k}\|x_v\|_\infty,
 \quad s&gt;0,
 $$</div>
-<p>then $\mathbb EF(\mathcal X_n)\to\mathbb EF(\mathcal X)$. The interpolated paths also satisfy this conclusion for every continuous function on the product uniform path space with the same growth bound. This includes positive powers of supremum norms and integrals of fixed polynomials of the paths.</p>
+<p>then $\mathbb EF(\mathcal X_n)\to\mathbb EF(\mathcal X)$. For deterministic grid sizes $N_{v,n}\to\infty$ at every node $v$, the interpolated paths $(\Pi_{N_{v,n}}X_{v,n})_{v\in\mathcal T_k}$ also satisfy this conclusion, with the same limit $\mathcal X$, for every continuous function on the product uniform path space with the same growth bound. This includes positive powers of supremum norms and integrals of fixed polynomials of the paths.</p>
 
 <p><em>Proof.</em> Use the decomposition $X_n=X_n(0)+\int D_n+M_n$ from (36). For a fixed coordinate $p$, let $j_{\ell,n}$ be the predictable rate of the $\ell$th power of its jump. All these jumps are nonnegative, since a merger increases $S_p$ and the deterministic normalization is continuous and positive. The estimates (18)–(22) in <a href="/tag/MFGT/">MFGT</a>, together with the bounded rescaled mean $t_n\mu_n(ut_n)$, give</p>
 <div class="math-display">$$

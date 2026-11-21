@@ -127,6 +127,17 @@ theorem ae_no_cross [Countable V₁] [Countable V₂] (q : Sym2 (V₁ ⊕ V₂) 
   rw [prodBernoulli_setOf_mem, hq]
   simp
 
+/-- **Almost surely every cluster factors through its side.** If every cross pair has
+probability `0`, then almost surely the cluster of `Sum.inl a` is the image of the cluster of
+`a` for the restricted configuration, and likewise on the `inr` side. -/
+theorem ae_cluster_inl_eq_and_cluster_inr_eq [Countable V₁] [Countable V₂]
+    (q : Sym2 (V₁ ⊕ V₂) → unitInterval) (hq : ∀ a b, q s(Sum.inl a, Sum.inr b) = 0) :
+    ∀ᵐ ω ∂law q,
+      (∀ a, cluster ω (Sum.inl a) = Sum.inl '' cluster (Sym2.map Sum.inl ⁻¹' ω) a) ∧
+      (∀ b, cluster ω (Sum.inr b) = Sum.inr '' cluster (Sym2.map Sum.inr ⁻¹' ω) b) := by
+  filter_upwards [ae_no_cross q hq] with ω hω
+  exact ⟨cluster_inl_eq hω, cluster_inr_eq hω⟩
+
 /-- **The two sides are independent.** -/
 theorem law_preimage_inl_inter_inr (q : Sym2 (V₁ ⊕ V₂) → unitInterval)
     {A : Set (Config V₁)} {B : Set (Config V₂)} (hA : MeasurableSet A) (hB : MeasurableSet B) :
@@ -183,6 +194,20 @@ theorem tau_inl_inr [Countable V₁] [Countable V₂] (q : Sym2 (V₁ ⊕ V₂) 
   obtain ⟨c, -, hc⟩ := hω
   exact Sum.inl_ne_inr hc
 
+/-- **Two-point function within one side** (`inr`). -/
+theorem tau_inr_inr [Countable V₁] [Countable V₂] (q : Sym2 (V₁ ⊕ V₂) → unitInterval)
+    (hq : ∀ a b, q s(Sum.inl a, Sum.inr b) = 0) (a b : V₂) :
+    tau q (Sum.inr a) (Sum.inr b) = tau (fun e => q (Sym2.map Sum.inr e)) a b := by
+  have hae : conn (Sum.inr a) (Sum.inr b) =ᵐ[law q]
+      {ω : Config (V₁ ⊕ V₂) | Sym2.map Sum.inr ⁻¹' ω ∈ conn a b} := by
+    filter_upwards [ae_no_cross q hq] with ω hω
+    refine propext ?_
+    change Sum.inr b ∈ cluster ω (Sum.inr a) ↔ b ∈ cluster _ a
+    rw [cluster_inr_eq hω, Sum.inr_injective.mem_set_image]
+  rw [tau, measure_congr hae]
+  exact prodBernoulli_preimage_preimage q (Sym2.map.injective Sum.inr_injective)
+    (measurableSet_conn a b)
+
 /-- **Percolation within one side.** -/
 theorem law_cluster_inl_infinite [Countable V₁] [Countable V₂]
     (q : Sym2 (V₁ ⊕ V₂) → unitInterval) (hq : ∀ a b, q s(Sum.inl a, Sum.inr b) = 0) (a : V₁) :
@@ -225,6 +250,21 @@ theorem chi_inl [Countable V₁] [Countable V₂] (q : Sym2 (V₁ ⊕ V₂) → 
   exact (lintegral_map
     ((measurable_of_countable (fun n : ℕ∞ => (n : ℝ≥0∞))).comp (measurable_encard_cluster a))
     (measurable_preimage_map (Sum.inl : V₁ → V₁ ⊕ V₂))).symm
+
+/-- **Susceptibility within one side** (`inr`). -/
+theorem chi_inr [Countable V₁] [Countable V₂] (q : Sym2 (V₁ ⊕ V₂) → unitInterval)
+    (hq : ∀ a b, q s(Sum.inl a, Sum.inr b) = 0) (b : V₂) :
+    chi q (Sum.inr b) = chi (fun e => q (Sym2.map Sum.inr e)) b := by
+  have hae : (fun ω : Config (V₁ ⊕ V₂) => ((cluster ω (Sum.inr b)).encard : ℝ≥0∞)) =ᵐ[law q]
+      fun ω => ((cluster (Sym2.map Sum.inr ⁻¹' ω) b).encard : ℝ≥0∞) := by
+    filter_upwards [ae_no_cross q hq] with ω hω
+    rw [cluster_inr_eq hω, Sum.inr_injective.encard_image]
+  rw [chi, lintegral_congr_ae hae, chi]
+  change _ = ∫⁻ ω, ((cluster ω b).encard : ℝ≥0∞) ∂law (q ∘ Sym2.map Sum.inr)
+  rw [← law_map_preimage_map q Sum.inr_injective]
+  exact (lintegral_map
+    ((measurable_of_countable (fun n : ℕ∞ => (n : ℝ≥0∞))).comp (measurable_encard_cluster b))
+    (measurable_preimage_map (Sum.inr : V₂ → V₁ ⊕ V₂))).symm
 
 /-- **Some cluster is infinite:** `P = 1 - (1 - P₁)(1 - P₂)`. -/
 theorem law_exists_cluster_infinite_sum [Countable V₁] [Countable V₂]

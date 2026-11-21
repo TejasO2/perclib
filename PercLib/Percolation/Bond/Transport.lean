@@ -171,6 +171,12 @@ theorem lintegral_map_image_sym2Map (σ : V ≃ W) (μ : Measure (Config V))
     _ = ∫⁻ ω, f (E ω) ∂μ := lintegral_map_equiv f E
     _ = _ := by rw [hE]
 
+/-- The connection probability under the push-forward of any measure along a vertex
+bijection, at the image vertices, is the connection probability under the measure. -/
+theorem connProb_map_image_sym2Map (σ : V ≃ W) (μ : Measure (Config V)) (x y : V) :
+    connProb (μ.map fun ω => Sym2.map σ '' ω) (σ x) (σ y) = connProb μ x y := by
+  rw [connProb, map_image_sym2Map_apply, preimage_conn_image, connProb]
+
 /-! ### Laws -/
 
 variable {q : Sym2 V → unitInterval} {q' : Sym2 W → unitInterval}
@@ -179,7 +185,7 @@ variable {q : Sym2 V → unitInterval} {q' : Sym2 W → unitInterval}
 theorem tau_eq_of_map_law (σ : V ≃ W)
     (h : (law q).map (fun ω => Sym2.map σ '' ω) = law q') (x y : V) :
     tau q' (σ x) (σ y) = tau q x y := by
-  rw [tau, ← h, map_image_sym2Map_apply, preimage_conn_image, tau]
+  rw [← connProb_law, ← h, connProb_map_image_sym2Map, connProb_law]
 
 /-- The probability that the cluster is infinite is carried along `σ` when the laws are. -/
 theorem law_cluster_infinite_eq_of_map_law (σ : V ≃ W)

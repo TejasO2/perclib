@@ -37,6 +37,37 @@ used; a shallow checkout fetches that one commit if necessary. Failure to obtain
 that base fails validation rather than silently skipping history. Source archives
 without Git still validate their current ledger and content.
 
+## Deployment
+
+`.github/workflows/pages.yml` publishes the site on GitHub Pages, at
+<https://tomhutchcroft.github.io/perclib/>, on every push to `main` that touches
+`wiki/` or the manifest inputs (`PercLib/`, `PercLib.lean`,
+`scripts/ExtractManifest.lean`, `scripts/build_manifest.py`), and on a manual run of
+`main`. It builds PercLib, extracts the manifest of that commit and builds the wiki
+with it. `WIKI_REQUIRE_MANIFEST=1` makes the build fail without a manifest, so the
+published site always shows formal status. The manifest, compiled earlier in the same
+workflow run, is accepted without an artifact receipt only if it names that run
+(`WIKI_MANIFEST_RUN`) and the commit being built (`WIKI_BUILD_COMMIT`).
+
+The site is served under a base path. `node src/build.mjs --base-path /perclib/ [dir]`
+(or `WIKI_BASE_PATH`) generates the pages with root-relative URLs, checks them, then
+prefixes every link, asset, refresh redirect and search-index URL with the base; the
+search script reads it from `<html data-base>`. Without the option the base is `/`
+and the output is unchanged. `tests/pages-site.test.mjs` builds under `/perclib/` and
+checks that every local URL resolves inside the output directory.
+
+Every page carries the unfinished banner at the top of its main content and
+`<meta name="robots" content="noindex">`; the home page states the counts of the
+build, and `/about/` (generated, not an article) explains the formal statuses, the
+provisional errata, authorship, responsibility, licence, and the commit and date of
+the build. `WIKI_HISTORY_BASE` names the commit for the tag-history check when the
+workflow has no push base.
+
+Each article page carries a small "Draft" marker until the article has been through
+the critic and restructuring. `src/passed-articles.json` is the list of article ids
+that have passed; add an id there (and only there) when an article passes, and
+remove it if the article is reopened. The build fails on an unknown or repeated id.
+
 ## File format
 
 Front matter is JSON between `---` delimiters (JSON is a YAML subset). It holds

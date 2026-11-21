@@ -36,7 +36,7 @@ translation-invariant `J` it equals the root threshold by
 Joining `x` and `y` inside a set `S` is `((openGraph ω).induce S).Reachable ⟨x, hx⟩ ⟨y, hy⟩`.
 Probabilities are in `ℝ≥0∞`, and real bounds enter through `ENNReal.ofReal`.
 
-* `HierarchicalTwoPointAveraged` (Theorem 1.1; no wiki tag yet).
+* `HierarchicalTwoPointAveraged` (Theorem 1.1, wiki J98J).
 * `HierarchicalTwoPointRadial` (Corollary 1.2, wiki W498).
 -/
 
@@ -49,10 +49,10 @@ open PercLib.Percolation.Bond
 
 namespace PercLib.Models
 
-/-- **Theorem 1.1 of arXiv:2103.17013v1 (averaged critical two-point bounds).** Let `d ≥ 1`,
-`L ≥ 2`, `0 < α < d` and `0 < c ≤ C`. There are constants `a, A > 0`, depending only on
-`d, L, α, c, C` (they are chosen before `J`), such that for every translation-invariant kernel
-`J` on `V = ℕ →₀ (Fin d → ZMod L)` with
+/-- **Theorem 1.1 of arXiv:2103.17013v1 (J98J: averaged critical two-point bounds).** Let
+`d ≥ 1`, `L ≥ 2`, `0 < α < d`, `0 < c` and `C : ℝ`. There are constants `a, A > 0`, depending
+only on `d, L, α, c, C` (they are chosen before `J`), such that for every translation-invariant
+kernel `J` on `V = ℕ →₀ (Fin d → ZMod L)` with
 `c L^{-(d+α) h(v-u)} ≤ J(u,v) ≤ C L^{-(d+α) h(v-u)}` for `u ≠ v`, the critical intensity
 `β_c = rootCriticalIntensity J 0` is finite and, for every `n ≥ 1`,
 `a L^{-(d-α)n} ≤ |Λ_n|^{-1} ∑_{h x = n} P_{β_c}(0 ↔ x inside Λ_n)
@@ -61,9 +61,11 @@ with `|Λ_n| = L^{dn}`. The shell sum is normalised by the volume of the whole b
 source. The law is `law (intensityProfile J β_c.toNNReal)`; this is the law at `β_c` because
 `β_c < ⊤` is part of the conclusion. The conjunct `β_c < ⊤` follows from the bounds themselves
 (if `β_c = ⊤` the law is the `β = 0` law and the lower bound fails), so including it does not
-strengthen the source. -/
+strengthen the source. The source assumes `c, C > 0` only: `0 < C` and `c ≤ C` hold whenever
+some kernel satisfies both bounds (there is a pair `u ≠ v`), so they are not assumed. -/
+@[tag "J98J"]
 def HierarchicalTwoPointAveraged (d L : ℕ) (α c C : ℝ) : Prop :=
-  1 ≤ d → 2 ≤ L → 0 < α → α < d → 0 < c → c ≤ C →
+  1 ≤ d → 2 ≤ L → 0 < α → α < d → 0 < c →
   ∃ a A : ℝ, 0 < a ∧ 0 < A ∧
     ∀ J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0,
       (∀ x u v, J s(u + x, v + x) = J s(u, v)) →
