@@ -1,8 +1,7 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Correspondence wrappers for path lower bounds, pivotal pairs, walk-length decay, bounded
-degree path counting and path comparison of roots.
-All mathematical inputs are proved in the imported modules.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
 -/
 module
 
@@ -14,14 +13,19 @@ public import PercLib.Percolation.Bond.RowSumDecay
 public import PercLib.Percolation.Bond.SelfAvoidingChi
 public import PercLib.Percolation.Bond.TreeCounting
 
+/-! Correspondence wrappers for path lower bounds, pivotal pairs, walk-length decay, bounded
+degree path counting and path comparison of roots.
+All mathematical inputs are proved in the imported modules. -/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set Finset
-open scoped ENNReal NNReal Classical
+open scoped ENNReal NNReal
 
 namespace PercLib.Percolation.Bond
 variable {V : Type*}
 
+open Classical in
 /-- The bonds of a walk are all open with probability the product of their probabilities,
 which bounds the two-point function from below. -/
 @[tag "9IPM"]
@@ -53,12 +57,13 @@ theorem pivotal_pairs_connection (ω : Config V) (x y : V) :
     fun hω _ he => ⟨mem_of_pivotal hω he.2, fun w => mem_edges_of_pivotal he.2 w⟩,
     fun hω => encard_pivotal_le_dist hω⟩
 
+open Classical in
 /-- With off-diagonal rows at most `m < 1`: the two-point mass on vertices all of whose
 support walks from `x` have length at least `k` is at most `m^k/(1-m)`, the pointwise bound,
 and the two-point function vanishes off the support component. -/
 @[tag "VYCM"]
 theorem tau_walk_length_decay [Countable V] (q : Sym2 V → unitInterval) (m : ℝ≥0∞)
-    (hrow : ∀ v, (∑' w, if w = v then 0 else (unitInterval.toNNReal (q s(v,w)) : ℝ≥0∞)) ≤ m)
+    (hrow : ∀ v, rowSum (fun e => unitInterval.toENNReal (q e)) v ≤ m)
     (hm : m < 1) (x : V) :
     (∀ k : ℕ, ∑' y, (if ∀ p : (SimpleGraph.fromEdgeSet {e | 0 < q e}).Walk x y, k ≤ p.length
       then tau q x y else 0) ≤ m ^ k * (1 - m)⁻¹) ∧
@@ -126,6 +131,7 @@ theorem tau_le_of_walk_length_ge_closed_form [Countable V] (G : SimpleGraph V)
   simp_rw [hshift]
   rw [ENNReal.tsum_mul_left, ENNReal.tsum_geometric, div_eq_mul_inv]
 
+open Classical in
 /-- Comparison of two roots joined by a walk `γ`: the volume tails, the percolation
 probability and the susceptibility at `x` dominate `ρ_γ` times those at `y`; positivity of
 the percolation probability and finiteness of the susceptibility are constant on components

@@ -1,7 +1,7 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Correspondence wrappers for the open-degree laws of independent bond percolation.
-All mathematical inputs are proved in the imported modules.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
 -/
 module
 
@@ -11,14 +11,18 @@ public import PercLib.Percolation.Bond.DegreeGenerating
 public import PercLib.Percolation.Bond.InfiniteDegree
 public import PercLib.Percolation.Bond.LocalFiniteness
 
+/-! Correspondence wrappers for the open-degree laws of independent bond percolation.
+All mathematical inputs are proved in the imported modules. -/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set Filter
-open scoped ENNReal NNReal Topology Classical
+open scoped ENNReal NNReal Topology
 
 namespace PercLib.Percolation.Bond
 variable {V : Type*}
 
+open Classical in
 /-- The expected number of open pairs in a finite set of pairs is the sum of their
 probabilities, and the expected number of open ordered pairs leaving a finite vertex set
 is the sum of the exterior probabilities. -/
@@ -31,6 +35,7 @@ theorem lintegral_open_pairs_and_boundary [Countable V] (q : Sym2 V → unitInte
       ∑ x ∈ Λ, ∑' y, if y ∈ Λ then 0 else (unitInterval.toNNReal (q s(x, y)) : ℝ≥0∞) :=
   ⟨lintegral_ncard_inter_finset_pairs q F, lintegral_encard_boundary_pairs q Λ⟩
 
+open Classical in
 /-- The generating function of the number of open pairs from `v` into a finite set, and
 the probability that there is none. -/
 @[tag "TEYJ"]
@@ -48,7 +53,7 @@ infinite degree and an infinite cluster at `v` almost surely, and both critical
 intensities vanish. -/
 @[tag "VNRG"]
 theorem infinite_row_degree_cluster_threshold [Countable V] (J : Sym2 V → ℝ≥0) (v : V)
-    (hJ : (∑' w, if w = v then 0 else (J s(v, w) : ℝ≥0∞)) = ∞) :
+    (hJ : rowSum (fun e => (J e : ℝ≥0∞)) v = ∞) :
     (∀ β : ℝ≥0, 0 < β →
       (∀ᵐ ω ∂law (intensityProfile J β), {w | (openGraph ω).Adj v w}.Infinite) ∧
       law (intensityProfile J β) {ω | (cluster ω v).Infinite} = 1) ∧
@@ -66,16 +71,17 @@ Markov bound, and it is almost surely finite when the row sum is finite. -/
 theorem open_degree_law [Countable V] (q : Sym2 V → unitInterval) (v : V) :
     Measurable (fun ω : Config V => {w | (openGraph ω).Adj v w}.encard) ∧
     ∫⁻ ω, ({w | (openGraph ω).Adj v w}.encard : ℝ≥0∞) ∂law q =
-      (∑' w, if w = v then 0 else (unitInterval.toNNReal (q s(v, w)) : ℝ≥0∞)) ∧
+      rowSum (fun e => unitInterval.toENNReal (q e)) v ∧
     (∀ k : ℕ, (k : ℝ≥0∞) * law q {ω | (k : ℕ∞) ≤ {w | (openGraph ω).Adj v w}.encard} ≤
-      ∑' w, if w = v then 0 else (unitInterval.toNNReal (q s(v, w)) : ℝ≥0∞)) ∧
-    ((∑' w, if w = v then 0 else (unitInterval.toNNReal (q s(v, w)) : ℝ≥0∞)) < ∞ →
+      rowSum (fun e => unitInterval.toENNReal (q e)) v) ∧
+    (rowSum (fun e => unitInterval.toENNReal (q e)) v < ∞ →
       ∀ᵐ ω ∂law q, {w | (openGraph ω).Adj v w}.encard < ⊤) := by
   refine ⟨measurable_degree v, lintegral_degree q v, mul_law_le_degree_le q v,
     fun hrow => ?_⟩
   filter_upwards [ae_finite_neighbors_of_rowSum_lt_top q v hrow] with ω hω
   exact Set.encard_lt_top_iff.2 hω
 
+open Classical in
 /-- For `s ≤ 1` and an increasing sequence of finite sets, the generating function of the
 limiting number of open pairs from `v` is the decreasing limit, equivalently the infimum,
 of the finite products. -/
@@ -109,16 +115,16 @@ infinite. -/
 @[tag "XJ74"]
 theorem ae_degree_finite_iff_rowSum [Countable V] (q : Sym2 V → unitInterval) :
     ∀ᵐ ω ∂law q, ∀ v,
-      ((∑' w, if w = v then 0 else (unitInterval.toNNReal (q s(v, w)) : ℝ≥0∞)) < ∞ →
+      (rowSum (fun e => unitInterval.toENNReal (q e)) v < ∞ →
         ((openGraph ω).neighborSet v).Finite) ∧
-      ((∑' w, if w = v then 0 else (unitInterval.toNNReal (q s(v, w)) : ℝ≥0∞)) = ∞ →
+      (rowSum (fun e => unitInterval.toENNReal (q e)) v = ∞ →
         ((openGraph ω).neighborSet v).Infinite) := by
   rw [ae_all_iff]
   intro v
-  by_cases h : (∑' w, if w = v then 0 else (unitInterval.toNNReal (q s(v, w)) : ℝ≥0∞)) < ∞
+  by_cases h : rowSum (fun e => unitInterval.toENNReal (q e)) v < ∞
   · filter_upwards [ae_finite_neighbors_of_rowSum_lt_top q v h] with ω hω
     exact ⟨fun _ => hω, fun h' => absurd h' h.ne⟩
-  · have h' : (∑' w, if w = v then 0 else (unitInterval.toNNReal (q s(v, w)) : ℝ≥0∞)) = ∞ :=
+  · have h' : rowSum (fun e => unitInterval.toENNReal (q e)) v = ∞ :=
       not_lt_top_iff.1 h
     filter_upwards [ae_infinite_neighbors_of_rowSum_eq_top q v h'] with ω hω
     exact ⟨fun h'' => absurd h'' h, fun _ => hω⟩

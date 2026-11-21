@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs using mathlib's product and Bernoulli measures, at the pinned revision
 56a005855ea17e0b0958f73ec801ae140b0a1679. No upstream coupling theorem is copied.
 The coordinate construction uses three states: both open, only the upper open,
@@ -10,6 +14,21 @@ module
 public import PercLib.Probability.ProdBernoulli
 public import Mathlib.MeasureTheory.Integral.Lebesgue.Map
 public import Mathlib.Data.Sym.Sym2
+
+/-!
+# Monotone coupling of product Bernoulli laws
+
+Ordered profiles admit a coupling of their product laws with ordered configurations, so increasing
+events and nonnegative increasing observables are monotone in the profile.
+
+## Main results
+
+* `exists_bernoulli_order_coupling`
+* `exists_prodBernoulli_monotone_coupling`
+* `prodBernoulli_mono_event`
+* `lintegral_prodBernoulli_mono`
+* `exists_bond_monotone_coupling`
+-/
 
 @[expose] public section
 

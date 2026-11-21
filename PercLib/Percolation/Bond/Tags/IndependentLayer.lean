@@ -1,7 +1,11 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-90 correspondence wrappers for the ghost field and the independent-layer ghost
-comparisons. All mathematical inputs are proved in the imported modules.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
+Correspondence wrappers for the ghost field and the independent-layer ghost comparisons. All
+mathematical inputs are proved in the imported modules.
 -/
 module
 
@@ -9,11 +13,22 @@ public import PercLib.Meta.Tag
 public import PercLib.Percolation.Bond.IndependentLayer.AddedVolume
 public import PercLib.Percolation.Bond.IndependentLayer.Conditional
 
+/-!
+# Independent layers and the ghost field: correspondence
+
+Wiki correspondence for the ghost field and the independent-layer ghost comparisons.
+
+## Main results
+
+* `ghost_field_magnetization`
+* `ghost_comparison_omitted_edges`
+* `ghost_bound_added_mass`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set PercLib.Probability
 open scoped ENNReal unitInterval
-open Classical
 
 namespace PercLib.Percolation.Bond
 variable {V : Type*}
@@ -44,6 +59,7 @@ theorem ghost_field_magnetization [Countable V] (q : Sym2 V → I) (x : V) :
     exact ⟨mem_univ _, v, hv.2⟩
   · rw [Measure.prod_prod, hmarks, mul_zero]
 
+open Classical in
 /-- The omitted-edge ghost comparison `M₀(h) ≤ M_o(h) ≤ M₀(h) + δ E[X e^{-hX}] M*(h)`;
 under a transitive full profile `M* = M_o` and the error is multiplicative. -/
 @[tag "FJWB"]
@@ -92,7 +108,7 @@ real `t > 0`. -/
 @[tag "AYPN"]
 theorem ghost_bound_added_mass [Countable V] (q₀ s : Sym2 V → I) (o : V) {h : ℝ}
     (hh : 0 < h) (hfin : ∀ᵐ ω ∂(law q₀), (cluster ω o).Finite) {a : ℝ≥0∞}
-    (ha : ∀ u, (∑' w, if w = u then 0 else (unitInterval.toNNReal (s s(u, w)) : ℝ≥0∞)) ≤ a) :
+    (ha : ∀ u, rowSum (fun e => unitInterval.toENNReal (s e)) u ≤ a) :
     (∀ (f : Set V → ℝ≥0∞), Measurable (fun ω : Config V => f (cluster ω o)) →
       ∫⁻ x, (1 - EReal.exp (-((h : EReal) *
           (((cluster (x.1 ∪ x.2) o \ cluster x.1 o).encard : ℝ≥0∞) : EReal)))) *

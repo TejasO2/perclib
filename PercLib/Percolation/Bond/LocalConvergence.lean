@@ -1,9 +1,10 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
-New proofs for issue 644 (Q-216), written on 2026-11-16 by PROVER-F. No upstream proof is
-copied and no definition is added.
+Authors: PercLib contributors
+-/
+/-
+New proofs, written on 2026-11-16. No upstream proof is copied and no definition is added.
 -/
 module
 
@@ -36,7 +37,7 @@ The closed ball of radius `R` is mathlib's `G.ball o (R + 1)` (`edist < R + 1`).
 noncomputable section
 
 open MeasureTheory Set Filter Topology
-open scoped ENNReal NNReal Classical
+open scoped ENNReal NNReal
 
 namespace PercLib.Percolation.Bond
 
@@ -79,6 +80,7 @@ theorem law_localConn_range_eq (q : Sym2 V → unitInterval) [Countable U] (g : 
 
 /-! ### Transport of the boundary functional -/
 
+open Classical in
 /-- **Transport of `Φ`.** Let `f` be injective on `A ⊇ S`, carry `q` on pairs of `A` to
 `q'`, and suppose every partner of `S` under `q` lies in `A` and every partner of `f '' S`
 under `q'` lies in `f '' A`. Then `Φ_{q'}(f o, f '' S) = Φ_q(o, S)`. -/
@@ -161,7 +163,8 @@ theorem boundaryFlux_image_eq (q : Sym2 V → unitInterval) (q' : Sym2 W → uni
     · intro h; exact ⟨a, h, rfl⟩
   by_cases ha : (a : V) ∈ S
   · simp [ha, hmem.2 ha]
-  · rw [ite_eq_right_iff.2 fun h => absurd h (mt hmem.1 ha), ite_eq_right_iff.2 fun h => absurd h ha, hP, hq u (hSA hu) a a.2]
+  · rw [ite_eq_right_iff.2 fun h => absurd h (mt hmem.1 ha),
+      ite_eq_right_iff.2 fun h => absurd h ha, hP, hq u (hSA hu) a a.2]
 
 /-! ### Rooted isomorphisms of balls -/
 
@@ -209,6 +212,7 @@ theorem edist_ballIso_le {o : V} {o' : W} {r : ℕ∞}
           _ ≤ 1 + k := add_le_add (SimpleGraph.edist_eq_one_iff_adj.2 hadj').le hvk
           _ = ((k + 1 : ℕ) : ℕ∞) := by push_cast; ring
 
+open Classical in
 /-- The edge indicator of a graph is invariant under its automorphisms. -/
 theorem indicator_edgeSet_map_iso (σ : G ≃g G) (e : Sym2 V) :
     G.edgeSet.indicator (fun _ => (1 : ℝ≥0)) (Sym2.map σ e) =
@@ -231,6 +235,7 @@ theorem summable_indicator_edgeSet (hG : ∀ v, (G.neighborSet v).Finite) (u : V
   have hadj : ¬ G.Adj u v := by simpa using hv
   simp [Set.indicator, SimpleGraph.mem_edgeSet, hadj]
 
+open Classical in
 /-- **Item 1, transport of certificates.** A rooted isomorphism of the balls `edist < r + 1`
 carries every finite `S ∋ o` in the ball `edist < r` to a finite `S' ∋ o'` with the same
 boundary functional for the edge-indicator intensities at every `β`. -/
@@ -258,7 +263,8 @@ theorem boundaryFlux_eq_of_ballIso {o : V} {o' : W} {r : ℕ∞}
   have hf : InjOn f (G.ball o (r + 1)) := fun x hx y hy h => by
     rw [hfA x hx, hfA y hy] at h
     simpa using φ.injective (Subtype.ext h)
-  have hadj : ∀ a (ha : a ∈ G.ball o (r + 1)) b (hb : b ∈ G.ball o (r + 1)), G'.Adj (f a) (f b) ↔ G.Adj a b := by
+  have hadj : ∀ a (ha : a ∈ G.ball o (r + 1)) b (hb : b ∈ G.ball o (r + 1)),
+      G'.Adj (f a) (f b) ↔ G.Adj a b := by
     intro a ha b hb
     rw [hfA a ha, hfA b hb]
     have := φ.map_adj_iff (v := ⟨a, ha⟩) (w := ⟨b, hb⟩)
@@ -281,7 +287,7 @@ theorem boundaryFlux_eq_of_ballIso {o : V} {o' : W} {r : ℕ∞}
       intro h
       refine hv ?_
       have hu' : G.edist u o < r := hS hu
-      show G.edist v o < r + 1
+      change G.edist v o < r + 1
       calc G.edist v o ≤ G.edist v u + G.edist u o := SimpleGraph.edist_triangle
         _ = G.edist u o + 1 := by
           rw [SimpleGraph.edist_eq_one_iff_adj.2 h.symm, add_comm]
@@ -314,11 +320,11 @@ end Balls
 
 /-! ### Lower semicontinuity of the threshold (468P) -/
 
-/-- **468P.** Let `G` be connected and locally finite on a countable type, and let every
-`G_n` be vertex-transitive and locally finite on a countable type. If for every `R` the
-closed balls of radius `R` about `o_n` in `G_n` are eventually isomorphic, as rooted graphs,
-to the closed ball of radius `R` about `o` in `G`, then for homogeneous nearest-neighbour
-percolation (the intensity profiles of the edge indicators),
+/-- **Lower semicontinuity of the threshold under local convergence.** Let `G` be connected and
+locally finite on a countable type, and let every `G_n` be vertex-transitive and locally finite on a
+countable type. If for every `R` the closed balls of radius `R` about `o_n` in `G_n` are eventually
+isomorphic, as rooted graphs, to the closed ball of radius `R` about `o` in `G`, then for
+homogeneous nearest-neighbour percolation (the intensity profiles of the edge indicators),
 `β_c(G) ≤ liminf_n β_c(G_n)`. -/
 theorem rootCriticalIntensity_le_liminf [Countable V] {W : ℕ → Type*} [∀ n, Countable (W n)]
     (G : SimpleGraph V) (Gs : ∀ n, SimpleGraph (W n)) (o : V) (os : ∀ n, W n)
@@ -340,7 +346,7 @@ theorem rootCriticalIntensity_le_liminf [Countable V] {W : ℕ → Type*} [∀ n
   set R : ℕ := S.sup fun u => (G.edist u o).toNat
   have hS : (S : Set V) ⊆ G.ball o ((R + 1 : ℕ) : ℕ∞) := fun u hu => by
     have hne : G.edist u o ≠ ⊤ := SimpleGraph.edist_ne_top_iff_reachable.2 (hG.preconnected u o)
-    show G.edist u o < ((R + 1 : ℕ) : ℕ∞)
+    change G.edist u o < ((R + 1 : ℕ) : ℕ∞)
     rw [← ENat.natCast_toNat hne, Nat.cast_lt]
     exact Nat.lt_succ_of_le (Finset.le_sup (f := fun u => (G.edist u o).toNat) hu)
   filter_upwards [hloc (R + 1)] with n ⟨φ, hφ⟩
@@ -351,12 +357,13 @@ theorem rootCriticalIntensity_le_liminf [Countable V] {W : ℕ → Type*} [∀ n
     (offDiag_rowSum_lt_top_of_summable _ (summable_indicator_edgeSet (hGsf n))) S' hoS' β
     hΦ).le
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
 section Witness
 
 open PercLib.Models.Site
 
+open Classical in
 /-- Item 1 with the identity isomorphism of the balls of `ℤ`. -/
 example (S : Finset (Fin 1 → ℤ)) (hoS : 0 ∈ S) (r : ℕ∞)
     (hS : (S : Set (Fin 1 → ℤ)) ⊆ (zdGraph 1).ball 0 r) (β : ℝ≥0) :
@@ -377,8 +384,8 @@ example (S : Finset (Fin 1 → ℤ)) (hoS : 0 ∈ S) (r : ℕ∞)
           ℝ≥0∞)) := by
   convert boundaryFlux_eq_of_ballIso SimpleGraph.Iso.refl (fun _ => rfl) S hoS hS β
 
-/-- 468P for the constant sequence `G_n = G = ℤ` (nearest-neighbour line, `zdGraph 1`):
-every hypothesis holds. -/
+/-- `rootCriticalIntensity_le_liminf` for the constant sequence `G_n = G = ℤ` (nearest-neighbour
+line, `zdGraph 1`): every hypothesis holds. -/
 example : rootCriticalIntensity ((zdGraph 1).edgeSet.indicator fun _ => (1 : ℝ≥0)) 0 ≤
     liminf (fun _ : ℕ => rootCriticalIntensity
       ((zdGraph 1).edgeSet.indicator fun _ => (1 : ℝ≥0)) (0 : Fin 1 → ℤ)) atTop :=

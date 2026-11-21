@@ -1,8 +1,12 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-New proofs for P-7 (issue 41), written on 2026-11-14, from pinned mathlib's `Sym2.lift`,
-`Equiv.tsum_eq` and ENNReal sums, and the P-5 and P-6 theorems. No upstream code is copied.
+Authors: PercLib contributors
+-/
+/-
+New proofs, written on 2026-11-14, from pinned mathlib's `Sym2.lift`, `Equiv.tsum_eq` and ENNReal
+sums, and the row-sum theorems of `PercLib.Percolation.Bond.RowSum` and the intensity bounds of
+`PercLib.Percolation.Bond.Intensity`. No upstream code is copied.
 -/
 module
 
@@ -10,11 +14,11 @@ public import PercLib.Percolation.Bond.Intensity
 
 /-! # Translation-invariant kernels on additive groups, and `ℤ^d`
 
-On an additive group `G`, a pair intensity is translation invariant when
-`J s(x,y) = k (y - x)` for a displacement kernel `k`. Such a `J` exists exactly when `k`
-is even, because pairs are unordered (`exists_sym2_kernel`). The off-diagonal row of `J`
-at every vertex is `∑'_{z ≠ 0} k z` (`rowSum_eq_of_translationInvariant`), so P-5 and
-P-6 apply with `M` any bound on `∑' z, k z`.
+On an additive group `G`, a pair intensity is translation invariant when `J s(x,y) = k (y - x)` for
+a displacement kernel `k`. Such a `J` exists exactly when `k` is even, because pairs are unordered
+(`exists_sym2_kernel`). The off-diagonal row of `J` at every vertex is `∑'_{z ≠ 0} k z`
+(`rowSum_eq_of_translationInvariant`), so the row-sum and intensity bounds apply with `M` any bound
+on `∑' z, k z`.
 
 `ℤ^d` is `Fin d → ℤ`. The compiled witness at the end uses the nearest-neighbour kernel
 along one coordinate axis; it is nonzero, its row sum is two, and at `β = 1/4` the
@@ -28,7 +32,6 @@ noncomputable section
 
 open MeasureTheory Set
 open scoped ENNReal NNReal
-open Classical
 open PercLib.Percolation.Bond
 
 namespace PercLib.Models
@@ -40,32 +43,68 @@ pairs. -/
 theorem exists_sym2_kernel (k : G → ℝ≥0) (hk : ∀ z, k (-z) = k z) :
     ∃ J : Sym2 G → ℝ≥0, ∀ x y, J s(x,y) = k (y - x) :=
   ⟨Sym2.lift ⟨fun x y => k (y - x), fun x y => by
-      show k (y - x) = k (x - y)
+      change k (y - x) = k (x - y)
       rw [← hk, neg_sub]⟩,
     fun x y => Sym2.lift_mk _ x y⟩
 
+open Classical in
 /-- A translation-invariant pair intensity has the same off-diagonal row at every vertex:
 the sum of the kernel away from zero. -/
 theorem rowSum_eq_of_translationInvariant (J : Sym2 G → ℝ≥0) (k : G → ℝ≥0)
-    (hJ : ∀ x y, J s(x,y) = k (y - x)) (v : G) :
-    (∑' w, if w = v then 0 else (J s(v,w) : ℝ≥0∞)) =
+    (hJ : ∀ x y, J s(x, y) = k (y - x)) (v : G) :
+    rowSum (fun e => (J e : ℝ≥0∞)) v =
       ∑' z, if z = 0 then 0 else (k z : ℝ≥0∞) := by
-  rw [← (Equiv.addRight v).tsum_eq]
+  rw [rowSum_def, ← (Equiv.addRight v).tsum_eq]
   refine tsum_congr fun z => ?_
   simp [hJ]
 
+open Classical in
 /-- The off-diagonal row of a translation-invariant pair intensity is at most the total
 mass of its kernel. -/
 theorem rowSum_le_tsum_of_translationInvariant (J : Sym2 G → ℝ≥0) (k : G → ℝ≥0)
-    (hJ : ∀ x y, J s(x,y) = k (y - x)) (v : G) :
-    (∑' w, if w = v then 0 else (J s(v,w) : ℝ≥0∞)) ≤ ∑' z, (k z : ℝ≥0∞) := by
+    (hJ : ∀ x y, J s(x, y) = k (y - x)) (v : G) :
+    rowSum (fun e => (J e : ℝ≥0∞)) v ≤ ∑' z, (k z : ℝ≥0∞) := by
   rw [rowSum_eq_of_translationInvariant J k hJ v]
   exact ENNReal.tsum_le_tsum fun z => by split_ifs <;> simp
 
-/-- **P-5 for translation-invariant profiles.** If `q s(x,y) = p (y - x)` and the
+/-- A kernel identity `J(x,y) = k(y - x)` on distinct pairs forces `k` to be even. -/
+theorem neg_eq_of_translationInvariant_of_ne (J : Sym2 G → ℝ≥0) (k : G → ℝ≥0)
+    (hJ : ∀ x y, x ≠ y → J s(x, y) = k (y - x)) (z : G) : k (-z) = k z := by
+  by_cases hz : z = 0
+  · rw [hz, neg_zero]
+  · have h1 := hJ 0 z (Ne.symm hz)
+    have h2 := hJ z 0 hz
+    rw [Sym2.eq_swap, h2, sub_zero, zero_sub] at h1
+    exact h1
+
+open Classical in
+/-- The off-diagonal row identity when the kernel identity is assumed on distinct pairs only
+(the diagonal is arbitrary). -/
+theorem rowSum_eq_of_translationInvariant_of_ne (J : Sym2 G → ℝ≥0) (k : G → ℝ≥0)
+    (hJ : ∀ x y, x ≠ y → J s(x, y) = k (y - x)) (v : G) :
+    rowSum (fun e => (J e : ℝ≥0∞)) v =
+      ∑' z, if z = 0 then 0 else (k z : ℝ≥0∞) := by
+  obtain ⟨J', hJ'⟩ := exists_sym2_kernel k (neg_eq_of_translationInvariant_of_ne J k hJ)
+  rw [← rowSum_eq_of_translationInvariant J' k hJ' v]
+  simp only [rowSum_def]
+  refine tsum_congr fun w => ?_
+  split_ifs with h
+  · rfl
+  · rw [hJ v w (Ne.symm h), hJ' v w]
+
+open Classical in
+/-- The off-diagonal row bound when the kernel identity is assumed on distinct pairs only. -/
+theorem rowSum_le_tsum_of_translationInvariant_of_ne (J : Sym2 G → ℝ≥0) (k : G → ℝ≥0)
+    (hJ : ∀ x y, x ≠ y → J s(x, y) = k (y - x)) (v : G) :
+    rowSum (fun e => (J e : ℝ≥0∞)) v ≤ ∑' z, (k z : ℝ≥0∞) := by
+  rw [rowSum_eq_of_translationInvariant_of_ne J k hJ v]
+  exact ENNReal.tsum_le_tsum fun z => by split_ifs <;> simp
+
+open Classical in
+/-- **Row-sum bound for translation-invariant profiles.** If `q s(x,y) = p (y - x)` and the
 off-diagonal mass of `p` is at most `m < 1`, then `chi q x ≤ (1 - m)⁻¹`. -/
 theorem chi_le_of_translationInvariant [Countable G] (q : Sym2 G → unitInterval)
-    (p : G → unitInterval) (hq : ∀ x y, q s(x,y) = p (y - x)) (m : ℝ≥0∞)
+    (p : G → unitInterval) (hq : ∀ x y, q s(x, y) = p (y - x)) (m : ℝ≥0∞)
     (hp : (∑' z, if z = 0 then 0 else (unitInterval.toNNReal (p z) : ℝ≥0∞)) ≤ m)
     (hm : m < 1) (x : G) : chi q x ≤ (1 - m)⁻¹ :=
   chi_le_inv_one_sub_of_rowSum q m (fun v =>
@@ -73,25 +112,25 @@ theorem chi_le_of_translationInvariant [Countable G] (q : Sym2 G → unitInterva
       (fun z => unitInterval.toNNReal (p z))
       (fun x y => congrArg unitInterval.toNNReal (hq x y)) v).le.trans hp) hm x
 
-/-- **P-6 for translation-invariant intensities: susceptibility.** -/
+/-- **Intensity bound for translation-invariant intensities: susceptibility.** -/
 theorem chi_intensity_le_of_translationInvariant [Countable G] (J : Sym2 G → ℝ≥0)
-    (k : G → ℝ≥0) (hJ : ∀ x y, J s(x,y) = k (y - x)) (M : ℝ≥0)
+    (k : G → ℝ≥0) (hJ : ∀ x y, J s(x, y) = k (y - x)) (M : ℝ≥0)
     (hk : ∑' z, (k z : ℝ≥0∞) ≤ M) (β : ℝ≥0) (hβ : (β : ℝ≥0∞) * M < 1) (x : G) :
     chi (intensityProfile J β) x ≤ (1 - (β : ℝ≥0∞) * M)⁻¹ :=
   chi_intensity_le J M (fun v => (rowSum_le_tsum_of_translationInvariant J k hJ v).trans hk)
     β hβ x
 
-/-- **P-6 for translation-invariant intensities: global threshold.** -/
+/-- **Intensity bound for translation-invariant intensities: global threshold.** -/
 theorem inv_le_globalCriticalIntensity_of_translationInvariant [Countable G]
-    (J : Sym2 G → ℝ≥0) (k : G → ℝ≥0) (hJ : ∀ x y, J s(x,y) = k (y - x)) (M : ℝ≥0)
+    (J : Sym2 G → ℝ≥0) (k : G → ℝ≥0) (hJ : ∀ x y, J s(x, y) = k (y - x)) (M : ℝ≥0)
     (hk : ∑' z, (k z : ℝ≥0∞) ≤ M) :
     (M : ℝ≥0∞)⁻¹ ≤ globalCriticalIntensity J :=
   inv_le_globalCriticalIntensity J M fun v =>
     (rowSum_le_tsum_of_translationInvariant J k hJ v).trans hk
 
-/-- **P-6 for translation-invariant intensities: root threshold.** -/
+/-- **Intensity bound for translation-invariant intensities: root threshold.** -/
 theorem inv_le_rootCriticalIntensity_of_translationInvariant [Countable G]
-    (J : Sym2 G → ℝ≥0) (k : G → ℝ≥0) (hJ : ∀ x y, J s(x,y) = k (y - x)) (M : ℝ≥0)
+    (J : Sym2 G → ℝ≥0) (k : G → ℝ≥0) (hJ : ∀ x y, J s(x, y) = k (y - x)) (M : ℝ≥0)
     (hk : ∑' z, (k z : ℝ≥0∞) ≤ M) (x : G) :
     (M : ℝ≥0∞)⁻¹ ≤ rootCriticalIntensity J x :=
   inv_le_rootCriticalIntensity J M (fun v =>

@@ -1,8 +1,7 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Correspondence wrappers for the finite-domain intensity Russo formula, the off-diagonal
-convolution bound, and semicontinuity of the percolation probability.
-All mathematical inputs are proved in the imported modules.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
 -/
 module
 
@@ -11,14 +10,19 @@ public import PercLib.Percolation.Bond.ConvolutionBound
 public import PercLib.Percolation.Bond.FiniteVolumeRusso
 public import PercLib.Percolation.Bond.ThetaSemicontinuity
 
+/-! Correspondence wrappers for the finite-domain intensity Russo formula, the off-diagonal
+convolution bound, and semicontinuity of the percolation probability.
+All mathematical inputs are proved in the imported modules. -/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set Finset Filter
-open scoped ENNReal NNReal Topology Classical
+open scoped ENNReal NNReal Topology
 
 namespace PercLib.Percolation.Bond
 variable {V : Type*}
 
+open Classical in
 /-- Diagonal pairs contribute nothing to the Russo sum of an internal connection event. -/
 private theorem sum_sym2_russo_eq_filter (J : Sym2 V → ℝ≥0) (S : Finset V)
     (x y : (S : Set V)) (β : ℝ) :
@@ -39,6 +43,7 @@ private theorem sum_sym2_russo_eq_filter (J : Sym2 V → ℝ≥0) (S : Finset V)
       rw [h]) he, measureReal_empty, mul_zero]
   · rw [ite_eq_left he]
 
+open Classical in
 /-- Finite-domain Russo formula in the intensity: the derivative of `τ^S_β(x,y)` is the sum
 over off-diagonal pairs of `S` of `J_e e^{-β J_e} P_β(e pivotal)` (from the right at zero,
 two-sided for `β > 0`), it lies in `[0, L_S]`, and the derivative of `χ^S_β(x)` is the sum
@@ -92,6 +97,7 @@ theorem finite_domain_intensity_russo (J : Sym2 V → ℝ≥0) (S : Finset V) (x
     simp_rw [sum_sym2_russo_eq_filter J S x _ β] at hd
     exact hd
 
+open Classical in
 /-- Off-diagonal convolution bound. For the walk weights `F_n(x,y)` of length-`n` sequences
 from `x` ending at `y` with the diagonal removal `b` of `a`: `F_{n+1}(x,y) ≤ c_{n+1} a(x,y)`
 for `x ≠ y`, `∑_n F_n(x,y) ≤ a(x,y) H(κ) H(m)`, and on countable `V` a profile dominated by

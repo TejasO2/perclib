@@ -1,8 +1,12 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written for package Q-113 (issue 447), on the D-2 interface, from the positive
-semidefiniteness of the connection kernel (`ConnectionKernel.lean`). The statements follow
-the wiki tag 96A2 (connection kernels). No source text or code is copied.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
+New proofs, on the bond interface, from the positive semidefiniteness of the connection
+kernel (`ConnectionKernel.lean`). The statements follow the wiki tag 96A2 (connection kernels). No
+source text or code is copied.
 -/
 module
 
@@ -37,7 +41,6 @@ noncomputable section
 
 open MeasureTheory Filter Topology Set
 open scoped ENNReal NNReal
-open Classical
 
 namespace PercLib.Percolation.Bond
 
@@ -72,6 +75,7 @@ private theorem sum_bilin_le_tsum (q : Sym2 V → unitInterval) (F : Finset V)
     ∑ u ∈ F, ∑ v ∈ F, a u * tau q u v * b v ≤ ∑' u, ∑' v, a u * tau q u v * b v :=
   (Finset.sum_le_sum fun _ _ => ENNReal.sum_le_tsum F).trans (ENNReal.sum_le_tsum F)
 
+open Classical in
 /-- **Cauchy–Schwarz for `T`.** For finite-valued `a, b`,
 `(∑' u v, a(u) T(u,v) b(v))² ≤ (∑' u v, a(u) T(u,v) a(v)) (∑' u v, b(u) T(u,v) b(v))`. -/
 theorem tsum_bilin_sq_le [Countable V] (q : Sym2 V → unitInterval) (a b : V → ℝ≥0∞)
@@ -132,6 +136,7 @@ theorem tendsto_tau_cofinite (q : Sym2 V → unitInterval) (v : V)
   have := ENNReal.pow_rpow_inv_natCast (n := 2) (by norm_num) (tau q v x)
   simpa [one_div] using this
 
+open Classical in
 /-- The tail `∑_{v ∉ H, w ∉ H} T(u,v) T(v,w) T(w,u)` is at most the tail
 `∑_{v ∉ H} T(u,v) T²(v,u)` of `Δ_u`. -/
 private theorem tail_le (q : Sym2 V → unitInterval) (u : V) (H : Finset V) :
@@ -149,6 +154,7 @@ private theorem tail_le (q : Sym2 V → unitInterval) (u : V) (H : Finset V) :
     · simp only [hw, ite_false]
       rw [tau_comm q u w, mul_assoc]
 
+open Classical in
 /-- Tails of a finite triangle are eventually small. -/
 private theorem exists_tail_lt (q : Sym2 V → unitInterval) (u : V)
     (hu : ∑' v, ∑' w, tau q u v * tau q v w * tau q w u < ⊤) {δ : ℝ≥0∞} (hδ : 0 < δ) :
@@ -165,12 +171,14 @@ private theorem exists_tail_lt (q : Sym2 V → unitInterval) (u : V)
     tsum_subtype {v | v ∉ H} (fun v => tau q u v * ∑' w, tau q v w * tau q w u)]
   exact tsum_congr fun v => by by_cases hv : v ∈ H <;> simp [hv]
 
+open Classical in
 /-- `∑' w, [w = x] f w = f x`. -/
 private theorem tsum_ite_eq_mul (x : V) (f : V → ℝ≥0∞) :
     ∑' w, (if w = x then (1 : ℝ≥0∞) else 0) * f w = f x := by
   rw [tsum_eq_single x (fun w hw => by simp [hw])]
   simp
 
+open Classical in
 /-- If `D = ⨆ x, Δₓ < ⊤`, then `T²(u,x) → 0` as `x` leaves finite sets. -/
 theorem tendsto_tau_sq_cofinite [Countable V] (q : Sym2 V → unitInterval)
     (hD : (⨆ x, ∑' u, ∑' v, tau q x u * tau q u v * tau q v x) < ⊤) (u : V) :
@@ -227,7 +235,8 @@ theorem tendsto_tau_sq_cofinite [Countable V] (q : Sym2 V → unitInterval)
 
 /-! ### Item 1: decay of the open triangle -/
 
-/-- **96A2, item 1.** If `D = ⨆ x, Δₓ < ⊤`, then for every `o`, `T³(o,x) → 0` as `x` leaves
+open Classical in
+/-- **Item 1.** If `D = ⨆ x, Δₓ < ⊤`, then for every `o`, `T³(o,x) → 0` as `x` leaves
 finite sets. -/
 theorem tendsto_triangle_cofinite [Countable V] (q : Sym2 V → unitInterval)
     (hD : (⨆ x, ∑' u, ∑' v, tau q x u * tau q u v * tau q v x) < ⊤) (o : V) :
@@ -287,7 +296,7 @@ theorem tendsto_triangle_cofinite [Countable V] (q : Sym2 V → unitInterval)
     _ ≤ η + η := by gcongr
     _ = ε := ENNReal.add_halves ε
 
-/-- **96A2, item 1, finite-set form.** If `D = ⨆ x, Δₓ < ⊤`, then for every `o` and `ε > 0`
+/-- **Item 1, finite-set form.** If `D = ⨆ x, Δₓ < ⊤`, then for every `o` and `ε > 0`
 there is a finite `E` with `T³(o,x) < ε` for every `x ∉ E`. -/
 theorem exists_finset_triangle_lt [Countable V] (q : Sym2 V → unitInterval)
     (hD : (⨆ x, ∑' u, ∑' v, tau q x u * tau q u v * tau q v x) < ⊤) (o : V) {ε : ℝ≥0∞}
@@ -312,7 +321,7 @@ theorem triangle_map_eq [Countable V] (q : Sym2 V → unitInterval) (σ : V ≃ 
   rw [← σ.tsum_eq]
   exact tsum_congr fun v => by rw [hT, hT, hT]
 
-/-- **96A2, item 2.** Suppose bijections of `V` preserving `q` and a function `d : V → V → ℝ`
+/-- **Item 2.** Suppose bijections of `V` preserving `q` and a function `d : V → V → ℝ`
 act transitively, and `Δ_o < ⊤`. Then `⨆_{d(u,v) ≥ r} T³(u,v) → 0` as `r → ∞` (the empty
 supremum is `0`). -/
 theorem tendsto_iSup_triangle [Countable V] (q : Sym2 V → unitInterval) (d : V → V → ℝ)
@@ -343,9 +352,9 @@ theorem tendsto_iSup_triangle [Countable V] (q : Sym2 V → unitInterval) (d : V
   have h3 := le_abs_self (d o (σ v))
   linarith
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
-/-- D-5, item 1 on a finite vertex type: `D < ⊤` holds since every `Δₓ ≤ |V|²`. -/
+/-- Non-vacuity, item 1 on a finite vertex type: `D < ⊤` holds since every `Δₓ ≤ |V|²`. -/
 example (q : Sym2 Bool → unitInterval) (o : Bool) {ε : ℝ≥0∞} (hε : 0 < ε) :
     ∃ E : Finset Bool, ∀ x ∉ E, ∑' u, ∑' v, tau q o u * tau q u v * tau q v x < ε := by
   refine exists_finset_triangle_lt q (lt_of_le_of_lt (iSup_le fun x => ?_)
@@ -357,7 +366,7 @@ example (q : Sym2 Bool → unitInterval) (o : Bool) {ε : ℝ≥0∞} (hε : 0 <
             _ = 1 := by ring
     _ = 4 := by simp [tsum_fintype]; norm_num
 
-/-- D-5, item 2 on `ℤ` with `q = p < 1` on nearest-neighbour pairs (and `0` elsewhere),
+/-- Non-vacuity, item 2 on `ℤ` with `q = p < 1` on nearest-neighbour pairs (and `0` elsewhere),
 `d(a,b) = |b - a|`, transitive by translations; `Δ₀ ≤ χ² < ⊤`. -/
 example (p : unitInterval) (hp : p < 1) :
     ∃ q : Sym2 ℤ → unitInterval, (∀ a b, a ≠ b → q s(a, b) = if |b - a| = 1 then p else 0) ∧

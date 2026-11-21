@@ -1,4 +1,9 @@
 /-
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Cut estimates for one-dimensional long-range bond percolation. New proofs using
 mathlib 56a005855ea17e0b0958f73ec801ae140b0a1679 (product measures, infinite products,
 and summability). The model is the canonical set of unordered open pairs.
@@ -9,6 +14,23 @@ public import PercLib.Percolation.Bond.Basic
 public import PercLib.Probability.ProdBernoulliIndependence
 public import Mathlib.Analysis.SpecialFunctions.Log.Summable
 public import Mathlib.Topology.Algebra.InfiniteSum.Real
+
+/-!
+# Cut points for one-dimensional long-range percolation
+
+A closed gap (no open pair crossing it) separates clusters; two cuts around the origin make its
+cluster finite. The probability of a cut is the product of the closed probabilities of its crossing
+pairs, positive when the weighted distance profile is summable and zero when it is not.
+
+## Main results
+
+* `cluster_subset_of_cuts`
+* `finite_cluster_of_cuts`
+* `law_cut_eq_tprod`
+* `law_cut_pos`
+* `law_cut_eq_zero_of_not_summable`
+* `law_cut_eq_zero_of_certain_length`
+-/
 
 @[expose] public section
 
@@ -68,7 +90,8 @@ theorem prodBernoulli_forall_notMem {ι α : Type*} [Countable α]
     prodBernoulli p {ω | ∀ a, f a ∉ ω} =
       ∏' a, (unitInterval.toNNReal (unitInterval.symm (p (f a))) : ℝ≥0∞) := by
   classical
-  rw [prodBernoulli_eq_map, Measure.map_apply (show Measurable (fun q : ι → Prop => {i | q i}) from by fun_prop)
+  rw [prodBernoulli_eq_map, Measure.map_apply (show Measurable (fun q : ι → Prop => {i | q i}) from
+      by fun_prop)
     (by simpa only [Set.ofPred_forall, Set.compl_ofPred] using
       MeasurableSet.iInter (fun a => (measurableSet_mem (f a)).compl))]
   have hset : (fun q : ι → Prop => {i | q i}) ⁻¹' {ω | ∀ a, f a ∉ ω} =
@@ -176,7 +199,8 @@ private theorem closed_product_pos {α : Type*} (p : α → unitInterval)
   rw [hp'.tprod_eq]
   exact ENNReal.ofReal_pos.mpr (Real.exp_pos _)
 
-/-- A summable weighted distance profile with no certain positive-length bond has a positive cut probability. -/
+/-- A summable weighted distance profile with no certain positive-length bond has a positive cut
+probability. -/
 theorem law_cut_pos (p : ℕ → unitInterval) (q : Sym2 ℤ → unitInterval)
     (hq : ∀ a b, q s(a, b) = p (Int.natAbs (b - a)))
     (hsum : Summable fun n : ℕ => (n : ℝ) * (p n : ℝ))
@@ -231,7 +255,8 @@ theorem law_cut_eq_zero_of_not_summable (p : ℕ → unitInterval) (q : Sym2 ℤ
       k + (z.1 : ℤ) - (z.2.val : ℤ) - (k - (z.2.val : ℤ)) = z.1 := by omega
   simp_rw [hq, hdist, Int.natAbs_natCast]
   by_contra h
-  have hs := summable_of_closed_product_pos (fun z : Σ n : ℕ, Fin n => p z.1) (lt_of_le_of_ne bot_le (Ne.symm h))
+  have hs := summable_of_closed_product_pos (fun z : Σ n : ℕ, Fin n => p z.1)
+      (lt_of_le_of_ne bot_le (Ne.symm h))
   rw [summable_sigma_of_nonneg (fun z => (p z.1).property.1)] at hs
   exact hsum (by simpa [tsum_fintype] using hs.2)
 

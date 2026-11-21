@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Correspondence wrapper for the one-dimensional finite-cluster assertion.
 All mathematical inputs are proved in the imported modules.
 -/
@@ -7,6 +11,17 @@ module
 
 public import PercLib.Meta.Tag
 public import PercLib.Models.LongRange.OneDimensional
+
+/-!
+# One-dimensional finite clusters: correspondence
+
+Wiki correspondence for finiteness of clusters of one-dimensional long-range percolation with finite
+first moment.
+
+## Main results
+
+* `oneDimensional_clusters_finite_criticalIntensity_eq_top`
+-/
 
 @[expose] public section
 noncomputable section

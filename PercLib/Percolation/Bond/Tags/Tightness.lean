@@ -1,7 +1,11 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-90 correspondence wrappers for the universal tightness, quantile moment and finite-set
-hyperscaling assertions. All mathematical inputs are proved in the imported modules.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
+Correspondence wrappers for the universal tightness, quantile moment and finite-set hyperscaling
+assertions. All mathematical inputs are proved in the imported modules.
 -/
 module
 
@@ -12,10 +16,28 @@ public import PercLib.Percolation.Bond.Tightness.TruncatedMean
 public import PercLib.Percolation.Bond.Tightness.WindowTails
 public import PercLib.Percolation.Bond.Forest
 
+/-!
+# Universal tightness and hyperscaling: correspondence
+
+Wiki correspondence for universal tightness, quantile moments and finite-set hyperscaling.
+
+## Main results
+
+* `universal_upper_lower_tails`
+* `rooted_upper_tail`
+* `tails_from_witness_splitting`
+* `moment_le_quantile_pow`
+* `expected_maximum_comparable`
+* `finite_set_hyperscaling`
+* `finite_window_hyperscaling`
+* `hyperscaling_exponent_inequalities`
+* `exponent_relations_sampled_root`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set Filter Topology
-open scoped ENNReal NNReal Nat Classical
+open scoped ENNReal NNReal Nat
 
 namespace PercLib.Percolation.Bond
 variable {V : Type*}
@@ -31,7 +53,8 @@ theorem universal_upper_lower_tails [Countable V] :
       (∀ ε : ℝ, 0 < ε → ε ≤ 1 →
         law q {ω | (maxClusterIntersection Λ ω : ℝ) < ε * (tightnessScale q Λ : ℝ)} ≤
           ENNReal.ofReal (27 * ε)) :=
-  fun q Λ hΛ => ⟨(universalTightness V q Λ hΛ).1, (universalTightness V q Λ hΛ).2.1⟩
+  fun q _Λ hΛ => ⟨fun _a ha => law_mul_tightnessScale_le_maxClusterIntersection_le q hΛ ha,
+    fun _ε hε hε1 => law_maxClusterIntersection_lt_mul_tightnessScale_le q hΛ hε hε1⟩
 
 /-- The rooted upper tail: `P(X_u ≥ a M) ≤ e^{1 - a/9} P(X_u ≥ M)` for every root. -/
 @[tag "21D4"]
@@ -41,7 +64,7 @@ theorem rooted_upper_tail [Countable V] :
         ENNReal.ofReal (Real.exp (1 - a / 9)) *
           law q {ω | tightnessScale q Λ ≤ clusterIntersection Λ ω u} := by
   intro q Λ hΛ u a ha
-  refine ((universalTightness V q Λ hΛ).2.2 u a ha).trans_eq ?_
+  refine (law_mul_tightnessScale_le_clusterIntersection_le q hΛ u ha).trans_eq ?_
   rw [sub_eq_add_neg, ← neg_div, Real.exp_add, ENNReal.ofReal_mul (Real.exp_pos _).le]
   ring
 
@@ -67,8 +90,11 @@ theorem tails_from_witness_splitting [Countable V] (q : Sym2 V → unitInterval)
     (∀ ε : ℝ, 0 < ε → ε ≤ 1 →
       law q {ω | (maxClusterIntersection Λ ω : ℝ) < ε * (tightnessScale q Λ : ℝ)} ≤
         ENNReal.ofReal (27 * ε)) :=
-  ⟨tightnessBK V q Λ hΛ, (universalTightness V q Λ hΛ).1, rooted_upper_tail q Λ hΛ,
-    (universalTightness V q Λ hΛ).2.1⟩
+  ⟨fun _l hl _k hk => ⟨law_three_pow_mul_le_maxClusterIntersection_le q hΛ hl hk,
+      fun u => law_three_pow_mul_le_clusterIntersection_le q Λ u hl hk⟩,
+    fun _r hr => law_mul_tightnessScale_le_maxClusterIntersection_le q hΛ hr,
+    rooted_upper_tail q Λ hΛ,
+    fun _ε hε hε1 => law_maxClusterIntersection_lt_mul_tightnessScale_le q hΛ hε hε1⟩
 
 /-- Deterministic bounds: `1 ≤ Z ≤ |Λ|` for every configuration and `2 ≤ M ≤ |Λ| + 1`. -/
 @[tag "AU8B"]
@@ -87,7 +113,7 @@ theorem moment_le_quantile_pow [Countable V] :
     ∀ (q : Sym2 V → unitInterval) (Λ : Finset V), Λ.Nonempty → ∀ k : ℕ,
       ∫⁻ ω, (maxClusterIntersection Λ ω : ℝ≥0∞) ^ k ∂(law q) ≤
         (20 * 18 ^ k * k ! : ℝ≥0∞) * (tightnessScale q Λ : ℝ≥0∞) ^ k :=
-  fun q _ hΛ k => lintegral_maxClusterIntersection_pow_le (universalTightness V) q hΛ k
+  fun q _ hΛ k => lintegral_maxClusterIntersection_pow_le q hΛ k
 
 /-- The expected largest intersection is comparable to `M`:
 `(M - 1)/e ≤ E Z`, `M/(2e) ≤ E Z` and `E Z ≤ 360 M`. -/
@@ -196,10 +222,9 @@ theorem finite_window_hyperscaling [Countable V] (q : Sym2 V → unitInterval)
     (θ ≤ 1 / 2 → ∀ u : V, ∑ v ∈ Λ, tau q u v ≤ ENNReal.ofReal
       (4 * Real.exp 1 * (2 + 9 * Real.exp (8 / 9)) ^ 2 * A ^ (2 / (1 + θ)) *
         (Λ.card : ℝ) ^ ((1 - θ) / (1 + θ)))) := by
-  have hUT := universalTightness V
-  refine ⟨tightnessScale_le_of_window_tail hUT q hΛ hA hθ0 hθ1 htail,
-    sum_tau_le_of_window_tail hUT q hΛ hA hθ0 hθ1 htail, fun hθ u => ?_⟩
-  refine (sum_tau_le_of_window_tail hUT q hΛ hA hθ0 hθ1 htail u).trans
+  refine ⟨tightnessScale_le_of_window_tail q hΛ hA hθ0 hθ1 htail,
+    sum_tau_le_of_window_tail q hΛ hA hθ0 hθ1 htail, fun hθ u => ?_⟩
+  refine (sum_tau_le_of_window_tail q hΛ hA hθ0 hθ1 htail u).trans
     (ENNReal.ofReal_le_ofReal ?_)
   set H := (1 - θ)⁻¹ + 9 * Real.exp (8 / 9) with hHdef
   set c := (1 - θ) / (1 + θ) with hc
@@ -247,9 +272,8 @@ theorem window_tail_damping_and_moments [Countable V] (q : Sym2 V → unitInterv
       ∫⁻ ω, ENNReal.ofReal ((clusterIntersection Λ ω u : ℝ) ^ p) ∂(law q) ≤
         ENNReal.ofReal (Real.exp 1 * A * 18 ^ p * p * Real.Gamma (p - θ) *
           (tightnessScale q Λ : ℝ) ^ (p - θ))) :=
-  ⟨law_le_clusterIntersection_le_damped (universalTightness V) q hΛ u hA hθ0 hθ1 htail,
-    fun _ hp => lintegral_rpow_clusterIntersection_le (universalTightness V) q hΛ u hA hθ0
-      hθ1 htail hp⟩
+  ⟨law_le_clusterIntersection_le_damped q hΛ u hA hθ0 hθ1 htail,
+    fun _ hp => lintegral_rpow_clusterIntersection_le q hΛ u hA hθ0 hθ1 htail hp⟩
 
 /-- Hyperscaling exponent inequalities for a family of windows `Λ_R`, under the uniform
 cluster tail of `finite_set_hyperscaling` (rooted damping is supplied by universal
@@ -285,11 +309,11 @@ theorem hyperscaling_exponent_inequalities [Countable V] (q : Sym2 V → unitInt
     (by
       filter_upwards [hne] with R hR
       exact tightnessScale_le_of_cluster_tail q hR hC hδ hclus
-        (universalTightness V q (Λ R) hR).2.2)
+        fun u _a ha => law_mul_tightnessScale_le_clusterIntersection_le q hR u ha)
     (by
       filter_upwards [hne] with R hR
       have h := avg_tau_le_of_cluster_tail q hR hC hδ hclus
-        (universalTightness V q (Λ R) hR).2.2 o
+        (fun u _a ha => law_mul_tightnessScale_le_clusterIntersection_le q hR u ha) o
       have hnn : 0 ≤ L * (4 * Real.exp 1 * L) ^ ((δ - 1) / (δ + 1)) *
           ((Λ R).card : ℝ) ^ (-2 / (δ + 1)) :=
         mul_nonneg (mul_nonneg hL (Real.rpow_nonneg (by positivity) _))
@@ -304,6 +328,7 @@ theorem hyperscaling_exponent_inequalities [Countable V] (q : Sym2 V → unitInt
   norm_num at h2
   linarith
 
+open Classical in
 /-- Exponent relations for the sampled-root variable and the window intersections of a
 family of profiles and windows; the counting identity is proved, not assumed. When
 `κ = 0`, `d_f = dδ/(δ+1)` and `α = d(δ-1)/(δ+1)`. -/
@@ -355,7 +380,7 @@ theorem exponent_relations_sampled_root [Countable V] (q : ℝ → Sym2 V → un
   field_simp
   ring
 
-/-! ### Non-vacuity of 7VCS (D-5)
+/-! ### Non-vacuity of 7VCS
 
 The zero profile on `ℕ` with windows `{0, …, ⌈R⌉₊ - 1}`: every cluster is a single
 vertex almost surely, so `C = 1`, `δ = 2` give the cluster tail, `M = 2`, the averaged

@@ -1,9 +1,10 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
-New for this project (issue 156, Q-22, items 1, 2 and the first half of 4). No upstream
-proof is copied.
+Authors: PercLib contributors
+-/
+/-
+New for this project. No upstream proof is copied.
 -/
 module
 
@@ -20,7 +21,7 @@ public import Mathlib.Topology.Semicontinuity.Basic
 Profiles carry the pointwise order and the product topology.
 
 * `τ`, `χ`, `θ` and the probability that some cluster is infinite are monotone in the
-  profile (from the monotone coupling S-2).
+  profile (from the monotone coupling).
 * The probability of an event determined by finitely many pairs is continuous in the profile.
 * `τ` is lower semicontinuous, as the supremum over a finite exhaustion of internal connection
   probabilities.

@@ -1,8 +1,7 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Correspondence wrappers for boundary contraction, the exterior law given a cluster, the
-critical boundary flux, and intrinsic balls.
-All mathematical inputs are proved in the imported modules.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
 -/
 module
 
@@ -13,14 +12,19 @@ public import PercLib.Percolation.Bond.FiniteSetCriterion
 public import PercLib.Percolation.Bond.IntrinsicBalls
 public import Mathlib.Probability.ConditionalProbability
 
+/-! Correspondence wrappers for boundary contraction, the exterior law given a cluster, the
+critical boundary flux, and intrinsic balls.
+All mathematical inputs are proved in the imported modules. -/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set ProbabilityTheory
-open scoped ENNReal NNReal Classical
+open scoped ENNReal NNReal
 
 namespace PercLib.Percolation.Bond
 variable {V : Type*}
 
+open Classical in
 /-- Boundary contraction: finite sets `S_x ∋ x` with internal mass at most `B` and boundary
 flux at most `a < 1` give `χ(x) ≤ B/(1-a)`, almost surely finite clusters when `B < ∞`, and
 the choice `B = N` when `|S_x| ≤ N`. -/
@@ -73,13 +77,14 @@ theorem exterior_law_given_cluster [Countable V] (q : Sym2 V → unitInterval) (
   · rw [cond_apply hmeas, law_cluster_eq_inter_localConn_compl q x C hx y z]
     exact hcancel hpos
 
+open Classical in
 /-- For a transitive kernel with finite rows and finite global critical intensity `β_c`,
 every finite `S ∋ o` has boundary flux at least one at `β_c`, bounded by
 `β_c ∑_{u ∈ S} τ_S(o,u) ∑_{v ∉ S} J(u,v)`. -/
 @[tag "R84Z"]
 theorem one_le_boundaryFlux_at_globalCriticalIntensity [Countable V] (J : Sym2 V → ℝ≥0)
     (hT : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e)
-    (hrow : ∀ u, (∑' v, if v = u then 0 else (J s(u, v) : ℝ≥0∞)) < ∞) {o : V}
+    (hrow : ∀ u, rowSum (fun e => (J e : ℝ≥0∞)) u < ∞) {o : V}
     (hc : globalCriticalIntensity J < ⊤) (S : Finset V) (hoS : o ∈ S) :
     1 ≤ ∑ u ∈ S, ∑' v, (if v ∈ S then 0 else
       law (intensityProfile J (globalCriticalIntensity J).toNNReal)

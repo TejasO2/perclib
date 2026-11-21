@@ -1,19 +1,17 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-
-Adapted for Q-188 (issue 616) from contributor yujinhkim, repository
-`yujinhkim/lrp`, branch `critical-lrp-1`, commit
-`d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, file
-`PercLib/CriticalLRP/Analysis/LaplaceUnique.lean` (blob `19a96549c5`).
-Licence: Apache-2.0 as declared in that revision's header and
-`third_party/critical-lrp/NOTICE.md`. Upstream origin:
-`yujinhkim/Critical-Long-range-percolation`, revision
-`3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf` (not independently verified).
-Changes: inline the trapezoid weights, omit the unused Tauberian dependency,
-use focused mathlib imports, enabled linters and explicit witnesses.
-Salvaged from branch `work/Q-188-laplace-uniqueness` at tip commit `f26e49c`
-and rebased onto the current tree; the helper `integrableOn_mul_of_norm_bound`
-is replaced by mathlib's `MeasureTheory.Integrable.bdd_mul`.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
+Adapted from contributor yujinhkim, repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
+`d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, file `PercLib/CriticalLRP/Analysis/LaplaceUnique.lean`
+(blob `19a96549c5`). Licence: Apache-2.0 as declared in that revision's header and
+`third_party/critical-lrp/NOTICE.md`. Upstream origin: `yujinhkim/Critical-Long-range-percolation`,
+revision `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf` (not independently verified). Changes: inline
+the trapezoid weights, omit the unused Tauberian dependency, use focused mathlib imports, enabled
+linters and explicit witnesses. The helper `integrableOn_mul_of_norm_bound` is replaced by mathlib's
+`MeasureTheory.Integrable.bdd_mul`.
 
 Uniqueness of the Laplace transform on L¹(0,∞), supporting the Tauberian
 converse of Hutchcroft, Critical long-range percolation I, Theorem I.2.11.
@@ -25,6 +23,21 @@ public import Mathlib.MeasureTheory.Integral.IntervalIntegral.LebesgueDifferenti
 public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 public import Mathlib.Analysis.SpecificLimits.Basic
 
+/-!
+# Uniqueness of the Laplace transform on `(0, ∞)`
+
+An integrable function on `(0, ∞)` whose Laplace transform vanishes identically is zero almost
+everywhere. The proof shows that all moments of `D ∘ (-log)` against polynomials vanish,
+approximates interval indicators by continuous trapezoid functions, and concludes that every
+interval integral vanishes.
+
+## Main results
+
+* `integral_eq_zero_of_forall_laplace_eq_zero`
+* `integral_Ioo_eq_zero`
+* `eq_zero_ae_of_forall_laplace_eq_zero`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set Filter
@@ -35,7 +48,7 @@ namespace PercLib.Analysis
 /-! ### Step 1: the total integral vanishes -/
 
 theorem integral_eq_zero_of_forall_laplace_eq_zero {D : ℝ → ℝ}
-    (hD : IntegrableOn D (Ioi (0:ℝ)))
+    (hD : IntegrableOn D (Ioi (0 : ℝ)))
     (hlaplace : ∀ σ : ℝ, 0 < σ → ∫ u in Ioi (0:ℝ), Real.exp (-(σ*u)) * D u = 0) :
     ∫ u in Ioi (0:ℝ), D u = 0 := by
   classical
@@ -85,7 +98,7 @@ theorem integral_eq_zero_of_forall_laplace_eq_zero {D : ℝ → ℝ}
 /-! ### Step 2: polynomial weights in `e^{-u}` -/
 
 theorem integral_eval_exp_mul_eq_zero {D : ℝ → ℝ}
-    (hD : IntegrableOn D (Ioi (0:ℝ)))
+    (hD : IntegrableOn D (Ioi (0 : ℝ)))
     (hlaplace : ∀ σ : ℝ, 0 < σ → ∫ u in Ioi (0:ℝ), Real.exp (-(σ*u)) * D u = 0) :
     ∀ p : ℝ[X], ∫ u in Ioi (0:ℝ), p.eval (Real.exp (-u)) * D u = 0 := by
   classical
@@ -103,7 +116,8 @@ theorem integral_eval_exp_mul_eq_zero {D : ℝ → ℝ}
   have hint_term : ∀ k : ℕ, Integrable (fun u : ℝ => (Real.exp (-u))^k * D u) μ := by
     intro k
     refine hDμ.norm.mono' ?_ ?_
-    · exact (Real.continuous_exp.comp continuous_id.neg).aestronglyMeasurable.pow k |>.mul hDμ.aestronglyMeasurable
+    · exact (Real.continuous_exp.comp continuous_id.neg).aestronglyMeasurable.pow k |>.mul
+        hDμ.aestronglyMeasurable
     · filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
       have hu' : (0:ℝ) < u := hu
       have hle : |(Real.exp (-u))^k| ≤ 1 := by
@@ -111,7 +125,8 @@ theorem integral_eval_exp_mul_eq_zero {D : ℝ → ℝ}
         exact pow_le_one₀ (Real.exp_pos _).le (Real.exp_le_one_iff.mpr (by linarith))
       have hgoal : |(Real.exp (-u))^k * D u| ≤ |D u| := by
         rw [abs_mul]
-        calc |(Real.exp (-u))^k| * |D u| ≤ 1 * |D u| := mul_le_mul_of_nonneg_right hle (abs_nonneg _)
+        calc |(Real.exp (-u))^k| * |D u| ≤ 1 * |D u| :=
+            mul_le_mul_of_nonneg_right hle (abs_nonneg _)
           _ = |D u| := one_mul _
       simpa [Real.norm_eq_abs] using hgoal
   -- each monomial contributes zero
@@ -143,7 +158,7 @@ theorem integral_eval_exp_mul_eq_zero {D : ℝ → ℝ}
 /-! ### Step 3: continuous weights in `e^{-u}` -/
 
 theorem integral_comp_exp_mul_eq_zero {D : ℝ → ℝ}
-    (hD : IntegrableOn D (Ioi (0:ℝ)))
+    (hD : IntegrableOn D (Ioi (0 : ℝ)))
     (hlaplace : ∀ σ : ℝ, 0 < σ → ∫ u in Ioi (0:ℝ), Real.exp (-(σ*u)) * D u = 0)
     {φ : ℝ → ℝ} (hφ : ContinuousOn φ (Icc (0:ℝ) 1)) :
     ∫ u in Ioi (0:ℝ), φ (Real.exp (-u)) * D u = 0 := by
@@ -235,16 +250,19 @@ theorem integral_comp_exp_mul_eq_zero {D : ℝ → ℝ}
 
 /-! ### Step 4: indicators of intervals -/
 
-theorem continuous_trapezoid (n : ℕ) (c d : ℝ) : Continuous ((fun s : ℝ => max 0 (min 1 ((n : ℝ) * (s - c))) *
+theorem continuous_trapezoid (n : ℕ) (c d : ℝ) : Continuous
+    ((fun s : ℝ => max 0 (min 1 ((n : ℝ) * (s - c))) *
       max 0 (min 1 ((n : ℝ) * (d - s))))) := by
   fun_prop
 
-theorem abs_trapezoid_le_one (n : ℕ) (c d s : ℝ) : |(max 0 (min 1 ((n : ℝ) * (s - c))) * max 0 (min 1 ((n : ℝ) * (d - s))))| ≤ 1 := by
+theorem abs_trapezoid_le_one (n : ℕ) (c d s : ℝ) : |(max 0 (min 1 ((n : ℝ) * (s - c))) *
+    max 0 (min 1 ((n : ℝ) * (d - s))))| ≤ 1 := by
   have h1 : (0:ℝ) ≤ max 0 (min 1 ((n:ℝ) * (s - c))) := le_max_left _ _
   have h2 : max 0 (min 1 ((n:ℝ) * (s - c))) ≤ 1 := max_le (by norm_num) (min_le_left _ _)
   have h3 : (0:ℝ) ≤ max 0 (min 1 ((n:ℝ) * (d - s))) := le_max_left _ _
   have h4 : max 0 (min 1 ((n:ℝ) * (d - s))) ≤ 1 := max_le (by norm_num) (min_le_left _ _)
-  have hnn : 0 ≤ (max 0 (min 1 ((n : ℝ) * (s - c))) * max 0 (min 1 ((n : ℝ) * (d - s)))) := mul_nonneg h1 h3
+  have hnn : 0 ≤ (max 0 (min 1 ((n : ℝ) * (s - c))) * max 0 (min 1 ((n : ℝ) * (d - s)))) :=
+      mul_nonneg h1 h3
   rw [abs_of_nonneg hnn]
   calc max 0 (min 1 ((n:ℝ) * (s - c))) * max 0 (min 1 ((n:ℝ) * (d - s)))
       ≤ 1 * 1 := mul_le_mul h2 h4 h3 (by norm_num)
@@ -269,7 +287,8 @@ theorem trapezoid_eq_zero_of_ge {n : ℕ} {c d s : ℝ} (_hcd : c < d) (hs : d �
   rw [min_eq_right h2, max_eq_left h1, mul_zero]
 
 theorem tendsto_trapezoid {c d s : ℝ} (hs : s ∈ Ioo c d) :
-    Tendsto (fun n : ℕ => (max 0 (min 1 ((n : ℝ) * (s - c))) * max 0 (min 1 ((n : ℝ) * (d - s))))) atTop (𝓝 1) := by
+    Tendsto (fun n : ℕ => (max 0 (min 1 ((n : ℝ) * (s - c))) * max 0 (min 1 ((n : ℝ) * (d - s)))))
+        atTop (𝓝 1) := by
   obtain ⟨h1, h2⟩ := hs
   have hpos1 : 0 < s - c := by linarith
   have hpos2 : 0 < d - s := by linarith
@@ -287,7 +306,7 @@ theorem tendsto_trapezoid {c d s : ℝ} (hs : s ∈ Ioo c d) :
 
 /-- For `D` integrable on `(0,∞)` with vanishing Laplace transform, all interval integrals
 vanish. -/
-theorem integral_Ioo_eq_zero {D : ℝ → ℝ} (hD : IntegrableOn D (Ioi (0:ℝ)))
+theorem integral_Ioo_eq_zero {D : ℝ → ℝ} (hD : IntegrableOn D (Ioi (0 : ℝ)))
     (hlaplace : ∀ σ : ℝ, 0 < σ → ∫ u in Ioi (0:ℝ), Real.exp (-(σ*u)) * D u = 0)
     {a b : ℝ} (ha : 0 ≤ a) (hab : a < b) :
     ∫ u in Ioo a b, D u = 0 := by
@@ -373,7 +392,7 @@ theorem integral_Ioo_eq_zero {D : ℝ → ℝ} (hD : IntegrableOn D (Ioi (0:ℝ)
 /-! ### Step 5: from interval integrals to the a.e. statement -/
 
 theorem eq_zero_ae_of_forall_laplace_eq_zero {D : ℝ → ℝ}
-    (hD : IntegrableOn D (Ioi (0:ℝ)))
+    (hD : IntegrableOn D (Ioi (0 : ℝ)))
     (hlaplace : ∀ σ : ℝ, 0 < σ → ∫ u in Ioi (0:ℝ), Real.exp (-(σ*u)) * D u = 0) :
     D =ᵐ[volume.restrict (Ioi (0:ℝ))] 0 := by
   classical
@@ -381,7 +400,8 @@ theorem eq_zero_ae_of_forall_laplace_eq_zero {D : ℝ → ℝ}
   -- the extended function `Dt` has vanishing integrals over all open intervals
   have hIoo : ∀ a b : ℝ, a < b → ∫ u in Ioo a b, Dt u = 0 := by
     intro a b hab
-    have hfun : (fun u => (Ioo a b).indicator Dt u) = (fun u => (Ioo (max a 0) b).indicator Dt u) := by
+    have hfun : (fun u => (Ioo a b).indicator Dt u) =
+        (fun u => (Ioo (max a 0) b).indicator Dt u) := by
       funext u
       by_cases hu : u ∈ Ioo (max a 0) b
       · have hu' : u ∈ Ioo a b := ⟨by linarith [le_max_left a (0:ℝ), hu.1], hu.2⟩
@@ -453,11 +473,11 @@ theorem eq_zero_ae_of_forall_laplace_eq_zero {D : ℝ → ℝ}
   rw [← h1]
   exact hu
 
-/-- D-5: the zero function meets every positive-rate hypothesis. -/
+/-- Non-vacuity: the zero function meets every positive-rate hypothesis. -/
 example : (fun _ : ℝ => (0 : ℝ)) =ᵐ[volume.restrict (Ioi (0 : ℝ))] 0 :=
   eq_zero_ae_of_forall_laplace_eq_zero (by simp) (by simp)
 
-/-- D-5: a nonzero compactly supported function has an explicitly nonzero
+/-- Non-vacuity: a nonzero compactly supported function has an explicitly nonzero
 Laplace transform. -/
 example :
     IntegrableOn ((Ioo (0 : ℝ) 1).indicator (fun _ => (1 : ℝ))) (Ioi 0) ∧

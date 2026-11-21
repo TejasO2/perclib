@@ -1,12 +1,15 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Correspondence wrappers for the connection distance and directional decay rates.
-All mathematical inputs are proved in the imported modules.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
 -/
 module
 
 public import PercLib.Meta.Tag
 public import PercLib.Percolation.Bond.CorrelationLength
+
+/-! Correspondence wrappers for the connection distance and directional decay rates.
+All mathematical inputs are proved in the imported modules. -/
 
 @[expose] public section
 noncomputable section

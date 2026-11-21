@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Correspondence wrappers for finite-window witnesses and cluster partitions.
 All mathematical inputs come from the imported modules; no source proof is copied.
 -/
@@ -16,10 +20,26 @@ public import PercLib.Percolation.Bond.Susceptibility
 public import PercLib.Probability.DeterministicModification
 public import PercLib.Probability.Transport.Pullback
 
+/-!
+# Finite volume: correspondence
+
+Wiki correspondence for finite-window witnesses, local domains, finite-edge exhaustions and cluster
+partitions.
+
+## Main results
+
+* `local_domain_restriction_and_exhaustion`
+* `finite_window_tail_representation`
+* `root_clusters_partition`
+* `finite_root_component_sums`
+* `finite_edge_exhaustion_limits`
+* `escape_and_order_of_volume_limits`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set
-open scoped ENNReal Classical
+open scoped ENNReal
 
 namespace PercLib.Percolation.Bond
 variable {V : Type*}
@@ -291,6 +311,7 @@ example : ∑' x : Empty, (cluster (∅ : Config Empty) x).ncard =
     ∑' C : (openGraph (∅ : Config Empty)).ConnectedComponent, C.supp.ncard ^ 2 :=
   ((finite_root_component_sums (∅ : Config Empty)).1 inferInstance).2
 
+open Classical in
 private theorem finite_cluster_of_finite_edges (ω : Config V) (E : Finset (Sym2 V)) (x : V) :
     (cluster (ω ∩ (E : Set (Sym2 V))) x).Finite := by
   apply ((E.biUnion Sym2.toFinset).finite_toSet.insert x).subset
@@ -435,6 +456,7 @@ private theorem edge_tail_convergence (μ : Measure (Config V))
   simpa only [← edge_tail_union hE hcover x T k, Function.comp_def] using
     tendsto_measure_iUnion_atTop (μ := μ) (edge_tail_mono hE x T k)
 
+open Classical in
 /-- Finite-edge exhaustions recover clusters, full and observed volume tails,
 and expected extended cluster volumes under any measure. The product-law clause
 is a pushforward identity, not conditioning on exterior coordinates. -/
@@ -589,7 +611,8 @@ theorem escape_and_order_of_volume_limits [Countable V]
         cluster (ω ∩ (E n : Set (Sym2 V))) x)).measure_iInter (μ := μ)
           (fun k => ((Set.to_countable {a : ℕ∞ | (k : ℕ∞) ≤ a}).measurableSet.preimage
             ((measurable_encard_cluster x).comp
-              (show Measurable (fun ω : Config V => ω ∩ (E n : Set (Sym2 V))) by fun_prop))).nullMeasurableSet)
+              (show Measurable (fun ω : Config V => ω ∩ (E n : Set (Sym2 V)))
+                  by fun_prop))).nullMeasurableSet)
           ⟨0, measure_ne_top _ _⟩,
         ← infinite_event_as_tails, hninf, measure_empty]
     simp_rw [hzero]
@@ -597,6 +620,7 @@ theorem escape_and_order_of_volume_limits [Countable V]
 
 -- The deterministic all-open ray gives a genuine failure of interchanging limits.
 -- This finite-edge exhaustion deliberately never retains a diagonal pair.
+open Classical in
 example : ∃ (E : ℕ → Finset (Sym2 ℕ)) (μ : Measure (Config ℕ)),
     IsProbabilityMeasure μ ∧ Monotone E ∧
     (∀ e, ¬ e.IsDiag → ∃ n, e ∈ E n) ∧

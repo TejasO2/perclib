@@ -1,4 +1,9 @@
 /-
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Exponential moments from double-factorial moment bounds, and explicit tails. New proofs
 against pinned mathlib 56a005855ea17e0b0958f73ec801ae140b0a1679; no upstream proof is
 copied. The binomial series of `(1 − z)^{∓1/2}` is mathlib's
@@ -13,6 +18,22 @@ public import Mathlib.Analysis.SpecialFunctions.Sqrt
 public import Mathlib.MeasureTheory.Integral.Lebesgue.Markov
 public import Mathlib.RingTheory.Binomial
 public import Mathlib.Data.Nat.Factorial.DoubleFactorial
+
+/-!
+# Exponential moments from double-factorial moment bounds
+
+If `E X^m ≤ (2m-3)!! χ^{2m-1}` for all `m ≥ 1`, then `X` has explicit exponential moments and
+explicit tail bounds.
+
+## Main results
+
+* `hasSum_inv_sqrt_one_sub`
+* `lintegral_mul_exp_le`
+* `lintegral_exp_le`
+* `measure_le_le_sqrt_two_mul`
+* `measure_le_le_min`
+* `measure_le_le_exp`
+-/
 
 @[expose] public section
 
@@ -42,7 +63,8 @@ theorem ascPochhammer_eval_half (n : ℕ) :
     ring
 
 theorem ascPochhammer_eval_neg_half (n : ℕ) :
-    (ascPochhammer ℝ (n + 1)).eval (-1 / 2) = -(Nat.doubleFactorial (2 * n - 1) : ℝ) / 2 ^ (n + 1) := by
+    (ascPochhammer ℝ (n + 1)).eval (-1 / 2) = -(Nat.doubleFactorial (2 * n - 1) : ℝ) / 2 ^
+        (n + 1) := by
   rw [ascPochhammer_succ_left, Polynomial.eval_mul, Polynomial.eval_comp, Polynomial.eval_X,
     Polynomial.eval_add, Polynomial.eval_X, Polynomial.eval_one,
     show (-1 / 2 : ℝ) + 1 = 1 / 2 by norm_num, ascPochhammer_eval_half]
@@ -58,7 +80,8 @@ theorem multichoose_eq_eval_div (r : ℝ) (n : ℕ) :
 
 /-- For `0 ≤ z < 1`: `∑ (2n−1)!!/(n! 2^n) z^n = (1 − z)^{−1/2}`. -/
 theorem hasSum_inv_sqrt_one_sub {z : ℝ} (hz0 : 0 ≤ z) (hz1 : z < 1) :
-    HasSum (fun n : ℕ => (Nat.doubleFactorial (2 * n - 1) : ℝ) / (n ! * 2 ^ n) * z ^ n) (1 / sqrt (1 - z)) := by
+    HasSum (fun n : ℕ => (Nat.doubleFactorial (2 * n - 1) : ℝ) / (n ! * 2 ^ n) * z ^ n)
+        (1 / sqrt (1 - z)) := by
   have hb : z ∈ Metric.eball (0 : ℝ) 1 := by
     rw [Metric.mem_eball, edist_zero_right, enorm_eq_nnnorm, ENNReal.coe_lt_one_iff,
       ← NNReal.coe_lt_coe, coe_nnnorm, Real.norm_of_nonneg hz0]
@@ -72,7 +95,8 @@ theorem hasSum_inv_sqrt_one_sub {z : ℝ} (hz0 : 0 ≤ z) (hz1 : z < 1) :
 
 /-- For `0 ≤ z < 1`: `∑_{n ≥ 0} (2n−1)!!/((n+1)! 2^{n+1}) z^{n+1} = 1 − (1 − z)^{1/2}`. -/
 theorem hasSum_one_sub_sqrt_one_sub {z : ℝ} (hz0 : 0 ≤ z) (hz1 : z < 1) :
-    HasSum (fun n : ℕ => (Nat.doubleFactorial (2 * n - 1) : ℝ) / ((n + 1) ! * 2 ^ (n + 1)) * z ^ (n + 1))
+    HasSum (fun n : ℕ => (Nat.doubleFactorial (2 * n - 1) : ℝ) / ((n + 1) ! * 2 ^ (n + 1)) * z ^
+        (n + 1))
       (1 - sqrt (1 - z)) := by
   have hb : z ∈ Metric.eball (0 : ℝ) 1 := by
     rw [Metric.mem_eball, edist_zero_right, enorm_eq_nnnorm, ENNReal.coe_lt_one_iff,
@@ -151,13 +175,14 @@ theorem lintegral_pow_succ_le
   rwa [show 2 * (k + 1) - 3 = 2 * k - 1 by omega, show 2 * (k + 1) - 1 = 2 * k + 1 by omega]
     at h
 
-/-- **0BQB, first bound.** If `X ≥ 0`, `χ > 0` and `E X^m ≤ (2m−3)!! χ^{2m−1}` for all
+/-- **First bound.** If `X ≥ 0`, `χ > 0` and `E X^m ≤ (2m−3)!! χ^{2m−1}` for all
 `m ≥ 1`, then for `0 ≤ r < (2χ²)⁻¹`: `E[X e^{rX}] ≤ χ / √(1 − 2rχ²)`. -/
 theorem lintegral_mul_exp_le (hX : Measurable X) (hX0 : ∀ ω, 0 ≤ X ω) (hχ : 0 < χ)
     (hmom : ∀ m : ℕ, 1 ≤ m → ∫⁻ ω, ENNReal.ofReal (X ω ^ m) ∂P ≤
       ENNReal.ofReal (Nat.doubleFactorial (2 * m - 3) * χ ^ (2 * m - 1)))
     {r : ℝ} (hr : 0 ≤ r) (hr1 : r < (2 * χ ^ 2)⁻¹) :
-    ∫⁻ ω, ENNReal.ofReal (X ω * exp (r * X ω)) ∂P ≤ ENNReal.ofReal (χ / sqrt (1 - 2 * r * χ ^ 2)) := by
+    ∫⁻ ω, ENNReal.ofReal (X ω * exp (r * X ω)) ∂P ≤
+        ENNReal.ofReal (χ / sqrt (1 - 2 * r * χ ^ 2)) := by
   have h2 : 0 < 2 * χ ^ 2 := by positivity
   have hz1 : 2 * r * χ ^ 2 < 1 := by
     calc 2 * r * χ ^ 2 = r * (2 * χ ^ 2) := by ring
@@ -186,7 +211,7 @@ theorem lintegral_mul_exp_le (hX : Measurable X) (hX0 : ∀ ω, 0 ≤ X ω) (hχ
         rw [← ENNReal.ofReal_tsum_of_nonneg (fun k => by positivity) hs.summable, hs.tsum_eq,
           mul_one_div]
 
-/-- **0BQB, second bound.** Under the same hypotheses, for a probability measure and
+/-- **Second bound.** Under the same hypotheses, for a probability measure and
 `0 ≤ r ≤ (2χ²)⁻¹` (endpoint included): `E e^{rX} ≤ 1 + (1 − √(1 − 2rχ²))/χ`. -/
 theorem lintegral_exp_le [IsProbabilityMeasure P] (hX : Measurable X) (hX0 : ∀ ω, 0 ≤ X ω)
     (hχ : 0 < χ)
@@ -247,7 +272,7 @@ theorem measure_le_ofReal_div {f : Ω → ℝ} (hf : Measurable f) {s : Set Ω} 
     (Or.inl ENNReal.ofReal_ne_top), mul_comm]
   exact (mul_le_mul_right (measure_mono hsub) _ |>.trans hm).trans hB
 
-/-- **SNB3, second bound.** `P(X ≥ n) ≤ (√2 χ / n) e^{−n/(4χ²)}` for `n > 0`. -/
+/-- **Second bound.** `P(X ≥ n) ≤ (√2 χ / n) e^{−n/(4χ²)}` for `n > 0`. -/
 theorem measure_le_le_sqrt_two_mul (hX : Measurable X) (hX0 : ∀ ω, 0 ≤ X ω) (hχ : 0 < χ)
     (hmom : ∀ m : ℕ, 1 ≤ m → ∫⁻ ω, ENNReal.ofReal (X ω ^ m) ∂P ≤
       ENNReal.ofReal (Nat.doubleFactorial (2 * m - 3) * χ ^ (2 * m - 1)))
@@ -270,7 +295,7 @@ theorem measure_le_le_sqrt_two_mul (hX : Measurable X) (hX0 : ∀ ω, 0 ≤ X ω
     rw [hs2, exp_neg, hrdef]
     field_simp
 
-/-- **SNB3, third bound.** `P(X ≥ n) ≤ (1 + χ⁻¹) e^{−n/(2χ²)}` for a probability measure. -/
+/-- **Third bound.** `P(X ≥ n) ≤ (1 + χ⁻¹) e^{−n/(2χ²)}` for a probability measure. -/
 theorem measure_le_le_one_add_inv_mul [IsProbabilityMeasure P] (hX : Measurable X)
     (hX0 : ∀ ω, 0 ≤ X ω) (hχ : 0 < χ)
     (hmom : ∀ m : ℕ, 1 ≤ m → ∫⁻ ω, ENNReal.ofReal (X ω ^ m) ∂P ≤
@@ -289,7 +314,7 @@ theorem measure_le_le_one_add_inv_mul [IsProbabilityMeasure P] (hX : Measurable 
   congr 2
   field_simp
 
-/-- **SNB3.** For every real `n > 0`,
+/-- **Tail bounds.** For every real `n > 0`,
 `P(X ≥ n) ≤ min{1, (√2 χ/n) e^{−n/(4χ²)}, (1 + χ⁻¹) e^{−n/(2χ²)}}`. -/
 theorem measure_le_le_min [IsProbabilityMeasure P] (hX : Measurable X) (hX0 : ∀ ω, 0 ≤ X ω)
     (hχ : 0 < χ)
@@ -306,7 +331,7 @@ theorem measure_le_le_min [IsProbabilityMeasure P] (hX : Measurable X) (hX0 : �
     · exact measure_le_le_sqrt_two_mul hX hX0 hχ hmom hn
     · exact measure_le_le_one_add_inv_mul hX hX0 hχ hmom n
 
-/-- **SNB3, last bound.** `P(X ≥ n) ≤ e^{−n/(4χ²)}` once `n ≥ 4χ² log(1 + χ⁻¹)`. -/
+/-- **Last bound.** `P(X ≥ n) ≤ e^{−n/(4χ²)}` once `n ≥ 4χ² log(1 + χ⁻¹)`. -/
 theorem measure_le_le_exp [IsProbabilityMeasure P] (hX : Measurable X) (hX0 : ∀ ω, 0 ≤ X ω)
     (hχ : 0 < χ)
     (hmom : ∀ m : ℕ, 1 ≤ m → ∫⁻ ω, ENNReal.ofReal (X ω ^ m) ∂P ≤
@@ -324,7 +349,7 @@ theorem measure_le_le_exp [IsProbabilityMeasure P] (hX : Measurable X) (hX0 : �
     _ = exp (-(n / (4 * χ ^ 2))) := by
         rw [← exp_add]; congr 1; field_simp; ring
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
 /-- The point mass `X = χ` with `χ ≥ 1` satisfies the moment hypothesis for every `m ≥ 1`. -/
 theorem dirac_moment_hyp {χ : ℝ} (hχ : 1 ≤ χ) (m : ℕ) (hm : 1 ≤ m) :

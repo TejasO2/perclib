@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Correspondence wrappers for the mesoscopic-tail-transfer assertions OP4X, J5R6 and KKGL,
 proved from `ReciprocalODE.lean` and `MesoscopicNegligibility.lean`. No new definitions.
 -/
@@ -8,6 +12,19 @@ module
 public import PercLib.Meta.Tag
 public import PercLib.Analysis.ReciprocalODE
 public import PercLib.Analysis.MesoscopicNegligibility
+
+/-!
+# Mesoscopic tail transfer: correspondence
+
+Wiki correspondence for the reciprocal ODE bounds, the two-point example and mesoscopic
+negligibility.
+
+## Main results
+
+* `reciprocal_ode_lower_bounds`
+* `twoPoint_truncated_ratio_example`
+* `tendsto_limsup_truncatedMean_div_mean_of_isTheta`
+-/
 
 @[expose] public section
 noncomputable section
@@ -98,7 +115,8 @@ theorem twoPoint_truncated_ratio_example {α κ : ℝ} (_hα : 0 < α) (hακ : 
         fun r => r ^ (α + κ) := by
       have h0 : Tendsto (fun r : ℝ => (1 - r ^ (α - κ)) * r ^ (α - κ)) atTop (𝓝 0) := by
         simpa using ((tendsto_const_nhds (x := (1 : ℝ))).sub hp).mul hp
-      have h := (isBigO_refl (fun r : ℝ => r ^ (α + κ)) atTop).mul_isLittleO ((isLittleO_one_iff (F := ℝ)).2 h0)
+      have h := (isBigO_refl (fun r : ℝ => r ^ (α + κ)) atTop).mul_isLittleO
+          ((isLittleO_one_iff (F := ℝ)).2 h0)
       simp only [mul_one] at h
       refine h.congr' ?_ EventuallyEq.rfl
       filter_upwards [eventually_gt_atTop 0] with r hr
@@ -117,7 +135,7 @@ theorem twoPoint_truncated_ratio_example {α κ : ℝ} (_hα : 0 < α) (hακ : 
     filter_upwards [Ioo_mem_nhdsGT (show (0 : ℝ) < 1 by norm_num)] with δ hδ
     exact ((tendsto_truncated_ratio hακ hδ.1 hδ.2.le).limUnder_eq).symm
 
-/-- **KKGL** (conclusion QMN5, written out). Let `0 < α ≤ κ < 2α` and `r₀ > 0`. For `r ≥ r₀`
+/-- **KKGL** (conclusion written out). Let `0 < α ≤ κ < 2α` and `r₀ > 0`. For `r ≥ r₀`
 let `μ_r` be a probability measure on `[0, ∞)` with integrable `x` and `x²`, and write
 `m₁(r) = ∫ x dμ_r`, `m₂(r) = ∫ x² dμ_r` and `T_m(r) = ∫ min x m dμ_r`. Suppose `m₁ ≍ r^α`,
 `b r^{α+κ} ≤ m₂(r) ≤ B r^{α+κ}` with `0 < b ≤ B`, `m₂` and every `T_m` (`m > 0`) are

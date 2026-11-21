@@ -1,10 +1,11 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
-New proofs for issue 233 (Q-50), written on 2026-11-15 by PROVER-E. No upstream proof is
-copied: the bound is derived from the merged monotone coupling
-`PercLib.Probability.exists_prodBernoulli_monotone_coupling`, through the profile
+Authors: PercLib contributors
+-/
+/-
+New proofs, written on 2026-11-15. No upstream proof is copied: the bound is derived from the merged
+monotone coupling `PercLib.Probability.exists_prodBernoulli_monotone_coupling`, through the profile
 `min q q'`.
 -/
 module
@@ -150,7 +151,8 @@ theorem abs_prodBernoulli_real_sub_le [Countable ι] (q q' : ι → unitInterval
       (∑' i, ENNReal.ofReal |(q i : ℝ) - q' i|).toReal := by
   have h1 := prodBernoulli_le_add_tsum_dist q q' hA
   have h2 := prodBernoulli_le_add_tsum_dist q' q hA
-  have hsym : (∑' i, ENNReal.ofReal |(q' i : ℝ) - q i|) = ∑' i, ENNReal.ofReal |(q i : ℝ) - q' i| := by
+  have hsym : (∑' i, ENNReal.ofReal |(q' i : ℝ) - q i|) = ∑' i,
+      ENNReal.ofReal |(q i : ℝ) - q' i| := by
     simp_rw [abs_sub_comm]
   rw [hsym] at h2
   have r1 := ENNReal.toReal_mono (ENNReal.add_ne_top.2 ⟨measure_ne_top _ _, hfin⟩) h1

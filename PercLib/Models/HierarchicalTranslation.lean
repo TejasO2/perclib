@@ -1,12 +1,15 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written on 2026-11-20 for package hier-translate: the upper two-point bound on the
-hierarchical lattice from bounds on the block means, for kernels that are translation invariant
-with an antitone radial upper envelope (not necessarily radial). Adapted from
-`PercLib/Models/HierarchicalTwoPointUpper.lean` of this library (same licence), where the radial
-hypothesis is replaced by translation invariance plus the envelope. No upstream code is copied,
-no definition is added and no Input is introduced; the block-mean bound is an ordinary
-hypothesis.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
+New proofs, written on 2026-11-20: the upper two-point bound on the hierarchical lattice from bounds
+on the block means, for kernels that are translation invariant with an antitone radial upper
+envelope (not necessarily radial). Adapted from `PercLib/Models/HierarchicalTwoPointUpper.lean` of
+this library (same licence), where the radial hypothesis is replaced by translation invariance plus
+the envelope. No upstream code is copied, no definition is added and no Input is introduced; the
+block-mean bound is an ordinary hypothesis.
 -/
 module
 
@@ -35,7 +38,7 @@ probability that `x` and `y` are joined inside `B_n` and `μ_n = ∑' z, τ_n(0,
 noncomputable section
 
 open MeasureTheory Set
-open scoped ENNReal NNReal Classical
+open scoped ENNReal NNReal
 open PercLib.Percolation.Bond
 
 namespace PercLib.Models

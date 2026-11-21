@@ -1,8 +1,10 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-
-New proofs for issue 459 (Q-125), written on 2026-11-16 by PROVER-G, against pinned mathlib.
-No upstream proof is copied.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
+New proofs, written on 2026-11-16, against pinned mathlib. No upstream proof is copied.
 -/
 module
 
@@ -13,7 +15,7 @@ public import Mathlib.MeasureTheory.Function.L2Space
 /-!
 # Doob's `L²` maximal inequality
 
-Part 1 of Q-125 (HXNR). For a real martingale `X` with every `X k` in `L²`,
+For a real martingale `X` with every `X k` in `L²`,
 
   `E[(max_{k ≤ n} |X_k|)²] ≤ 4 E[X_n²]`   (`lintegral_sup_abs_sq_le`).
 
@@ -100,7 +102,8 @@ theorem lintegral_sup_abs_sq_le [IsFiniteMeasure μ] (hX : Martingale X ℱ μ)
             (hgm.comp measurable_snd) measurable_const
       _ = ∫⁻ ω, g ω * ENNReal.ofReal (M ω) ∂μ := by
           refine lintegral_congr fun ω => ?_
-          have e2 : (fun t => if t ≤ M ω then g ω else 0) = (Set.Iic (M ω)).indicator fun _ => g ω := by
+          have e2 : (fun t => if t ≤ M ω then g ω else 0) = (Set.Iic (M ω)).indicator fun _ =>
+              g ω := by
             funext t
             simp only [indicator_apply, Set.mem_Iic]
           rw [e2, lintegral_indicator_const measurableSet_Iic,
@@ -214,7 +217,7 @@ theorem martingale_sq_sub_predictableVariation [IsFiniteMeasure μ] (hX : Martin
     rw [e1, e2, e3, e4, e5]
     ring
 
-/-! ### D-5 witnesses -/
+/-! ### Non-vacuity witnesses -/
 
 /-- The hypotheses of `lintegral_sup_abs_sq_le` hold for the zero martingale on any finite
 measure space. -/

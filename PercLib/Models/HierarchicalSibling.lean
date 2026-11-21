@@ -1,9 +1,11 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
-New proofs for the hierarchical programme (package H6, the sibling-block recursion), written on
-2026-11-20. No upstream proof is copied and no definition is added.
+Authors: PercLib contributors
+-/
+/-
+New proofs (the sibling-block recursion), written on 2026-11-20. No upstream proof is copied and no
+definition is added.
 -/
 module
 
@@ -121,17 +123,17 @@ theorem law_restrict_level_ball_map_addLeft (J : Sym2 (ℕ →₀ (Fin d → ZMo
     simp only [Sym2.map_mk, Equiv.coe_addLeft, Set.mk_mem_sym2_iff, mem_ofPred_eq, hiff]
     split_ifs
     · apply Subtype.ext
-      show 1 - Real.exp (-(β : ℝ) * (J s(x + a, x + b) : ℝ)) =
+      change 1 - Real.exp (-(β : ℝ) * (J s(x + a, x + b) : ℝ)) =
         1 - Real.exp (-(β : ℝ) * (J s(a, b) : ℝ))
       rw [add_comm x a, add_comm x b, hJt]
     · rfl
 
 open Classical in
-/-- **Sibling-block recursion** (Hutchcroft, arXiv:2103.17013v1, Lemma 2.8; wiki 655W,
-recursion part). On `ℕ →₀ (Fin d → ZMod L)` with `L ≥ 2`, `d ≥ 1`, let `c, α, β > 0` and let
-`J` be translation invariant with `J(u, v) ≥ c L^{-(d+α) h(v-u)}` for `u ≠ v`. Write `q_m` for
-`intensityProfile J β` restricted to the pairs inside `Λ_m = {h ≤ m}`, `M_n` for the quantile
-`tightnessScale q_n Λ_n` and `a_n = E_{q_n} |K_0 ∩ Λ_n|`. If `M_n² ≤ (A/β) L^{(d+α)n}`, then
+/-- **Sibling-block recursion** (Hutchcroft, arXiv:2103.17013v1, Lemma 2.8, recursion part). On
+`ℕ →₀ (Fin d → ZMod L)` with `L ≥ 2`, `d ≥ 1`, let `c, α, β > 0` and let `J` be translation
+invariant with `J(u, v) ≥ c L^{-(d+α) h(v-u)}` for `u ≠ v`. Write `q_m` for `intensityProfile J β`
+restricted to the pairs inside `Λ_m = {h ≤ m}`, `M_n` for the quantile `tightnessScale q_n Λ_n` and
+`a_n = E_{q_n} |K_0 ∩ Λ_n|`. If `M_n² ≤ (A/β) L^{(d+α)n}`, then
 
 `k β L^{-αn} a_n² ≤ ∑_{x ∈ Λ_{n+1} \ Λ_n} P_{q_{n+1}}(0 ↔ x)`
 
@@ -255,7 +257,7 @@ theorem sum_shell_tau_ge [NeZero L] (hL : 2 ≤ L) (hd : 1 ≤ d) {α c A : ℝ}
       have huv : u ≠ v := fun h => Finset.disjoint_left.1 hdisj hu (h ▸ hv)
       have hq1uv : q1 s(u, v) = q s(u, v) := by simp only [hq1, hmem1, ↓reduceIte]
       rw [hq1uv]
-      show 1 - Real.exp (-r) ≤ 1 - Real.exp (-(β : ℝ) * (J s(u, v) : ℝ))
+      change 1 - Real.exp (-r) ≤ 1 - Real.exp (-(β : ℝ) * (J s(u, v) : ℝ))
       have hlev : (((v - u).support.sup Nat.succ : ℕ) : ℝ) ≤ (n : ℝ) + 1 := by
         exact_mod_cast level_sub_le_of_mem_level_ball (hSsub u hu) (hTsub v hv)
       have hpow : (L : ℝ) ^ (-(((d : ℝ) + α) * ((n : ℝ) + 1))) ≤

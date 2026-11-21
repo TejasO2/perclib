@@ -1,8 +1,7 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Correspondence wrappers for the connectivity, closed-separator and susceptibility
-definitions and their basic properties.
-All mathematical inputs are proved in the imported modules.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
 -/
 module
 
@@ -11,6 +10,10 @@ public import PercLib.Percolation.Bond.ClosedCertificates
 public import PercLib.Percolation.Bond.HarrisDecreasing
 public import PercLib.Percolation.Bond.LocalConnectivity
 public import PercLib.Percolation.Bond.RowSum
+
+/-! Correspondence wrappers for the connectivity, closed-separator and susceptibility
+definitions and their basic properties.
+All mathematical inputs are proved in the imported modules. -/
 
 @[expose] public section
 noncomputable section

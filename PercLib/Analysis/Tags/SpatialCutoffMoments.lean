@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Correspondence wrapper for the spatial-cutoff-moments assertion GAF9, proved from
 `LinearODEAsymptotics.lean`. No new definitions.
 -/
@@ -7,6 +11,17 @@ module
 
 public import PercLib.Meta.Tag
 public import PercLib.Analysis.LinearODEAsymptotics
+
+/-!
+# Spatial cutoff moments: correspondence
+
+Wiki correspondence for the asymptotics of the linear spatial-moment ODE of
+`PercLib/Analysis/LinearODEAsymptotics.lean`.
+
+## Main results
+
+* `linearODE_asymptotics`
+-/
 
 @[expose] public section
 noncomputable section

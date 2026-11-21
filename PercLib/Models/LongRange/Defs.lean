@@ -1,21 +1,22 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-137 and Q-141 (issues 471 and 508, one interface by the ARCHITECT ruling D-33): radial
-long-range kernels on `ℤ^d` with the norm as a parameter, the cut-off kernels of
-Definition I.1.5 of T. Hutchcroft, *Critical long-range percolation I*,
-arXiv:2508.18807v1, for a general profile, and the power-law profile of Definition I.1.3
-as an instance; with the wiki targets PVA8, MQNP, LF50 and 6YYS (article
-`cutoff-families`) for the power law.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
+Radial long-range kernels on `ℤ^d` with the norm as a parameter, the cut-off kernels of Definition
+I.1.5 of T. Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1, for a general
+profile, and the power-law profile of Definition I.1.3 as an instance; with the wiki targets PVA8,
+MQNP, LF50 and 6YYS (article `cutoff-families`) for the power law.
 
-`cutoffProfile` and the `if x = y then 0` kernel shape are adapted from pull request 488:
-repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
-`d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, file `PercLib/CriticalLRP/KernelGeometry.lean`
-(`cutoffProfile`, `radialKernel`, `cutoffKernel`, `modelProfile`); licence Apache-2.0 as
-declared in that file's header; upstream `yujinhkim/Critical-Long-range-percolation` at
-`3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf`. Modified: kernels are functions on
-`Sym2 (Fin d → ℤ)` with values in `ℝ≥0` (D-2, for `intensityProfile`), the distance is a
-norm on `ℝ^d` (a `Seminorm ℝ (Fin d → ℝ)` that vanishes only at `0`) evaluated at integer
-points, instead of an arbitrary function `V → V → ℝ`, and the power-law profile carries a
+`cutoffProfile` and the `if x = y then 0` kernel shape are adapted from the repository
+`yujinhkim/lrp`, branch `critical-lrp-1`, commit `d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, file
+`PercLib/CriticalLRP/KernelGeometry.lean` (`cutoffProfile`, `radialKernel`, `cutoffKernel`,
+`modelProfile`); licence Apache-2.0 as declared in that file's header; upstream
+`yujinhkim/Critical-Long-range-percolation` at `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf`. Modified:
+kernels are functions on `Sym2 (Fin d → ℤ)` with values in `ℝ≥0` (as `intensityProfile` requires),
+the distance is a norm on `ℝ^d` (a `Seminorm ℝ (Fin d → ℝ)` that vanishes only at `0`) evaluated at
+integer points, instead of an arbitrary function `V → V → ℝ`, and the power-law profile carries a
 normalising constant. The API lemmas, targets and witnesses are new.
 -/
 module
@@ -30,17 +31,16 @@ public import Mathlib.Topology.MetricSpace.ProperSpace
 
 /-! # Long-range kernels and their cut-offs on `ℤ^d`
 
-As in Definition I.1.3, the norm is a norm `N` on `ℝ^d`, restricted to `ℤ^d`: it is a
-`Seminorm ℝ (Fin d → ℝ)`, so it is absolutely homogeneous, and it is a norm when it vanishes
-only at `0` (`∀ x, N x = 0 → x = 0`), which is a hypothesis wherever it is used. An integer
-point `z : Fin d → ℤ` is evaluated through the coercion `Int.cast ∘ z : Fin d → ℝ`.
-For a profile `K : ℝ → ℝ`, the radial kernel is `J(x, y) = K (N (x - y))` for `x ≠ y` and `0`
-on the diagonal. Definition I.1.5 cuts it off at scale `r` by `J_r(s) = ∫_s^r |K'| = K s - K r`
-for `s ≤ r` and `0` for `s > r`; for a decreasing differentiable profile the two forms agree
-by the fundamental theorem of calculus, and the closed form is taken as the definition
-(`cutoffProfile`), as in pull request 488. Values are truncated at `0` (`Real.toNNReal`), which
-changes nothing for a nonnegative profile. Probabilities are `intensityProfile J β` (no new
-profile definition).
+As in Definition I.1.3, the norm is a norm `N` on `ℝ^d`, restricted to `ℤ^d`: it is a `Seminorm ℝ
+(Fin d → ℝ)`, so it is absolutely homogeneous, and it is a norm when it vanishes only at `0` (`∀ x,
+N x = 0 → x = 0`), which is a hypothesis wherever it is used. An integer point `z : Fin d → ℤ` is
+evaluated through the coercion `Int.cast ∘ z : Fin d → ℝ`. For a profile `K : ℝ → ℝ`, the radial
+kernel is `J(x, y) = K (N (x - y))` for `x ≠ y` and `0` on the diagonal. Definition I.1.5 cuts it
+off at scale `r` by `J_r(s) = ∫_s^r |K'| = K s - K r` for `s ≤ r` and `0` for `s > r`; for a
+decreasing differentiable profile the two forms agree by the fundamental theorem of calculus, and
+the closed form is taken as the definition (`cutoffProfile`), as in the source formalisation cited
+in the header. Values are truncated at `0` (`Real.toNNReal`), which changes nothing for a
+nonnegative profile. Probabilities are `intensityProfile J β` (no new profile definition).
 
 Every norm on `ℝ^d` is comparable with the sup norm (`exists_pos_mul_norm_le`,
 `exists_le_mul_norm`, and their integer forms), so no comparability hypothesis is needed.
@@ -94,7 +94,7 @@ def cutoffKernel (N : Seminorm ℝ (Fin d → ℝ)) (K : ℝ → ℝ) (r : ℝ) 
 
 /-- The **power-law profile** `s ↦ c s^(-a)` of Definition I.1.3 (with `δ ≡ 0`), with
 exponent `a = d + α` and normalising constant `c`. The wiki articles use `c = 1/a`;
-pull request 488's `lrKernel` uses `c = 1` and the sup norm. -/
+the source formalisation's `lrKernel` uses `c = 1` and the sup norm. -/
 def powerLawProfile (c a s : ℝ) : ℝ :=
   c * s ^ (-a)
 
@@ -194,7 +194,8 @@ theorem exists_le_mul_norm (N : Seminorm ℝ (Fin d → ℝ)) :
   have hv : v = ∑ i, v i • Pi.single i (1 : ℝ) := by
     ext j; simp [Finset.sum_apply, Pi.single_apply]
   calc N v = N (∑ i, v i • Pi.single i (1 : ℝ)) := by rw [← hv]
-    _ ≤ ∑ i, N (v i • Pi.single i (1 : ℝ)) := Finset.le_sum_of_subadditive N (map_zero N).le (map_add_le_add N) _ _
+    _ ≤ ∑ i, N (v i • Pi.single i (1 : ℝ)) := Finset.le_sum_of_subadditive N (map_zero N).le
+        (map_add_le_add N) _ _
     _ = ∑ i, ‖v i‖ * N (Pi.single i 1) := by simp only [map_smul_eq_mul]
     _ ≤ ∑ i, ‖v‖ * N (Pi.single i 1) := Finset.sum_le_sum fun i _ =>
         mul_le_mul_of_nonneg_right (norm_le_pi_norm v i) (apply_nonneg N _)
@@ -311,7 +312,7 @@ theorem antitoneOn_powerLawProfile {c a : ℝ} (hc : 0 ≤ c) (ha : 0 ≤ a) :
     AntitoneOn (powerLawProfile c a) (Ioi 0) := fun _ hs _ _ hst =>
   mul_le_mul_of_nonneg_left (Real.rpow_le_rpow_of_nonpos hs hst (by linarith)) hc
 
-/-! ### Witnesses (D-5): the sup norm and the Euclidean norm -/
+/-! ### Witnesses: the sup norm and the Euclidean norm -/
 
 /-- The sup norm on `ℝ^d` is a norm. -/
 theorem normSeminorm_eq_zero (v : Fin d → ℝ) (h : normSeminorm ℝ (Fin d → ℝ) v = 0) : v = 0 :=
@@ -333,14 +334,14 @@ theorem one_le_norm_of_ne_zero {z : Fin d → ℤ} (hz : z ≠ 0) : 1 ≤ ‖z�
   rw [← natCast_floor_norm]
   exact_mod_cast Nat.one_le_iff_ne_zero.2 fun h => hz ((floor_norm_eq_zero_iff z).1 h)
 
-/-- Issue 508: at `d = 1`, `α = 1` (sup norm, `c = 1`), the kernel is positive off the
+/-- Non-vacuity: at `d = 1`, `α = 1` (sup norm, `c = 1`), the kernel is positive off the
 diagonal. -/
 theorem radialKernel_pos_example {x y : Fin 1 → ℤ} (h : x ≠ y) :
     0 < radialKernel (normSeminorm ℝ (Fin 1 → ℝ)) (powerLawProfile 1 2) s(x, y) := by
   rw [radialKernel_of_ne h, Real.toNNReal_pos]
   exact powerLawProfile_pos one_pos (norm_sub_pos normSeminorm_eq_zero h)
 
-/-- Issue 508: at `d = 1`, `α = 1` (sup norm, `c = 1`), the kernel is summable along rows. -/
+/-- Non-vacuity: at `d = 1`, `α = 1` (sup norm, `c = 1`), the kernel is summable along rows. -/
 theorem summable_radialKernel_example (x : Fin 1 → ℤ) :
     Summable fun y => (radialKernel (normSeminorm ℝ (Fin 1 → ℝ)) (powerLawProfile 1 2)
       s(x, y) : ℝ) := by
@@ -356,7 +357,7 @@ theorem summable_radialKernel_example (x : Fin 1 → ℤ) :
       normSeminorm_intCast]
     norm_num
 
-/-- Issue 508, Euclidean norm: at `d = 1`, `α = 1` (`c = 1`), the kernel is positive off the
+/-- Non-vacuity, Euclidean norm: at `d = 1`, `α = 1` (`c = 1`), the kernel is positive off the
 diagonal. -/
 theorem radialKernel_pos_euclidean_example {x y : Fin 1 → ℤ} (h : x ≠ y) :
     0 < radialKernel ((normSeminorm ℝ (EuclideanSpace ℝ (Fin 1))).comp
@@ -364,7 +365,7 @@ theorem radialKernel_pos_euclidean_example {x y : Fin 1 → ℤ} (h : x ≠ y) :
   rw [radialKernel_of_ne h, Real.toNNReal_pos]
   exact powerLawProfile_pos one_pos (norm_sub_pos euclidean_seminorm_eq_zero h)
 
-/-- Issue 508: the cut-off of `s ↦ s^(-2)` at `r = 1` vanishes for `s > 1` and is positive
+/-- Non-vacuity: the cut-off of `s ↦ s^(-2)` at `r = 1` vanishes for `s > 1` and is positive
 for `0 < s < 1`. -/
 theorem cutoffProfile_example :
     (∀ s, 1 < s → cutoffProfile (powerLawProfile 1 2) 1 s = 0) ∧
@@ -374,7 +375,7 @@ theorem cutoffProfile_example :
   simp only [powerLawProfile, one_mul, Real.one_rpow]
   exact Real.one_lt_rpow_of_pos_of_lt_one_of_neg hs hs1 (by norm_num)
 
-/-- Issue 471: with the sup norm, `J_r = 0` for `r < 1`, since no pair is at distance below
+/-- Non-vacuity: with the sup norm, `J_r = 0` for `r < 1`, since no pair is at distance below
 one. -/
 theorem cutoffKernel_eq_zero_of_lt_one {K : ℝ → ℝ} (hr : r < 1) (e : Sym2 (Fin d → ℤ)) :
     cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) K r e = 0 := by
@@ -386,7 +387,7 @@ theorem cutoffKernel_eq_zero_of_lt_one {K : ℝ → ℝ} (hr : r < 1) (e : Sym2 
       rw [normSeminorm_intCast]
       exact hr.trans_le (one_le_norm_of_ne_zero (sub_ne_zero.2 h))
 
-/-- Issue 471: `J_r ≤ J` at the explicit pair `{0, 1}` of `ℤ`, with `a = 2`, `c = 1/2`,
+/-- Non-vacuity: `J_r ≤ J` at the explicit pair `{0, 1}` of `ℤ`, with `a = 2`, `c = 1/2`,
 `r = 2`. -/
 example : cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (powerLawProfile (1 / 2) 2) 2
       s(0, fun _ => 1) ≤

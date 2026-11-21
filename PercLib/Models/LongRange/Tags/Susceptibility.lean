@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Correspondence wrapper for root independence of the susceptibility.
 All mathematical inputs are proved in the imported modules.
 -/
@@ -7,6 +11,16 @@ module
 
 public import PercLib.Meta.Tag
 public import PercLib.Models.LongRange.RootIndependence
+
+/-!
+# Root independence of the susceptibility: correspondence
+
+Wiki correspondence for the equality of susceptibilities under a transitive law.
+
+## Main results
+
+* `chi_eq_of_transitive_law`
+-/
 
 @[expose] public section
 noncomputable section

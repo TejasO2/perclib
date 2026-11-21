@@ -1,9 +1,10 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
-New proofs for issue 190 (Q-30), written on 2026-11-15 by PROVER-E. No upstream proof is
-copied.
+Authors: PercLib contributors
+-/
+/-
+New proofs, written on 2026-11-15. No upstream proof is copied.
 -/
 module
 
@@ -21,8 +22,8 @@ boundary pairs, so `P(K_x = C)` factors (`law_cluster_eq_finset`). The event `{K
 depends only on pairs meeting `C`, so it is independent of every event determined by the
 outer pairs (`law_cluster_eq_inter`, the domain Markov property).
 
-This file adds no definition. The independence of events determined by disjoint
-coordinate sets is used through a private lemma; PROVER-F's Q-15 (#136) proves a public
+This file adds no definition. The independence of events determined by disjoint coordinate sets is
+used through a private lemma; `PercLib/Probability/DeterminedIndependence.lean` proves a public
 version.
 -/
 
@@ -156,7 +157,8 @@ theorem law_cluster_eq_inter [Countable V] (q : Sym2 V → unitInterval) (x : V)
     (hx : x ∈ C) {B : Set (Config V)} (hB : MeasurableSet B)
     (hdet : ∀ ω ω', (∀ a ∉ C, ∀ b ∉ C, (s(a, b) ∈ ω ↔ s(a, b) ∈ ω')) → (ω ∈ B ↔ ω' ∈ B)) :
     law q ({ω | cluster ω x = C} ∩ B) = law q {ω | cluster ω x = C} * law q B := by
-  refine PercLib.Probability.prodBernoulli_inter_of_determined_inter q {e | ∃ v ∈ e, v ∈ C} {e | ∀ v ∈ e, v ∉ C} ?_
+  refine PercLib.Probability.prodBernoulli_inter_of_determined_inter q {e | ∃ v ∈ e, v ∈ C}
+      {e | ∀ v ∈ e, v ∉ C} ?_
     (measurableSet_cluster_eq_finset x C hx) hB (cluster_eq_finset_determined x C hx) ?_
   · exact Set.disjoint_left.2 fun e ⟨v, hv, hvC⟩ he => he v hv hvC
   · intro ω

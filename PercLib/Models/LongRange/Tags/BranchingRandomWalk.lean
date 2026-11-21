@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Correspondence wrapper for the Fourier symbol of a lazy power-law step distribution.
 All mathematical inputs are proved in the imported modules.
 -/
@@ -7,6 +11,16 @@ module
 
 public import PercLib.Meta.Tag
 public import PercLib.Models.LongRange.FourierSymbol
+
+/-!
+# Branching random walk: correspondence
+
+Wiki correspondence for the Fourier symbol of a lazy power-law step distribution.
+
+## Main results
+
+* `fourierSymbol_properties`
+-/
 
 @[expose] public section
 noncomputable section
@@ -22,10 +36,10 @@ namespace PercLib.Models.LongRange
 @[tag "VJCW"]
 theorem fourierSymbol_properties {d : ℕ} (hd : 1 ≤ d) {p : (Fin d → ℤ) → ℝ}
     (hp0 : ∀ x, 0 ≤ p x) (hp : HasSum p 1)
-    (_hsymm : ∀ x, p (-x) = p x) (hlazy : 1/2 ≤ p 0) {c C α : ℝ} (hc : 0 < c)
+    (_hsymm : ∀ x, p (-x) = p x) (hlazy : 1 / 2 ≤ p 0) {c C α : ℝ} (hc : 0 < c)
     (_hcC : c ≤ C) (hα : 0 < α)
-    (hlow : ∀ x, x ≠ 0 → c * √(∑ i, ((x i : ℝ)) ^ 2) ^ (-((d:ℝ)+α)) ≤ p x)
-    (hup  : ∀ x, x ≠ 0 → p x ≤ C * √(∑ i, ((x i : ℝ)) ^ 2) ^ (-((d:ℝ)+α))) :
+    (hlow : ∀ x, x ≠ 0 → c * √(∑ i, ((x i : ℝ)) ^ 2) ^ (-((d : ℝ) + α)) ≤ p x)
+    (hup : ∀ x, x ≠ 0 → p x ≤ C * √(∑ i, ((x i : ℝ)) ^ 2) ^ (-((d : ℝ) + α))) :
     (∀ k : Fin d → ℝ, 0 ≤ ∑' x, p x * cos (∑ i, k i * (x i : ℝ)) ∧
       ∑' x, p x * cos (∑ i, k i * (x i : ℝ)) ≤ 1) ∧
     (∀ k : Fin d → ℝ, (∀ i, |k i| ≤ π) → ∑' x, p x * cos (∑ i, k i * (x i : ℝ)) = 1 →

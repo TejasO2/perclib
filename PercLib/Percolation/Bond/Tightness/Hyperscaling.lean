@@ -1,14 +1,17 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written for package Q-104 (issue 438, roadmap T-6), on the D-2 interface.
-Source motivation: T. Hutchcroft, arXiv:2008.11197v2, §2 (consequences of universal
-tightness), and the wiki statements LQ6Y, OB0A, WRHL and UVQ6.
-No source text or code is copied.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
+New proofs, on the bond interface. Source motivation: T. Hutchcroft, arXiv:2008.11197v2,
+§2 (consequences of universal tightness), and the wiki statements LQ6Y, OB0A, WRHL and UVQ6. No
+source text or code is copied.
 -/
 module
 
 public import PercLib.Percolation.Bond.WindowPartition
-public import PercLib.Percolation.Bond.Tightness.FromBK
+public import PercLib.Percolation.Bond.Tightness.BKStep
 public import PercLib.Percolation.Bond.ClusterMoments
 public import Mathlib.Analysis.Convex.SpecificFunctions.Basic
 
@@ -35,7 +38,7 @@ Fix a finite nonempty `Λ`, write `X_x = |K_x ∩ Λ|`, `Z = max_{x ∈ Λ} X_x`
 noncomputable section
 
 open MeasureTheory Set
-open scoped ENNReal Classical
+open scoped ENNReal
 
 namespace PercLib.Percolation.Bond
 
@@ -43,6 +46,7 @@ variable {V : Type*}
 
 /-! ### The partition identity for every function of the trace size -/
 
+open Classical in
 /-- `∑_{x ∈ Λ} f(|K_x ∩ Λ|) = ∑_D |D| • f(|D|)` over the traces `D` of clusters on `Λ`. -/
 theorem sum_function_clusterIntersection {β : Type*} [AddCommMonoid β] (Λ : Finset V)
     (ω : Config V) (f : ℕ → β) :
@@ -57,6 +61,7 @@ theorem sum_function_clusterIntersection {β : Type*} [AddCommMonoid β] (Λ : F
     Finset.filter_congr fun a ha => filter_cluster_eq_iff Λ ω ha
   rw [hfib]
 
+open Classical in
 /-- The expectation form: `∑_{x ∈ Λ} E f(X_x) = E ∑_D |D| f(|D|)`. -/
 theorem sum_lintegral_function_clusterIntersection [Countable V] (q : Sym2 V → unitInterval)
     (Λ : Finset V) (f : ℕ → ℝ≥0∞) :
@@ -71,7 +76,8 @@ theorem sum_lintegral_function_clusterIntersection [Countable V] (q : Sym2 V →
 
 /-! ### OB0A: moments under a uniform root -/
 
-/-- **OB0A.** Under a uniform root `U` on `Λ` independent of `ω`,
+open Classical in
+/-- **Sampled-root moments.** Under a uniform root `U` on `Λ` independent of `ω`,
 `E X_U^m = |Λ|⁻¹ E ∑_D |D|^(m+1)`. -/
 theorem avg_lintegral_pow_clusterIntersection [Countable V] (q : Sym2 V → unitInterval)
     (Λ : Finset V) (m : ℕ) :
@@ -81,7 +87,8 @@ theorem avg_lintegral_pow_clusterIntersection [Countable V] (q : Sym2 V → unit
   rw [sum_lintegral_function_clusterIntersection q Λ fun n => (n : ℝ≥0∞) ^ m]
   simp only [pow_succ']
 
-/-- **OB0A, window form.** For `a, b, v ∈ ℝ`, the moment restricted to the window
+open Classical in
+/-- **Window form.** For `a, b, v ∈ ℝ`, the moment restricted to the window
 `a v ≤ X_U ≤ b v` is `|Λ|⁻¹ E ∑_{D : a v ≤ |D| ≤ b v} |D|^(m+1)`. -/
 theorem avg_lintegral_pow_clusterIntersection_window [Countable V]
     (q : Sym2 V → unitInterval) (Λ : Finset V) (m : ℕ) (a b v : ℝ) :
@@ -99,6 +106,7 @@ theorem avg_lintegral_pow_clusterIntersection_window [Countable V]
 
 /-! ### LQ6Y: the partition bound and the quantile lower bound -/
 
+open Classical in
 /-- The largest trace is one of the traces. -/
 theorem exists_trace_eq_max (Λ : Finset V) (hΛ : Λ.Nonempty) (ω : Config V) :
     ∃ D ∈ Λ.image (fun x => Λ.filter (· ∈ cluster ω x)),
@@ -109,7 +117,7 @@ theorem exists_trace_eq_max (Λ : Finset V) (hΛ : Λ.Nonempty) (ω : Config V) 
   rw [maxClusterIntersection, hmax, ← clusterIntersection_eq_card_filter]
   rfl
 
-/-- **LQ6Y, first inequality.** `E Z^(p+1) ≤ ∑_{x ∈ Λ} E X_x^p` for real `p ≥ 0`. -/
+/-- **First inequality.** `E Z^(p+1) ≤ ∑_{x ∈ Λ} E X_x^p` for real `p ≥ 0`. -/
 theorem lintegral_rpow_max_le_sum [Countable V] (q : Sym2 V → unitInterval) {Λ : Finset V}
     (hΛ : Λ.Nonempty) {p : ℝ} (hp : 0 ≤ p) :
     ∫⁻ ω, (maxClusterIntersection Λ ω : ℝ≥0∞) ^ (p + 1) ∂(law q) ≤
@@ -134,7 +142,7 @@ theorem measurable_maxClusterIntersection [Countable V] (Λ : Finset V) :
   exact (measurableSet_le_maxClusterIntersection Λ n).diff
     (measurableSet_le_maxClusterIntersection Λ (n + 1))
 
-/-- **LQ6Y, second inequality.** `M^(p+1) / (e 2^(p+1)) ≤ E Z^(p+1)` for real `p ≥ 0`. -/
+/-- **Second inequality.** `M^(p+1) / (e 2^(p+1)) ≤ E Z^(p+1)` for real `p ≥ 0`. -/
 theorem le_lintegral_rpow_max [Countable V] (q : Sym2 V → unitInterval) {Λ : Finset V}
     (hΛ : Λ.Nonempty) {p : ℝ} (hp : 0 ≤ p) :
     ENNReal.ofReal ((tightnessScale q Λ : ℝ) ^ (p + 1) / (Real.exp 1 * 2 ^ (p + 1))) ≤
@@ -468,22 +476,22 @@ theorem sum_tau_le_of_tail_damp [Countable V] (q : Sym2 V → unitInterval)
 
 /-! ### UVQ6 -/
 
-/-- **UVQ6, scale.** Under `UniversalTightness V` and a window tail
+/-- **Scale.** By universal tightness, under a window tail
 `P(n ≤ X_u) ≤ A n^(-θ)` (`0 ≤ θ < 1`, all `u`, `n ≥ 1`):
 `M ≤ (4 e H_θ A |Λ|)^(1/(1+θ))`. -/
-theorem tightnessScale_le_of_window_tail [Countable V] (hUT : UniversalTightness V)
+theorem tightnessScale_le_of_window_tail [Countable V]
     (q : Sym2 V → unitInterval) {Λ : Finset V} (hΛ : Λ.Nonempty) {A θ : ℝ} (hA : 0 ≤ A)
     (hθ0 : 0 ≤ θ) (hθ1 : θ < 1)
     (htail : ∀ (u : V) (n : ℕ), 1 ≤ n →
       law q {ω | n ≤ clusterIntersection Λ ω u} ≤ ENNReal.ofReal (A * (n : ℝ) ^ (-θ))) :
     (tightnessScale q Λ : ℝ) ≤
       (4 * Real.exp 1 * ((1 - θ)⁻¹ + 9 * Real.exp (8 / 9)) * A * Λ.card) ^ (1 / (1 + θ)) :=
-  tightnessScale_le_of_tail_damp q hΛ hA hθ0 hθ1 htail fun u a ha =>
-    (hUT q Λ hΛ).2.2 u a ha
+  tightnessScale_le_of_tail_damp q hΛ hA hθ0 hθ1 htail fun u _a ha =>
+    law_mul_tightnessScale_le_clusterIntersection_le q hΛ u ha
 
-/-- **UVQ6, root sum.** Under the hypotheses of `tightnessScale_le_of_window_tail`,
+/-- **Root sum.** Under the hypotheses of `tightnessScale_le_of_window_tail`,
 `∑_{v ∈ Λ} τ(u,v) ≤ H_θ (4 e H_θ)^((1-θ)/(1+θ)) A^(2/(1+θ)) |Λ|^((1-θ)/(1+θ))`. -/
-theorem sum_tau_le_of_window_tail [Countable V] (hUT : UniversalTightness V)
+theorem sum_tau_le_of_window_tail [Countable V]
     (q : Sym2 V → unitInterval) {Λ : Finset V} (hΛ : Λ.Nonempty) {A θ : ℝ} (hA : 0 ≤ A)
     (hθ0 : 0 ≤ θ) (hθ1 : θ < 1)
     (htail : ∀ (u : V) (n : ℕ), 1 ≤ n →
@@ -492,7 +500,8 @@ theorem sum_tau_le_of_window_tail [Countable V] (hUT : UniversalTightness V)
     ∑ v ∈ Λ, tau q u v ≤ ENNReal.ofReal (((1 - θ)⁻¹ + 9 * Real.exp (8 / 9)) *
       (4 * Real.exp 1 * ((1 - θ)⁻¹ + 9 * Real.exp (8 / 9))) ^ ((1 - θ) / (1 + θ)) *
       A ^ (2 / (1 + θ)) * (Λ.card : ℝ) ^ ((1 - θ) / (1 + θ))) :=
-  sum_tau_le_of_tail_damp q hΛ hA hθ0 hθ1 htail (fun u a ha => (hUT q Λ hΛ).2.2 u a ha) u
+  sum_tau_le_of_tail_damp q hΛ hA hθ0 hθ1 htail (fun u _a ha =>
+    law_mul_tightnessScale_le_clusterIntersection_le q hΛ u ha) u
 
 /-! ### WRHL -/
 
@@ -501,7 +510,7 @@ theorem law_le_clusterIntersection_le_cluster (q : Sym2 V → unitInterval) (Λ 
     (u : V) (n : ℕ) :
     law q {ω | n ≤ clusterIntersection Λ ω u} ≤ law q {ω | (n : ℕ∞) ≤ (cluster ω u).encard} := by
   refine measure_mono fun ω (hω : n ≤ clusterIntersection Λ ω u) => ?_
-  show (n : ℕ∞) ≤ (cluster ω u).encard
+  change (n : ℕ∞) ≤ (cluster ω u).encard
   calc (n : ℕ∞) ≤ (clusterIntersection Λ ω u : ℕ∞) := by exact_mod_cast hω
     _ = (cluster ω u ∩ (Λ : Set V)).encard :=
         (Λ.finite_toSet.subset Set.inter_subset_right).cast_ncard_eq
@@ -512,7 +521,7 @@ private theorem one_sub_inv_inv {δ : ℝ} (hδ : 1 < δ) : (1 - 1 / δ)⁻¹ = 
   have : δ - 1 ≠ 0 := by linarith
   field_simp
 
-/-- **WRHL, scale.** If `δ > 1`, `C ≥ 0`, `P(n ≤ |K_x|) ≤ C n^(-1/δ)` for all `x` and
+/-- **Scale.** If `δ > 1`, `C ≥ 0`, `P(n ≤ |K_x|) ≤ C n^(-1/δ)` for all `x` and
 `n ≥ 1`, and rooted damping holds for every root, then with
 `L = C (δ/(δ-1) + 9 e^(8/9))`: `M ≤ (4 e L)^(δ/(δ+1)) |Λ|^(δ/(δ+1))`. -/
 theorem tightnessScale_le_of_cluster_tail [Countable V] (q : Sym2 V → unitInterval)
@@ -539,7 +548,7 @@ theorem tightnessScale_le_of_cluster_tail [Countable V] (q : Sym2 V → unitInte
     positivity
   rwa [Real.mul_rpow (by positivity) (Nat.cast_nonneg _)] at h
 
-/-- **WRHL, uniform-root two-point function.** Under the hypotheses of
+/-- **Uniform-root two-point function.** Under the hypotheses of
 `tightnessScale_le_of_cluster_tail`, for every `x`,
 `|Λ|⁻¹ ∑_{v ∈ Λ} τ(x,v) ≤ L (4 e L)^((δ-1)/(δ+1)) |Λ|^(-2/(δ+1))`. -/
 theorem avg_tau_le_of_cluster_tail [Countable V] (q : Sym2 V → unitInterval)
@@ -588,7 +597,7 @@ theorem avg_tau_le_of_cluster_tail [Countable V] (q : Sym2 V → unitInterval)
   rw [e1, e2, e3]
   field_simp
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
 /-- On `Unit` every cluster is the single vertex. -/
 theorem encard_cluster_unit (ω : Config Unit) (x : Unit) : (cluster ω x).encard = 1 := by
@@ -601,7 +610,7 @@ theorem clusterIntersection_unit (ω : Config Unit) (u : Unit) :
   rw [clusterIntersection_eq_card_filter]
   simp [Subsingleton.elim u (), mem_cluster_self]
 
-/-- The cluster tail of WRHL with `C = 1`, `δ = 2` holds on `Unit`. -/
+/-- The cluster tail of `finite_set_hyperscaling` with `C = 1`, `δ = 2` holds on `Unit`. -/
 theorem cluster_tail_unit (q : Sym2 Unit → unitInterval) (x : Unit) (n : ℕ) (hn : 1 ≤ n) :
     law q {ω | (n : ℕ∞) ≤ (cluster ω x).encard} ≤
       ENNReal.ofReal (1 * (n : ℝ) ^ (-(1 / (2 : ℝ)))) := by
@@ -632,7 +641,8 @@ theorem damp_unit (q : Sym2 Unit → unitInterval) (u : Unit) (a : ℝ) (ha : 1 
   rw [hempty, measure_empty]
   exact zero_le
 
-/-- WRHL with all hypotheses satisfied: `Unit`, `Λ = {()}`, `C = 1`, `δ = 2`. -/
+/-- `finite_set_hyperscaling` with all hypotheses satisfied: `Unit`, `Λ = {()}`, `C = 1`, `δ = 2`.
+-/
 example (q : Sym2 Unit → unitInterval) :
     (tightnessScale q {()} : ℝ) ≤
       (4 * Real.exp 1 * (1 * (2 / (2 - 1) + 9 * Real.exp (8 / 9)))) ^ ((2 : ℝ) / (2 + 1)) *
@@ -648,19 +658,20 @@ example (q : Sym2 Unit → unitInterval) :
   avg_tau_le_of_cluster_tail q (Finset.singleton_nonempty _) zero_le_one (by norm_num)
     (cluster_tail_unit q) (damp_unit q) ()
 
-/-- UVQ6 with all hypotheses satisfied: `Unit`, `A = 1`, `θ = 0`. -/
+/-- `finite_window_hyperscaling` with all hypotheses satisfied: `Unit`, `A = 1`, `θ = 0`. -/
 example (q : Sym2 Unit → unitInterval) :
     (tightnessScale q {()} : ℝ) ≤
       (4 * Real.exp 1 * ((1 - 0)⁻¹ + 9 * Real.exp (8 / 9)) * 1 *
         ({()} : Finset Unit).card) ^ (1 / (1 + (0 : ℝ))) :=
-  tightnessScale_le_of_window_tail universalTightness_unit q (Finset.singleton_nonempty _)
+  tightnessScale_le_of_window_tail q (Finset.singleton_nonempty _)
     zero_le_one le_rfl zero_lt_one fun u n hn =>
       (law_le_clusterIntersection_le_cluster q _ u n).trans ((cluster_tail_unit q u n hn).trans
         (ENNReal.ofReal_le_ofReal (mul_le_mul_of_nonneg_left
           (Real.rpow_le_rpow_of_exponent_le (by exact_mod_cast hn) (by norm_num))
           zero_le_one)))
 
-/-- LQ6Y and OB0A on a singleton window, where `M = 2` and every count is one. -/
+/-- The lower rooted moments and `avg_lintegral_pow_clusterIntersection` on a singleton window,
+where `M = 2` and every count is one. -/
 example (q : Sym2 Unit → unitInterval) :
     ENNReal.ofReal (2 ^ ((1 : ℝ) + 1) / (Real.exp 1 * 2 ^ ((1 : ℝ) + 1))) ≤
       ∑ x ∈ ({()} : Finset Unit),
@@ -669,6 +680,7 @@ example (q : Sym2 Unit → unitInterval) :
     (lintegral_rpow_max_le_sum q (Finset.singleton_nonempty ()) zero_le_one)
   rwa [tightnessScale_singleton, Nat.cast_ofNat] at h
 
+open Classical in
 example (q : Sym2 Unit → unitInterval) (m : ℕ) :
     (({()} : Finset Unit).card : ℝ≥0∞)⁻¹ *
         ∑ x ∈ ({()} : Finset Unit), ∫⁻ ω, (clusterIntersection {()} ω x : ℝ≥0∞) ^ m ∂(law q) =

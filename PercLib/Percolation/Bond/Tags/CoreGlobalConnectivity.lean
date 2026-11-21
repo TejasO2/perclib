@@ -1,7 +1,7 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Correspondence wrappers for local finiteness and global connection events.
-All mathematical inputs are proved in the imported modules.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
 -/
 module
 
@@ -9,10 +9,13 @@ public import PercLib.Meta.Tag
 public import PercLib.Percolation.Bond.GlobalConnectivity
 public import PercLib.Percolation.Bond.LocalFiniteness
 
+/-! Correspondence wrappers for local finiteness and global connection events.
+All mathematical inputs are proved in the imported modules. -/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set
-open scoped ENNReal Classical
+open scoped ENNReal
 
 namespace PercLib.Percolation.Bond
 variable {V : Type*}
@@ -28,7 +31,7 @@ theorem finite_neighbors_finite_balls :
       {w | G.edist v w ≤ r}.Finite ∧ (G.ball v r).Finite) ∧
     (∀ (G : SimpleGraph V) (v : V), G.ball v 0 = ∅ ∧ {w | G.edist v w ≤ 0} = {v}) ∧
     (∀ [Countable V] (q : Sym2 V → unitInterval),
-      (∀ v, (∑' w, if w = v then 0 else (unitInterval.toNNReal (q s(v, w)) : ℝ≥0∞)) < ∞) →
+      (∀ v, rowSum (fun e => unitInterval.toENNReal (q e)) v < ∞) →
       ∀ᵐ ω ∂law q, (∀ v, ((openGraph ω).neighborSet v).Finite) ∧
         ∀ (v : V) (r : ℕ), {w | (openGraph ω).edist v w ≤ r}.Finite ∧
           ((openGraph ω).ball v r).Finite) := by
@@ -69,6 +72,7 @@ theorem global_connection_events :
     fun _ => ⟨measurableSet_preconnected, measurableSet_connected,
       measurableSet_forall_cluster_finite, measurableSet_forall_encard_cluster_le⟩⟩
 
+open Classical in
 /-- Spanning, Harris and isolation bounds for the all-pairs connection event; the
 isolation bounds need a second vertex. -/
 @[tag "JSS9"]

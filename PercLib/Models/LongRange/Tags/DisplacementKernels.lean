@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Correspondence wrappers for the displacement-kernel assertions on `ℤ^d` and `ℤ`.
 All mathematical inputs are proved in the imported modules.
 -/
@@ -9,6 +13,19 @@ public import PercLib.Meta.Tag
 public import PercLib.Models.LongRange.PowerLaw
 public import PercLib.Models.LongRange.CutPoints
 public import PercLib.Percolation.Bond.Diagonal.Probability
+
+/-!
+# Displacement kernels: correspondence
+
+Wiki correspondence for the power-law kernel on `ℤ^d`, sup-norm ball counts and cut probabilities on
+`ℤ`.
+
+## Main results
+
+* `powerLaw_kernel_properties`
+* `supNorm_ball_sphere_counts`
+* `law_cut_eq_tprod_and_pos_iff`
+-/
 
 @[expose] public section
 noncomputable section

@@ -1,9 +1,10 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
-New proofs for issue 119 (Q-3), written on 2026-11-14 by PROVER-E. No upstream proof is
-copied.
+Authors: PercLib contributors
+-/
+/-
+New proofs, written on 2026-11-14. No upstream proof is copied.
 -/
 module
 
@@ -200,7 +201,8 @@ example (J : Sym2 Unit → ℝ≥0) : rootCriticalIntensity J () = globalCritica
     cases a; cases b; exact SimpleGraph.Reachable.refl _) ()
 
 /-- The preconnectedness hypothesis is not automatic: `J = 0` on `Bool`. -/
-example : ¬ (SimpleGraph.fromEdgeSet {e : Sym2 Bool | 0 < (0 : Sym2 Bool → ℝ≥0) e}).Preconnected := by
+example : ¬ (SimpleGraph.fromEdgeSet {e : Sym2 Bool | 0 <
+    (0 : Sym2 Bool → ℝ≥0) e}).Preconnected := by
   intro h
   obtain ⟨w⟩ := h false true
   cases w with

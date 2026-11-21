@@ -1,7 +1,12 @@
 /-
-Integrated and open-pivotal forms of Russo's identity. New consequences of PercLib's
-Russo.lean (native NearCritical source c820fea91a7482c1755de0ec94ecb9f59ccfcacc, R-3)
-and mathlib 56a005855ea17e0b0958f73ec801ae140b0a1679's fundamental theorem of calculus.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
+Integrated and open-pivotal forms of Russo's identity. New consequences of PercLib's Russo.lean
+(native NearCritical source c820fea91a7482c1755de0ec94ecb9f59ccfcacc, reused with Tom Hutchcroft's
+permission) and mathlib 56a005855ea17e0b0958f73ec801ae140b0a1679's fundamental theorem of calculus.
 No new law or pivotal convention is introduced.
 -/
 module
@@ -10,15 +15,30 @@ public import PercLib.Probability.Cylinder
 public import PercLib.Probability.Russo
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 
+/-!
+# Integrated Russo formula
+
+The integral form of Russo's identity along a profile curve, and the Margulis–Russo form with open
+pivotal coordinates.
+
+## Main results
+
+* `prodBernoulli_real_open_pivotal`
+* `prodBernoulli_sub_eq_integral_profile`
+* `prodBernoulli_hasDerivWithinAt_open_pivotal`
+* `prodBernoulli_sub_eq_integral_pivotal`
+* `prodBernoulli_sub_eq_integral_segment`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set
-open scoped Classical
 
 namespace PercLib.Probability
 open FiniteProfile
 variable {E : Type*} [Fintype E]
 
+open Classical in
 /-- Coordinate-independent observables factor against the open-coordinate indicator. -/
 theorem expectation_open_coordinate (q : E → ℝ) (e : E) (g : (E → Bool) → ℝ)
     (hg : ∀ ω, g (flip e ω) = g ω) :
@@ -45,6 +65,7 @@ theorem open_pivotal_subset (A : Set (Set E)) (e : E) :
   simpa only [Set.insert_eq_of_mem hω.2] using hω.1.1
 
 set_option backward.isDefEq.respectTransparency false in
+open Classical in
 /-- Pivotality is independent of the tested coordinate, including p_e = 0 or 1. -/
 theorem prodBernoulli_real_open_pivotal (p : E → unitInterval) (A : Set (Set E)) (e : E) :
     (prodBernoulli p).real {ω | (insert e ω ∈ A ∧ ω \ {e} ∉ A) ∧ e ∈ ω} =
@@ -61,6 +82,7 @@ theorem prodBernoulli_real_open_pivotal (p : E → unitInterval) (A : Set (Set E
   simp only [eventValue, Set.mem_ofPred_eq, pivotal, toSet_force_true, toSet_force_false]
   by_cases h : ω e = true <;> simp [toSet, h]
 
+open Classical in
 /-- The probability along any C¹ real profile curve has the integral Russo formula.
 The supplied interval-valued profile only has to agree with the real curve on the
 integration interval, including its endpoints. -/
@@ -102,6 +124,7 @@ theorem prodBernoulli_sub_eq_integral_profile (q dq : E → ℝ → ℝ)
   congr 1
   simpa only [hp t ht] using expectation_pivotal_eq_real (p t) A e
 
+open Classical in
 /-- Expected number of open pivotal coordinates, with inhomogeneous marginals. -/
 theorem integral_open_pivotal_count (p : E → unitInterval) (A : Set (Set E)) :
     (∫ ω, (∑ e, if (insert e ω ∈ A ∧ ω \ {e} ∉ A) ∧ e ∈ ω then (1 : ℝ) else 0)
@@ -115,6 +138,7 @@ theorem integral_open_pivotal_count (p : E → unitInterval) (A : Set (Set E)) :
     {ω | (insert e ω ∈ A ∧ ω \ {e} ∉ A) ∧ e ∈ ω}).measurableSet).trans
       (prodBernoulli_real_open_pivotal p A e)
 
+open Classical in
 /-- In an increasing event, pivotal coordinates are open exactly when the event occurs. -/
 theorem pivotal_count_on_event (A : Set (Set E)) (ω : Set E) :
     (if ω ∈ A then ∑ e, if insert e ω ∈ A ∧ ω \ {e} ∉ A then (1 : ℝ) else 0 else 0) =
@@ -144,6 +168,7 @@ theorem pivotal_count_on_event (A : Set (Set E)) (ω : Set E) :
     simp only [hω, and_false, false_iff] at h
     simp [h]
 
+open Classical in
 /-- Homogeneous Margulis–Russo, including p = 1 as a within-domain derivative. -/
 theorem prodBernoulli_hasDerivWithinAt_open_pivotal {A : Set (Set E)} (hA : IsUpperSet A)
     (p : unitInterval) (hp : 0 < p) :
@@ -162,6 +187,7 @@ theorem prodBernoulli_hasDerivWithinAt_open_pivotal {A : Set (Set E)} (hA : IsUp
   have hp' : (p : ℝ) ≠ 0 := ne_of_gt (by exact_mod_cast hp)
   field_simp
 
+open Classical in
 /-- Expected total pivotal count restricted to the event gives the same derivative. -/
 theorem prodBernoulli_hasDerivWithinAt_pivotal_on_event {A : Set (Set E)} (hA : IsUpperSet A)
     (p : unitInterval) (hp : 0 < p) :
@@ -227,10 +253,12 @@ example {A : Set (Set E)} (hA : IsUpperSet A) (p : unitInterval) :
 
 -- Empty and full events have no pivotal coordinates.
 example (p : E → unitInterval) :
-    (∑ e, (prodBernoulli p).real {ω | insert e ω ∈ (∅ : Set (Set E)) ∧ ω \ {e} ∉ (∅ : Set (Set E))}) = 0 := by
+    (∑ e, (prodBernoulli p).real {ω | insert e ω ∈ (∅ : Set (Set E)) ∧ ω \ {e} ∉ (∅ : Set (Set E))})
+        = 0 := by
   simp
 example (p : E → unitInterval) :
-    (∑ e, (prodBernoulli p).real {ω | insert e ω ∈ (Set.univ : Set (Set E)) ∧ ω \ {e} ∉ Set.univ}) = 0 := by
+    (∑ e, (prodBernoulli p).real {ω | insert e ω ∈ (Set.univ : Set (Set E)) ∧ ω \ {e} ∉ Set.univ})
+        = 0 := by
   simp
 
 -- A two-coordinate increasing event has derivative 2p and probability p².
