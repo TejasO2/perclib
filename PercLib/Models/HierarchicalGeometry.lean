@@ -9,6 +9,26 @@ public import PercLib.Models.Hierarchical
 public import Mathlib.Analysis.SpecialFunctions.Pow.Real
 public import Mathlib.Data.Set.Card
 
+/-!
+# Geometry of the hierarchical lattice
+
+Levels, balls and shells of the hierarchical lattice: the level is an ultrametric, balls are cosets
+of subgroups and are nested or disjoint, ball and shell cardinalities are exact, and radial
+geometric and power-law kernels are summed exactly.
+
+## Main results
+
+* `level_sub_le_max`
+* `level_balls_eq_or_disjoint`
+* `level_balls_subset_or_disjoint_of_le`
+* `card_ball`
+* `card_shell_succ`
+* `tsum_radial_eq`
+* `tsum_geometricRadial_eq`
+* `tsum_geometricRadial_lt_top_iff`
+* `tsum_powerLaw_lt_top_iff`
+-/
+
 @[expose] public section
 noncomputable section
 open scoped ENNReal NNReal Classical

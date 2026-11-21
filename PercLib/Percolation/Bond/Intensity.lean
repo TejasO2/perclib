@@ -1,8 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-New proofs for P-6 (issue 40), written on 2026-11-14, from pinned mathlib's real
-exponential and ENNReal sums and the P-5 row-sum theorems. No upstream code is copied.
+New proofs, written on 2026-11-14, from pinned mathlib's real exponential and ENNReal sums and the
+row-sum theorems of `PercLib.Percolation.Bond.RowSum`. No upstream code is copied.
 -/
 module
 
@@ -66,7 +66,7 @@ theorem intensityProfile_toNNReal_le (J : Sym2 V → ℝ≥0) (β : ℝ≥0) (e 
   linarith
 
 /-- A row bound `M` on the intensity gives the row bound `β M` on the profile, in the
-off-diagonal form used by P-5. -/
+off-diagonal form used by `PercLib.Percolation.Bond.RowSum`. -/
 theorem intensity_rowSum_le (J : Sym2 V → ℝ≥0) (M : ℝ≥0)
     (hJ : ∀ v, rowSum (fun e => (J e : ℝ≥0∞)) v ≤ M) (β : ℝ≥0) (v : V) :
     rowSum (fun e => unitInterval.toENNReal (intensityProfile J β e)) v ≤

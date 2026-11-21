@@ -1,9 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written for package Q-74 (issue 381), on the D-2 interface and the intensity
-family `intensityProfile`. The construction (a ray with pendant paths of length `2^k` and
-intensity `k^2`) follows the wiki article on the infinite-cluster zero-one law (tag SA9P).
-No source text or code is copied.
+New proofs, on the bond interface and the intensity family `intensityProfile`. The
+construction (a ray with pendant paths of length `2^k` and intensity `k^2`) follows the wiki article
+on the infinite-cluster zero-one law (tag SA9P). No source text or code is copied.
 -/
 module
 
@@ -419,7 +418,7 @@ private theorem prod_eq_of_le (J : Sym2 (ℕ × ℕ) → ℝ≥0)
     · have := congrArg Prod.snd h; simp at this
     · have := congrArg Prod.snd h; simp at this
 
-/-- **The susceptibility threshold** (wiki tag SA9P): `χ_β(o) < ∞ ↔ β < log 2`. -/
+/-- **The susceptibility threshold**: `χ_β(o) < ∞ ↔ β < log 2`. -/
 theorem chi_lt_top_iff (J : Sym2 (ℕ × ℕ) → ℝ≥0)
     (hJ1 : ∀ i : ℕ, J s((i, 0), (i + 1, 0)) = 1)
     (hJ2 : ∀ a b : ℕ, 1 ≤ a → b + 1 ≤ 2 ^ a → J s((a, b), (a, b + 1)) = (a : ℝ≥0) ^ 2)
@@ -598,7 +597,7 @@ theorem chi_zero (J : Sym2 (ℕ × ℕ) → ℝ≥0)
 
 /-! ### The intensity exists -/
 
-/-- The intensity of the decorated ray exists (non-vacuity of `hJ`, D-5). -/
+/-- The intensity of the decorated ray exists (non-vacuity of `hJ`). -/
 theorem exists_J : ∃ J : Sym2 (ℕ × ℕ) → ℝ≥0, ∀ u v : ℕ × ℕ, J s(u, v) =
       (if u.2 = 0 ∧ v.2 = 0 ∧ v.1 = u.1 + 1 then 1 else 0) +
       (if v.1 = u.1 ∧ 1 ≤ u.1 ∧ v.2 = u.2 + 1 ∧ v.2 ≤ 2 ^ u.1 then (u.1 : ℝ≥0) ^ 2 else 0) +
@@ -613,7 +612,7 @@ theorem exists_J : ∃ J : Sym2 (ℕ × ℕ) → ℝ≥0, ∀ u v : ℕ × ℕ, 
   simp only [Sym2.lift_mk, hf]
   ring
 
-/-- At `β = 0` the model has `χ(o) = 1` (D-5). -/
+/-- At `β = 0` the model has `χ(o) = 1`. -/
 example : ∃ J : Sym2 (ℕ × ℕ) → ℝ≥0, chi (intensityProfile J 0) (0, 0) = 1 ∧
     ∀ β : ℝ≥0, chi (intensityProfile J β) (0, 0) < ⊤ ↔ (β : ℝ) < Real.log 2 := by
   obtain ⟨J, hJ⟩ := exists_J
@@ -622,7 +621,7 @@ example : ∃ J : Sym2 (ℕ × ℕ) → ℝ≥0, chi (intensityProfile J 0) (0, 
 
 /-! ### The existential statement -/
 
-/-- **A degree-3 example** (wiki tag SA9P): there is a connected countable host graph of
+/-- **A degree-3 example**: there is a connected countable host graph of
 maximum degree at most three, with finite nonnegative intensities supported on its edges,
 such that at every finite intensity every cluster is almost surely finite (so the root and
 global critical intensities are `⊤`), while the susceptibility of the root is finite exactly

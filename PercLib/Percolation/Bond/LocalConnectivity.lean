@@ -1,8 +1,8 @@
 /-
 Generalises the internal-connectivity helpers identified in
 near-critical-diffusivity/Percolation/Literature/SharpnessDCTProofs.lean at
-c820fea91a7482c1755de0ec94ecb9f59ccfcacc (native reuse permission R-3).
-Uses pinned mathlib induced graphs and walks directly; no PathIn or second
+c820fea91a7482c1755de0ec94ecb9f59ccfcacc (under Tom Hutchcroft's reuse permission recorded in
+`docs/DECISIONS.md`). Uses pinned mathlib induced graphs and walks directly; no PathIn or second
 connection-event definition is introduced. No nearest-neighbour assumption.
 -/
 module

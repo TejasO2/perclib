@@ -2,7 +2,7 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for the D-2 host-graph specialization, using the canonical cylinder
+New proofs for the host-graph specialization of the bond interface, using the canonical cylinder
 marginal, countable almost-everywhere conjunction and mathlib's fromEdgeSet API.
 -/
 module

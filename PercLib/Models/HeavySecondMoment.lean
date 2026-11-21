@@ -1,7 +1,6 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written for package Q-108 (issue 442, wiki HRS7), on the D-2 interface.
-No source text or code is copied.
+New proofs, on the bond interface. No source text or code is copied.
 -/
 module
 
@@ -300,7 +299,7 @@ theorem iSup_chi_eq_top : ⨆ v, chi q v = ⊤ := by
 
 end Model
 
-/-! ### The profile exists (D-5) -/
+/-! ### The profile exists -/
 
 /-- A profile with the required values exists. -/
 theorem exists_profile : ∃ q : Sym2 (Option (Σ k : ℕ, Fin (2 ^ (k + 1)))) → unitInterval,

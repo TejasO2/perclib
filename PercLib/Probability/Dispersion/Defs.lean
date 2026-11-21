@@ -1,20 +1,18 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-147 (issue 514): the Lévy measures of display (I.5.16), the Lévy exponent, and the law of
-a symmetric Lévy process stopped at an independent `Exp(1)` time (the displacement law
-`ν_disp` of Definition I.5.16), from T. Hutchcroft, *Critical long-range percolation I*,
-arXiv:2508.18807v1, §I.5.2.
+The Lévy measures of display (I.5.16), the Lévy exponent, and the law of a symmetric Lévy process
+stopped at an independent `Exp(1)` time (the displacement law `ν_disp` of Definition I.5.16), from
+T. Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1, §I.5.2.
 
-Adapted from pull request 488: repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
-`d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, files
-`PercLib/CriticalLRP/LevyAnalysis/Measures.lean` (`levyDensInf`, `levyDensLam`, `PiInf`,
-`PiLam`) and `PercLib/CriticalLRP/LevyAnalysis/Dispersion.lean` (`levyExp`, and the
-characteristic-function form of `exists_nuDisp`, `exists_laplaceMixture`); licence
-Apache-2.0 as declared in those file headers; upstream
-`yujinhkim/Critical-Long-range-percolation` at `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf`.
-Modified: the Haar measure parameter is replaced by `volume`; `levyDensOne`/`PiOne` are not
-defined (they are the case `l = 1`); the two regimes of Definition I.5.16 are one predicate
-taking the exponent. The API lemmas and witnesses are new.
+Adapted from the repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
+`d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, files `PercLib/CriticalLRP/LevyAnalysis/Measures.lean`
+(`levyDensInf`, `levyDensLam`, `PiInf`, `PiLam`) and
+`PercLib/CriticalLRP/LevyAnalysis/Dispersion.lean` (`levyExp`, and the characteristic-function form
+of `exists_nuDisp`, `exists_laplaceMixture`); licence Apache-2.0 as declared in those file headers;
+upstream `yujinhkim/Critical-Long-range-percolation` at `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf`.
+Modified: the Haar measure parameter is replaced by `volume`; `levyDensOne`/`PiOne` are not defined
+(they are the case `l = 1`); the two regimes of Definition I.5.16 are one predicate taking the
+exponent. The API lemmas and witnesses are new.
 -/
 module
 
@@ -29,8 +27,8 @@ public import Mathlib.MeasureTheory.Integral.Lebesgue.Basic
 /-! # Lévy measures and exponentially stopped laws
 
 On a finite-dimensional real inner product space `E` of dimension `d`, with Lebesgue measure
-`volume` and a model norm `N : Seminorm ℝ E` (the norm type of the long-range kernels fixed by
-the ARCHITECT decision on issue 508; the paper allows any norm, and the Euclidean one is
+`volume` and a model norm `N : Seminorm ℝ E` (the norm type of the long-range kernels of
+`PercLib/Models/LongRange/Defs.lean`; the paper allows any norm, and the Euclidean one is
 `normSeminorm ℝ E`), display (I.5.16) defines for `α > 0`
 * the cut-off Lévy measure `Π_l` with density `α ∫_{N(x)}^{l} s^(-d-α-1) ds =
   α/(d+α) (N(x)^(-d-α) - l^(-d-α))₊` (the closed form is the definition; `Π₁` is `l = 1`);
@@ -51,10 +49,10 @@ that law is the probability measure with characteristic function `u ↦ (1 + ψ(
 this determines it; `IsExpTimeStoppedLaw` is that characterisation. The inner product is used
 only in the pairing `⟪x, u⟫` of mathlib's `charFun`; the model norm `N` is independent of it.
 
-Not defined here, and written out where used (issue 514): convolutions and powers (mathlib
+Not defined here, and written out where used: convolutions and powers (mathlib
 `Measure.conv`), the exponential law (mathlib `expMeasure`), Gaussians (mathlib
 `gaussianReal`), chi-square laws (`gammaMeasure`), size-biasing (`Probability/SizeBias.lean`),
-truncations, and the moment-convergence notions of PR 488's `MomentConvergence.lean`
+truncations, and the moment-convergence notions of the source's `MomentConvergence.lean`
 (`HasSameMoments Φ ν₁ ν₂` is `∀ t, ∫ Φ t ∂ν₁ = ∫ Φ t ∂ν₂`; `monomialAlgebra` is
 `Algebra.adjoin ℝ (range Φ)`).
 -/
@@ -187,7 +185,7 @@ theorem stableLevyDensity_pos_of_ne {N : Seminorm ℝ E} (hN : ∀ x, N x = 0 �
   ENNReal.ofReal_pos.2 (mul_pos (by positivity)
     (Real.rpow_pos_of_pos ((apply_nonneg N x).lt_of_ne fun h => hx (hN x h.symm)) _))
 
-/-! ### Witnesses (D-5) -/
+/-! ### Witnesses -/
 
 /-- The point mass at `0` is the stopped law of the zero exponent. -/
 theorem isExpTimeStoppedLaw_dirac_zero [MeasurableSpace E] [BorelSpace E] : IsExpTimeStoppedLaw (fun _ : E => 0) (Measure.dirac 0) :=

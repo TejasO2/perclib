@@ -2,8 +2,7 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for issue 640 (Q-212, item 3), written on 2026-11-16 by PROVER-F. No upstream
-proof is copied and no definition is added.
+New proofs, written on 2026-11-16. No upstream proof is copied and no definition is added.
 -/
 module
 
@@ -185,7 +184,7 @@ theorem integral_ncard_pow_eq_of_transitive (J : Sym2 V → ℝ≥0)
   funext ω
   rw [← hσx, cluster_image, Set.ncard_image_of_injective _ σ.injective]
 
-/-- **C9Y8, bound.** For a transitive family with `w ≥ 0`, the derivative
+/-- **Bound.** For a transitive family with `w ≥ 0`, the derivative
 `m_k'(t)` of `hasDerivAt_moment_of_transitive` satisfies
 `m_k'(t) ≤ (a(t)/2) ∑_{j=1}^k C(k+1, j) m_j(t) m_{k+1-j}(t)`, where
 `a(t) = ∑_{y ≠ o} w(o, y)` and `m_j(t) = E_t|K_o|^j`. -/
@@ -244,9 +243,9 @@ theorem moment_derivative_le_of_transitive (lam : ℝ → Sym2 V → ℝ≥0) (w
         exact mul_le_mul_of_nonneg_left (hy y) (hw _)
     _ = _ := by rw [mul_assoc (1 / 2 : ℝ), Finset.sum_mul]
 
-/-! ### Non-vacuity witness (D-5) -/
+/-! ### Non-vacuity witness -/
 
-/-- **D-5 witness.** On `ZMod 2` with `λ_u = u⁺` and `w = 1`, the hypotheses of
+/-- **Non-vacuity witness.** On `ZMod 2` with `λ_u = u⁺` and `w = 1`, the hypotheses of
 `moment_derivative_le_of_transitive` hold, for every `k`. -/
 example (k : ℕ) :
     (1 / 2) * ∑ y ∈ Finset.univ.erase (0 : ZMod 2), (fun _ : Sym2 (ZMod 2) => (1 : ℝ)) s(0, y) *

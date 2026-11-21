@@ -9,6 +9,21 @@ module
 public import PercLib.Probability.Russo
 public import PercLib.Probability.FiniteContinuity
 
+/-!
+# Russo formula for finite cylinders
+
+The finite-profile Russo formula transported to cylinder events on an arbitrary ambient coordinate
+type, with the pivotal and intensity forms.
+
+## Main results
+
+* `finite_event_difference_hasDerivWithinAt`
+* `cylinder_difference_hasDerivWithinAt`
+* `forced_difference_eq_pivotal`
+* `cylinder_pivotal_hasDerivWithinAt`
+* `cylinder_intensity_hasDerivWithinAt`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set

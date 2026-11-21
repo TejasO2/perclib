@@ -2,9 +2,8 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for issue 450 (Q-116, part 2), written on 2026-11-16 by PROVER-F against pinned
-mathlib. No upstream proof is copied. The statements follow the wiki tag GGVG
-(binary-tree percolation), analytic part.
+New proofs, written on 2026-11-16 against pinned mathlib. No upstream proof is copied. The
+statements follow the wiki tag GGVG (binary-tree percolation), analytic part.
 -/
 module
 
@@ -28,8 +27,8 @@ written out in each statement with the index `n + 1`, `n : ℕ`. As `p → 1/2`,
   `M_s(p) → M_s(1/2)`;
 * `moment_ratio_isEquivalent` (`s > 1/2`): `M_{s+1}(p)/M_s(p) ~ (s-1/2)/(4(p-1/2)²)`.
 
-The inputs are `catalan_div_four_pow_isEquivalent` (Q-115) and the Abelian theorems of
-`PercLib/Analysis/AbelianSums.lean`. The identification of `M_s(p)` with
+The inputs are `catalan_div_four_pow_isEquivalent` (`PercLib/Models/BinaryTreeAsymptotics.lean`) and
+the Abelian theorems of `PercLib/Analysis/AbelianSums.lean`. The identification of `M_s(p)` with
 `E_p[|K|^s; |K| < ∞]` is not part of this file. This file adds no definition.
 -/
 
@@ -72,7 +71,7 @@ theorem tendsto_lambda :
     obtain ⟨h0, h1⟩ := four_mul_mem_Ioo hp.1 hp.2 hne
     exact neg_pos.2 (log_neg h0 h1)
 
-/-- **GGVG, intensity.** `λ(p) ~ 4(p - 1/2)²` as `p → 1/2`. -/
+/-- **Intensity.** `λ(p) ~ 4(p - 1/2)²` as `p → 1/2`. -/
 theorem lambda_isEquivalent :
     (fun p : ℝ => -log (4 * p * (1 - p))) ~[𝓝[≠] (1 / 2)] fun p => 4 * (p - 1 / 2) ^ 2 := by
   -- the slope of `log` at `1`
@@ -132,7 +131,7 @@ theorem moment_coeff_isEquivalent (s : ℝ) :
     rw [show s - 1 / 2 - 1 = s + -(3 / 2 : ℝ) by ring, Real.rpow_add hn0]
     ring
 
-/-- **GGVG, `s > 1/2`.** `M_s(p) ~ Γ(s-1/2) λ(p)^{-(s-1/2)}/√π` as `p → 1/2`. -/
+/-- **`s > 1/2`.** `M_s(p) ~ Γ(s-1/2) λ(p)^{-(s-1/2)}/√π` as `p → 1/2`. -/
 theorem moment_isEquivalent_of_gt {s : ℝ} (hs : 1 / 2 < s) :
     (fun p : ℝ => (1 - p) / p * ∑' n : ℕ, ((n + 1 : ℕ) : ℝ) ^ s *
         ((catalan (n + 1) : ℝ) / 4 ^ (n + 1)) *
@@ -164,7 +163,7 @@ theorem moment_isEquivalent_of_gt {s : ℝ} (hs : 1 / 2 < s) :
   rw [tsum_succ_eq_tsum_ite, Real.rpow_neg hl.le]
   field_simp
 
-/-- **GGVG, `s = 1/2`.** `M_{1/2}(p) ~ log(1/λ(p))/√π` as `p → 1/2`. -/
+/-- **`s = 1/2`.** `M_{1/2}(p) ~ log(1/λ(p))/√π` as `p → 1/2`. -/
 theorem moment_isEquivalent_half :
     (fun p : ℝ => (1 - p) / p * ∑' n : ℕ, ((n + 1 : ℕ) : ℝ) ^ (1 / 2 : ℝ) *
         ((catalan (n + 1) : ℝ) / 4 ^ (n + 1)) *
@@ -198,7 +197,7 @@ theorem moment_isEquivalent_half :
       simp only [Pi.mul_apply, Function.comp_apply]
       ring
 
-/-- **GGVG, `0 ≤ s < 1/2`.** The series at `p = 1/2` converges, and `M_s(p) → M_s(1/2)` as
+/-- **`0 ≤ s < 1/2`.** The series at `p = 1/2` converges, and `M_s(p) → M_s(1/2)` as
 `p → 1/2`. -/
 theorem moment_tendsto_of_lt {s : ℝ} (hs : s < 1 / 2) :
     Summable (fun n : ℕ => ((n + 1 : ℕ) : ℝ) ^ s * ((catalan (n + 1) : ℝ) / 4 ^ (n + 1))) ∧
@@ -231,7 +230,7 @@ theorem moment_tendsto_of_lt {s : ℝ} (hs : s < 1 / 2) :
     simp only [Function.comp_apply]
     rw [tsum_succ_eq_tsum_ite]
 
-/-- **GGVG, ratio.** For `s > 1/2`, `M_{s+1}(p)/M_s(p) ~ (s-1/2)/(4(p-1/2)²)` as `p → 1/2`. -/
+/-- **Ratio.** For `s > 1/2`, `M_{s+1}(p)/M_s(p) ~ (s-1/2)/(4(p-1/2)²)` as `p → 1/2`. -/
 theorem moment_ratio_isEquivalent {s : ℝ} (hs : 1 / 2 < s) :
     (fun p : ℝ => ((1 - p) / p * ∑' n : ℕ, ((n + 1 : ℕ) : ℝ) ^ (s + 1) *
         ((catalan (n + 1) : ℝ) / 4 ^ (n + 1)) *
@@ -296,7 +295,7 @@ theorem binaryTree_moment_eq_series (q : ℝ → Sym2 (List (Fin 2)) → unitInt
   rw [← h]
   ring
 
-/-- **GGVG, `s > 1/2`.** `M_s(p) ~ Γ(s-1/2) λ^{-(s-1/2)}/√π` as `p → 1/2`. -/
+/-- **`s > 1/2`.** `M_s(p) ~ Γ(s-1/2) λ^{-(s-1/2)}/√π` as `p → 1/2`. -/
 theorem binaryTree_moment_isEquivalent_of_gt (q : ℝ → Sym2 (List (Fin 2)) → unitInterval)
     (hq : ∀ (p : ℝ) (hp : p ∈ unitInterval), ∀ e, ¬ e.IsDiag → q p e =
       if e ∈ (SimpleGraph.fromRel fun u w : List (Fin 2) => ∃ b, w = b :: u).edgeSet then
@@ -309,7 +308,7 @@ theorem binaryTree_moment_isEquivalent_of_gt (q : ℝ → Sym2 (List (Fin 2)) �
   (moment_isEquivalent_of_gt hs).congr_left (eventually_mem_Ioo_half.mono fun _ hp =>
     (binaryTree_moment_eq_series q hq hp.1 hp.2 s).symm)
 
-/-- **GGVG, `s = 1/2`.** `M_{1/2}(p) ~ log(1/λ)/√π` as `p → 1/2`. -/
+/-- **`s = 1/2`.** `M_{1/2}(p) ~ log(1/λ)/√π` as `p → 1/2`. -/
 theorem binaryTree_moment_isEquivalent_half (q : ℝ → Sym2 (List (Fin 2)) → unitInterval)
     (hq : ∀ (p : ℝ) (hp : p ∈ unitInterval), ∀ e, ¬ e.IsDiag → q p e =
       if e ∈ (SimpleGraph.fromRel fun u w : List (Fin 2) => ∃ b, w = b :: u).edgeSet then
@@ -321,7 +320,7 @@ theorem binaryTree_moment_isEquivalent_half (q : ℝ → Sym2 (List (Fin 2)) →
   moment_isEquivalent_half.congr_left (eventually_mem_Ioo_half.mono fun _ hp =>
     (binaryTree_moment_eq_series q hq hp.1 hp.2 (1 / 2)).symm)
 
-/-- **GGVG, `s < 1/2`.** `M_s(1/2) < ∞` and `M_s(p) → M_s(1/2)` as `p → 1/2`. -/
+/-- **`s < 1/2`.** `M_s(1/2) < ∞` and `M_s(p) → M_s(1/2)` as `p → 1/2`. -/
 theorem binaryTree_moment_tendsto_of_lt (q : ℝ → Sym2 (List (Fin 2)) → unitInterval)
     (hq : ∀ (p : ℝ) (hp : p ∈ unitInterval), ∀ e, ¬ e.IsDiag → q p e =
       if e ∈ (SimpleGraph.fromRel fun u w : List (Fin 2) => ∃ b, w = b :: u).edgeSet then
@@ -347,7 +346,7 @@ theorem binaryTree_moment_tendsto_of_lt (q : ℝ → Sym2 (List (Fin 2)) → uni
     exact hlim.congr' (eventually_mem_Ioo_half.mono fun _ hp =>
       (binaryTree_moment_eq_series q hq hp.1 hp.2 s).symm)
 
-/-- **GGVG, ratio.** For `s > 1/2`, `M_{s+1}(p)/M_s(p) ~ (s-1/2)/(4(p-1/2)²)`. -/
+/-- **Ratio.** For `s > 1/2`, `M_{s+1}(p)/M_s(p) ~ (s-1/2)/(4(p-1/2)²)`. -/
 theorem binaryTree_moment_ratio_isEquivalent (q : ℝ → Sym2 (List (Fin 2)) → unitInterval)
     (hq : ∀ (p : ℝ) (hp : p ∈ unitInterval), ∀ e, ¬ e.IsDiag → q p e =
       if e ∈ (SimpleGraph.fromRel fun u w : List (Fin 2) => ∃ b, w = b :: u).edgeSet then
@@ -366,7 +365,7 @@ theorem binaryTree_moment_ratio_isEquivalent (q : ℝ → Sym2 (List (Fin 2)) �
 
 end Law
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
 /-- `s = 1`: `M_1(p) ~ Γ(1/2) λ(p)^{-1/2}/√π`. -/
 example := moment_isEquivalent_of_gt (s := 1) (by norm_num)

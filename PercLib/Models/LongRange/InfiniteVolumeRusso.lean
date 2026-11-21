@@ -1,18 +1,17 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-198 (issue 626): discharge of the premise `hunif` that pull request 488 adds to
-Lemma I.4.1 of T. Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1.
-The argument is read from pull request 488: repository `yujinhkim/lrp`, branch
-`critical-lrp-1`, commit `d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, files
-`PercLib/CriticalLRP/RussoInf/DominatedFlux.lean`, `PercLib/CriticalLRP/RussoInf/Exchange.lean`,
-`PercLib/CriticalLRP/RussoInf/FluxMain.lean`, `PercLib/CriticalLRP/RussoInf/CutoffFlux.lean`
-and `PercLib/CriticalLRP/RussoInf/Capstone.lean`; licence Apache-2.0 as declared in those
-file headers and `third_party/critical-lrp/NOTICE.md`; upstream
-`yujinhkim/Critical-Long-range-percolation` at `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf`
-(not independently verified). Contributor: yujinhkim. No code is copied: the fork's
-definitions (`cutConfig`, `cutFun`, `cappedClusterVol`, `pivotalFlux`, `cutoffEdgeDeriv`) are
-written out as expressions on the D-2 interface, and the proofs are new, from the finite
-Russo formula of this library and the dominated limit-of-derivatives theorem of
+Discharge of the premise `hunif` that the formalisation of contributor yujinhkim cited below adds to
+Lemma I.4.1 of T. Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1. The argument
+is read from the repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
+`d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, files `PercLib/CriticalLRP/RussoInf/DominatedFlux.lean`,
+`PercLib/CriticalLRP/RussoInf/Exchange.lean`, `PercLib/CriticalLRP/RussoInf/FluxMain.lean`,
+`PercLib/CriticalLRP/RussoInf/CutoffFlux.lean` and `PercLib/CriticalLRP/RussoInf/Capstone.lean`;
+licence Apache-2.0 as declared in those file headers and `third_party/critical-lrp/NOTICE.md`;
+upstream `yujinhkim/Critical-Long-range-percolation` at `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf`
+(not independently verified). Contributor: yujinhkim. No code is copied: the fork's definitions
+(`cutConfig`, `cutFun`, `cappedClusterVol`, `pivotalFlux`, `cutoffEdgeDeriv`) are written out as
+expressions on the bond interface, and the proofs are new, from the finite Russo formula
+of this library and the dominated limit-of-derivatives theorem of
 `PercLib/Analysis/DominatedDerivative.lean`.
 -/
 module
@@ -47,7 +46,7 @@ family of profiles `p r` write `ψ(r) = ∫ F |K_o| d(law (p r))` and, for a pai
   functional `F |K_o(ω ∩ S_k)|` is eventually equal to `F |K_o(ω)|`;
 * `hasDerivAt_integral_window`: the finite-window Russo formula;
 * `abs_integral_pivotal_le`: `|Δ_e| ≤ 2 m P(e touches K_o)`, also for every window;
-* `integral_sub_eq_integral_flux` (the integrated form of item 3 of issue 626): if
+* `integral_sub_eq_integral_flux` (the integrated form of item 3): if
   `r ↦ p r e` is continuous and differentiable with derivative `c r e` off a countable set
   of `r` for each `e`, and `∑_{e ∈ S} |c r e| P_r(e touches K_o) ≤ M` for every finite `S`
   (the dominator), then `ψ t - ψ s = ∫_s^t ∑' e, c r e Δ_e(r) dr`, and the flux is bounded
@@ -330,7 +329,7 @@ theorem continuousOn_integral_window (F : ℕ∞ → ℝ) (o : V) (S : Finset (S
 
 /-! ### The integrated infinite-volume Russo formula -/
 
-/-- **Integrated infinite-volume Russo formula (item 3 of issue 626, integrated form).**
+/-- **Integrated infinite-volume Russo formula (item 3, integrated form).**
 
 Let `r ↦ p r e` be continuous on `(u, v)` and differentiable with derivative `c r e` off a
 countable set `C e`, for every pair `e`, and let the dominator
@@ -444,7 +443,7 @@ theorem integral_sub_eq_integral_flux [Countable V] {F : ℕ∞ → ℝ} {m : �
       (tendsto_integral_window hFm hF o hSm hS id measurable_id _)
   exact tendsto_nhds_unique h6 (h5.congr fun k => (h4 k).symm)
 
-/-! ### The cut-off family (part 2 of issue 626)
+/-! ### The cut-off family
 
 For a norm `N` on `ℝ^d` (evaluated on `ℤ^d`), a profile `K ≥ 0`, decreasing and differentiable
 on `(0, ∞)` with derivative `K'`, and an intensity `β`, the cut-off law at scale `r` is
@@ -572,7 +571,7 @@ theorem tsum_row_count (x : Fin d → ℤ) (R : ℝ) :
   · have hxz : x ≠ x - z := fun h => hz (by simpa using h.symm)
     simp [hz, hxz]
 
-/-- **Item 1 of issue 626, the dominator.** On `(u, R)`, if `|K'| ≤ L` there,
+/-- **Item 1, the dominator.** On `(u, R)`, if `|K'| ≤ L` there,
 the cut-off family satisfies the dominator of `integral_sub_eq_integral_flux` with
 `M = (β L · 2 · #{z ≠ 0 : N (Int.cast ∘ z) < R} · E_{μ_R}|K_o|).toReal`. -/
 theorem cutoff_dominator (hN0 : ∀ v, N v = 0 → v = 0) (hKa : AntitoneOn K (Ioi 0)) (β : ℝ≥0) {L : ℝ} {u R : ℝ}
@@ -684,7 +683,7 @@ theorem cutoff_dominator (hN0 : ∀ v, N v = 0 → v = 0) (hKa : AntitoneOn K (I
           ENNReal.ofNat_ne_top) ?_) hχ
         exact ENat.toENNReal_ne_top.2 (finite_norm_lt hN0 R).encard_lt_top.ne
 
-/-- **Item 3 of issue 626, integrated form, for the cut-off family.** Let `N` be a norm on
+/-- **Item 3, integrated form, for the cut-off family.** Let `N` be a norm on
 `ℝ^d`, let `K` be decreasing on `(0, ∞)` with continuous derivative `K'` there, and let
 the cut-off law at scale `R` have finite expected cluster volume at `o`. Then for
 `0 < s ≤ t < R`, with `c_r(e) = 1{N(e) < r} β (-K'(r)) e^{-β J_r(e)}`,
@@ -716,7 +715,7 @@ theorem integral_sub_eq_integral_flux_cutoff (hN0 : ∀ v, N v = 0 → v = 0) (h
 
 end Cutoff
 
-/-! ### Continuity of the flux and the derivative (part 3 of issue 626) -/
+/-! ### Continuity of the flux and the derivative -/
 
 /-- The infinite pivotal flux is bounded by `2 m M` under the dominator. -/
 theorem abs_flux_le [Countable V] {F : ℕ∞ → ℝ} {m : ℝ} (hFm : ∀ n, |F n| ≤ m) (o : V)
@@ -982,7 +981,7 @@ theorem radialKernel_indicator_mono {r r' : ℝ} (h : r ≤ r') (e : Sym2 (Fin d
     · simp [h1, h1.trans_le h]
     · simp only [h1, ite_false]; split_ifs <;> norm_num
 
-/-- **Item 2 of issue 626.** On an interval `(u, v) ⊆ (0, R)` that contains no value `N (Int.cast ∘ z)`,
+/-- **Item 2.** On an interval `(u, v) ⊆ (0, R)` that contains no value `N (Int.cast ∘ z)`,
 the infinite pivotal flux of the cut-off family is continuous. -/
 theorem continuousOn_flux_cutoff (hN0 : ∀ v, N v = 0 → v = 0) (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
     (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) {F : ℕ∞ → ℝ} {m : ℝ} (hFm : ∀ n, |F n| ≤ m)
@@ -1111,7 +1110,7 @@ theorem exists_corner_free (hN0 : ∀ v, N v = 0 → v = 0) {r₀ R : ℝ}
     rw [Metric.mem_ball, Real.dist_eq, abs_lt]
     constructor <;> linarith [hz.1, hz.2]
 
-/-- **Item 3 of issue 626: Lemma I.4.1 without `hunif`.** For the cut-off family with finite
+/-- **Item 3: Lemma I.4.1 without `hunif`.** For the cut-off family with finite
 expected cluster volume at scale `R`, the expectation `ψ(r) = ∫ F |K_o| dμ_r` is
 differentiable at every `r₀ ∈ (0, R)` that is not a value `N (Int.cast ∘ z)`, with derivative the infinite
 pivotal flux `∑' e, c_{r₀}(e) ∫ (F |K_o(ω ∪ {e})| - F |K_o(ω \ {e})|) dμ_{r₀}`. -/
@@ -1153,10 +1152,11 @@ theorem hasDerivAt_integral_cutoff (hN0 : ∀ v, N v = 0 → v = 0) (hKa : Antit
 
 end CutoffContinuity
 
-/-! ### Witnesses (D-5) -/
+/-! ### Witnesses -/
 
-/-- D-5 for the cut-off family: at `d = 1`, the sup norm, `K(s) = s^{-2}` and `β = 1/10`, the
-cut-off law at `R = 5/2` has finite susceptibility (its kernel has total mass at most `4`). -/
+/-- Non-vacuity witness for the cut-off family: at `d = 1`, the sup norm, `K(s) = s^{-2}` and
+`β = 1/10`, the cut-off law at `R = 5/2` has finite susceptibility (its kernel has total mass at
+most `4`). -/
 theorem chi_cutoff_example_ne_top :
     chi (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (powerLawProfile 1 2)
       (5 / 2)) (1 / 10)) 0 ≠ ⊤ := by
@@ -1189,7 +1189,7 @@ theorem chi_cutoff_example_ne_top :
   refine ne_top_of_le_ne_top ?_ (chi_intensity_le_of_translationInvariant _ k hJ 4 hk _ hβ 0)
   exact ENNReal.inv_ne_top.2 (tsub_pos_iff_lt.2 hβ).ne'
 
-/-- D-5 for item 3 (integrated form): `d = 1`, sup norm, `K(s) = s^{-2}` with
+/-- Non-vacuity witness for item 3 (integrated form): `d = 1`, sup norm, `K(s) = s^{-2}` with
 `K'(s) = -2 s^{-3}`, `β = 1/10`, `R = 5/2`, `[s, t] = [3/2, 2]` and `F n = 1{n ≥ 2}`. -/
 example := integral_sub_eq_integral_flux_cutoff (d := 1) (N := normSeminorm ℝ (Fin 1 → ℝ))
   (K := powerLawProfile 1 2) (K' := fun t => 1 * ((-2) * t ^ ((-2 : ℝ) - 1))) normSeminorm_eq_zero
@@ -1240,7 +1240,7 @@ theorem norm_not_mem_Ioo_three_halves_two (z : Fin 1 → ℤ) :
   · have : (2 : ℝ) ≤ ⌊‖z‖⌋₊ := by exact_mod_cast h
     linarith
 
-/-- D-5 for items 2 and 3: at `d = 1`, the sup norm, `K(s) = s^{-2}`, `β = 1/10`,
+/-- Non-vacuity witness for items 2 and 3: at `d = 1`, the sup norm, `K(s) = s^{-2}`, `β = 1/10`,
 `R = 5/2`, `F n = 1{n ≥ 2}`: the flux is continuous on `(3/2, 2)` and `ψ` is differentiable
 at `r₀ = 7/4`. -/
 example := hasDerivAt_integral_cutoff (d := 1) (N := normSeminorm ℝ (Fin 1 → ℝ))

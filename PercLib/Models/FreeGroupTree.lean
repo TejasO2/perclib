@@ -2,8 +2,8 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for issue 575 (Q-168), written on 2026-11-16 by PROVER-F. No upstream proof is
-copied. The model is the Cayley graph of the free group of rank two (the 4-regular tree).
+New proofs, written on 2026-11-16. No upstream proof is copied. The model is the Cayley graph of the
+free group of rank two (the 4-regular tree).
 -/
 module
 
@@ -34,7 +34,8 @@ Let `V = FreeGroup (Fin 2)` and let `J e = 1` when `e = s(g, g * FreeGroup.of i)
   at least `(1 - e^{-β})ⁿ ≥ 2⁻ⁿ`.
 * Hence `b_χ` is finite and positive, `χ` is finite below it and infinite at it
   (`freeGroupTree_chi_endpoint`, and the real-parameter form `freeGroupTree_chi_endpoint_real`).
-  These are the D-5 witnesses wanted for the endpoint statements of issues 432 and 433.
+  These are the non-vacuity witnesses for the endpoint statements of
+  `PercLib/Percolation/Bond/SusceptibilityEndpoint.lean`.
 
 This file adds no definition: the kernel is written out in each statement.
 -/
@@ -344,8 +345,8 @@ example : ∃ b : ℝ, 0 < b ∧
 
 /-! ### Witnesses for the endpoint theorems of `SusceptibilityEndpoint.lean` -/
 
-/-- **5LNL endpoint** (issue 432): every hypothesis of `chi_intensity_sSup_eq_top` holds on the
-free-group tree, so `χ_{b_χ}(1) = ⊤` there. -/
+/-- **Endpoint of finite susceptibility.** Every hypothesis of `chi_intensity_sSup_eq_top` holds on
+the free-group tree, so `χ_{b_χ}(1) = ⊤` there. -/
 example : chi (intensityProfile
       (fun e : Sym2 (FreeGroup (Fin 2)) =>
         if e ∈ {f : Sym2 (FreeGroup (Fin 2)) | ∃ g i, f = s(g, g * FreeGroup.of i)}
@@ -360,7 +361,7 @@ example : chi (intensityProfile
   rw [← hb]
   exact ENNReal.coe_lt_top
 
-/-- **MXGM blow-up** (issue 433): every hypothesis of `one_div_le_chi_of_chi_eq_top` holds on
+/-- **Blow-up of the susceptibility.** Every hypothesis of `one_div_le_chi_of_chi_eq_top` holds on
 `(0, b)` for the free-group tree, with `R > 0`. -/
 example : ∃ b : ℝ, 0 < b ∧ ∃ R : ℝ, 0 < R ∧ ∀ β ∈ Ioo (0 : ℝ) b,
     1 / (R * (b - β)) ≤ (chi (intensityProfile

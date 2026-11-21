@@ -613,7 +613,7 @@ theorem tsum_law_induce_conn_le_of_boundary_contraction [Countable V]
 
 /-! ## Uniform boundary contraction (YLZV) -/
 
-/-- **Uniform boundary contraction (YLZV).** If every `x` has a finite `S_x ∋ x` with
+/-- **Uniform boundary contraction.** If every `x` has a finite `S_x ∋ x` with
 `∑_{u ∈ S_x} τ_{S_x}(x,u) ≤ B` and `Φ_q(x,S_x) ≤ a < 1`, then `χ(x) ≤ B (1 - a)⁻¹`. -/
 theorem chi_le_of_boundary_contraction [Countable V] (q : Sym2 V → unitInterval)
     (Sx : V → Finset V) (hSx : ∀ x, x ∈ Sx x) {B a : ℝ≥0∞} (ha : a < 1)

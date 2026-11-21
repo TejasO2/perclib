@@ -2,8 +2,7 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for issue 677 (Q-220), written on 2026-11-16 by PROVER-F. No upstream proof is
-copied and no definition is added.
+New proofs, written on 2026-11-16. No upstream proof is copied and no definition is added.
 -/
 module
 
@@ -12,7 +11,7 @@ public import PercLib.Probability.DeterminedIndependence
 public import PercLib.Percolation.Bond.IntrinsicGrowth
 
 /-!
-# Ball exploration and the spatial Markov property (Q-220)
+# Ball exploration and the spatial Markov property
 
 Intrinsic distance is `SimpleGraph.edist (openGraph ω)`. For `A ⊆ V`, the pairs touching `A`
 are `{e | ∃ a ∈ A, a ∈ e}` and the configuration outside `A` is `ω ∩ {e | ∀ a ∈ A, a ∉ e}`.
@@ -361,7 +360,7 @@ theorem renewal_ball (q : Sym2 V → unitInterval) (o : V) (r k : ℕ)
 
 end Markov
 
-/-! ### Non-vacuity witness (D-5) -/
+/-! ### Non-vacuity witness -/
 
 open Classical in
 /-- Balls of a profile with finite row sums are finite almost surely. -/

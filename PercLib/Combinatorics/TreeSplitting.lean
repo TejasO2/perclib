@@ -1,9 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written for package Q-66 (issue 373, roadmap T-6), using mathlib's
-`SimpleGraph.fromEdgeSet`, walks and finite sets. Source motivation: T. Hutchcroft,
-arXiv:2008.11197v2, §2.1, the tree-splitting step in the proof of Theorem 2.3.
-No source text or code is copied.
+New proofs, using mathlib's `SimpleGraph.fromEdgeSet`, walks and finite sets. Source motivation: T.
+Hutchcroft, arXiv:2008.11197v2, §2.1, the tree-splitting step in the proof of Theorem 2.3. No source
+text or code is copied.
 -/
 module
 
@@ -28,7 +27,7 @@ edge of `E`, `k ≥ 1` and `N = |A| ≥ 3^k`, then `E` is partitioned into at le
 `3^(k-1) + 1` nonempty connected pieces, each with at least `3^(-k) N` and strictly fewer
 than `3^(1-k) N` marked vertices, whose endpoints cover every endpoint of `E`.
 
-**Generalisation, stated explicitly.** The issue asks for a finite tree. Acyclicity is not
+**Generalisation, stated explicitly.** The source step uses a finite tree. Acyclicity is not
 used, so the statement is proved for every finite connected loopless edge set; the tree
 case is `exists_connected_split_of_isTree`, for a tree on a finite vertex type.
 
@@ -465,7 +464,7 @@ private theorem greedy_split (W : Finset (Sym2 V) → ℕ)
 
 /-! ### The splitting theorem -/
 
-/-- **Splitting a marked connected edge set** (Q-66, input to the BK step of T-6). Let `E`
+/-- **Splitting a marked connected edge set** (input to the BK step of universal tightness). Let `E`
 be a finite loopless edge set whose graph is connected on the endpoints of `E` (a finite
 tree is a special case), `A` a set of `N = |A|` marked endpoints, `k ≥ 1` and
 `N ≥ 3^k`. Then `E` is partitioned into `m ≥ 3^(k-1) + 1` nonempty connected pieces,
@@ -699,7 +698,7 @@ theorem exists_connected_split_of_isTree [Fintype V] {T : SimpleGraph V}
     obtain ⟨P, hP, heP⟩ := h3 e he
     exact ⟨P, hP, e, heP, hve⟩
 
-/-! ### Non-vacuity (D-5): a path on three vertices, all marked, `k = 1` -/
+/-! ### Non-vacuity: a path on three vertices, all marked, `k = 1` -/
 
 /-- The path `0 - 1 - 2` on `Fin 3` with every vertex marked satisfies the hypotheses with
 `k = 1`, `N = 3`, and the conclusion provides at least two pieces. -/

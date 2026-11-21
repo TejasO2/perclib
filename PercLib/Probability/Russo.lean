@@ -1,13 +1,13 @@
 /-
 Adapted from NearCritical/Russo.lean by Tom Hutchcroft and collaborators.
 Source: https://github.com/tomhutchcroft/near-critical-diffusivity/blob/c820fea91a7482c1755de0ec94ecb9f59ccfcacc/NearCritical/Russo.lean
-Reuse authorized by Tom Hutchcroft under DECISIONS R-3. The native source has no
-repository-wide licence inferred from its vendored dependencies.
+Reuse authorized by Tom Hutchcroft (permission recorded in `docs/DECISIONS.md`). The native
+source has no repository-wide licence inferred from its vendored dependencies.
 
 Modified for PercLib on 2026-11-14: individual real coordinate profiles and derivatives;
 division-free pairing of forced-open/forced-closed differences; p and beta specializations.
 This is finite polynomial calculus, not a new probability law. The probability integral
-bridge is the separate ProductExpectation package. Endpoint derivatives are derivatives
+bridge is the separate ProductExpectation module. Endpoint derivatives are derivatives
 of the real polynomial extension, not a globally interval-valued family.
 -/
 module
@@ -18,6 +18,24 @@ public import Mathlib.Analysis.Calculus.Deriv.Add
 public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
 public import Mathlib.Tactic.Ring
 public import Mathlib.Tactic.Linarith
+
+/-!
+# The finite Russo formula
+
+Finite-profile expectations as polynomials in the coordinate probabilities, the inhomogeneous,
+homogeneous and intensity forms of Russo's identity, the pivotal form for increasing events, and its
+transport to the canonical product law.
+
+## Main results
+
+* `expectation_hasDerivAt`
+* `expectation_homogeneous_hasDerivAt`
+* `expectation_intensity_hasDerivAt`
+* `event_hasDerivAt`
+* `integral_prodBernoulli_eq_expectation`
+* `integral_hasDerivWithinAt`
+* `event_real_hasDerivWithinAt`
+-/
 
 @[expose] public section
 noncomputable section

@@ -1,9 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs for issue 461 (Q-127), written on 2026-11-16 by PROVER-E: a logarithmic fourth-moment
-bound from a weighted exponential moment (wiki exponential-moments, tag IXEZ), and box exits
-force large clusters for finite-range bonds on `ℤ^d` (tag YVJT, deterministic and conditional
-parts). No upstream proof is copied, no definition is added and no Input is introduced.
+New proofs, written on 2026-11-16: a logarithmic fourth-moment bound from a weighted exponential
+moment (wiki exponential-moments, tag IXEZ), and box exits force large clusters for finite-range
+bonds on `ℤ^d` (tag YVJT, deterministic and conditional parts). No upstream proof is copied, no
+definition is added and no Input is introduced.
 -/
 module
 
@@ -76,9 +76,9 @@ theorem pow_four_le_of_nonneg {x T s : ℝ} (hx : 0 ≤ x) (hT : 0 < T) (hsT : 3
       exact mul_le_mul_of_nonneg_left h3 hx
     nlinarith [sq_nonneg x, sq_nonneg T]
 
-/-- **IXEZ.** Let `X ≥ 0` be measurable and integrable on a probability space, with
-`χ = E X ≥ 1`, `X e^{X/(4χ²)}` integrable and `E[X e^{X/(4χ²)}] ≤ √2 χ`. Then `X⁴` and `X²` are
-integrable and `E X⁴ ≤ 1152 χ⁴ (log 2χ)² E X²`. -/
+/-- **Fourth moment from an exponential moment.** Let `X ≥ 0` be measurable and integrable on a
+probability space, with `χ = E X ≥ 1`, `X e^{X/(4χ²)}` integrable and `E[X e^{X/(4χ²)}] ≤ √2 χ`.
+Then `X⁴` and `X²` are integrable and `E X⁴ ≤ 1152 χ⁴ (log 2χ)² E X²`. -/
 theorem integral_pow_four_le {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω}
     [IsProbabilityMeasure P] {X : Ω → ℝ} (hXm : AEStronglyMeasurable X P) (hX0 : ∀ ω, 0 ≤ X ω)
     (hXi : Integrable X P) (hχ : 1 ≤ ∫ ω, X ω ∂P)
@@ -204,7 +204,8 @@ theorem integral_pow_four_le {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω}
   calc ∫ ω, X ω ^ 4 ∂P ≤ 2 * T ^ 2 * ∫ ω, X ω ^ 2 ∂P := by linarith
     _ = 1152 * χ ^ 4 * L ^ 2 * ∫ ω, X ω ^ 2 ∂P := by rw [hT]; ring
 
-/-- **D-5 witness for IXEZ:** `X ≡ 1` under any probability measure (`χ = 1`). -/
+/-- **Non-vacuity witness for `integral_pow_four_le`:** `X ≡ 1` under any probability measure
+(`χ = 1`). -/
 theorem integral_pow_four_le_const_one {Ω : Type*} [MeasurableSpace Ω] (P : Measure Ω)
     [IsProbabilityMeasure P] :
     ∫ _ω, (1 : ℝ) ^ 4 ∂P ≤
@@ -232,11 +233,11 @@ section ClusterVolume
 open PercLib.Probability PercLib.Percolation.Bond
 open scoped ENNReal
 
-/-- **IXEZ for percolation.** For an independent bond model on a countable vertex set whose
-susceptibility is finite and the same at every vertex, the root cluster volume
-`X = |K_o|` (read in `ℕ`; it is a.s. finite) satisfies `E X⁴ ≤ 1152 χ⁴ log²(2χ) E X²`.
-The exponential-moment hypothesis of `integral_pow_four_le` comes from the tree-graph moment
-bounds (`lintegral_encard_pow_le`) and `lintegral_mul_exp_le` at `r = 1/(4χ²)`. -/
+/-- **Fourth moment of the cluster volume.** For an independent bond model on a countable vertex set
+whose susceptibility is finite and the same at every vertex, the root cluster volume `X = |K_o|`
+(read in `ℕ`; it is a.s. finite) satisfies `E X⁴ ≤ 1152 χ⁴ log²(2χ) E X²`. The exponential-moment
+hypothesis of `integral_pow_four_le` comes from the tree-graph moment bounds
+(`lintegral_encard_pow_le`) and `lintegral_mul_exp_le` at `r = 1/(4χ²)`. -/
 theorem integral_encard_cluster_pow_four_le {V : Type*} [Countable V]
     (q : Sym2 V → unitInterval) (o : V) (hconst : ∀ x, chi q x = chi q o)
     (hfin : chi q o < ⊤) :
@@ -362,7 +363,7 @@ theorem norm_sub_le_length_mul {ω : Config (LatticeSite d)} {R : ℝ}
           linarith
       _ = (p.length + 1) * R := by ring
 
-/-- **YVJT, geometric step.** Let `q` vanish on pairs at sup distance `> R`, with `R > 0`.
+/-- **Geometric step.** Let `q` vanish on pairs at sup distance `> R`, with `R > 0`.
 Almost surely, if `o` is joined to a vertex `y` with `‖y - o‖ > r`, then
 `|K_o| ≥ ⌊r/R⌋ + 1`. -/
 theorem ae_encard_cluster_ge_of_exit (q : Sym2 (LatticeSite d) → unitInterval) {R r : ℝ}
@@ -399,10 +400,9 @@ theorem ae_encard_cluster_ge_of_exit (q : Sym2 (LatticeSite d) → unitInterval)
         rw [Set.encard_coe_eq_coe_finsetCard, hcard]
     _ ≤ (cluster ω o).encard := Set.encard_le_encard hsub
 
-/-- **YVJT, conditional.** Under the hypotheses of `ae_encard_cluster_ge_of_exit` with
-any real `r`, if `P(|K_o| ≥ n) ≤ (√2 χ / n) e^{-n/(4M²)}` for every `n ≥ 1` (the volume bound XLWI,
-here an ordinary hypothesis), then
-`P(o ↔ a vertex outside o + [-r,r]^d) ≤ √2 χ e^{-r/(4RM²)}`. -/
+/-- **Conditional.** Under the hypotheses of `ae_encard_cluster_ge_of_exit` with any real `r`, if
+`P(|K_o| ≥ n) ≤ (√2 χ / n) e^{-n/(4M²)}` for every `n ≥ 1` (a volume tail bound, here an ordinary
+hypothesis), then `P(o ↔ a vertex outside o + [-r,r]^d) ≤ √2 χ e^{-r/(4RM²)}`. -/
 theorem law_exit_le (q : Sym2 (LatticeSite d) → unitInterval) {R r χ M : ℝ} (hR : 0 < R)
     (hq : ∀ x y : LatticeSite d, R < ‖x - y‖ → q s(x, y) = 0) (o : LatticeSite d)
     (hχ : 0 ≤ χ)
@@ -430,7 +430,7 @@ theorem law_exit_le (q : Sym2 (LatticeSite d) → unitInterval) {R r χ M : ℝ}
 
 /-! ### Non-vacuity for YVJT -/
 
-/-- **D-5 witness for the geometric step:** `d = 1`, `R = 1`, open probability `p` on
+/-- **Non-vacuity witness for the geometric step:** `d = 1`, `R = 1`, open probability `p` on
 nearest-neighbour pairs of `ℤ` and `0` otherwise. -/
 theorem ae_encard_cluster_ge_of_exit_nn (p : unitInterval) (r : ℝ) :
     ∀ᵐ ω ∂law (Sym2.lift ⟨fun x y : LatticeSite 1 => if ‖x - y‖ ≤ 1 then p else 0,
@@ -439,7 +439,7 @@ theorem ae_encard_cluster_ge_of_exit_nn (p : unitInterval) (r : ℝ) :
         ((⌊r / 1⌋₊ + 1 : ℕ) : ℕ∞) ≤ (cluster ω 0).encard :=
   ae_encard_cluster_ge_of_exit _ one_pos (fun x y h => by simp [not_le.2 h]) 0
 
-/-- **D-5 witness for the conditional bound:** with the zero profile the cluster of `o` is
+/-- **Non-vacuity witness for the conditional bound:** with the zero profile the cluster of `o` is
 `{o}` almost surely, so the volume tail hypothesis holds with `χ = 2` and `M = 1`. -/
 theorem law_exit_le_zero (o : LatticeSite d) (r : ℝ) :
     law (fun _ : Sym2 (LatticeSite d) => (0 : unitInterval))

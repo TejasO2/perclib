@@ -2,8 +2,7 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for issue 445 (Q-111, part 1), written on 2026-11-16 by PROVER-F. No upstream
-proof is copied.
+New proofs, written on 2026-11-16. No upstream proof is copied.
 -/
 module
 
@@ -19,9 +18,9 @@ most `D`, then `E|B_ω(o,r)| ≤ ∑_{j ≤ r} D^j` (`lintegral_encard_ball_le_o
 at intrinsic distance at most `r` is the end of an open simple path of length at most `r`
 (`edist_le_subset_iUnion_path`), and the weights of such paths are summed by `walkSum`.
 
-`lintegral_encard_ball_le_of_transitive` is the form of issue 445: for a transitive profile
+`lintegral_encard_ball_le_of_transitive` is the transitive form: for a transitive profile
 the bound holds with `D = ∑'_{v ≠ o} q s(o,v)`. It needs neither `D < ⊤` nor `χ = ⊤`.
-The lower bounds of issue 445 are part 2. This file adds no definition.
+The lower bounds are in `IntrinsicRenewal.lean`. This file adds no definition.
 -/
 
 @[expose] public section
@@ -75,7 +74,7 @@ theorem law_edist_le_le_tsum_paths [Countable V] (q : Sym2 V → unitInterval) (
         measure_iUnion_le _
     _ = _ := by simp only [law, prodBernoulli_subset]
 
-/-- **R5XZ, upper bound.** If every off-diagonal row sum of `q` is at most `D`, then
+/-- **Upper bound.** If every off-diagonal row sum of `q` is at most `D`, then
 `E|B_ω(o,r)| ≤ ∑_{j ≤ r} D^j`. -/
 theorem lintegral_encard_ball_le_of_rowSum [Countable V] (q : Sym2 V → unitInterval)
     (D : ℝ≥0∞)
@@ -141,7 +140,7 @@ theorem rowSum_eq_of_transitive_profile (q : Sym2 V → unitInterval)
   congr 3
   rw [← hσ s(o, w), Sym2.map_mk]
 
-/-- **R5XZ, upper bound (issue 445 form).** For a transitive profile with
+/-- **Upper bound, transitive form.** For a transitive profile with
 `D = ∑'_{v ≠ o} q s(o,v)`, `E|B_ω(o,r)| ≤ ∑_{j ≤ r} D^j`. -/
 theorem lintegral_encard_ball_le_of_transitive [Countable V] (q : Sym2 V → unitInterval)
     (hq : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, q (Sym2.map σ e) = q e) (o : V) (r : ℕ) :
@@ -151,7 +150,7 @@ theorem lintegral_encard_ball_le_of_transitive [Countable V] (q : Sym2 V → uni
   lintegral_encard_ball_le_of_rowSum q _
     (fun v => (rowSum_eq_of_transitive_profile q hq o v).le) o r
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
 /-- The nearest-neighbour profile on `ℤ` (open probability `1` on `s(a, a+1)`) is
 transitive, so the bound applies with `D = 2`. -/

@@ -18,6 +18,21 @@ public import Mathlib.Tactic.GCongr
 public import Mathlib.Tactic.Positivity
 public import Mathlib.Tactic.NormNum
 
+/-!
+# Convolution of doubling kernels
+
+A doubling kernel on a group has convolution bounded by twice its doubling constant times its mass;
+the origin-deleted power kernel is doubling, which gives the power-law convolution bound on normed
+groups and on `ℤ^d`.
+
+## Main results
+
+* `tsum_mul_le_of_doubling`
+* `powerKernel_doubling`
+* `tsum_powerKernel_mul_le`
+* `tsum_lattice_powerKernel_mul_le`
+-/
+
 @[expose] public section
 noncomputable section
 open scoped ENNReal NNReal Classical

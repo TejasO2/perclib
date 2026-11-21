@@ -10,6 +10,20 @@ public import PercLib.Percolation.Bond.Diagonal.Probability
 public import PercLib.Probability.Defs
 public import PercLib.Probability.Tags.ProductModel
 
+/-!
+# Symmetries of the configuration space: correspondence
+
+Wiki correspondence for loop erasure, diagonal insensitivity, the standard Borel structure and block
+independence.
+
+## Main results
+
+* `loop_erasure_transport`
+* `diagonal_insensitive_cluster_laws`
+* `countable_configuration_standardBorel`
+* `disjoint_block_independence`
+-/
+
 @[expose] public section
 
 open MeasureTheory ProbabilityTheory Set
