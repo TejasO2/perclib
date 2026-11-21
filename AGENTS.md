@@ -1,8 +1,10 @@
 # Working on PercLib
 
 PercLib is a Lean 4 / mathlib library of percolation theory, proved from the axioms. This
-file is the entry point for any assistant or person working here. The workflow (tasks,
-claims, pull requests, CI, merging, issues) is in [CONTRIBUTING.md](CONTRIBUTING.md); the
+file is the entry point for any assistant or person working here, and with
+[CONTRIBUTING.md](CONTRIBUTING.md) it is all you need: it has the build and gate commands
+and the rules for the Lean. The workflow (tasks, areas taken by other contributors,
+claims, pull requests, checks, merging, issues) is in [CONTRIBUTING.md](CONTRIBUTING.md); the
 detailed rules are in [docs/COORDINATION.md](docs/COORDINATION.md); the reasons are in
 [docs/DECISIONS.md](docs/DECISIONS.md) (later decisions override earlier ones; D-35 and
 D-37 are the current rules).
@@ -20,20 +22,72 @@ lake build --wfail PercLib.Area.YourFile   # while working: only the modules you
 python3 scripts/check_forbidden.py PercLib # forbidden-construct scan (seconds)
 ```
 
-- Before opening a pull request, if your machine has the memory, run the gate. It needs
-  the saved extract of the base, so run it on `main` first:
+- Before opening a pull request, run the gate locally (next section) and paste its final
+  lines into the pull request.
+
+## Running the gate locally
+
+**CI is not active yet.** The CI and auto-merge workflows are being reviewed and are not
+yet active on `main`. Until they are, the gate you run yourself is the only automatic
+check: run it before you mark a pull request ready, and paste the commit it ran on and its
+final lines (`== gate passed on <sha>` and any `NOTICE:` line, or the failure) into the
+pull request. Every pull request is merged by a maintainer (see
+[CONTRIBUTING.md](CONTRIBUTING.md), section 5).
+
+You need only a clone, `git`, `python3` (standard library only) and
+[elan](https://github.com/leanprover/elan); `lake` then selects the pinned toolchain
+from `lean-toolchain`. From the repository root:
 
 ```sh
-git switch main && scripts/gate.sh                  # saves .lake/gate/<main sha>.json
-git switch your-branch && scripts/gate.sh main      # build, axiom audit, import closure,
-                                                    # forbidden scan, classifier tests,
-                                                    # extract, D-35 checks, classification
+lake exe cache get              # once per clone (and after a pin change): mathlib's build
+lake build --wfail              # full build of PercLib, warnings are errors
 ```
 
-  A full build from a warm mathlib cache takes about 4.5 minutes on 4 cores. Kernel
-  replay is `scripts/kernel_replay.sh 6` (6 modules per process, about 4 GB each). Never
-  run `lake env leanchecker PercLib`: one process needs more than 15 GB and is killed.
-  CI runs all of this on your pull request anyway.
+The gate is `scripts/gate.sh [BASE]`. It classifies your change by comparing it with a
+saved extract of the base, `.lake/gate/<base sha>.json`, which only a gate run on the base
+itself writes (and only when `PercLib/` has no uncommitted changes). So bring your branch
+up to date with `main` (merge or rebase), then run it twice in the same clone:
+
+```sh
+git switch main && scripts/gate.sh                 # writes .lake/gate/<main sha>.json
+git switch your-branch && scripts/gate.sh main     # the gate on your change
+```
+
+If no extract of the base exists (for example because `main` does not yet have
+`scripts/gate.sh`), the gate prints `NOTICE: no saved extraction for base …;
+classification skipped` and your change is treated as an interface change. The steps, in
+order; the gate stops at the first failure:
+
+1. `lake build --wfail`: the whole library compiles with warnings (including mathlib's
+   standard linters set in `lakefile.toml`) as errors.
+2. `lake env lean --run scripts/AxiomAudit.lean`: every constant under `PercLib` uses no
+   axioms beyond `propext`, `Classical.choice` and `Quot.sound`.
+3. `python3 scripts/check_import_closure.py PercLib`: every file under `PercLib/` is
+   imported, directly or transitively, by `PercLib.lean` (an unimported file is never
+   compiled).
+4. `python3 scripts/check_forbidden.py PercLib`: no forbidden construct (rule 1 below)
+   outside comments and strings.
+5. `python3 scripts/test_proof_pr.py`: unit tests of the proof-only classifier.
+6. `lake env lean --run scripts/ExtractManifest.lean`: the manifest of declarations,
+   tags and dependencies, saved under `.lake/gate/` when the tree is clean.
+7. `python3 scripts/check_d35.py`: no tagged `Prop` definition is used as a hypothesis
+   and its proofs carry its tag; files not listed in `scripts/legacy_headers.txt` have a
+   module docstring and no task, issue, agent or decision labels in their headers.
+8. With `BASE`: `scripts/check_proof_pr.py` classifies the change as proof-only or
+   interface. An interface change prints `NOTICE: interface change; an auditor must
+   approve before merge.` and still exits 0: it needs review, it is not a failure.
+
+**Memory and time.** A full build needs several GB of memory and, from the downloaded
+mathlib cache, about 4.5 minutes on 4 cores; run one build or gate at a time on a machine
+and never two in parallel. The kernel replay, `scripts/kernel_replay.sh 6`, is separate
+from the gate and optional for contributors: it replays every module through
+`leanchecker`, 6 modules per process at about 4 GB each, and must not run beside a build.
+Never run `lake env leanchecker PercLib`: one process needs more than 15 GB and is killed.
+
+**What CI will check, once it is active** (not yet): on every pull request it will run
+`scripts/gate.sh` against the merge base, the kernel replay (for pushes and interface
+changes), the unit tests of `scripts/`, and the wiki build, and label the pull request
+`proof-only` or `interface`. Until then, the commands above are the check.
 
 ## Rules for the Lean
 
