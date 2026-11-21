@@ -98,6 +98,8 @@ public import PercLib.Models.HierarchicalAmplificationStep
 public import PercLib.Models.HierarchicalAveragedToPointwise
 public import PercLib.Models.HierarchicalBallSums
 public import PercLib.Models.HierarchicalBallSusceptibility
+public import PercLib.Models.HierarchicalBoundaryScales
+public import PercLib.Models.HierarchicalBoundaryScales.Defs
 public import PercLib.Models.HierarchicalCutoff
 public import PercLib.Models.HierarchicalEndpoint
 public import PercLib.Models.HierarchicalGeometry
@@ -113,8 +115,10 @@ public import PercLib.Models.HierarchicalTranslation
 public import PercLib.Models.HierarchicalTriangle
 public import PercLib.Models.HierarchicalTwoPoint
 public import PercLib.Models.HierarchicalTwoPointAveraged
+public import PercLib.Models.HierarchicalTwoPointConditional
 public import PercLib.Models.HierarchicalTwoPointRadial
 public import PercLib.Models.HierarchicalTwoPointUpper
+public import PercLib.Models.HierarchicalVolumeExponent
 public import PercLib.Models.Lattice
 public import PercLib.Models.Line
 public import PercLib.Models.LongRange.Convolution
@@ -151,9 +155,11 @@ public import PercLib.Models.Tags.DirectionalDecay
 public import PercLib.Models.Tags.FiniteRangeDecay
 public import PercLib.Models.Tags.FiniteRangeExit
 public import PercLib.Models.Tags.Hierarchical
+public import PercLib.Models.Tags.HierarchicalBoundaryScales
 public import PercLib.Models.Tags.HierarchicalRunaway
 public import PercLib.Models.Tags.HierarchicalTriangle
 public import PercLib.Models.Tags.HierarchicalTwoPoint
+public import PercLib.Models.Tags.HierarchicalTwoPointConditional
 public import PercLib.Models.Tags.KernelsAndSitePaths
 public import PercLib.Models.Tags.Lattice
 public import PercLib.Models.Tags.Line
