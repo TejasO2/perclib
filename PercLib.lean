@@ -66,6 +66,7 @@ public import PercLib.Analysis.VolumeTail.SizeBiasMGF
 public import PercLib.Analysis.VolumeTail.UpToConstants
 public import PercLib.Basic
 public import PercLib.Combinatorics.DoubleFactorialConvolution
+public import PercLib.Combinatorics.FiniteEdgeChange
 public import PercLib.Combinatorics.ForestBranching
 public import PercLib.Combinatorics.Tags.ForestConnections
 public import PercLib.Combinatorics.Tags.TreeSplitting
@@ -237,6 +238,7 @@ public import PercLib.Percolation.Bond.Tags.CoreBoundaryLaws
 public import PercLib.Percolation.Bond.Tags.CoreConnectivity
 public import PercLib.Percolation.Bond.Tags.CoreCorrelationLength
 public import PercLib.Percolation.Bond.Tags.CoreFiniteVolume
+public import PercLib.Percolation.Bond.Tags.CoreGraphCertificates
 public import PercLib.Percolation.Bond.Tags.CoreGlobalConnectivity
 public import PercLib.Percolation.Bond.Tags.CoreIntegratedSusceptibility
 public import PercLib.Percolation.Bond.Tags.CoreIntensity
