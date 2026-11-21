@@ -35,6 +35,7 @@ namespace PercLib.Models.DigitHierarchy
 
 variable {d L : ℕ} [NeZero L]
 
+open Classical in
 /-- **Translated hierarchical edge layers and good blocks.** Let `J` be a kernel on `ℤ^d` with
 `J(x, y) ≥ c ‖x - y‖_∞^{-s}` for `x ≠ y`, where `s = d + α`, `α > 0`, and let `σ` be a digit
 hierarchy with base `L` (offsets `t_n = ∑_{m < n} L^m σ_m`, level-`n` blocks
@@ -52,7 +53,6 @@ kernels `H_σ` and `R_σ = J - H_σ`; the restricted configuration `η_B`
 same restricted configuration. The block quantities `E Z_B`, `M_B`, `S_B` at intensity `β` are
 `σ.expectedBlockMax`, `σ.blockScale`, `σ.blockPairSum`, and good and ancestrally good blocks
 are `σ.IsGoodBlock` and `σ.IsAncestrallyGood`. -/
-open Classical in
 @[tag "EKDO"]
 theorem nested_and_law_eq_map_union_layerKernel {α : ℝ} (hα : 0 < α) (c : ℝ≥0)
     (J : Sym2 (Fin d → ℤ) → ℝ≥0)
