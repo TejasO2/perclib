@@ -357,6 +357,7 @@ public import PercLib.Probability.Tags.FourFunctions
 public import PercLib.Probability.Tags.GhostTransform
 public import PercLib.Probability.Tags.Harris
 public import PercLib.Probability.Tags.IntegratedLowerTail
+public import PercLib.Probability.Tags.NearMisses
 public import PercLib.Probability.Tags.ProductModel
 public import PercLib.Probability.Tags.ProfileContinuity
 public import PercLib.Probability.Tags.RevealmentDerivative
