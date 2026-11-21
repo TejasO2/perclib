@@ -43,151 +43,6 @@ namespace PercLib.Percolation.Bond
 
 variable {V : Type*}
 
-/-- **The cluster of `x` is a finite set `C`** exactly when every vertex of `C` is joined to
-`x` inside `C` and no pair leaving `C` is open. -/
-theorem cluster_eq_finset_iff (ω : Config V) (x : V) (C : Finset V) (hx : x ∈ C) :
-    cluster ω x = C ↔
-      (∀ y : (C : Set V), ((openGraph ω).induce (C : Set V)).Reachable ⟨x, hx⟩ y) ∧
-      ∀ y ∈ C, ∀ z ∉ C, s(y, z) ∉ ω := by
-  classical
-  constructor
-  · intro h
-    refine ⟨fun y => ?_, fun y hy z hz hyz => ?_⟩
-    · have hxy : (openGraph ω).Reachable x y := by
-        have : (y : V) ∈ cluster ω x := by rw [h]; exact y.2
-        exact this
-      obtain ⟨w⟩ := hxy
-      have hw : ∀ v ∈ w.support, v ∈ (C : Set V) := fun v hv => by
-        rw [← h]
-        exact ⟨w.takeUntil v hv⟩
-      exact ⟨w.induce (C : Set V) hw⟩
-    · have hne : y ≠ z := fun e => hz (e ▸ hy)
-      have hz' : z ∈ cluster ω x := by
-        have hxy : (openGraph ω).Reachable x y := by
-          have : y ∈ cluster ω x := by rw [h]; exact hy
-          exact this
-        exact hxy.trans (SimpleGraph.Adj.reachable ((openGraph_adj_iff ω y z).2 ⟨hyz, hne⟩))
-      rw [h] at hz'
-      exact hz hz'
-  · rintro ⟨hin, hbd⟩
-    ext v
-    constructor
-    · intro hv
-      change (openGraph ω).Reachable x v at hv
-      rw [SimpleGraph.reachable_iff_reflTransGen] at hv
-      induction hv with
-      | refl => exact hx
-      | @tail w z _ hadj ih =>
-        by_contra hz
-        rw [openGraph_adj_iff] at hadj
-        exact hbd w ih z hz hadj.1
-    · intro hv
-      exact conn_of_localConn ω (C : Set V) ⟨x, hx⟩ ⟨v, hv⟩ (hin ⟨v, hv⟩)
-
-/-- The internal connection event of a finite set is measurable. -/
-theorem measurableSet_internally_connected [Countable V] (x : V) (C : Finset V) (hx : x ∈ C) :
-    MeasurableSet {ω : Config V |
-      ∀ y : (C : Set V), ((openGraph ω).induce (C : Set V)).Reachable ⟨x, hx⟩ y} := by
-  rw [ofPred_forall]
-  exact MeasurableSet.iInter fun y => measurableSet_setOf_reachable_induce (C : Set V) ⟨x, hx⟩ y
-
-/-- The event that no pair leaving `C` is open is measurable. -/
-theorem measurableSet_boundary_closed [Countable V] (C : Finset V) :
-    MeasurableSet {ω : Config V | ∀ y ∈ C, ∀ z ∉ C, s(y, z) ∉ ω} := by
-  simp only [ofPred_forall]
-  exact MeasurableSet.iInter fun y => MeasurableSet.iInter fun _ =>
-    MeasurableSet.iInter fun z => MeasurableSet.iInter fun _ => (measurableSet_mem _).compl
-
-/-- The event `{K_x = C}` is measurable. -/
-theorem measurableSet_cluster_eq_finset [Countable V] (x : V) (C : Finset V) (hx : x ∈ C) :
-    MeasurableSet {ω : Config V | cluster ω x = C} := by
-  have : {ω : Config V | cluster ω x = C} =
-      {ω : Config V | ∀ y : (C : Set V), ((openGraph ω).induce (C : Set V)).Reachable ⟨x, hx⟩ y} ∩
-        {ω : Config V | ∀ y ∈ C, ∀ z ∉ C, s(y, z) ∉ ω} := by
-    ext ω
-    exact cluster_eq_finset_iff ω x C hx
-  rw [this]
-  exact (measurableSet_internally_connected x C hx).inter (measurableSet_boundary_closed C)
-
-/-- **The law of a finite cluster.** `P(K_x = C)` is the probability that `C` is internally
-connected to `x`, times the probability that every pair leaving `C` is closed. -/
-theorem law_cluster_eq_finset [Countable V] (q : Sym2 V → unitInterval) (x : V) (C : Finset V)
-    (hx : x ∈ C) :
-    law q {ω | cluster ω x = C} =
-      law q {ω : Config V |
-        ∀ y : (C : Set V), ((openGraph ω).induce (C : Set V)).Reachable ⟨x, hx⟩ y} *
-      law q {ω : Config V | ∀ y ∈ C, ∀ z ∉ C, s(y, z) ∉ ω} := by
-  have hset : {ω : Config V | cluster ω x = C} =
-      {ω : Config V | ∀ y : (C : Set V), ((openGraph ω).induce (C : Set V)).Reachable ⟨x, hx⟩ y} ∩
-        {ω : Config V | ∀ y ∈ C, ∀ z ∉ C, s(y, z) ∉ ω} := by
-    ext ω
-    exact cluster_eq_finset_iff ω x C hx
-  rw [hset]
-  refine PercLib.Probability.prodBernoulli_inter_of_determined_inter q {e | ∀ v ∈ e, v ∈ C}
-    {e | ∃ y ∈ C, ∃ z ∉ C, e = s(y, z)} ?_ (measurableSet_internally_connected x C hx)
-    (measurableSet_boundary_closed C) ?_ ?_
-  · refine Set.disjoint_left.2 fun e he ⟨y, _, z, hz, hez⟩ => hz (he z ?_)
-    rw [hez]; exact Sym2.mem_mk_right y z
-  · intro ω
-    simp only [mem_ofPred_eq]
-    refine forall_congr' fun y => localConn_iff_of_agree (C : Set V) ⟨x, hx⟩ y
-      fun a ha b hb => ?_
-    have : s(a, b) ∈ {e : Sym2 V | ∀ v ∈ e, v ∈ C} := by
-      intro v hv
-      rcases Sym2.mem_iff.1 hv with rfl | rfl
-      · exact ha
-      · exact hb
-    simp [this]
-  · intro ω
-    simp only [mem_ofPred_eq, mem_inter_iff]
-    refine forall_congr' fun y => forall_congr' fun hy => forall_congr' fun z =>
-      forall_congr' fun hz => ?_
-    simp only [not_and]
-    exact ⟨fun h hm => absurd hm h, fun h hm => h hm ⟨y, hy, z, hz, rfl⟩⟩
-
-/-- `{K_x = C}` depends only on the pairs meeting `C`. -/
-theorem cluster_eq_finset_determined (x : V) (C : Finset V) (hx : x ∈ C) (ω : Config V) :
-    ω ∈ {ω : Config V | cluster ω x = C} ↔
-      ω ∩ {e | ∃ v ∈ e, v ∈ C} ∈ {ω : Config V | cluster ω x = C} := by
-  simp only [mem_ofPred_eq]
-  rw [cluster_eq_finset_iff ω x C hx, cluster_eq_finset_iff _ x C hx]
-  refine and_congr (forall_congr' fun y => localConn_iff_of_agree (C : Set V) ⟨x, hx⟩ y
-    fun a ha b _ => ?_) (forall_congr' fun y => forall_congr' fun hy => forall_congr' fun z =>
-      forall_congr' fun _ => ?_)
-  · have : s(a, b) ∈ {e : Sym2 V | ∃ v ∈ e, v ∈ C} := ⟨a, Sym2.mem_mk_left a b, ha⟩
-    simp [this]
-  · have : s(y, z) ∈ {e : Sym2 V | ∃ v ∈ e, v ∈ C} := ⟨y, Sym2.mem_mk_left y z, hy⟩
-    simp [this]
-
-/-- **Domain Markov property.** `{K_x = C}` is independent of every measurable event
-determined by the pairs with both endpoints outside `C`. -/
-theorem law_cluster_eq_inter [Countable V] (q : Sym2 V → unitInterval) (x : V) (C : Finset V)
-    (hx : x ∈ C) {B : Set (Config V)} (hB : MeasurableSet B)
-    (hdet : ∀ ω ω', (∀ a ∉ C, ∀ b ∉ C, (s(a, b) ∈ ω ↔ s(a, b) ∈ ω')) → (ω ∈ B ↔ ω' ∈ B)) :
-    law q ({ω | cluster ω x = C} ∩ B) = law q {ω | cluster ω x = C} * law q B := by
-  refine PercLib.Probability.prodBernoulli_inter_of_determined_inter q {e | ∃ v ∈ e, v ∈ C}
-      {e | ∀ v ∈ e, v ∉ C} ?_
-    (measurableSet_cluster_eq_finset x C hx) hB (cluster_eq_finset_determined x C hx) ?_
-  · exact Set.disjoint_left.2 fun e ⟨v, hv, hvC⟩ he => he v hv hvC
-  · intro ω
-    refine hdet _ _ fun a ha b hb => ?_
-    have : s(a, b) ∈ {e : Sym2 V | ∀ v ∈ e, v ∉ C} := by
-      intro v hv
-      rcases Sym2.mem_iff.1 hv with rfl | rfl
-      · exact ha
-      · exact hb
-    simp [this]
-
-/-- **Corollary.** Off `C`, connections are independent of `{K_x = C}`. -/
-theorem law_cluster_eq_inter_localConn_compl [Countable V] (q : Sym2 V → unitInterval) (x : V)
-    (C : Finset V) (hx : x ∈ C) (y z : ((C : Set V)ᶜ : Set V)) :
-    law q ({ω | cluster ω x = C} ∩
-        {ω | ((openGraph ω).induce ((C : Set V)ᶜ)).Reachable y z}) =
-      law q {ω | cluster ω x = C} *
-        law q {ω | ((openGraph ω).induce ((C : Set V)ᶜ)).Reachable y z} :=
-  law_cluster_eq_inter q x C hx (measurableSet_setOf_reachable_induce _ y z) fun _ _ h =>
-    localConn_iff_of_agree _ y z fun a ha b hb => h a ha b hb
-
 /-! ### The finite-cluster law in the `localConn` spelling -/
 
 /-- **The cluster of `x` is a set `C ∋ x`** exactly when every vertex of `C` is connected to
@@ -300,6 +155,105 @@ theorem law_cluster_eq_eq_mul [Countable V] (q : Sym2 V → unitInterval) {x : V
       forall_congr' fun hv => ?_
     simp only [not_and]
     exact ⟨fun h hm => absurd hm h, fun h hm => h hm ⟨u, hu, v, hv, rfl⟩⟩
+
+/-- Internal connection to `x` in the `localConn` spelling is reachability from `x` in the
+open graph induced on `C`. -/
+theorem forall_mem_localConn_iff_forall_reachable {ω : Config V} {x : V} {C : Set V}
+    (hx : x ∈ C) :
+    (∀ y ∈ C, ω ∈ localConn C x y) ↔ ∀ y : C, ((openGraph ω).induce C).Reachable ⟨x, hx⟩ y :=
+  ⟨fun h y => (mem_localConn_iff_reachable hx y.2 ω).1 (h y y.2),
+    fun h y hy => (mem_localConn_iff_reachable hx hy ω).2 (h ⟨y, hy⟩)⟩
+
+/-- The internal connection event `I_C` in the induced-graph spelling. -/
+theorem setOf_forall_mem_localConn_eq_setOf_forall_reachable {x : V} {C : Set V} (hx : x ∈ C) :
+    {ω : Config V | ∀ y ∈ C, ω ∈ localConn C x y} =
+      {ω : Config V | ∀ y : C, ((openGraph ω).induce C).Reachable ⟨x, hx⟩ y} :=
+  Set.ext fun _ => forall_mem_localConn_iff_forall_reachable hx
+
+/-! ### Finite sets in the induced-graph spelling -/
+
+/-- **The cluster of `x` is a finite set `C`** exactly when every vertex of `C` is joined to
+`x` inside `C` and no pair leaving `C` is open. -/
+theorem cluster_eq_finset_iff (ω : Config V) (x : V) (C : Finset V) (hx : x ∈ C) :
+    cluster ω x = C ↔
+      (∀ y : (C : Set V), ((openGraph ω).induce (C : Set V)).Reachable ⟨x, hx⟩ y) ∧
+      ∀ y ∈ C, ∀ z ∉ C, s(y, z) ∉ ω :=
+  (cluster_eq_iff_forall_localConn ω hx).trans
+    (and_congr_left' (forall_mem_localConn_iff_forall_reachable hx))
+
+/-- The internal connection event of a finite set is measurable. -/
+theorem measurableSet_internally_connected [Countable V] (x : V) (C : Finset V) (hx : x ∈ C) :
+    MeasurableSet {ω : Config V |
+      ∀ y : (C : Set V), ((openGraph ω).induce (C : Set V)).Reachable ⟨x, hx⟩ y} := by
+  rw [ofPred_forall]
+  exact MeasurableSet.iInter fun y => measurableSet_setOf_reachable_induce (C : Set V) ⟨x, hx⟩ y
+
+/-- The event that no pair leaving `C` is open is measurable. -/
+theorem measurableSet_boundary_closed [Countable V] (C : Finset V) :
+    MeasurableSet {ω : Config V | ∀ y ∈ C, ∀ z ∉ C, s(y, z) ∉ ω} :=
+  measurableSet_setOf_boundary_closed (C : Set V)
+
+/-- The event `{K_x = C}` is measurable. -/
+theorem measurableSet_cluster_eq_finset [Countable V] (x : V) (C : Finset V) (hx : x ∈ C) :
+    MeasurableSet {ω : Config V | cluster ω x = C} :=
+  (setOf_cluster_eq_eq_inter (C := (C : Set V)) hx) ▸
+    (measurableSet_setOf_forall_localConn x C.countable_toSet).inter
+      (measurableSet_setOf_boundary_closed (C : Set V))
+
+/-- **The law of a finite cluster.** `P(K_x = C)` is the probability that `C` is internally
+connected to `x`, times the probability that every pair leaving `C` is closed. -/
+theorem law_cluster_eq_finset [Countable V] (q : Sym2 V → unitInterval) (x : V) (C : Finset V)
+    (hx : x ∈ C) :
+    law q {ω | cluster ω x = C} =
+      law q {ω : Config V |
+        ∀ y : (C : Set V), ((openGraph ω).induce (C : Set V)).Reachable ⟨x, hx⟩ y} *
+      law q {ω : Config V | ∀ y ∈ C, ∀ z ∉ C, s(y, z) ∉ ω} := by
+  rw [law_cluster_eq_eq_mul q (C := (C : Set V)) hx,
+    setOf_forall_mem_localConn_eq_setOf_forall_reachable hx]
+  rfl
+
+/-- `{K_x = C}` depends only on the pairs meeting `C`. -/
+theorem cluster_eq_finset_determined (x : V) (C : Finset V) (hx : x ∈ C) (ω : Config V) :
+    ω ∈ {ω : Config V | cluster ω x = C} ↔
+      ω ∩ {e | ∃ v ∈ e, v ∈ C} ∈ {ω : Config V | cluster ω x = C} := by
+  simp only [mem_ofPred_eq]
+  rw [cluster_eq_finset_iff ω x C hx, cluster_eq_finset_iff _ x C hx]
+  refine and_congr (forall_congr' fun y => localConn_iff_of_agree (C : Set V) ⟨x, hx⟩ y
+    fun a ha b _ => ?_) (forall_congr' fun y => forall_congr' fun hy => forall_congr' fun z =>
+      forall_congr' fun _ => ?_)
+  · have : s(a, b) ∈ {e : Sym2 V | ∃ v ∈ e, v ∈ C} := ⟨a, Sym2.mem_mk_left a b, ha⟩
+    simp [this]
+  · have : s(y, z) ∈ {e : Sym2 V | ∃ v ∈ e, v ∈ C} := ⟨y, Sym2.mem_mk_left y z, hy⟩
+    simp [this]
+
+/-- **Domain Markov property.** `{K_x = C}` is independent of every measurable event
+determined by the pairs with both endpoints outside `C`. -/
+theorem law_cluster_eq_inter [Countable V] (q : Sym2 V → unitInterval) (x : V) (C : Finset V)
+    (hx : x ∈ C) {B : Set (Config V)} (hB : MeasurableSet B)
+    (hdet : ∀ ω ω', (∀ a ∉ C, ∀ b ∉ C, (s(a, b) ∈ ω ↔ s(a, b) ∈ ω')) → (ω ∈ B ↔ ω' ∈ B)) :
+    law q ({ω | cluster ω x = C} ∩ B) = law q {ω | cluster ω x = C} * law q B := by
+  refine PercLib.Probability.prodBernoulli_inter_of_determined_inter q {e | ∃ v ∈ e, v ∈ C}
+      {e | ∀ v ∈ e, v ∉ C} ?_
+    (measurableSet_cluster_eq_finset x C hx) hB (cluster_eq_finset_determined x C hx) ?_
+  · exact Set.disjoint_left.2 fun e ⟨v, hv, hvC⟩ he => he v hv hvC
+  · intro ω
+    refine hdet _ _ fun a ha b hb => ?_
+    have : s(a, b) ∈ {e : Sym2 V | ∀ v ∈ e, v ∉ C} := by
+      intro v hv
+      rcases Sym2.mem_iff.1 hv with rfl | rfl
+      · exact ha
+      · exact hb
+    simp [this]
+
+/-- **Corollary.** Off `C`, connections are independent of `{K_x = C}`. -/
+theorem law_cluster_eq_inter_localConn_compl [Countable V] (q : Sym2 V → unitInterval) (x : V)
+    (C : Finset V) (hx : x ∈ C) (y z : ((C : Set V)ᶜ : Set V)) :
+    law q ({ω | cluster ω x = C} ∩
+        {ω | ((openGraph ω).induce ((C : Set V)ᶜ)).Reachable y z}) =
+      law q {ω | cluster ω x = C} *
+        law q {ω | ((openGraph ω).induce ((C : Set V)ᶜ)).Reachable y z} :=
+  law_cluster_eq_inter q x C hx (measurableSet_setOf_reachable_induce _ y z) fun _ _ h =>
+    localConn_iff_of_agree _ y z fun a ha b hb => h a ha b hb
 
 /-- Boundary pairs, indexed with their endpoint in `C` first, are distinct unordered pairs. -/
 theorem injective_sym2_mk_boundary (C : Set V) :

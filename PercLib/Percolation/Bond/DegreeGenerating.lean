@@ -182,18 +182,14 @@ theorem setOf_degree_eq_zero (v : V) :
     openGraph_adj_iff, not_and, Subtype.forall]
   exact ⟨fun h w hw hω => h w hω (Ne.symm hw), fun h w hω hvw => h w (Ne.symm hvw) hω⟩
 
-/-- The pairs `s(v, w)`, `w ≠ v`, are distinct. -/
-theorem injective_sym2_mk_ne (v : V) :
-    Function.Injective fun w : {w // w ≠ v} => s(v, w.1) :=
-  fun _ _ h => Subtype.ext (Sym2.congr_right.1 h)
-
 /-- **The isolation product.** On a countable vertex set, the probability that `v` has open
 degree zero is the infinite product of the closed probabilities of the pairs at `v`. -/
 theorem law_degree_eq_zero_eq_tprod [Countable V] (q : Sym2 V → unitInterval) (v : V) :
     law q {ω : Config V | {w | (openGraph ω).Adj v w}.encard = 0} =
       ∏' w : {w // w ≠ v}, (1 - (unitInterval.toNNReal (q s(v, w.1)) : ℝ≥0∞)) := by
   rw [setOf_degree_eq_zero]
-  exact (prodBernoulli_forall_notMem q _ (injective_sym2_mk_ne v)).trans
+  exact (prodBernoulli_forall_notMem q (fun w : {w // w ≠ v} => s(v, w.1))
+    ((Sym2.mkEmbedding v).injective.comp Subtype.val_injective)).trans
     (tprod_congr fun w => coe_toNNReal_symm_eq_one_sub _)
 
 /-- **Positivity of isolation.** On a countable vertex set, `v` has open degree zero with
@@ -204,7 +200,8 @@ theorem law_degree_eq_zero_pos_iff [Countable V] (q : Sym2 V → unitInterval) (
       rowSum (fun e => unitInterval.toENNReal (q e)) v < ∞ ∧ ∀ w, w ≠ v → q s(v, w) < 1 := by
   rw [setOf_degree_eq_zero]
   change 0 < prodBernoulli q _ ↔ _
-  rw [prodBernoulli_forall_notMem_pos_iff q _ (injective_sym2_mk_ne v), rowSum_eq_tsum_ne]
+  rw [prodBernoulli_forall_notMem_pos_iff q (fun w : {w // w ≠ v} => s(v, w.1))
+    ((Sym2.mkEmbedding v).injective.comp Subtype.val_injective), rowSum_eq_tsum_ne]
   have hsum : Summable (fun w : {w // w ≠ v} => (q s(v, w.1) : ℝ)) ↔
       ∑' w : {w // w ≠ v}, unitInterval.toENNReal (q s(v, w.1)) < ∞ := by
     simp_rw [unitInterval.toENNReal_apply, lt_top_iff_ne_top,
