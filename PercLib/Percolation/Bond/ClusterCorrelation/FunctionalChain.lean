@@ -5,8 +5,8 @@ Authors: PercLib contributors
 -/
 /-
 New proofs, on the bond interface. Mathematical reference: the restoration-map argument for
-functionals of two distinct clusters in a countable independent product model (wiki statement
-UXBN), extending Lemma I.2.1 of T. Hutchcroft, *Critical long-range percolation I*,
+functionals of two distinct clusters in a countable independent product model,
+extending Lemma I.2.1 of T. Hutchcroft, *Critical long-range percolation I*,
 arXiv:2508.18807v1. No source text or code is copied.
 -/
 module
@@ -146,6 +146,15 @@ theorem lintegral_indicator_compl_conn_mul_le_mul_le (q : Sym2 V → unitInterva
   ⟨lintegral_indicator_compl_conn_mul_le_mul q x y F G hG hFm hGm,
     mul_le_mul' (lintegral_mono fun ω => indicator_le_self _ _ ω) le_rfl⟩
 
+omit [Countable V] in
+/-- `E[F(K_x) 1{x ↮ y}] E G(K_y) ≤ E F(K_x) E G(K_y)`, the second step of the first chain. -/
+theorem lintegral_indicator_compl_conn_mul_lintegral_le (q : Sym2 V → unitInterval) (x y : V)
+    (F G : Set V → ℝ≥0∞) :
+    (∫⁻ ω, (conn x y)ᶜ.indicator (fun ω => F (cluster ω x)) ω ∂law q) *
+        ∫⁻ ω, G (cluster ω y) ∂law q ≤
+      (∫⁻ ω, F (cluster ω x) ∂law q) * ∫⁻ ω, G (cluster ω y) ∂law q :=
+  mul_le_mul' (lintegral_mono fun ω => indicator_le_self _ _ ω) le_rfl
+
 /-- **The second chain.** For `F`, `G` increasing,
 `E F(K_x) E G(K_y) ≤ E[F(K_x) G(K_y)] ≤ E F(K_x) E G(K_y) + E[F(K_x) G(K_y) 1{x ↔ y}]`. -/
 theorem lintegral_mul_lintegral_le_lintegral_mul_le_add (q : Sym2 V → unitInterval) (x y : V)
@@ -185,5 +194,28 @@ theorem covariance_cluster_nonneg_and_le (q : Sym2 V → unitInterval) (x y : V)
   · have h := ENNReal.toReal_mono (ENNReal.add_ne_top.mpr ⟨hprod, hI⟩) hU
     rw [ENNReal.toReal_add hprod hI] at h
     linarith
+
+/-- For `F`, `G` increasing with finite expectations, `0 ≤ Cov(F(K_x), G(K_y))`. -/
+theorem covariance_cluster_nonneg (q : Sym2 V → unitInterval) (x y : V)
+    (F G : Set V → ℝ≥0∞) (hF : Monotone F) (hG : Monotone G)
+    (hFm : Measurable fun ω : Config V => F (cluster ω x))
+    (hGm : Measurable fun ω : Config V => G (cluster ω y))
+    (hFG : ∫⁻ ω, F (cluster ω x) * G (cluster ω y) ∂law q ≠ ⊤)
+    (hEF : ∫⁻ ω, F (cluster ω x) ∂law q ≠ ⊤) (hEG : ∫⁻ ω, G (cluster ω y) ∂law q ≠ ⊤) :
+    0 ≤ cov[fun ω => (F (cluster ω x)).toReal, fun ω => (G (cluster ω y)).toReal; law q] :=
+  (covariance_cluster_nonneg_and_le q x y F G hF hG hFm hGm hFG hEF hEG).1
+
+/-- For `F`, `G` increasing with finite expectations,
+`Cov(F(K_x), G(K_y)) ≤ E[F(K_x) G(K_y) 1{x ↔ y}]`. -/
+theorem covariance_cluster_le (q : Sym2 V → unitInterval) (x y : V)
+    (F G : Set V → ℝ≥0∞) (hF : Monotone F) (hG : Monotone G)
+    (hFm : Measurable fun ω : Config V => F (cluster ω x))
+    (hGm : Measurable fun ω : Config V => G (cluster ω y))
+    (hFG : ∫⁻ ω, F (cluster ω x) * G (cluster ω y) ∂law q ≠ ⊤)
+    (hEF : ∫⁻ ω, F (cluster ω x) ∂law q ≠ ⊤) (hEG : ∫⁻ ω, G (cluster ω y) ∂law q ≠ ⊤) :
+    cov[fun ω => (F (cluster ω x)).toReal, fun ω => (G (cluster ω y)).toReal; law q] ≤
+      (∫⁻ ω, (conn x y).indicator
+        (fun ω => F (cluster ω x) * G (cluster ω y)) ω ∂law q).toReal :=
+  (covariance_cluster_nonneg_and_le q x y F G hF hG hFm hGm hFG hEF hEG).2
 
 end PercLib.Percolation.Bond
