@@ -38,9 +38,6 @@ With transitivity, the integrated mean-field inequality for the susceptibility g
 * `ae_hasDerivAt_chi_lt_triangle_formula` (1EWX): for almost every `β ∈ (0, 1/100)`,
   `χ'(β) < χ (χ - Δ) / (3 β² Δ²)`, so the stronger triangle formula fails there.
 
-The last section proves `connected_fromEdgeSet_pos` (HRS7): the support graph of the model of
-`PercLib.Models.HeavySecondMoment` is connected.
-
 The deterministic core is `tsum_triangle_le`: for a nonnegative matrix that is one on the
 diagonal and whose off-diagonal rows sum to at most `m`, the closed triangle at a vertex
 is at most `1 + 3 m² + m³`.
@@ -341,25 +338,6 @@ example (β : ℝ≥0) (hβ0 : 0 < β) (hβ : β < 1) :
 
 /-! ### Regularity of `χ` and failure of the stronger triangle formula -/
 
-open Set in
-/-- **Local Lipschitz continuity of `χ`.** In a transitive intensity model with finite
-off-diagonal row sum at `o` and susceptibility finite on `(a, b)`, `0 ≤ a`, the real
-susceptibility `β ↦ χ_β(o)` is locally Lipschitz on `(a, b)`. -/
-theorem locallyLipschitzOn_chi (J : Sym2 V → ℝ≥0)
-    (hJ : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e) (o : V)
-    (hR : rowSum (fun e => (J e : ℝ≥0∞)) o ≠ ⊤) {a b : ℝ} (ha : 0 ≤ a)
-    (hfin : ∀ β ∈ Ioo a b, chi (intensityProfile J β.toNNReal) o ≠ ⊤) :
-    LocallyLipschitzOn (Ioo a b)
-      (fun u : ℝ => (chi (intensityProfile J u.toNNReal) o).toReal) := by
-  intro β hβ
-  have hs : a < (a + β) / 2 := by linarith [hβ.1]
-  have hs' : (a + β) / 2 < β := by linarith [hβ.1]
-  have ht : (β + b) / 2 < b := by linarith [hβ.2]
-  have ht' : β < (β + b) / 2 := by linarith [hβ.2]
-  exact ⟨_, Icc ((a + β) / 2) ((β + b) / 2),
-    mem_nhdsWithin_of_mem_nhds (Icc_mem_nhds hs' ht'),
-    lipschitzOnWith_chi J hJ o hR ha hfin hs ht⟩
-
 /-- Real form of `chi_bounds` at a real intensity `0 ≤ β < 1`: `χ` is finite and
 `1 + β - β²/2 ≤ χ ≤ (1 - β)⁻¹`. -/
 theorem toReal_chi_bounds (J : Sym2 V → ℝ≥0)
@@ -509,47 +487,3 @@ theorem ae_hasDerivAt_chi_lt_triangle_formula (o : V) :
   exact ⟨D, hd, lt_mul_sub_div_of_small hmem.1 hmem.2.le hx hd1 hd2 hD⟩
 
 end PercLib.Models.NormalizedSmallIntensity
-
-/-! ### Connected host for the root-only counterexample
-
-The model of `PercLib.Models.HeavySecondMoment` lives on the vertex type
-`Option (Σ k : ℕ, Fin (2^(k+1)))`. Its support graph `{e | 0 < q e}` is connected: each path
-`C_k` is joined internally by edges of probability one and to the root by an edge of
-probability `4^(-(k+1))`. -/
-
-namespace PercLib.Models
-
-/-- **The support graph of the heavy-second-moment model is connected.** If `q` is one on
-consecutive vertices of each path `C_k` and positive on the pair joining the root to the
-endpoint `0` of `C_k`, then `fromEdgeSet {e | 0 < q e}` is connected. -/
-theorem connected_fromEdgeSet_pos {q : Sym2 (Option (Σ k : ℕ, Fin (2 ^ (k + 1)))) → unitInterval}
-    (hpath : ∀ (k : ℕ) (i j : Fin (2 ^ (k + 1))), i.val + 1 = j.val →
-      q s(some ⟨k, i⟩, some ⟨k, j⟩) = 1)
-    (hroot : ∀ k : ℕ, (q s(none, some ⟨k, ⟨0, Nat.two_pow_pos _⟩⟩) : ℝ) = (1 / 4) ^ (k + 1)) :
-    (SimpleGraph.fromEdgeSet {e | 0 < q e}).Connected := by
-  set G := SimpleGraph.fromEdgeSet {e | 0 < q e}
-  have hroot' : ∀ k : ℕ, G.Reachable none (some ⟨k, ⟨0, Nat.two_pow_pos _⟩⟩) := by
-    intro k
-    refine SimpleGraph.Adj.reachable ((SimpleGraph.fromEdgeSet_adj _).2 ⟨?_, by simp⟩)
-    change (0 : ℝ) < (q s(none, some ⟨k, ⟨0, Nat.two_pow_pos _⟩⟩) : ℝ)
-    rw [hroot k]
-    positivity
-  have hstep : ∀ (k n : ℕ) (h : n < 2 ^ (k + 1)),
-      G.Reachable (some ⟨k, ⟨0, Nat.two_pow_pos _⟩⟩) (some ⟨k, ⟨n, h⟩⟩) := by
-    intro k n
-    induction n with
-    | zero => intro h; exact SimpleGraph.Reachable.refl _
-    | succ n ih =>
-      intro h
-      refine (ih (Nat.lt_of_succ_lt h)).trans (SimpleGraph.Adj.reachable
-        ((SimpleGraph.fromEdgeSet_adj _).2 ⟨?_, ?_⟩))
-      · change 0 < q s(some ⟨k, ⟨n, Nat.lt_of_succ_lt h⟩⟩, some ⟨k, ⟨n + 1, h⟩⟩)
-        rw [hpath k _ _ rfl]
-        exact zero_lt_one
-      · simp
-  refine (SimpleGraph.connected_iff_exists_forall_reachable G).2 ⟨none, fun w => ?_⟩
-  rcases w with _ | ⟨k, ⟨n, h⟩⟩
-  · exact SimpleGraph.Reachable.refl _
-  · exact (hroot' k).trans (hstep k n h)
-
-end PercLib.Models
