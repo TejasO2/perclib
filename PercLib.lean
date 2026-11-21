@@ -23,6 +23,7 @@ public import PercLib.Analysis.LogarithmicCorrections
 public import PercLib.Analysis.MesoscopicNegligibility
 public import PercLib.Analysis.ModelNorm.Defs
 public import PercLib.Analysis.MomentHierarchy
+public import PercLib.Analysis.MultiplicativeDecrement
 public import PercLib.Analysis.PowerLawConvolution
 public import PercLib.Analysis.QuadraticRecursion
 public import PercLib.Analysis.ReciprocalCutoff
@@ -109,6 +110,7 @@ public import PercLib.Models.HierarchicalRunawayInterval
 public import PercLib.Models.HierarchicalSibling
 public import PercLib.Models.HierarchicalSymmetry
 public import PercLib.Models.HierarchicalTranslation
+public import PercLib.Models.HierarchicalTriangle
 public import PercLib.Models.HierarchicalTwoPoint
 public import PercLib.Models.HierarchicalTwoPointAveraged
 public import PercLib.Models.HierarchicalTwoPointRadial
@@ -150,6 +152,7 @@ public import PercLib.Models.Tags.FiniteRangeDecay
 public import PercLib.Models.Tags.FiniteRangeExit
 public import PercLib.Models.Tags.Hierarchical
 public import PercLib.Models.Tags.HierarchicalRunaway
+public import PercLib.Models.Tags.HierarchicalTriangle
 public import PercLib.Models.Tags.HierarchicalTwoPoint
 public import PercLib.Models.Tags.KernelsAndSitePaths
 public import PercLib.Models.Tags.Lattice
