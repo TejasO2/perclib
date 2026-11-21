@@ -235,6 +235,7 @@ public import PercLib.Percolation.Bond.SusceptibilityDerivative
 public import PercLib.Percolation.Bond.SusceptibilityEndpoint
 public import PercLib.Percolation.Bond.Tags.BoundaryForest
 public import PercLib.Percolation.Bond.Tags.ClusterCorrelation
+public import PercLib.Percolation.Bond.Tags.ConnectionKernel
 public import PercLib.Percolation.Bond.Tags.CoreBoundaryLaws
 public import PercLib.Percolation.Bond.Tags.CoreClosedProducts
 public import PercLib.Percolation.Bond.Tags.CoreConnectivity
