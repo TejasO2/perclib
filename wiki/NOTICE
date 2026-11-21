@@ -1,0 +1,23 @@
+PercLib wiki
+https://github.com/tomhutchcroft/perclib
+
+1. Wiki prose: Copyright (c) Tom Hutchcroft. All rights reserved.
+
+   The written content of this wiki (the articles in articles/, the reading maps
+   in sources/, the errata in errata/, the records in records/, COVERAGE.md and the
+   descriptive text in src/content/) is published for reading only. No licence to
+   copy, modify or redistribute it is granted at present. A licence for the wiki
+   prose is pending a decision (DECISIONS.md, R-2); until that decision is made
+   this notice applies.
+
+2. Lean code and tooling: Apache License, Version 2.0.
+
+   The build and test code of this directory (src/*.mjs, src/assets/, scripts/,
+   tests/, prototype/ and the package files) and the Lean code of the repository
+   are licensed under the Apache License, Version 2.0, as stated in the root
+   LICENSE and NOTICE files of this repository.
+
+3. Third-party software.
+
+   The build depends on KaTeX (MIT licence), installed by `npm ci` and not
+   included in this repository.

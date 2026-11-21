@@ -1,0 +1,78 @@
+{
+  "schema": "perclib-article-records-v1",
+  "article": "product-model",
+  "collections": [
+    {
+      "collection": "models",
+      "order": 0
+    }
+  ],
+  "sourceOccurrences": [
+    {
+      "source": "hutchcroft-book",
+      "order": 20,
+      "label": "Product percolation",
+      "locator": "Cited without locator; the book is unpublished.",
+      "relationship": "Credited source",
+      "status": "attribution only",
+      "note": "Results, arguments or exposition in this article taken from the book are credited to T. Hutchcroft, book in preparation."
+    },
+    {
+      "source": "grimmett",
+      "order": 0,
+      "label": "The basic percolation model",
+      "locator": "Chapter 1 · What is Percolation?",
+      "relationship": "Subject correspondence",
+      "status": "pending",
+      "note": "A precise statement-level mapping will follow the edition audit."
+    },
+    {
+      "source": "mathlib",
+      "order": 0,
+      "label": "Infinite product probability measure",
+      "locator": "Mathlib.Probability.ProductMeasure · Measure.infinitePi",
+      "relationship": "Formal foundation",
+      "status": "pending",
+      "note": "The compiled Lrp.Probability.ProdBernoulli adapter reuses this foundation. A full correspondence with the bond-percolation article remains pending."
+    },
+    {
+      "source": "mathlib",
+      "order": 1,
+      "label": "Homogeneous Bernoulli random subsets",
+      "locator": "Mathlib.Probability.Distributions.SetBernoulli",
+      "relationship": "Related formal construction",
+      "status": "pending",
+      "note": "The compiled Lrp.Probability.ProdBernoulli adapter reuses this foundation. A full correspondence with the bond-percolation article remains pending."
+    }
+  ],
+  "occursIn": [
+    {
+      "order": 1,
+      "source": "hutchcroft-book",
+      "tag": "2ML7",
+      "relationship": "generalization",
+      "edition": "In preparation",
+      "locator": "Cited without locator; the book is unpublished.",
+      "note": "Credited to T. Hutchcroft, book in preparation."
+    },
+    {
+      "order": 2,
+      "source": "hutchcroft-book",
+      "tag": "8NWX",
+      "relationship": "generalization",
+      "edition": "In preparation",
+      "locator": "Cited without locator; the book is unpublished.",
+      "note": "Credited to T. Hutchcroft, book in preparation."
+    }
+  ],
+  "proofUses": [
+    {
+      "order": 0,
+      "tag": "5PAT",
+      "proof_uses": [
+        "8NWX"
+      ],
+      "reason": "Intended prose proof: compute a finite cylinder under the product Bernoulli law. This is a prerequisite plan, not extracted Lean evidence."
+    }
+  ]
+}
