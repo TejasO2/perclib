@@ -60,7 +60,8 @@ if (form) {
   input.value = new URLSearchParams(location.search).get("q") || "";
   const data = Array.isArray(globalThis.PERCLIB_OFFLINE_SEARCH)
     ? Promise.resolve(globalThis.PERCLIB_OFFLINE_SEARCH)
-    : fetch("/search-index.json")
+    : // A site served under a base path (GitHub Pages) names it on <html data-base>.
+      fetch((document.documentElement?.dataset?.base ?? "/") + "search-index.json")
     .then((r) => {
       if (!r.ok) throw Error("Search unavailable");
       return r.json();

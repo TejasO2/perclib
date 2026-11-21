@@ -61,7 +61,7 @@ export function concordancePanel(rows, sources, assertions, evidence) {
   if (!rows.length)
     return '<section class="article-section"><h2>Tagged source occurrences</h2><p>No tagged source occurrences have been recorded for this selection. Editorial reading links are not source-to-assertion correspondences.</p></section>';
   const snapshot = evidence.provenance
-    ? `<p>Formal evidence: <a href="${esc(evidence.provenance.runUrl)}">successful CI</a> at compiled commit <code>${esc(evidence.provenance.commit)}</code>.</p>`
+    ? `<p>Formal evidence: <a href="${esc(evidence.provenance.runUrl)}">${esc(evidence.provenance.runLabel ?? "successful CI")}</a> at compiled commit <code>${esc(evidence.provenance.commit)}</code>.</p>`
     : "<p>No compiled manifest is supplied. Formal status is unavailable.</p>";
   return (
     '<section class="article-section"><h2>Tagged source occurrences</h2><p>These authored records locate source occurrences. A record does not certify source fidelity or a Lean proof; the displayed correspondence review concerns the compiled statement and wiki prose.</p>' +

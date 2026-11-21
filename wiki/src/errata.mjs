@@ -142,7 +142,7 @@ export function errataIndex(errata, sources) {
 export function errataPage(data, source, assertions, evidence) {
   const byTag = new Map(assertions.map((a) => [a.tag, a]));
   const snapshot = evidence.provenance
-    ? `<p>Compiled snapshot: <a href="https://github.com/${esc(evidence.provenance.repository)}/commit/${esc(evidence.provenance.commit)}"><code>${esc(evidence.provenance.commit)}</code></a> · <a href="${esc(evidence.provenance.runUrl)}">Successful CI run</a>. Proof status describes the compiled statement; its correspondence to the wiki is reviewed separately.</p>`
+    ? `<p>Compiled snapshot: <a href="https://github.com/${esc(evidence.provenance.repository)}/commit/${esc(evidence.provenance.commit)}"><code>${esc(evidence.provenance.commit)}</code></a> · <a href="${esc(evidence.provenance.runUrl)}">${esc(evidence.provenance.runLabel ?? "Successful CI run")}</a>. Proof status describes the compiled statement; its correspondence to the wiki is reviewed separately.</p>`
     : "<p>No compiled manifest is supplied with this edition. Formal status is unavailable; issue resolutions and prose proofs do not supply compiled evidence.</p>";
   const formal = (tag) => {
     const assertion = byTag.get(tag);
