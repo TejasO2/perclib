@@ -67,3 +67,23 @@ as a merge blocker for the workflows unless it does one of these:
 - lets pull-request code reach a token with write access.
 
 Either of those is fixed before the workflows run again.
+
+## Cancelled and shared CI runs
+
+- **Cancellation.** A push to a branch other than `main` (today only the integration
+  branch) cancels that branch's older CI run, and a new commit of a pull request cancels
+  the pull request's older run. Push runs on `main` are never cancelled. An integration
+  commit superseded within minutes therefore has no CI result of its own; this is safe
+  because the newer commit contains it (or, after a force-push, the old commit is no
+  longer on the branch) and the newer commit's run checks the whole tree, and anything
+  reaching `main` is checked there again by its own uncancelled run.
+- **Integration-branch pull requests reuse the push run.** In a pull request whose head is
+  the integration branch of this repository, the jobs `gate` and `kernel-replay` do not
+  build: each waits for the same job of the CI push run of the head commit and succeeds
+  exactly when that job succeeded (they are never skipped, so a skipped `gate` cannot
+  pass for a result). Both runs check out and check the same head commit, and the gate's
+  pass or fail does not depend on the base, so the result is the same; only the
+  advisory classification (against the previous tip instead of `main`) and the
+  `manifest` artifact are taken from the push run instead. If the push run's job is
+  re-run, re-run the pull request's job too. The cheap jobs `scripts` and `wiki` still run
+  in both. Pull requests from forks, and from any other branch, are unaffected.
