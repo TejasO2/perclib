@@ -2658,7 +2658,7 @@
       "edition": "Communications in Mathematical Physics 107, 611\u2013647",
       "url": "https://doi.org/10.1007/BF01205489",
       "description": "A density constraint for one-dimensional independent long-range percolation.",
-      "coverageNote": "Proposition 1.1, equations (1.5)\u2013(1.6), and the regularity definition read. The density theorem is a cited input; its renormalization proof is not reproduced."
+      "coverageNote": "Proposition 1.1, equations (1.5)\u2013(1.6), and the regularity definition read. The density theorem has a written proof on the integrated-susceptibility page, following Duminil-Copin\u2013Garban\u2013Tassion, section 2.4, rather than the paper's own argument."
     },
     {
       "id": "dgt-long-range-2023",
