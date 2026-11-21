@@ -128,6 +128,7 @@ public import PercLib.Models.LongRange.Tags.Susceptibility
 public import PercLib.Models.NonSummable
 public import PercLib.Models.NormalizedSmallIntensity
 public import PercLib.Models.NormalizedSmallIntensityLine
+public import PercLib.Models.Planar.Defs
 public import PercLib.Models.Site.Basic
 public import PercLib.Models.Site.Harris
 public import PercLib.Models.Site.SelfAvoiding
