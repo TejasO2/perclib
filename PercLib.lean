@@ -239,6 +239,7 @@ public import PercLib.Percolation.Bond.Multipoint.Geometry
 public import PercLib.Percolation.Bond.Multipoint.ShapeCount
 public import PercLib.Percolation.Bond.Multipoint.Sweep
 public import PercLib.Percolation.Bond.Multipoint.Tags.SmallSets
+public import PercLib.Percolation.Bond.OptimizedClusterTail
 public import PercLib.Percolation.Bond.PathComparison
 public import PercLib.Percolation.Bond.PathLowerBounds
 public import PercLib.Percolation.Bond.Pivotal
@@ -284,6 +285,7 @@ public import PercLib.Percolation.Bond.Tags.DomainIndependence
 public import PercLib.Percolation.Bond.Tags.FiniteVolume
 public import PercLib.Percolation.Bond.Tags.FourthMoment
 public import PercLib.Percolation.Bond.Tags.IndependentLayer
+public import PercLib.Percolation.Bond.Tags.OptimizedClusterTail
 public import PercLib.Percolation.Bond.Tags.RootGlobalPercolation
 public import PercLib.Percolation.Bond.Tags.SubcriticalBound
 public import PercLib.Percolation.Bond.Tags.Tightness
