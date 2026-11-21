@@ -102,6 +102,7 @@ public import PercLib.Models.LongRange.QuantileMoments
 public import PercLib.Models.LongRange.RootIndependence
 public import PercLib.Models.LongRange.SoftCutoff
 public import PercLib.Models.LongRange.Tags.BranchingRandomWalk
+public import PercLib.Models.LongRange.Tags.CutsAndRows
 public import PercLib.Models.LongRange.Tags.DisplacementKernels
 public import PercLib.Models.LongRange.Tags.IntegratedSusceptibility
 public import PercLib.Models.LongRange.Tags.Sharpness
@@ -120,6 +121,7 @@ public import PercLib.Models.Tags.Hierarchical
 public import PercLib.Models.Tags.Lattice
 public import PercLib.Models.Tags.Line
 public import PercLib.Models.Tags.Site
+public import PercLib.Models.Tags.TranslationInvariant
 public import PercLib.Models.Tags.ZeroOne
 public import PercLib.Models.TranslationInvariant
 public import PercLib.Models.Tree
