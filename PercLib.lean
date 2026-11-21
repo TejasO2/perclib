@@ -348,6 +348,9 @@ public import PercLib.Probability.DiscreteLayerCake
 public import PercLib.Probability.DisjointOccurrence
 public import PercLib.Probability.DisjointOccurrenceAlgebra
 public import PercLib.Probability.Dispersion.Defs
+public import PercLib.Probability.Exploration.PriorityStopped
+public import PercLib.Probability.Exploration.PriorityStopped.Defs
+public import PercLib.Probability.Exploration.Tags.PriorityStopped
 public import PercLib.Probability.Exploration.Transcript
 public import PercLib.Probability.ExponentialMoments
 public import PercLib.Probability.FKG

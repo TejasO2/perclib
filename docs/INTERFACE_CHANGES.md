@@ -12,6 +12,29 @@ deprecated alias for one release where that is possible.
   `blockLayerKernel`, `ancestorKernel`, `restrictedKernel`, `expectedBlockMax`, `blockScale`, `blockPairSum`,
   `IsGoodBlock`, `IsAncestrallyGood`. Additive; no existing name changed.
 
+### Stopped priority exploration (`priorityExploration`)
+
+- **What:** new definitions in the new file
+  `PercLib/Probability/Exploration/PriorityStopped/Defs.lean`, namespace
+  `PercLib.Percolation.Bond`: the structure `PriorityExploration.State G` (discovered vertices,
+  queried edges; `@[ext]`), `State.init`, `State.eligible`, `State.nextQuery`, `State.step`,
+  and `priorityExploration G ι o n ω t` (tag 28UY), `priorityQuery`, `priorityAnswer` for a
+  graph `G : SimpleGraph V`, an edge order `ι : G.edgeSet ↪ ℕ`, a root `o`, a threshold `n`
+  and a bond configuration `ω`. The root cluster is `cluster (ω ∩ G.edgeSet) o`. API and tag
+  PWBU in `PercLib/Probability/Exploration/PriorityStopped.lean` and its `Tags/` file
+  (`work/frontier-priority-exploration`).
+- **Breaks:** nothing (additive change).
+
+- `p-b-AFJX-fix` (AFJX, ICQP; audited APPROVE, `audit-r14-outside-b`, exact edit applied verbatim): in new
+  `PercLib/Combinatorics/Finpartition/Defs.lean` (namespace `Finpartition`): `extendSingleton`, `insertIntoPart`,
+  `extendOption`, `restrictErase`; in new `PercLib/Probability/HigherCorrelation/Defs.lean`: `higherCorrelation`.
+  Additive; no existing name changed.
+- `p-a-VI3Y` (VI3Y; audited APPROVE): in new `PercLib/Models/HierarchicalBlockLayers/Defs.lean` (namespace
+  `PercLib.Models.HierarchicalLayers`): `pairLevel`, `block`, `IsCopy`, `layerWeight`, `layerProfile`, `openCopies`,
+  `fullConfig`, `blockConfig`, `ancestorConfig`, `exactKernel`, `truncatedKernel`, `ancestorKernel`. Additive.
+- `frontier-section-comparison` (9GXY; audited APPROVE, `audit-r14-frontier-b`): in new
+  `PercLib/Probability/SectionComparison.lean` (namespace `PercLib.Probability`): `SamplingTree` and `law`. Additive.
+
 ## Merged
 
 ### New definitions, round 15 batch (`p-b-CUE4-fix`, `frontier-brw-first-moment`) (additive; no existing name changed)
