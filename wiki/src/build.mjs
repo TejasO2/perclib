@@ -12,6 +12,20 @@ import { loadEvidence, evidencePanel, statusFor } from "./manifest.mjs";
 import { readRegistry } from "../scripts/articles.mjs";
 import { loadRecords } from "./records.mjs";
 import { compactMathLayout } from "./math-layout.mjs";
+import {
+  prepareSection,
+  linkGraph,
+  assertNoDeadLinks,
+  linkReport,
+  linkReportText,
+  tableOfContents,
+  hasCollapsibles,
+  collapseTools,
+  citationList,
+  annotatePreviews,
+  previewData,
+  previewScript,
+} from "./wiki-features.mjs";
 import { loadErrata, errataPage, articleErrata, errataIndex, errataResolutionText, errataVersionText } from "./errata.mjs";
 import {
   esc,
@@ -102,6 +116,28 @@ export async function build(
     : "";
   const history = collectHistory(root, evidenceOptions.historyRef);
   const pages = new Map(articles.map((p) => [p.id, p]));
+  // Collapsible blocks and wanted links are expanded once; every later use of
+  // an article body (pages, search, link graph) sees the same HTML.
+  const bodies = new Map(),
+    wanted = [],
+    resolvedWanted = [];
+  for (const p of articles)
+    bodies.set(
+      p.id,
+      p.sections.map((s) => {
+        const where = `${p.id}/${s.id}`;
+        const r = prepareSection(s.html, pages, where);
+        const at = (w) => ({ ...w, article: p.id, section: s.id });
+        wanted.push(...r.wanted.map(at));
+        resolvedWanted.push(...r.resolved.map(at));
+        return { id: s.id, title: s.title, html: r.html };
+      }),
+    );
+  const graph = linkGraph(articles, bodies, assertions, baseline);
+  assertNoDeadLinks(graph);
+  const report = linkReport(articles, bodies, graph, wanted);
+  const sectionTitle = (id, section) =>
+    pages.get(id).sections.find((s) => s.id === section).title;
   const read = async (file) =>
     JSON.parse(await fs.readFile(path.join(root, "src/content", file), "utf8"));
   const { collections, sources } = records;
@@ -157,18 +193,27 @@ export async function build(
   };
   for (const p of articles) {
     const own = assertions.filter((a) => a.article === p.id);
-    const incoming = articles
-      .filter(
-        (q) =>
-          q.id !== p.id &&
-          q.sections.some((s) => s.html.includes(`href="#/${p.id}`)),
-      )
-      .map((q) => q.id);
+    const incoming = [
+      ...new Set(graph.incoming.get(p.id).map((x) => x.article)),
+    ].sort((a, b) => pages.get(a).title.localeCompare(pages.get(b).title));
+    const previewKeys = new Set();
+    const sections = bodies.get(p.id).map((s) => {
+      const r = annotatePreviews(s.html, p.id, pages, assertions, baseline);
+      r.used.forEach((k) => previewKeys.add(k));
+      return { ...s, html: r.html };
+    });
     const body =
       heading(p.title, p.subtitle || p.summary, p.kind) +
       articleErrata(p.id, errata, assertions) +
       `<div class="running-context"><h2>Running context</h2><ul>${p.context.map((c) => `<li>${c}</li>`).join("")}</ul></div>` +
-      p.sections
+      tableOfContents(sections, [
+        ["connections", "Connections"],
+        ["sources", "Sources"],
+        ["citations", "Assertion citations"],
+        ["formal-evidence", "Formal evidence"],
+      ]) +
+      (hasCollapsibles(sections) ? collapseTools() : "") +
+      sections
         .map(
           (s) =>
             `<section class="article-section" id="section-${s.id}"><h2>${esc(s.title)}</h2>${s.html}</section>`,
@@ -184,7 +229,7 @@ export async function build(
         .join(
           "",
         )}</ul>${sources.flatMap((s) => s.occurrences.filter((o) => o.pageId === p.id).map((o) => `<h3><a href="/sources/${s.id}/">${esc(s.shortName)}</a></h3>${occurrence(o)}`)).join("")}</section>` +
-      `<section class="article-section" id="citations"><h2>Assertion citations</h2><div class="tag-citations">${own.map((a) => `<a href="/tag/${a.tag}/">${a.tag} · ${esc(a.title)}</a>`).join("")}</div></section>` +
+      `<section class="article-section" id="citations"><h2>Assertion citations</h2><p>Each assertion with the article sections that link to it.</p>${citationList(own, graph, pages, sectionTitle)}</section>` +
       evidencePanel(own, evidence) +
       concordance(occurrences.filter((o) => own.some((a) => a.tag === o.tag)));
     const rail =
@@ -200,7 +245,15 @@ export async function build(
         `<div class="tag-citations">${own.map((a) => `<a href="/tag/${a.tag}/" title="${esc(a.title)}">${a.tag}</a>`).join("")}</div>`,
       ) +
       railBlock("Related reading", links(p.related));
-    add(`articles/${p.id}`, p.title, body, rail, p.summary);
+    add(
+      `articles/${p.id}`,
+      p.title,
+      body,
+      rail,
+      p.summary,
+      '<script defer src="/assets/article.js"></script>' +
+        previewScript(previewData(previewKeys, pages, assertions)),
+    );
     add(
       p.id,
       p.title,
@@ -395,7 +448,8 @@ export async function build(
       p.summary,
       ...p.aliases,
       ...p.context,
-      ...p.sections.map((s) => s.title + " " + plain(s.html)),
+      // Collapsed blocks are part of the body HTML and are indexed with it.
+      ...bodies.get(p.id).map((s) => s.title + " " + plain(s.html)),
       ...assertions
         .filter((a) => a.article === p.id)
         .map((a) => a.tag + " " + a.title),
@@ -432,6 +486,8 @@ export async function build(
     text: [entry.title, entry.status, entry.locator, errataVersionText(data), ...(entry.status === "withdrawn" ? [entry.withdrawalReason] : [errataResolutionText(entry), entry.claim, entry.problem, entry.correction, entry.leanImpact]), ...entry.tags].join(" "),
   }))));
   files.set("search-index.json", JSON.stringify(index) + "\n");
+  files.set("link-report.json", JSON.stringify({ ...report, resolvedWanted }, null, 2) + "\n");
+  files.set("link-report.txt", linkReportText(report, resolvedWanted));
   for (const entry of registry.tags) {
     const a = assertions.find((a) => a.tag === entry.tag),
       target = a ? `${articleUrl(a.article)}#${a.anchor}` : null;
@@ -489,6 +545,9 @@ export async function build(
   );
   console.log(
     `Built ${articles.length} static articles, ${assertions.length} assertion redirects, ${registry.tags.filter((t) => t.state === "withdrawn").length} tombstones; all local links and mathematics validated.`,
+  );
+  console.log(
+    `Link report (advisory): ${report.noInlineLinks.length} articles without inline links, ${report.unlinkedMentions.length} unlinked concept mentions, ${report.wantedPages.length} wanted pages; see dist/link-report.txt.`,
   );
   if (mathLayout.pages) console.log(`Shared ${mathLayout.styles} math layout styles across ${mathLayout.pages} pages; saved ${mathLayout.bytesSaved} bytes.`);
   return files;
