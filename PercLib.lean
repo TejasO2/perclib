@@ -363,6 +363,7 @@ public import PercLib.Probability.Tags.RevealmentDerivative
 public import PercLib.Probability.Tags.Russo
 public import PercLib.Probability.Tags.RussoCoordinate
 public import PercLib.Probability.Tags.SplitCoordinate
+public import PercLib.Probability.Tags.StoppedExploration
 public import PercLib.Probability.Tags.Symmetries
 public import PercLib.Probability.Tags.TailsAndMoments
 public import PercLib.Probability.Tags.Transformations
