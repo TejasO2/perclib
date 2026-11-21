@@ -76,8 +76,9 @@ theorem law_localConn_inter_eq_mul (q : Sym2 V → unitInterval) {S T : Set V}
         ((openGraph ω).induce T).Reachable u v} =
       law q {ω | ((openGraph ω).induce S).Reachable x y} *
         law q {ω | ((openGraph ω).induce T).Reachable u v} :=
-  law_inter_of_determined_internalPairs q hST (measurableSet_localConn S x y)
-    (measurableSet_localConn T u v) (localConn_determined S x y) (localConn_determined T u v)
+  law_inter_of_determined_internalPairs q hST (measurableSet_setOf_reachable_induce S x y)
+    (measurableSet_setOf_reachable_induce T u v) (localConn_determined S x y)
+    (localConn_determined T u v)
 
 /-- **Finitely many domains.** Measurable events determined by the internal pairs of
 pairwise disjoint domains are mutually independent. -/

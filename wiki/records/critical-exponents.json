@@ -143,6 +143,16 @@
         "HPE6"
       ],
       "reason": "The escape bound and the shell-summed window mean are fed into the volume-tail bound from escape probabilities and window means (HPE6) with a=eta/2, b=2-eta."
+    },
+    {
+      "order": 9,
+      "tag": "WD31",
+      "proof_uses": [
+        "X5SS",
+        "22S9",
+        "6THJ"
+      ],
+      "reason": "Written proof following Bollobás–Riordan (arXiv:math/0410359v3): a parity crossing lemma and planar duality give probability 1/2 for the self-dual rectangle; conditioning on the closed dual cluster of the left side, reflection and Harris give RSW; closed dual strip crossings in disjoint annuli give no percolation at 1/2, and sharpness excludes p_c>1/2."
     }
   ]
 }

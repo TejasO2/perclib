@@ -49,7 +49,7 @@ namespace PercLib.Models
 /-- Joining inside `S` written with membership proofs as existentials. -/
 theorem setOf_localConn_eq_exists {W : Type*} (S : Set W) {a b : W} (ha : a ∈ S) (hb : b ∈ S) :
     {ω : Config W | ((openGraph ω).induce S).Reachable ⟨a, ha⟩ ⟨b, hb⟩} =
-      {ω | ∃ ha : a ∈ S, ∃ hb : b ∈ S, ((openGraph ω).induce S).Reachable ⟨a, ha⟩ ⟨b, hb⟩} := by
+      localConn S a b := by
   ext ω
   exact ⟨fun h => ⟨ha, hb, h⟩, fun ⟨_, _, h⟩ => h⟩
 
@@ -72,17 +72,9 @@ theorem law_localConn_ball_eq_of_level_eq_level (β : ℝ≥0) {n : ℕ}
     {x z : ℕ →₀ (Fin d → ZMod L)} (hx : x.support.sup Nat.succ = n)
     (hz : z.support.sup Nat.succ = n) :
     law (intensityProfile J β)
-        {ω | ∃ h0 : (0 : ℕ →₀ (Fin d → ZMod L)) ∈
-            {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ n},
-          ∃ hx' : x ∈ {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ n},
-          ((openGraph ω).induce {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ n}).Reachable
-            ⟨0, h0⟩ ⟨x, hx'⟩} =
+        (localConn {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ n} 0 x) =
       law (intensityProfile J β)
-        {ω | ∃ h0 : (0 : ℕ →₀ (Fin d → ZMod L)) ∈
-            {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ n},
-          ∃ hz' : z ∈ {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ n},
-          ((openGraph ω).induce {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ n}).Reachable
-            ⟨0, h0⟩ ⟨z, hz'⟩} := by
+        (localConn {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ n} 0 z) := by
   have h := law_localConn_ball_eq_of_level_eq J f hJ β (x := 0) (y := x) (x' := 0) (y' := z)
     (by rw [sub_zero, sub_zero, hx, hz])
   have e1 : {c : ℕ →₀ (Fin d → ZMod L) |
@@ -102,21 +94,11 @@ inside `Λ_n` is the average of the same probability over the shell `{h = n}`. -
 theorem localConn_ball_eq_inv_card_mul_tsum_shell (β : ℝ≥0) {n : ℕ}
     {x : ℕ →₀ (Fin d → ZMod L)} (hx : x.support.sup Nat.succ = n) :
     law (intensityProfile J β)
-        {ω | ∃ h0 : (0 : ℕ →₀ (Fin d → ZMod L)) ∈
-            {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ n},
-          ∃ hx' : x ∈ {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ n},
-          ((openGraph ω).induce {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ n}).Reachable
-            ⟨0, h0⟩ ⟨x, hx'⟩} =
+        (localConn {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ n} 0 x) =
       (Nat.card {z : ℕ →₀ (Fin d → ZMod L) // z.support.sup Nat.succ = n} : ℝ≥0∞)⁻¹ *
         ∑' z : {z : ℕ →₀ (Fin d → ZMod L) // z.support.sup Nat.succ = n},
           law (intensityProfile J β)
-            {ω | ∃ h0 : (0 : ℕ →₀ (Fin d → ZMod L)) ∈
-                {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ n},
-              ∃ hz : (z : ℕ →₀ (Fin d → ZMod L)) ∈
-                {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ n},
-              ((openGraph ω).induce
-                {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ n}).Reachable
-                ⟨0, h0⟩ ⟨z, hz⟩} := by
+            (localConn {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ n} 0 z) := by
   have hfin : Finite {z : ℕ →₀ (Fin d → ZMod L) // z.support.sup Nat.succ = n} :=
     (finite_level_shell n).to_subtype
   have hpos : (Nat.card {z : ℕ →₀ (Fin d → ZMod L) // z.support.sup Nat.succ = n} : ℝ≥0∞)
@@ -136,22 +118,11 @@ and `x` are joined inside `Λ_{m+1}` is the average over the shell of level `m +
 theorem localConn_ball_eq_inv_card_mul_tsum_shell_succ (β : ℝ≥0) {m : ℕ}
     {x : ℕ →₀ (Fin d → ZMod L)} (hx : x.support.sup Nat.succ = m + 1) :
     law (intensityProfile J β)
-        {ω | ∃ h0 : (0 : ℕ →₀ (Fin d → ZMod L)) ∈
-            {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ m + 1},
-          ∃ hx' : x ∈ {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ m + 1},
-          ((openGraph ω).induce
-            {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ m + 1}).Reachable
-            ⟨0, h0⟩ ⟨x, hx'⟩} =
+        (localConn {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ m + 1} 0 x) =
       (((L ^ d) ^ (m + 1) - (L ^ d) ^ m : ℕ) : ℝ≥0∞)⁻¹ *
         ∑' z : {z : ℕ →₀ (Fin d → ZMod L) // z.support.sup Nat.succ = m + 1},
           law (intensityProfile J β)
-            {ω | ∃ h0 : (0 : ℕ →₀ (Fin d → ZMod L)) ∈
-                {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ m + 1},
-              ∃ hz : (z : ℕ →₀ (Fin d → ZMod L)) ∈
-                {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ m + 1},
-              ((openGraph ω).induce
-                {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ m + 1}).Reachable
-                ⟨0, h0⟩ ⟨z, hz⟩} := by
+            (localConn {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ m + 1} 0 z) := by
   rw [← card_shell_succ]
   exact localConn_ball_eq_inv_card_mul_tsum_shell J f hJ β hx
 
@@ -179,12 +150,7 @@ theorem localConn_ball_and_tau_bounds_of_averaged (hL : 2 ≤ L) (hd : 1 ≤ d) 
     (hlow : ∀ n : ℕ, 1 ≤ n → ENNReal.ofReal (a * (L : ℝ) ^ (-(n : ℝ) * ((d : ℝ) - α))) ≤
       (((L ^ d) ^ n : ℕ) : ℝ≥0∞)⁻¹ * ∑' x : ℕ →₀ (Fin d → ZMod L),
         if x.support.sup Nat.succ = n then law (intensityProfile J β)
-          {ω | ∃ h0 : (0 : ℕ →₀ (Fin d → ZMod L)) ∈
-              {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ n},
-            ∃ hx : x ∈ {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ n},
-            ((openGraph ω).induce
-              {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ n}).Reachable
-              ⟨0, h0⟩ ⟨x, hx⟩} else 0)
+          (localConn {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ n} 0 x) else 0)
     (hup : ∀ n : ℕ, 1 ≤ n → (((L ^ d) ^ n : ℕ) : ℝ≥0∞)⁻¹ * ∑' x : ℕ →₀ (Fin d → ZMod L),
         (if x.support.sup Nat.succ ≤ n then tau (intensityProfile J β) 0 x else 0) ≤
       ENNReal.ofReal (A * (L : ℝ) ^ (-(n : ℝ) * ((d : ℝ) - α))))
@@ -296,12 +262,7 @@ theorem lintegral_encard_cluster_inter_ball_bounds_of_averaged (hL : 2 ≤ L) (h
     (hlow : ∀ n : ℕ, 1 ≤ n → ENNReal.ofReal (a * (L : ℝ) ^ (-(n : ℝ) * ((d : ℝ) - α))) ≤
       (((L ^ d) ^ n : ℕ) : ℝ≥0∞)⁻¹ * ∑' x : ℕ →₀ (Fin d → ZMod L),
         if x.support.sup Nat.succ = n then law (intensityProfile J β)
-          {ω | ∃ h0 : (0 : ℕ →₀ (Fin d → ZMod L)) ∈
-              {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ n},
-            ∃ hx : x ∈ {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ n},
-            ((openGraph ω).induce
-              {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ n}).Reachable
-              ⟨0, h0⟩ ⟨x, hx⟩} else 0)
+          (localConn {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ n} 0 x) else 0)
     (hup : ∀ n : ℕ, 1 ≤ n → (((L ^ d) ^ n : ℕ) : ℝ≥0∞)⁻¹ * ∑' x : ℕ →₀ (Fin d → ZMod L),
         (if x.support.sup Nat.succ ≤ n then tau (intensityProfile J β) 0 x else 0) ≤
       ENNReal.ofReal (A * (L : ℝ) ^ (-(n : ℝ) * ((d : ℝ) - α))))
@@ -331,12 +292,7 @@ theorem localConn_ball_bounds_of_averaged (hL : 2 ≤ L) (hd : 1 ≤ d)
     (hlow : ∀ n : ℕ, 1 ≤ n → ENNReal.ofReal (a * (L : ℝ) ^ (-(n : ℝ) * ((d : ℝ) - α))) ≤
       (((L ^ d) ^ n : ℕ) : ℝ≥0∞)⁻¹ * ∑' x : ℕ →₀ (Fin d → ZMod L),
         if x.support.sup Nat.succ = n then law (intensityProfile J β)
-          {ω | ∃ h0 : (0 : ℕ →₀ (Fin d → ZMod L)) ∈
-              {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ n},
-            ∃ hx : x ∈ {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ n},
-            ((openGraph ω).induce
-              {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ n}).Reachable
-              ⟨0, h0⟩ ⟨x, hx⟩} else 0)
+          (localConn {c : ℕ →₀ (Fin d → ZMod L) | c.support.sup Nat.succ ≤ n} 0 x) else 0)
     (hup : ∀ n : ℕ, 1 ≤ n → (((L ^ d) ^ n : ℕ) : ℝ≥0∞)⁻¹ * ∑' x : ℕ →₀ (Fin d → ZMod L),
         (if x.support.sup Nat.succ ≤ n then tau (intensityProfile J β) 0 x else 0) ≤
       ENNReal.ofReal (A * (L : ℝ) ^ (-(n : ℝ) * ((d : ℝ) - α))))

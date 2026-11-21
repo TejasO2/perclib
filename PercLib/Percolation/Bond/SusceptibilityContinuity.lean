@@ -69,8 +69,7 @@ theorem tendsto_chi_intensity_nhdsLT (J : Sym2 V → ℝ≥0) (x : V) (b : ℝ�
 omit [Countable V] in
 /-- An internal connection probability is at most the two-point function. -/
 theorem law_localConn_le_tau (q : Sym2 V → unitInterval) (T : Set V) (o u : V) :
-    law q {ω | ∃ ho : o ∈ T, ∃ hu : u ∈ T,
-      ((openGraph ω).induce T).Reachable ⟨o, ho⟩ ⟨u, hu⟩} ≤ tau q o u :=
+    law q (localConn T o u) ≤ tau q o u :=
   measure_mono fun _ ⟨ho, hu, h⟩ => conn_of_localConn _ T ⟨o, ho⟩ ⟨u, hu⟩ h
 
 omit [Countable V] in
@@ -98,10 +97,7 @@ theorem tendsto_boundaryFlux_exhaustion (q : Sym2 V → unitInterval) {Q : ℝ�
     (hrow : ∀ u, rowSum (fun e => unitInterval.toENNReal (q e)) u ≤ Q)
     {o : V} (hchi : chi q o < ⊤) {T : ℕ → Finset V} (hT : Monotone T)
     (hcov : ∀ v, ∃ n, v ∈ T n) :
-    Tendsto (fun n => ∑ u ∈ T n, ∑' v, (if v ∈ T n then 0 else
-      law q {ω | ∃ ho : o ∈ (T n : Set V), ∃ hu : u ∈ (T n : Set V),
-        ((openGraph ω).induce (T n : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
-      (unitInterval.toNNReal (q s(u, v)) : ℝ≥0∞))) atTop (𝓝 0) := by
+    Tendsto (fun n => boundaryFlux q (T n) o) atTop (𝓝 0) := by
   -- The exterior row of `u` beyond `T n`, with the diagonal removed.
   set R : ℕ → V → ℝ≥0∞ := fun n u => ∑' v, if v ∈ T n then 0 else
       (if v = u then 0 else (unitInterval.toNNReal (q s(u, v)) : ℝ≥0∞)) with hR
@@ -114,10 +110,7 @@ theorem tendsto_boundaryFlux_exhaustion (q : Sym2 V → unitInterval) {Q : ℝ�
   have hsum_tau : (∑' u, tau q o u) ≠ ∞ := by rw [← chi_eq_tsum_tau]; exact hchi.ne
   have htau_ne : ∀ u, tau q o u ≠ ∞ := fun u => (prob_le_one.trans_lt ENNReal.one_lt_top).ne
   -- Upper bound `Φ_n ≤ ∑' u, tau q o u * R n u`.
-  have hle : ∀ n, (∑ u ∈ T n, ∑' v, (if v ∈ T n then 0 else
-      law q {ω | ∃ ho : o ∈ (T n : Set V), ∃ hu : u ∈ (T n : Set V),
-        ((openGraph ω).induce (T n : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
-      (unitInterval.toNNReal (q s(u, v)) : ℝ≥0∞))) ≤ ∑' u, tau q o u * R n u := by
+  have hle : ∀ n, (boundaryFlux q (T n) o) ≤ ∑' u, tau q o u * R n u := by
     intro n
     refine le_trans (Finset.sum_le_sum fun u hu => ?_) (ENNReal.sum_le_tsum _)
     simp only [hR]
@@ -167,10 +160,7 @@ has `Φ_q(o,T) < 1`. -/
 theorem exists_boundaryFlux_lt_one (q : Sym2 V → unitInterval) {Q : ℝ≥0∞} (hQ : Q < ⊤)
     (hrow : ∀ u, rowSum (fun e => unitInterval.toENNReal (q e)) u ≤ Q)
     {o : V} (hchi : chi q o < ⊤) :
-    ∃ T : Finset V, o ∈ T ∧ ∑ u ∈ T, ∑' v, (if v ∈ T then 0 else
-      law q {ω | ∃ ho : o ∈ (T : Set V), ∃ hu : u ∈ (T : Set V),
-        ((openGraph ω).induce (T : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
-      (unitInterval.toNNReal (q s(u, v)) : ℝ≥0∞)) < 1 := by
+    ∃ T : Finset V, o ∈ T ∧ boundaryFlux q T o < 1 := by
   obtain ⟨S, hS, hcov⟩ := exists_finset_exhaustion (V := V)
   have hT : Monotone fun n => insert o (S n) := fun m n h => Finset.insert_subset_insert o (hS h)
   have h := tendsto_boundaryFlux_exhaustion q hQ hrow hchi hT
@@ -184,10 +174,7 @@ open Classical in
 theorem exists_boundaryFlux_lt_one_of_chi_lt_top (J : Sym2 V → ℝ≥0) (M : ℝ≥0)
     (hJ : ∀ v, rowSum (fun e => (J e : ℝ≥0∞)) v ≤ M) (β : ℝ≥0) {o : V}
     (hchi : chi (intensityProfile J β) o < ⊤) :
-    ∃ T : Finset V, o ∈ T ∧ ∑ u ∈ T, ∑' v, (if v ∈ T then 0 else
-      law (intensityProfile J β) {ω | ∃ ho : o ∈ (T : Set V), ∃ hu : u ∈ (T : Set V),
-        ((openGraph ω).induce (T : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
-      (unitInterval.toNNReal (intensityProfile J β s(u, v)) : ℝ≥0∞)) < 1 :=
+    ∃ T : Finset V, o ∈ T ∧ boundaryFlux (intensityProfile J β) T o < 1 :=
   exists_boundaryFlux_lt_one _ (ENNReal.mul_lt_top ENNReal.coe_lt_top ENNReal.coe_lt_top)
     (fun u => by convert intensity_rowSum_le J M hJ β u) hchi
 
@@ -218,13 +205,13 @@ open Classical in
 `Φ < 1` (here `Φ = 0`). -/
 example : ∃ T : Finset ℤ, 0 ∈ T ∧ ∑ u ∈ T, ∑' v, (if v ∈ T then 0 else
     law (fun _ : Sym2 ℤ => (0 : unitInterval))
-      {ω | ∃ ho : (0 : ℤ) ∈ (T : Set ℤ), ∃ hu : u ∈ (T : Set ℤ),
-        ((openGraph ω).induce (T : Set ℤ)).Reachable ⟨0, ho⟩ ⟨u, hu⟩} *
+      (localConn (T : Set ℤ) 0 u) *
     (unitInterval.toNNReal (0 : unitInterval) : ℝ≥0∞)) < 1 := by
   have := exists_boundaryFlux_lt_one (V := ℤ) (fun _ => 0) (Q := 0) ENNReal.zero_lt_top
     (fun u => by simp) (o := 0)
     (by rw [chi_eq_one_of_offDiagonal_zero _ (fun _ _ _ => rfl)]; exact ENNReal.one_lt_top)
   obtain ⟨T, hT, h⟩ := this
+  rw [boundaryFlux_def] at h
   exact ⟨T, hT, by convert h⟩
 
 end PercLib.Percolation.Bond

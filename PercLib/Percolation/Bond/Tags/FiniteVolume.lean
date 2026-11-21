@@ -44,26 +44,6 @@ open scoped ENNReal
 namespace PercLib.Percolation.Bond
 variable {V : Type*}
 
-private theorem measurable_local_event (S : Set V) [Countable S] (x y : V) :
-    MeasurableSet {ω : Config V | ∃ hx : x ∈ S, ∃ hy : y ∈ S,
-      ((openGraph ω).induce S).Reachable ⟨x, hx⟩ ⟨y, hy⟩} := by
-  by_cases hx : x ∈ S
-  · by_cases hy : y ∈ S
-    · simpa only [hx, hy, exists_true_left] using
-        measurableSet_localConn S ⟨x, hx⟩ ⟨y, hy⟩
-    · have he : {ω : Config V | ∃ hx : x ∈ S, ∃ hy : y ∈ S,
-          ((openGraph ω).induce S).Reachable ⟨x, hx⟩ ⟨y, hy⟩} = ∅ := by
-        ext ω
-        simp [hy]
-      rw [he]
-      exact MeasurableSet.empty
-  · have he : {ω : Config V | ∃ hx : x ∈ S, ∃ hy : y ∈ S,
-        ((openGraph ω).induce S).Reachable ⟨x, hx⟩ ⟨y, hy⟩} = ∅ := by
-      ext ω
-      simp [hx]
-    rw [he]
-    exact MeasurableSet.empty
-
 /-- The complete local-domain restriction assertion. Probability convergence is
 for an arbitrary measure, not just an independent bond law. Countability is
 required only for measurability, and finiteness only for the cylinder clause. -/
@@ -96,26 +76,19 @@ theorem local_domain_restriction_and_exhaustion (S : Set V)
     (∀ (ω : Config V) (x y : S), ((openGraph ω).induce S).Reachable x y →
       ω ∈ conn (x : V) (y : V)) ∧
     (∀ (ω : Config V) (x y : V), ω ∈ conn x y ↔
-      ∃ F : Finset V, ∃ hx : x ∈ F, ∃ hy : y ∈ F,
-        ((openGraph ω).induce (F : Set V)).Reachable ⟨x, hx⟩ ⟨y, hy⟩) ∧
+      ∃ F : Finset V, ω ∈ localConn (F : Set V) x y) ∧
     (∀ x y : V,
-      Monotone (fun n => {ω : Config V | ∃ hx : x ∈ T n, ∃ hy : y ∈ T n,
-        ((openGraph ω).induce (T n)).Reachable ⟨x, hx⟩ ⟨y, hy⟩}) ∧
-      (conn x y : Set (Config V)) = ⋃ n, {ω : Config V |
-        ∃ hx : x ∈ T n, ∃ hy : y ∈ T n,
-          ((openGraph ω).induce (T n)).Reachable ⟨x, hx⟩ ⟨y, hy⟩}) ∧
+      Monotone (fun n => localConn (T n) x y) ∧
+      (conn x y : Set (Config V)) = ⋃ n, localConn (T n) x y) ∧
     (∀ (_ : ∀ n, Countable (T n)) (x y : V),
-      (∀ n, MeasurableSet {ω : Config V | ∃ hx : x ∈ T n, ∃ hy : y ∈ T n,
-        ((openGraph ω).induce (T n)).Reachable ⟨x, hx⟩ ⟨y, hy⟩}) ∧
+      (∀ n, MeasurableSet (localConn (T n) x y)) ∧
       MeasurableSet (conn x y : Set (Config V))) ∧
     (∀ (μ : Measure (Config V)) (x y : V),
-      Monotone (fun n => μ {ω : Config V | ∃ hx : x ∈ T n, ∃ hy : y ∈ T n,
-        ((openGraph ω).induce (T n)).Reachable ⟨x, hx⟩ ⟨y, hy⟩}) ∧
-      Filter.Tendsto (fun n => μ {ω : Config V | ∃ hx : x ∈ T n, ∃ hy : y ∈ T n,
-        ((openGraph ω).induce (T n)).Reachable ⟨x, hx⟩ ⟨y, hy⟩})
+      Monotone (fun n => μ (localConn (T n) x y)) ∧
+      Filter.Tendsto (fun n => μ (localConn (T n) x y))
         Filter.atTop (nhds (μ (conn x y)))) := by
   refine ⟨measurable_restrict_pairs S, fun ω => openGraph_induce ω S,
-    fun _ x y => measurableSet_localConn S x y, ?_, ?_,
+    fun _ x y => measurableSet_setOf_reachable_induce S x y, ?_, ?_,
     fun x y _ _ h => localConn_iff_of_agree S x y h,
     fun x y _ _ h hc => localConn_mono_config S x y h hc,
     fun ω _ h x y hc => localConn_mono_domain ω h x y hc,
@@ -136,11 +109,9 @@ theorem local_domain_restriction_and_exhaustion (S : Set V)
     exact PercLib.Probability.prodBernoulli_map_preimage q
       (Sym2.map.injective Subtype.val_injective)
   · intro hcount x y
-    have hm (n : ℕ) : MeasurableSet {ω : Config V |
-        ∃ hx : x ∈ T n, ∃ hy : y ∈ T n,
-          ((openGraph ω).induce (T n)).Reachable ⟨x, hx⟩ ⟨y, hy⟩} := by
+    have hm (n : ℕ) : MeasurableSet (localConn (T n) x y) := by
       let : Countable (T n) := hcount n
-      exact measurable_local_event (T n) x y
+      exact measurableSet_localConn (T n) x y
     refine ⟨hm, ?_⟩
     rw [conn_eq_iUnion_localConn hT hcover]
     exact MeasurableSet.iUnion hm
@@ -159,8 +130,7 @@ example : MeasurableSet {ω : Config ℝ |
 -- A genuinely growing exhaustion works for every configuration measure, with no
 -- independence hypothesis and with early domains allowed to omit either endpoint.
 example (μ : Measure (Config ℕ)) (x y : ℕ) :
-    Filter.Tendsto (fun n => μ {ω : Config ℕ | ∃ hx : x ∈ Iic n, ∃ hy : y ∈ Iic n,
-      ((openGraph ω).induce (Iic n)).Reachable ⟨x, hx⟩ ⟨y, hy⟩})
+    Filter.Tendsto (fun n => μ (localConn (Iic n) x y))
         Filter.atTop (nhds (μ (conn x y))) := by
   obtain ⟨_, _, _, _, _, _, _, _, _, _, _, _, h⟩ :=
     local_domain_restriction_and_exhaustion (∅ : Set ℕ) (fun n => Iic n)
