@@ -76,9 +76,9 @@ late. Interface changes and proofs go in separate pull requests, the interface f
 
 ## 5. Checks and merging
 
-**What CI checks** (`.github/workflows/ci.yml`, build and checks only). Once the
-workflow is on `main` it runs on every pull request, and its results are the checks
-`CI / gate`, `CI / kernel-replay`, `CI / scripts` and `CI / wiki` on the pull request.
+**What CI checks** (`.github/workflows/ci.yml`, build and checks only). It runs on
+every pull request, and its results are the checks `CI / gate`, `CI / kernel-replay`,
+`CI / scripts` and `CI / wiki` on the pull request.
 Run the gate locally as well (the commands in [AGENTS.md](AGENTS.md), "Running the gate
 locally") and paste its final lines into the pull request. The jobs:
 
@@ -92,17 +92,23 @@ locally") and paste its final lines into the pull request. The jobs:
 - `scripts`: the unit tests of the tooling in `scripts/`;
 - `wiki`: the wiki build.
 
-**What merges without review.** A *proof-only* pull request: it touches only `.lean`
-files under `PercLib/` (and `PercLib.lean` import lines), changes no definition, no
-tagged statement and no `Basic.lean`/`Defs.lean`, and nothing under `scripts/`,
+**What merges without review.** A *proof-only* pull request: it only modifies existing
+`.lean` files under `PercLib/` other than `Basic.lean`/`Defs.lean` (no new, deleted or
+renamed files, so no change to `PercLib.lean`), and changes only lines inside `theorem`,
+`lemma` or `example` commands (no definition, structure, class, instance, abbrev,
+notation, tag attribute or tagged statement), and nothing under `scripts/`,
 `.github/`, `tasks/` (other than moving its own task to `tasks/done/`) or the pins
 (`lean-toolchain`, `lakefile.toml`, `lake-manifest.json`). The kernel and the axiom
 audit are its check. The auto-merge workflow (`.github/workflows/automerge.yml`) merges
 such a pull request on green CI **only if its author is listed in
-`.github/automerge-authors`** (which Tom maintains), and only once the repository owner
-has made the repository settings it needs (branch protection on `main` requiring the
-`CI / gate` check, and turning the workflow on; the exact steps are at the top of that
-file). Until then, every pull request is merged by a maintainer.
+`.github/automerge-authors`** (which Tom maintains), only for a pull request from a
+branch of `tomhutchcroft/perclib` itself (pull requests from forks always wait for a
+maintainer), marked ready, targeting `main`, up to date with `main`, and with both
+`CI / gate` and `CI / kernel-replay` green on its current commit, and only once the
+repository owner has made the repository settings it needs (branch protection on `main`
+requiring the `CI / gate` check, up-to-date branches and Code Owner review, and the
+repository variable `AUTOMERGE_ENABLED` set to `true`; the exact steps are at the top of
+that file). Until then, every pull request is merged by a maintainer.
 
 **Everything else waits for review**: interface, wiki and tooling pull requests, and
 proof-only pull requests by authors not on that list. They need the approval of a
@@ -144,8 +150,8 @@ good-first-task if you are new), or from docs/FRONTIER.md for work no task cover
 that no open pull request has claimed and that is not in an area CONTRIBUTING.md lists as
 taken; claim it with a draft pull request against main titled "<task-id>: ...", from a
 branch of main in your fork. Build only the modules you change, after
-`lake exe cache get`. CI (.github/workflows/ci.yml) runs on every pull request once it
-is on main, and a maintainer merges unless CONTRIBUTING.md section 5 says it merges
+`lake exe cache get`. CI (.github/workflows/ci.yml) runs on every pull request, and
+a maintainer merges unless CONTRIBUTING.md section 5 says it merges
 automatically: before marking the pull request ready, run
 scripts/gate.sh as AGENTS.md describes and paste its final lines into it. Never use
 sorry, admit, axiom or native_decide; never redefine an existing notion; never alter a
