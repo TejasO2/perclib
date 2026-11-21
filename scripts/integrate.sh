@@ -15,8 +15,17 @@
 # is skipped. Modules missing from the import closure (scripts/check_import_closure.py)
 # get `public import` lines in sorted position, committed. Then scripts/gate.sh BASE runs
 # once, output to a log file. On failure the branch is reset to the recorded tip (local
-# only), the last merged branch is dropped and the rest re-merged and re-gated, until the
-# gate passes or no branch is left. Nothing is ever pushed.
+# only), one merged branch is dropped and the rest re-merged and re-gated, until the gate
+# passes or no branch is left. The dropped branch is the culprit when the log names one:
+# the failing files are read from `error: <path>.lean:` lines and from D-35 `FAIL` lines
+# (a file, or a declaration located through .lake/manifest-raw.json), each file is mapped
+# to the merged branches that changed it (`git diff --name-only <tip>...<branch>`), and if
+# every failing file maps to some branch and exactly one branch is implicated, that branch
+# is dropped ("integrate: dropping <branch> (culprit: <file>)"). Otherwise the last merged
+# branch is dropped. Nothing is ever pushed.
+# It also refuses a BRANCH whose merge-base with the integration branch is not an
+# ancestor of origin/<integration branch> (such a branch was cut from a transient,
+# unpushed integrate merge); the check is skipped when that remote ref does not exist.
 # Exit 0 if the gate passed, 1 if not, 2 on refusal or bad usage.
 set -uo pipefail
 
@@ -38,6 +47,18 @@ cd "$(git rev-parse --show-toplevel 2>/dev/null)" || die "not in a git repositor
 pgrep -f "$GATE_PATTERN" >/dev/null && die "another $GATE_PATTERN is running"
 git rev-parse -q --verify "$base^{commit}" >/dev/null || die "unknown BASE $base"
 tip=$(git rev-parse HEAD)
+REMOTE_REF=origin/$INTEGRATION
+if git rev-parse -q --verify "refs/remotes/$REMOTE_REF^{commit}" >/dev/null; then
+  for b in "${branches[@]}"; do
+    git rev-parse -q --verify "$b^{commit}" >/dev/null || continue
+    mb=$(git merge-base "$INTEGRATION" "$b") \
+      || die "$b has no merge-base with $INTEGRATION"
+    git merge-base --is-ancestor "$mb" "$REMOTE_REF" \
+      || die "$b was cut from ${mb:0:12}, which is not on $REMOTE_REF (a transient integrate merge?); rebase it onto $REMOTE_REF"
+  done
+else
+  echo "integrate: no $REMOTE_REF; transient-base check skipped" >&2
+fi
 
 # Python helpers on $ROOT.lean: `resolve` rewrites conflict hunks that contain only
 # `public import` lines (exit 1 if any hunk has anything else); `insert MOD...` adds
@@ -95,6 +116,53 @@ message_for() {  # $1: 1-based index, $2: branch
   local var="MSG_$1"
   printf '%s\n' "${!var:-Merge $2}"
   [ -n "${INTEGRATE_TRAILER:-}" ] && printf '\n%s\n' "$INTEGRATE_TRAILER"
+}
+
+# find_culprit LOG BRANCH...: print "<branch>\t<file>" when every failing file named
+# in LOG maps to a branch among BRANCH... (changed since $tip) and exactly one branch is
+# implicated; print nothing otherwise.
+find_culprit() {
+  python3 - "$tip" "$@" <<'EOF'
+import json, re, subprocess, sys
+tip, log, branches = sys.argv[1], sys.argv[2], sys.argv[3:]
+text = open(log, encoding="utf-8", errors="replace").read().splitlines()
+files, decls = [], []
+for line in text:
+    m = re.match(r"error: (?:\./)?(\S+?\.lean):\d+", line)
+    if m:
+        files.append(m.group(1)); continue
+    m = re.match(r"FAIL \(\w+\) (?:theorem )?(\S+?):", line)
+    if m:
+        (files if m.group(1).endswith(".lean") else decls).append(m.group(1).removeprefix("./"))
+if decls:
+    try:
+        manifest = json.load(open(".lake/manifest-raw.json", encoding="utf-8"))
+        where = {d["name"]: d.get("module") for d in manifest.get("declarations", [])}
+    except (OSError, ValueError, AttributeError, KeyError, TypeError):
+        where = {}
+    for d in decls:
+        mod = where.get(d)
+        if not mod:
+            sys.exit(0)  # a declaration we cannot locate: no verdict
+        files.append(mod.replace(".", "/") + ".lean")
+if not files:
+    sys.exit(0)
+changed = {}
+for b in branches:
+    out = subprocess.run(["git", "diff", "--name-only", f"{tip}...{b}"],
+                         capture_output=True, text=True)
+    changed[b] = set(out.stdout.split()) if out.returncode == 0 else None
+implicated, first = [], {}
+for f in dict.fromkeys(files):
+    hit = [b for b in branches if changed[b] is None or f in changed[b]]
+    if not hit:
+        sys.exit(0)  # a failing file no branch changed: no verdict
+    for b in hit:
+        if b not in implicated:
+            implicated.append(b); first[b] = f
+if len(implicated) == 1:
+    print(f"{implicated[0]}\t{first[implicated[0]]}")
+EOF
 }
 
 declare -A skipped=()   # branch -> reason
@@ -162,8 +230,16 @@ while :; do
     break
   fi
   gate_line="gate FAILED (attempt $attempt): $(tail -1 "$log" | cut -c1-120)"
-  last=${merged[-1]}
-  skipped[$last]="dropped after gate failure (log $log)"; skip_order+=("$last")
+  culprit=$(find_culprit "$log" "${merged[@]}")
+  if [ -n "$culprit" ]; then
+    last=${culprit%%$'\t'*}
+    echo "integrate: dropping $last (culprit: ${culprit#*$'\t'})"
+    skipped[$last]="dropped after gate failure, culprit ${culprit#*$'\t'} (log $log)"
+  else
+    last=${merged[-1]}
+    skipped[$last]="dropped after gate failure (log $log)"
+  fi
+  skip_order+=("$last")
   todo=()
   for b in "${merged[@]}"; do [ "$b" == "$last" ] || todo+=("$b"); done
   git reset -q --hard "$tip"
