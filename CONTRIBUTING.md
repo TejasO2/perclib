@@ -4,7 +4,7 @@ PercLib is a Lean 4 / mathlib library of percolation theory, proved from the axi
 by Tom Hutchcroft. Most of the work is done by AI assistants, and this page is written so
 that you can hand it to yours; people are equally welcome and follow the same rules. It
 assumes only a clone of the repository and a GitHub account: you can find a task, do it
-and check it without anybody being online. Merging still needs a maintainer for now
+and check it without anybody being online. Most pull requests are merged by a maintainer
 (section 5).
 
 The repository is `tomhutchcroft/perclib`. Work in your own fork (or a branch you own),
@@ -19,7 +19,8 @@ branched from **`main`**, and reach `main` only by pull request. Read
   [`tasks/README.md`](tasks/README.md) explains the board, and tasks labelled
   `good-first-task` are a good start. Finished tasks are in `tasks/done/`.
 - **The frontier**, `docs/FRONTIER.md`, is generated from the library's manifest and
-  lists wiki assertions not yet proved whose prerequisites are all proved. Use it for
+  lists wiki assertions not yet proved whose prerequisites are all proved (the wiki is
+  published from `main` at https://tomhutchcroft.github.io/perclib/). Use it for
   work no task covers; open an issue describing the statements before a large piece of
   such work, so that it does not duplicate work in progress.
 - **Areas taken.** The lace-expansion articles (`wiki/articles/`: lace-expansion,
@@ -63,9 +64,9 @@ Mark it ready for review when it is done. The description follows
 - tags added or changed;
 - the lemmas you searched for, in mathlib and in PercLib, and what you found;
 - the gate result: the commit you ran `scripts/gate.sh` on and its final lines, pasted
-  (see "Running the gate locally" in [AGENTS.md](AGENTS.md)); the CI workflow
-  (`.github/workflows/ci.yml`) runs on pull requests once it is on `main`; until it runs
-  on your pull request, this is the only automatic check a reviewer sees;
+  (see "Running the gate locally" in [AGENTS.md](AGENTS.md)); until the `CI / …` checks
+  appear on your pull request (section 5), this is the only automatic check a reviewer
+  sees;
 - **interface changes**: every new or changed definition, structure, class, instance,
   notation or tagged statement, and any change outside `PercLib/`. If there are none,
   say "none (proof-only)".
@@ -75,15 +76,11 @@ late. Interface changes and proofs go in separate pull requests, the interface f
 
 ## 5. Checks and merging
 
-> **Today: CI exists; no auto-merge.** The CI workflow (`.github/workflows/ci.yml`, build
-> and checks only) exists and runs on pull requests once it is on `main`. Auto-merge is
-> still being reviewed and is not active. Run the gate locally (the commands in
-> [AGENTS.md](AGENTS.md), "Running the gate locally") and paste its final lines into the
-> pull request. Until auto-merge is active, every pull request is merged by a maintainer,
-> Tom Hutchcroft, even when it is proof-only and the gate passes.
-
-**What CI checks** (`.github/workflows/ci.yml`, on every pull request once it is on
-`main`):
+**What CI checks** (`.github/workflows/ci.yml`, build and checks only). It runs on
+every pull request, and its results are the checks `CI / gate`, `CI / kernel-replay`,
+`CI / scripts` and `CI / wiki` on the pull request.
+Run the gate locally as well (the commands in [AGENTS.md](AGENTS.md), "Running the gate
+locally") and paste its final lines into the pull request. The jobs:
 
 - `gate`: a forbidden-construct scan, then `scripts/gate.sh` against the merge base of
   the pull request with its target: full `lake build --wfail`, axiom audit
@@ -95,19 +92,28 @@ late. Interface changes and proofs go in separate pull requests, the interface f
 - `scripts`: the unit tests of the tooling in `scripts/`;
 - `wiki`: the wiki build.
 
-**What will merge without review, once auto-merge is active** (not yet). A *proof-only*
-pull request: it touches only `.lean` files under `PercLib/` (and `PercLib.lean` import
-lines), changes no definition, no tagged statement and no `Basic.lean`/`Defs.lean`, and
-nothing under `scripts/`, `.github/`, `tasks/` (other than moving its own task to
-`tasks/done/`) or the pins (`lean-toolchain`, `lakefile.toml`, `lake-manifest.json`).
-The kernel and the axiom audit are its check. The planned auto-merge workflow will merge
-such a pull request on green CI only if its author is listed in a file of authors under
-`.github/` that Tom maintains; it also needs repository settings only Tom can make.
+**What merges without review.** A *proof-only* pull request: it only modifies existing
+`.lean` files under `PercLib/` other than `Basic.lean`/`Defs.lean` (no new, deleted or
+renamed files, so no change to `PercLib.lean`), and changes only lines inside `theorem`,
+`lemma` or `example` commands (no definition, structure, class, instance, abbrev,
+notation, tag attribute or tagged statement), and nothing under `scripts/`,
+`.github/`, `tasks/` (other than moving its own task to `tasks/done/`) or the pins
+(`lean-toolchain`, `lakefile.toml`, `lake-manifest.json`). The kernel and the axiom
+audit are its check. The auto-merge workflow (`.github/workflows/automerge.yml`) merges
+such a pull request on green CI **only if its author is listed in
+`.github/automerge-authors`** (which Tom maintains), only for a pull request from a
+branch of `tomhutchcroft/perclib` itself (pull requests from forks always wait for a
+maintainer), marked ready, targeting `main`, up to date with `main`, and with both
+`CI / gate` and `CI / kernel-replay` green on its current commit, and only once the
+repository owner has made the repository settings it needs (branch protection on `main`
+requiring the `CI / gate` check, up-to-date branches and Code Owner review, and the
+repository variable `AUTOMERGE_ENABLED` set to `true`; the exact steps are at the top of
+that file). Until then, every pull request is merged by a maintainer.
 
-**Everything else waits for review**, then and now: interface, wiki and tooling pull
-requests, and proof-only pull requests by authors not on that list. They need the
-approval of a maintainer (Tom Hutchcroft, and any collaborators he later names in a
-`CODEOWNERS` file) or of the project's auditing agent when it is running. That agent
+**Everything else waits for review**: interface, wiki and tooling pull requests, and
+proof-only pull requests by authors not on that list. They need the approval of a
+maintainer (Tom Hutchcroft, and any collaborators he names in `.github/CODEOWNERS`) or of
+the project's auditing agent when it is running. That agent
 cannot comment on GitHub, so its verdicts appear as files `docs/reviews/pr-<n>.md` (or
 `docs/reviews/branch-<name>.md` for a branch) on the integration branch
 `claude/zen-lovelace-rvlcw2`; for an example see
@@ -144,8 +150,9 @@ good-first-task if you are new), or from docs/FRONTIER.md for work no task cover
 that no open pull request has claimed and that is not in an area CONTRIBUTING.md lists as
 taken; claim it with a draft pull request against main titled "<task-id>: ...", from a
 branch of main in your fork. Build only the modules you change, after
-`lake exe cache get`. CI (.github/workflows/ci.yml) runs on pull requests once it is on
-main and auto-merge is not active: before marking the pull request ready, run
+`lake exe cache get`. CI (.github/workflows/ci.yml) runs on every pull request, and
+a maintainer merges unless CONTRIBUTING.md section 5 says it merges
+automatically: before marking the pull request ready, run
 scripts/gate.sh as AGENTS.md describes and paste its final lines into it. Never use
 sorry, admit, axiom or native_decide; never redefine an existing notion; never alter a
 tagged statement to make a proof close (report a counterexample in a math-gap issue

@@ -29,12 +29,11 @@ python3 scripts/check_forbidden.py PercLib # forbidden-construct scan (seconds)
 
 ## Running the gate locally
 
-**CI exists; auto-merge is not active.** The CI workflow
-(`.github/workflows/ci.yml`, build and checks only) exists and runs on pull requests once
-it is on `main`; until then the gate you run yourself is the only automatic check.
-Auto-merge is still being reviewed and is not active, so every pull request is merged by a
-maintainer (see [CONTRIBUTING.md](CONTRIBUTING.md), section 5). Run the gate before you
-mark a pull request ready, and paste the commit it ran on and its final lines
+CI (`.github/workflows/ci.yml`) runs on every pull request; its results are the checks
+named `CI / gate`, `CI / kernel-replay`, `CI / scripts` and `CI / wiki` on the pull
+request. Which pull requests merge automatically and which wait for a maintainer is in
+[CONTRIBUTING.md](CONTRIBUTING.md), section 5. Run the gate before
+you mark a pull request ready, and paste the commit it ran on and its final lines
 (`== gate passed on <sha>` and any `NOTICE:` line, or the failure) into the pull request.
 
 You need only a clone, `git`, `python3` (standard library only) and
@@ -87,7 +86,7 @@ from the gate and optional for contributors: it replays every module through
 `leanchecker`, 6 modules per process at about 4 GB each, and must not run beside a build.
 Never run `lake env leanchecker PercLib`: one process needs more than 15 GB and is killed.
 
-**What CI checks** (`.github/workflows/ci.yml`, on pull requests once it is on `main`):
+**What CI checks** (`.github/workflows/ci.yml`, on every pull request):
 `scripts/gate.sh` against the merge base of the pull request with its target, after a
 forbidden-construct scan; then, after a green gate, the kernel replay; the unit tests of
 `scripts/`; and the wiki build. It reports the classification `proof-only` or `interface`
