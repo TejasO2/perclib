@@ -8,6 +8,8 @@ labels: []
 
 # Small-intensity bounds for normalized models and a root-only moment counterexample
 
+Being done by the project's own agents; do not start it.
+
 ## Goal
 Prove and tag two wiki assertions whose Lean is nearly complete: **1EWX** (article
 `boundary-susceptibility`, anchor `tag-1EWX`) and **HRS7** (article `multipoint-trees`,
