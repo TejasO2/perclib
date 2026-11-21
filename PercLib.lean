@@ -69,9 +69,11 @@ public import PercLib.Analysis.VolumeTail.Normalizer
 public import PercLib.Analysis.VolumeTail.SizeBiasMGF
 public import PercLib.Analysis.VolumeTail.UpToConstants
 public import PercLib.Basic
+public import PercLib.Combinatorics.DFSPivot
 public import PercLib.Combinatorics.DoubleFactorialConvolution
 public import PercLib.Combinatorics.FiniteEdgeChange
 public import PercLib.Combinatorics.ForestBranching
+public import PercLib.Combinatorics.Tags.DFSPivot
 public import PercLib.Combinatorics.Tags.ForestConnections
 public import PercLib.Combinatorics.Tags.TreeSplitting
 public import PercLib.Combinatorics.TreeSplitting
