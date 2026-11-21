@@ -12,7 +12,8 @@
 #                  auto-merge workflow decides on its own from the API.
 #   kernel-replay  scripts/kernel_replay.sh 6 after a green gate, on every push and every
 #                  pull request (ruling 9d); the auto-merge workflow requires it.
-#   scripts        every script test (scripts/ci_script_tests.sh).
+#   scripts        every script test that needs no Lean (scripts/ci_script_tests.sh);
+#                  scripts/test_manifest.py needs `lake` and runs in the gate job instead.
 #   wiki           the wiki build, only once wiki/package.json exists; skips otherwise.
 #
 # Security (D-31): every job has a read-only token and no secrets; the trigger is
@@ -114,6 +115,9 @@ jobs:
         env:
           BASE: ${{ steps.base.outputs.base }}
         run: scripts/gate.sh ${BASE:+"$BASE"} 2>&1 | tee .lake/gate.log
+
+      - name: Manifest integration tests (need lake and the packages)
+        run: python3 scripts/test_manifest.py
 
       - name: Classify the change
         id: classify
