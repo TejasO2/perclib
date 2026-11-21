@@ -87,3 +87,10 @@ Either of those is fixed before the workflows run again.
   `manifest` artifact are taken from the push run instead. If the push run's job is
   re-run, re-run the pull request's job too. The cheap jobs `scripts` and `wiki` still run
   in both. Pull requests from forks, and from any other branch, are unaffected.
+- **A waiting job can time out.** The waiting `gate` (or `kernel-replay`) of such a pull
+  request has the same 360-minute limit as the push-run job it waits for, which is the
+  most a job on a GitHub-hosted runner may run, so it cannot be raised to cover that job's
+  queue time as well. If the push run's job is queued long or runs close to its limit, the
+  pull request's job times out and fails (never passes). Re-run it after the push run has
+  finished; it then reads the finished result at once. While it waits, each such job holds
+  a runner without building.
