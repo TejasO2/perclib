@@ -134,6 +134,7 @@ public import PercLib.Models.Site.SelfAvoiding
 public import PercLib.Models.Tags.BinaryTree
 public import PercLib.Models.Tags.Boundary
 public import PercLib.Models.Tags.FiniteRangeDecay
+public import PercLib.Models.Tags.FiniteRangeExit
 public import PercLib.Models.Tags.Hierarchical
 public import PercLib.Models.Tags.KernelsAndSitePaths
 public import PercLib.Models.Tags.Lattice
@@ -266,6 +267,7 @@ public import PercLib.Percolation.Bond.TreeGraph.BranchPoint
 public import PercLib.Percolation.Bond.TreeGraph.Defs
 public import PercLib.Percolation.Bond.TreeGraph.Moments
 public import PercLib.Percolation.Bond.TriangleDecay
+public import PercLib.Percolation.Bond.UniformVolumeTail
 public import PercLib.Percolation.Bond.VolumeTails
 public import PercLib.Percolation.Bond.WalkSum
 public import PercLib.Percolation.Bond.WindowPartition
