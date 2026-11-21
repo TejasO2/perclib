@@ -2,6 +2,7 @@
 """Unit tests of scripts/automerge_classify.py, on fixtures in the shape of the GitHub API."""
 import copy
 import difflib
+import warnings
 import io
 import json
 import re
@@ -107,6 +108,17 @@ FIXTURES = []
 def tearDownModule():
     for root in FIXTURES:
         shutil.rmtree(root, ignore_errors=True)
+
+
+class SourceTests(unittest.TestCase):
+    def test_compiles_without_warnings(self):
+        # Note N1 of the third audit: the module docstring held invalid escapes (`\\s`),
+        # a SyntaxWarning on Python 3.13 and an error in later versions.
+        source = Path(am.__file__).read_text(encoding='utf-8')
+        with warnings.catch_warnings():
+            warnings.simplefilter('error')
+            compile(source, am.__file__, 'exec')
+        self.assertIn('`\\bwhere\\b`', am.__doc__)
 
 
 class PathTests(unittest.TestCase):

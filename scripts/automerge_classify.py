@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Decide whether a pull request may be merged without a maintainer (D-37, ruling 10(2)).
+r"""Decide whether a pull request may be merged without a maintainer (D-37, ruling 10(2)).
 
 Run by `.github/workflows/automerge.yml` from the default branch. It never sees the pull
 request's checkout or anything its build produced: every input is a response of the
