@@ -4,10 +4,14 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: PercLib contributors
 -/
 /-
-Generalises the product-law transport in
-near-critical-diffusivity/Percolation/Literature/BondPercolationSymmetry.lean,
-setBernoulli_map_relabel and setBernoulli_real_preimage_relabel, at revision
-c820fea91a7482c1755de0ec94ecb9f59ccfcacc. Reuse permission: recorded in `docs/DECISIONS.md`.
+Generalises the product-law transport in Percolation/Literature/BondPercolationSymmetry.lean,
+setBernoulli_map_relabel and setBernoulli_real_preimage_relabel, at
+tomhutchcroft/near-critical-diffusivity, revision c820fea91a7482c1755de0ec94ecb9f59ccfcacc. Reuse
+permission: recorded in `docs/DECISIONS.md`. Licence status: that file lies in the source's
+`Percolation/Literature/` tree, which holds code vendored from the `percolation/` project of
+`anthropics/formal-math` (Apache-2.0; see the source's `third_party/formal-math/`). For any
+vendored part, the Apache-2.0 licence and its notices are those retained in
+`third_party/percolation/`; no other upstream licence is asserted.
 The law here is the existing arbitrary-profile prodBernoulli; no host graph or
 new configuration equivalence is introduced. Uses pinned mathlib reindexing.
 -/

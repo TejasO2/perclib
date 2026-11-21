@@ -13,22 +13,28 @@ list is an index of them.
 Checked against the integration branch on 21 November 2026. Every file under `PercLib/`
 was checked: the leading comment blocks of all 372 files, a search for the source
 repositories and revisions anywhere in the files, and the first commit of each file.
+Updated the same day: the seven partial headers were completed (now marked "complete,
+fixed 21 November 2026") and `third_party/critical-lrp/` was added.
 
 ## Summary
 
 | Source | Files | Complete | Partial | Absent |
 |---|---:|---:|---:|---:|
-| `github.com/yujinhkim/lrp` (long-range formalisation) | 62 | 60 | 2 | 0 |
-| `github.com/tomhutchcroft/near-critical-diffusivity` | 14 | 9 | 5 | 0 |
+| `github.com/yujinhkim/lrp` (long-range formalisation) | 62 | 62 | 0 | 0 |
+| `github.com/tomhutchcroft/near-critical-diffusivity` | 14 | 14 | 0 | 0 |
 | `github.com/anthropics/formal-math` (`percolation/`, PercolationContinuity) | 3 | 3 | 0 | 0 |
 | `github.com/nitromannitol/percolation-after-anthropic` | 2 | 2 | 0 | 0 |
-| **Total** | **81** | **74** | **7** | **0** |
+| **Total** | **81** | **81** | **0** | **0** |
 
 ## 1. `github.com/yujinhkim/lrp` (the formalisation of *Critical long-range percolation I*)
 
 Contributor: yujinhkim. Branch `critical-lrp-1`, revision
 `d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`. Licence: Apache-2.0, as declared in the source
-file headers and in the source repository's `third_party/critical-lrp/NOTICE.md`. The headers
+file headers and in the source repository's `third_party/critical-lrp/NOTICE.md`. perclib
+redistributes the licence text and that notice (passages not about the adapted Lean sources
+omitted) in `third_party/critical-lrp/` (`LICENSE`, `NOTICE.md`, `README.md`, and
+`OPENAI_MATH_LICENSE.txt`, which the notice names), so the headers' pointer to
+`third_party/critical-lrp/NOTICE.md` also resolves in perclib. The headers
 also name the upstream origin `github.com/yujinhkim/Critical-Long-range-percolation` at
 revision `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf`. Every header in this section gives that
 branch, revision, licence and upstream origin; source paths below are relative to
@@ -53,7 +59,7 @@ interface, no code copied.
 | `Analysis/HomogeneousBallIntegrals.lean` | `LevyAnalysis/Radial.lean`, `LevyAnalysis/Rpow.lean`, `LevyAnalysis/Homogeneous.lean` | code | complete |
 | `Analysis/LaplaceUniqueness.lean` | `Analysis/LaplaceUnique.lean` | code | complete |
 | `Analysis/RegularVariation/Algebra.lean` | `Analysis/RVAlgebra.lean`, `Analysis/MonotoneRV.lean` | code | complete |
-| `Analysis/RegularVariation/Defs.lean` | `Analysis/RegularVariation.lean`, `Analysis/GeneralInverse.lean` (definitions `LogarithmicallyIntegrable`, `IsLogErrorFunction`, `genInv`) | defs | **partial**: the file header names the repository and licence only; branch, revision, source paths and upstream origin are in the section comment before `LogarithmicallyIntegrable`, not in the header |
+| `Analysis/RegularVariation/Defs.lean` | `Analysis/RegularVariation.lean`, `Analysis/GeneralInverse.lean` (definitions `LogarithmicallyIntegrable`, `IsLogErrorFunction`, `genInv`) | defs | complete, fixed 21 November 2026 (branch, revision, source paths and upstream origin added to the header; previously only in the section comment) |
 | `Analysis/RegularVariation/GeneralInverse.lean` | `Analysis/GeneralInverse.lean`, `Analysis/KaramataTail.lean` | code | complete |
 | `Analysis/RegularVariation/Karamata.lean` | `Analysis/Karamata.lean`, `Analysis/KaramataMain.lean` | code | complete |
 | `Analysis/RegularVariation/KaramataPrimitive.lean` | `Analysis/KaramataPrimitive.lean`, `Analysis/KaramataDivergence.lean` | code | complete |
@@ -62,7 +68,7 @@ interface, no code copied.
 | `Analysis/RegularVariation/LogODE.lean` | `Analysis/RegularVariation.lean` | code | complete |
 | `Analysis/RegularVariation/LogScaling.lean` | `Analysis/LogScaling.lean` | code | complete |
 | `Analysis/RegularVariation/PotterODE.lean` | `Analysis/PotterODE.lean` | code | complete |
-| `Analysis/RegularVariation/UniformConvergence.lean` | `Analysis/UniformConvergence.lean`, `Analysis/PotterBounded.lean` | code | **partial**: the header names only `Analysis/UniformConvergence.lean` ("its first part"); the second part of the file and `Analysis/PotterBounded.lean` are credited only in the "Part 2" section comment |
+| `Analysis/RegularVariation/UniformConvergence.lean` | `Analysis/UniformConvergence.lean`, `Analysis/PotterBounded.lean` | code | complete, fixed 21 November 2026 (the header now credits the "Part 2" statements of `Analysis/UniformConvergence.lean` and `Analysis/PotterBounded.lean`) |
 | `Analysis/RiccatiBootstrap.lean` | `VolumeMoments/Bootstrap.lean` | code | complete |
 | `Analysis/RiccatiComparison.lean` | `ODE.lean` | code | complete |
 | `Analysis/SignedDrivenODE.lean` | `Analysis/Lemma_I_5_26.lean` | code | complete |
@@ -108,9 +114,12 @@ All perclib paths in this section are relative to `PercLib/`.
 ## 2. `github.com/tomhutchcroft/near-critical-diffusivity`
 
 Revision `c820fea91a7482c1755de0ec94ecb9f59ccfcacc`. Reused with Tom Hutchcroft's
-permission (`docs/DECISIONS.md`, D-6 and R-3). The source files carry no licence header, and
-no upstream licence is asserted for them; the licence column records what the header says
-about this. Source paths are relative to the root of that repository.
+permission (`docs/DECISIONS.md`, D-6 and R-3). The native `NearCritical/` files carry no
+licence header, and no upstream licence is asserted for them. The source's
+`Percolation/Literature/` tree holds code vendored from the `percolation/` project of
+`anthropics/formal-math` (Apache-2.0; licence and notices in `third_party/percolation/`); the
+four headers that adapt files from that tree say so. The licence column records what the
+header says. Source paths are relative to the root of that repository.
 
 | perclib file | Source path(s) | Taken | Licence as stated | Header credit |
 |---|---|---|---|---|
@@ -123,11 +132,11 @@ about this. Source paths are relative to the root of that repository.
 | `Probability/ProductExpectation.lean` | `NearCritical/ProductExpectation.lean` | code | no licence header; permission | complete |
 | `Probability/ProfileBK.lean` | `NearCritical/ProfileBKStrict.lean`, `NearCritical/BKAllParameters.lean` | stmts (Lean text new) | no upstream licence asserted; permission | complete |
 | `Probability/Russo.lean` | `NearCritical/Russo.lean` | code | no repository-wide licence; permission | complete |
-| `Probability/ProdBernoulliIndependence.lean` | `Percolation/Literature/BernoulliPercolation.lean` | code (generalised) | not stated; permission | **partial**: licence status not stated |
-| `Probability/FiniteEnergy/Insertion.lean` | `Percolation/Literature/FiniteEnergy.lean` | arg | not stated; permission | **partial**: licence status not stated; repository given as "Tom Hutchcroft's near-critical-diffusivity", not as `tomhutchcroft/near-critical-diffusivity` |
-| `Percolation/Bond/LocalConnectivity.lean` | `Percolation/Literature/SharpnessDCTProofs.lean` | code (generalised) | not stated; permission | **partial**: repository owner missing (`near-critical-diffusivity/…` without `tomhutchcroft/`); licence status not stated |
-| `Probability/Transport/Reindexing.lean` | `Percolation/Literature/BondPercolationSymmetry.lean` | code (generalised) | not stated; permission | **partial**: repository owner missing (`near-critical-diffusivity/…` without `tomhutchcroft/`); licence status not stated |
-| `Probability/Pivotal/Algebra.lean` | `NearCritical/Russo.lean` (the force/flip/difference method) | arg | not stated; permission | **partial**: licence status not stated |
+| `Probability/ProdBernoulliIndependence.lean` | `Percolation/Literature/BernoulliPercolation.lean` | code (generalised) | vendored formal-math tree (Apache-2.0, `third_party/percolation/`) for any vendored part; permission | complete, fixed 21 November 2026 |
+| `Probability/FiniteEnergy/Insertion.lean` | `Percolation/Literature/FiniteEnergy.lean` | arg | vendored formal-math tree (Apache-2.0, `third_party/percolation/`) for any vendored part; permission | complete, fixed 21 November 2026 |
+| `Percolation/Bond/LocalConnectivity.lean` | `Percolation/Literature/SharpnessDCTProofs.lean` | code (generalised) | vendored formal-math tree (Apache-2.0, `third_party/percolation/`) for any vendored part; permission | complete, fixed 21 November 2026 |
+| `Probability/Transport/Reindexing.lean` | `Percolation/Literature/BondPercolationSymmetry.lean` | code (generalised) | vendored formal-math tree (Apache-2.0, `third_party/percolation/`) for any vendored part; permission | complete, fixed 21 November 2026 |
+| `Probability/Pivotal/Algebra.lean` | `NearCritical/Russo.lean` (the force/flip/difference method) | arg | no licence header; permission | complete, fixed 21 November 2026 |
 
 ## 3. `github.com/anthropics/formal-math`, project `percolation/` (PercolationContinuity)
 
