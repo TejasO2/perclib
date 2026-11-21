@@ -584,6 +584,94 @@ class ClassifyTests(unittest.TestCase):
                 self.accept(Fixture().lean(PATH, WITH_A, WITH_A.replace(LINE_A, line)))
         self.assertEqual(am.strip_comments("x--c\n(-- c\n[/- c -/]"), 'x\n(\n[ ]')
 
+    # Findings S3, S4 and S6 of the fifth audit of the CI workflows (probe numbers as
+    # there; each wrote a file when Lean v4.35.0 ran it, after an error). S3: a `'` at a
+    # token start that fits no character literal makes Lean consume two more characters
+    # and resume after them. S4: `2r"…"` is a numeral and a raw string to Lean. S6: after
+    # a numeral, `x.1`, a standalone `!` or `?`, or `²`, a `'` starts a character literal
+    # in Lean, which an `isalnum` identifier test misses. The lexer must refuse each
+    # itself, so the reason names the lexical problem, not a token the line check sees.
+    def lexer_rejects(self, probe, reason):
+        line = 'theorem b : True := trivial ' + probe
+        with self.assertRaises(am.Reject) as cm:
+            Fixture().lean(PATH, WITH_A, WITH_A.replace(LINE_A, line)).classify()
+        message = str(cm.exception)
+        self.assertIn(reason, message)
+        self.assertNotIn('run_meta', message)
+        self.assertNotIn('changed line', message)
+
+    def test_unterminated_char_literal_rejected(self):
+        w = self.S2_WRITE
+        for name, probe in [('p1', f"'-- run_meta {w}"), ('p2', f"'/- run_meta {w} -- -/"),
+                            ('p13', f"'x-- run_meta {w}"),
+                            ('p14', f"'x/- run_meta {w} -- -/"),
+                            ('p20', f"(' -- run_meta {w}"),
+                            ('p16', f'\'a" run_meta {w} -- "')]:
+            with self.subTest(probe=name):
+                self.lexer_rejects(probe, 'unterminated character literal')
+
+    def test_kept_quote_read_both_ways(self):
+        # A `'` kept as code (after a symbol, or the second of `''`) may start a failing
+        # character literal: Lean then resumes two characters later (p18: after `a"`,
+        # so `run_meta` is code), and both readings must agree.
+        w = self.S2_WRITE
+        for name, probe in [('p18', f'+\'a" run_meta {w} -- "'),
+                            ('p19', f'\'\'a" run_meta {w} -- "'),
+                            ('p21', f'+\'ab2\'"\' run_meta {w} -- "'),
+                            ('+ then string', f'+\'a" " run_meta {w} -- "')]:
+            with self.subTest(probe=name):
+                self.lexer_rejects(probe, 'reads differently if Lean starts another token')
+        self.lexer_rejects(f"+'-- run_meta {w}", 'comment opener `--` directly after')  # p17
+
+    def test_raw_string_after_numeral_rejected(self):
+        w = self.S2_WRITE
+        for name, probe in [('p12', f'2r"\\" " /- " run_meta {w} -- -/'),
+                            ('p15', f'2r#"\\"# " /- " run_meta {w} -- -/')]:
+            with self.subTest(probe=name):
+                self.lexer_rejects(probe, 'raw string directly after a numeral')
+
+    def test_lean_identifier_rules(self):
+        w = self.S2_WRITE
+        for name, probe, reason in [
+                ('p4', f'2\'"\' " /- " run_meta {w} -- -/', "`'` directly after a numeral"),
+                ('p7', f'x.1\'"\' " /- " run_meta {w} -- -/', "`'` directly after a numeral"),
+                ('p5', f'!\'"\' " /- " run_meta {w} -- -/',
+                 'character literal directly after a symbol'),
+                ('p8', f'?\'"\' " /- " run_meta {w} -- -/',
+                 'character literal directly after a symbol'),
+                ('²', f'x²\'"\' " -- " run_meta {w}',
+                 'character literal directly after a symbol'),
+                ('«»', f'«x»\'"\' " -- " run_meta {w}', "`'` directly after a numeral or `»`")]:
+            with self.subTest(probe=name):
+                self.lexer_rejects(probe, reason)
+        # Lean's identifier characters include Greek and Latin-1 letters and subscripts.
+        self.assertEqual(am.strip_comments("η' ω₁' é' Σ' x²'"), "η' ω₁' é' Σ' x²'")
+
+    def test_numeral_after_dot_read_both_ways(self):
+        # Lean's parser reads `x.1.e5` as a field index `1` and the field `e5`, but its
+        # error recovery (here after `.1`) reads the number `1.e5`, so `'"'` is a character
+        # literal and `run_meta` code (checked with Lean v4.35.0: the file was written).
+        w = self.S2_WRITE
+        self.lexer_rejects(f'.1.e5\'"\' " -- " run_meta {w}',
+                           'reads differently if Lean starts another token')
+        self.lexer_rejects(f'2e-- run_meta {w}', 'malformed numeral')
+
+    def test_lean_lexing_legitimate_forms_accepted(self):
+        lines = [
+            "theorem b (μ : M) : μ.real (A' ∩ Tn ⁻¹' B') = 0 := rfl",
+            "theorem b : f = Sum.inl ⁻¹' η' := rfl",
+            "theorem b : (Subtype.val : S → V) ⁻¹' ω' = s := rfl",
+            "theorem b (f : ℕ → ℕ) (s t : Set ℕ) : f '' (s ∩ t) = f '' (s ∩ t) := rfl",
+            "theorem b (h : 1 ≤ 2 ∧ True) : 1 < 3 := lt_of_le_of_lt h.1.le (by decide)",
+            "theorem b (p : ℕ × ℕ × ℕ) : p.2.1 = p.2.1 := rfl",
+            "theorem b : (1.5 : ℝ) + 2.5e3 + 1e-3 + 0x1F + 1_000 = 2 := by norm_num",
+            "theorem b : [1, 2].map (· + 0) = [1, 2] := rfl",
+            "theorem b : ('a', \"b\").1 = 'a' := rfl",
+        ]
+        for line in lines:
+            with self.subTest(line=line):
+                self.accept(Fixture().lean(PATH, WITH_A, WITH_A.replace(LINE_A, line)))
+
 
 EVIDENCE_HEAD = 'a' * 40
 EVIDENCE_BASE = 'b' * 40

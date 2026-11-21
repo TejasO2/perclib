@@ -45,7 +45,14 @@ rejection.
   STRING_ESCAPE: Lean abandons such a string at the escape and reads the rest as code).
   Lean lexes the longest token, so a `--` or `/-` directly after a symbol (`<--`, `\/-`,
   `//-`) or a character literal directly after a symbol or `''` (`]'"'`) may be code to
-  Lean rather than a comment or literal: such a file is rejected too.
+  Lean rather than a comment or literal: such a file is rejected too. Identifiers and
+  numerals are delimited by Lean's own rules (`isIdFirst`, `isIdRest`, `numberFn`), not
+  Python's `isalnum`, and a `'` or `r"` directly after a numeral is rejected. A `'` at a
+  token start that fits no character literal is rejected (Lean reports an unterminated
+  character literal and resumes lexing two characters later). Where Lean may lex a `'`
+  kept as code as a failing character literal, or a numeral after `.` as a number
+  rather than a field index, the file is rejected unless both readings open no comment,
+  string or character literal before they meet again.
 - Auxiliary definitions count as definitions: a `where` clause or a `let rec` inside a
   theorem adds a definition (`z.foo`, `a.f`) to the library, so a changed line matching
   `\bwhere\b` or `\blet\s+rec\b` (after comments are removed) is rejected. Since Lean
@@ -376,25 +383,70 @@ def check_paths(entries, title=None) -> list[tuple[str, str | None, str | None]]
 # Lean source
 
 
+def is_letter_like(c: str) -> bool:
+    """Lean's `isLetterLike` (v4.35.0, Init/Meta/Defs.lean)."""
+    n = ord(c)
+    return ((0x3b1 <= n <= 0x3c9 and n != 0x3bb) or (0x391 <= n <= 0x3a9 and n not in (0x3a0, 0x3a3))
+            or 0x3ca <= n <= 0x3fb or 0x1f00 <= n <= 0x1ffe or 0x2100 <= n <= 0x214f
+            or 0x1d49c <= n <= 0x1d59f or (0xc0 <= n <= 0xff and n not in (0xd7, 0xf7))
+            or 0x100 <= n <= 0x17f)
+
+
+def is_id_first(c: str) -> bool:
+    """Lean's `isIdFirst`: ASCII letters, `_` and letter-like characters."""
+    return (c.isascii() and c.isalpha()) or c == '_' or is_letter_like(c)
+
+
 def is_ident_char(c: str) -> bool:
-    return c.isalnum() or c in "_'!?"
+    """Lean's `isIdRest`: ASCII alphanumerics, `_ ' ! ?`, letter-like characters and
+    subscripts. (Not Python's `isalnum`: `²`, `ᶜ` and `Σ` are symbols to Lean.)"""
+    n = ord(c)
+    return ((c.isascii() and c.isalnum()) or c in "_'!?" or is_letter_like(c)
+            or 0x2080 <= n <= 0x209c or 0x1d62 <= n <= 0x1d6a or n == 0x2c7c)
 
 
-def after_symbol(c: str) -> bool:
-    """Whether `c` before a `--`, `/-` or `'` may end a Lean token that the opener continues.
-
-    False for whitespace and `([{⟨,` (which no token of the pinned Lean and Mathlib
-    continues with `-` or `'`) and for identifier characters (after which Lean reads `--`
-    and `/-` as comments and `'` as part of the identifier)."""
-    return not (c.isspace() or c in '([{⟨,' or is_ident_char(c))
+def is_digit(c: str) -> bool:
+    return c.isascii() and c.isdigit()
 
 
-def quote_continues_identifier(text: str, i: int) -> bool:
-    """Whether the `'` at `text[i]` continues an identifier (`h'`, `h''`)."""
-    j = i
-    while j > 0 and text[j - 1] == "'":
-        j -= 1
-    return j > 0 and is_ident_char(text[j - 1])
+# Characters after which no token of the pinned Lean and Mathlib continues with `-` or `'`.
+TOKEN_BOUNDARY = frozenset(' \t\r\n([{⟨,')
+RAW_STRING_START = re.compile(r'r(#*)"')
+ASCII_WORD = re.compile(r'[A-Za-z0-9_]*')
+
+
+def number_end(text: str, i: int) -> tuple[int, bool]:
+    """Where Lean's `numberFn` stops on the numeral starting at `text[i]`, and whether it
+    succeeded (else the position is that of the error)."""
+    n = len(text)
+
+    def digits(j, ok, need):  # Lean's takeDigitsFn
+        while j < n and (text[j] == '_' or ok(text[j])):
+            need = text[j] == '_'
+            j += 1
+        return j, not need
+
+    if text[i] == '0' and text[i + 1:i + 2] in ('b', 'B', 'o', 'O', 'x', 'X'):
+        ok = {'b': lambda c: c in '01', 'o': lambda c: c in '01234567',
+              'x': lambda c: c in '0123456789abcdefABCDEF'}[text[i + 1].lower()]
+        return digits(i + 2, ok, True)
+    j, fine = digits(i + 1, is_digit, False)
+    if not fine or j >= n or text.startswith('..', j) or text[j] not in '.eE':
+        return j, fine
+    bare_dot = False
+    if text[j] == '.':
+        if j + 1 < n and is_digit(text[j + 1]):
+            j, _ = digits(j + 1, is_digit, False)
+        else:
+            j, bare_dot = j + 1, True
+    if j < n and text[j] in 'eE':
+        k = j + 1 + (text[j + 1:j + 2] in ('+', '-'))
+        if k < n and is_digit(text[k]):
+            return digits(k, is_digit, False)[0], True
+        return j, False
+    if bare_dot and j < n and (is_id_first(text[j]) or text[j] == '«'):
+        return i, False
+    return j, True
 
 
 def shown_escape(text: str, i: int) -> str:
@@ -404,112 +456,217 @@ def shown_escape(text: str, i: int) -> str:
     return f'`{text[i:i + 2]}`'
 
 
+class _Scan:
+    """One left-to-right reading of Lean source by the rules of strip_comments.
+
+    `visited` holds the positions where a token may start in code (outside comments and
+    literals), `events` the positions where a comment, string or character literal opens,
+    and `alternatives` pairs (k, j): Lean may lex differently at `k` and then resume at `j`
+    (a `'` that may start a failing character literal, or a numeral that Lean reads as a
+    field index or as a number)."""
+
+    def __init__(self, text, start, stop, blank_literals):
+        self.text, self.start, self.stop = text, start, stop
+        self.blank_literals = blank_literals
+        self.out, self.visited, self.events, self.alternatives = [], set(), [], []
+        self.end = self.run()
+
+    def literal(self, s):
+        return re.sub(r'[^\n]', ' ', s) if self.blank_literals else s
+
+    def run(self):
+        text, out, n, i = self.text, self.out, len(self.text), self.start
+        word_end = None  # where the last identifier or numeral ended
+        while i < n:
+            if self.stop is not None and i in self.stop:
+                return i
+            self.visited.add(i)
+            token_start = (i == self.start or text[i - 1] in TOKEN_BOUNDARY
+                           or i == word_end)
+            if text.startswith(('/-', '--'), i) and not token_start:
+                raise Reject(f'comment opener `{text[i:i + 2]}` directly after a symbol '
+                             f'(`{text[i - 1]}{text[i:i + 2]}` may continue a Lean token)')
+            if text.startswith('/-', i):
+                self.events.append(i)
+                depth, i = 1, i + 2
+                while i < n and depth:
+                    if text.startswith('/-', i):
+                        depth, i = depth + 1, i + 2
+                    elif text.startswith('-/', i):
+                        depth, i = depth - 1, i + 2
+                    else:
+                        if text[i] == '\n':
+                            out.append('\n')
+                        i += 1
+                if depth:
+                    raise Reject('unterminated comment')
+                out.append(' ')
+                continue
+            if text.startswith('--', i):
+                self.events.append(i)
+                end = text.find('\n', i)
+                i = n if end < 0 else end
+                continue
+            raw = RAW_STRING_START.match(text, i)
+            if raw:
+                self.events.append(i)
+                closing = '"' + raw[1]
+                end = text.find(closing, i + len(raw[0]))
+                if end < 0:
+                    raise Reject('unterminated raw string')
+                out.append(self.literal(text[i:end + len(closing)]))
+                i = end + len(closing)
+                continue
+            if text[i] == '"':
+                self.events.append(i)
+                j = i + 1
+                while j < n and text[j] != '"':
+                    if text[j] != '\\':
+                        j += 1
+                        continue
+                    escape = STRING_ESCAPE.match(text, j)
+                    if escape is None:
+                        raise Reject(f'invalid escape {shown_escape(text, j)} in a string '
+                                     'literal')
+                    j = escape.end()
+                if j >= n:
+                    raise Reject('unterminated string')
+                if '{' in text[i:j + 1]:
+                    raise Reject('string literal containing `{` (possibly interpolated)')
+                out.append(self.literal(text[i:j + 1]))
+                i = j + 1
+                continue
+            if text[i] == '«' or is_id_first(text[i]):
+                # An identifier: atoms of identifier characters or `«…»`, joined by `.`.
+                j = i
+                while True:
+                    if text[j] == '«':
+                        end = text.find('»', j + 1)
+                        if end < 0:
+                            raise Reject('unterminated «')
+                        j = end + 1
+                    else:
+                        j += 1
+                        while j < n and is_ident_char(text[j]):
+                            j += 1
+                    if text[j:j + 1] == '.' and j + 1 < n and (
+                            text[j + 1] == '«' or is_id_first(text[j + 1])):
+                        j += 1
+                        continue
+                    break
+                out.append(text[i:j])
+                i = word_end = j
+                continue
+            if is_digit(text[i]):
+                # A numeral. Directly after `.` Lean's parser reads a field index (digits
+                # only, `x.1.le`), but its error recovery reads a number (`1.e5`): where
+                # the two end apart, both readings are checked.
+                end, fine = number_end(text, i)
+                if i > 0 and text[i - 1] == '.' and text[i] != '0':
+                    j = i
+                    while j < n and is_digit(text[j]):
+                        j += 1
+                    resume = end if fine else (end if end > i else i + 1)
+                    if resume != j:
+                        self.alternatives.append((i, resume))
+                elif not fine:
+                    raise Reject(f'malformed numeral `{text[i:end + 1]}`')
+                else:
+                    j = end
+                run = ASCII_WORD.match(text, j)[0]
+                if 'r' in run and text[j + len(run):j + len(run) + 1] in ('"', '#'):
+                    raise Reject('raw string directly after a numeral')
+                out.append(text[i:j])
+                i = word_end = j
+                continue
+            if text[i] == "'":
+                if i == word_end and i != self.start:
+                    raise Reject('`\'` directly after a numeral or `»` (Lean starts a '
+                                 'character literal there)')
+                if text.startswith("''", i) or not token_start:
+                    # A `'` continuing a token (`]'`, `∑'`, `⁻¹'`) or in `''` (Mathlib's
+                    # token; core Lean errors and resumes after the first `'`). Where a
+                    # character literal would fit, the two readings differ: reject. Else
+                    # Lean may still start a character literal here that fails after two
+                    # more characters and resumes after them: that reading is checked too.
+                    if CHAR_LITERAL.match(text, i) or text.startswith("'\\", i):
+                        raise Reject("character literal directly after a symbol or `''`")
+                    if not text.startswith("''", i):
+                        self.alternatives.append((i, i + 3))
+                    out.append("'")
+                    i += 1
+                    continue
+                char = CHAR_LITERAL.match(text, i)
+                if char:
+                    self.events.append(i)
+                    out.append(self.literal(char[0]))
+                    i = char.end()
+                    continue
+                if text.startswith("'\\", i):
+                    # Lean reads `'\` as the start of a character literal, whatever follows.
+                    escape = STRING_ESCAPE.match(text, i + 1)
+                    if escape is None or escape[0] == '\\\n':
+                        raise Reject(f'invalid escape {shown_escape(text, i + 1)} in a '
+                                     'character literal')
+                    raise Reject('unterminated character literal')
+                if i == self.start and self.stop is not None:
+                    # A resumed reading: Lean fails here and resumes two characters later.
+                    self.alternatives.append((i, i + 3))
+                    out.append("'")
+                    i += 1
+                    continue
+                # Lean starts a character literal here, fails after two more characters
+                # and resumes after them, where this scan would not.
+                raise Reject('unterminated character literal')
+            out.append(text[i])
+            i += 1
+        return n
+
+
 def strip_comments(text: str, blank_literals: bool = False) -> str:
     """Remove line and (nested) block comments, keeping strings and every newline.
 
-    A `«…»` identifier is copied verbatim (Lean reads `«x--»` as one identifier, not as
-    the start of a comment). A string literal containing `{` is rejected: it may be an
-    interpolated string (`s!"…"`, `m!"…"`, `throwError "…"`), whose `{…}` holds code with
-    strings of its own, which this scanner does not follow. A string or character literal
-    with an escape outside STRING_ESCAPE is rejected (Lean would end the literal there and
-    read the rest as code). Lean lexes the longest token of its token table, so a `--`,
-    `/-` or `'` directly after a symbol may continue a token (`<-`, `\\/`, `//`, `]'`,
-    `∑'`, `''`) and be code to Lean: a comment opener directly after a character other
-    than whitespace, `([{⟨,` or an identifier character is rejected, and so is a
-    character literal directly after such a character or after `''` (a `'` there that
-    starts no literal, and `''` itself, are kept as code). With `blank_literals`, every
-    character of a string or character literal other than a newline becomes a space.
+    The lexing follows Lean's (v4.35.0) where a mismatch could hide code. An identifier
+    starts only at a character of Lean's `isIdFirst` or at `«` and continues with
+    `isIdRest` characters (a `«…»` part is copied verbatim: Lean reads `«x--»` as one
+    identifier, not as the start of a comment); a run starting with an ASCII digit is a
+    numeral, read as Lean's `numberFn` does, and `²`, `ᶜ`, `Σ`, a standalone `!` or `?` are
+    symbols. A string literal containing `{` is rejected: it may be an interpolated string
+    (`s!"…"`, `m!"…"`, `throwError "…"`), whose `{…}` holds code with strings of its own,
+    which this scanner does not follow. A string or character literal with an escape
+    outside STRING_ESCAPE is rejected (Lean would end the literal there and read the rest
+    as code). Lean lexes the longest token of its token table, so a `--`, `/-` or `'`
+    directly after a symbol may continue a token (`<-`, `\\/`, `//`, `]'`, `∑'`, `''`) and
+    be code to Lean: a comment opener directly after a character other than whitespace,
+    `([{⟨,` or the end of an identifier or numeral is rejected, and so is a character
+    literal directly after such a character or after `''` (a `'` there that starts no
+    literal, and `''` itself, are kept as code). A `'` directly after a numeral or a
+    `«…»` is rejected (Lean starts a character literal there), and so is `r"` or `r#`
+    directly after a numeral. A `'` at a token start that fits no character literal is
+    rejected: Lean reports an unterminated character literal and resumes lexing two
+    characters later, which this scan would not. A `'` kept as code may also start such a
+    failing literal; then the text from two characters after it is read again as a fresh
+    token start, and the file is rejected unless both readings open no comment, string or
+    character literal before they meet. The same check covers a numeral directly after
+    `.`, which Lean's parser reads as a field index (`x.1.le`) and its error recovery as a
+    number (`1.e5`). With `blank_literals`, every character of a string or character
+    literal other than a newline becomes a space.
     """
-    out, i, n = [], 0, len(text)
-
-    def literal(s: str) -> str:
-        return re.sub(r'[^\n]', ' ', s) if blank_literals else s
-
-    while i < n:
-        if text.startswith(('/-', '--'), i) and i > 0 and after_symbol(text[i - 1]):
-            raise Reject(f'comment opener `{text[i:i + 2]}` directly after a symbol '
-                         f'(`{text[i - 1]}{text[i:i + 2]}` may continue a Lean token)')
-        if text.startswith('/-', i):
-            depth, i = 1, i + 2
-            while i < n and depth:
-                if text.startswith('/-', i):
-                    depth, i = depth + 1, i + 2
-                elif text.startswith('-/', i):
-                    depth, i = depth - 1, i + 2
-                else:
-                    if text[i] == '\n':
-                        out.append('\n')
-                    i += 1
-            if depth:
-                raise Reject('unterminated comment')
-            out.append(' ')
-            continue
-        if text.startswith('--', i):
-            end = text.find('\n', i)
-            i = n if end < 0 else end
-            continue
-        raw = re.match(r'r(#*)"', text[i:]) if (i == 0 or not is_ident_char(text[i - 1])) \
-            else None
-        if raw:
-            closing = '"' + raw[1]
-            end = text.find(closing, i + len(raw[0]))
-            if end < 0:
-                raise Reject('unterminated raw string')
-            out.append(literal(text[i:end + len(closing)]))
-            i = end + len(closing)
-            continue
-        if text[i] == '"':
-            j = i + 1
-            while j < n and text[j] != '"':
-                if text[j] != '\\':
-                    j += 1
-                    continue
-                escape = STRING_ESCAPE.match(text, j)
-                if escape is None:
-                    raise Reject(f'invalid escape {shown_escape(text, j)} in a string '
-                                 'literal')
-                j = escape.end()
-            if j >= n:
-                raise Reject('unterminated string')
-            if '{' in text[i:j + 1]:
-                raise Reject('string literal containing `{` (possibly interpolated)')
-            out.append(literal(text[i:j + 1]))
-            i = j + 1
-            continue
-        if text[i] == "'" and i > 0 and not quote_continues_identifier(text, i) and (
-                text[i - 1] == "'" or after_symbol(text[i - 1])):
-            # A `'` continuing a token (`]'`, `∑'`), after `''` (never a character literal
-            # in Lean: Mathlib's token, or an error) or after a lexing error: Lean reads it
-            # as code, or errors and resumes after it. Where a character literal would fit,
-            # the two readings differ: reject. (A `''` itself starts no literal below.)
-            if CHAR_LITERAL.match(text, i) or text.startswith("'\\", i):
-                raise Reject("character literal directly after a symbol or `''`")
-            out.append("'")
-            i += 1
-            continue
-        if text[i] == "'" and (i == 0 or not is_ident_char(text[i - 1])):
-            char = CHAR_LITERAL.match(text, i)
-            if char:
-                out.append(literal(char[0]))
-                i = char.end()
-                continue
-            if text.startswith("'\\", i):
-                # Lean reads `'\` as the start of a character literal, whatever follows.
-                escape = STRING_ESCAPE.match(text, i + 1)
-                if escape is None or escape[0] == '\\\n':
-                    raise Reject(f'invalid escape {shown_escape(text, i + 1)} in a '
-                                 'character literal')
-                raise Reject('unterminated character literal')
-        if text[i] == '«':
-            end = text.find('»', i + 1)
-            if end < 0:
-                raise Reject('unterminated «')
-            out.append(text[i:end + 1])
-            i = end + 1
-            continue
-        out.append(text[i])
-        i += 1
-    return ''.join(out)
+    main = _Scan(text, 0, None, blank_literals)
+    todo = list(main.alternatives)
+    while todo:
+        k, resume = todo.pop()
+        try:
+            other = _Scan(text, resume, main.visited, blank_literals)
+        except Reject as e:
+            raise Reject(f'the text after `{text[k]}` reads differently if Lean starts '
+                         f'another token there: {e}') from None
+        meet = other.end
+        if any(e < meet for e in other.events) or any(k < e < meet for e in main.events):
+            raise Reject(f'the text after `{text[k]}` reads differently if Lean starts '
+                         'another token there (a failing character literal or a number)')
+        todo += other.alternatives
+    return ''.join(main.out)
 
 
 def split_lines(text: str) -> list[str]:
