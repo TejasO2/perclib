@@ -24,6 +24,7 @@ Each theorem restates a result proved under its own name in
 ## Main results
 
 * `maximal_bound_truncated_predictable_variance`
+* `damped_maximum_of_predictable_variance_tail`
 -/
 
 @[expose] public section
@@ -51,5 +52,37 @@ theorem maximal_bound_truncated_predictable_variance [IsFiniteMeasure μ]
       4 * ∫⁻ ω, min (⨆ n : ℕ, ENNReal.ofReal (stoppedProcess (fun k ω => ∑ i ∈ range k,
           μ[fun ω => (X (i + 1) ω - X i ω) ^ 2 | ℱ i] ω) T n ω)) (l : ℝ≥0∞) ∂μ :=
   setLIntegral_iSup_abs_sq_le_four_mul_lintegral_min hX hX0 hL2 hT l
+
+/-- Damped martingale maximum from a predictable-variance power tail: under the assumptions of
+`maximal_bound_truncated_predictable_variance`, if `μ (Q_T ≥ x) ≤ A x^{-θ}` for every real
+`x > 0`, with `A > 0` and `0 ≤ θ < 1/2`, then for every `h > 0`,
+`E[(M_T / Q_T)(1 - e^{-h Q_T}) 1{0 < Q_T < ∞}] ≤ C_θ A h^{1/2+θ}`, where
+`C_θ = 2 · 2^{(1-θ)/2} / √(1-θ) · (1 / (1 - 2^{-(1/2+θ)}) + 1 / (2^{1/2-θ} - 1))`, and
+`C_θ ≤ 32 / (1 - 2θ)`. -/
+@[tag "4GBV"]
+theorem damped_maximum_of_predictable_variance_tail [IsFiniteMeasure μ]
+    (hX : Martingale X ℱ μ) (hX0 : X 0 = 0) (hL2 : ∀ n, MemLp (X n) 2 μ)
+    {T : Ω → WithTop ℕ} (hT : IsStoppingTime ℱ T) {A θ : ℝ} (hA : 0 < A) (hθ0 : 0 ≤ θ)
+    (hθ : θ < 1 / 2)
+    (htail : ∀ x : ℝ, 0 < x → μ {ω | ENNReal.ofReal x ≤ ⨆ n : ℕ, ENNReal.ofReal
+      (stoppedProcess (fun k ω => ∑ i ∈ range k,
+        μ[fun ω => (X (i + 1) ω - X i ω) ^ 2 | ℱ i] ω) T n ω)} ≤ ENNReal.ofReal (A * x ^ (-θ)))
+    {h : ℝ} (hh : 0 < h) :
+    ∫⁻ ω in {ω | 0 < (⨆ n : ℕ, ENNReal.ofReal (stoppedProcess (fun k ω => ∑ i ∈ range k,
+          μ[fun ω => (X (i + 1) ω - X i ω) ^ 2 | ℱ i] ω) T n ω)) ∧
+        (⨆ n : ℕ, ENNReal.ofReal (stoppedProcess (fun k ω => ∑ i ∈ range k,
+          μ[fun ω => (X (i + 1) ω - X i ω) ^ 2 | ℱ i] ω) T n ω)) < ⊤},
+        (⨆ (n : ℕ) (_ : (n : WithTop ℕ) ≤ T ω), ENNReal.ofReal |X n ω|) *
+          ENNReal.ofReal ((1 - Real.exp (-(h * (⨆ n : ℕ, ENNReal.ofReal
+            (stoppedProcess (fun k ω => ∑ i ∈ range k,
+              μ[fun ω => (X (i + 1) ω - X i ω) ^ 2 | ℱ i] ω) T n ω)).toReal))) /
+            (⨆ n : ℕ, ENNReal.ofReal (stoppedProcess (fun k ω => ∑ i ∈ range k,
+              μ[fun ω => (X (i + 1) ω - X i ω) ^ 2 | ℱ i] ω) T n ω)).toReal) ∂μ ≤
+      ENNReal.ofReal (2 * 2 ^ ((1 - θ) / 2) / Real.sqrt (1 - θ) *
+        (1 / (1 - 2 ^ (-(1 / 2 + θ))) + 1 / (2 ^ (1 / 2 - θ) - 1)) * A * h ^ (1 / 2 + θ)) ∧
+    2 * 2 ^ ((1 - θ) / 2) / Real.sqrt (1 - θ) *
+        (1 / (1 - 2 ^ (-(1 / 2 + θ))) + 1 / (2 ^ (1 / 2 - θ) - 1)) ≤ 32 / (1 - 2 * θ) :=
+  ⟨setLIntegral_iSup_abs_mul_one_sub_exp_div_le hX hX0 hL2 hT hA hθ0 hθ htail hh,
+    two_mul_rpow_div_sqrt_mul_add_le hθ0 hθ⟩
 
 end PercLib.Probability

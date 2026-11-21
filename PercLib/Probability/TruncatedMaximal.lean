@@ -11,6 +11,12 @@ module
 public import Mathlib.Probability.Martingale.OptionalStopping
 public import Mathlib.Analysis.SpecialFunctions.Pow.Integral
 public import Mathlib.MeasureTheory.Function.L2Space
+public import Mathlib.MeasureTheory.Integral.Layercake
+public import Mathlib.MeasureTheory.Integral.MeanInequalities
+public import Mathlib.Data.Int.Log
+public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
+public import Mathlib.Analysis.SpecialFunctions.Integrability.Basic
+public import Mathlib.Analysis.SpecificLimits.Basic
 
 /-!
 # Doob's `L²` maximal inequality
@@ -511,5 +517,434 @@ theorem setLIntegral_iSup_abs_sq_le_four_mul_lintegral_min [IsFiniteMeasure μ]
         lintegral_iSup (fun n => (hMTm n).pow_const 2)
           (fun n n' h ω => pow_le_pow_left₀ zero_le (hMTmono h ω) 2)
     _ ≤ 4 * ∫⁻ ω, min (QT ω) l ∂μ := iSup_le hfin
+
+
+/-! ### A variance tail controls the damped maximum -/
+
+/-- A stopped process of measurable functions is measurable at every time. -/
+theorem measurable_stoppedProcess_of_measurable {u : ℕ → Ω → ℝ} (hu : ∀ k, Measurable (u k))
+    {T : Ω → WithTop ℕ} (hT : IsStoppingTime ℱ T) (n : ℕ) : Measurable (stoppedProcess u T n) := by
+  rw [stoppedProcess_eq]
+  refine ((hu n).indicator (ℱ.le n _ (hT.measurableSet_ge n))).add ?_
+  rw [Finset.sum_fn]
+  exact Finset.measurable_sum _ fun i _ => (hu i).indicator (ℱ.le i _ (hT.measurableSet_eq i))
+
+/-- The maximum of `|X_n|` over `n ≤ T` is measurable. -/
+theorem measurable_iSup_ofReal_abs_of_le (hXm : ∀ n, Measurable (X n)) {T : Ω → WithTop ℕ}
+    (hT : IsStoppingTime ℱ T) :
+    Measurable fun ω => ⨆ (n : ℕ) (_ : (n : WithTop ℕ) ≤ T ω), ENNReal.ofReal |X n ω| := by
+  refine Measurable.iSup fun n => ?_
+  have e : (fun ω => ⨆ (_ : (n : WithTop ℕ) ≤ T ω), ENNReal.ofReal |X n ω|) =
+      {ω | (n : WithTop ℕ) ≤ T ω}.indicator fun ω => ENNReal.ofReal |X n ω| := by
+    funext ω
+    by_cases h : (n : WithTop ℕ) ≤ T ω <;> simp [h]
+  rw [e]
+  exact (continuous_abs.measurable.comp (hXm n)).ennreal_ofReal.indicator
+    (ℱ.le n _ (hT.measurableSet_ge n))
+
+/-- **Truncated means from a power tail.** If `μ (f ≥ x) ≤ A x^{-θ}` for all `x > 0` with
+`θ < 1`, then `∫ min f c ≤ A c^{1-θ} / (1 - θ)`. -/
+theorem lintegral_min_ofReal_le_of_meas_le_rpow {f : Ω → ℝ≥0∞} (hf : Measurable f) {A θ : ℝ}
+    (hA : 0 ≤ A) (hθ1 : θ < 1)
+    (htail : ∀ x : ℝ, 0 < x → μ {ω | ENNReal.ofReal x ≤ f ω} ≤ ENNReal.ofReal (A * x ^ (-θ)))
+    {c : ℝ} (hc : 0 ≤ c) :
+    ∫⁻ ω, min (f ω) (ENNReal.ofReal c) ∂μ ≤ ENNReal.ofReal (A * c ^ (1 - θ) / (1 - θ)) := by
+  set g : Ω → ℝ := fun ω => (min (f ω) (ENNReal.ofReal c)).toReal with hg
+  have hgm : Measurable g := (hf.min measurable_const).ennreal_toReal
+  have hfin : ∀ ω, min (f ω) (ENNReal.ofReal c) ≠ ⊤ := fun ω =>
+    ne_top_of_le_ne_top ENNReal.ofReal_ne_top (min_le_right _ _)
+  have e : ∀ ω, min (f ω) (ENNReal.ofReal c) = ENNReal.ofReal (g ω) := fun ω =>
+    (ENNReal.ofReal_toReal (hfin ω)).symm
+  simp_rw [e]
+  rw [lintegral_eq_lintegral_meas_lt μ (Eventually.of_forall fun ω => ENNReal.toReal_nonneg)
+    hgm.aemeasurable]
+  have hint : IntegrableOn (fun t : ℝ => A * t ^ (-θ)) (Set.Ioc 0 c) := by
+    have := (intervalIntegral.intervalIntegrable_rpow' (a := 0) (b := c) (r := -θ)
+      (by linarith)).const_mul A
+    exact (intervalIntegrable_iff_integrableOn_Ioc_of_le hc).1 this
+  calc ∫⁻ t in Set.Ioi 0, μ {ω | t < g ω}
+      ≤ ∫⁻ t in Set.Ioi 0,
+          (Set.Ioc 0 c).indicator (fun t => ENNReal.ofReal (A * t ^ (-θ))) t := by
+        refine setLIntegral_mono' measurableSet_Ioi fun t ht => ?_
+        by_cases htc : t ≤ c
+        · rw [Set.indicator_of_mem (show t ∈ Set.Ioc 0 c from ⟨ht, htc⟩)]
+          refine (measure_mono fun ω hω => ?_).trans (htail t ht)
+          simp only [Set.mem_ofPred_eq] at hω ⊢
+          have h1 : ENNReal.ofReal t < min (f ω) (ENNReal.ofReal c) := by
+            rw [e ω]
+            exact (ENNReal.ofReal_lt_ofReal_iff (lt_trans (Set.mem_Ioi.1 ht) hω)).2 hω
+          exact (h1.trans_le (min_le_left _ _)).le
+        · rw [Set.indicator_of_notMem (fun h => htc h.2)]
+          have : {ω | t < g ω} = ∅ := by
+            ext ω
+            simp only [Set.mem_ofPred_eq, Set.mem_empty_iff_false, iff_false, not_lt]
+            have : g ω ≤ c := ENNReal.toReal_le_of_le_ofReal hc (min_le_right _ _)
+            linarith
+          rw [this, measure_empty]
+    _ ≤ ∫⁻ t, (Set.Ioc 0 c).indicator (fun t => ENNReal.ofReal (A * t ^ (-θ))) t :=
+        setLIntegral_le_lintegral _ _
+    _ = ∫⁻ t in Set.Ioc 0 c, ENNReal.ofReal (A * t ^ (-θ)) :=
+        lintegral_indicator measurableSet_Ioc _
+    _ = ENNReal.ofReal (∫ t in Set.Ioc 0 c, A * t ^ (-θ)) :=
+        (ofReal_integral_eq_lintegral_ofReal hint (ae_restrict_of_forall_mem measurableSet_Ioc
+          fun t ht => mul_nonneg hA (Real.rpow_nonneg ht.1.le _))).symm
+    _ = ENNReal.ofReal (A * c ^ (1 - θ) / (1 - θ)) := by
+        rw [← intervalIntegral.integral_of_le hc, intervalIntegral.integral_const_mul,
+          integral_rpow (Or.inl (by linarith)), show -θ + 1 = 1 - θ by ring,
+          Real.zero_rpow (by linarith : (1 - θ) ≠ 0), sub_zero, mul_div_assoc]
+
+/-- The Cauchy–Schwarz inequality on a set, in `ℝ≥0∞`:
+`∫_s f ≤ (∫_s f²)^{1/2} μ(s)^{1/2}`. -/
+theorem setLIntegral_le_rpow_mul_rpow {f : Ω → ℝ≥0∞} (hf : Measurable f) (s : Set Ω) :
+    ∫⁻ ω in s, f ω ∂μ ≤ (∫⁻ ω in s, f ω ^ 2 ∂μ) ^ (1 / 2 : ℝ) * μ s ^ (1 / 2 : ℝ) := by
+  have h := ENNReal.lintegral_mul_le_Lp_mul_Lq (μ.restrict s) Real.HolderConjugate.two_two
+    hf.aemeasurable (aemeasurable_const (b := (1 : ℝ≥0∞)))
+  simp only [Pi.mul_apply, mul_one, ENNReal.one_rpow, lintegral_const,
+    Measure.restrict_apply_univ, one_mul] at h
+  simpa [ENNReal.rpow_two] using h
+
+/-- The square root in the dyadic Cauchy–Schwarz step. -/
+theorem sqrt_four_mul_rpow_mul_rpow_eq {A θ c : ℝ} (hA : 0 ≤ A) (hθ1 : θ < 1) (hc : 0 < c) :
+    Real.sqrt (4 * (A * (2 * c) ^ (1 - θ) / (1 - θ)) * (A * c ^ (-θ))) =
+      2 * 2 ^ ((1 - θ) / 2) / Real.sqrt (1 - θ) * A * c ^ (1 / 2 - θ) := by
+  have hθ' : 0 < 1 - θ := by linarith
+  have hs : 0 < Real.sqrt (1 - θ) := Real.sqrt_pos.2 hθ'
+  rw [← Real.sqrt_sq (show 0 ≤ 2 * 2 ^ ((1 - θ) / 2) / Real.sqrt (1 - θ) * A * c ^ (1 / 2 - θ)
+    by positivity)]
+  congr 1
+  have e1 : ((2 : ℝ) ^ ((1 - θ) / 2)) ^ 2 = 2 ^ (1 - θ) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul (by norm_num)]
+    congr 1
+    push_cast
+    ring
+  have e2 : (c ^ (1 / 2 - θ)) ^ 2 = c ^ (1 - θ) * c ^ (-θ) := by
+    rw [← Real.rpow_natCast, ← Real.rpow_mul hc.le, ← Real.rpow_add hc]
+    congr 1
+    push_cast
+    ring
+  have e3 : Real.sqrt (1 - θ) ^ 2 = 1 - θ := Real.sq_sqrt hθ'.le
+  rw [show (2 * 2 ^ ((1 - θ) / 2) / Real.sqrt (1 - θ) * A * c ^ (1 / 2 - θ)) ^ 2 =
+      4 * ((2 : ℝ) ^ ((1 - θ) / 2)) ^ 2 / Real.sqrt (1 - θ) ^ 2 * A ^ 2 * (c ^ (1 / 2 - θ)) ^ 2
+      by ring, e1, e2, e3, Real.mul_rpow (by norm_num) hc.le]
+  ring
+
+/-- One dyadic piece: on a set where `c ≤ Q ≤ 2c`, the maximal bound and the power tail give
+`∫_s M ≤ 2 · 2^{(1-θ)/2} (1-θ)^{-1/2} A c^{1/2-θ}`. -/
+theorem setLIntegral_le_of_forall_le_of_meas_le_rpow {Qv Mv : Ω → ℝ≥0∞} (hQ : Measurable Qv)
+    (hM : Measurable Mv)
+    (hmax : ∀ l : ℝ≥0, ∫⁻ ω in {ω | Qv ω ≤ l}, Mv ω ^ 2 ∂μ ≤ 4 * ∫⁻ ω, min (Qv ω) l ∂μ)
+    {A θ : ℝ} (hA : 0 < A) (hθ1 : θ < 1)
+    (htail : ∀ x : ℝ, 0 < x → μ {ω | ENNReal.ofReal x ≤ Qv ω} ≤ ENNReal.ofReal (A * x ^ (-θ)))
+    {c : ℝ} (hc : 0 < c) {s : Set Ω}
+    (hs : s ⊆ {ω | ENNReal.ofReal c ≤ Qv ω ∧ Qv ω ≤ ENNReal.ofReal (2 * c)}) :
+    ∫⁻ ω in s, Mv ω ∂μ ≤
+      ENNReal.ofReal (2 * 2 ^ ((1 - θ) / 2) / Real.sqrt (1 - θ) * A * c ^ (1 / 2 - θ)) := by
+  have hθ' : 0 < 1 - θ := by linarith
+  have hα : 0 ≤ 4 * (A * (2 * c) ^ (1 - θ) / (1 - θ)) :=
+    mul_nonneg (by norm_num) (div_nonneg (mul_nonneg hA.le (Real.rpow_nonneg (by positivity) _))
+      hθ'.le)
+  have hβ : 0 ≤ A * c ^ (-θ) := mul_nonneg hA.le (Real.rpow_nonneg hc.le _)
+  have h1 : ∫⁻ ω in s, Mv ω ^ 2 ∂μ ≤ ENNReal.ofReal (4 * (A * (2 * c) ^ (1 - θ) / (1 - θ))) := by
+    have hl : ∫⁻ ω in {ω | Qv ω ≤ ENNReal.ofReal (2 * c)}, Mv ω ^ 2 ∂μ ≤
+        4 * ∫⁻ ω, min (Qv ω) (ENNReal.ofReal (2 * c)) ∂μ := hmax (2 * c).toNNReal
+    calc ∫⁻ ω in s, Mv ω ^ 2 ∂μ
+        ≤ ∫⁻ ω in {ω | Qv ω ≤ ENNReal.ofReal (2 * c)}, Mv ω ^ 2 ∂μ :=
+          lintegral_mono_set fun ω hω => (hs hω).2
+      _ ≤ 4 * ∫⁻ ω, min (Qv ω) (ENNReal.ofReal (2 * c)) ∂μ := hl
+      _ ≤ 4 * ENNReal.ofReal (A * (2 * c) ^ (1 - θ) / (1 - θ)) :=
+          mul_le_mul_of_nonneg_left (lintegral_min_ofReal_le_of_meas_le_rpow hQ hA.le hθ1 htail
+            (by positivity)) zero_le
+      _ = _ := by rw [ENNReal.ofReal_mul (by norm_num), ENNReal.ofReal_ofNat]
+  have h2 : μ s ≤ ENNReal.ofReal (A * c ^ (-θ)) :=
+    (measure_mono fun ω hω => (hs hω).1).trans (htail c hc)
+  refine (setLIntegral_le_rpow_mul_rpow hM s).trans ?_
+  calc (∫⁻ ω in s, Mv ω ^ 2 ∂μ) ^ (1 / 2 : ℝ) * μ s ^ (1 / 2 : ℝ)
+      ≤ ENNReal.ofReal (4 * (A * (2 * c) ^ (1 - θ) / (1 - θ))) ^ (1 / 2 : ℝ) *
+          ENNReal.ofReal (A * c ^ (-θ)) ^ (1 / 2 : ℝ) := by
+        gcongr
+    _ = ENNReal.ofReal (Real.sqrt (4 * (A * (2 * c) ^ (1 - θ) / (1 - θ)) * (A * c ^ (-θ)))) := by
+        rw [ENNReal.ofReal_rpow_of_nonneg hα (by norm_num),
+          ENNReal.ofReal_rpow_of_nonneg hβ (by norm_num), ← ENNReal.ofReal_mul (by positivity),
+          Real.sqrt_eq_rpow, Real.mul_rpow hα hβ]
+    _ = _ := by rw [sqrt_four_mul_rpow_mul_rpow_eq hA.le hθ1 hc]
+
+/-- **The damped maximum from a variance power tail**, for any pair `(Q, M)` satisfying the
+truncated maximal bound `∫_{Q ≤ λ} M² ≤ 4 ∫ min Q λ` for every `λ`: if
+`μ (Q ≥ x) ≤ A x^{-θ}` for all `x > 0`, with `A > 0` and `0 ≤ θ < 1/2`, then for `h > 0`,
+`∫_{0 < Q < ∞} M (1 - e^{-hQ}) / Q ≤ C_θ A h^{1/2+θ}`. -/
+theorem setLIntegral_mul_one_sub_exp_div_le_of_meas_le_rpow {Qv Mv : Ω → ℝ≥0∞}
+    (hQ : Measurable Qv) (hM : Measurable Mv)
+    (hmax : ∀ l : ℝ≥0, ∫⁻ ω in {ω | Qv ω ≤ l}, Mv ω ^ 2 ∂μ ≤ 4 * ∫⁻ ω, min (Qv ω) l ∂μ)
+    {A θ : ℝ} (hA : 0 < A) (hθ0 : 0 ≤ θ) (hθ : θ < 1 / 2)
+    (htail : ∀ x : ℝ, 0 < x → μ {ω | ENNReal.ofReal x ≤ Qv ω} ≤ ENNReal.ofReal (A * x ^ (-θ)))
+    {h : ℝ} (hh : 0 < h) :
+    ∫⁻ ω in {ω | 0 < Qv ω ∧ Qv ω < ⊤},
+        Mv ω * ENNReal.ofReal ((1 - Real.exp (-(h * (Qv ω).toReal))) / (Qv ω).toReal) ∂μ ≤
+      ENNReal.ofReal (2 * 2 ^ ((1 - θ) / 2) / Real.sqrt (1 - θ) *
+        (1 / (1 - 2 ^ (-(1 / 2 + θ))) + 1 / (2 ^ (1 / 2 - θ) - 1)) * A * h ^ (1 / 2 + θ)) := by
+  have hθ1 : θ < 1 := by linarith
+  set K : ℝ := 2 * 2 ^ ((1 - θ) / 2) / Real.sqrt (1 - θ) * A with hK
+  have hK0 : 0 ≤ K := by positivity
+  set F : Ω → ℝ≥0∞ := fun ω =>
+    Mv ω * ENNReal.ofReal ((1 - Real.exp (-(h * (Qv ω).toReal))) / (Qv ω).toReal) with hF
+  set x : Ω → ℝ := fun ω => h * (Qv ω).toReal with hx
+  set P : ℕ → Set Ω := fun n =>
+    {ω | 0 < Qv ω ∧ Qv ω < ⊤ ∧ (2 : ℝ) ^ n ≤ x ω ∧ x ω < 2 ^ (n + 1)} with hP
+  set N : ℕ → Set Ω := fun n =>
+    {ω | 0 < Qv ω ∧ Qv ω < ⊤ ∧ ((2 : ℝ) ^ (n + 1))⁻¹ ≤ x ω ∧ x ω < ((2 : ℝ) ^ n)⁻¹} with hN
+  -- every point of positive finite variance lies in one dyadic piece
+  have hcover : {ω | 0 < Qv ω ∧ Qv ω < ⊤} ⊆ (⋃ n, P n) ∪ ⋃ n, N n := by
+    intro ω hω
+    obtain ⟨h0, htop⟩ := hω
+    have hxpos : 0 < x ω := mul_pos hh (ENNReal.toReal_pos h0.ne' htop.ne)
+    have hlo := Int.zpow_log_le_self (b := 2) (by norm_num) hxpos
+    have hhi := Int.lt_zpow_succ_log_self (b := 2) (by norm_num) (x ω)
+    push_cast at hlo hhi
+    rcases hk : Int.log 2 (x ω) with n | n
+    · left
+      refine Set.mem_iUnion.2 ⟨n, h0, htop, ?_, ?_⟩
+      · rw [hk, Int.ofNat_eq_natCast, zpow_natCast] at hlo
+        exact hlo
+      · rw [hk, Int.ofNat_eq_natCast, show (n : ℤ) + 1 = ((n + 1 : ℕ) : ℤ) by push_cast; ring,
+          zpow_natCast] at hhi
+        exact hhi
+    · right
+      refine Set.mem_iUnion.2 ⟨n, h0, htop, ?_, ?_⟩
+      · rw [hk, zpow_negSucc] at hlo
+        exact hlo
+      · rw [hk, show Int.negSucc n + 1 = -(n : ℤ) by rw [Int.negSucc_eq]; ring, zpow_neg,
+          zpow_natCast] at hhi
+        exact hhi
+  -- pointwise bounds on the damping factor
+  have hdamp : ∀ ω, 0 < Qv ω → Qv ω < ⊤ →
+      (1 - Real.exp (-(h * (Qv ω).toReal))) / (Qv ω).toReal ≤ h ∧
+      (1 - Real.exp (-(h * (Qv ω).toReal))) / (Qv ω).toReal ≤ 1 / (Qv ω).toReal := by
+    intro ω h0 htop
+    have hq : 0 < (Qv ω).toReal := ENNReal.toReal_pos h0.ne' htop.ne
+    constructor
+    · rw [div_le_iff₀ hq]
+      have := Real.add_one_le_exp (-(h * (Qv ω).toReal))
+      linarith
+    · exact div_le_div_of_nonneg_right (by linarith [Real.exp_pos (-(h * (Qv ω).toReal))])
+        hq.le
+  -- the two families of pieces
+  have hpieceP : ∀ n : ℕ, ∫⁻ ω in P n, F ω ∂μ ≤
+      ENNReal.ofReal (K * h ^ (1 / 2 + θ) * ((2 : ℝ) ^ (-(1 / 2 + θ))) ^ n) := by
+    intro n
+    set c : ℝ := (2 : ℝ) ^ n / h with hc
+    have hc0 : 0 < c := by positivity
+    have hsub : P n ⊆ {ω | ENNReal.ofReal c ≤ Qv ω ∧ Qv ω ≤ ENNReal.ofReal (2 * c)} := by
+      rintro ω ⟨h0, htop, hlo, hhi⟩
+      have hq := ENNReal.ofReal_toReal htop.ne
+      constructor
+      · rw [← hq]
+        refine ENNReal.ofReal_le_ofReal ?_
+        rw [hc, div_le_iff₀ hh]
+        linarith [hlo, mul_comm h (Qv ω).toReal]
+      · rw [← hq]
+        refine ENNReal.ofReal_le_ofReal ?_
+        rw [hc, ← mul_div_assoc, le_div_iff₀ hh, ← pow_succ']
+        linarith [hhi, mul_comm h (Qv ω).toReal]
+    calc ∫⁻ ω in P n, F ω ∂μ ≤ ∫⁻ ω in P n, Mv ω * ENNReal.ofReal (1 / c) ∂μ := by
+          refine setLIntegral_mono (hM.mul_const _) fun ω hω => ?_
+          have hq : c ≤ (Qv ω).toReal :=
+            (ENNReal.ofReal_le_iff_le_toReal hω.2.1.ne).1 (hsub hω).1
+          obtain ⟨h0, htop, _, _⟩ := hω
+          refine mul_le_mul_of_nonneg_left (ENNReal.ofReal_le_ofReal ?_) zero_le
+          exact (hdamp ω h0 htop).2.trans (one_div_le_one_div_of_le hc0 hq)
+      _ = (∫⁻ ω in P n, Mv ω ∂μ) * ENNReal.ofReal (1 / c) := lintegral_mul_const _ hM
+      _ ≤ ENNReal.ofReal (K * c ^ (1 / 2 - θ)) * ENNReal.ofReal (1 / c) := by
+          gcongr
+          exact setLIntegral_le_of_forall_le_of_meas_le_rpow hQ hM hmax hA hθ1 htail hc0 hsub
+      _ = ENNReal.ofReal (K * h ^ (1 / 2 + θ) * ((2 : ℝ) ^ (-(1 / 2 + θ))) ^ n) := by
+          rw [← ENNReal.ofReal_mul (by positivity)]
+          congr 1
+          have e : ((2 : ℝ) ^ n) ^ (-(1 / 2 + θ)) = ((2 : ℝ) ^ (-(1 / 2 + θ))) ^ n := by
+            rw [← Real.rpow_natCast 2 n, ← Real.rpow_mul (by norm_num),
+              ← Real.rpow_natCast ((2 : ℝ) ^ (-(1 / 2 + θ))) n, ← Real.rpow_mul (by norm_num)]
+            ring_nf
+          rw [mul_assoc, ← div_eq_mul_one_div, ← Real.rpow_sub_one hc0.ne',
+            show 1 / 2 - θ - 1 = -(1 / 2 + θ) by ring, hc, Real.div_rpow (by positivity) hh.le, e,
+            Real.rpow_neg hh.le, div_inv_eq_mul]
+          ring
+  have hpieceN : ∀ n : ℕ, ∫⁻ ω in N n, F ω ∂μ ≤
+      ENNReal.ofReal (K * h ^ (1 / 2 + θ) * ((2 : ℝ) ^ (-(1 / 2 - θ))) ^ (n + 1)) := by
+    intro n
+    set c : ℝ := ((2 : ℝ) ^ (n + 1))⁻¹ / h with hc
+    have hc0 : 0 < c := by positivity
+    have hsub : N n ⊆ {ω | ENNReal.ofReal c ≤ Qv ω ∧ Qv ω ≤ ENNReal.ofReal (2 * c)} := by
+      rintro ω ⟨h0, htop, hlo, hhi⟩
+      have hq := ENNReal.ofReal_toReal htop.ne
+      constructor
+      · rw [← hq]
+        refine ENNReal.ofReal_le_ofReal ?_
+        rw [hc, div_le_iff₀ hh]
+        linarith [hlo, mul_comm h (Qv ω).toReal]
+      · rw [← hq]
+        refine ENNReal.ofReal_le_ofReal ?_
+        rw [hc, ← mul_div_assoc, le_div_iff₀ hh,
+          show 2 * ((2 : ℝ) ^ (n + 1))⁻¹ = ((2 : ℝ) ^ n)⁻¹ by rw [pow_succ]; field_simp]
+        linarith [hhi, mul_comm h (Qv ω).toReal]
+    calc ∫⁻ ω in N n, F ω ∂μ ≤ ∫⁻ ω in N n, Mv ω * ENNReal.ofReal h ∂μ := by
+          refine setLIntegral_mono (hM.mul_const _) fun ω hω => ?_
+          obtain ⟨h0, htop, _, _⟩ := hω
+          exact mul_le_mul_of_nonneg_left (ENNReal.ofReal_le_ofReal (hdamp ω h0 htop).1) zero_le
+      _ = (∫⁻ ω in N n, Mv ω ∂μ) * ENNReal.ofReal h := lintegral_mul_const _ hM
+      _ ≤ ENNReal.ofReal (K * c ^ (1 / 2 - θ)) * ENNReal.ofReal h := by
+          gcongr
+          exact setLIntegral_le_of_forall_le_of_meas_le_rpow hQ hM hmax hA hθ1 htail hc0 hsub
+      _ = ENNReal.ofReal (K * h ^ (1 / 2 + θ) * ((2 : ℝ) ^ (-(1 / 2 - θ))) ^ (n + 1)) := by
+          rw [← ENNReal.ofReal_mul (by positivity)]
+          congr 1
+          have e : (((2 : ℝ) ^ (n + 1))⁻¹) ^ (1 / 2 - θ) =
+              ((2 : ℝ) ^ (-(1 / 2 - θ))) ^ (n + 1) := by
+            rw [Real.inv_rpow (by positivity), ← Real.rpow_natCast 2 (n + 1),
+              ← Real.rpow_mul (by norm_num), ← Real.rpow_neg (by norm_num),
+              ← Real.rpow_natCast ((2 : ℝ) ^ (-(1 / 2 - θ))) (n + 1),
+              ← Real.rpow_mul (by norm_num)]
+            ring_nf
+          have e2 : h ^ (1 / 2 + θ) = h / h ^ (1 / 2 - θ) := by
+            rw [show (1 / 2 + θ) = 1 - (1 / 2 - θ) by ring, Real.rpow_sub hh, Real.rpow_one]
+          rw [hc, Real.div_rpow (by positivity) hh.le, e, e2]
+          field_simp
+  -- summing the pieces
+  set a : ℝ := (2 : ℝ) ^ (-(1 / 2 + θ)) with ha
+  set b : ℝ := (2 : ℝ) ^ (-(1 / 2 - θ)) with hb
+  have ha0 : 0 ≤ a := by positivity
+  have hb0 : 0 ≤ b := by positivity
+  have ha1 : a < 1 := Real.rpow_lt_one_of_one_lt_of_neg (by norm_num) (by linarith)
+  have hb1 : b < 1 := Real.rpow_lt_one_of_one_lt_of_neg (by norm_num) (by linarith)
+  have hKh : 0 ≤ K * h ^ (1 / 2 + θ) := by positivity
+  have hsumP : ∑' n, ∫⁻ ω in P n, F ω ∂μ ≤ ENNReal.ofReal (K * h ^ (1 / 2 + θ) * (1 - a)⁻¹) := by
+    calc ∑' n, ∫⁻ ω in P n, F ω ∂μ ≤ ∑' n : ℕ, ENNReal.ofReal (K * h ^ (1 / 2 + θ) * a ^ n) :=
+          ENNReal.tsum_le_tsum hpieceP
+      _ = ENNReal.ofReal (∑' n : ℕ, K * h ^ (1 / 2 + θ) * a ^ n) :=
+          (ENNReal.ofReal_tsum_of_nonneg (fun n => by positivity)
+            ((summable_geometric_of_lt_one ha0 ha1).mul_left _)).symm
+      _ = _ := by rw [tsum_mul_left, tsum_geometric_of_lt_one ha0 ha1]
+  have hsumN : ∑' n, ∫⁻ ω in N n, F ω ∂μ ≤
+      ENNReal.ofReal (K * h ^ (1 / 2 + θ) * b * (1 - b)⁻¹) := by
+    calc ∑' n, ∫⁻ ω in N n, F ω ∂μ ≤ ∑' n : ℕ, ENNReal.ofReal (K * h ^ (1 / 2 + θ) * b ^ (n + 1)) :=
+          ENNReal.tsum_le_tsum hpieceN
+      _ = ∑' n : ℕ, ENNReal.ofReal (K * h ^ (1 / 2 + θ) * b * b ^ n) := by
+          congr 1
+          funext n
+          rw [pow_succ']
+          ring_nf
+      _ = ENNReal.ofReal (∑' n : ℕ, K * h ^ (1 / 2 + θ) * b * b ^ n) :=
+          (ENNReal.ofReal_tsum_of_nonneg (fun n => by positivity)
+            ((summable_geometric_of_lt_one hb0 hb1).mul_left _)).symm
+      _ = _ := by rw [tsum_mul_left, tsum_geometric_of_lt_one hb0 hb1]
+  have ht : 1 < (2 : ℝ) ^ (1 / 2 - θ) := Real.one_lt_rpow (by norm_num) (by linarith)
+  have hb' : b * (1 - b)⁻¹ = 1 / ((2 : ℝ) ^ (1 / 2 - θ) - 1) := by
+    rw [hb, Real.rpow_neg (by norm_num)]
+    have : (2 : ℝ) ^ (1 / 2 - θ) - 1 ≠ 0 := by linarith
+    have : (2 : ℝ) ^ (1 / 2 - θ) ≠ 0 := by positivity
+    field_simp
+  calc ∫⁻ ω in {ω | 0 < Qv ω ∧ Qv ω < ⊤}, F ω ∂μ
+      ≤ ∫⁻ ω in (⋃ n, P n) ∪ ⋃ n, N n, F ω ∂μ := lintegral_mono_set hcover
+    _ ≤ ∫⁻ ω in ⋃ n, P n, F ω ∂μ + ∫⁻ ω in ⋃ n, N n, F ω ∂μ := lintegral_union_le _ _ _
+    _ ≤ ∑' n, ∫⁻ ω in P n, F ω ∂μ + ∑' n, ∫⁻ ω in N n, F ω ∂μ :=
+        add_le_add (lintegral_iUnion_le _ _) (lintegral_iUnion_le _ _)
+    _ ≤ ENNReal.ofReal (K * h ^ (1 / 2 + θ) * (1 - a)⁻¹) +
+          ENNReal.ofReal (K * h ^ (1 / 2 + θ) * b * (1 - b)⁻¹) := add_le_add hsumP hsumN
+    _ = _ := by
+        rw [← ENNReal.ofReal_add (mul_nonneg hKh (inv_pos.2 (by linarith)).le)
+          (mul_nonneg (mul_nonneg hKh hb0) (inv_pos.2 (by linarith)).le)]
+        congr 1
+        rw [mul_assoc (K * h ^ (1 / 2 + θ)) b, hb', hK]
+        ring
+
+/-- The constant of the damped maximum bound satisfies `C_θ ≤ 32 / (1 - 2θ)` for
+`0 ≤ θ < 1/2`. -/
+theorem two_mul_rpow_div_sqrt_mul_add_le {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ : θ < 1 / 2) :
+    2 * 2 ^ ((1 - θ) / 2) / Real.sqrt (1 - θ) *
+        (1 / (1 - 2 ^ (-(1 / 2 + θ))) + 1 / (2 ^ (1 / 2 - θ) - 1)) ≤ 32 / (1 - 2 * θ) := by
+  have hP : 2 * 2 ^ ((1 - θ) / 2) / Real.sqrt (1 - θ) ≤ 4 := by
+    have hs : 0 < Real.sqrt (1 - θ) := Real.sqrt_pos.2 (by linarith)
+    rw [div_le_iff₀ hs]
+    have h1 : (2 : ℝ) ^ ((1 - θ) / 2) ≤ 2 ^ (1 / 2 : ℝ) :=
+      Real.rpow_le_rpow_of_exponent_le (by norm_num) (by linarith)
+    have h2 : (2 : ℝ) ^ (1 / 2 : ℝ) = Real.sqrt 2 := (Real.sqrt_eq_rpow 2).symm
+    have h3 : Real.sqrt 2 ≤ 2 * Real.sqrt (1 - θ) := by
+      rw [show (2 : ℝ) * Real.sqrt (1 - θ) = Real.sqrt (4 * (1 - θ)) by
+        rw [Real.sqrt_mul (by norm_num), show (4 : ℝ) = 2 ^ 2 by norm_num,
+          Real.sqrt_sq (by norm_num)]]
+      exact Real.sqrt_le_sqrt (by linarith)
+    nlinarith
+  have ha1 : (2 : ℝ) ^ (-(1 / 2 + θ)) ≤ 3 / 4 := by
+    have h1 : (2 : ℝ) ^ (-(1 / 2 + θ)) ≤ 2 ^ (-(1 / 2) : ℝ) :=
+      Real.rpow_le_rpow_of_exponent_le (by norm_num) (by linarith)
+    have h2 : (2 : ℝ) ^ (-(1 / 2) : ℝ) ≤ 3 / 4 := by
+      rw [Real.rpow_neg (by norm_num), ← Real.sqrt_eq_rpow,
+        inv_le_comm₀ (Real.sqrt_pos.2 (by norm_num)) (by norm_num),
+        show (3 / 4 : ℝ)⁻¹ = Real.sqrt ((4 / 3) ^ 2) by rw [Real.sqrt_sq (by norm_num)]; norm_num]
+      exact Real.sqrt_le_sqrt (by norm_num)
+    linarith
+  have hS1 : 1 / (1 - (2 : ℝ) ^ (-(1 / 2 + θ))) ≤ 4 := by
+    rw [div_le_iff₀ (by linarith)]
+    linarith
+  have hS1' : 0 ≤ 1 / (1 - (2 : ℝ) ^ (-(1 / 2 + θ))) := div_nonneg zero_le_one (by linarith)
+  have h1 : 1 + (1 / 2 - θ) * Real.log 2 ≤ (2 : ℝ) ^ (1 / 2 - θ) := by
+    rw [Real.rpow_def_of_pos (by norm_num)]
+    have := Real.add_one_le_exp (Real.log 2 * (1 / 2 - θ))
+    linarith
+  have hl : (1 / 2 : ℝ) < Real.log 2 := by
+    rw [Real.lt_log_iff_exp_lt (by norm_num)]
+    have h := Real.add_one_lt_exp (show (-(1 / 2) : ℝ) ≠ 0 by norm_num)
+    have h2 : Real.exp (1 / 2) * Real.exp (-(1 / 2)) = 1 := by rw [← Real.exp_add]; simp
+    nlinarith [Real.exp_pos (1 / 2)]
+  have hu : 0 < 1 / 2 - θ := by linarith
+  have hpos : 0 < (2 : ℝ) ^ (1 / 2 - θ) - 1 := by nlinarith
+  have hS2 : 1 / ((2 : ℝ) ^ (1 / 2 - θ) - 1) ≤ 4 / (1 - 2 * θ) := by
+    rw [div_le_div_iff₀ hpos (by linarith)]
+    nlinarith
+  have hS2' : 0 ≤ 1 / ((2 : ℝ) ^ (1 / 2 - θ) - 1) := div_nonneg zero_le_one hpos.le
+  have hinv : 1 ≤ 1 / (1 - 2 * θ) := by
+    rw [le_div_iff₀ (by linarith)]
+    linarith
+  calc _ ≤ 4 * (4 + 4 / (1 - 2 * θ)) :=
+        mul_le_mul hP (add_le_add hS1 hS2) (add_nonneg hS1' hS2') (by norm_num)
+    _ ≤ 32 / (1 - 2 * θ) := by
+        rw [show 32 / (1 - 2 * θ) = 32 * (1 / (1 - 2 * θ)) by ring,
+          show 4 / (1 - 2 * θ) = 4 * (1 / (1 - 2 * θ)) by ring]
+        nlinarith
+
+/-- **The damped martingale maximum from a predictable-variance power tail.** Under the
+assumptions of `setLIntegral_iSup_abs_sq_le_four_mul_lintegral_min`, if
+`μ (Q_T ≥ x) ≤ A x^{-θ}` for every real `x > 0`, with `A > 0` and `0 ≤ θ < 1/2`, then for every
+`h > 0`, `E[(M_T / Q_T)(1 - e^{-h Q_T}) 1{0 < Q_T < ∞}] ≤ C_θ A h^{1/2+θ}`. -/
+theorem setLIntegral_iSup_abs_mul_one_sub_exp_div_le [IsFiniteMeasure μ]
+    (hX : Martingale X ℱ μ) (hX0 : X 0 = 0) (hL2 : ∀ n, MemLp (X n) 2 μ)
+    {T : Ω → WithTop ℕ} (hT : IsStoppingTime ℱ T) {A θ : ℝ} (hA : 0 < A) (hθ0 : 0 ≤ θ)
+    (hθ : θ < 1 / 2)
+    (htail : ∀ x : ℝ, 0 < x → μ {ω | ENNReal.ofReal x ≤ ⨆ n : ℕ, ENNReal.ofReal
+      (stoppedProcess (fun k ω => ∑ i ∈ range k,
+        μ[fun ω => (X (i + 1) ω - X i ω) ^ 2 | ℱ i] ω) T n ω)} ≤ ENNReal.ofReal (A * x ^ (-θ)))
+    {h : ℝ} (hh : 0 < h) :
+    ∫⁻ ω in {ω | 0 < (⨆ n : ℕ, ENNReal.ofReal (stoppedProcess (fun k ω => ∑ i ∈ range k,
+          μ[fun ω => (X (i + 1) ω - X i ω) ^ 2 | ℱ i] ω) T n ω)) ∧
+        (⨆ n : ℕ, ENNReal.ofReal (stoppedProcess (fun k ω => ∑ i ∈ range k,
+          μ[fun ω => (X (i + 1) ω - X i ω) ^ 2 | ℱ i] ω) T n ω)) < ⊤},
+        (⨆ (n : ℕ) (_ : (n : WithTop ℕ) ≤ T ω), ENNReal.ofReal |X n ω|) *
+          ENNReal.ofReal ((1 - Real.exp (-(h * (⨆ n : ℕ, ENNReal.ofReal
+            (stoppedProcess (fun k ω => ∑ i ∈ range k,
+              μ[fun ω => (X (i + 1) ω - X i ω) ^ 2 | ℱ i] ω) T n ω)).toReal))) /
+            (⨆ n : ℕ, ENNReal.ofReal (stoppedProcess (fun k ω => ∑ i ∈ range k,
+              μ[fun ω => (X (i + 1) ω - X i ω) ^ 2 | ℱ i] ω) T n ω)).toReal) ∂μ ≤
+      ENNReal.ofReal (2 * 2 ^ ((1 - θ) / 2) / Real.sqrt (1 - θ) *
+        (1 / (1 - 2 ^ (-(1 / 2 + θ))) + 1 / (2 ^ (1 / 2 - θ) - 1)) * A * h ^ (1 / 2 + θ)) := by
+  have hXm : ∀ n, Measurable (X n) := fun n =>
+    (hX.stronglyMeasurable n).measurable.mono (ℱ.le n) le_rfl
+  have hQm : ∀ k, Measurable (fun ω => ∑ i ∈ range k,
+      μ[fun ω => (X (i + 1) ω - X i ω) ^ 2 | ℱ i] ω) := fun k =>
+    Finset.measurable_sum _ fun i _ => (stronglyMeasurable_condExp.mono (ℱ.le i)).measurable
+  have hQT : Measurable fun ω => ⨆ n : ℕ, ENNReal.ofReal (stoppedProcess (fun k ω =>
+      ∑ i ∈ range k, μ[fun ω => (X (i + 1) ω - X i ω) ^ 2 | ℱ i] ω) T n ω) :=
+    Measurable.iSup fun n => (measurable_stoppedProcess_of_measurable hQm hT n).ennreal_ofReal
+  exact setLIntegral_mul_one_sub_exp_div_le_of_meas_le_rpow hQT
+    (measurable_iSup_ofReal_abs_of_le hXm hT)
+    (fun l => setLIntegral_iSup_abs_sq_le_four_mul_lintegral_min hX hX0 hL2 hT l) hA hθ0 hθ
+    htail hh
 
 end PercLib.Probability
