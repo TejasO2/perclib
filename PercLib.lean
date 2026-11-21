@@ -47,6 +47,7 @@ public import PercLib.Analysis.Tauberian.Converse
 public import PercLib.Analysis.Tauberian.Endpoints
 public import PercLib.Analysis.Tauberian.Complete
 public import PercLib.Analysis.VolumeTail.ChiSquareConstants
+public import PercLib.Analysis.VolumeTail.Endpoint
 public import PercLib.Analysis.VolumeTail.MGFAssembly
 public import PercLib.Analysis.VolumeTail.Normalizer
 public import PercLib.Analysis.VolumeTail.SizeBiasMGF
