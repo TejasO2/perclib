@@ -38,6 +38,7 @@
 ## Statement {#section-karamata}
 
 <a id="tag-SLGY" data-assertion="theorem" data-title="Karamata Laplace–tail equivalence for fractional index"></a><p>Let $X$ be a nonnegative random variable, finite almost surely, and $M_X(h)=\mathbb E[1-e^{-hX}]$. Let $0&lt;\alpha&lt;1$ and let $L$ be positive, measurable and slowly varying at infinity. Then</p><div class="math-display">$$\mathbb P(X&gt;t)\sim t^{-\alpha}L(t)\quad(t\to\infty)$$</div><p>if and only if</p><div class="math-display">$$M_X(h)\sim\Gamma(1-\alpha)h^\alpha L(1/h)\quad(h\downarrow0).$$</div><p>For integer-valued $X$, one may equivalently write $\mathbb P(X\geq n)\sim n^{-\alpha}L(n)$.</p>
+<p>For integer-valued $X$ the two forms are equivalent: $\mathbb P(X&gt;t)=\mathbb P(X\geq\lfloor t\rfloor+1)$ for real $t$ and $\mathbb P(X\geq n)=\mathbb P(X&gt;n-\tfrac12)$ for integers $n$, while $s^{-\alpha}L(s)\sim t^{-\alpha}L(t)$ as $t\to\infty$ with $s/t\to1$, by the uniform convergence theorem (see Variants and generalisations below).</p>
 <p>The implication from the tail to the transform is the Abelian half of the theorem, and the converse the Tauberian half. The range $0&lt;\alpha&lt;1$ is the one in which the tail of $X$ at the scale $1/h$ determines the leading term of $M_X(h)$. The equivalence persists at $\alpha=0$, with $\Gamma(1)=1$; for $\alpha\geq1$ the leading term of $M_X(h)$ is $h$ times a truncated mean, from which the tail cannot be read off (see Variants and generalisations below).</p>
 
 ## Examples and non-examples {#section-examples}
