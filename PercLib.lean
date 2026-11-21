@@ -22,6 +22,7 @@ public import PercLib.Analysis.MomentHierarchy
 public import PercLib.Analysis.QuadraticRecursion
 public import PercLib.Analysis.ReciprocalODE
 public import PercLib.Analysis.RegularVariation.Algebra
+public import PercLib.Analysis.RegularVariation.Composition
 public import PercLib.Analysis.RegularVariation.Defs
 public import PercLib.Analysis.RegularVariation.GeneralInverse
 public import PercLib.Analysis.RegularVariation.Karamata
@@ -42,6 +43,7 @@ public import PercLib.Analysis.Tags.MarginalODE
 public import PercLib.Analysis.Tags.MarginalODETail
 public import PercLib.Analysis.Tags.MesoscopicTailTransfer
 public import PercLib.Analysis.Tags.SpatialCutoffMoments
+public import PercLib.Analysis.Tags.SpatialNormalization
 public import PercLib.Analysis.Tauberian.Laplace
 public import PercLib.Analysis.Tauberian.Converse
 public import PercLib.Analysis.Tauberian.Endpoints
