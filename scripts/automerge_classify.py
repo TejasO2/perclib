@@ -41,6 +41,13 @@ rejection.
   and character literals (no `#eval!` and no other `#` command, wherever it starts) and
   no `«…»` identifier. A file containing a string literal with `{` (possibly an
   interpolated string) is rejected, and so is an unterminated comment, string or `«`.
+- Auxiliary definitions count as definitions: a `where` clause or a `let rec` inside a
+  theorem adds a definition (`z.foo`, `a.f`) to the library, so a changed line matching
+  `\bwhere\b` or `\blet\s+rec\b` (after comments are removed) is rejected. Since Lean
+  also reads `let` and `rec` on different lines as `let rec`, a change is rejected too
+  when its command, with comments removed and literals blanked, matches `\blet\s+rec\b`
+  anywhere (a theorem that already holds a `let rec` waits for a maintainer). `rec`
+  alone is not a forbidden token: proofs may use `Nat.rec` and other recursors.
 - Attribute changes on theorems and lemmas (`@[simp]`, `@[ext]`, ...) are accepted: they
   change how later proofs elaborate but no definition or tagged statement (ruling 9e).
   Attributes that are command keywords or forbidden tokens (`instance`, `tag`,
@@ -258,6 +265,10 @@ FORBIDDEN_TOKENS = (frozenset('''
     compile_inductive initialize_simps_projections recall
 '''.split()) | COMMAND_KEYWORDS) - PROOF_COMMANDS - MODIFIERS
 TAG_ATTR = re.compile(r'@\[[^\]]*\btag\b')
+# `where` clauses and `let rec` add auxiliary definitions even inside a theorem.
+AUX_DEFINITION = re.compile(r'\bwhere\b|\blet\s+rec\b')
+# Lean also reads `let` and `rec` on different lines as `let rec`.
+LET_REC = re.compile(r'\blet\s+rec\b')
 TAG_VALUE = re.compile(r'\btag\s+"([0-9A-Z]{4})"')
 
 
@@ -622,6 +633,9 @@ def check_lean_change(path: str, base_text: str, head_text: str,
                     raise Reject(f'{where}: changed line uses {sorted(bad)}')
                 if TAG_ATTR.search(line):
                     raise Reject(f'{where}: changed line is a tag attribute')
+                if AUX_DEFINITION.search(line):
+                    raise Reject(f'{where}: changed line uses `where` or `let rec`, which '
+                                 'add auxiliary definitions')
                 # Any `#` outside a literal: `#eval!` and the other `#` commands may start
                 # in the middle of a line (`#[…]` and `#s` are refused too).
                 if '#' in code[side][k]:
@@ -630,6 +644,10 @@ def check_lean_change(path: str, base_text: str, head_text: str,
                     raise Reject(f'{where}: changed line contains a «…» identifier')
                 if starts[k] < 0:
                     raise Reject(f'{where}: change outside any command')
+                if LET_REC.search(command_text(code[side], starts, starts[k])):
+                    raise Reject(f'{where}: changed command uses `where` or `let rec` '
+                                 '(here `let rec`, possibly split over lines), which add '
+                                 'auxiliary definitions')
                 keyword = command_keyword(command_text(lines, starts, starts[k]))
                 if keyword not in PROOF_COMMANDS:
                     raise Reject(f'{where}: change inside a {keyword or "unknown"!r} '

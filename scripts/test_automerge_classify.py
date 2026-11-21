@@ -421,6 +421,43 @@ class ClassifyTests(unittest.TestCase):
         new = BASE_FILE.replace('theorem helper', '@[simp] theorem helper')
         self.accept(Fixture().lean(PATH, BASE_FILE, new))
 
+    def test_where_and_let_rec_rejected(self):
+        # R4: `where` and `let rec` inside a theorem add auxiliary definitions (`z.foo`,
+        # `a.f`), which a proof-only change may not do.
+        line_z = 'theorem z : True := trivial'
+        with_z = BASE_FILE.replace('end PercLib', line_z + '\n\nend PercLib')
+        cases = [
+            ('where (R4 fixture)', with_z,
+             with_z.replace(line_z, 'theorem z : True := trivial where\n  foo : Nat := 1')),
+            ('let rec (R4 fixture)', WITH_A,
+             WITH_A.replace(LINE_A, 'theorem a : True := let rec f : Nat → Nat '
+                                    '| 0 => 0 | n+1 => f n; trivial')),
+            ('where on its own line', with_z,
+             with_z.replace(line_z, 'theorem z : True := trivial\nwhere\n  foo : Nat := 1')),
+            ('let rec over lines', WITH_A,
+             WITH_A.replace(LINE_A, 'theorem a : True := by\n  let\n    rec f : Nat → Nat '
+                                    '| _ => 0\n  trivial')),
+            ('body of an existing split let rec edited',
+             WITH_A.replace(LINE_A, 'theorem a : True := by\n  let\n    rec f : Nat → Nat '
+                                    '| _ => 0\n  trivial'),
+             WITH_A.replace(LINE_A, 'theorem a : True := by\n  let\n    rec f : Nat → Nat '
+                                    '| _ => 1\n  trivial')),
+        ]
+        for name, base, head in cases:
+            with self.subTest(case=name):
+                self.assertNotEqual(base, head)
+                self.reject(Fixture().lean(PATH, base, head), contains='where` or `let rec')
+
+    def test_recursor_and_where_in_comment_accepted(self):
+        # `rec` is not a forbidden token: a proof may use `Nat.rec`; and `where` or
+        # `let rec` inside a comment is not code.
+        for line in ['theorem a : True := Nat.rec (motive := fun _ => True) trivial '
+                     '(fun _ _ => trivial) 0',
+                     'theorem a : True := trivial -- where, let rec',
+                     'theorem a : True := /- where foo -/ trivial']:
+            with self.subTest(line=line):
+                self.accept(Fixture().lean(PATH, WITH_A, WITH_A.replace(LINE_A, line)))
+
 EVIDENCE_HEAD = 'a' * 40
 EVIDENCE_BASE = 'b' * 40
 
