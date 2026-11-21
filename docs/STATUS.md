@@ -1,6 +1,6 @@
 # Status
 
-Handoff file for the coordinator (the LEAD role of D-34). Last updated 21 November 2026, about 13:05 UTC, at the end of coordinator round 5 of the current series (sixteenth coordinator overall;
+Handoff file for the coordinator (the LEAD role of D-34). Last updated 21 November 2026, about 13:16 UTC, at the end of coordinator round 6 of the current series (seventeenth coordinator overall;
 the previous file, round 9 of the earlier series, is at `874da60` and older rounds are in
 `git log -p docs/STATUS.md`). A coordinator with no memory resumes from this file,
 [COORDINATOR.md](COORDINATOR.md), [COORDINATION.md](COORDINATION.md), [DECISIONS.md](DECISIONS.md)
@@ -10,9 +10,16 @@ pull requests to `main`). Container-local reports and briefs are copied for dura
 
 ## Integration tip and gate
 
-- Branch `claude/zen-lovelace-rvlcw2` in both repositories. **Last gated commit `caa28bc`** (pushed;
-  extract `.lake/gate/caa28bc….json` saved); the tip is this STATUS/FRONTIER commit on top of it. **Next
-  gate: `scripts/gate.sh caa28bc`.**
+- Branch `claude/zen-lovelace-rvlcw2` in both repositories. **Last gated commit `1146988`** (pushed;
+  extract `.lake/gate/1146988….json` saved); the tip is this STATUS commit on top of it. **Next
+  gate: `scripts/gate.sh 1146988`.**
+- **Round 6 (13:03-13:16): one gated batch, passed, pushed.** `scripts/gate.sh caa28bc` on **`1146988`** (merge
+  `lrp-first-moment-b`): build `--wfail` OK (3,927 jobs), axiom audit 6,194 constants only
+  `propext`/`Classical.choice`/`Quot.sound`, import closure 334 modules, forbidden scan, script tests, "D-35 checks
+  passed", "PROOF-ONLY change against caa28bc: 2 Lean file(s), no compiled interface change", "== gate passed on
+  1146988…" (2.5 min, run beside three worker Lean builds without OOM). Kernel replay still **not run** (workers
+  were building throughout). GitHub: unchanged (no MCP tool, `GH_TOKEN` invalid; anonymous read 13:05: 0 open pull
+  requests, issue #1 only). `main` (`1df822a`) lacks everything up to `1146988`.
 - **Round 5 (12:55-13:05): no merge, no gate** (nothing mergeable: the four done markers of the round were
   an audit asking for changes, a fix awaiting its re-audit, a premises audit, and a wiki follow-up whose brief
   requires a mechanical audit). Tip unchanged apart from this STATUS commit. Kernel replay still not run (the
@@ -68,6 +75,12 @@ parent). After each gate `git checkout scripts/__pycache__/`; after `frontier.py
 
 ## Progress (D-35 measure)
 
+Round 6: **0 assertions proved, 0 tagged statements audited.** One untagged proof-only Lean package merged
+(`lrp-first-moment-b`, D-33: `PercLib/Analysis/FirstMomentAsymptotic.lean`, the analytic parts of Prop. I.4.2 /
+Cor. I.4.8 / Lemma I.4.9 with the paper's inputs as explicit premises; the model statements I.4.2 and I.4.8 remain
+unproved targets). Manifest at `1146988` (perclib script): **268 proved, 2 statement-only, 1,132 unformalised, of
+1,402** (unchanged; `docs/FRONTIER.md` at `caa28bc` is still current, no tag changed).
+
 Round 5: **0 assertions proved, 0 tagged statements audited** (no merge). One source-fidelity audit:
 `audit-lrp-I55-premises` judges `regularlyVarying_max_and_tendsto_of_tendsto_deriv_ratio` (`CriticalDrivenODE.lean`)
 to be Lemma I.5.5 of arXiv:2508.18807v1 **PROVED AS STATED** (binder table: every binder SOURCE or TYPING, no
@@ -82,6 +95,15 @@ D-33 packages 6 (Lemma I.5.5, premises not yet audited), 12 (Tauberian complete)
 Manifest at `caa28bc` (perclib script): **268 proved, 2 statement-only, 1,132 unformalised, of 1,402**.
 Frontier (`docs/FRONTIER.md` regenerated at `caa28bc` by this STATUS commit): 301 ready, 818 blocked,
 15 without recorded prerequisites, 268 proved. Rounds 1-3: 0 proved; 3 wiki tagged statements audited (round 1).
+
+## Merged in round 6
+
+- `lrp-first-moment-b` (`1146988`, proof-only, new file, D-33 package "first moment b"): nine public theorems in
+  `PercLib.Analysis` (error decomposition, perturbed bootstrap `bootstrap_perturbed` /
+  `exists_forall_le_of_bootstrap_perturbed`, Riccati lower bound, closed form of `1+𝓗_r`, log-integrability of the
+  error, `tendsto_div_rpow_of_one_sub_mul_one_sub_error`). D-33 premises (sharpness threshold, a-priori bound, error
+  bound, left limit, ODE) are explicit hypotheses; four theorems have 11-14 hypotheses (the source's; the author
+  suggests an ODE-hypotheses structure: interface package, later). Worktree removed.
 
 ## Merged in round 4
 
@@ -108,6 +130,29 @@ Frontier (`docs/FRONTIER.md` regenerated at `caa28bc` by this STATUS commit): 30
 
 ## Finished, not merged (each waits for the item named)
 
+- **`work/nm-longrange`** (`0d4b908`, fix `095-fix-nm-longrange` done 13:06): R01V on ordered pairs in the new
+  `PercLib/Models/Tags/TranslationInvariant.lean`, ZH13 alone in the new `Models/LongRange/Tags/CutsAndRows.lean`,
+  area lemmas moved into `OneDimensional.lean` / `TranslationInvariant.lean`, `Sym2` duplicates removed. **Interface**
+  (two new tagged statements): fresh audit **`120-audit-nm-longrange-r2`** queued (diff `51fe8e5..0d4b908`, wiki
+  `displacement-kernels` and the two earlier audits as the decided form). On APPROVE: merge, gate, then write and
+  release `mig-iscut-fold` (scout-localconn-fold §6) and release `HOLD-362` (needs 095 merged), each checked for file
+  overlap with the fold.
+- **`work/wiki-proof-WD31`** (`16a390a`): `audit-wiki-proof-WD31` **APPROVE WITH CHANGE** (proof correct and complete;
+  changes 1-5: one false unused sentence, two definitional wording gaps, two attribution sentences; plus the stale
+  "cited" in `wiki/COVERAGE.md` line 276). Fix **`119-fix-wiki-proof-WD31`** queued, then
+  `HOLD-audit-wiki-proof-WD31-r2` (mechanical; release with the fixer's `<merge>`/`<fix>`). On APPROVE merge
+  `work/fix-wiki-proof-WD31` (contains the original), wiki test, gate.
+- **`work/wiki-revise-proof-sections-a`** (`024def9` on `62be6c2`; done 13:02): critic proof-sections-a must-change
+  lists applied to `branching-random-walk`, `size-biased-laws`, `marginal-ode`. Audit
+  **`118-audit-wiki-revise-proof-sections-a`** released (diff `62be6c2 024def9`). The reviser lists four disagreements
+  with the critic (B-S2 placement, S-E1/S-E3 near-critical input, the dropped polynomial rate in FM8D, innermost vs
+  outermost circuit) for Tom (D-19) and mathematical reports B-C2, M-S4, M-M1, M-B2 (would touch tagged blocks; not
+  applied); also the one-word G12U `proofUses` reason ("Fuk-Nagaev" -> "Bennett-type"). Record these "For Tom" when
+  the audit reports. Then a critic re-read.
+- **`work/fix-tooling-d35-header-blocks`** (`d2744fa` on merge `c480100`; done 13:02): changes 1-3 applied, 12 tests
+  pass. Re-audit **`117-audit-tooling-d35-header-blocks-r2`** released. On APPROVE merge, gate. The fixer notes the
+  docstring now says line comments are both "skipped" and "part of the result" (audit's wording): a one-word
+  follow-up if the re-audit asks.
 - **`work/wiki-proof-2ZI0-tail`** (`5dea723`): proofs of the 2ZI0 critical tail and order-parameter
   estimates, by Hutchcroft's route (arXiv:2106.06400 §3). `audit-wiki-proof-2ZI0-tail` (round 5): **APPROVE WITH
   CHANGE**, both proofs correct and complete; two text changes (idea-paragraph sentence; explicit zero weights
@@ -122,8 +167,6 @@ Frontier (`docs/FRONTIER.md` regenerated at `caa28bc` by this STATUS commit): 30
   paper's lemma) and its `Tags/` restatement of the full theorem, then a fresh binder-table audit. Brief it with
   the B5SL tag (both touch the driven-ODE material). The audit's optional §4 (drop `hpos`, weaken `hfpos` in the
   b<a theorem; strict generalisation) is a small prover package for later, not needed for fidelity.
-- **`work/wiki-proof-WD31`** (`16a390a`): full proof of WD31 (duality, RSW, p_c=1/2 after Bollobás–Riordan,
-  with four stated departures; upper bound via 6THJ). Correctness audit **`107-audit-wiki-proof-WD31`** queued.
 - **`work/fix-wiki-runaway-split-1`** (`8bc1cd6`): `audit-wiki-runaway-split-1-r2` APPROVE WITH CHANGE, one
   sentence (first moment conserved only up to gelation, `multiplicative-coalescent`). Fix
   `fix-wiki-runaway-split-1-r2` done (merge `233ece3`, fix `6d47a91`, one-line diff checked); mechanical re-audit
@@ -139,36 +182,35 @@ Frontier (`docs/FRONTIER.md` regenerated at `caa28bc` by this STATUS commit): 30
   the page for Tom (`/articles/hierarchical-two-point/`) with the reviser's §5 questions; then queue the J98J
   Lean tag (interface), critic R2/R4/R6 (V4QQ, YWTU precise; constants in 655W, 7YNX; fresh audit), runaway
   split step 8.
-- **`work/tooling-d35-header-blocks`** (`c01bf41`): `audit-tooling-d35-header-blocks` APPROVE WITH CHANGE
-  (changes 1-3 in `header_text`; change 1 closes a fail-open on valid Lean). Fix
-  **`109-fix-tooling-d35-header-blocks`** queued, then `HOLD-audit-tooling-d35-header-blocks-r2`.
 - **Workflows and scanner:** `work/fix-scanner-r4` (`0707396` on merge `3c65334`) and `work/fix-workflows-r4`
   (`0471b5e` on merge `1ab3c5c`) done 12:50/12:53; re-audit **`112-audit-fix-workflows-r4`** released 12:55. Merge order on APPROVE: `work/fix-scanner-r4`, then
   `work/fix-workflows-r4`, gate; the workflows must not reach `main` before AM4. Then `work/contrib-docs` and
   `work/task-board` (check against the tip), mirror the queue into `tasks/` (ruling 9b), open the
   pages-deploy brief (ruling 12).
-- **`critic-proof-sections-a`**: revision `103-wiki-revise-proof-sections-a` claimed 12:48; then
-  `HOLD-audit-wiki-revise-proof-sections-a`, then a critic re-read. S-S1 and M-B2 as recorded in round 3
-  (`git show 6f8ac2c:docs/STATUS.md`).
 - `work/wiki-I421`'s Lean counterpart: the `@[tag "B5SL"]` restatement (interface; not yet briefed; it touches
   `DrivenODE.lean`, outside the fold: brief it after the window closes).
-- `work/nm-longrange` (`e4e9b59`; ZH13, R01V): `095-fix-nm-longrange` held for the window
-  (`HOLD-095-fix-nm-longrange`); release first when proving reopens. The IsCut fold (`mig-iscut-fold`,
-  scout-localconn-fold §6) follows it.
 
-## In flight (claims without a done marker at 13:03)
+## In flight (claims without a done marker at 13:15)
 
-`mig-localconn-fold` (claimed 12:39; live: commits P0 `23d0619`, P1 `06fc758` "respell the bond area files" by
-13:01, P2-P3 to come), `wiki-revise-proof-sections-a` (12:48), `audit-wiki-proof-WD31` (~12:57),
-`fix-tooling-d35-header-blocks` (~12:58). Briefs released at 13:02 may be claimed by now: check `claims/`.
-Worktrees kept (unmerged; add wiki-67W9-followup, fix-wiki-runaway-split-1-r2):
+`mig-localconn-fold` (claimed 12:39; phases 0-3 committed by 13:05: P0 `23d0619`, P1 `06fc758`, P2 `e23732b`, P3
+`197bd95` "respell the hierarchical files"; the report and done marker may follow at any moment), `lrp-I526` (13:02),
+`nm-finite-coordinates` and `nm-uniform-volume` (both ~13:07). Nothing else claimed since 13:02: the audits 110-120
+were all unclaimed at 13:15 (all four lanes on Lean).
+Worktrees kept (unmerged):
 automerge-workflow, ci-workflow, contrib-docs, task-board, fix-gate-scanner, fix-workflows(-r2,-r3,-r4),
 fix-scanner-r2/-r3/-r4, nm-longrange, port-wiki-hier-thm11, fix-port-wiki-hier-thm11, wiki-model-hier-two-point,
-fix-wiki-model-hier-two-point(-r3), wiki-runaway-split-1, fix-wiki-runaway-split-1, wiki-revise-regular-variation,
-fix-wiki-revise-regular-variation, tooling-d35-header-blocks, wiki-proof-2ZI0-tail, wiki-proof-WD31,
-wiki-revise-proof-sections-a, mig-localconn-fold.
+fix-wiki-model-hier-two-point(-r3), wiki-runaway-split-1, fix-wiki-runaway-split-1(-r2), wiki-revise-regular-variation,
+fix-wiki-revise-regular-variation, tooling-d35-header-blocks, fix-tooling-d35-header-blocks, wiki-proof-2ZI0-tail,
+wiki-proof-WD31, wiki-revise-proof-sections-a, wiki-67W9-followup, mig-localconn-fold, lrp-I526,
+nm-finite-coordinates, nm-uniform-volume.
 
 ## Migration window (c): fold `mig-localconn-fold` running; proving reopened beside it (round 5, 13:02)
+
+**Round 6:** no change of plan. The fold has committed all three respelling phases; when `done/mig-localconn-fold`
+appears, step 1 below applies (release `HOLD-audit-mig-localconn-fold` with head and base, pre-gate it in a detached
+worktree when no worker builds). Of the briefs released beside it, 095 (done, audit 120 queued) and 093 (merged) are
+finished; 092, 096, 098 are claimed. Before merging the fold, check it against `work/nm-longrange` with
+`git merge-tree` (both touch `Models/` files; 095 owns `OneDimensional.lean` and `TranslationInvariant.lean`).
 
 **Round 5 decision (step 2 below, ruling 11g):** the window opened in round 4 (12:40) and the fold was still in
 phase 1 of 3 at 13:01, so proving was reopened rather than letting the window exceed one round. Released, all on
@@ -212,14 +254,17 @@ its scout edit; 383 after its edit (area lemmas, never H0OC).
 ## Queue (`/home/user/reports/queue/`)
 
 A brief is startable when it has no `HOLD-` prefix and no `claims/<id>`; claimed briefs stay in the
-directory. **Startable at 13:03 (22; mutually file-disjoint and disjoint from the claims):** Lean (14): 092, 093,
-095, 096, 098, 099, 381, 382, 384-389 (see the window section). Non-Lean (8): 110
+directory. **Startable at 13:15 (23; mutually file-disjoint and disjoint from the claims):** Lean (9): 099
+frontier-four-functions, 381, 382, 384-389 (frontier assertions). Non-Lean (14): 110
 audit-wiki-revise-regular-variation-r2, 111 audit-wiki-model-hier-two-point-r4, 112 audit-fix-workflows-r4, 113
-audit-wiki-runaway-split-1-r3, 114 fix-wiki-proof-2ZI0-tail (owns `triangle-condition.md` and its baseline digest),
-115 audit-wiki-original-runaway-a (J0DE, MFGT, OQV3) and -b (Q4PO, F7Q2, NC7F) (ruling 11h low-priority correctness
-audits of wiki-original results, read-only at `6c8a181`; Q7QG, V7MP, 9FO5 still to brief), 116
-audit-wiki-67W9-followup. Workers take the alphabetically first, so the six 09x Lean briefs go first.
-**Held added in round 5:** `HOLD-audit-wiki-proof-2ZI0-tail-r2`. Released: `HOLD-audit-wiki-runaway-split-1-r3`
+audit-wiki-runaway-split-1-r3, 114 fix-wiki-proof-2ZI0-tail (owns `triangle-condition.md`), 115
+audit-wiki-original-runaway-a/-b, 116 audit-wiki-67W9-followup, **new in round 6:** 117
+audit-tooling-d35-header-blocks-r2 (released), 118 audit-wiki-revise-proof-sections-a (released), 119
+fix-wiki-proof-WD31 (owns `critical-exponents.md` and one sentence of `wiki/COVERAGE.md`), 120 audit-nm-longrange-r2
+(interface audit, builds, read-only). **Held added in round 6:** `HOLD-audit-wiki-proof-WD31-r2`.
+The non-Lean briefs sort before 381-389, so a lane freed from Lean will take audits first; that is intended (they
+unblock merges), and nine Lean briefs remain for the other lanes (ruling 11g asks for 8+).
+Round-5 note: **Held added in round 5:** `HOLD-audit-wiki-proof-2ZI0-tail-r2`. Released: `HOLD-audit-wiki-runaway-split-1-r3`
 (as 113). Round-4 list for reference:
 **Startable at 12:55 (9, all non-Lean: the eight below plus 112 audit-fix-workflows-r4; mutually file-disjoint and disjoint from the claims):**
 104 audit-wiki-proof-2ZI0-tail, 105 fix-wiki-runaway-split-1-r2 (owns `multiplicative-coalescent.md`), 106
@@ -228,8 +273,7 @@ audit-lrp-I55-premises, 107 audit-wiki-proof-WD31, 108 wiki-67W9-followup (owns 
 `scripts/test_check_d35.py`), 110 audit-wiki-revise-regular-variation-r2, 111 audit-wiki-model-hier-two-point-r4.
 Lean prover briefs are held for the window (see above); this is the window, so fewer than 8 Lean briefs are
 startable by design.
-**Held:** `HOLD-audit-mig-localconn-fold`, `HOLD-audit-wiki-runaway-split-1-r3`,
-`HOLD-audit-tooling-d35-header-blocks-r2`, `HOLD-audit-wiki-revise-proof-sections-a`,
+**Held (as of round 6; the two tooling/proof-sections audits are released, WD31-r2 added):** `HOLD-audit-mig-localconn-fold`, `HOLD-audit-wiki-proof-2ZI0-tail-r2`, `HOLD-audit-wiki-proof-WD31-r2`,
 `HOLD-mig-law-generality`, `HOLD-mig-model-norm`, `HOLD-wiki-original-marking`, `HOLD-audit-nm-bond-core`,
 `HOLD-audit-nm-probability`, the six window-held prover briefs `HOLD-092/093/095/096/098/099`, and the 21
 prover briefs listed in the migration section.
@@ -252,7 +296,7 @@ corollary of `normalized_increment_of_ae_driving_ode`; lrp-I55 report); the task
   request was opened, issue #1 was not answered. Anonymous reads work (no open pull requests). Please
   give the coordinator a working GitHub tool or token; until then `main` stays at `1df822a`. (Rechecked in
   round 4: still no tool; `main` now lacks everything up to `caa28bc`, six gated batches of this round included.
-  Round 5: unchanged.)
+  Round 5: unchanged. Round 6: unchanged; `main` lacks everything up to `1146988`.)
 - **Window (c) closed early for proving (round 5, coordinator's call under 11g).** The fold still runs (phase 1
   of 3 after 22 minutes); fourteen prover briefs on new or disjoint files were released beside it rather than
   let the window run past one round. Overrule if you want the queue kept empty until the fold merges.
@@ -363,6 +407,11 @@ corollary of `normalized_increment_of_ae_driving_ode`; lrp-I55 report); the task
   add `/PercLib/**/Tags/` (and area `Defs`) to CODEOWNERS or accept this knowingly. Also check
   once that each action SHA pinned in the workflows is the tag it names (N4).
 ## Lessons
+
+- **Round 6:** started at 13:03 with the tree clean and the predecessor's STATUS pushed; three done markers waiting
+  (an audit with changes, a fix, a revision), none mergeable: two held audits released and a fix brief written within
+  five minutes. A proof-only new-file merge gated in 2.5 min beside three worker Lean builds without OOM. When all
+  four lanes are on Lean, released audits sit unclaimed: expect merges of wiki/tooling work only once a lane frees.
 
 - **Round 5:** short (10 min); four done markers in the first six minutes, none mergeable (audit with changes,
   fix awaiting re-audit, premises audit, follow-up needing its own audit). Reopening proving was a rename once the
