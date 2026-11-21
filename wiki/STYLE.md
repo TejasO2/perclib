@@ -143,3 +143,21 @@ function; write $\eta$ for an extinction probability).
     disclaimer; a section whose second paragraph only disclaims or points elsewhere becomes one
     paragraph. Triplets ("X, Y and Z") only when there really are three parallel things. Bold
     only where a term is defined.
+
+## Citations
+
+Cite a published work by its key in the source catalogue (`src/content/catalog.json`, field
+`id`): `[@key]`, or `[@key, locator]` with the locator ("Theorem 1.1", "§3") kept in the
+visible text; several works go in one bracket separated by `;`. The generator renders each as
+the catalogue's short label linked to `#ref-<key>` in a References list at the foot of the
+article (only the works the page cites, each with backlinks to its citations), and the site
+bibliography `/bibliography/` lists every catalogue entry with the articles citing it.
+Citations inside collapsed proofs are written the same way. A key missing from the catalogue
+fails the build: add the work to the catalogue first. The book in preparation
+(`hutchcroft-book`) is cited without a locator. Plain-text citations ("Hutchcroft (2022)",
+"[DCT16, Theorem 1.1]", a bare arXiv identifier) are listed in `dist/link-report.txt`.
+
+- Before: "Sharpness was proved by Duminil-Copin and Tassion [DCT16, Theorem 1.1]."
+- After: "Sharpness was proved by Duminil-Copin and Tassion [@dct-sharpness, Theorem 1.1]."
+  (renders as "Sharpness was proved by Duminil-Copin and Tassion [Duminil-Copin–Tassion,
+  Theorem 1.1]", the bracket linking to the References entry).
