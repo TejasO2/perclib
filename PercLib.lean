@@ -190,6 +190,7 @@ public import PercLib.Percolation.Bond.FiniteVolume
 public import PercLib.Percolation.Bond.FiniteVolumeRusso
 public import PercLib.Percolation.Bond.FirstExit
 public import PercLib.Percolation.Bond.Forest
+public import PercLib.Percolation.Bond.FourthMoment
 public import PercLib.Percolation.Bond.GlobalConnectivity
 public import PercLib.Percolation.Bond.HarrisDecreasing
 public import PercLib.Percolation.Bond.HarrisLocal
@@ -261,6 +262,7 @@ public import PercLib.Percolation.Bond.Tags.CoreThresholdsAndSymmetries
 public import PercLib.Percolation.Bond.Tags.CoreZeroOne
 public import PercLib.Percolation.Bond.Tags.DomainIndependence
 public import PercLib.Percolation.Bond.Tags.FiniteVolume
+public import PercLib.Percolation.Bond.Tags.FourthMoment
 public import PercLib.Percolation.Bond.Tags.IndependentLayer
 public import PercLib.Percolation.Bond.Tags.RootGlobalPercolation
 public import PercLib.Percolation.Bond.Tags.SubcriticalBound
