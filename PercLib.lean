@@ -99,6 +99,7 @@ public import PercLib.Models.HierarchicalCutoff
 public import PercLib.Models.HierarchicalEndpoint
 public import PercLib.Models.HierarchicalGeometry
 public import PercLib.Models.HierarchicalPointwise
+public import PercLib.Models.HierarchicalPointwiseCritical
 public import PercLib.Models.HierarchicalPowerKernel
 public import PercLib.Models.HierarchicalRestrictedSusc
 public import PercLib.Models.HierarchicalRunaway
@@ -147,6 +148,7 @@ public import PercLib.Models.Tags.FiniteRangeDecay
 public import PercLib.Models.Tags.FiniteRangeExit
 public import PercLib.Models.Tags.Hierarchical
 public import PercLib.Models.Tags.HierarchicalRunaway
+public import PercLib.Models.Tags.HierarchicalTwoPoint
 public import PercLib.Models.Tags.KernelsAndSitePaths
 public import PercLib.Models.Tags.Lattice
 public import PercLib.Models.Tags.Line
