@@ -38,7 +38,7 @@ let `Φ_β(Λ_n) = boundaryFlux q_β Λ_n 0`.
   `le_maxBoundaryThreshold_of_boundaryScaleIndex_eq`: `m(β)` is the least index.
 * `boundaryLength_eq_pow_of_boundaryScaleIndex_eq`,
   `boundaryLength_eq_top_of_boundaryScaleIndex_eq_top`: `ξ = L^m`.
-* `coe_toFinset_level_ball`, `mem_toFinset_level_ball`: the finset ball.
+* `coe_toFinset_level_ball`, `mem_toFinset_level_ball_finset`: the finset ball.
 -/
 
 @[expose] public section
@@ -149,7 +149,7 @@ theorem coe_toFinset_level_ball (n : ℕ) :
       {z | z.support.sup Nat.succ ≤ n} :=
   Set.Finite.coe_toFinset _
 
-theorem mem_toFinset_level_ball {n : ℕ} {z : ℕ →₀ (Fin d → ZMod L)} :
+theorem mem_toFinset_level_ball_finset {n : ℕ} {z : ℕ →₀ (Fin d → ZMod L)} :
     z ∈ (finite_level_ball (A := Fin d → ZMod L) n).toFinset ↔ z.support.sup Nat.succ ≤ n := by
   rw [← Finset.mem_coe, coe_toFinset_level_ball]
   rfl

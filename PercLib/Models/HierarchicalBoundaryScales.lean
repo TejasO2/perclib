@@ -78,7 +78,7 @@ theorem tsum_law_localConn_ball_eq_sum (q : Sym2 (ℕ →₀ (Fin d → ZMod L))
         law q (localConn {z : ℕ →₀ (Fin d → ZMod L) | z.support.sup Nat.succ ≤ n} 0 z) :=
   tsum_eq_sum fun z hz => by
     have hz' : z ∉ {z : ℕ →₀ (Fin d → ZMod L) | z.support.sup Nat.succ ≤ n} := fun h =>
-      hz (mem_toFinset_level_ball.2 h)
+      hz (mem_toFinset_level_ball_finset.2 h)
     rw [localConn_of_notMem_right hz', measure_empty]
 
 omit [NeZero L] in
@@ -141,12 +141,12 @@ theorem boundaryFlux_ball_eq_ballExitRate_mul
   set S := (finite_level_ball (A := Fin d → ZMod L) n).toFinset with hS
   rw [boundaryFlux_eq, coe_toFinset_level_ball, tsum_law_localConn_ball_eq_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun u hu => ?_
-  have hu' : u.support.sup Nat.succ ≤ n := mem_toFinset_level_ball.1 hu
+  have hu' : u.support.sup Nat.succ ≤ n := mem_toFinset_level_ball_finset.1 hu
   rw [mul_comm, ballExitRate, ← ENNReal.tsum_mul_left, ← (Equiv.addRight u).tsum_eq]
   refine tsum_congr fun w => ?_
   simp only [Equiv.coe_addRight]
   have hw : w + u ∈ S ↔ w.support.sup Nat.succ ≤ n := by
-    rw [mem_toFinset_level_ball, level_le_iff_level_sub_le hu', add_sub_cancel_right]
+    rw [mem_toFinset_level_ball_finset, level_le_iff_level_sub_le hu', add_sub_cancel_right]
   by_cases hwn : w.support.sup Nat.succ ≤ n
   · simp [hw, hwn, not_lt.2 hwn]
   · have hJ : J s(u, w + u) = J s(0, w) := by simpa using hJt u 0 w
@@ -357,7 +357,7 @@ theorem chi_le_two_mul_of_le_boundaryThreshold (hL : 2 ≤ L) {α c C : ℝ} (h�
     fun x => S.map (σ x).toEmbedding with hSx
   have hmemSx : ∀ x, x ∈ Sx x := fun x => by
     simp only [hSx, Finset.mem_map_equiv]
-    rw [mem_toFinset_level_ball]
+    rw [mem_toFinset_level_ball_finset]
     simp [hσ]
   have hB : ∀ x, ∑ u ∈ Sx x, law (intensityProfile J β) (localConn (Sx x : Set _) x u) ≤
       ∑' z, law (intensityProfile J β)
