@@ -186,6 +186,7 @@ public import PercLib.Percolation.Bond.DomainIndependence
 public import PercLib.Percolation.Bond.Embedding
 public import PercLib.Percolation.Bond.Ergodic
 public import PercLib.Percolation.Bond.FiniteSetCriterion
+public import PercLib.Percolation.Bond.FiniteTriangle
 public import PercLib.Percolation.Bond.FiniteVolume
 public import PercLib.Percolation.Bond.FiniteVolumeRusso
 public import PercLib.Percolation.Bond.FirstExit
@@ -260,6 +261,7 @@ public import PercLib.Percolation.Bond.Tags.CoreSymmetries
 public import PercLib.Percolation.Bond.Tags.CoreThresholdsAndSymmetries
 public import PercLib.Percolation.Bond.Tags.CoreZeroOne
 public import PercLib.Percolation.Bond.Tags.DomainIndependence
+public import PercLib.Percolation.Bond.Tags.FiniteTriangle
 public import PercLib.Percolation.Bond.Tags.FiniteVolume
 public import PercLib.Percolation.Bond.Tags.IndependentLayer
 public import PercLib.Percolation.Bond.Tags.RootGlobalPercolation
