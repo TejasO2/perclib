@@ -1,6 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-14, from pinned mathlib's finite sums and simple-graph degrees and
 the row-sum theorems of `PercLib.Percolation.Bond.RowSum`. No upstream code is copied.
 -/
@@ -29,18 +32,18 @@ noncomputable section
 
 open MeasureTheory Set
 open scoped ENNReal NNReal
-open Classical
 open PercLib.Percolation.Bond
 
 namespace PercLib.Models
 
+open Classical in
 /-- **Finite graph.** A profile that is at most `p` on the edges of a simple graph of
 maximum degree at most `Δ`, and zero on its other off-diagonal pairs, has susceptibility
 at most `(1 - Δ p)⁻¹` when `Δ p < 1`. -/
 theorem chi_le_of_degree_le {V : Type*} [Fintype V] (G : SimpleGraph V)
     [DecidableRel G.Adj] (q : Sym2 V → unitInterval) (p : unitInterval)
-    (hon : ∀ v w, G.Adj v w → q s(v,w) ≤ p)
-    (hoff : ∀ v w, v ≠ w → ¬ G.Adj v w → q s(v,w) = 0)
+    (hon : ∀ v w, G.Adj v w → q s(v, w) ≤ p)
+    (hoff : ∀ v w, v ≠ w → ¬ G.Adj v w → q s(v, w) = 0)
     (Δ : ℕ) (hdeg : ∀ v, G.degree v ≤ Δ)
     (hp : (Δ : ℝ≥0∞) * (unitInterval.toNNReal p : ℝ≥0∞) < 1) (x : V) :
     chi q x ≤ (1 - (Δ : ℝ≥0∞) * (unitInterval.toNNReal p : ℝ≥0∞))⁻¹ := by
@@ -67,7 +70,7 @@ theorem chi_le_of_degree_le {V : Type*} [Fintype V] (G : SimpleGraph V)
 /-- **Complete graph.** On `Fin n`, a profile equal to `p` on every pair of distinct
 vertices has off-diagonal row `(n - 1) p` at every vertex. The diagonal is arbitrary. -/
 theorem chi_completeGraph_le (n : ℕ) (q : Sym2 (Fin n) → unitInterval) (p : unitInterval)
-    (hq : ∀ v w, v ≠ w → q s(v,w) = p)
+    (hq : ∀ v w, v ≠ w → q s(v, w) = p)
     (hp : ((n - 1 : ℕ) : ℝ≥0∞) * (unitInterval.toNNReal p : ℝ≥0∞) < 1) (x : Fin n) :
     chi q x ≤ (1 - ((n - 1 : ℕ) : ℝ≥0∞) * (unitInterval.toNNReal p : ℝ≥0∞))⁻¹ := by
   refine chi_le_inv_one_sub_of_rowSum q _ (fun v => le_of_eq ?_) hp x

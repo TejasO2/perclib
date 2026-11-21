@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-16: the three-vertex counterexample showing that the lower bound for
 the boundary functional of the wiki page boundary-susceptibility (tag 67GX) needs the positive part
 (tag JTBG). No upstream proof is copied, no definition is added and no Input is introduced.
@@ -44,7 +48,9 @@ namespace PercLib.Percolation.Bond
 /-- `3/5 < 1 - e^{-99/100}`, from `1 + x + x²/2 + x³/6 ≤ e^x`. -/
 theorem three_fifths_lt_one_sub_exp : (3 / 5 : ℝ) < 1 - Real.exp (-(99 / 100)) := by
   have h := Real.sum_le_exp_of_nonneg (show (0 : ℝ) ≤ 99 / 100 by norm_num) 4
-  simp [Finset.sum_range_succ, Nat.factorial] at h
+  simp only [Finset.sum_range_succ, Finset.range_one, Finset.sum_singleton, pow_zero, Nat.factorial,
+      Nat.cast_one, ne_eq, one_ne_zero, not_false_eq_true, div_self, pow_one, Nat.succ_eq_add_one,
+      zero_add, mul_one, div_one, Nat.reduceAdd, Nat.cast_ofNat, Nat.reduceMul] at h
   have hpos := Real.exp_pos (99 / 100 : ℝ)
   have hinv : Real.exp (-(99 / 100)) = (Real.exp (99 / 100))⁻¹ := Real.exp_neg _
   rw [hinv]
@@ -114,7 +120,11 @@ theorem tau_three_path (h01 : J s(0, 1) = 99 / 100) (h12 : J s(1, 2) = 1 / 100)
   · rw [tau_eq_prod_of_ae_le_acyclic _ hG hhost
       ⟨SimpleGraph.Walk.cons a01 (SimpleGraph.Walk.cons a12 .nil),
         by simp [SimpleGraph.Walk.isPath_def]⟩]
-    simp [hq, h01, h12]
+    simp only [Fin.isValue, SimpleGraph.Walk.edges_cons, SimpleGraph.Walk.edges_nil,
+        List.toFinset_cons, List.toFinset_nil, insert_empty_eq, hq, Finset.mem_singleton, Sym2.eq,
+        Sym2.rel_iff', Prod.mk.injEq, zero_ne_one, Fin.reduceEq, and_self, Prod.swap_prod_mk,
+        and_true, or_self, not_false_eq_true, Finset.prod_insert, h01, NNReal.coe_div,
+        NNReal.coe_ofNat, Finset.prod_singleton, h12, one_div, NNReal.coe_inv]
     rw [ENNReal.ofReal_mul (sub_nonneg.2 (Real.exp_le_one_iff.2 (by norm_num)))]
 
 /-- The three susceptibilities. -/

@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 The Laplace-transform half of the Tauberian chain for Theorem I.2.11 of T. Hutchcroft,
 *Critical long-range percolation I*, arXiv:2508.18807v1, p. 26 (citing Feller XIII.5.2).
 
@@ -238,7 +242,8 @@ theorem one_sub_exp_eq_setIntegral_indicator {h s : ℝ} (hs : 0 ≤ s) :
     convert h3 using 1
     ring
   have hint : IntervalIntegrable (fun x : ℝ => h * Real.exp (-h * x)) volume 0 s :=
-    ((continuous_const.mul (Real.continuous_exp.comp (by fun_prop : Continuous fun x : ℝ => -h * x)))).intervalIntegrable _ _
+    ((continuous_const.mul (Real.continuous_exp.comp
+        (by fun_prop : Continuous fun x : ℝ => -h * x)))).intervalIntegrable _ _
   have hclosed := intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv hint
   have hmain : ∫ x in (0 : ℝ)..s, h * Real.exp (-h * x) = 1 - Real.exp (-h * s) := by
     rw [hclosed]
@@ -436,14 +441,16 @@ theorem tendsto_laplace_of_tail_asymptotic
         field_simp
         ring
       rw [hsplit]
-      have hb1 : |(Real.Gamma (1 - α) * F (u/h) - f (u/h)) / f (1/h)| ≤ η * (f (u/h) / f (1/h)) := by
+      have hb1 : |(Real.Gamma (1 - α) * F (u/h) - f (u/h)) / f (1/h)| ≤ η *
+          (f (u/h) / f (1/h)) := by
         rw [abs_div, abs_of_pos hposinv, div_le_iff₀ hposinv]
         have he : η * (f (u/h) / f (1/h)) * f (1/h) = η * f (u/h) := by field_simp
         rw [he]
         exact hFeqx
       have hb2 : |f (u/h) / f (1/h) - u ^ (-α)| ≤ f (u/h) / f (1/h) + u ^ (-α) := by
         have h1 : 0 ≤ f (u/h) / f (1/h) := le_of_lt (div_pos hposfx hposinv)
-        have h2 : 0 ≤ u ^ (-α) := le_of_lt (Real.rpow_pos_of_pos (lt_of_lt_of_le (mul_pos hh hXpos) hu) _)
+        have h2 : 0 ≤ u ^ (-α) := le_of_lt (Real.rpow_pos_of_pos
+            (lt_of_lt_of_le (mul_pos hh hXpos) hu) _)
         rw [abs_le]
         constructor <;> linarith
       have hrb' : f (u/h) / f (1/h) ≤ B * (u ^ (-α - η) + u ^ (-α + η)) := by
@@ -722,11 +729,13 @@ theorem tendsto_laplace_of_tail_asymptotic
           ring
         have hstep4 : ∫ u in Set.Ioo (0:ℝ) (h*X), Real.exp (-u) ≤ h*X := by
           have hc : ∫ u in Set.Ioo (0:ℝ) (h*X), (1:ℝ) = h*X := by
-            rw [setIntegral_const, Measure.real, Real.volume_Ioo, ENNReal.toReal_ofReal (by linarith),
+            rw [setIntegral_const, Measure.real, Real.volume_Ioo,
+                ENNReal.toReal_ofReal (by linarith),
               smul_eq_mul, mul_one, sub_zero]
           calc ∫ u in Set.Ioo (0:ℝ) (h*X), Real.exp (-u)
               ≤ ∫ u in Set.Ioo (0:ℝ) (h*X), (1:ℝ) := by
-                refine setIntegral_mono_on hIntExp (integrableOn_const ?_) measurableSet_Ioo (fun u hu => ?_)
+                refine setIntegral_mono_on hIntExp (integrableOn_const ?_) measurableSet_Ioo
+                    (fun u hu => ?_)
                 · rw [Real.volume_Ioo]; exact ENNReal.ofReal_ne_top
                 · rw [← Real.exp_zero]
                   exact Real.exp_le_exp.2 (by linarith [hu.1])
@@ -755,12 +764,14 @@ theorem tendsto_laplace_of_tail_asymptotic
               linarith
           _ = Real.Gamma (1 - α) * X * (h / f (1/h)) + X ^ (1 - α) * h ^ (1 - α) / (1 - α) := by
               rw [hstep6, hstep7]
-      have hlim1 : Tendsto (fun h : ℝ => Real.Gamma (1 - α) * X * (h / f (1/h))) (𝓝[>] (0:ℝ)) (𝓝 0) := by
+      have hlim1 : Tendsto (fun h : ℝ => Real.Gamma (1 - α) * X * (h / f (1/h))) (𝓝[>] (0:ℝ))
+          (𝓝 0) := by
         have h0 : Tendsto (fun h : ℝ => h / f (1/h)) (𝓝[>] (0:ℝ)) (𝓝 0) :=
           tendsto_div_of_regularlyVarying_neg hα1 hfmeas hrv
         have h1 := h0.const_mul (Real.Gamma (1 - α) * X)
         rwa [mul_zero] at h1
-      have hlim2 : Tendsto (fun h : ℝ => X ^ (1 - α) * h ^ (1 - α) / (1 - α)) (𝓝[>] (0:ℝ)) (𝓝 0) := by
+      have hlim2 : Tendsto (fun h : ℝ => X ^ (1 - α) * h ^ (1 - α) / (1 - α)) (𝓝[>] (0:ℝ))
+          (𝓝 0) := by
         have h1 : Tendsto (fun h : ℝ => h ^ (1 - α)) (𝓝[>] (0:ℝ)) (𝓝 0) := by
           have hr : Tendsto (fun h : ℝ => h ^ (-(1 - α))) (𝓝[>] (0:ℝ)) atTop :=
             tendsto_rpow_neg_nhdsGT_zero (by linarith : -(1 - α) < 0)
@@ -1133,7 +1144,8 @@ theorem unique_of_kernel_averages {α c : ℝ} (hα1 : α < 1)
                 Real.exp (-u) * u ^ (-α) * φ (δ + Real.log u))
             + ∫ u in Set.Ici (Real.exp (v₀ - δ)),
                 Real.exp (-u) * u ^ (-α) * φ (δ + Real.log u) := by
-        have hset : Set.Ioi (0:ℝ) = Set.Ioo 0 (Real.exp (v₀ - δ)) ∪ Set.Ici (Real.exp (v₀ - δ)) := by
+        have hset : Set.Ioi (0:ℝ) = Set.Ioo 0 (Real.exp (v₀ - δ)) ∪
+            Set.Ici (Real.exp (v₀ - δ)) := by
           ext u
           simp only [Set.mem_Ioi, Set.mem_union, Set.mem_Ioo, Set.mem_Ici]
           constructor
@@ -1160,7 +1172,8 @@ theorem unique_of_kernel_averages {α c : ℝ} (hα1 : α < 1)
         rw [mul_comm B, ← integral_mul_const]
         refine setIntegral_mono_on
           (hintOn δ (Set.Ioo 0 (Real.exp (v₀ - δ))) (fun u hu => hu.1))
-          ((hgOn (Set.Ioo 0 (Real.exp (v₀ - δ))) (fun u hu => hu.1)).mul_const B) measurableSet_Ioo ?_
+          ((hgOn (Set.Ioo 0 (Real.exp (v₀ - δ))) (fun u hu => hu.1)).mul_const B)
+              measurableSet_Ioo ?_
         · intro u hu
           rw [Set.mem_Ioo] at hu
           exact mul_le_mul_of_nonneg_left (hB _) (hg0 u hu.1)
@@ -1173,11 +1186,13 @@ theorem unique_of_kernel_averages {α c : ℝ} (hα1 : α < 1)
           rw [mul_comm (φ v₀), ← integral_mul_const]
           refine setIntegral_mono_on
             (hintOn δ (Set.Ici (Real.exp (v₀ - δ))) (fun u hu => lt_of_lt_of_le hLpos hu))
-            ((hgOn (Set.Ici (Real.exp (v₀ - δ))) (fun u hu => lt_of_lt_of_le hLpos hu)).mul_const (φ v₀))
+            ((hgOn (Set.Ici (Real.exp (v₀ - δ))) (fun u hu =>
+                lt_of_lt_of_le hLpos hu)).mul_const (φ v₀))
             measurableSet_Ici ?_
           · intro u hu
             rw [Set.mem_Ici] at hu
-            have hlog : v₀ - δ ≤ Real.log u := (Real.le_log_iff_exp_le (lt_of_lt_of_le hLpos hu)).2 hu
+            have hlog : v₀ - δ ≤ Real.log u := (Real.le_log_iff_exp_le
+                (lt_of_lt_of_le hLpos hu)).2 hu
             have h1 : φ (δ + Real.log u) ≤ φ v₀ := hmono (by linarith)
             exact mul_le_mul_of_nonneg_left h1 (hg0 u (lt_of_lt_of_le hLpos hu))
         have h2 : φ v₀ * (∫ u in Set.Ici (Real.exp (v₀ - δ)), Real.exp (-u) * u ^ (-α))

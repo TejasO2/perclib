@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs, from pinned mathlib's Stirling formula (`Stirling.tendsto_stirlingSeq_sqrt_pi`) and
 Catalan numbers. The statements follow the wiki tags AAZS and V5OZ (binary-tree percolation). No
 source text or code is copied.
@@ -25,8 +29,8 @@ Catalan law of 9K6O (the index `n` is the cluster size, as in
 * `centralBinom_div_four_pow_mul_sqrt_tendsto`: `C(2n,n) 4^{-n} √n → 1/√π` (Stirling);
 * `catalan_div_four_pow_isEquivalent` (item 1): `Cat(n)/4^n ~ n^{-3/2}/√π`;
 * `tsum_catalan_div_four_pow_tail` (exact): `∑_{k ≥ n} Cat(k)/4^k = 2 C(2n,n)/4^n`;
-* `catalan_critical_isEquivalent`, `catalan_critical_tail_isEquivalent` (AAZS): `a_n(1/2) ~ n^{-3/2}/√π`
-  and `∑_{k ≥ n} a_k(1/2) ~ 2 n^{-1/2}/√π`;
+* `catalan_critical_isEquivalent`, `catalan_critical_tail_isEquivalent` (AAZS):
+  `a_n(1/2) ~ n^{-3/2}/√π` and `∑_{k ≥ n} a_k(1/2) ~ 2 n^{-1/2}/√π`;
 * `catalan_tendstoUniformlyOn_ratio` (V5OZ): the ratio
   `a_n(p) / [((1-p)/(p√π)) n^{-3/2} (4p(1-p))^n]` tends to `1` uniformly in `p ∈ (0,1)`;
 * `catalan_nearCritical_isEquivalent` (V5OZ): if `p_n = 1/2 + ε_n`, `ε_n → 0` and `n ε_n⁴ → 0`, then

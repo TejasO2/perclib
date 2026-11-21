@@ -38,8 +38,51 @@ def prop_valued(d):
     return d['prop_valued']
 
 
-def statement_definition(d):
-    return d['kind'] == 'definition' and prop_valued(d)
+def declared_codomain(d, decls):
+    """The declared type's codomain after its own binders, with project aliases resolved.
+
+    Lean's `prop_valued` also unfolds the codomain itself, so `Set α` (which is `α → Prop`)
+    counts as Prop-valued there. Only the binders written in the declared type count here.
+    """
+    codomain, seen = d['type'], set()
+    while codomain[0] == 'forall':
+        codomain = codomain[3]
+    while True:
+        if codomain[0] != 'const' or codomain[1] in seen:
+            return codomain
+        alias = decls.get(codomain[1])
+        if alias is None or alias['kind'] != 'definition' or alias['value'] is None:
+            return codomain
+        seen.add(codomain[1])
+        codomain = alias['value']
+
+
+def predicate_codomain(codomain):
+    """A codomain that is a predicate type (`Set α`, or a pi through an alias), not `Prop`."""
+    if codomain == ['sort', ['zero']]:
+        return False
+    head = codomain
+    while head[0] == 'app':
+        head = head[1]
+    if head[0] == 'const' and head[1] == 'Set':
+        return True
+    if codomain[0] == 'forall':
+        return True
+    raise ValueError('Unrecognised codomain of a Prop-valued definition')
+
+
+def statement_definition(d, decls):
+    """D-16 statement: a definition whose declared codomain is `Prop` (through aliases).
+
+    A tagged definition of a set or predicate (`conn x y : Set Config`) is a definition,
+    not an assertion awaiting a proof, even though Lean reduces it to a Prop-valued type.
+    """
+    if d['kind'] != 'definition' or not prop_valued(d):
+        return False
+    try:
+        return not predicate_codomain(declared_codomain(d, decls))
+    except ValueError as e:
+        raise ValueError(f"{e}: {d['name']}") from None
 
 
 def proposition(d):
@@ -152,7 +195,7 @@ def build(raw, catalog, context):
             continue
         if d['kind'] not in ('definition', 'theorem', 'opaque'):
             raise ValueError(f'Unsupported tagged declaration kind {d["kind"]}: {d["name"]}')
-        if d['kind'] == 'opaque' and prop_valued(d):
+        if d['kind'] == 'opaque' and statement_definition({**d, 'kind': 'definition'}, decls):
             raise ValueError(f'Opaque proposition is unsupported by D-16: {d["name"]}')
         if not re.fullmatch('[0-9A-Z]{4}', tag) or tag not in catalog:
             raise ValueError(f'Unknown, withdrawn or absent wiki tag: {tag}')
@@ -165,7 +208,7 @@ def build(raw, catalog, context):
         if not ds:
             entries.append(entry)
             continue
-        statements = [d for d in ds if statement_definition(d)]
+        statements = [d for d in ds if statement_definition(d, decls)]
         proofs = [d for d in ds if d['kind'] == 'theorem']
         if len(ds) > 1 and not (len(ds) == 2 and len(statements) == len(proofs) == 1
                                and is_pair(statements[0], proofs[0])):

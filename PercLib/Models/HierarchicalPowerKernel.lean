@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 Power-law kernel bounds on the hierarchical lattice. New proofs from this library's
 hierarchical geometry and exact geometric rows (`tsum_level_gt_eq`), its threshold,
 transport and truncated-mean theorems, and pinned mathlib

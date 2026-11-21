@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs, using mathlib's `SimpleGraph.fromEdgeSet`, walks and finite sets. Source motivation: T.
 Hutchcroft, arXiv:2008.11197v2, §2.1, the tree-splitting step in the proof of Theorem 2.3. No source
 text or code is copied.
@@ -42,7 +46,6 @@ reachable from `x`; each part is split recursively with one *open* piece of weig
 noncomputable section
 
 open SimpleGraph Finset
-open scoped Classical
 
 namespace PercLib
 
@@ -104,6 +107,7 @@ theorem reachable_of_closed {F S : Set (Sym2 V)} {a u v : V}
       (fromEdgeSet_adj _).2 ⟨hS _ h1.1 b (Sym2.mem_mk_left b d) hu, h1.2⟩
     exact ih (hu.trans hadj.reachable) (hu'.trans hadj'.reachable)
 
+open Classical in
 /-- The edges of `F` with an endpoint reachable from `a` form a set in which every one of
 their endpoints is reachable from `a`. -/
 theorem reachable_filter_reachable (F : Finset (Sym2 V)) (a : V) {v : V}
@@ -128,6 +132,7 @@ theorem exists_mem_of_reachable_ne {S : Set (Sym2 V)} {a v : V}
   | nil => exact absurd rfl hne
   | cons h _ => exact ⟨_, ((fromEdgeSet_adj _).1 h).1, Sym2.mem_mk_left _ _⟩
 
+open Classical in
 /-- The union of two connected edge sets with a common endpoint is connected. -/
 theorem connected_union {P Q : Finset (Sym2 V)}
     (hP : ∀ u v, (∃ e ∈ P, u ∈ e) → (∃ e ∈ P, v ∈ e) →
@@ -168,6 +173,7 @@ theorem exists_common_vertex {E O : Finset (Sym2 V)} {C : Finset (Finset (Sym2 V
 
 /-! ### Bookkeeping for partitions of an edge set -/
 
+open Classical in
 private theorem part_close {E U : Finset (Sym2 V)} {C : Finset (Finset (Sym2 V))}
     (h : (∀ P ∈ C, P ⊆ E) ∧ U ⊆ E ∧ (∀ e ∈ E, e ∈ U ∨ ∃ P ∈ C, e ∈ P) ∧
       (∀ P ∈ C, Disjoint P U) ∧ (C : Set (Finset (Sym2 V))).PairwiseDisjoint id) :
@@ -188,6 +194,7 @@ private theorem part_close {E U : Finset (Sym2 V)} {C : Finset (Finset (Sym2 V))
   · rw [Finset.coe_insert]
     exact h5.insert fun P hP _ => (h4 P hP).symm
 
+open Classical in
 private theorem part_union {E₁ E₂ O₁ O₂ : Finset (Sym2 V)} {C₁ C₂ : Finset (Finset (Sym2 V))}
     (hE : Disjoint E₁ E₂)
     (h₁ : (∀ P ∈ C₁, P ⊆ E₁) ∧ O₁ ⊆ E₁ ∧ (∀ e ∈ E₁, e ∈ O₁ ∨ ∃ P ∈ C₁, e ∈ P) ∧
@@ -223,6 +230,7 @@ private theorem part_union {E₁ E₂ O₁ O₂ : Finset (Sym2 V)} {C₁ C₂ : 
     refine a5.union b5 fun P hP Q hQ _ => ?_
     exact Finset.disjoint_of_subset_left (a1 P hP) (Finset.disjoint_of_subset_right (b1 Q hQ) hE)
 
+open Classical in
 private theorem part_insert {E O : Finset (Sym2 V)} {C : Finset (Finset (Sym2 V))}
     {f : Sym2 V} (hf : f ∉ E)
     (h : (∀ P ∈ C, P ⊆ E) ∧ O ⊆ E ∧ (∀ e ∈ E, e ∈ O ∨ ∃ P ∈ C, e ∈ P) ∧
@@ -244,6 +252,7 @@ private theorem part_insert {E O : Finset (Sym2 V)} {C : Finset (Finset (Sym2 V)
 
 /-! ### The greedy split -/
 
+open Classical in
 /-- Close an open piece once its weight reaches `w`. -/
 private theorem close_or_open (W : Finset (Sym2 V) → ℕ) (w : ℝ) {E U : Finset (Sym2 V)}
     {C : Finset (Finset (Sym2 V))} (x : V)
@@ -274,6 +283,7 @@ private theorem close_or_open (W : Finset (Sym2 V) → ℕ) (w : ℝ) {E U : Fin
     · exact ⟨hne, hcn, not_lt.1 hlt, hW⟩
     · exact hC P hP'
 
+open Classical in
 /-- The recursive step: a partition into closed pieces of weight in `[w, 2w)` (or at most
 two) and one open piece of weight below `w` containing the root `x`. -/
 private theorem greedy_split (W : Finset (Sym2 V) → ℕ)
@@ -464,6 +474,7 @@ private theorem greedy_split (W : Finset (Sym2 V) → ℕ)
 
 /-! ### The splitting theorem -/
 
+open Classical in
 /-- **Splitting a marked connected edge set** (input to the BK step of universal tightness). Let `E`
 be a finite loopless edge set whose graph is connected on the endpoints of `E` (a finite
 tree is a special case), `A` a set of `N = |A|` marked endpoints, `k ≥ 1` and
@@ -656,6 +667,7 @@ theorem exists_connected_split (E : Finset (Sym2 V)) (hdiag : ∀ e ∈ E, ¬ e.
     obtain ⟨P, hP, heP⟩ := hD2 e he
     exact ⟨P, hP, e, heP, hve⟩
 
+open Classical in
 /-- **The tree case.** A finite tree with `N ≥ 3^k` marked vertices, `k ≥ 1`: its edge set
 is partitioned into at least `3^(k-1) + 1` nonempty connected pieces, each with at least
 `N / 3^k` and fewer than `3 N / 3^k` marked endpoints, covering every vertex. -/

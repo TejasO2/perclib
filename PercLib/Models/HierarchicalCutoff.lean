@@ -1,4 +1,9 @@
 /-
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Cutoff clusters and the exact omitted row on the hierarchical lattice, and the sharp small-intensity
 bound. New proofs from the existing hierarchical geometry, the row-sum and intensity theorems of
 `PercLib.Percolation.Bond.RowSum` and `PercLib.Percolation.Bond.Intensity` and pinned mathlib
@@ -37,7 +42,6 @@ noncomputable section
 
 open MeasureTheory Set
 open scoped ENNReal NNReal
-open Classical
 open PercLib.Percolation.Bond
 
 /-! ### Clusters inside a host graph, allowing arbitrary loop probabilities -/
@@ -181,10 +185,11 @@ theorem ae_cluster_subset_ball (q : Sym2 (ℕ →₀ (Fin d → ZMod L)) → uni
 
 /-! ### KL29 (b), (c): the omitted row -/
 
+open Classical in
 /-- **The omitted kernel mass.** The kernel mass above level `n` is
 `C (N − 1) r / (1 − N r) · (N r)^n`. In `ℝ≥0∞` this holds with no hypothesis on `N r`. -/
 theorem tsum_level_gt_eq (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) (C r : ℝ≥0)
-    (hJ : ∀ x y, J s(x,y) = C * r ^ ((y - x).support.sup Nat.succ)) (n : ℕ)
+    (hJ : ∀ x y, J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ)) (n : ℕ)
     (x : ℕ →₀ (Fin d → ZMod L)) :
     (∑' y, if n < (y - x).support.sup Nat.succ then (J s(x, y) : ℝ≥0∞) else 0) =
       (C : ℝ≥0∞) * ((L ^ d - 1 : ℕ) : ℝ≥0∞) * r / (1 - (L : ℝ≥0∞) ^ d * r) *
@@ -230,7 +235,7 @@ theorem tsum_level_gt_eq (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) 
 /-- **The omitted probability row.** In the exponential family the omitted probability row above
 level `n` is at most `β` times the omitted kernel mass. -/
 theorem tsum_level_gt_intensity_le (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) (C r : ℝ≥0)
-    (hJ : ∀ x y, J s(x,y) = C * r ^ ((y - x).support.sup Nat.succ)) (β : ℝ≥0) (n : ℕ)
+    (hJ : ∀ x y, J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ)) (β : ℝ≥0) (n : ℕ)
     (x : ℕ →₀ (Fin d → ZMod L)) :
     (∑' y, if n < (y - x).support.sup Nat.succ then
         (unitInterval.toNNReal (intensityProfile J β s(x, y)) : ℝ≥0∞) else 0) ≤
@@ -248,7 +253,7 @@ theorem tsum_level_gt_intensity_le (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) →
 /-- With `N r < 1`, the off-diagonal row of the hierarchical kernel is exactly
 `M = C (N − 1) r / (1 − N r)`. -/
 theorem rowSum_hierarchical_eq (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) (C r : ℝ≥0)
-    (hJ : ∀ x y, J s(x,y) = C * r ^ ((y - x).support.sup Nat.succ))
+    (hJ : ∀ x y, J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ))
     (hr : (L : ℝ≥0) ^ d * r < 1) (v : ℕ →₀ (Fin d → ZMod L)) :
     rowSum (fun e => (J e : ℝ≥0∞)) v =
       ((C * ((L ^ d - 1 : ℕ) : ℝ≥0) * r / (1 - (L : ℝ≥0) ^ d * r) : ℝ≥0) : ℝ≥0∞) := by
@@ -270,7 +275,7 @@ theorem rowSum_hierarchical_eq (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ
 
 /-- **Susceptibility.** With `N r < 1` and `β M < 1`, `chi ≤ (1 − β M)⁻¹`. -/
 theorem chi_intensity_le_hierarchical_sharp (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0)
-    (C r : ℝ≥0) (hJ : ∀ x y, J s(x,y) = C * r ^ ((y - x).support.sup Nat.succ))
+    (C r : ℝ≥0) (hJ : ∀ x y, J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ))
     (hr : (L : ℝ≥0) ^ d * r < 1) (β : ℝ≥0)
     (hβ : (β : ℝ≥0∞) *
       ((C * ((L ^ d - 1 : ℕ) : ℝ≥0) * r / (1 - (L : ℝ≥0) ^ d * r) : ℝ≥0) : ℝ≥0∞) < 1)
@@ -282,7 +287,7 @@ theorem chi_intensity_le_hierarchical_sharp (J : Sym2 (ℕ →₀ (Fin d → ZMo
 /-- **Finiteness.** With `N r < 1` and `β M < 1`, almost surely every cluster is
 finite. -/
 theorem law_exists_infinite_hierarchical_eq_zero (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0)
-    (C r : ℝ≥0) (hJ : ∀ x y, J s(x,y) = C * r ^ ((y - x).support.sup Nat.succ))
+    (C r : ℝ≥0) (hJ : ∀ x y, J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ))
     (hr : (L : ℝ≥0) ^ d * r < 1) (β : ℝ≥0)
     (hβ : (β : ℝ≥0∞) *
       ((C * ((L ^ d - 1 : ℕ) : ℝ≥0) * r / (1 - (L : ℝ≥0) ^ d * r) : ℝ≥0) : ℝ≥0∞) < 1) :
@@ -294,7 +299,7 @@ theorem law_exists_infinite_hierarchical_eq_zero (J : Sym2 (ℕ →₀ (Fin d �
 (and is `⊤` when `M = 0`). -/
 theorem inv_le_globalCriticalIntensity_hierarchical_sharp
     (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) (C r : ℝ≥0)
-    (hJ : ∀ x y, J s(x,y) = C * r ^ ((y - x).support.sup Nat.succ))
+    (hJ : ∀ x y, J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ))
     (hr : (L : ℝ≥0) ^ d * r < 1) :
     ((C * ((L ^ d - 1 : ℕ) : ℝ≥0) * r / (1 - (L : ℝ≥0) ^ d * r) : ℝ≥0) : ℝ≥0∞)⁻¹ ≤
       globalCriticalIntensity J :=
@@ -303,7 +308,7 @@ theorem inv_le_globalCriticalIntensity_hierarchical_sharp
 /-- **Root threshold.** With `N r < 1`, every root threshold is at least `M⁻¹`. -/
 theorem inv_le_rootCriticalIntensity_hierarchical_sharp
     (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) (C r : ℝ≥0)
-    (hJ : ∀ x y, J s(x,y) = C * r ^ ((y - x).support.sup Nat.succ))
+    (hJ : ∀ x y, J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ))
     (hr : (L : ℝ≥0) ^ d * r < 1) (x : ℕ →₀ (Fin d → ZMod L)) :
     ((C * ((L ^ d - 1 : ℕ) : ℝ≥0) * r / (1 - (L : ℝ≥0) ^ d * r) : ℝ≥0) : ℝ≥0∞)⁻¹ ≤
       rootCriticalIntensity J x :=
@@ -312,7 +317,7 @@ theorem inv_le_rootCriticalIntensity_hierarchical_sharp
 /-- **`M = 0`.** With `N r < 1` and `M = 0`: at every parameter every cluster is
 almost surely a singleton, `chi = 1`, and both thresholds are `⊤`. -/
 theorem hierarchical_of_M_eq_zero (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) (C r : ℝ≥0)
-    (hJ : ∀ x y, J s(x,y) = C * r ^ ((y - x).support.sup Nat.succ))
+    (hJ : ∀ x y, J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ))
     (hr : (L : ℝ≥0) ^ d * r < 1)
     (hM : C * ((L ^ d - 1 : ℕ) : ℝ≥0) * r / (1 - (L : ℝ≥0) ^ d * r) = 0) (β : ℝ≥0) :
     (∀ᵐ ω ∂law (intensityProfile J β), ∀ x, cluster ω x = {x}) ∧

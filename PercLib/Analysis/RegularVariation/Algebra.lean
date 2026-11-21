@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Algebra of regular variation, of Potter's bounds, and doubling, from T. Hutchcroft, *Critical
 long-range percolation I*, arXiv:2508.18807v1, §I.2.2, pp. 25-28.
 
@@ -98,8 +102,8 @@ theorem RegularlyVarying.rpow {f : ℝ → ℝ} {ρ a : ℝ}
 
 /-! ### Algebra of Potter's bounds -/
 
-/-- Potter's bounds (written out as in `lemma_I_2_10`) are preserved when multiplying by an exact power `x ^ a`
-(the index shifts by `a`).  This is the step by which `lemma_I_2_10` is applied
+/-- Potter's bounds (written out as in `lemma_I_2_10`) are preserved when multiplying by an exact
+power `x ^ a` (the index shifts by `a`).  This is the step by which `lemma_I_2_10` is applied
 to an integrand of the form "power of `r` times a regularly varying `h`". -/
 theorem potterBounds_mul_rpow {f : ℝ → ℝ} {α : ℝ}
     (hpot : (∀ ε : ℝ, 0 < ε → ∃ X : ℝ, 1 ≤ X ∧ ∀ x y : ℝ, X ≤ y → y ≤ x →
@@ -149,7 +153,8 @@ theorem potterBounds_mul_rpow {f : ℝ → ℝ} {α : ℝ}
       _ = (1 + ε) * (x / y) ^ (α + a + ε) * (y ^ a * |f y|) := by
           rw [hkey4]; ring
 
-/-- Potter's bounds (written out as in `lemma_I_2_10`) are preserved when multiplying by a nonzero constant. -/
+/-- Potter's bounds (written out as in `lemma_I_2_10`) are preserved when multiplying by a nonzero
+constant. -/
 theorem potterBounds_const_mul {f : ℝ → ℝ} {α c : ℝ}
     (hpot : (∀ ε : ℝ, 0 < ε → ∃ X : ℝ, 1 ≤ X ∧ ∀ x y : ℝ, X ≤ y → y ≤ x →
       (1 - ε) * (x / y) ^ (α - ε) * |f y| ≤ |f x| ∧

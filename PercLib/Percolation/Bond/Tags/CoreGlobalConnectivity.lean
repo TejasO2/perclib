@@ -1,5 +1,7 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
 -/
 module
 
@@ -13,7 +15,7 @@ All mathematical inputs are proved in the imported modules. -/
 @[expose] public section
 noncomputable section
 open MeasureTheory Set
-open scoped ENNReal Classical
+open scoped ENNReal
 
 namespace PercLib.Percolation.Bond
 variable {V : Type*}
@@ -70,6 +72,7 @@ theorem global_connection_events :
     fun _ => ⟨measurableSet_preconnected, measurableSet_connected,
       measurableSet_forall_cluster_finite, measurableSet_forall_encard_cluster_le⟩⟩
 
+open Classical in
 /-- Spanning, Harris and isolation bounds for the all-pairs connection event; the
 isolation bounds need a second vertex. -/
 @[tag "JSS9"]

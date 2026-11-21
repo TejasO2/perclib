@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs, on the bond interface. Source motivation: T. Hutchcroft, arXiv:2008.11197v2,
 §2 (consequences of universal tightness), and the wiki statements MJEP, 7VCS and DEZI. No source
 text or code is copied.
@@ -542,7 +546,7 @@ example : (1 : ℝ) = 2 * 2 + 0 - 3 ∧ (2 : ℝ) / 2 = 3 - 2 - 0 ∧ (0 : ℝ) 
     have hc1 : r ^ (2 : ℝ) ≤ (⌈r ^ (2 : ℝ)⌉₊ : ℝ) := Nat.le_ceil _
     have hc2 : (⌈r ^ (2 : ℝ)⌉₊ : ℝ) ≤ 2 * r ^ (2 : ℝ) := by
       have := Nat.ceil_lt_add_one (show 0 ≤ r ^ (2 : ℝ) by linarith); linarith
-    show 1 / 2 * (r ^ (2 : ℝ) * 1 / r ^ (3 : ℝ)) ≤ (⌈r ^ (2 : ℝ)⌉₊ : ℝ) ^ (-1 / 2 : ℝ) ∧
+    change 1 / 2 * (r ^ (2 : ℝ) * 1 / r ^ (3 : ℝ)) ≤ (⌈r ^ (2 : ℝ)⌉₊ : ℝ) ^ (-1 / 2 : ℝ) ∧
       (⌈r ^ (2 : ℝ)⌉₊ : ℝ) ^ (-1 / 2 : ℝ) ≤ 1 * (r ^ (2 : ℝ) * 1 / r ^ (3 : ℝ))
     rw [hv]
     constructor

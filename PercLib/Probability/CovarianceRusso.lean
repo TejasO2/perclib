@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 The covariance form of the finite Russo formula. The covariance of an observable with a coordinate
 indicator is `qₑ(1-qₑ)` times the expected forced increment, and in intensity coordinates the Russo
 derivative is a sum of covariances with the coefficients `J/(1 - e^{-βJ})`. Uses the finite-profile
@@ -28,7 +32,6 @@ noncomputable section
 
 namespace PercLib.Probability.FiniteProfile
 open Finset
-open scoped Classical
 variable {E : Type*} [Fintype E]
 
 omit [Fintype E] in
@@ -96,6 +99,7 @@ theorem covariance_coordinate (q : E → ℝ) (e : E) (f : (E → Bool) → ℝ)
   ring
 
 omit [Fintype E] in
+open Classical in
 lemma force_false_le_force_true (e : E) (ω : E → Bool) :
     force e false ω ≤ force e true ω := by
   intro j

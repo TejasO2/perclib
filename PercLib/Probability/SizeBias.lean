@@ -1,4 +1,9 @@
 /-
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Truncated first moments and size-biased laws of nonnegative random variables, with the
 cluster-volume instance. New proofs against pinned mathlib
 56a005855ea17e0b0958f73ec801ae140b0a1679; no upstream proof is copied. Random variables
@@ -76,7 +81,7 @@ theorem le_setLIntegral_le_of_le (P : Measure Ω) {X : Ω → ℝ≥0∞} (hX : 
   have hν0 : ν ≠ 0 := fun h => hμ0 (lintegral_eq_zero_of_lintegral_sq_eq_zero P hX h)
   have hAB : A + B = μ := by
     have hc : {ω | X ω ≤ t}ᶜ = {ω | t < X ω} := by ext ω; simp
-    show _ = ∫⁻ ω, X ω ∂P
+    change _ = ∫⁻ ω, X ω ∂P
     rw [← lintegral_add_compl (fun ω => X ω) (measurableSet_le hX measurable_const), hc]
   -- `B λ ≤ μ`.
   have hBl : B * l ≤ μ := by
@@ -177,7 +182,8 @@ theorem lintegral_sizeBiased_cluster (q : Sym2 V → unitInterval) (o : V) :
     ∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ∂((law q).withDensity fun ω =>
         ((cluster ω o).encard : ℝ≥0∞) / chi q o) =
       (∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ^ 2 ∂law q) / chi q o :=
-  lintegral_self_withDensity_div (law q) ((measurable_of_countable (fun n : ℕ∞ => (n : ℝ≥0∞))).comp (measurable_encard_cluster o))
+  lintegral_self_withDensity_div (law q) ((measurable_of_countable (fun n : ℕ∞ => (n : ℝ≥0∞))).comp
+      (measurable_encard_cluster o))
 
 /-! ### Non-vacuity witnesses -/
 

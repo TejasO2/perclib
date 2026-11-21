@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-16. No upstream proof is copied and no definition is added.
 -/
 module
@@ -96,7 +98,8 @@ theorem law_all_closed_le {V : Type*} (J : Sym2 V → ℝ≥0) (β : ℝ≥0) (F
     law (intensityProfile J β) {ω | ∀ e ∈ F, e ∉ ω} ≤
       ENNReal.ofReal (Real.exp (-((β : ℝ) * j₀ * F.card))) := by
   -- complement duality and the all-open product
-  have hset : {ω : Config V | ∀ e ∈ F, e ∉ ω} = {ω | ωᶜ ∈ {ω' : Config V | (F : Set (Sym2 V)) ⊆ ω'}} := by
+  have hset : {ω : Config V | ∀ e ∈ F, e ∉ ω} = {ω | ωᶜ ∈
+      {ω' : Config V | (F : Set (Sym2 V)) ⊆ ω'}} := by
     ext ω
     simp only [Set.mem_ofPred_eq, Set.subset_def, Finset.mem_coe, Set.mem_compl_iff]
   have hmeas : MeasurableSet {ω' : Config V | (F : Set (Sym2 V)) ⊆ ω'} := by
@@ -112,7 +115,7 @@ theorem law_all_closed_le {V : Type*} (J : Sym2 V → ℝ≥0) (β : ℝ≥0) (F
     intro e _
     rw [← ENNReal.ofReal_coe_nnreal]
     congr 1
-    show 1 - (1 - Real.exp (-(β : ℝ) * J e)) = _
+    change 1 - (1 - Real.exp (-(β : ℝ) * J e)) = _
     ring
   rw [Finset.prod_congr rfl hfac, ← ENNReal.ofReal_prod_of_nonneg fun e _ => (Real.exp_pos _).le]
   refine ENNReal.ofReal_le_ofReal ?_
@@ -176,7 +179,8 @@ theorem amplified_sq_ge {L d α B R K : ℝ} (hL : 0 < L) {n ℓ : ℕ}
     have h1 : (L ^ (d * ℓ) / (2 * Real.exp 1)) ^ 2 ≤ K ^ 2 := pow_le_pow_left₀ (by positivity) hK 2
     rw [div_pow, hsplit] at h1
     have hpos : 0 < L ^ ((d + α) * ℓ) := Real.rpow_pos_of_pos hL _
-    calc 4 * L ^ ((d + α) * ℓ) = L ^ ((d + α) * ℓ) * (16 * Real.exp 1 ^ 2) / (2 * Real.exp 1) ^ 2 := by
+    calc 4 * L ^ ((d + α) * ℓ) = L ^ ((d + α) * ℓ) * (16 * Real.exp 1 ^ 2) /
+        (2 * Real.exp 1) ^ 2 := by
           field_simp; ring
       _ ≤ L ^ ((d + α) * ℓ) * L ^ ((d - α) * ℓ) / (2 * Real.exp 1) ^ 2 := by
           gcongr

@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs for the host-graph specialization of the bond interface, using the canonical cylinder
 marginal, countable almost-everywhere conjunction and mathlib's fromEdgeSet API.
 -/
@@ -21,7 +23,6 @@ containment. The general bond law continues to allow arbitrary diagonal values.
 @[expose] public section
 
 open MeasureTheory
-open scoped Classical
 
 namespace PercLib.Percolation.Bond
 
@@ -63,6 +64,7 @@ example (G : SimpleGraph V) : ∀ᵐ ω ∂law (fun _ : Sym2 V => 0),
   hostContainment G _ (fun _ _ => rfl)
 
 -- Inhomogeneous host profiles, including probability one on host edges.
+open Classical in
 example (G : SimpleGraph Bool) (p : Sym2 Bool → unitInterval) :
     let q := fun e => if e ∈ G.edgeSet then p e else 0
     ∀ᵐ ω ∂law q, ω ⊆ G.edgeSet ∧ openGraph ω ≤ G := by

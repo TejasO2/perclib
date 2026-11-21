@@ -126,7 +126,7 @@
         },
         "certificate": {
           "title": "The finite-set certificate",
-          "sha256": "a406330fb320b418b63526832b583245f112d4fc18abca42277c5f6e5a043b05"
+          "sha256": "0f591b21c0e55e76ba9c33a22f4ca4649b50008c9bc0bf18475c76a771588fc5"
         },
         "long-range": {
           "title": "What survives for long-range percolation",

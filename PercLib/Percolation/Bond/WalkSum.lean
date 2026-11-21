@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
 module
 
 public import PercLib.Meta.Tag
@@ -29,7 +34,6 @@ New proofs for PercLib, using the pinned mathlib API; no upstream proof is copie
 noncomputable section
 
 open scoped ENNReal
-open Classical
 
 namespace PercLib.Percolation.Bond
 
@@ -119,6 +123,7 @@ def offDiagonal (a : V → V → ℝ≥0∞) (v w : V) : ℝ≥0∞ := by
   classical
   exact if w = v then 0 else a v w
 
+open Classical in
 /-- Unfolding the mask gives the explicit row-sum spelling used in
 `PercLib.Percolation.Bond.RowSum`. -/
 theorem offDiagonal_apply (a : V → V → ℝ≥0∞) (v w : V) :
@@ -155,6 +160,7 @@ example (r : ℝ≥0∞) (n : ℕ) :
   | zero => simp
   | succ n ih => simp [ih, pow_succ, mul_comm]
 
+open Classical in
 /-- Even an infinite original diagonal is irrelevant to the masked bound. -/
 example (v : V) :
     (∑' n : ℕ, walkSum

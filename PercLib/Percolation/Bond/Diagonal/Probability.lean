@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New glue on the bond interface, using mathlib infinitePi_map_pi and map_bernoulliMeasure
 at revision 56a005855ea17e0b0958f73ec801ae140b0a1679. No upstream proof is copied. The probability
 space retains diagonal coordinates; only observables insensitive to them have equal distributions.

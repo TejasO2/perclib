@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Correspondence wrappers for examples in the infinite-cluster-zero-one and criticality
 articles: the decorated ray, the unattained threshold and finite vertex sets.
 Every statement is assembled from lemmas proved in the imported modules; no new

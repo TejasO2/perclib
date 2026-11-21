@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs, on the bond interface. Source motivation: T. Hutchcroft, arXiv:2008.11197v2,
 §2.1, proof of Theorem 2.3. No source text or code is copied.
 -/
@@ -54,11 +58,13 @@ theorem clusterIntersection_le_max (Λ : Finset V) (ω : Config V) {v : V} (hv :
 
 theorem isUpperSet_real_le_clusterIntersection (Λ : Finset V) (u : V) (l : ℝ) :
     IsUpperSet {ω : Config V | l ≤ (clusterIntersection Λ ω u : ℝ)} :=
-  fun _ _ h (hω : l ≤ _) => show l ≤ _ from le_trans hω (by exact_mod_cast clusterIntersection_mono Λ h u)
+  fun _ _ h (hω : l ≤ _) => show l ≤ _ from le_trans hω
+      (by exact_mod_cast clusterIntersection_mono Λ h u)
 
 theorem isUpperSet_real_le_maxClusterIntersection (Λ : Finset V) (l : ℝ) :
     IsUpperSet {ω : Config V | l ≤ (maxClusterIntersection Λ ω : ℝ)} :=
-  fun _ _ h (hω : l ≤ _) => show l ≤ _ from le_trans hω (by exact_mod_cast maxClusterIntersection_mono Λ h)
+  fun _ _ h (hω : l ≤ _) => show l ≤ _ from le_trans hω
+      (by exact_mod_cast maxClusterIntersection_mono Λ h)
 
 /-! ### Iterated disjoint occurrence from disjoint finite witnesses -/
 

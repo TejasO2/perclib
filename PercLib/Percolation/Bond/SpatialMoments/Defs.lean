@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 The spatial moment of the cluster, `E[∑_{x ∈ K_o} w(x - o)]`, used in §I.4.1 and §I.5.1 of T.
 Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1, and in the wiki article
 `spatial-cutoff-moments` (as `S = ∑_x ℓ(x)² τ(0, x)`), on the bond interface.

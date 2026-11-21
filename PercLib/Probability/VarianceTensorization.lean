@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Variance tensorisation (Efron–Stein) for finite Bernoulli profiles, the variance lower bound on the
 homogeneous Russo derivative of an increasing event, and the odds-ratio monotonicity it implies.
 Uses the finite-profile vocabulary of Russo.lean; no new definition is introduced.
@@ -32,7 +36,6 @@ noncomputable section
 
 namespace PercLib.Probability.FiniteProfile
 open Finset
-open scoped Classical
 variable {E : Type*} [Fintype E]
 
 /-! ### Linearity and positivity of the profile expectation -/
@@ -72,6 +75,7 @@ lemma force_force (a : E) (b c : Bool) (ω : E → Bool) :
   simp [force, Function.update_idem]
 
 omit [Fintype E] in
+open Classical in
 lemma force_comm {a e : E} (h : a ≠ e) (b c : Bool) (ω : E → Bool) :
     force a b (force e c ω) = force e c (force a b ω) := by
   simp only [force]
@@ -100,6 +104,7 @@ lemma paired_average (q : E → ℝ) (a : E) (h : (E → Bool) → ℝ) (ω : E 
     rw [hf, ho]
     ring
 
+open Classical in
 /-- Tower property: averaging out one coordinate does not change the expectation. This is
 an identity of polynomials in the profile. -/
 theorem expectation_average (q : E → ℝ) (a : E) (h : (E → Bool) → ℝ) :
@@ -140,6 +145,7 @@ lemma force_eq_of_difference_eq_zero {e : E} {f : (E → Bool) → ℝ}
   cases b <;> cases ω e <;> simp [h]
 
 omit [Fintype E] in
+open Classical in
 /-- An observable with no increment at any coordinate is constant. -/
 lemma eq_const_of_difference_eq_zero [Finite E] {f : (E → Bool) → ℝ}
     (hf : ∀ e ω, difference e f ω = 0) (ω : E → Bool) : f ω = f (fun _ => false) := by
@@ -159,6 +165,7 @@ lemma eq_const_of_difference_eq_zero [Finite E] {f : (E → Bool) → ℝ}
 
 /-! ### Efron–Stein -/
 
+open Classical in
 /-- Efron–Stein on the coordinates in `S`, for an observable without increments outside `S`. -/
 theorem variance_le_sum_on (q : E → ℝ) (hq : ∀ e, q e ∈ Set.Icc (0 : ℝ) 1) (S : Finset E) :
     ∀ f : (E → Bool) → ℝ, (∀ e ∉ S, ∀ ω, difference e f ω = 0) →
@@ -254,6 +261,7 @@ lemma expectation_eventValue_mem_Icc {q : E → ℝ} (hq : ∀ e, q e ∈ Set.Ic
   · rw [← expectation_const q 1]
     exact expectation_mono hq fun ω => by unfold eventValue; split_ifs <;> norm_num
 
+open Classical in
 /-- Variance bound for an increasing event with the pivotal sum written out, for any
 profile with values in `[0,1]`. -/
 theorem event_variance_le_pivotal (q : E → ℝ) (hq : ∀ e, q e ∈ Set.Icc (0 : ℝ) 1)
@@ -267,12 +275,14 @@ theorem event_variance_le_pivotal (q : E → ℝ) (hq : ∀ e, q e ∈ Set.Icc (
   simp only [hsq] at h
   nlinarith [h]
 
+open Classical in
 /-- The homogeneous event polynomial `F(p) = E_p[1_A]` and its Russo derivative. -/
 lemma event_homogeneous_hasDerivAt (p : ℝ) (A : Set (Set E)) (hA : IsUpperSet A) :
     HasDerivAt (fun u => expectation (fun _ : E => u) (eventValue A))
       (∑ e, expectation (fun _ : E => p) (fun ω => if pivotal A e ω then 1 else 0)) p := by
   simpa using event_hasDerivAt (fun _ u => u) (fun _ => 1) p (fun _ => hasDerivAt_id p) hA
 
+open Classical in
 /-- **Variance bound on the Russo derivative.** For an increasing event and `F(p) = P_p(A)` (as the
 event polynomial), `p(1-p) F'(p) ≥ F(p)(1-F(p))`. Holds on the closed interval `[0,1]`. -/
 theorem event_variance_le_deriv {A : Set (Set E)} (hA : IsUpperSet A) {p : ℝ}
@@ -303,7 +313,8 @@ theorem prodBernoulli_event_variance_le_deriv {A : Set (Set E)} (hA : IsUpperSet
         expectation (fun _ : E => u) (eventValue A) := by
     intro u hu
     rw [prodBernoulli_real_eq_expectation, Set.projIcc_of_mem zero_le_one hu]
-  have hev : (fun u => (prodBernoulli (fun _ : E => Set.projIcc 0 1 zero_le_one u)).real A) =ᶠ[nhds p]
+  have hev : (fun u => (prodBernoulli (fun _ : E => Set.projIcc 0 1 zero_le_one u)).real A)
+      =ᶠ[nhds p]
       fun u => expectation (fun _ : E => u) (eventValue A) := by
     filter_upwards [Ioo_mem_nhds hp.1 hp.2] with u hu
     exact heq u (Set.Ioo_subset_Icc_self hu)
@@ -312,6 +323,7 @@ theorem prodBernoulli_event_variance_le_deriv {A : Set (Set E)} (hA : IsUpperSet
 
 /-! ### Odds-ratio monotonicity -/
 
+open Classical in
 lemma expectation_eventValue_pos {q : E → ℝ} (hq : ∀ e, q e ∈ Set.Ioo (0 : ℝ) 1)
     {A : Set (Set E)} (hA : IsUpperSet A) (hne : A.Nonempty) :
     0 < expectation q (eventValue A) := by
@@ -327,6 +339,7 @@ lemma expectation_eventValue_pos {q : E → ℝ} (hq : ∀ e, q e ∈ Set.Ioo (0
           (fun ω _ => mul_nonneg (by unfold eventValue; split_ifs <;> norm_num)
             (weight_nonneg hq' ω)) (mem_univ _)
 
+open Classical in
 lemma expectation_eventValue_lt_one {q : E → ℝ} (hq : ∀ e, q e ∈ Set.Ioo (0 : ℝ) 1)
     {A : Set (Set E)} (hA : IsUpperSet A) (hnu : A ≠ Set.univ) :
     expectation q (eventValue A) < 1 := by
@@ -347,6 +360,7 @@ lemma expectation_eventValue_lt_one {q : E → ℝ} (hq : ∀ e, q e ∈ Set.Ioo
   rw [expectation_sub, expectation_const] at h1
   linarith
 
+open Classical in
 /-- The function `p ↦ [F/(1-F)] / [p/(1-p)]` is monotone on `(0,1)`. -/
 theorem odds_ratio_monotoneOn {A : Set (Set E)} (hA : IsUpperSet A) (hne : A.Nonempty)
     (hnu : A ≠ Set.univ) :
@@ -426,8 +440,8 @@ theorem prodBernoulli_odds_ratio_le {A : Set (Set E)} (hA : IsUpperSet A) (hne :
   simp only [prodBernoulli_real_eq_expectation]
   exact odds_ratio_le hA hne hnu ha hab hb
 
-/-- **Odds-ratio bound, solved form.** For a nontrivial increasing event and `0 < a < b < 1`, the odds
-inequality bounds `P_b(A)` below by `F b (1-a) / (F b (1-a) + (1-F) a (1-b))`, `F = P_a(A)`. -/
+/-- **Odds-ratio bound, solved form.** For a nontrivial increasing event and `0 < a < b < 1`, the
+odds inequality bounds `P_b(A)` below by `F b (1-a) / (F b (1-a) + (1-F) a (1-b))`, `F = P_a(A)`. -/
 theorem prodBernoulli_odds_solved_le {A : Set (Set E)} (hA : IsUpperSet A) (hne : A.Nonempty)
     (hnu : A ≠ Set.univ) {a b : unitInterval} (ha : 0 < (a : ℝ)) (hab : (a : ℝ) < b)
     (hb : (b : ℝ) < 1) :
@@ -493,7 +507,8 @@ example (p : ℝ) (hp : p ∈ Set.Icc (0 : ℝ) 1) :
     expectation (fun _ : Unit => p) (eventValue {s : Set Unit | () ∈ s}) *
         (1 - expectation (fun _ : Unit => p) (eventValue {s : Set Unit | () ∈ s})) ≤
       p * (1 - p) *
-        deriv (fun u => expectation (fun _ : Unit => u) (eventValue {s : Set Unit | () ∈ s})) p := by
+        deriv (fun u => expectation (fun _ : Unit => u)
+            (eventValue {s : Set Unit | () ∈ s})) p := by
   refine ⟨?_, event_variance_le_deriv (fun _ _ hst h => hst h) hp⟩
   simp only [singleton_event, deriv_id'', mul_one]
 

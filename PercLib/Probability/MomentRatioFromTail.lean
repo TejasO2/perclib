@@ -1,6 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Adapted from the source repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
 d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc, file `PercLib/CriticalLRP/Tightness/RealMomentRatio.lean`,
 contributed by `yujinhkim`. Licence: Apache-2.0, as declared in that file's header and in
@@ -49,7 +52,8 @@ variable {Ω : Type*} [MeasurableSpace Ω]
 lemma aemeasurable_rpow_const_restrict {s : Set ℝ} (hms : MeasurableSet s) (hpos : s ⊆ Ioi (0 : ℝ))
     (c : ℝ) : AEMeasurable (fun t : ℝ => t ^ c) (volume.restrict s) :=
   ContinuousOn.aemeasurable
-    (fun x hx => (Real.continuousAt_rpow_const x c (Or.inl (ne_of_gt (hpos hx)))).continuousWithinAt)
+    (fun x hx => (Real.continuousAt_rpow_const x c
+        (Or.inl (ne_of_gt (hpos hx)))).continuousWithinAt)
     hms
 
 /-- **The Gamma tail bound.**  For `r > 0` and `M > 0`,
@@ -204,7 +208,8 @@ theorem moment_ratio_le_rpow {μ : Measure Ω} {f : Ω → ℝ} (hf : Measurable
       ENNReal.ofReal (Real.exp 1 * Real.exp (-(t / (9 * M)))) * μ {ω | M ≤ f ω})
     {p q : ℝ} (hp : 0 < p) (hq : 0 ≤ q) :
     ∫⁻ ω, ENNReal.ofReal (f ω ^ (p + q)) ∂μ ≤
-      ENNReal.ofReal ((p + q) / p + Real.exp 1 * (p + q) * 9 ^ (p + q) * Real.Gamma (p + q)) * ENNReal.ofReal (M ^ q) *
+      ENNReal.ofReal ((p + q) / p + Real.exp 1 * (p + q) * 9 ^ (p + q) * Real.Gamma (p + q)) *
+          ENNReal.ofReal (M ^ q) *
         ∫⁻ ω, ENNReal.ofReal (f ω ^ p) ∂μ := by
   classical
   have hMpos : (0 : ℝ) < M := by linarith
@@ -368,8 +373,10 @@ theorem moment_ratio_le_rpow {μ : Measure Ω} {f : Ω → ℝ} (hf : Measurable
     _ = (ENNReal.ofReal ((p + q) / p) +
           ENNReal.ofReal (Real.exp 1 * (p + q) * 9 ^ (p + q) * Real.Gamma (p + q))) *
           ENNReal.ofReal (M ^ q) * EfP := by ring
-    _ = ENNReal.ofReal ((p + q) / p + Real.exp 1 * (p + q) * 9 ^ (p + q) * Real.Gamma (p + q)) * ENNReal.ofReal (M ^ q) * EfP := by rw [hconst]
-    _ = ENNReal.ofReal ((p + q) / p + Real.exp 1 * (p + q) * 9 ^ (p + q) * Real.Gamma (p + q)) * ENNReal.ofReal (M ^ q) *
+    _ = ENNReal.ofReal ((p + q) / p + Real.exp 1 * (p + q) * 9 ^ (p + q) * Real.Gamma (p + q)) *
+        ENNReal.ofReal (M ^ q) * EfP := by rw [hconst]
+    _ = ENNReal.ofReal ((p + q) / p + Real.exp 1 * (p + q) * 9 ^ (p + q) * Real.Gamma (p + q)) *
+        ENNReal.ofReal (M ^ q) *
           ∫⁻ ω, ENNReal.ofReal (f ω ^ p) ∂μ := by rw [hEfP]
 
 /-! ### The case `p = 0` -/

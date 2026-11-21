@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Measure-theoretic engine for the method of moments used in Section I.5.3--I.5.4 of
 T. Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1 (the passage from the
 moment asymptotics of Theorem I.5.21 to the scaling limit of Corollary I.5.22; cf. the
