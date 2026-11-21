@@ -238,6 +238,7 @@ R^{d-2}G_p(x)
 <li>Bonds $\{x,y\}$ with $0&lt;\|x-y\|_\infty\leq L$, where $d&gt;6$ and the integer $L\geq L_0(d)$ is sufficiently large.</li></ul>
 <p>For each fixed model, let $q_c$ be its critical opening probability and $\tau(x)=\mathbb P_{q_c}(0\leftrightarrow x)$. There is a constant $a&gt;0$ such that, along arbitrary lattice points with $\|x\|_2\to\infty$,</p>
 <div class="math-display">$$\tau(x)\sim a\|x\|_2^{2-d}.$$</div>
+<p><em>Idea of the proof.</em> Both theorems come from the lace expansion of the critical two-point function. For $q&lt;q_c$ the expansion writes $\tau_q$ as the solution of a convolution equation $\tau_q=\delta_0+\Pi_q+(\delta_0+\Pi_q)*qJ*\tau_q$, where $J$ is the indicator of the allowed nonzero displacements and $\Pi_q$ is an alternating sum of explicit diagrams (Hara–Slade, <em>Mean-field critical behaviour for percolation in high dimensions</em>, Comm. Math. Phys. 128 (1990)). A bootstrap argument bounds these diagrams by bubbles and triangles of $\tau_q$, uniformly in $q&lt;q_c$; it closes when the nearest-neighbour dimension or the spread-out range $L$ is large, and the bounds pass to $q_c$ by monotone limits. At $q_c$ the diagram estimates give spatial decay of $\Pi_{q_c}$ faster than $\|x\|_2^{-d-2}$. A deconvolution theorem for such equations then identifies $\tau_{q_c}$, up to a constant factor and a smaller error, with the Green function of the walk whose steps are uniform on the allowed displacements, and that Green function behaves like $\|x\|_2^{2-d}$ by <a href="/tag/02EB/">02EB</a>. Hara–van der Hofstad–Slade carry out the deconvolution in $x$-space for the spread-out models. For nearest-neighbour bonds the asymptotic is Hara's theorem (<em>Decay of correlations in nearest-neighbor self-avoiding walk, percolation, lattice trees and animals</em>, Ann. Probab. 36 (2008)), whose diagrammatic hypotheses Fitzner and van der Hofstad verify for $d\geq11$ by a non-backtracking lace expansion with computer-assisted numerical bounds. These expansions, their diagrammatic estimates and the numerical verification are far longer than this article and are not reproduced.</p>
 <p><em>Cited model-specific input.</em> The nearest-neighbour assertion is <a href="https://rhofstad.win.tue.nl/PercPaper_fin.pdf">Fitzner–van der Hofstad, Theorem 1.4</a>. The spread-out assertion is the box-kernel case of <a href="https://rhofstad.win.tue.nl/hara-hofstad-slade.pdf">Hara–van der Hofstad–Slade, Definition 1.1 and Theorem 1.2</a>. These lace-expansion estimates are not proved by the walk calculations in this article.</p>
 <p>The parameter conversion in the second reference matters. For its uniform box kernel $D_L(x)=(2L+1)^{-d}\mathbf1_{\{\|x\|_\infty\leq L\}}$, a bond between distinct sites has probability $pD_L(y-x)$. Thus our probability is $q=p/(2L+1)^d$. The mass assigned to $D_L(0)$ creates no connection between distinct vertices. For fixed sufficiently large $L$, Theorem 1.2 gives the displayed equivalent by choosing its error exponent smaller than $\min\{d-6,2\}$. The paper's dimensionless correction factor $A_L$ tends to one as $L$ increases; multiplied by its positive walk-variance prefactor, it gives a positive spatial coefficient for all sufficiently large $L$. No uniformity in unbounded $L$ is needed here.</p>
 <p>The two dimension statements concern different graph families. The spread-out theorem does not establish the nearest-neighbour case in every dimension above six. Nor does an infrared bound alone permit pointwise Fourier inversion of an asymptotic without additional estimates; the cited theorems already provide the spatial conclusion.</p>
@@ -274,6 +275,7 @@ P(x,y)=\frac{C_{xy}}{\sum_zC_{xz}}.$$</div>
 <div class="math-display">$$P^n(x,y)\leq c_2 H_n(x,y)\quad(n\geq1),\qquad
 P^n(x,y)\geq c_1 H_n(x,y)\quad(n\geq2),$$</div>
 <p>where $H_n(x,y)=\min\{n^{-d/\alpha},n|x-y|^{-d-\alpha}\}$ and $H_n(x,x)=n^{-d/\alpha}$. The lower bound also holds at $n=1$ off the diagonal. This is <a href="https://pages.uoregon.edu/dlevin/pubs/sym.pdf#page=2">Bass–Levin, Theorem 1.1, equations (1.1)–(1.4), author PDF p. 2</a>, used as a cited input. Its proof is not reproduced here.</p>
+<p><em>Idea of the proof.</em> The argument follows the scheme used for symmetric jump processes. The two-sided bounds on $C_{xy}$ compare the Dirichlet form of the chain with that of the translation-invariant chain with conductances $|x-y|^{-d-\alpha}$, whose Fourier symbol is comparable to $|k|^\alpha$ near zero; this gives a Nash inequality and hence the on-diagonal bound of order $n^{-d/\alpha}$. For the off-diagonal upper bound one removes the jumps longer than a scale $\rho$: the truncated chain satisfies an exponential spatial bound, while the probability of making a removed jump before time $n$ is at most a constant times $n\rho^{-\alpha}$, and the law of the landing point of such a jump is spread out with density of order $\rho^{-d}$. Taking $\rho$ comparable to $|x-y|$ gives the term $n|x-y|^{-d-\alpha}$. For the lower bound, exit-time estimates and a Harnack inequality for the chain show that $P^n(x,\cdot)$ is at least a constant times $n^{-d/\alpha}$ on the ball of radius $n^{1/\alpha}$ about $x$; one jump of length comparable to $|x-y|$, which has probability of order $|x-y|^{-d-\alpha}$ at each of order $n$ times, then gives the off-diagonal lower bound. The diagonal exception at $n=1$ is forced by $C_{xx}=0$. The uniform versions of these steps occupy the whole paper of Bass and Levin and rely on their Harnack inequality (Bass–Levin, <em>Harnack inequalities for jump processes</em>, Potential Anal. 17 (2002)).</p>
 
 ## Summing time before space {#section-stable-potentials}
 
@@ -359,10 +361,42 @@ U(x)&=\frac1{v\Gamma(\alpha/2)}\int_0^\infty s^{\alpha/2-1}(4\pi s)^{-d/2}e^{-|x
 <div class="math-display">$$D_L(0)=0,\qquad D_L(x)=\frac{(|x|\vee L)^{-d-2}}{Z_L}\quad(x\ne0),\qquad Z_L=\sum_{y\ne0}(|y|\vee L)^{-d-2}.$$</div>
 <p>Distances are Euclidean. Throughout the walk calculations $L$ is fixed; constants and errors may depend on it.</p>
 
-<a id="tag-G12U" data-assertion="theorem" data-title="The cited marginal transition bound for the clipped power-law walk"></a>
+<a id="tag-G12U" data-assertion="theorem" data-title="The marginal transition bound for the clipped power-law walk"></a>
 <p>For this law, there is $C_L&lt;\infty$ such that</p>
 <div class="math-display">$$D_L^{*n}(x)\leq C_L\frac{n\log(2+|x|)}{(1+|x|)^{d+2}}\qquad(n\geq1,\ x\ne0).$$</div>
-<p>This is the fixed-$L$ form of <a href="https://arxiv.org/html/1808.06789v3#S1.SS2.SSS1">Chen–Sakai, (1.13), with example (1.14)</a>, used as a cited input. The transition estimate is not proved here.</p>
+<p>This is the fixed-$L$ form of <a href="https://arxiv.org/html/1808.06789v3#S1.SS2.SSS1">Chen–Sakai, (1.13), with example (1.14)</a>. For fixed $L$ it also follows directly from the local bound in <a href="/tag/V7FQ/">V7FQ</a>, whose proof does not use it.</p>
+<p><em>Idea of the proof.</em> Let $t=|x|$ be large and cut the steps at length $t/K$ for a fixed integer $K$. A path that uses a step longer than $t/K$ costs one factor $D_L(z)\leq Z_L^{-1}(t/K)^{-d-2}$, and there are $n$ choices for the time of that step: this gives $Cn\,t^{-d-2}$. A path made of short steps needs at least $K$ of them, and one of its two halves must travel distance of order $t$ in a fixed coordinate. The truncated steps have variance of order $\log t$, so an exponential (Fuk–Nagaev) inequality makes this probability at most a high power of $n\log t/t^2$, while the other half contributes the local bound $(n\log n)^{-d/2}$ of V7FQ. When $n\log t/t^2$ is not small, the local bound alone already has the required size, and this is where the factor $\log(2+|x|)$ is needed.</p>
+:::details Proof
+<p>Write $D=D_L$ and let $X_1,X_2,\ldots$ be independent with law $D$, $S_n=X_1+\cdots+X_n$, so that $D^{*n}(x)=\mathbb P(S_n=x)$. Constants $C,K_1,K_2,\ldots$ below depend only on $d$ and $L$. We use four facts.</p>
+<p>(a) Since $|z|\vee L\geq|z|$, one has $D(z)\leq Z_L^{-1}|z|^{-d-2}$ for every $z\ne0$. Also $D$ is invariant under changing the sign of any coordinate.</p>
+<p>(b) For $r\geq1$ and each coordinate $j$,</p>
+<div class="math-display">$$\sum_{|z|\leq r}D(z)z_j^2\leq Z_L^{-1}\sum_{0&lt;|z|\leq r}|z|^{-d}\leq K_1\log(2+r).$$</div>
+<p>Indeed, nonzero lattice points have $|z|\geq1$; the shell $2^{i-1}&lt;|z|\leq2^i$ contains at most $(2^{i+1}+1)^d\leq 3^d2^{id}$ points, each contributing less than $2^{-(i-1)d}$, so each shell contributes at most $6^d$, and the shells with $0\leq i\leq\lceil\log_2r\rceil$ cover the sum.</p>
+<p>(c) By <a href="/tag/V7FQ/">V7FQ</a>, $\sup_yD^{*k}(y)\leq C_L(k\log k)^{-d/2}$ for $k\geq2$.</p>
+<p>(d) Let $Y_1,\ldots,Y_m$ be independent copies of a real variable $Y$ with $\mathbb EY=0$, $|Y|\leq r$ and $\mathbb EY^2\leq\sigma^2$, where $r,\sigma^2&gt;0$. Then for $s&gt;0$,</p>
+<div class="math-display">$$\mathbb P(Y_1+\cdots+Y_m\geq s)\leq\left(\frac{e\,m\sigma^2}{sr}\right)^{s/r}.$$</div>
+<p>To see this, note that $\psi(u)=(e^u-1-u)/u^2=\int_0^1(1-v)e^{uv}\,dv$ is nondecreasing on $\mathbb R$. For $\lambda&gt;0$, $\lambda Y\leq\lambda r$ gives $e^{\lambda Y}\leq1+\lambda Y+\lambda^2Y^2\psi(\lambda r)$, hence</p>
+<div class="math-display">$$\mathbb Ee^{\lambda Y}\leq1+\frac{\sigma^2(e^{\lambda r}-1-\lambda r)}{r^2}\leq\exp\!\left(\frac{\sigma^2e^{\lambda r}}{r^2}\right).$$</div>
+<p>If $m\sigma^2\geq sr$ the claimed bound exceeds one. Otherwise take $\lambda=r^{-1}\log(sr/(m\sigma^2))&gt;0$ in Markov's inequality: $\mathbb P(\sum Y_i\geq s)\leq\exp(-\lambda s+m\sigma^2e^{\lambda r}/r^2)$, and $m\sigma^2e^{\lambda r}/r^2=s/r$, which gives the bound.</p>
+<p><em>Reduction.</em> Fix an integer $K\geq\max\{4,\ 2\sqrt d\,(d/2+2)\}$; put $K_2=4e\sqrt d\,KK_1$ and $\delta=1/K_2$. Choose $t_0\geq e$ with $\delta t/\log t\geq1$ and $(\log t)^{d/2+1}\leq t$ for $t\geq t_0$. Let $t=|x|$. If $1\leq t&lt;t_0$, then $D^{*n}(x)\leq1$ while the right side of the claim is at least $C_L\log3/(1+t_0)^{d+2}$, so the claim holds after enlarging $C_L$. For $t\geq t_0$ we have $1+t\leq2t$ and $\log t\leq\log(2+t)$, so it suffices to prove</p>
+<div class="math-display">$$D^{*n}(x)\leq C\,\frac{n\log t}{t^{d+2}}\qquad(n\geq1,\ |x|=t\geq t_0).\tag{1}$$</div>
+<p><em>Large times.</em> Suppose $n&gt;\delta t^2/\log t$. Then $n\geq t\geq e$, so $n\geq2$ and $\log n\geq\log t$, and by (c)</p>
+<div class="math-display">$$D^{*n}(x)\leq C_L(n\log t)^{-d/2}
+=C_L\frac{n\log t}{t^{d+2}}\cdot\frac{t^{d+2}}{(n\log t)^{1+d/2}}
+\leq C_L\delta^{-1-d/2}\frac{n\log t}{t^{d+2}}.$$</div>
+<p><em>Small times: one long step.</em> Now let $n\leq\delta t^2/\log t$ and put $r=t/K$. For each $i\leq n$, $S_n-X_i$ is independent of $X_i$, so by (a)</p>
+<div class="math-display">$$\mathbb P(S_n=x,\ |X_i|&gt;r)=\sum_{|z|&gt;r}D(z)\,\mathbb P(S_n-X_i=x-z)\leq Z_L^{-1}r^{-d-2}=Z_L^{-1}K^{d+2}t^{-d-2}.$$</div>
+<p>Summing over $i$ bounds the probability that $S_n=x$ and some step is longer than $r$ by $Z_L^{-1}K^{d+2}n\,t^{-d-2}$, which is at most the right side of (1) because $\log t\geq1$.</p>
+<p><em>Small times: only short steps.</em> Let $A$ be the event that $|X_i|\leq r$ for all $i\leq n$. On $A$, $|S_n|\leq nr=nt/K$, so $\mathbb P(S_n=x,A)=0$ unless $n\geq K\geq4$; assume this. Choose a coordinate $j$ with $|x_j|\geq t/\sqrt d$; by the reflection invariance in (a) we may assume $x_j&gt;0$. Put $m=\lfloor n/2\rfloor$ and $s=x_j/2\geq t/(2\sqrt d)$. If $S_n=x$, then either $S_m$ or $S_n-S_m$ has $j$-th coordinate at least $s$. The two blocks of steps are independent. Conditioning on the first block, and then on the second, gives</p>
+<div class="math-display">$$\mathbb P(S_n=x,A)\leq\mathbb P\Bigl(\textstyle\sum_{i=1}^{m}Y_i\geq s\Bigr)\sup_yD^{*(n-m)}(y)+\mathbb P\Bigl(\textstyle\sum_{i=1}^{n-m}Y_i\geq s\Bigr)\sup_yD^{*m}(y),$$</div>
+<p>where $Y_i=X_i\cdot e_j\,\mathbf1_{\{|X_i|\leq r\}}$. On $A$ the $j$-th coordinate of the displacement of either block equals the sum of the $Y_i$ over that block, and these are independent copies of $Y_1$; this is why only the sums $Y_1+\cdots+Y_k$ with $k\in\{m,n-m\}$ appear. By (a) the variables $Y_i$ are symmetric, so $\mathbb EY_i=0$; also $|Y_i|\leq r$ and, by (b), $\mathbb EY_i^2\leq\sigma^2:=K_1\log(2+r)\leq2K_1\log t$, since $t\geq e$ implies $2+t\leq t^2$. For $k=m$ and for $k=n-m$, since $k\leq n$ and $sr\geq t^2/(2\sqrt dK)$, fact (d) gives</p>
+<div class="math-display">$$\mathbb P\Bigl(\textstyle\sum_{i=1}^kY_i\geq s\Bigr)\leq\bigl(K_2u\bigr)^{s/r},\qquad u=\frac{n\log t}{t^2}.$$</div>
+<p>Here $K_2u\leq1$ and $s/r\geq K/(2\sqrt d)\geq d/2+2$, so this is at most $(K_2u)^{d/2+2}$. For the other factor, $n-k\geq m\geq2$ and $n-k\geq n/3$, so $\log(n-k)\geq c_0\log n$ with $c_0=\log2/\log9$ (use $\log(n-k)\geq\log2$ when $n&lt;9$ and $\log(n-k)\geq\log(n/3)\geq\tfrac12\log n$ when $n\geq9$). By (c), $\sup_yD^{*(n-k)}(y)\leq C(n\log n)^{-d/2}$. Therefore</p>
+<div class="math-display">$$\mathbb P(S_n=x,A)\leq 2CK_2^{d/2+2}\,u\cdot f,\qquad f=(n\log n)^{-d/2}u^{d/2+1}
+=n\,(\log n)^{-d/2}(\log t)^{d/2+1}t^{-d-2}.$$</div>
+<p>If $n\leq t$, then $\log n\geq\log4&gt;1$ and $f\leq(\log t)^{d/2+1}t^{-d-1}\leq t^{-d}$ by the choice of $t_0$. If $n&gt;t$, then $\log n&gt;\log t$ and $f\leq n\log t\,t^{-d-2}\leq\delta t^{-d}$. In both cases $u f\leq u\,t^{-d}=n\log t/t^{d+2}$.</p>
+<p>Adding the three bounds proves (1), and hence the theorem.</p>
+:::
 
 ## The logarithmic Gaussian scale {#section-marginal-local-limit}
 
@@ -411,7 +445,7 @@ U(x)&=\frac1{v\Gamma(\alpha/2)}\int_0^\infty s^{\alpha/2-1}(4\pi s)^{-d/2}e^{-|x
 <div class="math-display">$$\frac{R^d}{N_R^j}\sum_{aN_R\leq n\leq bN_R}
 \binom{n+j-1}{j-1}D_L^{*n}(x)
 \longrightarrow\frac1{\Gamma(j)}\int_a^b t^{j-1}(4\pi t)^{-d/2}e^{-1/(4t)}\,dt.$$</div>
-<p>The cited off-diagonal bound G12U and the upper bound in V7FQ control the omitted times separately:</p>
+<p>The off-diagonal bound G12U and the upper bound in V7FQ control the omitted times separately:</p>
 <div class="math-display">$$\begin{aligned}
 \limsup_{R\to\infty}\frac{R^d}{N_R^j}
 \sum_{1\leq n&lt;aN_R}\binom{n+j-1}{j-1}D_L^{*n}(x)&\leq C_La^{j+1},\\
@@ -770,7 +804,7 @@ R^dD_L^{*n}(x)
 \longrightarrow0.
 $$</div>
 <p>Indeed $n\log n/R^2\to2t/v_L$ when $n/N_R\to t$. The binomial coefficient is uniformly asymptotic to $n^{j-1}/\Gamma(j)$ on this interval, and $\lambda^n=e^{-\theta n/N_R}$. A Riemann sum therefore gives the integral defining $\Psi_{d,j}$ over $[a,b]$, uniformly for $\theta$ in a fixed bounded interval.</p>
-<p>The omitted early times are controlled by the cited transition estimate <a href="/tag/G12U/">G12U</a>. Since $x\ne0$, generation zero contributes nothing, and</p>
+<p>The omitted early times are controlled by the transition estimate <a href="/tag/G12U/">G12U</a>. Since $x\ne0$, generation zero contributes nothing, and</p>
 <div class="math-display">$$
 \limsup_{R\to\infty}\frac{R^d}{N_R^j}
 \sum_{1\le n&lt;aN_R}\binom{n+j-1}{j-1}

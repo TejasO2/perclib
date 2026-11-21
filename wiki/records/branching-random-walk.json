@@ -42,7 +42,7 @@
       "locator": "arXiv:1808.06789v3, (1.13)\u2013(1.14), \u00a71.2.3 and Theorem 1.4, (1.36)",
       "relationship": "Explicitly cited inputs and written deductions",
       "status": "pending",
-      "note": "G12U and the first display of6ZYT are cited. V7FQ proves the exact symbol and local limit; CEVT proves all spatial potential equivalents, including critical equality, using G12U for early times. Percolation consequences are then deduced from the cited equivalent."
+      "note": "The first display of 6ZYT is cited; G12U is the fixed-L form of (1.13)\u2013(1.14) and is also proved directly from the local bound of V7FQ. V7FQ proves the exact symbol and local limit; CEVT proves all spatial potential equivalents, including critical equality, using G12U for early times. Percolation consequences are then deduced from the cited equivalent."
     },
     {
       "source": "chen-sakai-marginal-2019",
@@ -333,6 +333,14 @@
       "tag": "DTYB",
       "proof_uses": [],
       "reason": "The proof computes the masses of the convolution powers with Tonelli; no other wiki assertion is invoked."
+    },
+    {
+      "order": 29,
+      "tag": "G12U",
+      "proof_uses": [
+        "V7FQ"
+      ],
+      "reason": "The proof splits paths by one step longer than |x|/K, uses a Fuk-Nagaev bound for truncated steps, and takes the local bound sup_y D_L^{*k}(y) <= C(k log k)^{-d/2} from V7FQ."
     }
   ]
 }
