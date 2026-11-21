@@ -18,7 +18,9 @@ export async function checkArticles(root = wikiRoot) {
     if (new Set(article.sections.map(s => s.id)).size !== article.sections.length) throw Error(`${article.id}: duplicate section`);
     if (!assertions.some(a => a.article === article.id)) throw Error(`${article.id}: missing assertion tags`);
     if (!original) continue; // Later articles are validated, without rewriting the migration baseline.
-    const {sections, ...metadata} = article;
+    // The lead has its own digest, `lead`, present exactly when the article has a lead;
+    // an article without a lead hashes as before (wiki/README.md, "Lead").
+    const {sections, lead, ...metadata} = article;
     if (hash(JSON.stringify(metadata)) !== original.metadataSha256) throw Error(`${article.id}: metadata changed from migration baseline`);
     if (sections.length !== Object.keys(original.sections).length) throw Error(`${article.id}: section count changed`);
     const seen = new Set();
@@ -28,6 +30,7 @@ export async function checkArticles(root = wikiRoot) {
       const expected = original.sections[s.id];
       if (!expected || expected.title !== s.title || hash(stripAnchors(s.html)) !== expected.sha256) throw Error(`${article.id}/${s.id}: exposition changed from migration baseline`);
     }
+    if ((lead === undefined) !== (original.lead === undefined) || (lead !== undefined && hash(lead) !== original.lead.sha256)) throw Error(`${article.id}/lead: exposition changed from migration baseline`);
     if (!assertions.some(a => a.article === article.id)) throw Error(`${article.id}: missing assertion tags`);
   }
   return {articles, assertions, baseline};

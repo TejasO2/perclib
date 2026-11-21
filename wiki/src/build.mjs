@@ -9,7 +9,7 @@ import { coveragePage, readingMapPage } from "./coverage.mjs";
 import { historyCsv, dailyHistoryCsv, fileHistoryCsv } from "./history-csv.mjs";
 import { validateProofUses, frontierPage } from "./frontier.mjs";
 import { loadEvidence, evidencePanel, statusFor } from "./manifest.mjs";
-import { readRegistry } from "../scripts/articles.mjs";
+import { readRegistry, leadId, leadHtml } from "../scripts/articles.mjs";
 import { loadRecords } from "./records.mjs";
 import { compactMathLayout } from "./math-layout.mjs";
 import {
@@ -37,8 +37,68 @@ import {
   item,
   railBlock,
   document,
+  leadSection,
 } from "./render.mjs";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+// Collapsible blocks and wanted links are expanded once; every later use of
+// an article body (pages, search, link graph) sees the same HTML. The lead,
+// when present, is the first body entry, with id `lead` and an empty title, so
+// backlinks, the link checks and the link report treat it as body text.
+export function prepareBodies(articles, pages) {
+  const bodies = new Map(),
+    wanted = [],
+    resolvedWanted = [];
+  for (const p of articles)
+    bodies.set(
+      p.id,
+      [
+        ...(p.lead === undefined
+          ? []
+          : [{ id: leadId, title: "", html: leadHtml(p.lead), lead: true }]),
+        ...p.sections,
+      ].map((s) => {
+        const where = `${p.id}/${s.id}`;
+        const r = prepareSection(s.html, pages, where);
+        const at = (w) => ({ ...w, article: p.id, section: s.id });
+        wanted.push(...r.wanted.map(at));
+        resolvedWanted.push(...r.resolved.map(at));
+        return s.lead
+          ? { id: s.id, title: s.title, html: r.html, lead: true }
+          : { id: s.id, title: s.title, html: r.html };
+      }),
+    );
+  return { bodies, wanted, resolvedWanted };
+}
+// Title of a body entry in backlink lists.
+export const bodyTitle = (page, section) =>
+  section === leadId
+    ? "Introduction"
+    : page.sections.find((s) => s.id === section).title;
+// The opening of an article page after its header: lead, running context,
+// contents box (sections only) and the collapse tools.
+export function articleOpening(p, sections, extra) {
+  const lead = sections.find((s) => s.lead),
+    rest = sections.filter((s) => !s.lead);
+  return (
+    (lead ? leadSection(lead.html) : "") +
+    `<div class="running-context"><h2>Running context</h2><ul>${p.context.map((c) => `<li>${c}</li>`).join("")}</ul></div>` +
+    tableOfContents(rest, extra) +
+    (hasCollapsibles(sections) ? collapseTools() : "")
+  );
+}
+// Search text of an article: metadata, every body entry (lead, sections and
+// collapsed blocks) and its assertion titles.
+export const articleSearchText = (p, body, assertions) =>
+  [
+    p.title,
+    p.summary,
+    ...p.aliases,
+    ...p.context,
+    ...body.map((s) => (s.title ? s.title + " " : "") + plain(s.html)),
+    ...assertions
+      .filter((a) => a.article === p.id)
+      .map((a) => a.tag + " " + a.title),
+  ].join(" ");
 export function validateLinks(files) {
   for (const [file, html] of files) {
     if (!file.endsWith(".html")) continue;
@@ -116,28 +176,11 @@ export async function build(
     : "";
   const history = collectHistory(root, evidenceOptions.historyRef);
   const pages = new Map(articles.map((p) => [p.id, p]));
-  // Collapsible blocks and wanted links are expanded once; every later use of
-  // an article body (pages, search, link graph) sees the same HTML.
-  const bodies = new Map(),
-    wanted = [],
-    resolvedWanted = [];
-  for (const p of articles)
-    bodies.set(
-      p.id,
-      p.sections.map((s) => {
-        const where = `${p.id}/${s.id}`;
-        const r = prepareSection(s.html, pages, where);
-        const at = (w) => ({ ...w, article: p.id, section: s.id });
-        wanted.push(...r.wanted.map(at));
-        resolvedWanted.push(...r.resolved.map(at));
-        return { id: s.id, title: s.title, html: r.html };
-      }),
-    );
+  const { bodies, wanted, resolvedWanted } = prepareBodies(articles, pages);
   const graph = linkGraph(articles, bodies, assertions, baseline);
   assertNoDeadLinks(graph);
   const report = linkReport(articles, bodies, graph, wanted);
-  const sectionTitle = (id, section) =>
-    pages.get(id).sections.find((s) => s.id === section).title;
+  const sectionTitle = (id, section) => bodyTitle(pages.get(id), section);
   const read = async (file) =>
     JSON.parse(await fs.readFile(path.join(root, "src/content", file), "utf8"));
   const { collections, sources } = records;
@@ -205,15 +248,14 @@ export async function build(
     const body =
       heading(p.title, p.subtitle || p.summary, p.kind) +
       articleErrata(p.id, errata, assertions) +
-      `<div class="running-context"><h2>Running context</h2><ul>${p.context.map((c) => `<li>${c}</li>`).join("")}</ul></div>` +
-      tableOfContents(sections, [
+      articleOpening(p, sections, [
         ["connections", "Connections"],
         ["sources", "Sources"],
         ["citations", "Assertion citations"],
         ["formal-evidence", "Formal evidence"],
       ]) +
-      (hasCollapsibles(sections) ? collapseTools() : "") +
       sections
+        .filter((s) => !s.lead)
         .map(
           (s) =>
             `<section class="article-section" id="section-${s.id}"><h2>${esc(s.title)}</h2>${s.html}</section>`,
@@ -443,17 +485,8 @@ export async function build(
     title: p.title,
     summary: p.summary,
     url: articleUrl(p.id),
-    text: [
-      p.title,
-      p.summary,
-      ...p.aliases,
-      ...p.context,
-      // Collapsed blocks are part of the body HTML and are indexed with it.
-      ...bodies.get(p.id).map((s) => s.title + " " + plain(s.html)),
-      ...assertions
-        .filter((a) => a.article === p.id)
-        .map((a) => a.tag + " " + a.title),
-    ].join(" "),
+    // Collapsed blocks and the lead are part of the body and are indexed with it.
+    text: articleSearchText(p, bodies.get(p.id), assertions),
   }));
   index.push(
     ...[...inventories].map(([id, record]) => ({
