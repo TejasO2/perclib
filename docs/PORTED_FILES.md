@@ -20,11 +20,11 @@ fixed 21 November 2026") and `third_party/critical-lrp/` was added.
 
 | Source | Files | Complete | Partial | Absent |
 |---|---:|---:|---:|---:|
-| `github.com/yujinhkim/lrp` (long-range formalisation) | 62 | 62 | 0 | 0 |
+| `github.com/yujinhkim/lrp` (long-range formalisation) | 64 | 64 | 0 | 0 |
 | `github.com/tomhutchcroft/near-critical-diffusivity` | 14 | 14 | 0 | 0 |
 | `github.com/anthropics/formal-math` (`percolation/`, PercolationContinuity) | 3 | 3 | 0 | 0 |
 | `github.com/nitromannitol/percolation-after-anthropic` | 2 | 2 | 0 | 0 |
-| **Total** | **81** | **81** | **0** | **0** |
+| **Total** | **83** | **83** | **0** | **0** |
 
 ## 1. `github.com/yujinhkim/lrp` (the formalisation of *Critical long-range percolation I*)
 
@@ -84,8 +84,10 @@ interface, no code copied.
 | `Analysis/VolumeTail/SizeBiasMGF.lean` | `Analysis/SizeBiasedMGF.lean` | code | complete |
 | `Analysis/VolumeTail/UpToConstants.lean` | `Analysis/VolumeTailUpToConstants.lean`, `Analysis/VolumeTailLower.lean` | code | complete |
 | `Combinatorics/DoubleFactorialConvolution.lean` | `Analysis/Lemma_I_4_23.lean`, `VolumeMoments/DFactorial.lean` | code | complete |
+| `Models/LongRange/CutoffCorner.lean` | `CutoffCorner.lean`, `KernelGeometry.lean`, `CutoffRusso.lean` | code | complete |
 | `Models/LongRange/Defs.lean` | `KernelGeometry.lean` | defs | complete |
 | `Models/LongRange/InfiniteVolumeRusso.lean` | `RussoInf/DominatedFlux.lean`, `RussoInf/Exchange.lean`, `RussoInf/FluxMain.lean`, `RussoInf/CutoffFlux.lean`, `RussoInf/Capstone.lean` | arg | complete |
+| `Models/LongRange/MassTransportI41.lean` | `MassTransportI41.lean`, `CountableProduct/MassTransport.lean`, `Tightness/LemmaI26Cutoff.lean` | code | complete |
 | `Models/LongRange/OmittedLayer.lean` | `Analysis/VolumeTailAllN.lean`, `Analysis/VolumeTailUpper.lean`, `CountableProduct/GhostCoupling.lean` | arg | complete |
 | `Models/LongRange/QuantileMoments.lean` | `Tightness/LemmaI26Averaging.lean`, `Analysis/LatticeBallAsymptotic.lean` | code | complete |
 | `Models/LongRange/RootIndependence.lean` | `Analysis/VolumeTailAllN.lean`, `Analysis/VolumeTailUpper.lean`, `CountableProduct/GhostField.lean` | arg | complete |
