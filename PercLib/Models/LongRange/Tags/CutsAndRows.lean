@@ -37,8 +37,8 @@ finite. -/
 theorem ae_cuts_unbounded_and_cluster_finite (p : ℕ → unitInterval)
     (q : Sym2 ℤ → unitInterval) (hq : ∀ a b, a ≠ b → q s(a, b) = p (Int.natAbs (b - a)))
     (hlt : ∀ n, 1 ≤ n → p n < 1) (hsum : Summable fun n : ℕ => (n : ℝ) * (p n : ℝ)) :
-    ∀ᵐ ω ∂law q, (∀ N : ℤ, ∃ k, N ≤ k ∧ ∀ a b, a ≤ k → k < b → s(a, b) ∉ ω) ∧
-      (∀ N : ℤ, ∃ k, k ≤ N ∧ ∀ a b, a ≤ k → k < b → s(a, b) ∉ ω) ∧
+    ∀ᵐ ω ∂law q, (∀ N : ℤ, ∃ k, N ≤ k ∧ IsCut ω k) ∧
+      (∀ N : ℤ, ∃ k, k ≤ N ∧ IsCut ω k) ∧
       ∀ x, (cluster ω x).Finite :=
   (ae_cuts_atTop_of_offDiagonal p q hq hlt hsum).and
     ((ae_cuts_atBot_of_offDiagonal p q hq hlt hsum).and
