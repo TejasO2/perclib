@@ -80,7 +80,6 @@ open Classical in
 `τ_n(0, u) = P_b(0 ↔ u using only edges in Λ_n)`. Then there are `c₁, C₁ > 0` with
 `c₁ L^{-(d-α)n} ≤ τ_n(0, x) ≤ τ(0, x) ≤ C₁ L^{-(d-α)n}` whenever `x ∈ Λ_n \ Λ_{n-1}`,
 `n ≥ 1`. -/
-@[tag "7YNX"]
 theorem law_localConn_bounds_of_chi_lt_top_of_boundaryFlux [NeZero L] (hL : 2 ≤ L)
     {α c C₀ : ℝ} (hc : 0 < c) (hα : 0 < α) (hαd : α < d)
     (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0)
