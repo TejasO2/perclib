@@ -112,3 +112,7 @@
 .errata-filter label { min-width: 0; flex: 1 1 180px; }
 .errata-filter select { text-overflow: ellipsis; }
 .errata-filter[hidden], [data-errata-group][hidden], [data-errata-row][hidden], #errata-pending[hidden] { display: none; }
+
+/* Article lead: the opening paragraphs before the contents box. */
+.article-lead { margin: 18px 0 24px; }
+.article-lead p:last-child { margin-bottom: 0; }
