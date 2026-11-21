@@ -1093,6 +1093,31 @@ lists at the end of an article." ARCHITECT's reading, binding on the style guide
   by the coordinator) come first, so that Tom can see the pattern before it is applied
   to 142 articles; it is listed "For Tom" with the page to look at.
 
+**Ruling 19.** 21 Nov, Tom, having seen the live site: "The model article looks great." The
+ruling-8 shape is therefore confirmed as the pattern: roll it out to the other articles in
+the critic's order, at the pace ruling 11g allows. "Inline citations should be hyperlinked,
+probably to a bibliography at the bottom of the page." ARCHITECT (recorded here and in
+`wiki/STYLE.md`; one generator package with tests, then the model article first):
+- Every citation in running text is a link to its entry in a "References" section at the
+  bottom of the same page, built by the generator from the source catalogue: only the works
+  cited on that page, in a consistent style (authors, title, journal/volume/year or arXiv
+  identifier), each with an anchor (`#ref-<key>`), an outbound link (DOI or arXiv) where one
+  exists, and backlinks to the places in the article that cite it. Locators stay in the text
+  of the citation ("Theorem 1.1", "§3").
+- Authors write citations by catalogue key in one markup form; the generator renders the
+  visible text and the link. A citation whose key is not in the catalogue fails the build; a
+  plain-text citation left unlinked is reported by the link report and, once the backlog is
+  cleared, fails the build.
+- The book-in-preparation entry is a reference like any other, with no link and no locator
+  (ruling 6).
+- Works inside collapsed proofs are cited the same way; following a reference backlink into
+  a collapsed block opens it (ruling 8).
+- A site-wide bibliography page lists every catalogue entry with the articles that cite it.
+  The provenance panel and reading maps keep their own detail; they are not the bibliography.
+- Migration: the model article and the already restructured articles first, then each
+  article as it is restructured; a scout fills gaps in catalogue entries (arXiv and DOI
+  metadata) and lists for Tom any reference it could not verify.
+
 ### D-37. The repository must run without us
 Recorded 20 November 2026 by the coordinator from rulings 9 and 10 (container file
 `RULINGS.md`), with their text. Supersedes D-28 where they differ.
