@@ -145,6 +145,20 @@
         "WR5S"
       ],
       "reason": "Bound the centered exponential remainder separately for negative and positive parameters, then optimize the exponential Markov inequality."
+    },
+    {
+      "order": 5,
+      "tag": "RU6O",
+      "proof_uses": [],
+      "reason": "Grouping the root sum by the window partition gives the identity and elementary bounds; no other wiki assertion is invoked."
+    },
+    {
+      "order": 6,
+      "tag": "25Z4",
+      "proof_uses": [
+        "X5SS"
+      ],
+      "reason": "The distinct-cluster comparison conditions on an explored cluster and couples the outside product law; the covariance lower bound applies Harris (X5SS) to the increasing observables T_F and T_G."
     }
   ]
 }

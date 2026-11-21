@@ -111,6 +111,38 @@
         "K8A1"
       ],
       "reason": "Written consequence under existence of the arm logarithmic exponent. Explicit smallest-pair exponent lambda; no numerical square-bond exponent claimed."
+    },
+    {
+      "order": 4,
+      "tag": "PHLF",
+      "proof_uses": [],
+      "reason": "A definition; it invokes no other wiki assertion."
+    },
+    {
+      "order": 5,
+      "tag": "U5MC",
+      "proof_uses": [],
+      "reason": "A definition; it invokes no other wiki assertion."
+    },
+    {
+      "order": 6,
+      "tag": "BLNL",
+      "proof_uses": [],
+      "reason": "A definition; it invokes no other wiki assertion."
+    },
+    {
+      "order": 7,
+      "tag": "OB0A",
+      "proof_uses": [],
+      "reason": "Averaging over the uniform root and grouping by window classes; no other wiki assertion is invoked."
+    },
+    {
+      "order": 8,
+      "tag": "0RX3",
+      "proof_uses": [
+        "HPE6"
+      ],
+      "reason": "The escape bound and the shell-summed window mean are fed into the volume-tail bound from escape probabilities and window means (HPE6) with a=eta/2, b=2-eta."
     }
   ]
 }

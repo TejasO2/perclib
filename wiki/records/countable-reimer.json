@@ -308,6 +308,32 @@
         "7ZTB"
       ],
       "reason": "Distinct clusters give disjoint certificates; the first includes its closed boundary and the others only internal open edges. The outer product bound applies to a measurable subset, and Tonelli gives the functional statement."
+    },
+    {
+      "order": 22,
+      "tag": "LLAT",
+      "proof_uses": [
+        "7GDN"
+      ],
+      "reason": "Finite-certificate events are exhausted by cylinder events D_n, to each of which the finite nonmonotone Reimer inequality and its fair bound (7GDN) are applied, followed by continuity from below."
+    },
+    {
+      "order": 23,
+      "tag": "1NUW",
+      "proof_uses": [],
+      "reason": "A compactness argument on nested cylinder intersections; no other wiki assertion is invoked."
+    },
+    {
+      "order": 24,
+      "tag": "IH8I",
+      "proof_uses": [],
+      "reason": "Induction over finitely many queries, bounded and L^1 martingale limits, and the monotone-class theorem; no other wiki assertion is invoked."
+    },
+    {
+      "order": 25,
+      "tag": "43BU",
+      "proof_uses": [],
+      "reason": "A linear-algebra argument with tensor vectors that are independent modulo two and pairwise orthogonal; no other wiki assertion is invoked."
     }
   ]
 }

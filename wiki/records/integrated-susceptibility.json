@@ -176,6 +176,104 @@
       "tag": "GQJY",
       "proof_uses": [],
       "reason": "Local chain rules and endpoint divergence integrate the corrected square; the logarithmic antiderivative first gives a polynomial bound, avoiding a circular logarithm substitution."
+    },
+    {
+      "order": 4,
+      "tag": "4800",
+      "proof_uses": [
+        "6JBS",
+        "BNY8"
+      ],
+      "reason": "The finite-volume pivotal derivative formula (6JBS) is bounded uniformly by finite-coordinate BK (BNY8), passed to the limit by dominated convergence, and translated to the root."
+    },
+    {
+      "order": 5,
+      "tag": "J1LW",
+      "proof_uses": [
+        "7902",
+        "L82Q"
+      ],
+      "reason": "Conditioning on K_x gives the expectation identity; the deletion bound (7902) and the three-point tree-graph inequality (L82Q) give the five-factor error."
+    },
+    {
+      "order": 6,
+      "tag": "4960",
+      "proof_uses": [
+        "J1LW",
+        "4800"
+      ],
+      "reason": "The five-factor bound J1LW is weighted by J(o,y) and summed, with the two-cluster identity (4800) identifying the main term with chi'."
+    },
+    {
+      "order": 7,
+      "tag": "TC6Q",
+      "proof_uses": [],
+      "reason": "Integration of the differential inequality for 1/chi using monotonicity of chi; no other wiki assertion is invoked."
+    },
+    {
+      "order": 8,
+      "tag": "W9IY",
+      "proof_uses": [
+        "TC6Q"
+      ],
+      "reason": "The reciprocal integral in the integrated bound TC6Q is restricted to a short interval where the diagram bound controls D."
+    },
+    {
+      "order": 9,
+      "tag": "5LNL",
+      "proof_uses": [
+        "MLLO",
+        "E771"
+      ],
+      "reason": "Sprinkling an independent sparse layer and MLLO give right-openness; the row-sum bound (E771) gives b_chi>=1/L, and monotone coupling gives endpoint divergence."
+    },
+    {
+      "order": 10,
+      "tag": "NUJY",
+      "proof_uses": [],
+      "reason": "A Peierls dual-cycle count with a union bound and a path count for the lower bound; no other wiki assertion is invoked."
+    },
+    {
+      "order": 11,
+      "tag": "EBVV",
+      "proof_uses": [
+        "NUJY",
+        "5LNL"
+      ],
+      "reason": "The Peierls bound on a retained coordinate plane (NUJY) gives beta_c finite; 5LNL gives the row-sum lower bound and endpoint divergence."
+    },
+    {
+      "order": 12,
+      "tag": "65PY",
+      "proof_uses": [
+        "JZ47"
+      ],
+      "reason": "A growing-block renormalisation with a union-bound recursion gives an infinite cluster; the row-sum bound (JZ47) gives beta_c>0."
+    },
+    {
+      "order": 13,
+      "tag": "IU3W",
+      "proof_uses": [
+        "L0TE",
+        "HATE",
+        "4IHK"
+      ],
+      "reason": "Above p_c every finite-set functional is at least one by the threshold identification L0TE; the wired-boundary calculation (HATE) with the homogeneous Russo formula (4IHK) gives the differential inequality that is integrated."
+    },
+    {
+      "order": 14,
+      "tag": "468P",
+      "proof_uses": [
+        "RDF0",
+        "YLZV"
+      ],
+      "reason": "Below p_c(G) the finite-set characterisation (RDF0) gives a contracting set, transported by the local isomorphism, and the certificate bound (YLZV) gives finite susceptibility on G_n."
+    },
+    {
+      "order": 15,
+      "tag": "PAFY",
+      "proof_uses": [],
+      "reason": "Direct integration and a comparison of the lattice sum with the integral; no other wiki assertion is invoked."
     }
   ]
 }

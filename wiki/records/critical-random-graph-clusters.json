@@ -74,6 +74,12 @@
         "25Z4"
       ],
       "reason": "Largest critical component under the stated model and parameter hypotheses."
+    },
+    {
+      "order": 4,
+      "tag": "0K60",
+      "proof_uses": [],
+      "reason": "A queue exploration coupled with fresh Bernoulli rows dominates and is dominated by binomial Galton-Watson queues; no other wiki assertion is invoked."
     }
   ]
 }

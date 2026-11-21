@@ -99,5 +99,36 @@
     }
   ],
   "occursIn": [],
-  "proofUses": []
+  "proofUses": [
+    {
+      "order": 0,
+      "tag": "D106",
+      "proof_uses": [],
+      "reason": "Deleting or adding one edge changes components finitely; no other wiki assertion is invoked."
+    },
+    {
+      "order": 1,
+      "tag": "0YH8",
+      "proof_uses": [
+        "H0OC"
+      ],
+      "reason": "A positive root probability makes the global probability positive and hence one by the global zero-one law (H0OC); the converse is countable subadditivity."
+    },
+    {
+      "order": 2,
+      "tag": "1C8G",
+      "proof_uses": [
+        "C3OO"
+      ],
+      "reason": "The global event is a countable union of root events; the positive-path comparison (C3OO) makes rooted thresholds equal within each support component."
+    },
+    {
+      "order": 3,
+      "tag": "D1CH",
+      "proof_uses": [
+        "DK14"
+      ],
+      "reason": "Finite-modification invariance places A in every outside sigma-algebra, and approximation by a finite-coordinate event (DK14) gives P(A)=P(A)^2."
+    }
+  ]
 }

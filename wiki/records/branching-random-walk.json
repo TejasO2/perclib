@@ -281,6 +281,58 @@
         "6ZYT"
       ],
       "reason": "The cited critical percolation equivalent gives the limiting ratio to the walk Green function. The transfer criterion raises that ratio to the convolution order, and CEVT supplies the exact spatial coefficients."
+    },
+    {
+      "order": 21,
+      "tag": "CYYG",
+      "proof_uses": [],
+      "reason": "A definition; it invokes no other wiki assertion."
+    },
+    {
+      "order": 22,
+      "tag": "94E7",
+      "proof_uses": [],
+      "reason": "A conditional-expectation recursion, induction and Tonelli give the formulas; no other wiki assertion is invoked."
+    },
+    {
+      "order": 23,
+      "tag": "4F49",
+      "proof_uses": [
+        "94E7"
+      ],
+      "reason": "Independence and monotone convergence factor the expectation, and the occupation identity (94E7) evaluates each factor."
+    },
+    {
+      "order": 24,
+      "tag": "J1E9",
+      "proof_uses": [
+        "94E7"
+      ],
+      "reason": "The genealogical classification of ordered pairs evaluates each class by the first-moment identity (94E7) summed over positive generations."
+    },
+    {
+      "order": 25,
+      "tag": "E9BP",
+      "proof_uses": [],
+      "reason": "The proof is a Fourier computation of the damped Green function convolutions with monotone convergence; no other wiki assertion is invoked."
+    },
+    {
+      "order": 26,
+      "tag": "C69U",
+      "proof_uses": [],
+      "reason": "A definition; it invokes no other wiki assertion."
+    },
+    {
+      "order": 27,
+      "tag": "7C2W",
+      "proof_uses": [],
+      "reason": "The proof is a characteristic-function expansion, an aperiodicity argument and Fourier inversion; no other wiki assertion is invoked."
+    },
+    {
+      "order": 28,
+      "tag": "DTYB",
+      "proof_uses": [],
+      "reason": "The proof computes the masses of the convolution powers with Tonelli; no other wiki assertion is invoked."
     }
   ]
 }

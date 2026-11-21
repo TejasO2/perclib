@@ -179,6 +179,81 @@
         "MRZO"
       ],
       "reason": "A finite positive-semidefinite pairing bounds every translated ball sum by a centred radius-4R sum, without finite susceptibility or independence."
+    },
+    {
+      "order": 7,
+      "tag": "70KD",
+      "proof_uses": [],
+      "reason": "Expanding the cluster squares gives the identity pointwise; taking expectations of a finite sum invokes no other wiki assertion."
+    },
+    {
+      "order": 8,
+      "tag": "UZ7J",
+      "proof_uses": [
+        "70KD"
+      ],
+      "reason": "Positivity of the restricted kernel (70KD) makes its cube positive semidefinite, and Cauchy-Schwarz for that matrix with finite exhaustion gives the bound."
+    },
+    {
+      "order": 9,
+      "tag": "96A2",
+      "proof_uses": [
+        "UZ7J",
+        "70KD"
+      ],
+      "reason": "The quadratic bound of UZ7J gives decay of T and T^2, and Cauchy-Schwarz for the positive semidefinite restrictions (70KD) controls the one-sided tail of the triangle."
+    },
+    {
+      "order": 10,
+      "tag": "C2YT",
+      "proof_uses": [
+        "UZ7J"
+      ],
+      "reason": "The preceding cubic bound (UZ7J) makes the entries finite and bounds T^3 by D; rearranging nonnegative sums gives A_o <= D Delta_o."
+    },
+    {
+      "order": 11,
+      "tag": "87W3",
+      "proof_uses": [
+        "70KD",
+        "CS16",
+        "C2YT"
+      ],
+      "reason": "Positivity of T (70KD) and the finite matrix comparison (CS16) under exhaustion make H positive; the invariant trace identity gives A_o-B_o>=0, and the first comparison (C2YT) gives A_o<=Delta_o^2."
+    },
+    {
+      "order": 12,
+      "tag": "N0HM",
+      "proof_uses": [],
+      "reason": "A definition; it invokes no other wiki assertion."
+    },
+    {
+      "order": 13,
+      "tag": "IZAO",
+      "proof_uses": [
+        "70KD",
+        "CS16",
+        "C2YT"
+      ],
+      "reason": "The proof reuses the boundedness and positivity arguments for T (70KD) and H (CS16), proves the trace identity by mass transport, and uses the first comparison (C2YT) for A<=Delta^2."
+    },
+    {
+      "order": 14,
+      "tag": "TAB8",
+      "proof_uses": [],
+      "reason": "Gram-matrix factorisation, a tensor-product compression and a weighted Cauchy-Schwarz estimate; no other wiki assertion is invoked."
+    },
+    {
+      "order": 15,
+      "tag": "530W",
+      "proof_uses": [],
+      "reason": "Completing the square and an orthogonal change of variables; no other wiki assertion is invoked."
+    },
+    {
+      "order": 16,
+      "tag": "Z4JP",
+      "proof_uses": [],
+      "reason": "Uniqueness of the positive square root and the spectral theorem; no other wiki assertion is invoked."
     }
   ]
 }

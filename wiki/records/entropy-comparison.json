@@ -28,5 +28,51 @@
     }
   ],
   "occursIn": [],
-  "proofUses": []
+  "proofUses": [
+    {
+      "order": 0,
+      "tag": "UVKE",
+      "proof_uses": [],
+      "reason": "A definition; its well-definedness remark uses only t log t >= -1/e and the log-sum inequality, invoking no other wiki assertion."
+    },
+    {
+      "order": 1,
+      "tag": "JR0J",
+      "proof_uses": [],
+      "reason": "Factoring the likelihood ratio on fibres and the log-sum inequality (proved inline); no other wiki assertion is invoked."
+    },
+    {
+      "order": 2,
+      "tag": "58HC",
+      "proof_uses": [
+        "JR0J"
+      ],
+      "reason": "The first inequality is data processing (JR0J) applied to the event indicator; the second is Taylor's formula for the Bernoulli divergence."
+    },
+    {
+      "order": 3,
+      "tag": "CH4N",
+      "proof_uses": [
+        "56TE",
+        "JR0J"
+      ],
+      "reason": "The conditional transcript formula (56TE) gives each next bit its original law, and iterating the chain rule (JR0J) sums the one-coordinate costs."
+    },
+    {
+      "order": 4,
+      "tag": "D66F",
+      "proof_uses": [
+        "CH4N",
+        "KHB7",
+        "58HC"
+      ],
+      "reason": "The finite-transcript identity (CH4N) and the weighted Bernoulli entropy bound (KHB7) bound the prefix entropy; the event comparison (58HC) and finite-prefix approximation pass to the Borel event."
+    },
+    {
+      "order": 5,
+      "tag": "29WG",
+      "proof_uses": [],
+      "reason": "A hybrid-configuration telescoping argument with the conditional product law of unqueried coordinates, proved inline; no other wiki assertion is invoked."
+    }
+  ]
 }

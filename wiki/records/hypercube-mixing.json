@@ -122,6 +122,12 @@
         "1PM2"
       ],
       "reason": "The root estimate controls typical Fourier characters; a sign-moment bound and an exponential tail control their average."
+    },
+    {
+      "order": 6,
+      "tag": "2PEX",
+      "proof_uses": [],
+      "reason": "Independent Poisson coordinate clocks give the kernel and the threshold is solved explicitly; no other wiki assertion is invoked."
     }
   ]
 }
