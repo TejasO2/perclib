@@ -1,4 +1,9 @@
 /-
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Two-point (Bernoulli) divergence inequalities for the exponential intensity family. New
 proofs against pinned mathlib 56a005855ea17e0b0958f73ec801ae140b0a1679, using mathlib's
 `InformationTheory.klFun`; no upstream proof is copied. The Bernoulli divergence
@@ -9,6 +14,22 @@ module
 public import Mathlib.InformationTheory.KullbackLeibler.KLFun
 public import Mathlib.Analysis.Convex.SpecificFunctions.Basic
 public import Mathlib.Analysis.Calculus.Deriv.MeanValue
+
+/-!
+# Bernoulli divergence for the exponential intensity family
+
+Quadratic bounds for `klFun` and comparison of the divergence between two Bernoulli laws with
+parameters `1 - e^{-βJ}` with the Poisson divergence.
+
+## Main results
+
+* `two_mul_min_mul_klFun_le`
+* `sq_sub_one_le_two_mul_max_mul_klFun`
+* `bernoulliDivergence_exp_le`
+* `mul_poissonDivergence_le`
+* `bernoulliDivergence_exp_le_of_nonneg`
+* `sq_sub_le_two_mul_max_mul_bernoulliDivergence`
+-/
 
 @[expose] public section
 
@@ -192,7 +213,7 @@ theorem bernoulli_exp_div_le_poisson {x y : ℝ} (hx : 0 < x) (hy : 0 < y) :
   have hsum : A * (y - x) + exp (-x) * (y - x) = y - x := by rw [hAdef]; ring
   nlinarith [hGx, hsum]
 
-/-- **KHB7, first inequality.** For `J, β₁, β₂ > 0`,
+/-- **First inequality.** For `J, β₁, β₂ > 0`,
 `d(1 − e^{−β₁J} ‖ 1 − e^{−β₂J}) ≤ J (β₁ log(β₁/β₂) − β₁ + β₂)`. -/
 theorem bernoulliDivergence_exp_le {J β₁ β₂ : ℝ} (hJ : 0 < J) (h₁ : 0 < β₁) (h₂ : 0 < β₂) :
     (1 - exp (-(β₁ * J))) * log ((1 - exp (-(β₁ * J))) / (1 - exp (-(β₂ * J)))) +
@@ -203,7 +224,7 @@ theorem bernoulliDivergence_exp_le {J β₁ β₂ : ℝ} (hJ : 0 < J) (h₁ : 0 
   rw [mul_div_mul_right _ _ hJ.ne']
   ring
 
-/-- **KHB7, second inequality.** For `J ≥ 0` and `β₁, β₂ > 0`,
+/-- **Second inequality.** For `J ≥ 0` and `β₁, β₂ > 0`,
 `J (β₁ log(β₁/β₂) − β₁ + β₂) ≤ J (β₁ − β₂)² / (2 min{β₁, β₂})`. -/
 theorem mul_poissonDivergence_le {J β₁ β₂ : ℝ} (hJ : 0 ≤ J) (h₁ : 0 < β₁) (h₂ : 0 < β₂) :
     J * (β₁ * log (β₁ / β₂) - β₁ + β₂) ≤ J * (β₁ - β₂) ^ 2 / (2 * min β₁ β₂) := by
@@ -221,7 +242,7 @@ theorem mul_poissonDivergence_le {J β₁ β₂ : ℝ} (hJ : 0 ≤ J) (h₁ : 0 
   have := mul_le_mul_of_nonneg_left hk (sq_nonneg β₂)
   nlinarith [this]
 
-/-- **KHB7, the case `J = 0`.** Both parameters vanish, and the explicit expression for
+/-- **The case `J = 0`.** Both parameters vanish, and the explicit expression for
 the divergence is `0` (with Lean's conventions `log 0 = 0` and `0 / 0 = 0`). -/
 theorem bernoulliDivergence_exp_zero (β₁ β₂ : ℝ) :
     (1 - exp (-(β₁ * 0))) * log ((1 - exp (-(β₁ * 0))) / (1 - exp (-(β₂ * 0)))) +
@@ -229,9 +250,22 @@ theorem bernoulliDivergence_exp_zero (β₁ β₂ : ℝ) :
           log ((1 - (1 - exp (-(β₁ * 0)))) / (1 - (1 - exp (-(β₂ * 0))))) = 0 := by
   simp
 
+/-- The divergence bound of `bernoulliDivergence_exp_le` for every `J ≥ 0`; at `J = 0` both
+sides vanish. -/
+theorem bernoulliDivergence_exp_le_of_nonneg {J β₁ β₂ : ℝ} (hJ : 0 ≤ J) (h₁ : 0 < β₁)
+    (h₂ : 0 < β₂) :
+    (1 - exp (-(β₁ * J))) * log ((1 - exp (-(β₁ * J))) / (1 - exp (-(β₂ * J)))) +
+        (1 - (1 - exp (-(β₁ * J)))) *
+          log ((1 - (1 - exp (-(β₁ * J)))) / (1 - (1 - exp (-(β₂ * J))))) ≤
+      J * (β₁ * log (β₁ / β₂) - β₁ + β₂) := by
+  rcases hJ.eq_or_lt with h0 | hpos
+  · subst h0
+    rw [bernoulliDivergence_exp_zero, zero_mul]
+  · exact bernoulliDivergence_exp_le hpos h₁ h₂
+
 /-! ### 58HC, two-point form -/
 
-/-- **58HC, two-point form.** For `a, b ∈ (0,1)`: `(a − b)² ≤ 2 max{a,b} · d(a‖b)`. -/
+/-- **Two-point form.** For `a, b ∈ (0,1)`: `(a − b)² ≤ 2 max{a,b} · d(a‖b)`. -/
 theorem sq_sub_le_two_mul_max_mul_bernoulliDivergence {a b : ℝ} (ha : 0 < a) (ha1 : a < 1)
     (hb : 0 < b) (hb1 : b < 1) :
     (a - b) ^ 2 ≤ 2 * max a b * (a * log (a / b) + (1 - a) * log ((1 - a) / (1 - b))) := by
@@ -252,9 +286,9 @@ theorem sq_sub_le_two_mul_max_mul_bernoulliDivergence {a b : ℝ} (ha : 0 < a) (
   have hm : 0 ≤ b * max (a / b) 1 := by positivity
   nlinarith [mul_nonneg (mul_nonneg zero_le_two hm) h2]
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
-/-- `β₁ = β₂`: both sides of KHB7 vanish. -/
+/-- `β₁ = β₂`: both sides of `bernoulliDivergence_exp_le` vanish. -/
 example (J β : ℝ) :
     (1 - exp (-(β * J))) * log ((1 - exp (-(β * J))) / (1 - exp (-(β * J)))) +
         (1 - (1 - exp (-(β * J)))) *
@@ -278,7 +312,7 @@ example :
   ⟨bernoulliDivergence_exp_le one_pos two_pos one_pos,
     mul_poissonDivergence_le zero_le_one two_pos one_pos⟩
 
-/-- 58HC at `a = 1/2, b = 1/4`. -/
+/-- `sq_sub_le_two_mul_max_mul_bernoulliDivergence` at `a = 1/2, b = 1/4`. -/
 example : ((1 / 2 : ℝ) - 1 / 4) ^ 2 ≤ 2 * max (1 / 2) (1 / 4) *
     (1 / 2 * log ((1 / 2) / (1 / 4)) + (1 - 1 / 2) * log ((1 - 1 / 2) / (1 - 1 / 4))) :=
   sq_sub_le_two_mul_max_mul_bernoulliDivergence (by norm_num) (by norm_num) (by norm_num)

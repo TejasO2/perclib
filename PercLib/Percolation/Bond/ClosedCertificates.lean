@@ -1,8 +1,10 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
-New for this project (issue 223, Q-47). No upstream proof is copied.
+Authors: PercLib contributors
+-/
+/-
+New for this project. No upstream proof is copied.
 -/
 module
 
@@ -118,6 +120,7 @@ theorem isLowerSet_cluster_finite (x : V) :
 
 /-- For `x ∈ C`, the cluster of `x` lies in `C` exactly when no pair from the cluster to the
 complement of `C` is open. -/
+@[tag "YIM4"]
 theorem cluster_subset_iff (ω : Config V) {x : V} {C : Set V} (hx : x ∈ C) :
     cluster ω x ⊆ C ↔ ∀ a ∈ cluster ω x, ∀ b ∉ C, s(a, b) ∉ ω := by
   constructor

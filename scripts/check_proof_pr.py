@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
-"""Conservative D-24 proof-only gate, selected by the PR label `proof`."""
+"""Conservative D-24 proof-only classification of a change, run locally by LEAD."""
 import argparse
 import json
-import os
 from pathlib import Path
 import re
-import shutil
 import subprocess
-import tempfile
 
 ROOT = Path(__file__).resolve().parent.parent
 FORBIDDEN = set('def abbrev opaque axiom axioms constant constants inductive coinductive structure '
@@ -107,40 +104,33 @@ def command(*args, cwd=ROOT, capture=False):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--event', type=Path, default=os.environ.get('GITHUB_EVENT_PATH'))
+    """Classify the change from BASE to the working tree as proof-only or interface.
+
+    Exit 0: proof-only (passes on the gate alone). Exit 3: interface change, which needs
+    a fresh auditor's approval (D-34); the reason is printed. Other exits are errors.
+    The compiled comparison needs the extracted manifest of BASE (`--base-raw`), which
+    the gate saves for every gated commit, and of the head (`--head-raw`).
+    """
+    parser = argparse.ArgumentParser(description=main.__doc__)
+    parser.add_argument('--base', required=True, help='base commit (the integration tip)')
+    parser.add_argument('--base-raw', type=Path, help='ExtractManifest output for BASE')
     parser.add_argument('--head-raw', type=Path, default=Path('.lake/manifest-raw.json'))
     args = parser.parse_args()
-    event = json.loads(args.event.read_text()) if args.event else {}
-    pr = event.get('pull_request')
-    if not pr or 'proof' not in {x['name'] for x in pr.get('labels', [])}:
-        print('Interface/review lane: no proof-only classification requested.')
-        return
-    base = pr['base']['sha']
-    if not re.fullmatch('[0-9a-f]{40}', base):
-        raise ValueError('Invalid base commit')
-    if subprocess.run(['git', 'cat-file', '-e', base + '^{commit}'], cwd=ROOT,
-                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode:
-        command('git', 'fetch', '--no-tags', 'origin', base)
-    paths = command('git', 'diff', '--name-only', '--no-renames', base, 'HEAD', capture=True).splitlines()
-    changes = {p: (ROOT / p).read_text() if (ROOT / p).exists() else None for p in paths}
-    check_paths_and_source(changes)
-    # Isolated checkout/cache; builds run sequentially in this job. Never mutate the head build.
-    temporary = tempfile.mkdtemp(prefix='perclib-proof-base-')
-    checkout = Path(temporary) / 'base'
+    base = command('git', 'rev-parse', '--verify', args.base + '^{commit}', capture=True).strip()
+    paths = command('git', 'diff', '--name-only', '--no-renames', base, capture=True).splitlines()
+    paths += command('git', 'ls-files', '--others', '--exclude-standard', capture=True).splitlines()
+    lean = [p for p in paths if p.endswith('.lean') and not p.startswith('scripts/')]
+    changes = {p: (ROOT / p).read_text() if (ROOT / p).exists() else None for p in lean}
     try:
-        command('git', 'worktree', 'add', '--detach', str(checkout), base)
-        command('cp', '-a', '--reflink=auto', str(ROOT / '.lake'), str(checkout / '.lake'))
-        command('lake', 'exe', 'cache', 'get', cwd=checkout)
-        command('lake', 'build', '--wfail', cwd=checkout)
-        raw = command('lake', 'env', 'lean', '-R', str(ROOT), '--run', str(ROOT / 'scripts/ExtractManifest.lean'),
-                      cwd=checkout, capture=True)
-        check_compiled(json.loads(raw), json.loads(args.head_raw.read_text()))
-        print(f'Proof-only gate passed against actual base {base}; no compiled interface changes.')
-    finally:
-        if checkout.exists():
-            command('git', 'worktree', 'remove', '--force', str(checkout))
-        shutil.rmtree(temporary, ignore_errors=True)
+        check_paths_and_source(changes)
+        if args.base_raw is None:
+            raise ValueError('no compiled manifest of the base given; cannot confirm proof-only')
+        check_compiled(json.loads(args.base_raw.read_text()), json.loads(args.head_raw.read_text()))
+    except ValueError as e:
+        print(f'INTERFACE change against {base[:12]}: {e}')
+        raise SystemExit(3)
+    print(f'PROOF-ONLY change against {base[:12]}: {len(lean)} Lean file(s), '
+          'no compiled interface change.')
 
 
 if __name__ == '__main__':

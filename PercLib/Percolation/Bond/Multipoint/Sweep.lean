@@ -1,11 +1,12 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
-New proofs for issue 633 (Q-205, part 2), written on 2026-11-16 by PROVER-F. Statements from
-the wiki article `multipoint-trees` (tags CS13, 9YE6); T. Hutchcroft, *Critical long-range
-percolation I*, arXiv:2508.18807v1, §I.2. No upstream proof is copied and no definition is
-added.
+Authors: PercLib contributors
+-/
+/-
+New proofs, written on 2026-11-16. Statements from the wiki article `multipoint-trees` (tags CS13,
+9YE6); T. Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1, §I.2. No upstream
+proof is copied and no definition is added.
 -/
 module
 
@@ -246,7 +247,7 @@ theorem sweepProduct_image_smul {E : Type*} [NormedAddCommGroup E] [NormedSpace 
 
 /-! ### Item 4: three points -/
 
-/-- **Item 4 (9YE6), three points.** `S({x, y, z}) = d(x, y) d(y, z) d(z, x)` for distinct
+/-- **Item 4, three points.** `S({x, y, z}) = d(x, y) d(y, z) d(z, x)` for distinct
 `x, y, z`. -/
 theorem threePartDistance_triple {x y z : X} (hxy : x ≠ y) (hyz : y ≠ z) (hxz : x ≠ z) :
     threePartDistance ({x, y, z} : Finset X) = dist x y * dist y z * dist z x := by
@@ -288,7 +289,7 @@ theorem threePartDistance_triple {x y z : X} (hxy : x ≠ y) (hyz : y ≠ z) (hx
     | ring1
     | (rw [dist_comm a b, dist_comm b c, dist_comm c a]; ring1)
 
-/-! ### Witnesses (D-5) -/
+/-! ### Witnesses -/
 
 /-- `A = {0, 1, 3} ⊆ ℝ`: `Sweep(A) > 0`, `Sweep(2 • A) = 2³ Sweep(A)`, and
 `S(A) = 1 · 2 · 3 = 6`. -/

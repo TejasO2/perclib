@@ -1,9 +1,10 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
-New proofs for issue 455 (Q-121, item 1), written on 2026-11-16 by PROVER-G, against pinned
-mathlib. No upstream proof is copied.
+Authors: PercLib contributors
+-/
+/-
+New proofs, written on 2026-11-16, against pinned mathlib. No upstream proof is copied.
 -/
 module
 
@@ -18,6 +19,7 @@ public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 public import Mathlib.Analysis.Asymptotics.AsymptoticEquivalent
 public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 public import Mathlib.Analysis.SpecialFunctions.Sqrt
+public import PercLib.Meta.Tag
 
 /-!
 # Logarithmic corrections from a quadratic differential inequality (6PGV)
@@ -84,9 +86,10 @@ theorem measurable_inv_three_sq_mul_sq {D : ℝ → ℝ} (hD : Measurable D) :
 
 variable {β₀ βc : ℝ} {χ D : ℝ → ℝ}
 
-/-- **6PGV.** Let `0 ≤ β₀ < β_c`, `χ > 0` nondecreasing and locally absolutely continuous on
-`(β₀, β_c)`, `D ≥ 1` measurable and `χ' ≥ (χ - D)₊²/(3β²D²)` a.e. on `(β₀, β_c)`. Then
-`χ(β) ≤ (1 + 2(β_c - β)/(3ββ_c)) (∫_β^{β_c} ds/(3s²D(s)²))⁻¹` for every `β ∈ (β₀, β_c)`. -/
+/-- **Integrated susceptibility bound.** Let `0 ≤ β₀ < β_c`, `χ > 0` nondecreasing and locally
+absolutely continuous on `(β₀, β_c)`, `D ≥ 1` measurable and `χ' ≥ (χ - D)₊²/(3β²D²)` a.e. on
+`(β₀, β_c)`. Then `χ(β) ≤ (1 + 2(β_c - β)/(3ββ_c)) (∫_β^{β_c} ds/(3s²D(s)²))⁻¹` for every
+`β ∈ (β₀, β_c)`. -/
 theorem le_of_deriv_ge_sq_div (hβ₀ : 0 ≤ β₀) (hpos : ∀ β ∈ Ioo β₀ βc, 0 < χ β)
     (hmono : MonotoneOn χ (Ioo β₀ βc))
     (hac : ∀ p q, β₀ < p → p ≤ q → q < βc → AbsolutelyContinuousOnInterval χ p q)
@@ -267,7 +270,7 @@ theorem le_of_deriv_ge_sq_div (hβ₀ : 0 ≤ β₀) (hpos : ∀ β ∈ Ioo β�
   rw [← div_eq_mul_inv, le_div_iff₀ hIpos, mul_comm, ← le_div_iff₀ hχβ]
   exact hIle
 
-/-- **6PGV, logarithmic form.** Under the hypotheses of `le_of_deriv_ge_sq_div`, if moreover
+/-- **Logarithmic form.** Under the hypotheses of `le_of_deriv_ge_sq_div`, if moreover
 `D(β_c - u) ≤ C (log(1/u))^a` for all small `u > 0`, with `C > 0` and `a ≥ 0`, then
 `χ(β_c - ε) = O(ε⁻¹ (log(1/ε))^{2a})` as `ε ↓ 0`. -/
 theorem isBigO_of_deriv_ge_sq_div (hβ₀ : 0 ≤ β₀) (hlt : β₀ < βc)
@@ -530,6 +533,7 @@ theorem absolutelyContinuousOnInterval_inv {u : ℝ → ℝ} {p q : ℝ} (hpq : 
 
 Then `f/m³ ~ (6 K a₀ c⁴ log r / ν)^{-1/2}` and
 `f ~ c √(ν/(6 K a₀)) r^{3α}/√(log r)`. -/
+@[tag "OP8F"]
 theorem op8f_asymptotics {α a₀ c ν K r₀ : ℝ} (ha₀ : 0 < a₀) (hc : 0 < c)
     (hν : 0 < ν) (hK : 0 < K) (hr₀ : 1 < r₀) {m f a b e₁ e₂ ε : ℝ → ℝ}
     (hm0 : ∀ r, r₀ ≤ r → 0 < m r) (hf0 : ∀ r, r₀ ≤ r → 0 < f r)
@@ -700,10 +704,10 @@ theorem op8f_asymptotics {α a₀ c ν K r₀ : ℝ} (ha₀ : 0 < a₀) (hc : 0 
     have : 0 < Real.sqrt (Real.log r) := Real.sqrt_pos.2 hlr
     field_simp
 
-/-- **D-5 witness for OP8F.** Take `α = a₀ = c = ν = K = 1` and `r₀ = 2`, with `m(r) = r`,
-`a(r) = r^{-2}`, `b(r) = r³`, `e₁ = 0`, `ε = 0`, `f(r) = r³/√(6 log r)` and
-`e₂(r) = 1/(6 log r)`. Every hypothesis holds, and the theorem gives
-`f/m³ ~ (6 log r)^{-1/2}`, which is exact. -/
+/-- **Non-vacuity witness for `op8f_asymptotics`.** Take `α = a₀ = c = ν = K = 1` and `r₀ = 2`, with
+`m(r) = r`, `a(r) = r^{-2}`, `b(r) = r³`, `e₁ = 0`, `ε = 0`, `f(r) = r³/√(6 log r)` and
+`e₂(r) = 1/(6 log r)`. Every hypothesis holds, and the theorem gives `f/m³ ~ (6 log r)^{-1/2}`,
+which is exact. -/
 example : ((fun r : ℝ => (r ^ 3 / Real.sqrt (6 * Real.log r)) / r ^ 3) ~[atTop]
       fun r => (6 * 1 * 1 * 1 ^ 4 * Real.log r / 1) ^ (-(1 / 2 : ℝ))) ∧
     (fun r : ℝ => r ^ 3 / Real.sqrt (6 * Real.log r)) ~[atTop]
@@ -754,7 +758,7 @@ example : ((fun r : ℝ => (r ^ 3 / Real.sqrt (6 * Real.log r)) / r ^ 3) ~[atTop
     IsEquivalent.refl IsEquivalent.refl
     (Eventually.of_forall fun r hr => by
       have hr0 : 0 < r := by linarith
-      show deriv (fun r : ℝ => r) r = 1 * r ^ (-1 - 1 : ℝ) * r ^ 2 * (1 - 0)
+      change deriv (fun r : ℝ => r) r = 1 * r ^ (-1 - 1 : ℝ) * r ^ 2 * (1 - 0)
       rw [deriv_id'', show (-1 - 1 : ℝ) = -((2 : ℕ) : ℝ) by norm_num, Real.rpow_neg hr0.le,
         Real.rpow_natCast, sub_zero]
       field_simp)

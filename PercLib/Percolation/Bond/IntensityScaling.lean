@@ -1,9 +1,10 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
-New proofs for issue 168 (Q-25), written on 2026-11-14 by PROVER-E. No upstream proof is
-copied.
+Authors: PercLib contributors
+-/
+/-
+New proofs, written on 2026-11-14. No upstream proof is copied.
 -/
 module
 
@@ -36,7 +37,6 @@ This file adds no definition.
 
 open MeasureTheory Set Filter Topology PercLib.Probability
 open scoped ENNReal NNReal
-open Classical
 
 namespace PercLib.Percolation.Bond
 
@@ -91,7 +91,7 @@ theorem globalCriticalIntensity_smul (J : Sym2 V → ℝ≥0) {c : ℝ≥0} (hc 
 
 /-- The zero kernel has row sums zero. -/
 theorem rowSum_zero_smul_le (J : Sym2 V → ℝ≥0) (v : V) :
-    (∑' w, if w = v then 0 else (((0 : ℝ≥0) • J) s(v, w) : ℝ≥0∞)) ≤ (0 : ℝ≥0) := by
+    rowSum (fun e => (((0 : ℝ≥0) • J) e : ℝ≥0∞)) v ≤ (0 : ℝ≥0) := by
   classical
   simp
 
@@ -221,10 +221,12 @@ private theorem setOf_edges_subset_conn {x y : V} (p : (⊤ : SimpleGraph V).Wal
   intro ω hω
   refine ⟨p.transfer (openGraph ω) fun e he => ?_⟩
   rw [openGraph, SimpleGraph.edgeSet_fromEdgeSet]
-  exact ⟨hω (by simpa using he), SimpleGraph.not_isDiag_of_mem_edgeSet _ (p.edges_subset_edgeSet he)⟩
+  exact ⟨hω (by simpa using he), SimpleGraph.not_isDiag_of_mem_edgeSet _
+      (p.edges_subset_edgeSet he)⟩
 
 /-- **Large intensity connects the support graph.** If `x` and `y` are joined in the support
 graph of `J`, then `τ(x, y) → 1` as `β → ∞`. No countability is needed. -/
+@[tag "QZVQ"]
 theorem tendsto_tau_intensityProfile_atTop (J : Sym2 V → ℝ≥0) {x y : V}
     (h : (SimpleGraph.fromEdgeSet {e | 0 < J e}).Reachable x y) :
     Tendsto (fun β : ℝ≥0 => tau (intensityProfile J β) x y) atTop (𝓝 1) := by

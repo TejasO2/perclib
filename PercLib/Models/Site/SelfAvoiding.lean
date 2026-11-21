@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New site-percolation proofs using the merged PercLib bond path-counting theorems
 and mathlib walks. No upstream proof copied.
 -/
@@ -8,10 +12,25 @@ module
 public import PercLib.Percolation.Bond.SelfAvoiding
 public import Mathlib.Order.SuccPred.Int
 
+/-!
+# Self-avoiding paths and subcritical site percolation
+
+An infinite site cluster contains open simple paths of every length; counting such paths shows that
+site percolation on a graph of maximum degree `Δ` has no infinite cluster when `(Δ - 1) p < 1`.
+
+## Main results
+
+* `exists_path_length_of_siteCluster_infinite`
+* `siteBernoulli_siteInfinite_eq_zero_of_degree_le`
+* `ae_all_siteClusters_finite_of_degree_le`
+* `thetaSite_eq_zero_of_lt_inv`
+* `inv_le_criticalProbSite`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set PercLib.Probability PercLib.Percolation.Bond
-open scoped ENNReal NNReal Classical
+open scoped ENNReal NNReal
 
 namespace PercLib.Models.Site
 variable {V : Type*}
@@ -93,7 +112,7 @@ theorem siteBernoulli_exists_path_length_le (G : SimpleGraph V) [G.LocallyFinite
 theorem siteBernoulli_siteInfinite_eq_zero_of_degree_le_ennreal
     (G : SimpleGraph V) [G.LocallyFinite] {Δ : ℕ} (hΔ : ∀ v, G.degree v ≤ Δ)
     (w : V → unitInterval) (p : unitInterval) (hw : ∀ v, w v ≤ p)
-    (hp : ((Δ-1 : ℕ) : ℝ≥0∞) * unitInterval.toNNReal p < 1) (x : V) :
+    (hp : ((Δ - 1 : ℕ) : ℝ≥0∞) * unitInterval.toNNReal p < 1) (x : V) :
     siteBernoulli w {ω | (siteCluster G ω x).Infinite} = 0 := by
   apply ENNReal.eq_zero_of_le_mul_pow (ε := (Δ : ℝ≥0) * unitInterval.toNNReal p ^ 2) hp
   intro n
@@ -113,7 +132,7 @@ cluster at a specified root. No countability of the vertex type is needed. -/
 theorem siteBernoulli_siteInfinite_eq_zero_of_degree_le
     (G : SimpleGraph V) [G.LocallyFinite] {Δ : ℕ} (hΔ : ∀ v, G.degree v ≤ Δ)
     (w : V → unitInterval) (p : unitInterval) (hw : ∀ v, w v ≤ p)
-    (hp : ((Δ : ℝ)-1) * (p : ℝ) < 1) (x : V) :
+    (hp : ((Δ : ℝ) - 1) * (p : ℝ) < 1) (x : V) :
     siteBernoulli w {ω | (siteCluster G ω x).Infinite} = 0 := by
   apply siteBernoulli_siteInfinite_eq_zero_of_degree_le_ennreal G hΔ w p hw _ x
   by_cases hΔ0 : Δ = 0
@@ -128,7 +147,7 @@ theorem siteBernoulli_siteInfinite_eq_zero_of_degree_le
 theorem ae_all_siteClusters_finite_of_degree_le [Countable V]
     (G : SimpleGraph V) [G.LocallyFinite] {Δ : ℕ} (hΔ : ∀ v, G.degree v ≤ Δ)
     (w : V → unitInterval) (p : unitInterval) (hw : ∀ v, w v ≤ p)
-    (hp : ((Δ : ℝ)-1) * (p : ℝ) < 1) :
+    (hp : ((Δ : ℝ) - 1) * (p : ℝ) < 1) :
     ∀ᵐ ω ∂siteBernoulli w, ∀ x, (siteCluster G ω x).Finite := by
   apply ae_all_iff.mpr
   intro x
@@ -137,7 +156,7 @@ theorem ae_all_siteClusters_finite_of_degree_le [Countable V]
     siteBernoulli_siteInfinite_eq_zero_of_degree_le G hΔ w p hw hp x
 
 /-- A finite cover of each lattice neighbour set by signed coordinate steps.
-This local degree bound avoids a dependency on the pending Q-32 lattice package. -/
+This local degree bound keeps the file independent of `PercLib.Models.Lattice`. -/
 private theorem lattice_neighbors_subset (d : ℕ) (x : LatticeSite d) :
     (zdGraph d).neighborSet x ⊆ Set.range
       (fun t : Fin d × Bool => Function.update x t.1 (x t.1 + if t.2 then 1 else -1)) := by
@@ -170,7 +189,7 @@ private theorem exists_lattice_degree_bound (d : ℕ) :
 
 /-- Subcritical site percolation on the nearest-neighbour integer lattice. -/
 theorem thetaSite_eq_zero_of_lt_inv {d : ℕ} (hd : 1 ≤ d) (p : unitInterval)
-    (hp : (p : ℝ) < 1 / (2*(d : ℝ)-1)) : thetaSite d p = 0 := by
+    (hp : (p : ℝ) < 1 / (2 * (d : ℝ) - 1)) : thetaSite d p = 0 := by
   obtain ⟨h, hdegree⟩ := exists_lattice_degree_bound d
   let := h
   have hd' : (1 : ℝ) ≤ d := by exact_mod_cast hd
