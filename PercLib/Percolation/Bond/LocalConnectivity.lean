@@ -5,9 +5,13 @@ Authors: PercLib contributors
 -/
 /-
 Generalises the internal-connectivity helpers identified in
-near-critical-diffusivity/Percolation/Literature/SharpnessDCTProofs.lean at
+Percolation/Literature/SharpnessDCTProofs.lean at tomhutchcroft/near-critical-diffusivity, revision
 c820fea91a7482c1755de0ec94ecb9f59ccfcacc (under Tom Hutchcroft's reuse permission recorded in
-`docs/DECISIONS.md`). Uses pinned mathlib induced graphs and walks directly; no PathIn or second
+`docs/DECISIONS.md`). Licence status: that file lies in the source's `Percolation/Literature/`
+tree, which holds code vendored from the `percolation/` project of `anthropics/formal-math`
+(Apache-2.0; see the source's `third_party/formal-math/`). For any vendored part, the Apache-2.0
+licence and its notices are those retained in `third_party/percolation/`; no other upstream licence
+is asserted. Uses pinned mathlib induced graphs and walks directly; no PathIn or second
 connection-event definition is introduced. No nearest-neighbour assumption.
 -/
 module
