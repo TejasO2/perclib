@@ -43,6 +43,9 @@ rejection.
   interpolated string) is rejected, and so is an unterminated comment, string or `«`,
   and a string or character literal with an escape Lean does not accept (see
   STRING_ESCAPE: Lean abandons such a string at the escape and reads the rest as code).
+  Lean lexes the longest token, so a `--` or `/-` directly after a symbol (`<--`, `\/-`,
+  `//-`) or a character literal directly after a symbol or `''` (`]'"'`) may be code to
+  Lean rather than a comment or literal: such a file is rejected too.
 - Auxiliary definitions count as definitions: a `where` clause or a `let rec` inside a
   theorem adds a definition (`z.foo`, `a.f`) to the library, so a changed line matching
   `\bwhere\b` or `\blet\s+rec\b` (after comments are removed) is rejected. Since Lean
@@ -377,6 +380,23 @@ def is_ident_char(c: str) -> bool:
     return c.isalnum() or c in "_'!?"
 
 
+def after_symbol(c: str) -> bool:
+    """Whether `c` before a `--`, `/-` or `'` may end a Lean token that the opener continues.
+
+    False for whitespace and `([{⟨,` (which no token of the pinned Lean and Mathlib
+    continues with `-` or `'`) and for identifier characters (after which Lean reads `--`
+    and `/-` as comments and `'` as part of the identifier)."""
+    return not (c.isspace() or c in '([{⟨,' or is_ident_char(c))
+
+
+def quote_continues_identifier(text: str, i: int) -> bool:
+    """Whether the `'` at `text[i]` continues an identifier (`h'`, `h''`)."""
+    j = i
+    while j > 0 and text[j - 1] == "'":
+        j -= 1
+    return j > 0 and is_ident_char(text[j - 1])
+
+
 def shown_escape(text: str, i: int) -> str:
     """The escape starting with the `\\` at `text[i]`, quoted for a rejection reason."""
     if text.startswith('\\\n', i):
@@ -392,7 +412,12 @@ def strip_comments(text: str, blank_literals: bool = False) -> str:
     interpolated string (`s!"…"`, `m!"…"`, `throwError "…"`), whose `{…}` holds code with
     strings of its own, which this scanner does not follow. A string or character literal
     with an escape outside STRING_ESCAPE is rejected (Lean would end the literal there and
-    read the rest as code). With `blank_literals`, every
+    read the rest as code). Lean lexes the longest token of its token table, so a `--`,
+    `/-` or `'` directly after a symbol may continue a token (`<-`, `\\/`, `//`, `]'`,
+    `∑'`, `''`) and be code to Lean: a comment opener directly after a character other
+    than whitespace, `([{⟨,` or an identifier character is rejected, and so is a
+    character literal directly after such a character or after `''` (a `'` there that
+    starts no literal, and `''` itself, are kept as code). With `blank_literals`, every
     character of a string or character literal other than a newline becomes a space.
     """
     out, i, n = [], 0, len(text)
@@ -401,6 +426,9 @@ def strip_comments(text: str, blank_literals: bool = False) -> str:
         return re.sub(r'[^\n]', ' ', s) if blank_literals else s
 
     while i < n:
+        if text.startswith(('/-', '--'), i) and i > 0 and after_symbol(text[i - 1]):
+            raise Reject(f'comment opener `{text[i:i + 2]}` directly after a symbol '
+                         f'(`{text[i - 1]}{text[i:i + 2]}` may continue a Lean token)')
         if text.startswith('/-', i):
             depth, i = 1, i + 2
             while i < n and depth:
@@ -447,6 +475,17 @@ def strip_comments(text: str, blank_literals: bool = False) -> str:
                 raise Reject('string literal containing `{` (possibly interpolated)')
             out.append(literal(text[i:j + 1]))
             i = j + 1
+            continue
+        if text[i] == "'" and i > 0 and not quote_continues_identifier(text, i) and (
+                text[i - 1] == "'" or after_symbol(text[i - 1])):
+            # A `'` continuing a token (`]'`, `∑'`), after `''` (never a character literal
+            # in Lean: Mathlib's token, or an error) or after a lexing error: Lean reads it
+            # as code, or errors and resumes after it. Where a character literal would fit,
+            # the two readings differ: reject. (A `''` itself starts no literal below.)
+            if CHAR_LITERAL.match(text, i) or text.startswith("'\\", i):
+                raise Reject("character literal directly after a symbol or `''`")
+            out.append("'")
+            i += 1
             continue
         if text[i] == "'" and (i == 0 or not is_ident_char(text[i - 1])):
             char = CHAR_LITERAL.match(text, i)

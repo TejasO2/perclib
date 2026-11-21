@@ -521,6 +521,70 @@ class ClassifyTests(unittest.TestCase):
         self.assertEqual(am.strip_comments('x "\\" def" y \'\\\'\' z', blank_literals=True),
                          'x ' + ' ' * 8 + ' y ' + ' ' * 4 + ' z')
 
+    # Finding S2 of the fourth audit of the CI workflows: Lean lexes the longest token, so
+    # a `--`, `/-` or `'` directly after a symbol may continue a token (`<-`, `\/`, `//`,
+    # `]'`, `''`) and be code to Lean. Probe lines A, B, C, P-Z (comment openers) and D, H
+    # (character literals) of that audit, and the same with `]''`; each wrote a file when
+    # Lean v4.35.0 elaborated it (P-Z with no error at all). The lexer must refuse the
+    # opener or literal itself, not a token that the line check happens to see.
+    S2_WRITE = "IO.FS.writeFile (toString 'q' ++ toString 'N') (toString 'x')"
+
+    def test_comment_opener_after_symbol_rejected(self):
+        w = self.S2_WRITE
+        cases = [
+            ('A', f'theorem b : True := trivial <-- run_meta {w}', '`<--`'),
+            ('B', f'theorem b : True := trivial \\/- run_meta {w} -- -/', '`\\/-`'),
+            ('C', f'theorem b : True := trivial //- run_meta {w} -- -/', '`//-`'),
+            ('P-Z', "theorem b : ∃ y : { x : Int //- x < 1 }, y.1 = 0 := ⟨⟨0, by run_tac do "
+                    "IO.FS.writeFile (toString 'q' ++ toString 'Z') (toString 'x'); "
+                    "Lean.Elab.Tactic.evalTactic (← `(tactic| decide))⟩, rfl⟩ -- -/", '`//-`'),
+        ]
+        for name, line, shown in cases:
+            with self.subTest(probe=name):
+                with self.assertRaises(am.Reject) as cm:
+                    Fixture().lean(PATH, WITH_A, WITH_A.replace(LINE_A, line)).classify()
+                message = str(cm.exception)
+                self.assertIn('directly after a symbol', message)
+                self.assertIn('comment opener', message)
+                self.assertIn(shown, message)
+                self.assertNotIn('run_', message)
+                self.assertNotIn('changed line', message)
+
+    def test_char_literal_after_symbol_rejected(self):
+        w = self.S2_WRITE
+        cases = [
+            ('D', f'theorem b : True := trivial ]\'"\' foo " run_meta {w} -- "'),
+            ('E', f'theorem b : True := trivial ×\'"\' foo " run_meta {w} -- "'),
+            ('H', f'theorem b : True := trivial \'\'\'"\' run_meta {w} -- "'),
+            ("]''", f'theorem b : True := trivial ]\'\'"\' x " /- " run_meta {w} -- -/'),
+            ('escape', "theorem b : True := trivial ]'\\n' run_meta pure ()"),
+            ('invalid escape', "theorem b : True := trivial ]'\\q' run_meta pure ()"),
+        ]
+        for name, line in cases:
+            with self.subTest(probe=name):
+                with self.assertRaises(am.Reject) as cm:
+                    Fixture().lean(PATH, WITH_A, WITH_A.replace(LINE_A, line)).classify()
+                message = str(cm.exception)
+                self.assertIn('character literal directly after a symbol', message)
+                self.assertNotIn('run_meta', message)
+                self.assertNotIn('changed line', message)
+
+    def test_token_quotes_and_dashes_accepted(self):
+        lines = [
+            "theorem b : (∑' i : ℕ, (0 : ℝ)) = 0 := by simp",
+            "theorem b (f : ℕ → ℕ) (s : Set ℕ) : f '' s = f '' s := rfl",
+            "theorem b (f : ℕ → ℕ) (s : Set ℕ) : (f ⁻¹' s) = f ⁻¹' s := rfl",
+            "theorem b : ['a', 'b'].length = 2 := rfl",
+            "theorem b : True := by have h' := trivial; exact h'",
+            "theorem b : True := by have h''a' := trivial; exact h''a'",
+            'theorem b (x c : ℕ) : x--c\n    = x := rfl',
+        ]
+        for line in lines:
+            with self.subTest(line=line):
+                self.accept(Fixture().lean(PATH, WITH_A, WITH_A.replace(LINE_A, line)))
+        self.assertEqual(am.strip_comments("x--c\n(-- c\n[/- c -/]"), 'x\n(\n[ ]')
+
+
 EVIDENCE_HEAD = 'a' * 40
 EVIDENCE_BASE = 'b' * 40
 
