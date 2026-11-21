@@ -60,7 +60,7 @@ theorem setOf_not_cluster_subset_eq_iUnion_conn (Λ : Set V) (o : V) :
 /-- Summable real rows give finite off-diagonal rows in `ℝ≥0∞`. -/
 theorem offDiag_rowSum_lt_top_of_summable (J : Sym2 V → ℝ≥0)
     (hJ : ∀ u, Summable fun v => (J s(u, v) : ℝ)) (u : V) :
-    (∑' v, if v = u then 0 else (J s(u, v) : ℝ≥0∞)) < ∞ := by
+    rowSum (fun e => (J e : ℝ≥0∞)) u < ∞ := by
   refine lt_of_le_of_lt (ENNReal.tsum_le_tsum fun v => ?_)
     (ENNReal.tsum_coe_ne_top_iff_summable.2 (NNReal.summable_coe.1 (hJ u))).lt_top
   split_ifs <;> simp

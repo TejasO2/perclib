@@ -70,7 +70,8 @@ theorem lintegral_ghost_le_union [Countable V] (q₀ s : Sym2 V → I) (o : V) {
 full off-diagonal row sum. -/
 theorem tsum_ite_not_mem_le (s : Sym2 V → I) (C : Finset V) {u : V} (hu : u ∈ C) :
     ∑' v, (if v ∉ C then (unitInterval.toNNReal (s s(u, v)) : ℝ≥0∞) else 0) ≤
-      ∑' w, if w = u then 0 else (unitInterval.toNNReal (s s(u, w)) : ℝ≥0∞) := by
+      rowSum (fun e => unitInterval.toENNReal (s e)) u := by
+  rw [rowSum_toENNReal]
   refine ENNReal.tsum_le_tsum fun v => ?_
   by_cases hv : v ∈ C
   · simp [hv]
@@ -83,7 +84,7 @@ almost surely, every off-diagonal row sum of `s` is at most `δ` and every ghost
 `G_o(h) ≤ E[1 - e^{-hX}] + δ · E[X e^{-hX}] · G`. -/
 theorem lintegral_ghost_union_le [Countable V] (q₀ s : Sym2 V → I) (o : V) {h : ℝ}
     (hh : 0 < h) (hfin : ∀ᵐ ω ∂(law q₀), (cluster ω o).Finite) {δ G : ℝ≥0∞}
-    (hδ : ∀ u, (∑' w, if w = u then 0 else (unitInterval.toNNReal (s s(u, w)) : ℝ≥0∞)) ≤ δ)
+    (hδ : ∀ u, rowSum (fun e => unitInterval.toENNReal (s e)) u ≤ δ)
     (hG : ∀ v, ∫⁻ ω, (1 - EReal.exp (-((h : EReal) * (((cluster ω v).encard : ℝ≥0∞) : EReal))))
         ∂(law fun e => σ (σ (q₀ e) * σ (s e))) ≤ G) :
     ∫⁻ ω, (1 - EReal.exp (-((h : EReal) * (((cluster ω o).encard : ℝ≥0∞) : EReal))))
@@ -227,14 +228,14 @@ theorem lintegral_ghost_le_layer [Countable V] (q₀ s : Sym2 V → I) (o : V) {
         ∂(law fun e => σ (σ (q₀ e) * σ (s e))) ≤
       ∫⁻ ω, (1 - EReal.exp (-((h : EReal) * (((cluster ω o).encard : ℝ≥0∞) : EReal))))
           ∂(law q₀) +
-        (⨆ u, ∑' w, if w = u then 0 else (unitInterval.toNNReal (s s(u, w)) : ℝ≥0∞)) *
+        (⨆ u, rowSum (fun e => unitInterval.toENNReal (s e)) u) *
           (∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) *
             EReal.exp (-((h : EReal) * (((cluster ω o).encard : ℝ≥0∞) : EReal))) ∂(law q₀)) *
           ⨆ v, ∫⁻ ω, (1 - EReal.exp (-((h : EReal) * (((cluster ω v).encard : ℝ≥0∞) : EReal))))
             ∂(law fun e => σ (σ (q₀ e) * σ (s e))) :=
   ⟨lintegral_ghost_le_union q₀ s o hh,
     lintegral_ghost_union_le q₀ s o hh hfin (fun u => le_iSup (fun u =>
-      ∑' w, if w = u then 0 else (unitInterval.toNNReal (s s(u, w)) : ℝ≥0∞)) u)
+      rowSum (fun e => unitInterval.toENNReal (s e)) u) u)
       (fun v => le_iSup (fun v => ∫⁻ ω,
         (1 - EReal.exp (-((h : EReal) * (((cluster ω v).encard : ℝ≥0∞) : EReal))))
           ∂(law fun e => σ (σ (q₀ e) * σ (s e)))) v)⟩
@@ -317,7 +318,7 @@ theorem ae_cluster_finite_of_chi_lt_top [Countable V] {q : Sym2 V → I} {v : V}
 /-- **MLLO, ghost form.** Under the hypotheses of `chi_union_le_of_bounds`, every ghost
 transform of the union law satisfies `G_v(h) ≤ h χ_{q₀}(v) / (1 - δM)`. -/
 theorem lintegral_ghost_union_le_mul [Countable V] (q₀ s : Sym2 V → I) {δ M : ℝ≥0∞}
-    (hδ : ∀ u, (∑' w, if w = u then 0 else (unitInterval.toNNReal (s s(u, w)) : ℝ≥0∞)) ≤ δ)
+    (hδ : ∀ u, rowSum (fun e => unitInterval.toENNReal (s e)) u ≤ δ)
     (hchi : ∀ v, chi q₀ v ≤ M) (hM : M < ⊤) (hδM : δ * M < 1) {h : ℝ} (hh : 0 < h) (v : V) :
     ∫⁻ ω, (1 - EReal.exp (-((h : EReal) * (((cluster ω v).encard : ℝ≥0∞) : EReal))))
         ∂(law fun e => σ (σ (q₀ e) * σ (s e))) ≤
@@ -368,7 +369,7 @@ theorem lintegral_ghost_union_le_mul [Countable V] (q₀ s : Sym2 V → I) {δ M
 /-- **MLLO.** Let `δ` bound the off-diagonal row sums of `s`, `M` bound `χ_{q₀}`, `M < ⊤` and
 `δM < 1`. Then `χ_r(v) ≤ χ_{q₀}(v) / (1 - δM)` for the union law `r`. -/
 theorem chi_union_le_of_bounds [Countable V] (q₀ s : Sym2 V → I) {δ M : ℝ≥0∞}
-    (hδ : ∀ u, (∑' w, if w = u then 0 else (unitInterval.toNNReal (s s(u, w)) : ℝ≥0∞)) ≤ δ)
+    (hδ : ∀ u, rowSum (fun e => unitInterval.toENNReal (s e)) u ≤ δ)
     (hchi : ∀ v, chi q₀ v ≤ M) (hM : M < ⊤) (hδM : δ * M < 1) (v : V) :
     chi (fun e => σ (σ (q₀ e) * σ (s e))) v ≤ chi q₀ v / (1 - δ * M) := by
   set r : Sym2 V → I := fun e => σ (σ (q₀ e) * σ (s e)) with hr
@@ -438,21 +439,21 @@ theorem chi_union_le_of_bounds [Countable V] (q₀ s : Sym2 V → I) {δ M : ℝ
 `δ = ⨆ u, ∑'_{v ≠ u} s(u, v)`, then `χ_r(v) ≤ χ_{q₀}(v) / (1 - δM)` for every `v`. -/
 @[tag "MLLO"]
 theorem chi_union_le [Countable V] (q₀ s : Sym2 V → I) (hM : ⨆ v, chi q₀ v < ⊤)
-    (hδM : (⨆ u, ∑' w, if w = u then 0 else (unitInterval.toNNReal (s s(u, w)) : ℝ≥0∞)) *
+    (hδM : (⨆ u, rowSum (fun e => unitInterval.toENNReal (s e)) u) *
       (⨆ v, chi q₀ v) < 1) (v : V) :
     chi (fun e => σ (σ (q₀ e) * σ (s e))) v ≤ chi q₀ v /
-      (1 - (⨆ u, ∑' w, if w = u then 0 else (unitInterval.toNNReal (s s(u, w)) : ℝ≥0∞)) *
+      (1 - (⨆ u, rowSum (fun e => unitInterval.toENNReal (s e)) u) *
         (⨆ v, chi q₀ v)) :=
   chi_union_le_of_bounds q₀ s (fun u => le_iSup (fun u =>
-    ∑' w, if w = u then 0 else (unitInterval.toNNReal (s s(u, w)) : ℝ≥0∞)) u)
+    rowSum (fun e => unitInterval.toENNReal (s e)) u) u)
     (fun v => le_iSup (fun v => chi q₀ v) v) hM hδM v
 
 /-! ### Non-vacuity -/
 
 /-- With `s = 0` the off-diagonal row sums vanish, so `δ = 0`. -/
 example (V : Type*) :
-    (⨆ u : V, ∑' w, if w = u then 0 else
-      (unitInterval.toNNReal ((fun _ => 0 : Sym2 V → I) s(u, w)) : ℝ≥0∞)) = 0 := by
+    (⨆ u : V, rowSum (fun e => unitInterval.toENNReal ((fun _ => 0 : Sym2 V → I) e)) u) =
+      0 := by
   simp
 
 /-- `s = 0`, `q₀ = 0` on `ℕ`: the hypotheses of BEJT and MLLO hold (`X = 1`, `M = 1`,
@@ -483,10 +484,10 @@ example : chi (fun e => σ (σ ((fun _ : Sym2 Bool => (0 : I)) e) *
       σ ((fun _ => (⟨1 / 2, by norm_num, by norm_num⟩ : I)) e))) false ≤ 2 := by
   have hchi : ∀ v, chi (fun _ : Sym2 Bool => (0 : I)) v = 1 :=
     chi_eq_one_of_offDiagonal_zero _ fun _ _ _ => rfl
-  have hrow : ∀ u : Bool, (∑' w, if w = u then 0 else (unitInterval.toNNReal
-      ((fun _ => (⟨1 / 2, by norm_num, by norm_num⟩ : I)) s(u, w)) : ℝ≥0∞)) ≤ 2⁻¹ := by
+  have hrow : ∀ u : Bool, rowSum (fun e => unitInterval.toENNReal
+      ((fun _ => (⟨1 / 2, by norm_num, by norm_num⟩ : I)) e)) u ≤ 2⁻¹ := by
     intro u
-    rw [tsum_fintype, Fintype.sum_bool]
+    rw [rowSum_toENNReal, tsum_fintype, Fintype.sum_bool]
     have : ((unitInterval.toNNReal (⟨1 / 2, by norm_num, by norm_num⟩ : I) : NNReal) :
         ℝ≥0∞) = 2⁻¹ := by
       rw [← ENNReal.ofReal_coe_nnreal, unitInterval.coe_toNNReal]

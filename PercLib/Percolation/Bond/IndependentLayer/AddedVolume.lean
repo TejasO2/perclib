@@ -188,7 +188,7 @@ theorem measurableSet_mem_added [Countable V] (o v : V) :
 
 /-- The off-diagonal row sums of `s` from a finite set `C` to its complement. -/
 theorem tsum_tsum_ite_mem_not_mem_le (s : Sym2 V → I) (C : Finset V) {a : ℝ≥0∞}
-    (ha : ∀ u, (∑' w, if w = u then 0 else (unitInterval.toNNReal (s s(u, w)) : ℝ≥0∞)) ≤ a) :
+    (ha : ∀ u, rowSum (fun e => unitInterval.toENNReal (s e)) u ≤ a) :
     ∑' u, ∑' v,
       (if u ∈ C ∧ v ∉ C then (unitInterval.toNNReal (s s(u, v)) : ℝ≥0∞) else 0) ≤
         (C.card : ℝ≥0∞) * a := by
@@ -212,7 +212,7 @@ functional `f ≥ 0` of the original cluster,
 `E[(1 - e^{-h|D|}) f(C)] ≤ E[min(1, a M*(h) |C|) f(C)]`. -/
 theorem lintegral_ghost_added_mul_le [Countable V] (q₀ s : Sym2 V → I) (o : V) {h : ℝ}
     (hh : 0 < h) (hfin : ∀ᵐ ω ∂(law q₀), (cluster ω o).Finite) {a : ℝ≥0∞}
-    (ha : ∀ u, (∑' w, if w = u then 0 else (unitInterval.toNNReal (s s(u, w)) : ℝ≥0∞)) ≤ a)
+    (ha : ∀ u, rowSum (fun e => unitInterval.toENNReal (s e)) u ≤ a)
     (f : Set V → ℝ≥0∞) (hf : Measurable fun ω : Config V => f (cluster ω o)) :
     ∫⁻ x, (1 - EReal.exp (-((h : EReal) *
         (((cluster (x.1 ∪ x.2) o \ cluster x.1 o).encard : ℝ≥0∞) : EReal)))) *
@@ -394,7 +394,7 @@ theorem lintegral_ghost_added_mul_le [Countable V] (q₀ s : Sym2 V → I) (o : 
 `t`, `(1 - e^{-ht}) P(|D| ≥ t) ≤ E[min(1, a M*(h) |C|)]`. -/
 theorem law_added_volume_ge_mul_le [Countable V] (q₀ s : Sym2 V → I) (o : V) {h : ℝ}
     (hh : 0 < h) (hfin : ∀ᵐ ω ∂(law q₀), (cluster ω o).Finite) {a : ℝ≥0∞}
-    (ha : ∀ u, (∑' w, if w = u then 0 else (unitInterval.toNNReal (s s(u, w)) : ℝ≥0∞)) ≤ a)
+    (ha : ∀ u, rowSum (fun e => unitInterval.toENNReal (s e)) u ≤ a)
     (t : ℕ∞) :
     (1 - EReal.exp (-((h : EReal) * ((t : ℝ≥0∞) : EReal)))) *
         ((law q₀).prod (law s)) {x | t ≤ (cluster (x.1 ∪ x.2) o \ cluster x.1 o).encard} ≤
@@ -438,7 +438,7 @@ example (f : Set Bool → ℝ≥0∞) :
   refine lintegral_ghost_added_mul_le _ _ false one_pos
     (Filter.Eventually.of_forall fun ω => Set.toFinite _) ?_ f (measurable_of_countable _)
   intro u
-  rw [tsum_fintype]
+  rw [rowSum_toENNReal, tsum_fintype]
   cases u <;> simp [Fintype.univ_bool]
 
 end PercLib.Percolation.Bond

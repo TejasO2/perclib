@@ -186,7 +186,7 @@ allowed). -/
 @[tag "F4RR"]
 theorem lintegral_encard_union_mul_le [Countable V] (q₀ s : Sym2 V → I) (o : V)
     {ε χ : ℝ≥0∞}
-    (hε : ∀ u, (∑' w, if w = u then 0 else (unitInterval.toNNReal (s s(u, w)) : ℝ≥0∞)) ≤ ε)
+    (hε : ∀ u, rowSum (fun e => unitInterval.toENNReal (s e)) u ≤ ε)
     (hχ : ∀ v, chi (fun e => σ (σ (q₀ e) * σ (s e))) v ≤ χ)
     (f : Set V → ℝ≥0∞) (hf : Measurable fun ω : Config V => f (cluster ω o)) :
     ∫⁻ x, ((cluster (x.1 ∪ x.2) o).encard : ℝ≥0∞) * f (cluster x.1 o)
@@ -424,7 +424,7 @@ example (f : Set Bool → ℝ≥0∞) :
         ∂(law (fun _ : Sym2 Bool => (0 : I))) := by
   refine lintegral_encard_union_mul_le _ _ false ?_ ?_ f (measurable_of_countable _)
   · intro u
-    rw [tsum_fintype]
+    rw [rowSum_toENNReal, tsum_fintype]
     cases u <;> simp [Fintype.univ_bool]
   · intro v
     refine le_trans (lintegral_mono (g := fun _ => (2 : ℝ≥0∞)) fun ω => ?_) (by simp)

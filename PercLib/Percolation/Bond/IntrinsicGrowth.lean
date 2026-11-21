@@ -79,8 +79,7 @@ theorem law_edist_le_le_tsum_paths [Countable V] (q : Sym2 V → unitInterval) (
 `E|B_ω(o,r)| ≤ ∑_{j ≤ r} D^j`. -/
 theorem lintegral_encard_ball_le_of_rowSum [Countable V] (q : Sym2 V → unitInterval)
     (D : ℝ≥0∞)
-    (hrow : ∀ v, (∑' w, if w = v then 0 else
-      (unitInterval.toNNReal (q s(v,w)) : ℝ≥0∞)) ≤ D) (o : V) (r : ℕ) :
+    (hrow : ∀ v, rowSum (fun e => unitInterval.toENNReal (q e)) v ≤ D) (o : V) (r : ℕ) :
     ∫⁻ ω, (({y | (openGraph ω).edist o y ≤ r} : Set V).encard : ℝ≥0∞) ∂law q ≤
       ∑ j ∈ Finset.range (r + 1), D ^ j := by
   set a := offDiagonal (fun v w : V => (unitInterval.toNNReal (q s(v,w)) : ℝ≥0∞))
@@ -133,10 +132,10 @@ theorem lintegral_encard_ball_le_of_rowSum [Countable V] (q : Sym2 V → unitInt
 /-- Under transitivity of `q` every off-diagonal row sum equals the one at `o`. -/
 theorem rowSum_eq_of_transitive_profile (q : Sym2 V → unitInterval)
     (hq : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, q (Sym2.map σ e) = q e) (o v : V) :
-    (∑' w, if w = v then 0 else (unitInterval.toNNReal (q s(v,w)) : ℝ≥0∞)) =
-      ∑' w, if w = o then 0 else (unitInterval.toNNReal (q s(o,w)) : ℝ≥0∞) := by
+    rowSum (fun e => unitInterval.toENNReal (q e)) v =
+      rowSum (fun e => unitInterval.toENNReal (q e)) o := by
   obtain ⟨σ, rfl, hσ⟩ := hq o v
-  rw [← σ.tsum_eq]
+  rw [rowSum_toENNReal, rowSum_toENNReal, ← σ.tsum_eq]
   refine tsum_congr fun w => ?_
   simp only [σ.injective.eq_iff]
   congr 3
@@ -148,7 +147,7 @@ theorem lintegral_encard_ball_le_of_transitive [Countable V] (q : Sym2 V → uni
     (hq : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, q (Sym2.map σ e) = q e) (o : V) (r : ℕ) :
     ∫⁻ ω, (({y | (openGraph ω).edist o y ≤ r} : Set V).encard : ℝ≥0∞) ∂law q ≤
       ∑ j ∈ Finset.range (r + 1),
-        (∑' v, if v = o then 0 else (unitInterval.toNNReal (q s(o,v)) : ℝ≥0∞)) ^ j :=
+        rowSum (fun e => unitInterval.toENNReal (q e)) o ^ j :=
   lintegral_encard_ball_le_of_rowSum q _
     (fun v => (rowSum_eq_of_transitive_profile q hq o v).le) o r
 
