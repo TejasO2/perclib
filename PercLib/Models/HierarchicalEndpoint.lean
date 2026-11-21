@@ -61,7 +61,7 @@ variable {V : Type*}
 `ω ∩ D.sym2` exactly when it is joined to `o` inside `D` in `ω`. -/
 theorem mem_cluster_inter_sym2_iff (ω : Config V) {D : Set V} {o : V} (ho : o ∈ D) (u : V) :
     u ∈ cluster (ω ∩ D.sym2) o ↔
-      ∃ ho : o ∈ D, ∃ hu : u ∈ D, ((openGraph ω).induce D).Reachable ⟨o, ho⟩ ⟨u, hu⟩ := by
+      ω ∈ localConn D o u := by
   constructor
   · intro h
     change (openGraph (ω ∩ D.sym2)).Reachable o u at h
@@ -92,8 +92,7 @@ theorem lintegral_clusterIntersection_restrict_eq_sum [Countable V]
     (q : Sym2 V → unitInterval) (S : Finset V) {D : Set V} (hS : (S : Set V) = D)
     [DecidablePred (· ∈ D.sym2)] {o : V} (ho : o ∈ S) :
     ∫⁻ ω, (clusterIntersection S ω o : ℝ≥0∞) ∂law (fun e => if e ∈ D.sym2 then q e else 0) =
-      ∑ u ∈ S, law q {ω | ∃ ho : o ∈ (S : Set V), ∃ hu : u ∈ (S : Set V),
-        ((openGraph ω).induce (S : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} := by
+      ∑ u ∈ S, law q (localConn (S : Set V) o u) := by
   subst hS
   classical
   rw [← lintegral_comp_inter_eq q _ (measurable_clusterIntersection_ennreal S o)]
@@ -247,8 +246,7 @@ theorem ofReal_le_lintegral_clusterIntersection_at_rootCriticalIntensity [NeZero
   have h0S : (0 : ℕ →₀ (Fin d → ZMod L)) ∈ S := by simp [hmemS]
   rw [lintegral_clusterIntersection_restrict_eq_sum _ S (Set.Finite.coe_toFinset _) h0S]
   set P : (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0∞ := fun u =>
-    law (intensityProfile J βc.toNNReal) {ω | ∃ ho : (0 : ℕ →₀ (Fin d → ZMod L)) ∈ (S : Set _),
-      ∃ hu : u ∈ (S : Set _), ((openGraph ω).induce (S : Set _)).Reachable ⟨0, ho⟩ ⟨u, hu⟩}
+    law (intensityProfile J βc.toNNReal) (localConn (S : Set _) 0 u)
     with hP_def
   have hflux := one_le_boundaryFlux_at_rootCriticalIntensity J
     (transitive_of_powerLaw_translationInvariant J hJt)
