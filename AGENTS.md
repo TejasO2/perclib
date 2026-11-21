@@ -29,12 +29,13 @@ python3 scripts/check_forbidden.py PercLib # forbidden-construct scan (seconds)
 
 ## Running the gate locally
 
-**CI is being added; auto-merge is not active.** The CI workflow (build and checks only) is
-being added to `main`; the auto-merge workflow is still under review. Until they are, the gate you run yourself is the only automatic
-check: run it before you mark a pull request ready, and paste the commit it ran on and its
-final lines (`== gate passed on <sha>` and any `NOTICE:` line, or the failure) into the
-pull request. Every pull request is merged by a maintainer (see
-[CONTRIBUTING.md](CONTRIBUTING.md), section 5).
+**CI exists; auto-merge is not active.** The CI workflow
+(`.github/workflows/ci.yml`, build and checks only) exists and runs on pull requests once
+it is on `main`; until then the gate you run yourself is the only automatic check.
+Auto-merge is still being reviewed and is not active, so every pull request is merged by a
+maintainer (see [CONTRIBUTING.md](CONTRIBUTING.md), section 5). Run the gate before you
+mark a pull request ready, and paste the commit it ran on and its final lines
+(`== gate passed on <sha>` and any `NOTICE:` line, or the failure) into the pull request.
 
 You need only a clone, `git`, `python3` (standard library only) and
 [elan](https://github.com/leanprover/elan); `lake` then selects the pinned toolchain
@@ -55,8 +56,8 @@ git switch main && scripts/gate.sh                 # writes .lake/gate/<main sha
 git switch your-branch && scripts/gate.sh main     # the gate on your change
 ```
 
-If no extract of the base exists (for example because `main` does not yet have
-`scripts/gate.sh`), the gate prints `NOTICE: no saved extraction for base …;
+If no extract of the base exists (for example because the first command was not run in
+this clone, or ran while `PercLib/` had uncommitted changes), the gate prints `NOTICE: no saved extraction for base …;
 classification skipped` and your change is treated as an interface change. The steps, in
 order; the gate stops at the first failure:
 
@@ -86,16 +87,21 @@ from the gate and optional for contributors: it replays every module through
 `leanchecker`, 6 modules per process at about 4 GB each, and must not run beside a build.
 Never run `lake env leanchecker PercLib`: one process needs more than 15 GB and is killed.
 
-**What CI checks** (being added): on every pull request it will run
-`scripts/gate.sh` against the merge base, the kernel replay (for pushes and interface
-changes), the unit tests of `scripts/`, and the wiki build, and label the pull request
-`proof-only` or `interface`. Until then, the commands above are the check.
+**What CI checks** (`.github/workflows/ci.yml`, on pull requests once it is on `main`):
+`scripts/gate.sh` against the merge base of the pull request with its target, after a
+forbidden-construct scan; then, after a green gate, the kernel replay; the unit tests of
+`scripts/`; and the wiki build. It reports the classification `proof-only` or `interface`
+in the gate job's summary; it does not set a label. Until it runs on your pull request,
+the commands above are the check.
 
 ## Rules for the Lean
 
 1. **Forbidden:** `sorry`, `admit`, `axiom`, `native_decide`, code that runs at
    elaboration time (`#eval`, `elab`, `macro`, `syntax`, `initialize`, `run_cmd`, ...),
-   `set_option maxHeartbeats`, `set_option linter.*`. Only the axioms `propext`,
+   `unsafe`, `implemented_by`, `extern`, `debug.skipKernelTC`, and every `set_option`
+   outside the allowlist in `scripts/check_forbidden.py` (`maxRecDepth`,
+   `backward.isDefEq.respectTransparency` and `pp.*`; so no `maxHeartbeats`,
+   `synthInstance.maxHeartbeats` or `linter.*`). Only the axioms `propext`,
    `Classical.choice` and `Quot.sound` are allowed.
 2. **Bond interface (D-2).** A configuration on `V` is a `Set (Sym2 V)`, its law is
    `PercLib.Probability.prodBernoulli q`, the open graph is `SimpleGraph.fromEdgeSet ω`,
