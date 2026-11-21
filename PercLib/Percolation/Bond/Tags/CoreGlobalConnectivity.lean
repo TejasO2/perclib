@@ -29,7 +29,7 @@ theorem finite_neighbors_finite_balls :
       {w | G.edist v w ≤ r}.Finite ∧ (G.ball v r).Finite) ∧
     (∀ (G : SimpleGraph V) (v : V), G.ball v 0 = ∅ ∧ {w | G.edist v w ≤ 0} = {v}) ∧
     (∀ [Countable V] (q : Sym2 V → unitInterval),
-      (∀ v, (∑' w, if w = v then 0 else (unitInterval.toNNReal (q s(v, w)) : ℝ≥0∞)) < ∞) →
+      (∀ v, rowSum (fun e => unitInterval.toENNReal (q e)) v < ∞) →
       ∀ᵐ ω ∂law q, (∀ v, ((openGraph ω).neighborSet v).Finite) ∧
         ∀ (v : V) (r : ℕ), {w | (openGraph ω).edist v w ≤ r}.Finite ∧
           ((openGraph ω).ball v r).Finite) := by

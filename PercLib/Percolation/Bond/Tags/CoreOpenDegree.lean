@@ -49,7 +49,7 @@ infinite degree and an infinite cluster at `v` almost surely, and both critical
 intensities vanish. -/
 @[tag "VNRG"]
 theorem infinite_row_degree_cluster_threshold [Countable V] (J : Sym2 V → ℝ≥0) (v : V)
-    (hJ : (∑' w, if w = v then 0 else (J s(v, w) : ℝ≥0∞)) = ∞) :
+    (hJ : rowSum (fun e => (J e : ℝ≥0∞)) v = ∞) :
     (∀ β : ℝ≥0, 0 < β →
       (∀ᵐ ω ∂law (intensityProfile J β), {w | (openGraph ω).Adj v w}.Infinite) ∧
       law (intensityProfile J β) {ω | (cluster ω v).Infinite} = 1) ∧
@@ -67,10 +67,10 @@ Markov bound, and it is almost surely finite when the row sum is finite. -/
 theorem open_degree_law [Countable V] (q : Sym2 V → unitInterval) (v : V) :
     Measurable (fun ω : Config V => {w | (openGraph ω).Adj v w}.encard) ∧
     ∫⁻ ω, ({w | (openGraph ω).Adj v w}.encard : ℝ≥0∞) ∂law q =
-      (∑' w, if w = v then 0 else (unitInterval.toNNReal (q s(v, w)) : ℝ≥0∞)) ∧
+      rowSum (fun e => unitInterval.toENNReal (q e)) v ∧
     (∀ k : ℕ, (k : ℝ≥0∞) * law q {ω | (k : ℕ∞) ≤ {w | (openGraph ω).Adj v w}.encard} ≤
-      ∑' w, if w = v then 0 else (unitInterval.toNNReal (q s(v, w)) : ℝ≥0∞)) ∧
-    ((∑' w, if w = v then 0 else (unitInterval.toNNReal (q s(v, w)) : ℝ≥0∞)) < ∞ →
+      rowSum (fun e => unitInterval.toENNReal (q e)) v) ∧
+    (rowSum (fun e => unitInterval.toENNReal (q e)) v < ∞ →
       ∀ᵐ ω ∂law q, {w | (openGraph ω).Adj v w}.encard < ⊤) := by
   refine ⟨measurable_degree v, lintegral_degree q v, mul_law_le_degree_le q v,
     fun hrow => ?_⟩
@@ -110,16 +110,16 @@ infinite. -/
 @[tag "XJ74"]
 theorem ae_degree_finite_iff_rowSum [Countable V] (q : Sym2 V → unitInterval) :
     ∀ᵐ ω ∂law q, ∀ v,
-      ((∑' w, if w = v then 0 else (unitInterval.toNNReal (q s(v, w)) : ℝ≥0∞)) < ∞ →
+      (rowSum (fun e => unitInterval.toENNReal (q e)) v < ∞ →
         ((openGraph ω).neighborSet v).Finite) ∧
-      ((∑' w, if w = v then 0 else (unitInterval.toNNReal (q s(v, w)) : ℝ≥0∞)) = ∞ →
+      (rowSum (fun e => unitInterval.toENNReal (q e)) v = ∞ →
         ((openGraph ω).neighborSet v).Infinite) := by
   rw [ae_all_iff]
   intro v
-  by_cases h : (∑' w, if w = v then 0 else (unitInterval.toNNReal (q s(v, w)) : ℝ≥0∞)) < ∞
+  by_cases h : rowSum (fun e => unitInterval.toENNReal (q e)) v < ∞
   · filter_upwards [ae_finite_neighbors_of_rowSum_lt_top q v h] with ω hω
     exact ⟨fun _ => hω, fun h' => absurd h' h.ne⟩
-  · have h' : (∑' w, if w = v then 0 else (unitInterval.toNNReal (q s(v, w)) : ℝ≥0∞)) = ∞ :=
+  · have h' : rowSum (fun e => unitInterval.toENNReal (q e)) v = ∞ :=
       not_lt_top_iff.1 h
     filter_upwards [ae_infinite_neighbors_of_rowSum_eq_top q v h'] with ω hω
     exact ⟨fun h'' => absurd h'' h, fun _ => hω⟩

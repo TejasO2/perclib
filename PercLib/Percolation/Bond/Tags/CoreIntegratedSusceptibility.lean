@@ -37,7 +37,7 @@ positive part with `L(S)`. -/
 @[tag "67GX"]
 theorem boundary_susceptibility_bound_positive_part [Countable V] (J : Sym2 V → ℝ≥0)
     (β : ℝ≥0) (S : Finset V)
-    (hJ : ∀ u, ∑' v, (if v = u then 0 else (J s(u, v) : ℝ≥0∞)) ≤ 1)
+    (hJ : ∀ u, rowSum (fun e => (J e : ℝ≥0∞)) u ≤ 1)
     (hχ : (⨆ u, chi (intensityProfile J β) u) ≠ ⊤) :
     (∑ u ∈ S, ∑' w, if w ∈ S then 0 else (tau (intensityProfile J β) u w).toReal) ^ 2 /
         ((β : ℝ) ^ 2 * (⨆ u, chi (intensityProfile J β) u).toReal *
@@ -81,16 +81,16 @@ every `β ∈ (a,b)` has a derivative in `[0, R χ(β)²]`, and if `R > 0` and `
 @[tag "MXGM"]
 theorem susceptibility_derivative_blowup [Countable V] (J : Sym2 V → ℝ≥0)
     (hJ : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e) (o : V)
-    (hR : ∑' v, (if v = o then 0 else (J s(o, v) : ℝ≥0∞)) ≠ ⊤) {a b : ℝ} (ha : 0 ≤ a)
+    (hR : rowSum (fun e => (J e : ℝ≥0∞)) o ≠ ⊤) {a b : ℝ} (ha : 0 ≤ a)
     (hfin : ∀ β ∈ Ioo a b, chi (intensityProfile J β.toNNReal) o ≠ ⊤) :
     LocallyLipschitzOn (Ioo a b) (fun u : ℝ => (chi (intensityProfile J u.toNNReal) o).toReal) ∧
     (∀ᵐ β, β ∈ Ioo a b → ∃ D,
       HasDerivAt (fun u : ℝ => (chi (intensityProfile J u.toNNReal) o).toReal) D β ∧ 0 ≤ D ∧
-      D ≤ (∑' v, (if v = o then 0 else (J s(o, v) : ℝ≥0∞))).toReal *
+      D ≤ (rowSum (fun e => (J e : ℝ≥0∞)) o).toReal *
         (chi (intensityProfile J β.toNNReal) o).toReal ^ 2) ∧
-    (0 < ∑' v, (if v = o then 0 else (J s(o, v) : ℝ≥0∞)) →
+    (0 < rowSum (fun e => (J e : ℝ≥0∞)) o →
       chi (intensityProfile J b.toNNReal) o = ⊤ → ∀ β ∈ Ioo a b,
-        1 / ((∑' v, (if v = o then 0 else (J s(o, v) : ℝ≥0∞))).toReal * (b - β)) ≤
+        1 / ((rowSum (fun e => (J e : ℝ≥0∞)) o).toReal * (b - β)) ≤
           (chi (intensityProfile J β.toNNReal) o).toReal) := by
   refine ⟨fun β hβ => ?_, ?_, fun hR0 hb β hβ =>
     one_div_le_chi_of_chi_eq_top J hJ o hR hR0 ha hfin hb hβ⟩
