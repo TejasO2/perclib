@@ -7,6 +7,23 @@ module
 
 public import PercLib.Percolation.Bond.Intensity
 
+/-!
+# Subcritical bound: correspondence
+
+Wiki correspondence for the row-sum bound, its path and walk ingredients, and the intensity
+thresholds.
+
+## Main results
+
+* `subcritical_bound_and_finiteness`
+* `simple_path_certificates_and_probability`
+* `walk_recurrence_and_geometric_bound`
+* `susceptibility_walk_geometric_chain`
+* `finite_susceptibility_implies_cluster_finiteness`
+* `intensity_row_and_susceptibility_bound`
+* `critical_intensity_bounds_and_zero_case`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set PercLib.Probability

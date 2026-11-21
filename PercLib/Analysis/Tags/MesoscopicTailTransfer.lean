@@ -9,6 +9,19 @@ public import PercLib.Meta.Tag
 public import PercLib.Analysis.ReciprocalODE
 public import PercLib.Analysis.MesoscopicNegligibility
 
+/-!
+# Mesoscopic tail transfer: correspondence
+
+Wiki correspondence for the reciprocal ODE bounds, the two-point example and mesoscopic
+negligibility.
+
+## Main results
+
+* `reciprocal_ode_lower_bounds`
+* `twoPoint_truncated_ratio_example`
+* `tendsto_limsup_truncatedMean_div_mean_of_isTheta`
+-/
+
 @[expose] public section
 noncomputable section
 

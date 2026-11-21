@@ -20,6 +20,19 @@ module
 
 public import PercLib.Analysis.RiccatiComparison
 
+/-!
+# Analytic bootstrap for the volume moments
+
+The bootstrapping argument of Lemma I.4.9 of Hutchcroft, *Critical long-range percolation I*, and a
+general form of the same step that also covers Lemma I.4.10.
+
+## Main results
+
+* `error_bound_eight`
+* `bootstrap_high_dim`
+* `bootstrap_general`
+-/
+
 @[expose] public section
 noncomputable section
 open Filter Set

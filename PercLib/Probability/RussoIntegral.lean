@@ -10,6 +10,21 @@ public import PercLib.Probability.Cylinder
 public import PercLib.Probability.Russo
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 
+/-!
+# Integrated Russo formula
+
+The integral form of Russo's identity along a profile curve, and the Margulis–Russo form with open
+pivotal coordinates.
+
+## Main results
+
+* `prodBernoulli_real_open_pivotal`
+* `prodBernoulli_sub_eq_integral_profile`
+* `prodBernoulli_hasDerivWithinAt_open_pivotal`
+* `prodBernoulli_sub_eq_integral_pivotal`
+* `prodBernoulli_sub_eq_integral_segment`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set

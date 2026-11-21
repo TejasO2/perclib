@@ -6,9 +6,17 @@ module
 
 public import PercLib.Probability.OpenEventHarris
 
-/-! The grouped connection and escape corollary in the Harris article.
+/-!
+# Harris inequality: correspondence
+
+The grouped connection and escape corollary in the Harris article.
 The increasing-event and observable notions are mathlib's `IsUpperSet` and `Monotone`;
-no replacement definitions are introduced here. -/
+no replacement definitions are introduced here.
+
+## Main results
+
+* `harris_connection_escape`
+-/
 
 @[expose] public section
 

@@ -9,6 +9,20 @@ module
 
 public import PercLib.Probability.RussoIntegral
 
+/-!
+# Covariance form of the Russo formula
+
+The covariance of an observable with a coordinate indicator is `qₑ(1-qₑ)` times the expected forced
+increment; in intensity coordinates the Russo derivative is a sum of such covariances.
+
+## Main results
+
+* `covariance_coordinate`
+* `covariance_coordinate_nonneg`
+* `expectation_intensity_hasDerivAt_covariance`
+* `intensity_coefficient_bounds`
+-/
+
 @[expose] public section
 noncomputable section
 

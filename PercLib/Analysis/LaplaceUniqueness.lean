@@ -20,6 +20,21 @@ public import Mathlib.MeasureTheory.Integral.IntervalIntegral.LebesgueDifferenti
 public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 public import Mathlib.Analysis.SpecificLimits.Basic
 
+/-!
+# Uniqueness of the Laplace transform on `(0, ∞)`
+
+An integrable function on `(0, ∞)` whose Laplace transform vanishes identically is zero almost
+everywhere. The proof shows that all moments of `D ∘ (-log)` against polynomials vanish,
+approximates interval indicators by continuous trapezoid functions, and concludes that every
+interval integral vanishes.
+
+## Main results
+
+* `integral_eq_zero_of_forall_laplace_eq_zero`
+* `integral_Ioo_eq_zero`
+* `eq_zero_ae_of_forall_laplace_eq_zero`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set Filter

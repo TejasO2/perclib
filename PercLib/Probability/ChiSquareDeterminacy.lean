@@ -22,6 +22,19 @@ public import Mathlib.Probability.Distributions.Gamma
 public import Mathlib.Analysis.SpecialFunctions.Gaussian.GaussianIntegral
 public import Mathlib.Data.Nat.Factorial.DoubleFactorial
 
+/-!
+# Chi-square moments and determinacy
+
+The chi-square law with one degree of freedom has moments `(2n-1)!!`, its moment series converges
+near zero, and it is determined by its moments.
+
+## Main results
+
+* `integral_pow_gammaMeasure_one_half`
+* `summable_gammaMeasure_moment_series`
+* `eq_gammaMeasure_of_forall_moment_eq`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory ProbabilityTheory Filter

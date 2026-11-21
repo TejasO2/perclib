@@ -8,6 +8,16 @@ module
 public import PercLib.Meta.Tag
 public import PercLib.Percolation.Bond.TreeGraph.Moments
 
+/-!
+# Cluster moments from the tree-graph bound: correspondence
+
+Wiki correspondence for the cluster moments under a uniform susceptibility bound.
+
+## Main results
+
+* `cluster_moments_le_susceptibility`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory

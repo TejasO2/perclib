@@ -10,6 +10,24 @@ public import PercLib.Probability.Harris
 public import PercLib.Probability.Cylinder
 public import PercLib.Probability.Coupling.Monotone
 
+/-!
+# Harris inequality for site percolation
+
+Monotonicity of site connection events, Harris association for connections and infinite clusters,
+supermultiplicativity of connection probabilities, and monotonicity of the site percolation
+probability in the parameter.
+
+## Main results
+
+* `siteBernoulli_harris_siteConn`
+* `siteBernoulli_harris_siteInfinite`
+* `siteBernoulli_siteConn_mul_le`
+* `siteBernoulli_mono_event`
+* `monotone_thetaSite`
+* `thetaSite_eq_zero_of_lt_critical`
+* `thetaSite_pos_of_critical_lt`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set PercLib.Probability

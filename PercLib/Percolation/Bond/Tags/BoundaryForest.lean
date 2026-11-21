@@ -13,6 +13,22 @@ public import PercLib.Percolation.Bond.Wiring.BoundaryLaw
 public import PercLib.Percolation.Bond.Wiring.Collapse
 public import PercLib.Probability.Transport.Pullback
 
+/-!
+# Boundaries, forests and walk kernels: correspondence
+
+Wiki correspondence for boundary laws, the first-exit inequality, forest hosts, walk kernels,
+bounded-degree path counts and intensity bounds.
+
+## Main results
+
+* `boundary_mark_exponential`
+* `boundary_escape_and_percolation`
+* `forest_path_and_susceptibility`
+* `walk_kernel_row_bounds`
+* `bounded_degree_susceptibility_and_finiteness`
+* `intensity_susceptibility_and_thresholds`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory ProbabilityTheory Set PercLib.Probability

@@ -11,6 +11,18 @@ public import PercLib.Percolation.Bond.Basic
 public import PercLib.Probability.Cylinder
 public import Mathlib.Topology.Algebra.InfiniteSum.ENNReal
 
+/-!
+# The tree-graph inequality (statement)
+
+The three-point Aizenman–Newman tree-graph inequality as a statement, with elementary cases.
+
+## Main results
+
+* `TreeGraphInequality`
+* `treeGraph_le_of_middle_eq_root`
+* `treeGraph_bool_values`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set PercLib.Probability

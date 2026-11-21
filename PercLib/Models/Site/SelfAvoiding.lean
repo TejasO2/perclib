@@ -8,6 +8,21 @@ module
 public import PercLib.Percolation.Bond.SelfAvoiding
 public import Mathlib.Order.SuccPred.Int
 
+/-!
+# Self-avoiding paths and subcritical site percolation
+
+An infinite site cluster contains open simple paths of every length; counting such paths shows that
+site percolation on a graph of maximum degree `Δ` has no infinite cluster when `(Δ - 1) p < 1`.
+
+## Main results
+
+* `exists_path_length_of_siteCluster_infinite`
+* `siteBernoulli_siteInfinite_eq_zero_of_degree_le`
+* `ae_all_siteClusters_finite_of_degree_le`
+* `thetaSite_eq_zero_of_lt_inv`
+* `inv_le_criticalProbSite`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set PercLib.Probability PercLib.Percolation.Bond

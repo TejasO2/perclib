@@ -9,6 +9,21 @@ module
 public import PercLib.Percolation.Bond.Basic
 public import Mathlib.Topology.Algebra.InfiniteSum.Defs
 
+/-!
+# Clusters as connected components
+
+Clusters of the open graph are the supports of mathlib's connected components, so they partition the
+vertex set, and sums over roots of functions of the cluster size regroup as sums over components.
+
+## Main results
+
+* `cluster_eq_component_supp`
+* `cluster_eq_or_disjoint`
+* `tsum_cluster_ncard_function`
+* `tsum_cluster_ncard_eq_tsum_component_sq`
+* `tsum_internal_cluster_ncard`
+-/
+
 @[expose] public section
 
 open Set SimpleGraph

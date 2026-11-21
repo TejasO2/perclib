@@ -13,6 +13,21 @@ public import PercLib.Meta.Tag
 public import PercLib.Probability.ProdBernoulli
 public import Mathlib.Data.Sym.Sym2
 
+/-!
+# Reindexing product laws
+
+Relabelling coordinates by an equivalence transports the product law and its profile; vertex
+relabelling transports bond profiles on unordered pairs.
+
+## Main results
+
+* `prodBernoulli_map_image_equiv`
+* `prodBernoulli_preimage_image_equiv`
+* `prodBernoulli_map_image_invariant`
+* `prodBernoulli_map_image_sym2`
+* `prodBernoulli_map_image_sym2_invariant`
+-/
+
 @[expose] public section
 open MeasureTheory ProbabilityTheory
 namespace PercLib.Probability

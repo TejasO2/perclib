@@ -14,6 +14,22 @@ public import Mathlib.MeasureTheory.Integral.Lebesgue.Markov
 public import Mathlib.RingTheory.Binomial
 public import Mathlib.Data.Nat.Factorial.DoubleFactorial
 
+/-!
+# Exponential moments from double-factorial moment bounds
+
+If `E X^m ≤ (2m-3)!! χ^{2m-1}` for all `m ≥ 1`, then `X` has explicit exponential moments and
+explicit tail bounds.
+
+## Main results
+
+* `hasSum_inv_sqrt_one_sub`
+* `lintegral_mul_exp_le`
+* `lintegral_exp_le`
+* `measure_le_le_sqrt_two_mul`
+* `measure_le_le_min`
+* `measure_le_le_exp`
+-/
+
 @[expose] public section
 
 open Real Filter MeasureTheory Set

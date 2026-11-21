@@ -11,6 +11,22 @@ public import Mathlib.Combinatorics.SimpleGraph.Walk.Counting
 public import Mathlib.Algebra.Order.BigOperators.Group.Finset
 public import Mathlib.Analysis.SpecificLimits.Basic
 
+/-!
+# Self-avoiding paths in bounded-degree graphs
+
+Counting simple paths in a host graph of maximum degree `Δ`: an infinite cluster contains open
+simple paths of every length, so no vertex percolates when `(Δ - 1) p < 1`.
+
+## Main results
+
+* `finite_card_paths_length`
+* `exists_path_length_of_cluster_infinite`
+* `law_exists_path_length_le`
+* `law_cluster_infinite_eq_zero_of_degree_le`
+* `ae_all_clusters_finite_of_degree_le`
+* `law_lattice_cluster_infinite_eq_zero_of_degree_bound`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set PercLib.Probability

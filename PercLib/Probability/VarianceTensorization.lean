@@ -10,6 +10,23 @@ public import PercLib.Probability.Russo
 public import Mathlib.Analysis.Calculus.Deriv.MeanValue
 public import Mathlib.Analysis.Calculus.Deriv.Inv
 
+/-!
+# Variance tensorisation for Bernoulli profiles
+
+The Efron–Stein inequality for finite Bernoulli profiles, the variance lower bound on the
+homogeneous Russo derivative of an increasing event, and the odds-ratio monotonicity it implies.
+
+## Main results
+
+* `expectation_average`
+* `variance_le_sum_difference_sq`
+* `event_variance_le_pivotal`
+* `event_variance_le_deriv`
+* `prodBernoulli_event_variance_le_deriv`
+* `odds_ratio_le`
+* `prodBernoulli_odds_ratio_le`
+-/
+
 @[expose] public section
 noncomputable section
 

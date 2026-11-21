@@ -7,6 +7,17 @@ module
 public meta import Lean.Attributes
 public meta import Lean.Elab.Command
 
+/-!
+# The `tag` attribute
+
+The parametric attribute `@[tag "XXXX"]` that records the permanent four-character wiki assertion
+tag of a declaration.
+
+## Main results
+
+* `PercLib.Meta.tagAttribute`
+-/
+
 public meta section
 open Lean
 namespace Lean.Parser.Attr

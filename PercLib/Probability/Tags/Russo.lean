@@ -9,6 +9,20 @@ module
 public import PercLib.Meta.Tag
 public import PercLib.Probability.Russo
 
+/-!
+# Russo formula: correspondence
+
+Wiki correspondence for the grouped Russo assertions.
+
+## Main results
+
+* `forced_increment_pivotal_identities`
+* `russo_observable_polynomial_and_probability`
+* `russo_event_polynomial_and_probability`
+* `russo_homogeneous_polynomial_and_endpoints`
+* `russo_intensity_and_closed_pivotal`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set

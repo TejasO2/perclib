@@ -9,6 +9,18 @@ public import PercLib.Meta.Tag
 public import PercLib.Analysis.RiccatiComparison
 public import PercLib.Analysis.MomentHierarchy
 
+/-!
+# Marginal ODE: correspondence
+
+Wiki correspondence for the Riccati comparison and the moment hierarchy with a slowly varying
+correction.
+
+## Main results
+
+* `riccati_comparison_hasDerivWithinAt`
+* `isEquivalent_moment_hierarchy_slowlyVarying_eventually`
+-/
+
 @[expose] public section
 noncomputable section
 

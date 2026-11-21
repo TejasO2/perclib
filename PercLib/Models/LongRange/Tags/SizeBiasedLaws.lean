@@ -12,6 +12,16 @@ public import PercLib.Models.LongRange.OmittedLayer
 public import PercLib.Models.LongRange.FiniteSusceptibility
 public import PercLib.Percolation.Bond.IndependentLayer.Conditional
 
+/-!
+# Soft power-law cutoff: correspondence
+
+Wiki correspondence for the soft power-law cutoff and its ghost comparison.
+
+## Main results
+
+* `softCutoff_rows_and_ghost_comparison`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory PercLib.Percolation.Bond

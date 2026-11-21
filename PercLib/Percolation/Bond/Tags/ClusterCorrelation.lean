@@ -8,6 +8,16 @@ module
 public import PercLib.Meta.Tag
 public import PercLib.Percolation.Bond.ClusterCorrelation.Inequalities
 
+/-!
+# Cluster correlation gap: correspondence
+
+Wiki correspondence for the support of the correlation gap of increasing cluster functionals.
+
+## Main results
+
+* `correlation_gap_on_common_cluster`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set

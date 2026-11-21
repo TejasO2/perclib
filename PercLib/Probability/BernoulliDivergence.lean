@@ -10,6 +10,22 @@ public import Mathlib.InformationTheory.KullbackLeibler.KLFun
 public import Mathlib.Analysis.Convex.SpecificFunctions.Basic
 public import Mathlib.Analysis.Calculus.Deriv.MeanValue
 
+/-!
+# Bernoulli divergence for the exponential intensity family
+
+Quadratic bounds for `klFun` and comparison of the divergence between two Bernoulli laws with
+parameters `1 - e^{-βJ}` with the Poisson divergence.
+
+## Main results
+
+* `two_mul_min_mul_klFun_le`
+* `sq_sub_one_le_two_mul_max_mul_klFun`
+* `bernoulliDivergence_exp_le`
+* `mul_poissonDivergence_le`
+* `bernoulliDivergence_exp_le_of_nonneg`
+* `sq_sub_le_two_mul_max_mul_bernoulliDivergence`
+-/
+
 @[expose] public section
 
 open Real Set InformationTheory

@@ -19,6 +19,24 @@ public import Mathlib.Analysis.SpecialFunctions.ExpDeriv
 public import Mathlib.Tactic.Ring
 public import Mathlib.Tactic.Linarith
 
+/-!
+# The finite Russo formula
+
+Finite-profile expectations as polynomials in the coordinate probabilities, the inhomogeneous,
+homogeneous and intensity forms of Russo's identity, the pivotal form for increasing events, and its
+transport to the canonical product law.
+
+## Main results
+
+* `expectation_hasDerivAt`
+* `expectation_homogeneous_hasDerivAt`
+* `expectation_intensity_hasDerivAt`
+* `event_hasDerivAt`
+* `integral_prodBernoulli_eq_expectation`
+* `integral_hasDerivWithinAt`
+* `event_real_hasDerivWithinAt`
+-/
+
 @[expose] public section
 noncomputable section
 namespace PercLib.Probability.FiniteProfile

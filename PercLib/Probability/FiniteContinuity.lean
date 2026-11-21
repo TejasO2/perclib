@@ -10,6 +10,21 @@ module
 public import PercLib.Probability.ProductExpectation
 public import PercLib.Percolation.Bond.Basic
 
+/-!
+# Continuity of finite-event probabilities
+
+Probabilities of events depending on finitely many coordinates are multiaffine, hence continuous, in
+the profile; in particular connection probabilities on finite domains are continuous.
+
+## Main results
+
+* `prodBernoulli_finite_apply`
+* `continuous_prodBernoulli_cylinder`
+* `tendsto_prodBernoulli_cylinder`
+* `continuous_tau_finite`
+* `tendsto_tau_finite_domain`
+-/
+
 @[expose] public section
 
 open MeasureTheory ProbabilityTheory Set

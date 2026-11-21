@@ -13,6 +13,23 @@ public import PercLib.Probability.FiniteContinuity
 public import PercLib.Probability.Coupling.Monotone
 public import PercLib.Probability.OpenEventHarris
 
+/-!
+# The quantile scale on finite vertex types
+
+Basic properties of the quantile `tightnessScale`, its monotonicity in the profile on finite vertex
+types, and its left stability along the intensity family, which passes subcritical bounds to the
+endpoint.
+
+## Main results
+
+* `law_max_tail_at_tightnessScale`
+* `tightnessScale_le_iff`
+* `tightnessScale_mono_finite`
+* `finite_quantile_left_stable`
+* `finite_quantile_left_limit`
+* `finite_quantile_sq_bound_at_endpoint`
+-/
+
 @[expose] public section
 noncomputable section
 

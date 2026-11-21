@@ -9,6 +9,18 @@ public import PercLib.Meta.Tag
 public import PercLib.Percolation.Bond.IndependentLayer.AddedVolume
 public import PercLib.Percolation.Bond.IndependentLayer.Conditional
 
+/-!
+# Independent layers and the ghost field: correspondence
+
+Wiki correspondence for the ghost field and the independent-layer ghost comparisons.
+
+## Main results
+
+* `ghost_field_magnetization`
+* `ghost_comparison_omitted_edges`
+* `ghost_bound_added_mass`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set PercLib.Probability

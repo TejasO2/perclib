@@ -13,6 +13,21 @@ public import PercLib.Probability.Harris
 public import PercLib.Probability.Tags.ProductModel
 public import PercLib.Probability.TotalVariation
 
+/-!
+# Profile continuity and association: correspondence
+
+Wiki correspondence for finite-profile continuity, the ordered coupling, and Harris-type
+association.
+
+## Main results
+
+* `finite_restrictions_and_weighted_expectations`
+* `continuous_finite_observations`
+* `ordered_product_coupling_and_comparison`
+* `ordered_coordinate_association`
+* `ordered_product_association`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Measure Set

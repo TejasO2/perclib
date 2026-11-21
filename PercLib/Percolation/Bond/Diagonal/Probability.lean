@@ -8,6 +8,22 @@ module
 
 public import PercLib.Percolation.Bond.Susceptibility
 
+/-!
+# Diagonal insensitivity
+
+Deleting loops does not change the open graph, so observables that ignore the diagonal coordinates,
+among them the two-point function, the cluster volume and the susceptibility, depend only on the
+off-diagonal profile.
+
+## Main results
+
+* `law_map_sdiff_diagSet`
+* `law_map_eq_of_offDiagonal`
+* `tau_eq_of_offDiagonal`
+* `cluster_volume_law_eq_of_offDiagonal`
+* `chi_eq_of_offDiagonal`
+-/
+
 @[expose] public section
 
 open MeasureTheory ProbabilityTheory Set PercLib.Probability

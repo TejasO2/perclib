@@ -12,6 +12,24 @@ public import PercLib.Percolation.Bond.Tightness.TruncatedMean
 public import PercLib.Percolation.Bond.Tightness.WindowTails
 public import PercLib.Percolation.Bond.Forest
 
+/-!
+# Universal tightness and hyperscaling: correspondence
+
+Wiki correspondence for universal tightness, quantile moments and finite-set hyperscaling.
+
+## Main results
+
+* `universal_upper_lower_tails`
+* `rooted_upper_tail`
+* `tails_from_witness_splitting`
+* `moment_le_quantile_pow`
+* `expected_maximum_comparable`
+* `finite_set_hyperscaling`
+* `finite_window_hyperscaling`
+* `hyperscaling_exponent_inequalities`
+* `exponent_relations_sampled_root`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set Filter Topology

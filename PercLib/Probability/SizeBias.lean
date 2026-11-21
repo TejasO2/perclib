@@ -12,6 +12,22 @@ public import PercLib.Percolation.Bond.RowSum
 public import Mathlib.MeasureTheory.Measure.WithDensity
 public import Mathlib.MeasureTheory.Integral.Lebesgue.Countable
 
+/-!
+# Truncated first moments and size-biased laws
+
+Truncated means of a nonnegative random variable from its first two moments, the size-biased law as
+a `withDensity` measure, and its instance for the cluster volume.
+
+## Main results
+
+* `le_setLIntegral_le_of_le`
+* `le_lintegral_min`
+* `isProbabilityMeasure_withDensity_div`
+* `lintegral_withDensity_div`
+* `isProbabilityMeasure_sizeBiased_cluster`
+* `lintegral_sizeBiased_cluster`
+-/
+
 @[expose] public section
 
 noncomputable section
