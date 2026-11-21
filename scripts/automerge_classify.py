@@ -1,0 +1,578 @@
+#!/usr/bin/env python3
+"""Decide whether a pull request may be merged without a maintainer (D-37, ruling 10(2)).
+
+Run by `.github/workflows/automerge.yml` from the default branch. It never sees the pull
+request's checkout or anything its build produced: every input is a response of the
+GitHub REST API, saved to a file by the workflow.
+
+Subcommands (exit 0: yes; exit 1: no, with the reasons printed; exit 2: usage error):
+
+  plan    --pr PR.json < FILES
+          Check the changed paths only and print the files to fetch, one per line,
+          `base <path>` or `head <path>`. Exit 1 if the paths already rule out a merge.
+  decide  --run RUN.json --jobs JOBS.json --pr PR.json --branch BRANCH.json
+          --compare COMPARE.json --ci-workflow WORKFLOW.json --authors AUTHORS
+          --default-branch NAME --base-dir DIR --head-dir DIR < FILES
+          The full decision: the CI evidence, the author, and the diff.
+  classify --base-dir DIR --head-dir DIR [--title TITLE] < FILES
+          The diff classification alone (used by `decide` and by the tests).
+
+FILES is `GET /repos/{o}/{r}/pulls/{n}/files`, as the pages of `gh api --paginate`
+(JSON arrays back to back) or one JSON object per value. DIR holds the files of a side at their repository
+paths, fetched through `GET /repos/{o}/{r}/contents/{path}?ref=<sha>`.
+
+The diff is accepted only if all of the following hold; anything not understood is a
+rejection.
+- Every changed path is an existing `.lean` file under `PercLib/` (status modified) other
+  than `Basic.lean` and `Defs.lean`, except at most one pure move, with no content change,
+  of `tasks/open/<id>.md` or `tasks/claimed/<id>.md` to `tasks/done/<id>.md`, where the
+  pull request title begins with `<id>` (the claim convention of ruling 9c).
+- The API patch of each Lean file, applied to the fetched base file, gives exactly the
+  fetched head file (so the checks below see what the diff says).
+- After comments are removed, every changed non-blank line lies inside a `theorem`,
+  `lemma` or `example` command (so no definition, structure, instance, notation, import,
+  `open`, `variable`, `namespace`, `set_option` ... command is added, removed or edited),
+  and contains none of the tokens in FORBIDDEN_TOKENS and no `@[tag` attribute.
+- No `+`/`-` line of the patch carries a `tag` attribute, even inside a comment.
+- The statement (everything before the first top-level `:=`) of every tagged declaration
+  is the same before and after, and no tag is added or removed.
+Standard library only.
+"""
+from __future__ import annotations
+
+import argparse
+import difflib
+import json
+import os
+import re
+import sys
+from pathlib import Path
+
+LEAN_PATH = re.compile(r'PercLib/(?:[A-Za-z0-9_]+/)*[A-Za-z0-9_]+\.lean')
+INTERFACE_NAMES = {'Basic.lean', 'Defs.lean'}
+TASK_ID = r'[A-Za-z0-9][A-Za-z0-9._-]*'
+TASK_FROM = re.compile(rf'tasks/(?:open|claimed)/({TASK_ID})\.md')
+TASK_TO = re.compile(rf'tasks/done/({TASK_ID})\.md')
+SHA = re.compile(r'[0-9a-f]{40}')
+LOGIN = re.compile(r'[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})')
+
+# Commands whose bodies a proof-only change may edit.
+PROOF_COMMANDS = {'theorem', 'lemma', 'example'}
+# Modifiers that may precede those commands.
+MODIFIERS = {'public', 'private', 'protected', 'nonrec'}
+# Tokens that may not appear on a changed code line: declarations of the interface,
+# anything that runs code at elaboration time or changes syntax, options, and escape
+# hatches (D-29, D-35). Matching is on identifier tokens split at dots, so it is
+# deliberately over-inclusive (`foo.def` is rejected too).
+FORBIDDEN_TOKENS = frozenset('''
+    def abbrev opaque axiom axioms constant constants inductive coinductive structure class
+    instance notation prefix infix infixl infixr postfix syntax macro macro_rules elab
+    elab_rules declare_syntax_cat initialize builtin_initialize register_option
+    register_builtin_option attribute export deriving mutual tag unsafe partial meta
+    implemented_by extern csimp init run_cmd run_elab run_tac run_meta by_elab
+    set_option debug skipKernelTC native_decide sorry admit
+    variable variables universe universes namespace section end omit include
+    import module local scoped noncomputable
+'''.split())
+TAG_ATTR = re.compile(r'@\[[^\]]*\btag\b')
+TAG_VALUE = re.compile(r'\btag\s+"([0-9A-Z]{4})"')
+
+
+class Reject(Exception):
+    """The pull request is not merged automatically; the message says why."""
+
+
+# ---------------------------------------------------------------------------------------
+# Input
+
+
+def read_files(stream) -> list[dict]:
+    """Parse the pulls/files listing: a sequence of JSON arrays or objects.
+
+    `gh api --paginate` prints one array per page back to back, and `--jq '.[]'` prints
+    one object per value; both are accepted.
+    """
+    text, decoder, pos, entries = stream.read(), json.JSONDecoder(), 0, []
+    while True:
+        while pos < len(text) and text[pos].isspace():
+            pos += 1
+        if pos == len(text):
+            break
+        value, pos = decoder.raw_decode(text, pos)
+        entries.extend(value if isinstance(value, list) else [value])
+    if not entries or not all(isinstance(e, dict) and isinstance(e.get('filename'), str)
+                              for e in entries):
+        raise Reject('the file listing is empty or malformed')
+    return entries
+
+
+def load_json(path):
+    return json.loads(Path(path).read_text())
+
+
+# ---------------------------------------------------------------------------------------
+# Paths
+
+
+def is_proof_path(path) -> bool:
+    return (isinstance(path, str) and LEAN_PATH.fullmatch(path) is not None
+            and '..' not in path and Path(path).name not in INTERFACE_NAMES)
+
+
+def title_task_id(title: str | None, task_id: str) -> bool:
+    if not title or not title.startswith(task_id):
+        return False
+    rest = title[len(task_id):]
+    return rest == '' or re.match(r'[A-Za-z0-9._-]', rest[0]) is None
+
+
+def check_paths(entries, title=None) -> list[tuple[str, str | None, str | None]]:
+    """Return (path, base path, head path) for each Lean file; reject what may not merge."""
+    lean, task_moves = [], 0
+    for e in entries:
+        path, status, prev = e.get('filename'), e.get('status'), e.get('previous_filename')
+        if status == 'renamed' and prev is not None and not is_proof_path(prev) \
+                and is_proof_path(path):
+            raise Reject(f'{path}: renamed into PercLib/ from {prev}')
+        move_from = TASK_FROM.fullmatch(prev or '')
+        move_to = TASK_TO.fullmatch(path)
+        if move_to or move_from or (path or '').startswith('tasks/'):
+            ok = (status == 'renamed' and move_from and move_to
+                  and move_from[1] == move_to[1]
+                  and e.get('changes', 1) == 0 and e.get('additions', 1) == 0
+                  and e.get('deletions', 1) == 0)
+            if not ok:
+                raise Reject(f'{path}: tasks/ may only see its own task moved, unchanged, '
+                             'to tasks/done/')
+            if not title_task_id(title, move_to[1]):
+                raise Reject(f'{path}: the title does not begin with the task id '
+                             f'{move_to[1]}')
+            task_moves += 1
+            if task_moves > 1:
+                raise Reject('more than one task file is moved')
+            continue
+        if not is_proof_path(path):
+            raise Reject(f'{path}: not a Lean file under PercLib/ other than '
+                         'Basic.lean/Defs.lean')
+        if status != 'modified':
+            # A new module needs a new import line in PercLib.lean, which is excluded, and
+            # removing or moving a module changes the import graph: both wait for review.
+            raise Reject(f'{path}: status {status!r} (only modified Lean files merge '
+                         'automatically)')
+        lean.append((path, path, path))
+        if not isinstance(e.get('patch'), str):
+            raise Reject(f'{path}: the API gives no patch (binary or too large)')
+    return lean
+
+
+# ---------------------------------------------------------------------------------------
+# Lean source
+
+
+def is_ident_char(c: str) -> bool:
+    return c.isalnum() or c in "_'!?"
+
+
+def strip_comments(text: str) -> str:
+    """Remove line and (nested) block comments, keeping strings and every newline."""
+    out, i, n = [], 0, len(text)
+    while i < n:
+        if text.startswith('/-', i):
+            depth, i = 1, i + 2
+            while i < n and depth:
+                if text.startswith('/-', i):
+                    depth, i = depth + 1, i + 2
+                elif text.startswith('-/', i):
+                    depth, i = depth - 1, i + 2
+                else:
+                    if text[i] == '\n':
+                        out.append('\n')
+                    i += 1
+            if depth:
+                raise Reject('unterminated comment')
+            out.append(' ')
+            continue
+        if text.startswith('--', i):
+            end = text.find('\n', i)
+            i = n if end < 0 else end
+            continue
+        raw = re.match(r'r(#*)"', text[i:]) if (i == 0 or not is_ident_char(text[i - 1])) \
+            else None
+        if raw:
+            closing = '"' + raw[1]
+            end = text.find(closing, i + len(raw[0]))
+            if end < 0:
+                raise Reject('unterminated raw string')
+            out.append(text[i:end + len(closing)])
+            i = end + len(closing)
+            continue
+        if text[i] == '"':
+            j = i + 1
+            while j < n and text[j] != '"':
+                j += 2 if text[j] == '\\' else 1
+            if j >= n:
+                raise Reject('unterminated string')
+            out.append(text[i:j + 1])
+            i = j + 1
+            continue
+        if text[i] == "'" and (i == 0 or not is_ident_char(text[i - 1])):
+            char = re.match(r"'(?:\\.[^']*|[^\\'])'", text[i:])
+            if char:
+                out.append(char[0])
+                i += len(char[0])
+                continue
+        out.append(text[i])
+        i += 1
+    return ''.join(out)
+
+
+def split_lines(text: str) -> list[str]:
+    lines = text.split('\n')
+    if lines and lines[-1] == '':
+        lines.pop()
+    return lines
+
+
+def attribute_prefix_end(text: str) -> int:
+    """Index just after the leading `@[...]` blocks (and whitespace) of a command."""
+    i = 0
+    while True:
+        while i < len(text) and text[i].isspace():
+            i += 1
+        if not text.startswith('@[', i):
+            return i
+        depth, i = 0, i + 1
+        while i < len(text):
+            if text[i] == '[':
+                depth += 1
+            elif text[i] == ']':
+                depth -= 1
+                if depth == 0:
+                    i += 1
+                    break
+            i += 1
+        else:
+            return len(text)
+
+
+def segment(lines: list[str]) -> list[int]:
+    """For each line, the index of the line starting its command (-1 before the first).
+
+    A command starts at a non-blank line in column 0, except that a run of lines holding
+    only attributes belongs to the command that follows it.
+    """
+    starts, current, attrs_only = [], -1, False
+    for i, line in enumerate(lines):
+        if line.strip() and not line[0].isspace():
+            if not attrs_only:
+                current = i
+            stripped = line.strip()
+            attrs_only = (stripped.startswith('@[')
+                          and attribute_prefix_end(stripped) == len(stripped)
+                          and (attrs_only or current == i))
+        starts.append(current)
+    return starts
+
+
+def command_text(lines: list[str], starts: list[int], start: int) -> str:
+    return '\n'.join(line for line, s in zip(lines, starts) if s == start)
+
+
+def command_keyword(text: str) -> str:
+    rest = text[attribute_prefix_end(text):]
+    tokens = re.findall(r'[A-Za-z_#][A-Za-z0-9_]*', rest)
+    while tokens and tokens[0] in MODIFIERS:
+        tokens.pop(0)
+    return tokens[0] if tokens else ''
+
+
+def statement_end(text: str) -> int:
+    """Index of the first top-level `:=` (or `|` alternative or `where`) of a command."""
+    depth, i = 0, 0
+    while i < len(text):
+        c = text[i]
+        if c == '"':
+            j = i + 1
+            while j < len(text) and text[j] != '"':
+                j += 2 if text[j] == '\\' else 1
+            i = j + 1
+            continue
+        if c in '([{⟨⦃⟪':
+            depth += 1
+        elif c in ')]}⟩⦄⟫':
+            depth -= 1
+        elif depth == 0:
+            if text.startswith(':=', i):
+                return i
+            if c == '|' and text[:i].rstrip(' \t').endswith('\n'):
+                return i
+            if text.startswith('where', i) and (i == 0 or not is_ident_char(text[i - 1])) \
+                    and not is_ident_char(text[i + 5:i + 6] or ' '):
+                return i
+        i += 1
+    return len(text)
+
+
+def tagged_statements(lines: list[str]) -> dict[str, list[str]]:
+    starts = segment(lines)
+    result: dict[str, list[str]] = {}
+    for start in sorted(set(starts) - {-1}):
+        text = command_text(lines, starts, start)
+        attrs = text[:attribute_prefix_end(text)]
+        tags = TAG_VALUE.findall(attrs)
+        if re.search(r'\btag\b', attrs) and not tags:
+            raise Reject(f'line {start + 1}: unparsed tag attribute')
+        for tag in tags:
+            header = ' '.join(text[:statement_end(text)].split())
+            result.setdefault(tag, []).append(header)
+    return {k: sorted(v) for k, v in result.items()}
+
+
+# ---------------------------------------------------------------------------------------
+# Patches
+
+
+HUNK = re.compile(r'@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@')
+
+
+def apply_patch(base: list[str], patch: str) -> list[str]:
+    """Apply a GitHub API patch (hunks only, no file headers) to the base lines."""
+    out, pos, hunk = [], 0, None
+    lines = patch.split('\n')
+    if lines and lines[-1] == '':
+        lines.pop()
+    for line in lines:
+        m = HUNK.match(line)
+        if m:
+            if hunk and (hunk[0] or hunk[1]):
+                raise Reject('hunk line counts do not match its header')
+            start = int(m[1])
+            old = 1 if m[2] is None else int(m[2])
+            new = 1 if m[4] is None else int(m[4])
+            target = start - 1 if old else start
+            if target < pos or target > len(base):
+                raise Reject('hunks out of order')
+            out.extend(base[pos:target])
+            pos, hunk = target, [old, new]
+            continue
+        if hunk is None:
+            raise Reject('patch text before the first hunk')
+        if line.startswith('\\'):
+            continue
+        kind, body = line[:1], line[1:]
+        if kind in (' ', '-'):
+            if pos >= len(base) or base[pos] != body:
+                raise Reject('the patch does not apply to the fetched base file')
+            pos += 1
+            hunk[0] -= 1
+            if kind == ' ':
+                out.append(body)
+                hunk[1] -= 1
+        elif kind == '+':
+            out.append(body)
+            hunk[1] -= 1
+        else:
+            raise Reject('unrecognised patch line')
+    if hunk is None or hunk[0] or hunk[1]:
+        raise Reject('empty patch or hunk line counts do not match its header')
+    out.extend(base[pos:])
+    return out
+
+
+def changed_patch_lines(patch: str) -> list[str]:
+    return [line[1:] for line in patch.split('\n')
+            if line[:1] in '+-' and not HUNK.match(line)]
+
+
+# ---------------------------------------------------------------------------------------
+# Classification
+
+
+def check_lean_change(path: str, base_text: str, head_text: str,
+                      patch: str) -> None:
+    for line in changed_patch_lines(patch):
+        if TAG_ATTR.search(line) or re.search(r'\btag\s+"', line):
+            raise Reject(f'{path}: the patch adds or removes a tag attribute line')
+    base_raw = split_lines(base_text)
+    if apply_patch(base_raw, patch) != split_lines(head_text):
+        raise Reject(f'{path}: the patch does not reproduce the fetched head file')
+    base = split_lines(strip_comments(base_text))
+    head = split_lines(strip_comments(head_text))
+    base_starts, head_starts = segment(base), segment(head)
+    matcher = difflib.SequenceMatcher(None, base, head, autojunk=False)
+    for op, i1, i2, j1, j2 in matcher.get_opcodes():
+        if op == 'equal':
+            continue
+        for side, lines, starts, lo, hi in (('base', base, base_starts, i1, i2),
+                                           ('head', head, head_starts, j1, j2)):
+            for k in range(lo, hi):
+                line = lines[k]
+                if not line.strip():
+                    continue
+                where = f'{path}:{k + 1} ({side})'
+                bad = FORBIDDEN_TOKENS.intersection(
+                    re.findall(r'[A-Za-z_][A-Za-z0-9_]*', line))
+                if bad:
+                    raise Reject(f'{where}: changed line uses {sorted(bad)}')
+                if TAG_ATTR.search(line) or line.lstrip().startswith('#'):
+                    raise Reject(f'{where}: changed line is a tag attribute or a # command')
+                if starts[k] < 0:
+                    raise Reject(f'{where}: change outside any command')
+                keyword = command_keyword(command_text(lines, starts, starts[k]))
+                if keyword not in PROOF_COMMANDS:
+                    raise Reject(f'{where}: change inside a {keyword or "unknown"!r} '
+                                 'command (only theorem, lemma and example may change)')
+    before, after = tagged_statements(base), tagged_statements(head)
+    if before != after:
+        changed = sorted(t for t in before.keys() | after.keys()
+                         if before.get(t) != after.get(t))
+        raise Reject(f'{path}: tagged statements change or move: {", ".join(changed)}')
+
+
+def read_side(directory: Path | None, path: str) -> str:
+    if directory is None:
+        raise Reject('file contents were not supplied')
+    file = directory / path
+    if not file.is_file():
+        raise Reject(f'{path}: fetched file missing')
+    return file.read_text(encoding='utf-8')
+
+
+def classify(entries, base_dir: Path | None, head_dir: Path | None, title=None) -> None:
+    lean = check_paths(entries, title)
+    by_name = {e['filename']: e for e in entries}
+    for path, base_path, head_path in lean:
+        try:
+            base_text = read_side(base_dir, base_path)
+            head_text = read_side(head_dir, head_path)
+        except UnicodeDecodeError:
+            raise Reject(f'{path}: not UTF-8') from None
+        check_lean_change(path, base_text, head_text, by_name[path]['patch'])
+
+
+def plan(entries, title=None) -> list[str]:
+    out = []
+    for _path, base_path, head_path in check_paths(entries, title):
+        out.append(f'base {base_path}')
+        out.append(f'head {head_path}')
+    return out
+
+
+def read_authors(path) -> set[str]:
+    names = set()
+    for line in Path(path).read_text().splitlines():
+        line = line.split('#', 1)[0].strip()
+        if line:
+            if not LOGIN.fullmatch(line):
+                raise Reject(f'malformed line in the authors file: {line!r}')
+            names.add(line.lower())
+    return names
+
+
+def check_evidence(run, jobs, pr, branch, compare, workflow, authors, default_branch):
+    """The CI evidence (D-29), the pull request's state and the author."""
+    number = pr.get('number')
+    head = (pr.get('head') or {}).get('sha')
+    base = (pr.get('base') or {}).get('sha')
+    if not (isinstance(number, int) and SHA.fullmatch(head or '')
+            and SHA.fullmatch(base or '')):
+        raise Reject('malformed pull request')
+    if pr.get('state') != 'open' or pr.get('draft') or pr.get('merged'):
+        raise Reject('the pull request is not open and ready')
+    if (pr['base'].get('ref') != default_branch):
+        raise Reject('the pull request does not target the default branch')
+    base_repo = (pr['base'].get('repo') or {}).get('full_name')
+    head_repo = (pr['head'].get('repo') or {}).get('full_name')
+    if not base_repo or head_repo != base_repo:
+        raise Reject('the head is not a branch of this repository (the CI run cannot be '
+                     'bound to a base commit for a fork)')
+    login = (pr.get('user') or {}).get('login') or ''
+    if login.lower() not in authors:
+        raise Reject(f'author {login!r} is not in .github/automerge-authors')
+    # The run: the default branch's CI workflow, on a pull_request event, finished green.
+    if run.get('workflow_id') != workflow.get('id') or workflow.get('id') is None:
+        raise Reject('the run is not of the default branch\'s CI workflow')
+    if workflow.get('path') != '.github/workflows/ci.yml':
+        raise Reject('unexpected CI workflow path')
+    if run.get('event') != 'pull_request' or run.get('status') != 'completed' \
+            or run.get('conclusion') != 'success':
+        raise Reject('the CI run is not a completed, successful pull_request run')
+    if run.get('head_sha') != head:
+        raise Reject('the CI run is not for the pull request\'s current head')
+    prs = [p for p in run.get('pull_requests') or [] if p.get('number') == number]
+    if len(prs) != 1 or len(run.get('pull_requests') or []) != 1:
+        raise Reject('the CI run is not attached to exactly this pull request')
+    if (prs[0].get('head') or {}).get('sha') != head \
+            or (prs[0].get('base') or {}).get('sha') != base:
+        raise Reject('the CI run\'s head and base are not the pull request\'s current ones')
+    gates = [j for j in jobs.get('jobs') or [] if j.get('name') == 'gate']
+    if len(gates) != 1 or gates[0].get('conclusion') != 'success' \
+            or gates[0].get('head_sha', head) != head:
+        raise Reject('the CI job `gate` did not succeed (a skipped job does not count)')
+    # The base the run saw is the branch's tip, and the head contains it, so the merge
+    # commit's tree is the tree CI checked.
+    tip = (branch.get('commit') or {}).get('sha')
+    if branch.get('name') != default_branch or tip != base:
+        raise Reject('the default branch has moved since the CI run; CI must rerun')
+    if not branch.get('protected'):
+        raise Reject('the default branch is not protected; auto-merge stays off')
+    if compare.get('behind_by') != 0 or \
+            (compare.get('merge_base_commit') or {}).get('sha') != tip:
+        raise Reject('the head does not contain the current base; update the branch')
+    return number, head, base
+
+
+# ---------------------------------------------------------------------------------------
+# Command line
+
+
+def main(argv=None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    sub = parser.add_subparsers(dest='cmd', required=True)
+    p_plan = sub.add_parser('plan')
+    p_plan.add_argument('--pr', required=True)
+    p_cls = sub.add_parser('classify')
+    p_cls.add_argument('--base-dir', type=Path)
+    p_cls.add_argument('--head-dir', type=Path)
+    p_cls.add_argument('--title')
+    p_dec = sub.add_parser('decide')
+    for name in ('run', 'jobs', 'pr', 'branch', 'compare', 'ci-workflow', 'authors',
+                 'default-branch'):
+        p_dec.add_argument('--' + name, required=True)
+    p_dec.add_argument('--base-dir', type=Path, required=True)
+    p_dec.add_argument('--head-dir', type=Path, required=True)
+    p_dec.add_argument('--github-output', help='file to append merge/pr/head/base to')
+    args = parser.parse_args(argv)
+    try:
+        entries = read_files(sys.stdin)
+        if args.cmd == 'plan':
+            print('\n'.join(plan(entries, load_json(args.pr).get('title'))))
+            return 0
+        if args.cmd == 'classify':
+            classify(entries, args.base_dir, args.head_dir, args.title)
+            print('proof-only: may merge on green CI')
+            return 0
+        pr = load_json(args.pr)
+        number, head, base = check_evidence(
+            load_json(args.run), load_json(args.jobs), pr, load_json(args.branch),
+            load_json(args.compare), load_json(args.ci_workflow),
+            read_authors(args.authors), args.default_branch)
+        if len(entries) != pr.get('changed_files') or len(entries) >= 3000:
+            raise Reject('the file listing is incomplete')
+        classify(entries, args.base_dir, args.head_dir, pr.get('title'))
+    except Reject as e:
+        print(f'Not merging: {e}')
+        return 1
+    except (OSError, ValueError, KeyError, TypeError, AttributeError) as e:
+        print(f'Not merging: could not evaluate the inputs ({type(e).__name__}: {e})')
+        return 1
+    print(f'Merging pull request #{number} at {head} onto {base}.')
+    if args.github_output:
+        with open(args.github_output, 'a') as out:
+            out.write(f'merge=true\npr={number}\nhead={head}\nbase={base}\n')
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())
