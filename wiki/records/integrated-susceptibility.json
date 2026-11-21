@@ -121,7 +121,7 @@
       "order": 0,
       "label": "The density constraint",
       "locator": "Proposition 1.1, pp. 613\u2013614, equations (1.5)\u2013(1.6)",
-      "relationship": "Written deduction or explicitly cited input",
+      "relationship": "Written deduction",
       "status": "pending",
       "note": "67W9 states this result with regularity and the limsup coefficient retained, and is proved on the page following Duminil-Copin, Garban and Tassion, section 2.4."
     },
@@ -130,7 +130,7 @@
       "order": 0,
       "label": "Existence input and block-integral repair",
       "locator": "Theorem 1(i); section 2.3, Lemma 2 proof, PDF p. 4; HTML equations (12)\u2013(15)",
-      "relationship": "Written deduction or explicitly cited input",
+      "relationship": "Written deduction",
       "status": "pending",
       "note": "JZG4 is proved in the wiki by a written block renormalization following section 2.3, with its own constants and discrete comparison; it uses PAFY's integral identity but not the source's Lemma 2 numerics. PAFY supplies a local numerical repair of the source's estimate, provisional pending Tom confirmation; no compiled association is claimed."
     }
