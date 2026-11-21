@@ -41,6 +41,7 @@ public import PercLib.Analysis.RegularVariation.PotterODE
 public import PercLib.Analysis.RegularVariation.UniformConvergence
 public import PercLib.Analysis.RiccatiBootstrap
 public import PercLib.Analysis.RiccatiComparison
+public import PercLib.Analysis.RiccatiLinearError
 public import PercLib.Analysis.SignedDrivenODE
 public import PercLib.Analysis.SqrtLowerBound
 public import PercLib.Analysis.Tags.CriticalExponents
@@ -50,6 +51,7 @@ public import PercLib.Analysis.Tags.MarginalODE
 public import PercLib.Analysis.Tags.MarginalODETail
 public import PercLib.Analysis.Tags.MesoscopicTailTransfer
 public import PercLib.Analysis.Tags.ReciprocalCutoff
+public import PercLib.Analysis.Tags.RiccatiLinearError
 public import PercLib.Analysis.Tags.SpatialCutoffMoments
 public import PercLib.Analysis.Tags.SpatialNormalization
 public import PercLib.Analysis.Tags.SqrtLowerBound
