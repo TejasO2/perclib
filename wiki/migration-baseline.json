@@ -242,7 +242,7 @@
         },
         "history": {
           "title": "History and attribution",
-          "sha256": "1eceb796d07eebf779f0dbe10bb22dbe7612927b5bc32ca88138a0110f9b9f42"
+          "sha256": "0107c7b6a2b96edb8d02a33ea8a1a703ccb33bb416e7a251a04ddc8b8a7b799a"
         },
         "references": {
           "title": "References",
@@ -250,7 +250,7 @@
         }
       },
       "lead": {
-        "sha256": "e6ee841d3f501a1b427efe1d907c755296af4ade69de4216f8991076fb22aac8"
+        "sha256": "4007a383b9913b5587743e74e1c7db10305e5945d9eed07860b1ffccb47dae29"
       }
     },
     "finite-random-graphs": {

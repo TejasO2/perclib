@@ -44,9 +44,11 @@ test("markup: [@key] and [@key, locator], several keys per bracket", () => {
   ]);
   assert.throws(() => parseCitation("grimmett,  "), /empty locator/);
   assert.throws(() => parseCitation("grimmett; dct"), /malformed citation/);
-  // The markup does not occur in any existing article.
+  // Every citation in an existing article parses and names a catalogue work.
   for (const p of real)
-    for (const s of [p.lead ?? "", ...p.sections.map((x) => x.html)]) assert.ok(!s.includes("[@"), p.id);
+    for (const s of [p.lead ?? "", ...p.sections.map((x) => x.html)])
+      for (const [, inner] of s.matchAll(/\[@([^\]]*)\]/g))
+        for (const { key } of parseCitation(inner, p.id)) assert.ok(byKey.has(key), `${p.id}: ${key}`);
 });
 
 test("a citation key missing from the catalogue fails with a clear message", () => {
