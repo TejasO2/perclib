@@ -78,41 +78,12 @@ theorem encard_cluster_eq_iSup_induce {S : ℕ → Set V} (hS : Monotone S)
   rw [← iUnion_induce_cluster hS hcover ω x,
     encard_iUnion_of_monotone (monotone_induce_cluster hS ω x)]
 
-/-- An internal connection event is measurable when there are countably many vertices. -/
-theorem measurableSet_induce_conn [Countable V] (S : Set V) (x y : V) :
-    MeasurableSet {ω : Config V | ∃ hx : x ∈ S, ∃ hy : y ∈ S,
-      ((openGraph ω).induce S).Reachable ⟨x, hx⟩ ⟨y, hy⟩} := by
-  by_cases hx : x ∈ S
-  · by_cases hy : y ∈ S
-    · have : {ω : Config V | ∃ hx : x ∈ S, ∃ hy : y ∈ S,
-          ((openGraph ω).induce S).Reachable ⟨x, hx⟩ ⟨y, hy⟩} =
-          {ω : Config V | ((openGraph ω).induce S).Reachable ⟨x, hx⟩ ⟨y, hy⟩} := by
-        ext ω
-        simp only [mem_ofPred_eq]
-        exact ⟨fun ⟨_, _, h⟩ => h, fun h => ⟨hx, hy, h⟩⟩
-      rw [this]
-      exact measurableSet_localConn S ⟨x, hx⟩ ⟨y, hy⟩
-    · have : {ω : Config V | ∃ hx : x ∈ S, ∃ hy : y ∈ S,
-          ((openGraph ω).induce S).Reachable ⟨x, hx⟩ ⟨y, hy⟩} = ∅ := by
-        ext ω
-        simp only [mem_ofPred_eq, mem_empty_iff_false, iff_false]
-        exact fun ⟨_, h, _⟩ => hy h
-      rw [this]
-      exact MeasurableSet.empty
-  · have : {ω : Config V | ∃ hx : x ∈ S, ∃ hy : y ∈ S,
-        ((openGraph ω).induce S).Reachable ⟨x, hx⟩ ⟨y, hy⟩} = ∅ := by
-      ext ω
-      simp only [mem_ofPred_eq, mem_empty_iff_false, iff_false]
-      exact fun ⟨h, _, _⟩ => hx h
-    rw [this]
-    exact MeasurableSet.empty
-
 /-- The internal cluster volume is measurable when there are countably many vertices. -/
 theorem measurable_encard_induce_cluster [Countable V] (S : Set V) (x : V) :
     Measurable fun ω : Config V => ({y | ∃ hx : x ∈ S, ∃ hy : y ∈ S,
       ((openGraph ω).induce S).Reachable ⟨x, hx⟩ ⟨y, hy⟩} : Set V).encard := by
   refine measurable_encard.comp (Measurable.of_mem fun y => ?_)
-  exact (measurableSet_induce_conn S x y).mem
+  exact (measurableSet_localConn S x y).mem
 
 /-- **The susceptibility is the supremum of the internal expected volumes.** Infinite
 values are allowed on both sides. -/

@@ -50,7 +50,7 @@ private theorem measurable_local_event (S : Set V) [Countable S] (x y : V) :
   by_cases hx : x ∈ S
   · by_cases hy : y ∈ S
     · simpa only [hx, hy, exists_true_left] using
-        measurableSet_localConn S ⟨x, hx⟩ ⟨y, hy⟩
+        measurableSet_setOf_reachable_induce S ⟨x, hx⟩ ⟨y, hy⟩
     · have he : {ω : Config V | ∃ hx : x ∈ S, ∃ hy : y ∈ S,
           ((openGraph ω).induce S).Reachable ⟨x, hx⟩ ⟨y, hy⟩} = ∅ := by
         ext ω
@@ -115,7 +115,7 @@ theorem local_domain_restriction_and_exhaustion (S : Set V)
         ((openGraph ω).induce (T n)).Reachable ⟨x, hx⟩ ⟨y, hy⟩})
         Filter.atTop (nhds (μ (conn x y)))) := by
   refine ⟨measurable_restrict_pairs S, fun ω => openGraph_induce ω S,
-    fun _ x y => measurableSet_localConn S x y, ?_, ?_,
+    fun _ x y => measurableSet_setOf_reachable_induce S x y, ?_, ?_,
     fun x y _ _ h => localConn_iff_of_agree S x y h,
     fun x y _ _ h hc => localConn_mono_config S x y h hc,
     fun ω _ h x y hc => localConn_mono_domain ω h x y hc,

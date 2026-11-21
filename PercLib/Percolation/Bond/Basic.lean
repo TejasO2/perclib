@@ -475,12 +475,12 @@ theorem localConn_mono {S : Set V} {x y : V} {ω ω' : Config V} (h : ω ⊆ ω'
   exact ⟨hx, hy, hr.mono fun _ _ hadj => openGraph_mono h hadj⟩
 
 /-- Connection inside a set is an upper set of configurations. -/
-theorem isUpperSet_localConn' (S : Set V) (x y : V) : IsUpperSet (localConn S x y) :=
+theorem isUpperSet_localConn (S : Set V) (x y : V) : IsUpperSet (localConn S x y) :=
   fun _ _ h hxy => localConn_mono h hxy
 
 /-- Connection inside a countable set is measurable, whatever the cardinality of the
 vertex type. -/
-theorem measurableSet_localConn' (S : Set V) [Countable S] (x y : V) :
+theorem measurableSet_localConn (S : Set V) [Countable S] (x y : V) :
     MeasurableSet (localConn S x y) := by
   by_cases hx : x ∈ S
   · by_cases hy : y ∈ S

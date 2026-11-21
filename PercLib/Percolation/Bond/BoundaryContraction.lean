@@ -64,13 +64,6 @@ theorem induce_walk_last_exit (G : SimpleGraph V) (A K : Set V) {a b : A}
         exact hadj.reachable.trans hr
     · exact Or.inr ⟨z, hz, y, hy, hzy, hd, hr⟩
 
-/-- Internal connections are preserved by enlarging the domain. -/
-theorem exists_localConn_mono {ω : Config V} {D D' : Set V} (h : D ⊆ D') {a b : V}
-    (hab : ∃ ha : a ∈ D, ∃ hb : b ∈ D, ((openGraph ω).induce D).Reachable ⟨a, ha⟩ ⟨b, hb⟩) :
-    ∃ ha : a ∈ D', ∃ hb : b ∈ D', ((openGraph ω).induce D').Reachable ⟨a, ha⟩ ⟨b, hb⟩ := by
-  obtain ⟨ha, hb, r⟩ := hab
-  exact ⟨h ha, h hb, localConn_mono_domain ω h ⟨a, ha⟩ ⟨b, hb⟩ r⟩
-
 /-- The event `{K_S(u) = K}` depends only on pairs meeting `K` with both ends in `S`. -/
 theorem induce_cluster_eq_of_agree (S K : Set V) (u : V) {ω ω' : Config V}
     (hagree : ∀ a ∈ K, ∀ b ∈ S, (s(a, b) ∈ ω ↔ s(a, b) ∈ ω'))
@@ -121,17 +114,13 @@ theorem induce_cluster_eq_of_agree (S K : Set V) (u : V) {ω ω' : Config V}
 /-! ## Measurability -/
 
 /-- Connection inside a domain to some vertex of a target set is measurable. -/
-theorem measurableSet_exists_induce_conn [Countable V] (D T : Set V) (y : V) :
-    MeasurableSet {ω : Config V | ∃ b ∈ T, ∃ hy : y ∈ D, ∃ hb : b ∈ D,
-      ((openGraph ω).induce D).Reachable ⟨y, hy⟩ ⟨b, hb⟩} := by
-  have : {ω : Config V | ∃ b ∈ T, ∃ hy : y ∈ D, ∃ hb : b ∈ D,
-      ((openGraph ω).induce D).Reachable ⟨y, hy⟩ ⟨b, hb⟩} =
-      ⋃ b ∈ T, {ω : Config V | ∃ hy : y ∈ D, ∃ hb : b ∈ D,
-        ((openGraph ω).induce D).Reachable ⟨y, hy⟩ ⟨b, hb⟩} := by
+theorem measurableSet_exists_localConn [Countable V] (D T : Set V) (y : V) :
+    MeasurableSet {ω : Config V | ∃ b ∈ T, ω ∈ localConn D y b} := by
+  have : {ω : Config V | ∃ b ∈ T, ω ∈ localConn D y b} = ⋃ b ∈ T, localConn D y b := by
     ext ω
-    simp
+    simp only [mem_ofPred_eq, mem_iUnion, exists_prop]
   rw [this]
-  exact MeasurableSet.biUnion T.to_countable fun b _ => measurableSet_induce_conn D y b
+  exact MeasurableSet.biUnion T.to_countable fun b _ => measurableSet_localConn D y b
 
 /-- The event that the internal cluster of `u` in `S` equals `K` is measurable. -/
 theorem measurableSet_induce_cluster_eq [Countable V] (S K : Set V) (u : V) :
@@ -140,10 +129,10 @@ theorem measurableSet_induce_cluster_eq [Countable V] (S K : Set V) (u : V) :
   rw [ofPred_forall]
   refine MeasurableSet.iInter fun v => ?_
   by_cases hv : v ∈ K
-  · convert measurableSet_induce_conn S u v using 1
+  · convert measurableSet_localConn S u v using 1
     ext ω
     simp [hv]
-  · convert (measurableSet_induce_conn S u v).compl using 1
+  · convert (measurableSet_localConn S u v).compl using 1
     ext ω
     simp [hv]
 
@@ -233,8 +222,7 @@ theorem law_reach_not_localConn_le_firstExit [Countable V] (q : Sym2 V → unitI
     -- Measurability.
     have hEm : MeasurableSet (E K) := measurableSet_induce_cluster_eq _ _ u
     have hFm : MeasurableSet (F K y) := by
-      have h := measurableSet_exists_induce_conn (A \ (K : Set V)) T y
-      convert h using 1
+      exact measurableSet_exists_localConn (A \ (K : Set V)) T y
     have hxym : MeasurableSet {ω : Config V | s(x, y) ∈ ω} := measurableSet_mem _
     -- Determinedness.
     have hEdet : ∀ ω ω' : Config V,
@@ -320,7 +308,7 @@ theorem law_reach_not_localConn_le_firstExit [Countable V] (q : Sym2 V → unitI
       exact and_congr (hxydet ω ω' h1) (hFdet ω ω' h2)
     have hFle : law q (F K y) ≤ P y := by
       refine measure_mono fun ω ⟨b, hbT, hy, hb, r⟩ => ⟨b, hbT, ?_⟩
-      exact exists_localConn_mono sdiff_subset ⟨hy, hb, r⟩
+      exact localConn_mono_set sdiff_subset _ _ ⟨hy, hb, r⟩
     rw [hHeq, hOuter, hInner, ← mul_assoc]
     exact mul_le_mul' le_rfl hFle
   -- Summing the internal cluster events containing `x` gives `τ x`.
@@ -400,7 +388,7 @@ theorem law_reach_le_firstExit [Countable V] (q : Sym2 V → unitInterval) {S A 
     intro F G
     refine ⟨F ∪ G, ?_, ?_⟩ <;>
     · rintro ω ⟨b, hbB, h⟩
-      refine ⟨b, hbB, exists_localConn_mono ?_ h⟩
+      refine ⟨b, hbB, localConn_mono_set ?_ _ _ h⟩
       exact inter_subset_inter_right _ (by simp [Finset.coe_union])
   refine (measure_mono hcover).trans ?_
   rw [hdir.measure_iUnion]
@@ -438,8 +426,8 @@ theorem law_reach_le_firstExit [Countable V] (q : Sym2 V → unitInterval) {S A 
       exact zero_le
   · have hyS' : y ∉ S' := fun h => hyS (hS'S h)
     simp only [hyS, hyS', ↓reduceIte]
-    exact mul_le_mul' (mul_le_mul' (measure_mono fun ω h => exists_localConn_mono hS'S h) le_rfl)
-      (measure_mono fun ω ⟨b, hbB, h⟩ => ⟨b, hbB, exists_localConn_mono inter_subset_left h⟩)
+    exact mul_le_mul' (mul_le_mul' (measure_mono fun ω h => localConn_mono_set hS'S _ _ h) le_rfl)
+      (measure_mono fun ω ⟨b, hbB, h⟩ => ⟨b, hbB, localConn_mono_set inter_subset_left _ _ h⟩)
 
 /-! ## Finite-volume susceptibility -/
 
@@ -452,16 +440,16 @@ theorem lintegral_encard_induce [Countable V] (q : Sym2 V → unitInterval) (D :
         ((openGraph ω).induce D).Reachable ⟨x, hx⟩ ⟨v, hv⟩} := by
   have hpt : ∀ ω : Config V, ((({y | ∃ hx : x ∈ D, ∃ hy : y ∈ D,
       ((openGraph ω).induce D).Reachable ⟨x, hx⟩ ⟨y, hy⟩} : Set V).encard : ℝ≥0∞)) =
-      ∑' v, ({ω : Config V | ∃ hx : x ∈ D, ∃ hv : v ∈ D,
-        ((openGraph ω).induce D).Reachable ⟨x, hx⟩ ⟨v, hv⟩}).indicator 1 ω := by
+      ∑' v, (localConn D x v).indicator 1 ω := by
     intro ω
     rw [encard_eq_tsum_indicator]
     refine tsum_congr fun v => ?_
     simp only [indicator, mem_ofPred_eq, Pi.one_apply]
+    rfl
   simp_rw [hpt]
   rw [lintegral_tsum fun v => (measurable_one.indicator
-    (measurableSet_induce_conn D x v)).aemeasurable]
-  exact tsum_congr fun v => lintegral_indicator_one (measurableSet_induce_conn D x v)
+    (measurableSet_localConn D x v)).aemeasurable]
+  exact tsum_congr fun v => lintegral_indicator_one (measurableSet_localConn D x v)
 
 /-- Off the domain the internal connection probabilities vanish. -/
 theorem law_induce_conn_eq_zero_of_notMem {q : Sym2 V → unitInterval} {D : Set V} {x v : V}
@@ -545,7 +533,7 @@ theorem tsum_law_induce_conn_le_of_boundary_contraction [Countable V]
       rw [tsum_eq_sum (s := Sx y) fun v hv =>
         law_induce_conn_eq_zero_of_notMem (Or.inr fun h => hv (hS'Sx h))]
       refine le_trans (Finset.sum_le_sum fun v _ => measure_mono fun ω h =>
-        exists_localConn_mono hS'Sx h) (hB y)
+        localConn_mono_set hS'Sx _ _ h) (hB y)
     -- The boundary part.
     have hbd : ∑' v, ∑ z ∈ S', ∑' w, (if w ∈ S' then 0 else
           law q {ω | ∃ hy : y ∈ (S' : Set V), ∃ hz : z ∈ (S' : Set V),
@@ -573,7 +561,7 @@ theorem tsum_law_induce_conn_le_of_boundary_contraction [Countable V]
         by_cases hwΛ : w ∈ Λ
         · have hwSx : w ∉ Sx y := fun h => hwS' (Finset.mem_filter.mpr ⟨h, hwΛ⟩)
           simp only [hwSx, ↓reduceIte]
-          exact mul_le_mul' (mul_le_mul' (measure_mono fun ω h => exists_localConn_mono hS'Sx h)
+          exact mul_le_mul' (mul_le_mul' (measure_mono fun ω h => localConn_mono_set hS'Sx _ _ h)
             le_rfl) (hWM w)
         · rw [show (∑' v, law q {ω | ∃ hw : w ∈ (Λ : Set V), ∃ hv : v ∈ (Λ : Set V),
               ((openGraph ω).induce (Λ : Set V)).Reachable ⟨w, hw⟩ ⟨v, hv⟩}) = 0 from

@@ -41,7 +41,7 @@ theorem measurable_restrict_pairs (S : Set V) :
 
 /-- Internal connectivity is measurable on every countable domain, even when the
 ambient vertex type is uncountable. Finite domains need no extra assumption. -/
-theorem measurableSet_localConn (S : Set V) [Countable S] (x y : S) :
+theorem measurableSet_setOf_reachable_induce (S : Set V) [Countable S] (x y : S) :
     MeasurableSet {ω : Config V | ((openGraph ω).induce S).Reachable x y} := by
   simpa only [openGraph_induce, conn, Set.preimage_ofPred_eq] using
     (measurableSet_conn x y).preimage (measurable_restrict_pairs S)
@@ -102,7 +102,7 @@ example (x : V) :
 /-- Finite-domain events are measurable without ambient countability. -/
 example (S : Finset V) (x y : S) :
     MeasurableSet {ω : Config V | ((openGraph ω).induce (S : Set V)).Reachable x y} :=
-  measurableSet_localConn (S : Set V) x y
+  measurableSet_setOf_reachable_induce (S : Set V) x y
 
 /-- Internal connection events increase with an increasing family of domains. -/
 theorem monotone_localConn {S : ℕ → Set V} (hS : Monotone S) (x y : V) :

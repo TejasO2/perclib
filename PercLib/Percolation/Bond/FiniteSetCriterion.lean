@@ -108,12 +108,6 @@ theorem rootCriticalIntensity_eq_globalCriticalIntensity_of_transitive [Countabl
 
 /-! ### Regularity of the boundary functional in the intensity -/
 
-/-- Internal connection events are increasing. -/
-theorem isUpperSet_exists_localConn (S : Set V) (x u : V) :
-    IsUpperSet {ω : Config V | ∃ hx : x ∈ S, ∃ hu : u ∈ S,
-      ((openGraph ω).induce S).Reachable ⟨x, hx⟩ ⟨u, hu⟩} := fun _ _ hle ⟨hx, hu, h⟩ =>
-  ⟨hx, hu, localConn_mono_config S _ _ hle h⟩
-
 open Classical in
 /-- **Regularity of `Φ`, monotonicity.** For a fixed finite `S`, the boundary functional
 `β ↦ Φ_{q_β}(o,S)` is monotone. -/
@@ -126,8 +120,8 @@ theorem monotone_boundaryFlux_intensity [Countable V] (J : Sym2 V → ℝ≥0) (
   refine Finset.sum_le_sum fun u _ => ENNReal.tsum_le_tsum fun v => ?_
   split_ifs
   · exact le_rfl
-  · exact mul_le_mul' (law_intensityProfile_mono (isUpperSet_exists_localConn _ o u)
-      (measurableSet_induce_conn _ o u) J h)
+  · exact mul_le_mul' (law_intensityProfile_mono (isUpperSet_localConn _ o u)
+      (measurableSet_localConn _ o u) J h)
       (ENNReal.coe_le_coe.2 (intensityProfile_mono J h _))
 
 /-- The profile depends continuously on the intensity, as a point of the product space. -/

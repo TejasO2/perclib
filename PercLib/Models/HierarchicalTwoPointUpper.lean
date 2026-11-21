@@ -227,8 +227,8 @@ theorem tau_le_localConn_ball_add (K : ℕ → ℝ≥0∞) (hK : ∀ j, (f j : �
     {ω | ∃ h0 : (0 : ℕ →₀ (Fin d → ZMod L)) ∈ B N, ∃ hx' : x ∈ B N,
       ((openGraph ω).induce (B N)).Reachable ⟨0, h0⟩ ⟨x, hx'⟩} with hP
   have hmono : Monotone B := fun a b hab z hz => le_trans hz hab
-  have hPmono : Monotone P := fun a b hab => measure_mono fun ω h => exists_localConn_mono
-    (hmono hab) h
+  have hPmono : Monotone P := fun a b hab => measure_mono fun ω h => localConn_mono_set
+    (hmono hab) _ _ h
   have step : ∀ M, P (n + M) ≤ P n + β * ∑ k ∈ Finset.range M,
       K (n + k + 1) * g (n + k) * g (n + k + 1) := by
     intro M

@@ -98,18 +98,17 @@ theorem lintegral_clusterIntersection_restrict_eq_sum [Countable V]
   classical
   rw [← lintegral_comp_inter_eq q _ (measurable_clusterIntersection_ennreal S o)]
   have hpt : ∀ ω : Config V, (clusterIntersection S (ω ∩ (S : Set V).sym2) o : ℝ≥0∞) =
-      ∑ u ∈ S, ({ω : Config V | ∃ ho : o ∈ (S : Set V), ∃ hu : u ∈ (S : Set V),
-        ((openGraph ω).induce (S : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩}).indicator 1 ω := by
+      ∑ u ∈ S, (localConn (S : Set V) o u).indicator 1 ω := by
     intro ω
     rw [clusterIntersection_eq_card_filter, Finset.card_filter]
     push_cast
     refine Finset.sum_congr rfl fun u _ => ?_
     simp only [mem_cluster_inter_sym2_iff ω (Finset.mem_coe.2 ho) u, Set.indicator_apply,
-      Set.mem_ofPred_eq, Pi.one_apply]
+      Pi.one_apply, mem_localConn]
   simp_rw [hpt]
   rw [lintegral_finsetSum _ fun u _ =>
-    (measurable_one.indicator (measurableSet_induce_conn _ o u))]
-  exact Finset.sum_congr rfl fun u _ => lintegral_indicator_one (measurableSet_induce_conn _ o u)
+    (measurable_one.indicator (measurableSet_localConn _ o u))]
+  exact Finset.sum_congr rfl fun u _ => lintegral_indicator_one (measurableSet_localConn _ o u)
 
 end General
 
