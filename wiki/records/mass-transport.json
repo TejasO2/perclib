@@ -36,6 +36,22 @@
         "IHJ3"
       ],
       "reason": "Integrate the transport to obtain a diagonally invariant kernel, reindex by inversion, and exchange countable nonnegative sums and integrals."
+    },
+    {
+      "order": 1,
+      "tag": "4SZ9",
+      "proof_uses": [
+        "K5ZX"
+      ],
+      "reason": "The proof defines the finite-cluster transport f(omega,x)/|K_x| and applies expected mass transport under an invariant law (K5ZX)."
+    },
+    {
+      "order": 2,
+      "tag": "O0TO",
+      "proof_uses": [
+        "K5ZX"
+      ],
+      "reason": "The proof sends unit mass to the selected vertex of each infinite cluster and applies expected mass transport (K5ZX) to force the event to be null."
     }
   ]
 }

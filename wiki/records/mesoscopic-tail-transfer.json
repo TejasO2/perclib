@@ -208,6 +208,94 @@
         "DR1W"
       ],
       "reason": "Negligibility makes the independent-layer ghost comparison contractive without a critical-cutoff susceptibility upper bound. Uniform cubic moments give the lower bound below half the biased mean; the resulting cutoff window retains its fixed coefficient."
+    },
+    {
+      "order": 8,
+      "tag": "QMN5",
+      "proof_uses": [],
+      "reason": "A definition; it invokes no other wiki assertion."
+    },
+    {
+      "order": 9,
+      "tag": "MIJ7",
+      "proof_uses": [
+        "7WIO"
+      ],
+      "reason": "The proof differentiates the finite product law of the truncated volume (finite-profile Russo formula, 7WIO), double counts by transitivity and bounds the merge term by conditioning on the root cluster."
+    },
+    {
+      "order": 10,
+      "tag": "D7A5",
+      "proof_uses": [
+        "7WIO"
+      ],
+      "reason": "The proof differentiates in finite exhausting sets (7WIO), passes to the limit by dominated convergence, and repeats the finite merge and conditioning argument after a mass transport supplied by the hypothesis."
+    },
+    {
+      "order": 11,
+      "tag": "6H7C",
+      "proof_uses": [
+        "7WIO",
+        "X5SS"
+      ],
+      "reason": "The proof justifies the derivative by finite-volume differentiation (7WIO) and dominated exhaustion, uses mass transport for the factor-three identity, and applies the Harris inequality (X5SS) to truncations for the lower bound."
+    },
+    {
+      "order": 12,
+      "tag": "C9Y8",
+      "proof_uses": [
+        "7WIO"
+      ],
+      "reason": "The proof sums cluster powers over V, differentiates the finite product law with the edge forced closed (7WIO), and bounds the two-cluster term by conditioning on the root cluster."
+    },
+    {
+      "order": 13,
+      "tag": "09EI",
+      "proof_uses": [
+        "7WIO"
+      ],
+      "reason": "The proof differentiates in finite induced subgraphs (7WIO), dominates by Hoelder and mass transport, and reruns the symmetrisation and conditioning steps of D7A5 and C9Y8 rather than applying their statements."
+    },
+    {
+      "order": 14,
+      "tag": "NJF3",
+      "proof_uses": [
+        "7WIO",
+        "X5SS"
+      ],
+      "reason": "The proof reuses dominated finite-volume differentiation (7WIO), bounds outside clusters by conditioning, and gets the lower bounds from Harris association (X5SS) minus the same-cluster contribution."
+    },
+    {
+      "order": 15,
+      "tag": "XXTP",
+      "proof_uses": [
+        "09EI",
+        "X5SS"
+      ],
+      "reason": "The proof inserts into the countable moment hierarchy (09EI) two-sided bounds on each two-cluster term from conditioning and Harris association (X5SS)."
+    },
+    {
+      "order": 16,
+      "tag": "ZWQ3",
+      "proof_uses": [],
+      "reason": "The proof bounds the ghost transform above using mesoscopic negligibility and below by Jensen under size bias, then converts transform bounds to tail bounds by hand; it invokes no other wiki assertion."
+    },
+    {
+      "order": 17,
+      "tag": "YJ5E",
+      "proof_uses": [
+        "0WAE",
+        "NJF3",
+        "LQ6Y",
+        "NS0Q",
+        "D7A5",
+        "6H7C",
+        "KKGL",
+        "C4E9",
+        "BEJT",
+        "ZWQ3"
+      ],
+      "reason": "The proof combines localized damping bounds (0WAE), moment-deficit bounds (NJF3), the quantile bound (LQ6Y) and the all-scale quantile theorem (NS0Q), feeds D7A5 and 6H7C into the negligibility theorem (KKGL), and applies the full-tail transfer (ZWQ3) with the ghost comparison from C4E9 and BEJT."
     }
   ]
 }

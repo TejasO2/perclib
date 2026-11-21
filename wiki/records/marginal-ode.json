@@ -97,6 +97,32 @@
       "tag": "2KB9",
       "proof_uses": [],
       "reason": "A regularly varying integrating factor and a positive forcing-index gap identify signed asymptotics without differentiating the normalization."
+    },
+    {
+      "order": 1,
+      "tag": "09N5",
+      "proof_uses": [],
+      "reason": "The proof transforms the equation to a linear one for w=u^{-gamma} and solves it with an integrating factor; it invokes no other wiki assertion."
+    },
+    {
+      "order": 2,
+      "tag": "QKHV",
+      "proof_uses": [
+        "9PSJ"
+      ],
+      "reason": "The proof inverts the scale s(r) and substitutes F(t)^alpha into the cutoff-to-full transfer theorem (9PSJ) with its coefficient c_*."
+    },
+    {
+      "order": 3,
+      "tag": "SR9U",
+      "proof_uses": [],
+      "reason": "The proof integrates the transformed linear equation w'=a gamma C directly; it invokes no other wiki assertion."
+    },
+    {
+      "order": 4,
+      "tag": "63GS",
+      "proof_uses": [],
+      "reason": "The proof solves the explicit linear equation w'-w/t=a gamma C in closed form; it invokes no other wiki assertion."
     }
   ]
 }
