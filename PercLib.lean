@@ -208,6 +208,7 @@ public import PercLib.Percolation.Bond.PathComparison
 public import PercLib.Percolation.Bond.PathLowerBounds
 public import PercLib.Percolation.Bond.Pivotal
 public import PercLib.Percolation.Bond.ProfileRegularity
+public import PercLib.Percolation.Bond.RootGlobalPercolation
 public import PercLib.Percolation.Bond.RootIndependence
 public import PercLib.Percolation.Bond.RowSum
 public import PercLib.Percolation.Bond.RowSumDecay
@@ -240,6 +241,7 @@ public import PercLib.Percolation.Bond.Tags.CoreZeroOne
 public import PercLib.Percolation.Bond.Tags.DomainIndependence
 public import PercLib.Percolation.Bond.Tags.FiniteVolume
 public import PercLib.Percolation.Bond.Tags.IndependentLayer
+public import PercLib.Percolation.Bond.Tags.RootGlobalPercolation
 public import PercLib.Percolation.Bond.Tags.SubcriticalBound
 public import PercLib.Percolation.Bond.Tags.Tightness
 public import PercLib.Percolation.Bond.Tags.TreeGraph
