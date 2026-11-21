@@ -71,8 +71,8 @@ theorem binaryTree_arm_and_two_point :
       binaryTree_law_reach_depth_isEquivalent q hq⟩,
     fun p q hq x y => tau_kTree_eq_pow p q (fun u w huw => hq s(u, w) (by simpa using huw)) x y⟩
 
-/-- For `0 < p < 1`, `P_p(|K| = n) ~ (1-p)/(p√π) n^{-3/2} (4p(1-p))^n` uniformly in
-`p`; and if `p_n = 1/2 + ε_n` with `ε_n → 0` and `n ε_n^4 → 0`, then
+/-- For `0 < p < 1`, `P_p(|K| = n) ~ (1-p)/(p√π) n^{-3/2} (4p(1-p))^n` with relative error
+depending only on `n`, hence uniformly in `p`; and if `p_n = 1/2 + ε_n` with `ε_n → 0` and `n ε_n^4 → 0`, then
 `P_{p_n}(|K| = n) ~ n^{-3/2} e^{-4nε_n^2}/√π`. -/
 @[tag "V5OZ"]
 theorem binaryTree_law_card_uniform_and_nearCritical :
@@ -80,6 +80,11 @@ theorem binaryTree_law_card_uniform_and_nearCritical :
       (∀ p e, ¬ e.IsDiag → q p e =
         if e ∈ (SimpleGraph.fromRel fun u w : List (Fin 2) => ∃ b, w = b :: u).edgeSet then p
           else 0) →
+      (∀ p : unitInterval, (p : ℝ) ∈ Set.Ioo 0 1 → ∀ n : ℕ, 1 ≤ n →
+        (law (q p) {ω | (cluster ω []).ncard = n ∧ (cluster ω []).Finite}).toReal /
+          ((1 - (p : ℝ)) / ((p : ℝ) * √π) * (n : ℝ) ^ (-(3 / 2 : ℝ)) *
+            (4 * (p : ℝ) * (1 - (p : ℝ))) ^ n) =
+          (catalan n : ℝ) / 4 ^ n / ((n : ℝ) ^ (-(3 / 2 : ℝ)) / √π)) ∧
       TendstoUniformlyOn (fun (n : ℕ) (p : unitInterval) =>
         (law (q p) {ω | (cluster ω []).ncard = n ∧ (cluster ω []).Finite}).toReal /
           ((1 - (p : ℝ)) / ((p : ℝ) * √π) * (n : ℝ) ^ (-(3 / 2 : ℝ)) *
@@ -94,7 +99,8 @@ theorem binaryTree_law_card_uniform_and_nearCritical :
       (fun n : ℕ => (law (q n) {ω | (cluster ω []).ncard = n ∧ (cluster ω []).Finite}).toReal)
         ~[atTop] (fun n : ℕ => (n : ℝ) ^ (-(3 / 2 : ℝ)) *
           Real.exp (-4 * n * ((pn n : ℝ) - 1 / 2) ^ 2) / √π)) :=
-  ⟨binaryTree_law_card_tendstoUniformlyOn, fun pn q hq h1 h2 =>
+  ⟨fun q hq => ⟨fun _ hp _ hn => binaryTree_law_card_ratio_eq q hq hp hn,
+      binaryTree_law_card_tendstoUniformlyOn q hq⟩, fun pn q hq h1 h2 =>
     binaryTree_law_card_nearCritical_isEquivalent pn q hq h1 h2⟩
 
 /-- For the moments `M_s(p) = ∑_{n ≥ 1} n^s P_p(|K| = n)` and

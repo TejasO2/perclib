@@ -483,6 +483,20 @@ theorem binaryTree_law_card_tendstoUniformlyOn
   simp only [Function.comp_apply]
   rw [binaryTree_law_cluster_card_toReal p (q p) (hq p) hn, catalan_div_four_pow_mul_eq hp0 hn]
 
+/-- **V5OZ, exact ratio.** For `0 < p < 1` and `n ≥ 1`, the ratio of `P_p(|K| = n)` to
+`(1-p)/(p√π) n^{-3/2} (4p(1-p))^n` equals `(Cat(n)/4^n) / (n^{-3/2}/√π)`, a function of `n`
+alone. -/
+theorem binaryTree_law_card_ratio_eq (q : unitInterval → Sym2 (List (Fin 2)) → unitInterval)
+    (hq : ∀ p e, ¬ e.IsDiag → q p e =
+      if e ∈ (SimpleGraph.fromRel fun u w : List (Fin 2) => ∃ b, w = b :: u).edgeSet then p else 0)
+    {p : unitInterval} (hp : (p : ℝ) ∈ Set.Ioo 0 1) {n : ℕ} (hn : 1 ≤ n) :
+    (law (q p) {ω | (cluster ω []).ncard = n ∧ (cluster ω []).Finite}).toReal /
+        ((1 - (p : ℝ)) / ((p : ℝ) * √π) * (n : ℝ) ^ (-(3 / 2 : ℝ)) *
+          (4 * (p : ℝ) * (1 - (p : ℝ))) ^ n) =
+      (catalan n : ℝ) / 4 ^ n / ((n : ℝ) ^ (-(3 / 2 : ℝ)) / √π) := by
+  rw [binaryTree_law_cluster_card_toReal p (q p) (hq p) hn,
+    ← catalan_div_four_pow_mul_eq hp.1.ne' hn, catalan_ratio_eq hp.1 hp.2 n]
+
 /-- **V5OZ, near-critical window.** If `p_n = 1/2 + ε_n` with `ε_n → 0` and `n ε_n⁴ → 0`,
 then `P_{p_n}(|K| = n) ~ n^{-3/2} e^{-4nε_n²}/√π`. -/
 theorem binaryTree_law_card_nearCritical_isEquivalent (pn : ℕ → unitInterval)
