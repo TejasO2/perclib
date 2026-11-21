@@ -48,7 +48,6 @@ variable (Γ V : Type*) [Group Γ] [MulAction Γ V]
 `∑_v F (o, v) = ∑_v F (v, o)` for each `o ∈ V`; the sums may be infinite. For a transitive
 action this is the same as asking it at one fixed `o`
 (`hasMassTransport_iff_of_pretransitive`). -/
-@[tag "N0HM"]
 def HasMassTransport : Prop :=
   ∀ F : V → V → ℝ≥0∞, (∀ (g : Γ) (x y : V), F (g • x) (g • y) = F x y) →
     ∀ o : V, ∑' v, F o v = ∑' v, F v o
