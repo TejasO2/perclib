@@ -1,6 +1,6 @@
 # Status
 
-Handoff file for the coordinator (the LEAD role of D-34). Last updated 21 November 2026, about 12:25 UTC, at the end of coordinator round 2 of the current series (thirteenth coordinator overall;
+Handoff file for the coordinator (the LEAD role of D-34). Last updated 21 November 2026, about 12:25 UTC, at the end of coordinator round 3 of the current series (fourteenth coordinator overall;
 the previous file, round 9 of the earlier series, is at `874da60` and older rounds are in
 `git log -p docs/STATUS.md`). A coordinator with no memory resumes from this file,
 [COORDINATOR.md](COORDINATOR.md), [COORDINATION.md](COORDINATION.md), [DECISIONS.md](DECISIONS.md)
@@ -13,6 +13,14 @@ pull requests to `main`). Container-local reports and briefs are copied for dura
 - Branch `claude/zen-lovelace-rvlcw2` in both repositories. **Last gated commit `6e85f59`** (pushed;
   extract `.lake/gate/6e85f59….json` saved); the tip is this STATUS commit on top of it. **Next gate:
   `scripts/gate.sh 6e85f59`.** Last gated commit with Lean changes: `882c3bf` (mig-linters).
+- **Round 3 (12:21-12:25): no merge, no gate.** The predecessor's STATUS commit `f67780f` landed at 12:20:55;
+  the tree was clean and idle. Nothing was waiting, so the coordinator waited for a marker: one arrived at
+  12:22 (`critic-proof-sections-a`, read-only critique, all three articles NOT PASS). It became revision brief
+  `103-wiki-revise-proof-sections-a` plus `HOLD-audit-wiki-revise-proof-sections-a`. The tip is this STATUS
+  commit on `f67780f` on the gated `6e85f59`; **next gate still `scripts/gate.sh 6e85f59`**. Kernel replay not
+  run (prover briefs released and about to be claimed; never alongside a build; and no pull request can be
+  opened anyway, see "For ARCHITECT"). GitHub: ToolSearch still finds no GitHub tool, `gh` token invalid;
+  anonymous read at 12:23: no open pull requests, issue #1 only.
 - **Round 2 (12:09-12:25): no merge, no gate.** Nothing finished was mergeable: every finished branch
   waits for an audit or a fix (see "Finished, not merged"). The tip is still the round-1 STATUS commit
   `0bd4b10` on the gated `6e85f59` (this round adds only a STATUS commit). **Next gate:
@@ -84,7 +92,7 @@ FRONTIER-only commits have none: pass their gated parent). After each gate
 
 ## Progress (D-35 measure)
 
-Round 2: **0 new assertions proved in Lean, 0 tagged statements audited and merged** (no merges). Lean
+Round 3: 0 proved, 0 audited and merged (no merges). Round 2: **0 new assertions proved in Lean, 0 tagged statements audited and merged** (no merges). Lean
 proving reopened this round (10 prover briefs released, see the migration section). Manifest unchanged
 since `882c3bf`: **266 proved, 2 statement-only, 1,134 unformalised, of 1,402**. Frontier
 (`docs/FRONTIER.md` at `882c3bf`): 300 ready, 816 blocked, 20 without recorded prerequisites. Round 1:
@@ -117,6 +125,17 @@ since `882c3bf`: **266 proved, 2 statement-only, 1,134 unformalised, of 1,402**.
   `audit-wiki-marginal-ode-context` (fresh) APPROVE.
 
 ## Finished, not merged (each waits for the item named)
+
+- **`critic-proof-sections-a`** (done 12:22; `/home/user/reports/critic/proof-sections-a.md`): ruling 7 (iii) critic
+  of the round-1 proof sections. NOT PASS for `branching-random-walk` (G12U placed before V7FQ, which it uses;
+  48GR idea implies a single truncation gives the sharp bound, M-B1 PLAUSIBLE), `size-biased-laws` (FM8D idea's
+  decoupling step wrong, M-S1 CONFIRMED as an error in the sketch, not the statement) and `marginal-ode` (pointer
+  at l. 31 now wrong; structure). No tagged statement affected. Revision **`103-wiki-revise-proof-sections-a`**
+  queued (one reviser, all three articles, no new lead because of the frozen-digest test), then
+  `HOLD-audit-wiki-revise-proof-sections-a` (release with the branch commit when 103 is done), then a critic
+  re-read (brief it after the audit). Coordinator's later decision: S-S1 (move FM8D, E22E, Q7E9 to
+  `incipient-cluster-limits`); M-B2 (check Fitzner–van der Hofstad Thm 1.4 gives the x-space asymptotic) goes to
+  the next source-fidelity audit of BSI3.
 
 - **`work/wiki-proof-67W9`** (`38232d3`, done 12:09): full collapsed proof of 67W9 (θ>0 ⇒ L_qθ²≥1 for
   symmetric q on ℤ, after Duminil-Copin–Garban–Tassion arXiv:2011.04642v2 §2.4, adapted to general q),
@@ -169,9 +188,9 @@ since `882c3bf`: **266 proved, 2 statement-only, 1,134 unformalised, of 1,402**.
   briefed; disjoint from the migrations, can be briefed next round).
 - `work/nm-longrange` (`e4e9b59`; ZH13, R01V): **`095-fix-nm-longrange`** released this round.
 
-## In flight (claims without a done marker at 12:19)
+## In flight (claims without a done marker at 12:23)
 
-`critic-proof-sections-a` (read-only), `scout-localconn-fold` (read-only; drafts the fold brief and its
+`audit-wiki-proof-F9EV-r2` (claimed 12:23), `scout-localconn-fold` (read-only; drafts the fold brief and its
 audit into `/home/user/reports/drafts/`), `wiki-proof-2ZI0-tail` (owns the 2ZI0 proofs of
 `triangle-condition.md`), `wiki-proof-WD31` (owns `critical-exponents.md`). Released prover briefs may be
 claimed by the time you read this: check `claims/`. Worktrees kept (unmerged): automerge-workflow,
@@ -213,15 +232,16 @@ round-2 note as in 086-099; next releases to keep 8+ Lean briefs startable).
 ## Queue (`/home/user/reports/queue/`)
 
 A brief is startable when it has no `HOLD-` prefix and no `claims/<id>`; claimed briefs stay in the
-directory. **Startable at 12:19 (19; mutually file-disjoint and disjoint from the claims):** 083
-audit-wiki-proof-F9EV-r2, 085 audit-mig-def-bond, 086 hier-restricted-susc, 087 lrp-I55, 088
+directory. **Startable at 12:23 (19; mutually file-disjoint and disjoint from the claims):** 085 audit-mig-def-bond, 086 hier-restricted-susc, 087 lrp-I55, 088
 audit-wiki-runaway-split-1-r2, 089 lrp-tauber-complete, 090 lrp-weak-kernels, 091 audit-wiki-proof-67W9,
 092 lrp-I526, 093 lrp-first-moment-b, 094 fix-wiki-model-hier-two-point-r3, 095 fix-nm-longrange, 096
 nm-finite-coordinates, 097 audit-tooling-d35-header-blocks, 098 nm-uniform-volume, 099
-frontier-four-functions, 100 fix-wiki-revise-regular-variation, 101 fix-scanner-r4, 102 fix-workflows-r4.
+frontier-four-functions, 100 fix-wiki-revise-regular-variation, 101 fix-scanner-r4, 102 fix-workflows-r4, 103
+wiki-revise-proof-sections-a (round 3; owns the three articles and their records, disjoint from all). Ten of them are Lean
+prover briefs (086, 087, 089, 090, 092, 093, 095, 096, 098, 099).
 All startable briefs were renumbered 083-102 this round so that Lean briefs are interleaved with the
 critical-path audits (about three prover briefs per non-Lean brief; ruling 11g). Claimed this round:
-`075`-`078`. **Held:** `HOLD-audit-wiki-model-hier-two-point-r4`, `HOLD-audit-wiki-revise-regular-variation-r2`,
+`075`-`078`. **Held:** `HOLD-audit-wiki-revise-proof-sections-a`, `HOLD-audit-wiki-model-hier-two-point-r4`, `HOLD-audit-wiki-revise-regular-variation-r2`,
 `HOLD-audit-fix-workflows-r4`, `HOLD-mig-law-generality`, `HOLD-mig-model-norm`, `HOLD-wiki-original-marking`,
 `HOLD-audit-nm-bond-core`, `HOLD-audit-nm-probability`, and the 21 prover briefs listed in the migration
 section. Interface prover packages (095, 096, 098; 086 is proof-only) get a fresh audit brief (diff and
@@ -258,7 +278,7 @@ scout-defs D1, D2, D3a, D6; the tasks board mirror once `task-board` merges.
   merged since round 4 of the earlier series. Ten prover briefs whose owned files are disjoint from every
   file of (c), the D4b fold, (d) and (e) were released. The migrations still run one at a time, but no
   longer behind an empty queue: each is checked for file-disjointness against the claimed prover work
-  before release. (Still: no GitHub write tool in round 2; the first item above stands.)
+  before release. (Still: no GitHub write tool in rounds 2 and 3; the first item above stands.)
 
 ## For Tom
 
@@ -348,6 +368,11 @@ scout-defs D1, D2, D3a, D6; the tasks board mirror once `task-board` merges.
   add `/PercLib/**/Tags/` (and area `Defs`) to CODEOWNERS or accept this knowingly. Also check
   once that each action SHA pinned in the workflows is the tag it names (N4).
 ## Lessons
+
+- **Round 3:** started 25 s after the predecessor's push; nothing waiting; the 8-minute wait produced one critique
+  within 90 s. A critique covering several articles gets one reviser brief owning all of them (ruling 7: one
+  reviser at a time), with the held audit written at the same time. Briefs released in round 2 sat unclaimed for
+  several minutes: there is no need to add more beyond about 20 startable.
 
 - **Round 2:** a predecessor's STATUS commit (12:09) and this round's start (12:09) coincided; the tree
   was clean and pushed, so no wait was needed. Five done markers arrived in ten minutes, all needing an
