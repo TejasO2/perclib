@@ -133,6 +133,7 @@ public import PercLib.Models.Planar.Defs
 public import PercLib.Models.Planar.Duality
 public import PercLib.Models.Planar.Gluing
 public import PercLib.Models.Planar.KestenBound
+public import PercLib.Models.Planar.RSW
 public import PercLib.Models.Planar.RSWKeyStep
 public import PercLib.Models.Planar.SelfDuality
 public import PercLib.Models.Site.Basic
