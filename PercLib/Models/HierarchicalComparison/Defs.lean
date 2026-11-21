@@ -22,7 +22,7 @@ public import Mathlib.Data.ENat.Basic
 # Translated hierarchical edge layers and good blocks (definitions)
 
 A *digit hierarchy* `σ` on `ℤ^d = Fin d → ℤ` with base `L` is a sequence of digits
-`σ_m ∈ {0, …, L-1}^d`. Its offsets are `t_n = ∑_{m < n} L^m σ_m` (the digit `σ.digit m` is the
+`σ_m ∈ {0, …, L - 1}^d`. Its offsets are `t_n = ∑_{m < n} L^m σ_m` (the digit `σ.digit m` is the
 source's `σ_{m+1}`), and its level-`n` blocks are the translates `t_n + L^n k + {0, …, L^n-1}^d`.
 
 ## Main definitions
