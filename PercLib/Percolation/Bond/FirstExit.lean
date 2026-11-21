@@ -138,7 +138,8 @@ theorem law_cluster_infinite_le_phi [Countable V] (q : Sym2 V → unitInterval)
 /-- A singleton domain gives the explicit off-diagonal row sum. -/
 theorem law_escape_singleton_le_rowSum [Countable V] (q : Sym2 V → unitInterval) (x : V) :
     law q (⋃ w ∈ ({x} : Set V)ᶜ, conn x w) ≤
-      ∑' z, if z = x then 0 else (unitInterval.toNNReal (q s(x,z)) : ℝ≥0∞) := by
+      rowSum (fun e => unitInterval.toENNReal (q e)) x := by
+  rw [rowSum_toENNReal]
   simpa using law_escape_le_phi q {x} (Finset.mem_singleton_self x)
 
 /-- A finite domain with zero boundary profile has zero escape probability. -/
@@ -227,7 +228,7 @@ theorem phi_nat_range (q : Sym2 ℕ → unitInterval) (t : unitInterval)
 -- Non-vacuity: singleton and zero-boundary cases instantiate the public bounds.
 example [Countable V] (q : Sym2 V → unitInterval) (x : V) :
     law q (⋃ w ∈ ({x} : Set V)ᶜ, conn x w) ≤
-      ∑' z, if z = x then 0 else (unitInterval.toNNReal (q s(x,z)) : ℝ≥0∞) :=
+      rowSum (fun e => unitInterval.toENNReal (q e)) x :=
   law_escape_singleton_le_rowSum q x
 
 example (n : ℕ) : law (fun _ : Sym2 ℕ => 0)

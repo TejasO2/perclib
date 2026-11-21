@@ -52,8 +52,8 @@ theorem union_cutoff_omitted (q : Sym2 V → I) (E₀ : Set (Sym2 V)) :
 theorem omitted_row_le (q : Sym2 V → I) (E₀ : Set (Sym2 V)) {δ : ℝ≥0∞}
     (hδ : ∀ u, (∑' w, if w = u ∨ s(u, w) ∈ E₀ then 0 else
       (unitInterval.toNNReal (q s(u, w)) : ℝ≥0∞)) ≤ δ) (u : V) :
-    (∑' w, if w = u then 0 else
-      (unitInterval.toNNReal (if s(u, w) ∈ E₀ then 0 else q s(u, w)) : ℝ≥0∞)) ≤ δ := by
+    rowSum (fun e => unitInterval.toENNReal (if e ∈ E₀ then 0 else q e)) u ≤ δ := by
+  rw [rowSum_toENNReal]
   refine le_trans (le_of_eq (tsum_congr fun w => ?_)) (hδ u)
   by_cases hw : w = u
   · simp [hw]

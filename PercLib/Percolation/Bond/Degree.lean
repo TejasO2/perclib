@@ -74,7 +74,8 @@ theorem degree_eq_tsum (ω : Config V) (v : V) :
 /-- **The expected degree is the off-diagonal row sum**, including the value `∞`. -/
 theorem lintegral_degree [Countable V] (q : Sym2 V → unitInterval) (v : V) :
     ∫⁻ ω, ({w | (openGraph ω).Adj v w}.encard : ℝ≥0∞) ∂law q =
-      ∑' w, if w = v then 0 else (unitInterval.toNNReal (q s(v, w)) : ℝ≥0∞) := by
+      rowSum (fun e => unitInterval.toENNReal (q e)) v := by
+  rw [rowSum_toENNReal]
   simp_rw [degree_eq_tsum _ v]
   rw [lintegral_tsum fun w => (measurable_const.indicator (measurableSet_adj v w)).aemeasurable]
   refine tsum_congr fun w => ?_
@@ -83,7 +84,7 @@ theorem lintegral_degree [Countable V] (q : Sym2 V → unitInterval) (v : V) :
 /-- **Markov's inequality for the degree.** -/
 theorem mul_law_le_degree_le [Countable V] (q : Sym2 V → unitInterval) (v : V) (k : ℕ) :
     (k : ℝ≥0∞) * law q {ω | (k : ℕ∞) ≤ {w | (openGraph ω).Adj v w}.encard} ≤
-      ∑' w, if w = v then 0 else (unitInterval.toNNReal (q s(v, w)) : ℝ≥0∞) := by
+      rowSum (fun e => unitInterval.toENNReal (q e)) v := by
   rw [← lintegral_degree]
   have hm : Measurable fun ω : Config V => ({w | (openGraph ω).Adj v w}.encard : ℝ≥0∞) :=
     (measurable_of_countable _).comp (measurable_degree v)
@@ -141,13 +142,13 @@ whatever the (irrelevant) value on the diagonal. -/
 example : ∫⁻ ω, ({w | (openGraph ω).Adj false w}.encard : ℝ≥0∞)
     ∂law (fun _ : Sym2 Bool => (⟨1 / 3, by norm_num, by norm_num⟩ : unitInterval)) =
       (unitInterval.toNNReal ⟨1 / 3, by norm_num, by norm_num⟩ : ℝ≥0∞) := by
-  rw [lintegral_degree, tsum_fintype, Fintype.sum_bool]
+  rw [lintegral_degree, rowSum_toENNReal, tsum_fintype, Fintype.sum_bool]
   simp
 
 /-- On `ℕ` with every pair open with probability `1/2`, the expected degree is infinite. -/
 example : ∫⁻ ω, ({w | (openGraph ω).Adj 0 w}.encard : ℝ≥0∞)
     ∂law (fun _ : Sym2 ℕ => (⟨1 / 2, by norm_num, by norm_num⟩ : unitInterval)) = ∞ := by
-  rw [lintegral_degree]
+  rw [lintegral_degree, rowSum_toENNReal]
   set c : ℝ≥0∞ := (unitInterval.toNNReal ⟨1 / 2, by norm_num, by norm_num⟩ : ℝ≥0∞)
   have hc : c ≠ 0 := by
     rw [Ne, ENNReal.coe_eq_zero]

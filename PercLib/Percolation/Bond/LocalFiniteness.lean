@@ -70,8 +70,7 @@ variable {V : Type*} [Countable V]
 
 /-- A finite off-diagonal row sum gives a finite neighbor set almost surely at one vertex. -/
 theorem ae_finite_neighbors_of_rowSum_lt_top (q : Sym2 V → unitInterval) (v : V)
-    (hrow : (∑' w, if w = v then 0 else
-      (unitInterval.toNNReal (q s(v, w)) : ℝ≥0∞)) < ∞) :
+    (hrow : rowSum (fun e => unitInterval.toENNReal (q e)) v < ∞) :
     ∀ᵐ ω ∂law q, ((openGraph ω).neighborSet v).Finite := by
   have hm (w : V) : law q {ω | (openGraph ω).Adj v w} =
       if w = v then 0 else (unitInterval.toNNReal (q s(v, w)) : ℝ≥0∞) := by
@@ -81,19 +80,17 @@ theorem ae_finite_neighbors_of_rowSum_lt_top (q : Sym2 V → unitInterval) (v : 
     · simpa [law, openGraph_adj_iff, h, Ne.symm h] using
         prodBernoulli_setOf_mem q s(v, w)
   exact ae_finite_setOfPred_mem (μ := law q) (s := fun w => {ω | (openGraph ω).Adj v w})
-    (by simpa only [hm] using ne_of_lt hrow)
+    (by rw [rowSum_toENNReal] at hrow; simpa only [hm] using ne_of_lt hrow)
 
 /-- Finite row sums at every vertex give simultaneous almost-sure local finiteness. -/
 theorem ae_all_finite_neighbors_of_rowSum_lt_top (q : Sym2 V → unitInterval)
-    (hrow : ∀ v, (∑' w, if w = v then 0 else
-      (unitInterval.toNNReal (q s(v, w)) : ℝ≥0∞)) < ∞) :
+    (hrow : ∀ v, rowSum (fun e => unitInterval.toENNReal (q e)) v < ∞) :
     ∀ᵐ ω ∂law q, ∀ v, ((openGraph ω).neighborSet v).Finite :=
   ae_all_iff.mpr fun v => ae_finite_neighbors_of_rowSum_lt_top q v (hrow v)
 
 /-- Almost surely every finite-radius graph ball is finite; clusters may still be infinite. -/
 theorem ae_finite_balls_of_rowSum_lt_top (q : Sym2 V → unitInterval)
-    (hrow : ∀ v, (∑' w, if w = v then 0 else
-      (unitInterval.toNNReal (q s(v, w)) : ℝ≥0∞)) < ∞) :
+    (hrow : ∀ v, rowSum (fun e => unitInterval.toENNReal (q e)) v < ∞) :
     ∀ᵐ ω ∂law q, ∀ (v : V) (n : ℕ), ((openGraph ω).ball v n).Finite := by
   filter_upwards [ae_all_finite_neighbors_of_rowSum_lt_top q hrow] with ω hω
   exact fun v n => (openGraph ω).finite_ball_of_finite_neighborSet hω n v
@@ -104,7 +101,7 @@ example : ∀ᵐ ω ∂law (fun _ : Sym2 Bool => 1),
     ∀ (v : Bool) (n : ℕ), ((openGraph ω).ball v n).Finite := by
   apply ae_finite_balls_of_rowSum_lt_top
   intro v
-  cases v <;> simp [tsum_fintype]
+  cases v <;> simp [rowSum_def, tsum_fintype]
 
 -- Infinitely many diagonal coordinates may be always open; none counts as a neighbor.
 example : ∀ᵐ ω ∂law (fun e : Sym2 ℕ => if e.IsDiag then 1 else 0),

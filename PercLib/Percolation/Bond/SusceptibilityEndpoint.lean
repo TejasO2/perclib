@@ -41,7 +41,7 @@ variable {V : Type*}
 /-- **5LNL, right-openness.** If `b_χ = sSup {β | χ_β < ⊤}` is finite, then `χ_{b_χ} = ⊤`. -/
 theorem chi_intensity_sSup_eq_top [Countable V] {J : Sym2 V → ℝ≥0} {o : V}
     (hJ : ∀ x, ∃ φ : V ≃ V, φ o = x ∧ ∀ e, J (Sym2.map φ e) = J e)
-    (hL : (∑' y, if y = o then 0 else (J s(o, y) : ℝ≥0∞)) < ⊤)
+    (hL : rowSum (fun e => (J e : ℝ≥0∞)) o < ⊤)
     (hb : sSup ((fun β : ℝ≥0 => (β : ℝ≥0∞)) '' {β | chi (intensityProfile J β) o < ⊤}) < ⊤) :
     chi (intensityProfile J
       (sSup ((fun β : ℝ≥0 => (β : ℝ≥0∞)) '' {β | chi (intensityProfile J β) o < ⊤})).toNNReal)
@@ -105,13 +105,13 @@ include hJ in
 `χ(β) = chi q_β o` is finite on `(a,b)`, `0 ≤ a`, and `χ(b) = ∞`, then
 `χ(β) ≥ 1/(R (b - β))` for `a < β < b`. -/
 theorem one_div_le_chi_of_chi_eq_top (o : V)
-    (hR : ∑' v, (if v = o then 0 else (J s(o, v) : ℝ≥0∞)) ≠ ⊤)
-    (hR0 : 0 < ∑' v, (if v = o then 0 else (J s(o, v) : ℝ≥0∞))) {a b : ℝ} (ha : 0 ≤ a)
+    (hR : rowSum (fun e => (J e : ℝ≥0∞)) o ≠ ⊤)
+    (hR0 : 0 < rowSum (fun e => (J e : ℝ≥0∞)) o) {a b : ℝ} (ha : 0 ≤ a)
     (hfin : ∀ β ∈ Ioo a b, chi (intensityProfile J β.toNNReal) o ≠ ⊤)
     (hb : chi (intensityProfile J b.toNNReal) o = ⊤) {β : ℝ} (hβ : β ∈ Ioo a b) :
-    1 / ((∑' v, (if v = o then 0 else (J s(o, v) : ℝ≥0∞))).toReal * (b - β)) ≤
+    1 / ((rowSum (fun e => (J e : ℝ≥0∞)) o).toReal * (b - β)) ≤
       (chi (intensityProfile J β.toNNReal) o).toReal := by
-  set R := (∑' v, (if v = o then 0 else (J s(o, v) : ℝ≥0∞))).toReal
+  set R := (rowSum (fun e => (J e : ℝ≥0∞)) o).toReal
   set χ : ℝ → ℝ := fun u => (chi (intensityProfile J u.toNNReal) o).toReal
   have hRpos : 0 < R := ENNReal.toReal_pos hR0.ne' hR
   have hχ1 : 1 ≤ χ β := by

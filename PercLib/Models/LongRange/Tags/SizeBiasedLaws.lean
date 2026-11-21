@@ -103,7 +103,7 @@ theorem softCutoff_rows_and_ghost_comparison {d : ℕ} {j : ℝ → ℝ} {α A :
   rw [hlaw] at h1 h2
   refine ⟨h1, h2.trans ?_⟩
   -- The rows of the added layer.
-  have hrow : (⨆ u, ∑' w, if w = u then 0 else (unitInterval.toNNReal (s s(u, w)) : ℝ≥0∞)) ≤
+  have hrow : (⨆ u, rowSum (fun e => unitInterval.toENNReal (s e)) u) ≤
       ENNReal.ofReal ((β : ℝ) * (A * 3 ^ d * (1 + 2 ^ d / (1 - 2 ^ (-α))) * r ^ (-α))) := by
     refine iSup_le fun u => le_trans (le_of_eq (tsum_congr fun w => ?_))
       (tsum_added_layer_le hα hA.le hjA hr β.2 u)
@@ -113,7 +113,8 @@ theorem softCutoff_rows_and_ghost_comparison {d : ℕ} {j : ℝ → ℝ} {α A :
       have huw : u ≠ w := fun h => hwu h.symm
       have hj : 0 ≤ j √(∑ i, (((w - u) i : ℤ) : ℝ) ^ 2) :=
         hj0 _ (one_le_euclid (sub_ne_zero.2 hwu))
-      rw [show (unitInterval.toNNReal (s s(u, w)) : ℝ≥0∞) = ENNReal.ofReal (s s(u, w)) from
+      rw [unitInterval.toENNReal_apply,
+        show (unitInterval.toNNReal (s s(u, w)) : ℝ≥0∞) = ENNReal.ofReal (s s(u, w)) from
         (ENNReal.ofReal_eq_coe_nnreal (s s(u, w)).2.1).symm]
       congr 1
       change 1 - Real.exp (-(β : ℝ) * ((Kfull s(u, w) - Kr s(u, w) : ℝ≥0) : ℝ)) = _
@@ -143,6 +144,5 @@ theorem softCutoff_rows_and_ghost_comparison {d : ℕ} {j : ℝ → ℝ} {α A :
         (((cluster ω v).encard : ℝ≥0∞) : EReal)))) ∂law (intensityProfile Kfull β)) 0)
   rw [hsup]
   gcongr
-  convert hrow
 
 end PercLib.Models.LongRange

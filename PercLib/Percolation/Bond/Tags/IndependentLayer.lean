@@ -92,7 +92,7 @@ real `t > 0`. -/
 @[tag "AYPN"]
 theorem ghost_bound_added_mass [Countable V] (q₀ s : Sym2 V → I) (o : V) {h : ℝ}
     (hh : 0 < h) (hfin : ∀ᵐ ω ∂(law q₀), (cluster ω o).Finite) {a : ℝ≥0∞}
-    (ha : ∀ u, (∑' w, if w = u then 0 else (unitInterval.toNNReal (s s(u, w)) : ℝ≥0∞)) ≤ a) :
+    (ha : ∀ u, rowSum (fun e => unitInterval.toENNReal (s e)) u ≤ a) :
     (∀ (f : Set V → ℝ≥0∞), Measurable (fun ω : Config V => f (cluster ω o)) →
       ∫⁻ x, (1 - EReal.exp (-((h : EReal) *
           (((cluster (x.1 ∪ x.2) o \ cluster x.1 o).encard : ℝ≥0∞) : EReal)))) *

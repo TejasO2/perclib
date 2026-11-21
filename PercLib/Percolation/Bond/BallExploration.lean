@@ -366,8 +366,8 @@ end Markov
 open Classical in
 /-- Balls of a profile with finite row sums are finite almost surely. -/
 theorem ae_finite_ball_of_rowSum [Countable V] (q : Sym2 V → unitInterval) {D : ℝ≥0∞}
-    (hD : D < ⊤) (hrow : ∀ v, (∑' w, if w = v then 0 else
-      (unitInterval.toNNReal (q s(v,w)) : ℝ≥0∞)) ≤ D) (o : V) (r : ℕ) :
+    (hD : D < ⊤) (hrow : ∀ v, rowSum (fun e => unitInterval.toENNReal (q e)) v ≤ D) (o : V)
+    (r : ℕ) :
     ∀ᵐ ω ∂law q, ({y | (openGraph ω).edist o y ≤ r} : Set V).Finite := by
   have hlt : ∫⁻ ω, (({y | (openGraph ω).edist o y ≤ r} : Set V).encard : ℝ≥0∞) ∂law q < ⊤ :=
     (lintegral_encard_ball_le_of_rowSum q D hrow o r).trans_lt
@@ -385,9 +385,10 @@ example {W : Type*} [Countable W] (o : W) (r k : ℕ) :
           ∂law (fun _ => (0 : unitInterval)) +
         (∫⁻ ω, (({y | (openGraph ω).edist o y = ((r + 1 : ℕ) : ℕ∞)} : Set W).encard : ℝ≥0∞)
           ∂law (fun _ => (0 : unitInterval))) * 1 := by
-  have hrow : ∀ v : W, (∑' w, if w = v then 0 else
-      (unitInterval.toNNReal ((fun _ : Sym2 W => (0 : unitInterval)) s(v,w)) : ℝ≥0∞)) ≤ 0 := by
+  have hrow : ∀ v : W, rowSum (fun e => unitInterval.toENNReal
+      ((fun _ : Sym2 W => (0 : unitInterval)) e)) v ≤ 0 := by
     intro v
+    rw [rowSum_toENNReal]
     refine le_of_eq (ENNReal.tsum_eq_zero.2 fun w => ?_)
     split_ifs
     · rfl
