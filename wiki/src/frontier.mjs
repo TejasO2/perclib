@@ -96,7 +96,7 @@ export function frontierPage(assertions, evidence, authored) {
       "Unproved assertions whose recorded prerequisites are all proved.",
     ) +
     (evidence.provenance
-      ? `<p>Computed from <a href="${esc(evidence.provenance.runUrl)}">successful CI</a> at compiled commit <code>${esc(evidence.provenance.commit)}</code>.</p>`
+      ? `<p>Computed from <a href="${esc(evidence.provenance.runUrl)}">${esc(evidence.provenance.runLabel?.toLowerCase() ?? "successful CI")}</a> at compiled commit <code>${esc(evidence.provenance.commit)}</code>.</p>`
       : "<p>No compiled manifest is supplied. The proof frontier is unavailable.</p>") +
     "<p>Readiness concerns prerequisites, not assignment or mathematical correspondence. Check the displayed correspondence review before starting proof work. Missing prerequisite records are kept separate from an explicitly empty list.</p>" +
     `<section class="article-section" id="ready"><h2>Ready by prerequisites (${f.ready.length})</h2>${list(f.ready)}</section>` +
