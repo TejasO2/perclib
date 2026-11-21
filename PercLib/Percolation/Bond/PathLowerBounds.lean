@@ -95,6 +95,7 @@ theorem prodBernoulli_biUnion_of_determined {ι κ : Type*} (p : ι → unitInte
 
 /-- **Edge-disjoint paths.** Pairwise edge-disjoint walks give the parallel-system lower
 bound. -/
+@[tag "8V8H"]
 theorem one_sub_prod_le_tau_of_edgeDisjoint [DecidableEq V] (q : Sym2 V → unitInterval)
     {x y : V} {n : ℕ} (p : Fin n → (⊤ : SimpleGraph V).Walk x y)
     (hdisj : Pairwise fun i j => Disjoint (p i).edges.toFinset (p j).edges.toFinset) :

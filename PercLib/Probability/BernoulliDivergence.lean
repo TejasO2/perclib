@@ -229,6 +229,19 @@ theorem bernoulliDivergence_exp_zero (β₁ β₂ : ℝ) :
           log ((1 - (1 - exp (-(β₁ * 0)))) / (1 - (1 - exp (-(β₂ * 0))))) = 0 := by
   simp
 
+/-- The divergence bound of `bernoulliDivergence_exp_le` for every `J ≥ 0`; at `J = 0` both
+sides vanish. -/
+theorem bernoulliDivergence_exp_le_of_nonneg {J β₁ β₂ : ℝ} (hJ : 0 ≤ J) (h₁ : 0 < β₁)
+    (h₂ : 0 < β₂) :
+    (1 - exp (-(β₁ * J))) * log ((1 - exp (-(β₁ * J))) / (1 - exp (-(β₂ * J)))) +
+        (1 - (1 - exp (-(β₁ * J)))) *
+          log ((1 - (1 - exp (-(β₁ * J)))) / (1 - (1 - exp (-(β₂ * J))))) ≤
+      J * (β₁ * log (β₁ / β₂) - β₁ + β₂) := by
+  rcases hJ.eq_or_lt with h0 | hpos
+  · subst h0
+    rw [bernoulliDivergence_exp_zero, zero_mul]
+  · exact bernoulliDivergence_exp_le hpos h₁ h₂
+
 /-! ### 58HC, two-point form -/
 
 /-- **58HC, two-point form.** For `a, b ∈ (0,1)`: `(a − b)² ≤ 2 max{a,b} · d(a‖b)`. -/

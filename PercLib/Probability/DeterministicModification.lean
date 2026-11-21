@@ -94,6 +94,14 @@ theorem prodBernoulli_le_union_profile (q : ι → unitInterval) (E : Set ι)
   rw [← prodBernoulli_map_union q E, Measure.map_apply (by fun_prop) hm]
   exact prodBernoulli_le_preimage_union q E hA
 
+/-- The corresponding comparison with probabilities fixed at zero by deletion. -/
+theorem prodBernoulli_sdiff_profile_le (q : ι → unitInterval) (E : Set ι)
+    [DecidablePred (· ∈ E)] {A : Set (Set ι)} (hA : IsUpperSet A)
+    (hm : MeasurableSet A) :
+    prodBernoulli (fun i => if i ∈ E then 0 else q i) A ≤ prodBernoulli q A := by
+  rw [← prodBernoulli_map_sdiff q E, Measure.map_apply (by fun_prop) hm]
+  exact measure_mono fun _ h => hA Set.sdiff_subset h
+
 -- Measurability already belongs to mathlib's set-valued measurable-function API.
 example (E : Set ι) : Measurable (fun ω : Set ι => ω ∩ E) := by fun_prop
 example (E : Set ι) : Measurable (fun ω : Set ι => ω ∪ E) := by fun_prop

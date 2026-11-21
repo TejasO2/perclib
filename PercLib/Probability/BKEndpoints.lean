@@ -31,6 +31,31 @@ theorem prodBernoulli_deterministic (u : Set E) :
   rw [prodBernoulli_indicator]
   simp
 
+/-- An a.e. strongly measurable function integrates against a Dirac measure to its value at
+the atom. No measurable-singleton assumption is needed. -/
+theorem integral_dirac_of_aestronglyMeasurable {α F : Type*} [MeasurableSpace α]
+    [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F] {f : α → F} {a : α}
+    (hf : AEStronglyMeasurable f (Measure.dirac a)) :
+    ∫ x, f x ∂Measure.dirac a = f a := by
+  rw [integral_congr_ae hf.ae_eq_mk, integral_dirac' _ _ hf.stronglyMeasurable_mk]
+  by_contra hne
+  have h0 : Measure.dirac a {x | f x ≠ hf.mk f x} = 0 := hf.ae_eq_mk
+  rw [Measure.dirac_apply_of_mem (show a ∈ {x | f x ≠ hf.mk f x} from Ne.symm hne)] at h0
+  exact one_ne_zero h0
+
+/-- Under a deterministic zero/one profile a measurable event has indicator probability. -/
+theorem prodBernoulli_deterministic_apply (u : Set E) {A : Set (Set E)} (hA : MeasurableSet A) :
+    prodBernoulli (fun e => if e ∈ u then 1 else 0) A = A.indicator 1 u := by
+  rw [prodBernoulli_deterministic, Measure.dirac_apply' _ hA]
+
+/-- Under a deterministic zero/one profile an integrable observable integrates to its value
+at the set of open coordinates. -/
+theorem integral_prodBernoulli_deterministic (u : Set E) {f : Set E → ℝ}
+    (hf : Integrable f (prodBernoulli (fun e => if e ∈ u then 1 else 0))) :
+    ∫ ω, f ω ∂prodBernoulli (fun e => if e ∈ u then 1 else 0) = f u := by
+  rw [prodBernoulli_deterministic] at hf ⊢
+  exact integral_dirac_of_aestronglyMeasurable hf.aestronglyMeasurable
+
 /-- Homogeneous expectation at one evaluates at the all-open configuration. -/
 theorem finiteExpectation_one [Fintype E] (f : Set E → ℝ) :
     finiteExpectation 1 f = f Set.univ := by
@@ -53,6 +78,7 @@ theorem prodBernoulli_deterministic_real [Fintype E] (u : Set E) (A : Set (Set E
     simp [measureReal_def, Measure.dirac_apply' _ (Set.toFinite A).measurableSet, indicator, h]
 
 /-- New mixed zero/one specialization: deterministic BK for arbitrary finite events. -/
+@[tag "E7HI"]
 theorem bk_deterministic [Fintype E] (u : Set E) (A B : Set (Set E)) :
     (prodBernoulli (fun e => if e ∈ u then 1 else 0)).real (disjointOccurrence A B) ≤
       (prodBernoulli (fun e => if e ∈ u then 1 else 0)).real A *

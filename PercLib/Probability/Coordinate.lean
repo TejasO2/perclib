@@ -143,6 +143,15 @@ theorem prodBernoulli_eq_smul_add_smul (q : ι → unitInterval) (e : ι) :
     simp
   · rw [← add_mul, hsum, one_mul]
 
+/-- **Affinity along a coordinate path.** The law with `q e` replaced by `t` is the mixture,
+with weights `t` and `1 - t`, of the laws with `q e` replaced by `1` and by `0`. -/
+theorem prodBernoulli_update_eq_smul_add_smul (q : ι → unitInterval) (e : ι)
+    (t : unitInterval) :
+    prodBernoulli (update q e t) = (unitInterval.toNNReal t) • prodBernoulli (update q e 1) +
+      (unitInterval.toNNReal (σ t)) • prodBernoulli (update q e 0) := by
+  have h := prodBernoulli_eq_smul_add_smul (update q e t) e
+  rwa [update_self, update_idem, update_idem] at h
+
 /-- **Affinity.** Every probability is affine in one coordinate. -/
 theorem prodBernoulli_eq_affine (q : ι → unitInterval) (e : ι) (A : Set (Set ι)) :
     (prodBernoulli q).real A =

@@ -225,6 +225,7 @@ private theorem setOf_edges_subset_conn {x y : V} (p : (⊤ : SimpleGraph V).Wal
 
 /-- **Large intensity connects the support graph.** If `x` and `y` are joined in the support
 graph of `J`, then `τ(x, y) → 1` as `β → ∞`. No countability is needed. -/
+@[tag "QZVQ"]
 theorem tendsto_tau_intensityProfile_atTop (J : Sym2 V → ℝ≥0) {x y : V}
     (h : (SimpleGraph.fromEdgeSet {e | 0 < J e}).Reachable x y) :
     Tendsto (fun β : ℝ≥0 => tau (intensityProfile J β) x y) atTop (𝓝 1) := by

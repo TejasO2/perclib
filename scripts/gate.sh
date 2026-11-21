@@ -6,7 +6,8 @@
 #
 # Steps: full build with warnings as errors; axiom audit of every constant under PercLib;
 # import closure; forbidden-construct scan; unit tests of the proof-only classifier;
-# manifest extraction (saved as .lake/gate/<HEAD>.json for later comparisons); and, if
+# manifest extraction (saved as .lake/gate/<HEAD>.json for later comparisons); the D-35
+# checks (tagged statements, headers of new files); and, if
 # BASE is given and its saved extraction exists, the proof-only/interface
 # classification. Exit 0 only if every check passes. An interface classification is
 # reported (exit 0 with a notice) because it needs an auditor, not a failure.
@@ -25,6 +26,7 @@ python3 scripts/check_forbidden.py PercLib
 python3 scripts/test_proof_pr.py
 mkdir -p .lake/gate
 lake env lean --run scripts/ExtractManifest.lean > .lake/manifest-raw.json
+python3 scripts/check_d35.py .lake/manifest-raw.json
 [ -z "$dirty" ] && cp .lake/manifest-raw.json ".lake/gate/$head.json"
 if [ $# -ge 1 ]; then
   base=$(git rev-parse "$1")

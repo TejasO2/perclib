@@ -118,6 +118,7 @@ theorem isLowerSet_cluster_finite (x : V) :
 
 /-- For `x ∈ C`, the cluster of `x` lies in `C` exactly when no pair from the cluster to the
 complement of `C` is open. -/
+@[tag "YIM4"]
 theorem cluster_subset_iff (ω : Config V) {x : V} {C : Set V} (hx : x ∈ C) :
     cluster ω x ⊆ C ↔ ∀ a ∈ cluster ω x, ∀ b ∉ C, s(a, b) ∉ ω := by
   constructor

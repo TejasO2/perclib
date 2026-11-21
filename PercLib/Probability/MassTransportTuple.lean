@@ -47,6 +47,7 @@ variable {G : Type*} [AddCommGroup G]
 /-- **Mass-transport principle, `k`-fold form** (paper (I.4.3)). If
 `F : (Fin k → G) → ℝ≥0∞` is invariant under simultaneous translation, then the sum of `F`
 over the tuples with `i`-th coordinate `0` does not depend on `i`. -/
+@[tag "SCGY"]
 theorem tsum_mass_transport_tuple {k : ℕ} (F : (Fin k → G) → ℝ≥0∞)
     (hF : ∀ (v : Fin k → G) (t : G), F (fun i => v i + t) = F v) (i j : Fin k) :
     (∑' v : {v : Fin k → G // v i = 0}, F v.1)

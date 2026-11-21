@@ -9,6 +9,7 @@ proof is copied and no definition is added.
 -/
 module
 
+public import PercLib.Meta.Tag
 public import PercLib.Percolation.Bond.SpatialMoments.Defs
 public import PercLib.Percolation.Bond.Susceptibility
 public import PercLib.Percolation.Bond.Transport
@@ -279,6 +280,7 @@ variables `0 ≤ Y ≤ X` on a probability space with finite first four moments 
 `P(Y ≥ tQ) ≤ A e^{-bt} P(Y ≥ Q)` for `t ≥ 1` and `E X^j ≤ L E Y^j` for `j = 2, 3, 4`
 (`Q > 0`), the moments `m_j = E X^j` satisfy
 `m₂ ≤ D Q m₁`, `m₃ ≤ D Q² m₁`, `m₃ ≤ D Q m₂` and `m₄ ≤ D Q² m₂`. -/
+@[tag "0WAE"]
 theorem exists_moment_ratio_bounds {A b L : ℝ} (hA : 0 < A) (hb : 0 < b) (hL : 0 < L) :
     ∃ D : ℝ, ∀ {Ω : Type*} [MeasurableSpace Ω] (μ : Measure Ω) [IsProbabilityMeasure μ]
       (X Y : Ω → ℝ) (Q : ℝ), Measurable X → Measurable Y → (∀ ω, 0 ≤ Y ω) →

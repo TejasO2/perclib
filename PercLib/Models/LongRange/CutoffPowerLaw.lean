@@ -120,6 +120,7 @@ theorem hasDerivAt_powerLawProfile_inv {a t : ℝ} (ha : 0 < a) (ht : 0 < t) :
   exact h
 
 /-- **PVA8.** -/
+@[tag "PVA8"]
 theorem cutoffPowerLawFormula : CutoffPowerLawFormula := by
   intro d α N r x y hN hα hr hxy
   set a : ℝ := d + α
@@ -149,6 +150,7 @@ theorem cutoffPowerLawFormula : CutoffPowerLawFormula := by
       (by linarith))), zero_div]
 
 /-- **MQNP.** -/
+@[tag "MQNP"]
 theorem cutoffPowerLawMonotone : CutoffPowerLawMonotone := by
   intro d α N β e hN hα
   have ha : (0 : ℝ) < d + α := by positivity
@@ -160,6 +162,7 @@ theorem cutoffPowerLawMonotone : CutoffPowerLawMonotone := by
   · exact intensityProfile_le_of_le (fun e => monotone_cutoffKernel hN hKa e h) β e
 
 /-- **LF50.** -/
+@[tag "LF50"]
 theorem cutoffPowerLawDeficit : CutoffPowerLawDeficit := by
   intro d α N r x y hN hα hxy h
   have ha : (0 : ℝ) < d + α := by positivity
@@ -171,6 +174,7 @@ theorem cutoffPowerLawDeficit : CutoffPowerLawDeficit := by
   ring
 
 /-- **6YYS.** -/
+@[tag "6YYS"]
 theorem cutoffPowerLawDerivative : CutoffPowerLawDerivative := by
   intro d α N β r x y hN hα hxy hr
   have ha : (0 : ℝ) < d + α := by positivity

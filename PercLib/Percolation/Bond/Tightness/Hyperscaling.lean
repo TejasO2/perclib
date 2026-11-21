@@ -8,7 +8,7 @@ No source text or code is copied.
 module
 
 public import PercLib.Percolation.Bond.WindowPartition
-public import PercLib.Percolation.Bond.Tightness.FromBK
+public import PercLib.Percolation.Bond.Tightness.BKStep
 public import PercLib.Percolation.Bond.ClusterMoments
 public import Mathlib.Analysis.Convex.SpecificFunctions.Basic
 
@@ -468,22 +468,22 @@ theorem sum_tau_le_of_tail_damp [Countable V] (q : Sym2 V → unitInterval)
 
 /-! ### UVQ6 -/
 
-/-- **UVQ6, scale.** Under `UniversalTightness V` and a window tail
+/-- **UVQ6, scale.** By universal tightness, under a window tail
 `P(n ≤ X_u) ≤ A n^(-θ)` (`0 ≤ θ < 1`, all `u`, `n ≥ 1`):
 `M ≤ (4 e H_θ A |Λ|)^(1/(1+θ))`. -/
-theorem tightnessScale_le_of_window_tail [Countable V] (hUT : UniversalTightness V)
+theorem tightnessScale_le_of_window_tail [Countable V]
     (q : Sym2 V → unitInterval) {Λ : Finset V} (hΛ : Λ.Nonempty) {A θ : ℝ} (hA : 0 ≤ A)
     (hθ0 : 0 ≤ θ) (hθ1 : θ < 1)
     (htail : ∀ (u : V) (n : ℕ), 1 ≤ n →
       law q {ω | n ≤ clusterIntersection Λ ω u} ≤ ENNReal.ofReal (A * (n : ℝ) ^ (-θ))) :
     (tightnessScale q Λ : ℝ) ≤
       (4 * Real.exp 1 * ((1 - θ)⁻¹ + 9 * Real.exp (8 / 9)) * A * Λ.card) ^ (1 / (1 + θ)) :=
-  tightnessScale_le_of_tail_damp q hΛ hA hθ0 hθ1 htail fun u a ha =>
-    (hUT q Λ hΛ).2.2 u a ha
+  tightnessScale_le_of_tail_damp q hΛ hA hθ0 hθ1 htail fun u _a ha =>
+    law_mul_tightnessScale_le_clusterIntersection_le q hΛ u ha
 
 /-- **UVQ6, root sum.** Under the hypotheses of `tightnessScale_le_of_window_tail`,
 `∑_{v ∈ Λ} τ(u,v) ≤ H_θ (4 e H_θ)^((1-θ)/(1+θ)) A^(2/(1+θ)) |Λ|^((1-θ)/(1+θ))`. -/
-theorem sum_tau_le_of_window_tail [Countable V] (hUT : UniversalTightness V)
+theorem sum_tau_le_of_window_tail [Countable V]
     (q : Sym2 V → unitInterval) {Λ : Finset V} (hΛ : Λ.Nonempty) {A θ : ℝ} (hA : 0 ≤ A)
     (hθ0 : 0 ≤ θ) (hθ1 : θ < 1)
     (htail : ∀ (u : V) (n : ℕ), 1 ≤ n →
@@ -492,7 +492,8 @@ theorem sum_tau_le_of_window_tail [Countable V] (hUT : UniversalTightness V)
     ∑ v ∈ Λ, tau q u v ≤ ENNReal.ofReal (((1 - θ)⁻¹ + 9 * Real.exp (8 / 9)) *
       (4 * Real.exp 1 * ((1 - θ)⁻¹ + 9 * Real.exp (8 / 9))) ^ ((1 - θ) / (1 + θ)) *
       A ^ (2 / (1 + θ)) * (Λ.card : ℝ) ^ ((1 - θ) / (1 + θ))) :=
-  sum_tau_le_of_tail_damp q hΛ hA hθ0 hθ1 htail (fun u a ha => (hUT q Λ hΛ).2.2 u a ha) u
+  sum_tau_le_of_tail_damp q hΛ hA hθ0 hθ1 htail (fun u _a ha =>
+    law_mul_tightnessScale_le_clusterIntersection_le q hΛ u ha) u
 
 /-! ### WRHL -/
 
@@ -653,7 +654,7 @@ example (q : Sym2 Unit → unitInterval) :
     (tightnessScale q {()} : ℝ) ≤
       (4 * Real.exp 1 * ((1 - 0)⁻¹ + 9 * Real.exp (8 / 9)) * 1 *
         ({()} : Finset Unit).card) ^ (1 / (1 + (0 : ℝ))) :=
-  tightnessScale_le_of_window_tail universalTightness_unit q (Finset.singleton_nonempty _)
+  tightnessScale_le_of_window_tail q (Finset.singleton_nonempty _)
     zero_le_one le_rfl zero_lt_one fun u n hn =>
       (law_le_clusterIntersection_le_cluster q _ u n).trans ((cluster_tail_unit q u n hn).trans
         (ENNReal.ofReal_le_ofReal (mul_le_mul_of_nonneg_left
