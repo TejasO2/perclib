@@ -359,6 +359,7 @@ public import PercLib.Probability.OffspringTransform
 public import PercLib.Probability.OpenEventHarris
 public import PercLib.Probability.PaleyZygmund
 public import PercLib.Probability.Pivotal.Algebra
+public import PercLib.Probability.PredictableSwap
 public import PercLib.Probability.ProdBernoulli
 public import PercLib.Probability.ProdBernoulliIndependence
 public import PercLib.Probability.ProductExpectation
@@ -386,6 +387,7 @@ public import PercLib.Probability.Tags.Harris
 public import PercLib.Probability.Tags.IntegratedLowerTail
 public import PercLib.Probability.Tags.MonotoneCoupling
 public import PercLib.Probability.Tags.NearMisses
+public import PercLib.Probability.Tags.PredictableSwap
 public import PercLib.Probability.Tags.ProductModel
 public import PercLib.Probability.Tags.ProfileContinuity
 public import PercLib.Probability.Tags.RevealmentDerivative
