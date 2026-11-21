@@ -21,6 +21,11 @@
 # from the pull request); no event field that a contributor controls (titles, branch
 # names, bodies) is interpolated into a command, and the commit ids that are used reach
 # scripts through `env:`. Every third-party action is pinned to a commit.
+#
+# Pull-request runs build PercLib from scratch on purpose: they never restore or save
+# `.lake/build` through the GitHub cache, because an earlier commit of the same pull
+# request could have written forged oleans and traces there. Only push runs use that
+# cache. Mathlib still comes from `lake exe cache get` in every run.
 
 name: CI
 
@@ -70,6 +75,7 @@ jobs:
         run: scripts/ci_install_elan.sh
 
       - name: Restore the library build
+        if: github.event_name == 'push'
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .lake/build
@@ -131,7 +137,7 @@ jobs:
           echo "Classification: $classification"
 
       - name: Save the library build
-        if: success()
+        if: success() && github.event_name == 'push'
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .lake/build
@@ -153,9 +159,12 @@ jobs:
   kernel-replay:
     needs: gate
     # Runs on every push and every pull request; `needs` also requires the gate to have
-    # succeeded. The auto-merge workflow requires this job to succeed. The hosted runner
-    # has about 16 GB; kernel_replay.sh 6 replays six modules per process (about 4 GB
-    # each batch).
+    # succeeded. The auto-merge workflow requires this job to succeed. On a push it
+    # restores the library build the gate saved; on a pull request it restores nothing
+    # and builds the library itself from scratch (only Mathlib comes from the cache), so
+    # it never replays oleans that an earlier commit of the pull request wrote. The
+    # hosted runner has about 16 GB; kernel_replay.sh 6 replays six modules per process
+    # (about 4 GB each batch).
     runs-on: ubuntu-latest
     timeout-minutes: 360
     steps:
@@ -169,6 +178,7 @@ jobs:
         run: scripts/ci_install_elan.sh
 
       - name: Restore the library build saved by the gate
+        if: github.event_name == 'push'
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .lake/build
