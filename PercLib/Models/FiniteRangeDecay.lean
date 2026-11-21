@@ -256,8 +256,7 @@ theorem integral_encard_cluster_pow_four_le {V : Type*} [Countable V]
           ∫ ω, ((cluster ω o).encard.toNat : ℝ) ^ 2 ∂law q := by
   set χ := (chi q o).toReal with hχdef
   set X : Config V → ℝ := fun ω => ((cluster ω o).encard.toNat : ℝ) with hXdef
-  have hEm : Measurable fun ω : Config V => (cluster ω o).encard := measurable_encard_cluster o
-  have hXm : Measurable X := (measurable_of_countable (fun n : ℕ∞ => (n.toNat : ℝ))).comp hEm
+  have hXm : Measurable X := measurable_encard_toNat_cluster o
   have hX0 : ∀ ω, 0 ≤ X ω := fun ω => Nat.cast_nonneg _
   have hχtop : chi q o ≠ ⊤ := hfin.ne
   have hχ1 : 1 ≤ chi q o := by
@@ -278,13 +277,8 @@ theorem integral_encard_cluster_pow_four_le {V : Type*} [Countable V]
     · simp [h]
     · obtain ⟨m, hm⟩ := ENat.ne_top_iff_exists.1 h
       simp [hXdef, ← hm]
-  have hae : ∀ᵐ ω ∂law q, ENNReal.ofReal (X ω) = ((cluster ω o).encard : ℝ≥0∞) := by
-    have hmeas : Measurable fun ω : Config V => ((cluster ω o).encard : ℝ≥0∞) :=
-      (measurable_of_countable (fun n : ℕ∞ => (n : ℝ≥0∞))).comp hEm
-    filter_upwards [ae_lt_top hmeas hχtop] with ω hω
-    have h : (cluster ω o).encard ≠ ⊤ := (ENat.toENNReal_lt_top.1 hω).ne
-    obtain ⟨m, hm⟩ := ENat.ne_top_iff_exists.1 h
-    simp [hXdef, ← hm]
+  have hae : ∀ᵐ ω ∂law q, ENNReal.ofReal (X ω) = ((cluster ω o).encard : ℝ≥0∞) :=
+    ae_ofReal_encard_toNat_cluster_eq q o hχtop
   have hlint : ∫⁻ ω, ENNReal.ofReal (X ω) ∂law q = chi q o := lintegral_congr_ae hae
   have hXi : Integrable X (law q) :=
     (lintegral_ofReal_ne_top_iff_integrable hXm.aestronglyMeasurable
