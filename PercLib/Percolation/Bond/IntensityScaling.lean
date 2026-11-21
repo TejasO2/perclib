@@ -91,7 +91,7 @@ theorem globalCriticalIntensity_smul (J : Sym2 V → ℝ≥0) {c : ℝ≥0} (hc 
 
 /-- The zero kernel has row sums zero. -/
 theorem rowSum_zero_smul_le (J : Sym2 V → ℝ≥0) (v : V) :
-    (∑' w, if w = v then 0 else (((0 : ℝ≥0) • J) s(v, w) : ℝ≥0∞)) ≤ (0 : ℝ≥0) := by
+    rowSum (fun e => (((0 : ℝ≥0) • J) e : ℝ≥0∞)) v ≤ (0 : ℝ≥0) := by
   classical
   simp
 

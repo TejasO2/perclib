@@ -126,6 +126,36 @@
         "XJ74"
       ],
       "reason": "The displacement row identity and a truncation lower bound make each probability row infinite; independent degrees give the threshold conclusion."
+    },
+    {
+      "order": 4,
+      "tag": "U8CI",
+      "proof_uses": [],
+      "reason": "Direct algebra of displacements under swapping and translation; no other wiki assertion is invoked."
+    },
+    {
+      "order": 5,
+      "tag": "R01V",
+      "proof_uses": [],
+      "reason": "Reindexing by the bijection y -> yx^{-1}; no other wiki assertion is invoked."
+    },
+    {
+      "order": 6,
+      "tag": "B2ZL",
+      "proof_uses": [],
+      "reason": "Shell counting and integral comparison of the power series; no other wiki assertion is invoked."
+    },
+    {
+      "order": 7,
+      "tag": "TKAS",
+      "proof_uses": [],
+      "reason": "The conditional product law of the unrevealed cross bonds gives exact formulas, bounded by elementary scalar inequalities; no other wiki assertion is invoked."
+    },
+    {
+      "order": 8,
+      "tag": "NIWS",
+      "proof_uses": [],
+      "reason": "Riemann-sum convergence of the intensities and a Bernoulli-Poisson coupling; no other wiki assertion is invoked."
     }
   ]
 }

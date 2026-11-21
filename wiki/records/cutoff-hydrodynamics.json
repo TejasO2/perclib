@@ -971,6 +971,33 @@
         "5J3U"
       ],
       "reason": "Tuple-loss expansion and two original geodesic hits give diagram sums m_(i+2)R_jR_(m-1) and m_(i+1)R_(j+1)R_(m-1). Spatial weights use marked path moments. A smaller marginal correction restores the source restricted factor. Signed polynomial tests and zero exponents are included. Interception remains an independent unresolved input."
+    },
+    {
+      "order": 45,
+      "tag": "UWLQ",
+      "proof_uses": [],
+      "reason": "A definition; it invokes no other wiki assertion."
+    },
+    {
+      "order": 46,
+      "tag": "UUQO",
+      "proof_uses": [],
+      "reason": "Independence of the distinct cross-edge coordinates gives the exact product formula; no other wiki assertion is invoked."
+    },
+    {
+      "order": 47,
+      "tag": "XB1X",
+      "proof_uses": [],
+      "reason": "The proof integrates the two scalar moment equations and compares growth exponents; no other wiki assertion is invoked."
+    },
+    {
+      "order": 48,
+      "tag": "NS0Q",
+      "proof_uses": [
+        "XB1X",
+        "YEVN"
+      ],
+      "reason": "The contradiction theorem XB1X gives good scales at all heights and the last-good-scale theorem (YEVN), applied to m_2, turns them into a uniform lower bound."
     }
   ]
 }

@@ -473,6 +473,35 @@
         "X86B"
       ],
       "reason": "The averaged vertex weight is at most one and has total mass |B|, so its restricted two-point row is at most min(chi, |B|). Discard the arbitrary cluster class only from the long-path error."
+    },
+    {
+      "order": 24,
+      "tag": "8W1Q",
+      "proof_uses": [],
+      "reason": "A definition; the remarks on monotonicity of balls and spheres are direct examples."
+    },
+    {
+      "order": 25,
+      "tag": "R5XZ",
+      "proof_uses": [],
+      "reason": "A path-weight union bound, a renewal inequality from the conditional product law outside explored layers, and monotone convergence; no other wiki assertion is invoked."
+    },
+    {
+      "order": 26,
+      "tag": "KEO7",
+      "proof_uses": [
+        "Y84V",
+        "SNB3"
+      ],
+      "reason": "A stopped layer exploration gives the arm recursion; finiteness of the normalised constant uses tree-graph moments (Y84V) and the exponential volume tail (SNB3), and the endpoint is reached by coupling."
+    },
+    {
+      "order": 27,
+      "tag": "SBMG",
+      "proof_uses": [
+        "AUUG"
+      ],
+      "reason": "Splitting a geodesic into q+1 edge-disjoint connections and applying the iterated BK product bound (AUUG), with finite-edge approximation, gives the chain sum chi^{q+1}."
     }
   ]
 }

@@ -621,6 +621,81 @@
         "5J3U"
       ],
       "reason": "Higher marked-kernel products give a relative O(V^2) joint-cut bound with arbitrary first, second and third cluster powers. A union over failed labelled coordinates handles the full target tuple. The (0,1,2) case is covered; interception and final decoupling remain separate."
+    },
+    {
+      "order": 32,
+      "tag": "SO5J",
+      "proof_uses": [],
+      "reason": "The proof counts by the degree sum and removes the last leaf to get the recursion; it invokes no other wiki assertion."
+    },
+    {
+      "order": 33,
+      "tag": "AFH6",
+      "proof_uses": [
+        "SO5J",
+        "BNY8",
+        "HP3X"
+      ],
+      "reason": "The proof builds a trivalent tree witness with 2k-3 edge paths over the shapes counted in SO5J, applies finite-coordinate BK (BNY8) iterated through associativity of disjoint occurrence (HP3X), and exhausts the bonds."
+    },
+    {
+      "order": 34,
+      "tag": "5PHR",
+      "proof_uses": [],
+      "reason": "The proof is an explicit three-vertex counterexample; it invokes no other wiki assertion."
+    },
+    {
+      "order": 35,
+      "tag": "HRS7",
+      "proof_uses": [],
+      "reason": "The proof is an explicit construction computed with Tonelli; it invokes no other wiki assertion."
+    },
+    {
+      "order": 36,
+      "tag": "5PBL",
+      "proof_uses": [],
+      "reason": "The proof reparametrises s=c lambda and uses regular variation of f; it invokes no other wiki assertion."
+    },
+    {
+      "order": 37,
+      "tag": "N76U",
+      "proof_uses": [],
+      "reason": "The proof uses the Moebius distance identity and transitivity on pairs and triples; the Gladkov inequality (87RB) appears only in the remark after the proof."
+    },
+    {
+      "order": 38,
+      "tag": "9YE6",
+      "proof_uses": [
+        "Y4H4"
+      ],
+      "reason": "The proof inserts the three-point formula into the recursive definition of S (Y4H4) and inducts on subsets for the covariance identity."
+    },
+    {
+      "order": 39,
+      "tag": "ESZG",
+      "proof_uses": [
+        "Y4H4",
+        "CS13"
+      ],
+      "reason": "The proof compares both the recursive quantity (Y4H4) and the sweep product (CS13) with the Kruskal spanning-tree expression by a threshold-count integral."
+    },
+    {
+      "order": 40,
+      "tag": "WDGK",
+      "proof_uses": [
+        "ESZG"
+      ],
+      "reason": "The proof reduces to the spanning-tree ultrametric u, where recursive and sweep products coincide by ESZG, and compares d with u up to the factor n-1."
+    },
+    {
+      "order": 41,
+      "tag": "FAT3",
+      "proof_uses": [
+        "X5SS",
+        "C4A5",
+        "WDGK"
+      ],
+      "reason": "The proof combines arm and circuit events by the Harris inequality (X5SS) and glues them deterministically; the conditional upper bound is C4A5 and WDGK identifies the two geometric quantities."
     }
   ]
 }

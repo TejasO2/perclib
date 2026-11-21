@@ -70,6 +70,83 @@
         "RIRJ"
       ],
       "reason": "BK bounds both weighted two-cluster deficits; differentiation of S divided by susceptibility squared retains the cycle contribution."
+    },
+    {
+      "order": 4,
+      "tag": "EJHT",
+      "proof_uses": [],
+      "reason": "A definition; the remarks after it (implies connection, increasing, the triangle example) are immediate and invoke no other wiki assertion."
+    },
+    {
+      "order": 5,
+      "tag": "RIRJ",
+      "proof_uses": [
+        "BNY8"
+      ],
+      "reason": "The identity is a group change of variables; the upper bound applies finite-coordinate BK (BNY8) to each summand and extends it to countably many bonds by finite-witness approximation."
+    },
+    {
+      "order": 6,
+      "tag": "32MY",
+      "proof_uses": [
+        "8B62",
+        "RIRJ"
+      ],
+      "reason": "The small-field limit is a union bound and inclusion-exclusion; the comparison uses the single-field first-moment limit (8B62) and the counting identity and BK bound of RIRJ."
+    },
+    {
+      "order": 7,
+      "tag": "I6SP",
+      "proof_uses": [
+        "X5SS"
+      ],
+      "reason": "The path transfer splits witnesses along the fixed path and applies Harris (X5SS) to the all-open path event and the separated-root event; the second bound is a direct union bound."
+    },
+    {
+      "order": 8,
+      "tag": "Q6FI",
+      "proof_uses": [
+        "53Z9",
+        "I6SP"
+      ],
+      "reason": "Small intensities use the row-sum susceptibility bound (53Z9) and the two-ghost bound of I6SP; large intensities apply the separated-root hypothesis along a short-edge path and the finite-path transfer of I6SP."
+    },
+    {
+      "order": 9,
+      "tag": "3JPN",
+      "proof_uses": [],
+      "reason": "The proof is an l2/convolution estimate (Cauchy-Schwarz and finite truncation); the remarks applying it to Q6FI and 32MY come after the proof and are not used in it."
+    },
+    {
+      "order": 10,
+      "tag": "X4OE",
+      "proof_uses": [],
+      "reason": "The proof is a finite enumeration of bond and mark assignments on the three-vertex star and invokes no other wiki assertion."
+    },
+    {
+      "order": 11,
+      "tag": "NGRO",
+      "proof_uses": [
+        "BNY8"
+      ],
+      "reason": "The proof splits a simple path to a marked vertex at z and applies finite-coordinate BK (BNY8), with increasing approximation on a countable graph, then a union bound."
+    },
+    {
+      "order": 12,
+      "tag": "DTVY",
+      "proof_uses": [
+        "BNY8"
+      ],
+      "reason": "On a finite graph the deletion bound and the three-branch decomposition each apply BK (BNY8); the countable case follows by exhaustion and dominated convergence."
+    },
+    {
+      "order": 13,
+      "tag": "79WX",
+      "proof_uses": [
+        "DTVY",
+        "JRCI"
+      ],
+      "reason": "The proof applies the distinct-cluster bound DTVY and then BK on Z^d (JRCI) with a union bound to discard field connections ending inside the box."
     }
   ]
 }

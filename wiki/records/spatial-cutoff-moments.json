@@ -341,6 +341,81 @@
         "Y3SX"
       ],
       "reason": "The one-point ODE induction has positive gap k-alpha at even k>=2. Volume equivalents and the factorized mixed derivative supply GY8M; Y3SX then gives tightness and uniqueness of the volume-biased random-measure limit. No interacting deficit limit is inferred."
+    },
+    {
+      "order": 19,
+      "tag": "0CUF",
+      "proof_uses": [
+        "Y84V"
+      ],
+      "reason": "The proof bounds the cutoff kernel by a strictly smaller full kernel, gets all volume moments from the tree-graph moment bound (Y84V), and bounds displacements by path length."
+    },
+    {
+      "order": 20,
+      "tag": "7F5O",
+      "proof_uses": [
+        "0CUF",
+        "NJF3",
+        "Y84V"
+      ],
+      "reason": "The proof uses finiteness from 0CUF, the first-moment deficit bound (NJF3) with E|K|^3 <= 3 chi^5 from the tree-graph bound (Y84V), and a reciprocal differential inequality."
+    },
+    {
+      "order": 21,
+      "tag": "K3DB",
+      "proof_uses": [
+        "0CUF",
+        "7F5O",
+        "6H7C",
+        "NJF3",
+        "IXEZ",
+        "XXTP",
+        "Y84V",
+        "5O1G"
+      ],
+      "reason": "The proof starts from 7F5O, closes the second-moment equation (6H7C, NJF3, IXEZ), and inducts using the factorization error bound (XXTP), the tree-graph bound (Y84V) and the linear induction step of 5O1G."
+    },
+    {
+      "order": 22,
+      "tag": "57RX",
+      "proof_uses": [
+        "7WIO",
+        "BNY8"
+      ],
+      "reason": "The proof differentiates the finite-volume projected moment (7WIO), bounds the closed-pivotal terms by finite BK (BNY8), and passes to the limit by dominated convergence."
+    },
+    {
+      "order": 23,
+      "tag": "5OBO",
+      "proof_uses": [
+        "AFH6",
+        "SO5J"
+      ],
+      "reason": "The proof applies the multipoint tree-graph bound (AFH6) over the (2m-3)!! shapes with 2m-1 edges (SO5J) and sums the projected square along the root-to-leaf path."
+    },
+    {
+      "order": 24,
+      "tag": "6DOC",
+      "proof_uses": [
+        "JRCI",
+        "X5SS",
+        "57RX",
+        "5OBO",
+        "Y84V"
+      ],
+      "reason": "The proof bounds the deficit by BK (JRCI) and Harris (X5SS), subtracts the exact identity of 57RX, and bounds the collision sums by 5OBO and the third-moment bound (Y84V)."
+    },
+    {
+      "order": 25,
+      "tag": "Z11O",
+      "proof_uses": [
+        "Y84V",
+        "0CUF",
+        "57RX",
+        "6DOC",
+        "GAF9"
+      ],
+      "reason": "The proof gets finite moments from the tree-graph bound (Y84V) and 0CUF, writes the equation of 57RX with the error of 6DOC, and applies the linear ODE regimes of GAF9."
     }
   ]
 }

@@ -28,5 +28,14 @@
     }
   ],
   "occursIn": [],
-  "proofUses": []
+  "proofUses": [
+    {
+      "order": 0,
+      "tag": "8IGH",
+      "proof_uses": [
+        "DUYN"
+      ],
+      "reason": "The proof bounds the input sum by R times the exact covariance expansion of F'(beta), with nonnegative covariances and c_beta(e)>=1/beta, all from DUYN."
+    }
+  ]
 }

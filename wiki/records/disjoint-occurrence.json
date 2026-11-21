@@ -46,5 +46,12 @@
     }
   ],
   "occursIn": [],
-  "proofUses": []
+  "proofUses": [
+    {
+      "order": 0,
+      "tag": "OQN6",
+      "proof_uses": [],
+      "reason": "A definition; it invokes no other wiki assertion."
+    }
+  ]
 }

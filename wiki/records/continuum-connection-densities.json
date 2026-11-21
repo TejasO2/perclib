@@ -363,6 +363,12 @@
         "W3QF"
       ],
       "reason": "The needed chordal coordinate change is proved by C6T0/6RZ1/0INI. Together with the normalized hypergeometric calculation retained in AGJ2, this proves the full candidate equation under the stated deterministic and stochastic foundations; terminal percolation inputs remain separate."
+    },
+    {
+      "order": 18,
+      "tag": "O3HO",
+      "proof_uses": [],
+      "reason": "A definition; its well-posedness remarks use the closed-form representation theorem of Hilbert-space theory and no other wiki assertion."
     }
   ]
 }

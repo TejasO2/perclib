@@ -240,7 +240,7 @@ theorem boundarySum_le_intensity [Countable V] (J : Sym2 V → ℝ≥0) (β : �
 
 /-- With off-diagonal row sums of `J` at most `1`, `φ_y ≤ χ_max` for `y ∈ S`. -/
 theorem boundaryRow_le_iSup_chi [Countable V] (J : Sym2 V → ℝ≥0) (β : ℝ≥0)
-    (hJ : ∀ u, ∑' v, (if v = u then 0 else (J s(u, v) : ℝ≥0∞)) ≤ 1) (S : Finset V)
+    (hJ : ∀ u, rowSum (fun e => (J e : ℝ≥0∞)) u ≤ 1) (S : Finset V)
     {y : V} (hy : y ∈ S) :
     ∑' x, (if x ∈ S then 0 else (J s(y, x) : ℝ≥0∞)) *
         ∑' w, law (intensityProfile J β) {ω | ∃ hx : x ∈ (S : Set V)ᶜ,
@@ -255,8 +255,8 @@ theorem boundaryRow_le_iSup_chi [Countable V] (J : Sym2 V → ℝ≥0) (β : ℝ
         · have hxy : x ≠ y := fun h => hx (h ▸ hy)
           rw [ite_eq_right hx, ite_eq_right hxy]
           exact mul_le_mul_right ((tsum_law_deleted_le_chi _ _ x).trans (le_iSup _ x)) _
-    _ = (∑' x, if x = y then 0 else (J s(y, x) : ℝ≥0∞)) *
-        ⨆ u, chi (intensityProfile J β) u := ENNReal.tsum_mul_right
+    _ = rowSum (fun e => (J e : ℝ≥0∞)) y *
+        ⨆ u, chi (intensityProfile J β) u := by rw [rowSum_def, ENNReal.tsum_mul_right]
     _ ≤ 1 * ⨆ u, chi (intensityProfile J β) u := mul_le_mul_left (hJ y) _
     _ = _ := one_mul _
 
@@ -298,7 +298,7 @@ most `1` and `χ_max = ⨆ u, χ(u) < ∞`, for every finite `S`,
 `Q(S) = ∑_{u ∈ S} (∑_{v ∈ S} τ(u,v))²` and
 `Φ_β(S) = ∑_{v ∈ S} ∑_{z ∉ S} J(v,z) χ_{Sᶜ}(z)`. -/
 theorem boundarySum_sq_div_le
-    (hJ : ∀ u, ∑' v, (if v = u then 0 else (J s(u, v) : ℝ≥0∞)) ≤ 1)
+    (hJ : ∀ u, rowSum (fun e => (J e : ℝ≥0∞)) u ≤ 1)
     (hχ : (⨆ u, chi (intensityProfile J β) u) ≠ ⊤) :
     (∑ u ∈ S, ∑' w, if w ∈ S then 0 else (tau (intensityProfile J β) u w).toReal) ^ 2 /
         ((β : ℝ) ^ 2 * (⨆ u, chi (intensityProfile J β) u).toReal *
@@ -436,7 +436,7 @@ theorem posPart_sq_div_le_boundarySum_sq_div (q : Sym2 V → unitInterval)
 `χ_max < ∞`, for every finite `S`,
 `Φ_β(S) ≥ L(S)² / (β² χ_max Q(S)) ≥ (χ_min |S| - ∑_{u,v ∈ S} τ(u,v))₊² / (β² χ_max Q(S))`. -/
 theorem boundary_susceptibility_bound
-    (hJ : ∀ u, ∑' v, (if v = u then 0 else (J s(u, v) : ℝ≥0∞)) ≤ 1)
+    (hJ : ∀ u, rowSum (fun e => (J e : ℝ≥0∞)) u ≤ 1)
     (hχ : (⨆ u, chi (intensityProfile J β) u) ≠ ⊤) :
     (∑ u ∈ S, ∑' w, if w ∈ S then 0 else (tau (intensityProfile J β) u w).toReal) ^ 2 /
         ((β : ℝ) ^ 2 * (⨆ u, chi (intensityProfile J β) u).toReal *
@@ -479,7 +479,7 @@ example (q : Sym2 (Fin 3) → unitInterval) :
 example (β : ℝ≥0) :=
   boundary_susceptibility_bound (fun e : Sym2 Bool => if e = s(false, true) then 1 else 0) β
     {false}
-    (fun u => by cases u <;> simp [tsum_fintype, Sym2.eq_swap])
+    (fun u => by cases u <;> simp [rowSum_def, tsum_fintype, Sym2.eq_swap])
     (by
       refine ne_top_of_le_ne_top (b := 2) ENNReal.ofNat_ne_top (iSup_le fun u => ?_)
       rw [chi_eq_tsum_tau, tsum_fintype, Fintype.sum_bool]

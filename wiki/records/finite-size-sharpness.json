@@ -73,5 +73,33 @@
     }
   ],
   "occursIn": [],
-  "proofUses": []
+  "proofUses": [
+    {
+      "order": 0,
+      "tag": "HATE",
+      "proof_uses": [
+        "IENL"
+      ],
+      "reason": "The proof factorises P(S=T, o<->_T u) by independence, identifies closed pivotal bonds, and applies the finite intensity Russo formula (IENL)."
+    },
+    {
+      "order": 1,
+      "tag": "L0TE",
+      "proof_uses": [
+        "YLZV",
+        "HATE"
+      ],
+      "reason": "Below t the finite-size susceptibility criterion (YLZV) gives finite susceptibility; above t the differential inequality of HATE is integrated and the domains are exhausted."
+    },
+    {
+      "order": 2,
+      "tag": "RDF0",
+      "proof_uses": [
+        "YLZV",
+        "L0TE",
+        "R84Z"
+      ],
+      "reason": "Contraction implies finite susceptibility by YLZV and the threshold theorem L0TE; the converse uses dominated convergence and the persistence argument of the critical-flux theorem (R84Z)."
+    }
+  ]
 }

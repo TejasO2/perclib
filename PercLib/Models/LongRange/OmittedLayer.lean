@@ -167,9 +167,8 @@ theorem omitted_const_nonneg {c κ α : ℝ} (hc : 0 ≤ c) (hκ : 0 < κ) (hα 
 theorem tsum_omittedKernel_le (hd : 1 ≤ d) {α c κ : ℝ} (hα : 0 < α) (hc : 0 ≤ c)
     (hN0 : ∀ v, N v = 0 → v = 0) (hκ : 0 < κ) (hN : ∀ z, κ * ‖z‖ ≤ N (Int.cast ∘ z))
     (hr : 1 ≤ r) (x : Fin d → ℤ) :
-    (∑' y, if y = x then 0 else
-        (((radialKernel N (powerLawProfile c (d + α)) -
-          cutoffKernel N (powerLawProfile c (d + α)) r) s(x, y) : ℝ≥0) : ℝ≥0∞)) ≤
+    rowSum (fun e => (((radialKernel N (powerLawProfile c (d + α)) -
+      cutoffKernel N (powerLawProfile c (d + α)) r) e : ℝ≥0) : ℝ≥0∞)) x ≤
       ENNReal.ofReal (c * ((1 + 2 / κ) ^ d +
         κ ^ (-(d : ℝ)) * (((2 * d * 3 ^ (d - 1) : ℕ) : ℝ) * (1 + 1 / α))) * r ^ (-α)) := by
   have hr0 : 0 < r := one_pos.trans_le hr
@@ -183,6 +182,7 @@ theorem tsum_omittedKernel_le (hd : 1 ≤ d) {α c κ : ℝ} (hα : 0 < α) (hc 
   set t : ℝ := max (r / κ) 1
   have ht1 : 1 ≤ t := le_max_right _ _
   -- shift to the origin: `y = z + x`
+  simp only [rowSum_def]
   rw [← (Equiv.addRight x).tsum_eq]
   simp only [Equiv.coe_addRight, add_eq_right]
   -- pointwise domination
@@ -281,13 +281,14 @@ the omitted layer `1 - e^{-β (J - J_r)}` is at most `β C r^{-α}` for `r ≥ 1
 theorem tsum_omittedLayer_le (hd : 1 ≤ d) {α c κ : ℝ} (hα : 0 < α) (hc : 0 ≤ c)
     (hN0 : ∀ v, N v = 0 → v = 0) (hκ : 0 < κ) (hN : ∀ z, κ * ‖z‖ ≤ N (Int.cast ∘ z))
     (hr : 1 ≤ r) (β : ℝ≥0) (x : Fin d → ℤ) :
-    (∑' y, if y = x then 0 else ENNReal.ofReal
-        (intensityProfile (radialKernel N (powerLawProfile c (d + α)) -
-          cutoffKernel N (powerLawProfile c (d + α)) r) β s(x, y) : ℝ)) ≤
+    rowSum (fun e => ENNReal.ofReal (intensityProfile
+      (radialKernel N (powerLawProfile c (d + α)) -
+        cutoffKernel N (powerLawProfile c (d + α)) r) β e : ℝ)) x ≤
       ENNReal.ofReal (β * (c * ((1 + 2 / κ) ^ d +
         κ ^ (-(d : ℝ)) * (((2 * d * 3 ^ (d - 1) : ℕ) : ℝ) * (1 + 1 / α))) * r ^ (-α))) := by
   rw [ENNReal.ofReal_mul β.coe_nonneg]
   refine le_trans ?_ (mul_le_mul' le_rfl (tsum_omittedKernel_le hd hα hc hN0 hκ hN hr x))
+  simp only [rowSum_def]
   rw [← ENNReal.tsum_mul_left]
   refine ENNReal.tsum_le_tsum fun y => ?_
   split_ifs
@@ -299,13 +300,12 @@ theorem tsum_omittedLayer_le (hd : 1 ≤ d) {α c κ : ℝ} (hα : 0 < α) (hc :
 theorem exists_tsum_omittedLayer_le (hd : 1 ≤ d) {α c : ℝ} (hα : 0 < α) (hc : 0 ≤ c)
     (hN0 : ∀ v, N v = 0 → v = 0) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ r : ℝ, 1 ≤ r → ∀ (β : ℝ≥0) (x : Fin d → ℤ),
-      (∑' y, if y = x then 0 else
-          (((radialKernel N (powerLawProfile c (d + α)) -
-            cutoffKernel N (powerLawProfile c (d + α)) r) s(x, y) : ℝ≥0) : ℝ≥0∞)) ≤
+      rowSum (fun e => (((radialKernel N (powerLawProfile c (d + α)) -
+        cutoffKernel N (powerLawProfile c (d + α)) r) e : ℝ≥0) : ℝ≥0∞)) x ≤
         ENNReal.ofReal (C * r ^ (-α)) ∧
-      (∑' y, if y = x then 0 else ENNReal.ofReal
-          (intensityProfile (radialKernel N (powerLawProfile c (d + α)) -
-            cutoffKernel N (powerLawProfile c (d + α)) r) β s(x, y) : ℝ)) ≤
+      rowSum (fun e => ENNReal.ofReal (intensityProfile
+        (radialKernel N (powerLawProfile c (d + α)) -
+          cutoffKernel N (powerLawProfile c (d + α)) r) β e : ℝ)) x ≤
         ENNReal.ofReal (β * (C * r ^ (-α))) :=
   let ⟨_, hκ, hN⟩ := exists_pos_mul_norm_le_intCast hN0
   ⟨_, omitted_const_nonneg hc hκ hα, fun _ hr β x =>
@@ -376,10 +376,9 @@ example {x y : Fin 1 → ℤ} (hxy : x ≠ y) :
 /-- At `d = 1`, the sup norm (`κ = 1`), `α = 1`, `c = 1`, `r = 1`: the constant evaluates to
 `C = 7`, and every omitted row is at most `7`. -/
 example (x : Fin 1 → ℤ) :
-    (∑' y, if y = x then 0 else
-        (((radialKernel (normSeminorm ℝ (Fin 1 → ℝ)) (powerLawProfile 1 ((1 : ℕ) + 1)) -
-          cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (powerLawProfile 1 ((1 : ℕ) + 1)) 1)
-            s(x, y) : ℝ≥0) : ℝ≥0∞)) ≤ ENNReal.ofReal 7 := by
+    rowSum (fun e => (((radialKernel (normSeminorm ℝ (Fin 1 → ℝ))
+      (powerLawProfile 1 ((1 : ℕ) + 1)) - cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (powerLawProfile 1 ((1 : ℕ) + 1)) 1) e : ℝ≥0) :
+        ℝ≥0∞)) x ≤ ENNReal.ofReal 7 := by
   refine (tsum_omittedKernel_le le_rfl one_pos zero_le_one normSeminorm_eq_zero one_pos
     (fun z => by rw [one_mul, normSeminorm_intCast]) le_rfl x).trans_eq ?_
   norm_num

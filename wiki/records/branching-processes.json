@@ -102,6 +102,106 @@
         "NT0R"
       ],
       "reason": "The conditioned-contour invariance theorem is an explicit external input. LHWC gives measured-tree convergence and continuity gives height/diameter. NOKH identifies admissible sizes; NT0R supplies the uniform ordered-tree specialization."
+    },
+    {
+      "order": 5,
+      "tag": "NCWZ",
+      "proof_uses": [],
+      "reason": "A definition; it invokes no other wiki assertion."
+    },
+    {
+      "order": 6,
+      "tag": "8TFY",
+      "proof_uses": [],
+      "reason": "The proof iterates q_{n+1}=phi(q_n) and uses monotonicity and continuity of phi; it invokes no other wiki assertion."
+    },
+    {
+      "order": 7,
+      "tag": "BFM4",
+      "proof_uses": [
+        "8TFY"
+      ],
+      "reason": "Each case compares phi(s) with s and concludes through the least-fixed-point characterisation of extinction (8TFY)."
+    },
+    {
+      "order": 8,
+      "tag": "UKY4",
+      "proof_uses": [],
+      "reason": "Conditional means and Tonelli give the formulas directly; no other wiki assertion is invoked."
+    },
+    {
+      "order": 9,
+      "tag": "OVG9",
+      "proof_uses": [
+        "BFM4"
+      ],
+      "reason": "Almost-sure critical extinction (BFM4) makes T finite; the root decomposition F=s phi(F) and a second-order expansion of phi give the asymptotic."
+    },
+    {
+      "order": 10,
+      "tag": "8WO7",
+      "proof_uses": [
+        "BFM4"
+      ],
+      "reason": "Critical extinction (BFM4) gives r_n decreasing to zero; the recursion r_{n+1}=1-phi(1-r_n) and a second-order expansion give the equivalent."
+    },
+    {
+      "order": 11,
+      "tag": "MIFH",
+      "proof_uses": [
+        "OVG9"
+      ],
+      "reason": "Both tail bounds are derived from the transform asymptotic OVG9 by Markov-type comparisons of G(t)=E[1-e^{-tT}]."
+    },
+    {
+      "order": 12,
+      "tag": "XXQK",
+      "proof_uses": [
+        "BFM4",
+        "8TFY"
+      ],
+      "reason": "The extinction criterion (BFM4) gives the threshold and extinction at p_c; the fixed-point characterisation (8TFY) gives the extinction equation that is expanded near p_c."
+    },
+    {
+      "order": 13,
+      "tag": "N9P5",
+      "proof_uses": [
+        "BFM4"
+      ],
+      "reason": "Subsequential limits of the extinction probabilities are fixed points of the critical limit law; the extinction criterion (BFM4) gives rho_j>0 before the uniform expansion is inserted."
+    },
+    {
+      "order": 14,
+      "tag": "Q4NA",
+      "proof_uses": [],
+      "reason": "The proof is a direct computation for the two-point offspring laws and invokes no other wiki assertion."
+    },
+    {
+      "order": 15,
+      "tag": "RL1L",
+      "proof_uses": [],
+      "reason": "The proof is the queue exploration and the cyclic lemma; it invokes no other wiki assertion."
+    },
+    {
+      "order": 16,
+      "tag": "AGPB",
+      "proof_uses": [
+        "RL1L",
+        "BFM4"
+      ],
+      "reason": "Dwass's formula (RL1L) gives the point probabilities; critical extinction (BFM4) leaves no mass at infinity for the tail sum."
+    },
+    {
+      "order": 17,
+      "tag": "NT0R",
+      "proof_uses": [],
+      "reason": "Independence gives the product weight and the contour bijection is explicit; no other wiki assertion is invoked."
+    },
+    {
+      "order": 18,
+      "tag": "OO12",
+      "proof_uses": [],
+      "reason": "A definition; the remarks verifying the metric tree structure are self-contained."
     }
   ]
 }

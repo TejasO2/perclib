@@ -72,10 +72,10 @@ theorem chi_intensity_le_root [Countable V] {J : Sym2 V → ℝ≥0} {o : V}
 /-- Under transitivity every off-diagonal row sum of `J` equals the one at `o`. -/
 theorem rowSum_eq_root {J : Sym2 V → ℝ≥0} {o : V}
     (hJ : ∀ x, ∃ φ : V ≃ V, φ o = x ∧ ∀ e, J (Sym2.map φ e) = J e) (u : V) :
-    (∑' w, if w = u then 0 else (J s(u, w) : ℝ≥0∞)) =
-      ∑' y, if y = o then 0 else (J s(o, y) : ℝ≥0∞) := by
+    rowSum (fun e => (J e : ℝ≥0∞)) u =
+      rowSum (fun e => (J e : ℝ≥0∞)) o := by
   obtain ⟨φ, rfl, hφ⟩ := hJ u
-  rw [← φ.tsum_eq]
+  rw [rowSum_def, rowSum_def, ← φ.tsum_eq]
   refine tsum_congr fun y => ?_
   simp only [φ.injective.eq_iff]
   congr 2
@@ -85,18 +85,18 @@ theorem rowSum_eq_root {J : Sym2 V → ℝ≥0} {o : V}
 `ε < 1/(L χ_β)`, then `χ_{β+ε} ≤ χ_β / (1 - ε L χ_β)`. -/
 theorem chi_intensity_add_le [Countable V] {J : Sym2 V → ℝ≥0} {o : V}
     (hJ : ∀ x, ∃ φ : V ≃ V, φ o = x ∧ ∀ e, J (Sym2.map φ e) = J e)
-    (hL : (∑' y, if y = o then 0 else (J s(o, y) : ℝ≥0∞)) < ⊤) {β ε : ℝ≥0}
+    (hL : rowSum (fun e => (J e : ℝ≥0∞)) o < ⊤) {β ε : ℝ≥0}
     (hχ : chi (intensityProfile J β) o < ⊤)
     (hε : (ε : ℝ≥0∞) <
-      ((∑' y, if y = o then 0 else (J s(o, y) : ℝ≥0∞)) * chi (intensityProfile J β) o)⁻¹) :
+      (rowSum (fun e => (J e : ℝ≥0∞)) o * chi (intensityProfile J β) o)⁻¹) :
     chi (intensityProfile J (β + ε)) o ≤ chi (intensityProfile J β) o /
-      (1 - (ε : ℝ≥0∞) * (∑' y, if y = o then 0 else (J s(o, y) : ℝ≥0∞)) *
+      (1 - (ε : ℝ≥0∞) * rowSum (fun e => (J e : ℝ≥0∞)) o *
         chi (intensityProfile J β) o) := by
-  set L := ∑' y, if y = o then 0 else (J s(o, y) : ℝ≥0∞) with hLdef
+  set L := rowSum (fun e => (J e : ℝ≥0∞)) o with hLdef
   have hprof : intensityProfile J (β + ε) =
       fun e => σ (σ (intensityProfile J β e) * σ (intensityProfile J ε e)) :=
     funext (intensityProfile_add J β ε)
-  have hrow : ∀ u, (∑' w, if w = u then 0 else (J s(u, w) : ℝ≥0∞)) ≤ (L.toNNReal : ℝ≥0∞) := by
+  have hrow : ∀ u, rowSum (fun e => (J e : ℝ≥0∞)) u ≤ (L.toNNReal : ℝ≥0∞) := by
     intro u
     rw [rowSum_eq_root hJ u, ENNReal.coe_toNNReal hL.ne]
   have hδ := intensity_rowSum_le J L.toNNReal hrow ε
@@ -111,13 +111,13 @@ theorem chi_intensity_add_le [Countable V] {J : Sym2 V → ℝ≥0} {o : V}
 /-- The susceptibility at `β + ε` stays finite for small `ε`. -/
 theorem chi_intensity_add_lt_top [Countable V] {J : Sym2 V → ℝ≥0} {o : V}
     (hJ : ∀ x, ∃ φ : V ≃ V, φ o = x ∧ ∀ e, J (Sym2.map φ e) = J e)
-    (hL : (∑' y, if y = o then 0 else (J s(o, y) : ℝ≥0∞)) < ⊤) {β ε : ℝ≥0}
+    (hL : rowSum (fun e => (J e : ℝ≥0∞)) o < ⊤) {β ε : ℝ≥0}
     (hχ : chi (intensityProfile J β) o < ⊤)
     (hε : (ε : ℝ≥0∞) <
-      ((∑' y, if y = o then 0 else (J s(o, y) : ℝ≥0∞)) * chi (intensityProfile J β) o)⁻¹) :
+      (rowSum (fun e => (J e : ℝ≥0∞)) o * chi (intensityProfile J β) o)⁻¹) :
     chi (intensityProfile J (β + ε)) o < ⊤ := by
   refine (chi_intensity_add_le hJ hL hχ hε).trans_lt (ENNReal.div_lt_top hχ.ne ?_)
-  have : (ε : ℝ≥0∞) * (∑' y, if y = o then 0 else (J s(o, y) : ℝ≥0∞)) *
+  have : (ε : ℝ≥0∞) * rowSum (fun e => (J e : ℝ≥0∞)) o *
       chi (intensityProfile J β) o < 1 := by
     rw [mul_assoc]
     exact ENNReal.mul_lt_of_lt_div (by rwa [one_div])
@@ -126,11 +126,11 @@ theorem chi_intensity_add_lt_top [Countable V] {J : Sym2 V → ℝ≥0} {o : V}
 /-- **Right-openness.** If `χ_β < ⊤`, then `χ_{β+ε} < ⊤` for some `ε > 0`. -/
 theorem exists_pos_chi_intensity_add_lt_top [Countable V] {J : Sym2 V → ℝ≥0} {o : V}
     (hJ : ∀ x, ∃ φ : V ≃ V, φ o = x ∧ ∀ e, J (Sym2.map φ e) = J e)
-    (hL : (∑' y, if y = o then 0 else (J s(o, y) : ℝ≥0∞)) < ⊤) {β : ℝ≥0}
+    (hL : rowSum (fun e => (J e : ℝ≥0∞)) o < ⊤) {β : ℝ≥0}
     (hχ : chi (intensityProfile J β) o < ⊤) :
     ∃ ε : ℝ≥0, 0 < ε ∧ chi (intensityProfile J (β + ε)) o < ⊤ := by
   have hpos : (0 : ℝ≥0∞) <
-      ((∑' y, if y = o then 0 else (J s(o, y) : ℝ≥0∞)) * chi (intensityProfile J β) o)⁻¹ :=
+      (rowSum (fun e => (J e : ℝ≥0∞)) o * chi (intensityProfile J β) o)⁻¹ :=
     ENNReal.inv_pos.2 (ENNReal.mul_ne_top hL.ne hχ.ne)
   obtain ⟨ε, hε0, hε⟩ := ENNReal.lt_iff_exists_nnreal_btwn.1 hpos
   exact ⟨ε, by exact_mod_cast hε0, chi_intensity_add_lt_top hJ hL hχ hε⟩
@@ -138,8 +138,8 @@ theorem exists_pos_chi_intensity_add_lt_top [Countable V] {J : Sym2 V → ℝ≥
 /-- **5LNL, lower bound.** `b_χ = sSup {β | χ_β < ⊤} ≥ 1/L` for a transitive intensity. -/
 theorem inv_le_chiCriticalIntensity [Countable V] {J : Sym2 V → ℝ≥0} {o : V}
     (hJ : ∀ x, ∃ φ : V ≃ V, φ o = x ∧ ∀ e, J (Sym2.map φ e) = J e)
-    (hL : (∑' y, if y = o then 0 else (J s(o, y) : ℝ≥0∞)) < ⊤) :
-    (∑' y, if y = o then 0 else (J s(o, y) : ℝ≥0∞))⁻¹ ≤
+    (hL : rowSum (fun e => (J e : ℝ≥0∞)) o < ⊤) :
+    (rowSum (fun e => (J e : ℝ≥0∞)) o)⁻¹ ≤
       sSup ((fun β : ℝ≥0 => (β : ℝ≥0∞)) '' {β | chi (intensityProfile J β) o < ⊤}) := by
   refine le_of_forall_lt fun c hc => ?_
   obtain ⟨ε, hcε, hεL⟩ := ENNReal.lt_iff_exists_nnreal_btwn.1 hc

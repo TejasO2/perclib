@@ -67,6 +67,12 @@
         "YP44"
       ],
       "reason": "The simple-path union bound and nonnegative endpoint sum are the bounded-degree argument with the actual lattice path counts; growth below the reciprocal parameter makes the series finite."
+    },
+    {
+      "order": 4,
+      "tag": "RSRP",
+      "proof_uses": [],
+      "reason": "A definition; it invokes no other wiki assertion."
     }
   ]
 }

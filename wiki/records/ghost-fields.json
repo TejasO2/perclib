@@ -28,5 +28,27 @@
     }
   ],
   "occursIn": [],
-  "proofUses": []
+  "proofUses": [
+    {
+      "order": 0,
+      "tag": "J2TE",
+      "proof_uses": [],
+      "reason": "Dominated differentiation of the finite-cluster terms; no other wiki assertion is invoked."
+    },
+    {
+      "order": 1,
+      "tag": "4QV6",
+      "proof_uses": [],
+      "reason": "The recursion comes from independence of the root mark and the two child subtrees, and the critical root is solved explicitly; no other wiki assertion is invoked."
+    },
+    {
+      "order": 2,
+      "tag": "F7SW",
+      "proof_uses": [
+        "BEJT",
+        "J2TE"
+      ],
+      "reason": "A red-blue sprinkling coupling with the last-exit argument (BEJT) bounds the increment, and the positive-field derivative formula (J2TE) identifies the averaged bound with partial_h M."
+    }
+  ]
 }

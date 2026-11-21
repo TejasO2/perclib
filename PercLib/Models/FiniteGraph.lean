@@ -45,7 +45,7 @@ theorem chi_le_of_degree_le {V : Type*} [Fintype V] (G : SimpleGraph V)
     (hp : (Δ : ℝ≥0∞) * (unitInterval.toNNReal p : ℝ≥0∞) < 1) (x : V) :
     chi q x ≤ (1 - (Δ : ℝ≥0∞) * (unitInterval.toNNReal p : ℝ≥0∞))⁻¹ := by
   refine chi_le_inv_one_sub_of_rowSum q _ (fun v => ?_) hp x
-  rw [tsum_fintype]
+  rw [rowSum_toENNReal, tsum_fintype]
   calc _ ≤ ∑ w, if w ∈ G.neighborFinset v then (unitInterval.toNNReal p : ℝ≥0∞) else 0 := by
         refine Finset.sum_le_sum fun w _ => ?_
         by_cases hw : w = v
@@ -71,7 +71,7 @@ theorem chi_completeGraph_le (n : ℕ) (q : Sym2 (Fin n) → unitInterval) (p : 
     (hp : ((n - 1 : ℕ) : ℝ≥0∞) * (unitInterval.toNNReal p : ℝ≥0∞) < 1) (x : Fin n) :
     chi q x ≤ (1 - ((n - 1 : ℕ) : ℝ≥0∞) * (unitInterval.toNNReal p : ℝ≥0∞))⁻¹ := by
   refine chi_le_inv_one_sub_of_rowSum q _ (fun v => le_of_eq ?_) hp x
-  rw [tsum_fintype, ← Finset.add_sum_erase _ _ (Finset.mem_univ v),
+  rw [rowSum_toENNReal, tsum_fintype, ← Finset.add_sum_erase _ _ (Finset.mem_univ v),
     Finset.sum_congr rfl (g := fun _ => (unitInterval.toNNReal p : ℝ≥0∞))]
   · rw [ite_eq_left rfl, zero_add, Finset.sum_const, Finset.card_erase_of_mem (Finset.mem_univ v),
       Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]

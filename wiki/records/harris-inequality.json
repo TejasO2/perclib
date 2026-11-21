@@ -202,6 +202,18 @@
         "E9HR"
       ],
       "reason": "Proof by conditioning on the finite root cluster. The almost-sure finiteness restriction is explicit and does not certify the unrestricted source interface."
+    },
+    {
+      "order": 7,
+      "tag": "H4OA",
+      "proof_uses": [],
+      "reason": "A definition; the remark that connection events are increasing is immediate."
+    },
+    {
+      "order": 8,
+      "tag": "EZJ7",
+      "proof_uses": [],
+      "reason": "A one-coordinate inequality followed by induction on |E|; no other wiki assertion is invoked."
     }
   ]
 }

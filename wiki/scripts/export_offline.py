@@ -18,6 +18,7 @@ import zipfile
 
 ATTR = re.compile(r"\b(href|src|action)\s*=\s*([\"'])(.*?)\2", re.S)
 REFRESH = re.compile(r'content="0;url=([^"<>]+)"')
+DETAILS = re.compile(r"<details\b(?![^>]*\sopen(?:[\s=>]|$))([^>]*)>", re.I)
 CSS_URL = re.compile(r"url\(\s*[\"']?([^\"')\s]+)")
 FORMAT = 1
 
@@ -82,6 +83,8 @@ def relative_url(root, current, url):
 def offline_html(root, current, text):
     result = ATTR.sub(lambda m: m[1] + "=" + m[2] + escape(
         relative_url(root, current, m[3]), quote=True) + m[2], text)
+    # The offline reader shows every collapsed block expanded.
+    result = DETAILS.sub(lambda m: "<details open" + m[1] + ">", result)
     result = REFRESH.sub(lambda m: 'content="0;url=' + escape(
         relative_url(root, current, m[1]), quote=True) + '"', result)
     if current == root / "search/index.html":
@@ -220,6 +223,7 @@ No Git history, installed dependencies or Lean repository files are included.
 The exported reader works immediately; rebuilding the source requires the
 repository context and dependencies described in source/wiki/README.md.
 HTML text and rendered mathematics are preserved; local URLs are made relative.
+Collapsed blocks (proofs, long computations) are shown expanded.
 Search uses an embedded data file instead of a file-origin network request.
 BUILD-FILE-SHA256.json records the original build files.
 EXPORT-SHA256.json records exported files, excluding that hash manifest itself.

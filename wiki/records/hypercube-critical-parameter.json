@@ -121,6 +121,18 @@
         "PROF"
       ],
       "reason": "Triangle up to the susceptibility threshold with the stated hypotheses and finite Reimer input where used."
+    },
+    {
+      "order": 7,
+      "tag": "V395",
+      "proof_uses": [],
+      "reason": "Explicit path counts and a conditional bound on downward Hamming steps over finitely many patterns; no other wiki assertion is invoked."
+    },
+    {
+      "order": 8,
+      "tag": "N19V",
+      "proof_uses": [],
+      "reason": "The inequality 1-(1-p)^a >= ap - C(a,2)p^2 and counting of common neighbours; no other wiki assertion is invoked."
     }
   ]
 }

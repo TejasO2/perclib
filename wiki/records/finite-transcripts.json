@@ -118,6 +118,20 @@
         "FH29"
       ],
       "reason": "Countably many finite cluster records and fixed-block independence prove preservation of the product law, even with infinitely many boundary coordinates. Repeated roots and zero/one probabilities are included. The three coupled cut events are exact vertex-deletion events in the independent third copy."
+    },
+    {
+      "order": 3,
+      "tag": "D9KI",
+      "proof_uses": [],
+      "reason": "Measurability of the assembly map, cylinder uniqueness and Fubini; no other wiki assertion is invoked."
+    },
+    {
+      "order": 4,
+      "tag": "QH7Q",
+      "proof_uses": [
+        "DYU8"
+      ],
+      "reason": "Injective sampling is identified on cylinders; mutual block independence follows by induction from fixed-block independence (DYU8), and the closed product by continuity from above."
     }
   ]
 }

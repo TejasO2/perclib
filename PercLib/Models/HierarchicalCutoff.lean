@@ -249,11 +249,11 @@ theorem tsum_level_gt_intensity_le (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) →
 theorem rowSum_hierarchical_eq (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) (C r : ℝ≥0)
     (hJ : ∀ x y, J s(x,y) = C * r ^ ((y - x).support.sup Nat.succ))
     (hr : (L : ℝ≥0) ^ d * r < 1) (v : ℕ →₀ (Fin d → ZMod L)) :
-    (∑' w, if w = v then 0 else (J s(v, w) : ℝ≥0∞)) =
+    rowSum (fun e => (J e : ℝ≥0∞)) v =
       ((C * ((L ^ d - 1 : ℕ) : ℝ≥0) * r / (1 - (L : ℝ≥0) ^ d * r) : ℝ≥0) : ℝ≥0∞) := by
   have h := tsum_level_gt_eq J C r hJ 0 v
   rw [pow_zero, mul_one] at h
-  have e : (∑' w, if w = v then 0 else (J s(v, w) : ℝ≥0∞)) =
+  have e : rowSum (fun e => (J e : ℝ≥0∞)) v =
       ∑' w, if 0 < (w - v).support.sup Nat.succ then (J s(v, w) : ℝ≥0∞) else 0 := by
     refine tsum_congr fun w => ?_
     by_cases hw : w = v
@@ -317,16 +317,16 @@ theorem hierarchical_of_M_eq_zero (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → 
     (∀ᵐ ω ∂law (intensityProfile J β), ∀ x, cluster ω x = {x}) ∧
       (∀ x, chi (intensityProfile J β) x = 1) ∧
       globalCriticalIntensity J = ⊤ ∧ ∀ x, rootCriticalIntensity J x = ⊤ := by
-  have hrow0 : ∀ v, (∑' w, if w = v then 0 else (J s(v, w) : ℝ≥0∞)) ≤ 0 := fun v => by
+  have hrow0 : ∀ v, rowSum (fun e => (J e : ℝ≥0∞)) v ≤ 0 := fun v => by
     rw [rowSum_hierarchical_eq J C r hJ hr v, hM, ENNReal.coe_zero]
-  have hrow : ∀ v, (∑' w, @ite _ (w = v) (Classical.propDecidable _) 0 (J s(v, w) : ℝ≥0∞)) ≤
-      0 := fun v => by convert hrow0 v
   refine ⟨ae_cluster_eq_singleton_of_offDiagonal _ fun x y hxy => ?_,
-    chi_intensity_eq_one_of_rowSum_zero J hrow β,
-    globalCriticalIntensity_eq_top_of_rowSum_zero J hrow,
-    rootCriticalIntensity_eq_top_of_rowSum_zero J hrow⟩
+    chi_intensity_eq_one_of_rowSum_zero J hrow0 β,
+    globalCriticalIntensity_eq_top_of_rowSum_zero J hrow0,
+    rootCriticalIntensity_eq_top_of_rowSum_zero J hrow0⟩
   refine intensityProfile_eq_zero_of_eq_zero J ?_ β
-  have h0 := ENNReal.tsum_eq_zero.1 (nonpos_iff_eq_zero.1 (hrow x)) y
+  have hx := hrow0 x
+  rw [rowSum_def] at hx
+  have h0 := ENNReal.tsum_eq_zero.1 (nonpos_iff_eq_zero.1 hx) y
   rw [ite_eq_right (Ne.symm hxy), ENNReal.coe_eq_zero] at h0
   exact h0
 
