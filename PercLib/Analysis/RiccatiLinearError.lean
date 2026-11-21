@@ -8,7 +8,7 @@ New proofs, written on 2026-11-21, against pinned mathlib. No upstream proof is 
 -/
 module
 
-public import PercLib.Analysis.Elementary
+public import PercLib.Analysis.LogarithmicCorrections
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.AbsolutelyContinuousFun
 public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
@@ -23,8 +23,6 @@ continuous with derivative at least `-A t^{e-α-1}`, and integrating gives a low
 
 ## Main results
 
-* `AbsolutelyContinuousOnInterval.inv_of_pos`: the reciprocal of a positive absolutely
-  continuous function is absolutely continuous.
 * `rpow_div_sub_le_rpow_div_of_deriv_le`: the integrated inequality
   `r^e / f r - A/(α - e) (r^{e-α} - R^{e-α}) ≤ R^e / f R`.
 * `one_div_sub_add_mul_rpow_pos`: positivity of the bracket below the threshold.
@@ -41,15 +39,6 @@ noncomputable section
 
 open MeasureTheory Set Real intervalIntegral
 
-/-- The reciprocal of an absolutely continuous function that is positive on `uIcc a b` is
-absolutely continuous there. -/
-theorem AbsolutelyContinuousOnInterval.inv_of_pos {f : ℝ → ℝ} {a b : ℝ}
-    (hf : AbsolutelyContinuousOnInterval f a b) (hpos : ∀ t ∈ uIcc a b, 0 < f t) :
-    AbsolutelyContinuousOnInterval (fun t => (f t)⁻¹) a b := by
-  obtain ⟨x₀, hx₀, hmin⟩ := isCompact_uIcc.exists_isMinOn nonempty_uIcc hf.continuousOn
-  exact LipschitzOnWith.comp_absolutelyContinuousOnInterval
-    (PercLib.Analysis.lipschitzOnWith_inv_Ici (hpos x₀ hx₀)) (fun t ht => hmin ht) hf
-
 namespace PercLib.Analysis
 
 /-- **Integrated inequality.** Let `0 < r ≤ R`, `e ≠ α`, and let `f > 0` be absolutely
@@ -62,13 +51,13 @@ theorem rpow_div_sub_le_rpow_div_of_deriv_le {f : ℝ → ℝ} {α A e r R : ℝ
       deriv f t ≤ A * t ^ (-α - 1) * f t ^ 2 + e * t⁻¹ * f t) :
     r ^ e / f r - A / (α - e) * (r ^ (e - α) - R ^ (e - α)) ≤ R ^ e / f R := by
   have hI : uIcc r R = Icc r R := uIcc_of_le hrR
-  have hpos' : ∀ t ∈ uIcc r R, 0 < f t := fun t ht => hpos t (hI ▸ ht)
   have hmem : ∀ x ∈ uIcc r R, 0 < x := fun x hx => hr.trans_le (by rw [hI] at hx; exact hx.1)
   have hpowAC : AbsolutelyContinuousOnInterval (fun t => t ^ e) r R :=
     ContDiffOn.absolutelyContinuousOnInterval
       (contDiffOn_id.rpow_const_of_ne fun x hx => (hmem x hx).ne')
   have hg : AbsolutelyContinuousOnInterval (fun t => t ^ e / f t) r R := by
-    simpa only [div_eq_mul_inv] using hpowAC.fun_mul (hf.inv_of_pos hpos')
+    simpa only [div_eq_mul_inv] using
+      hpowAC.fun_mul (absolutelyContinuousOnInterval_inv hrR hf hpos)
   have hderg : ∀ᵐ t, t ∈ Icc r R →
       -A * t ^ (e - α - 1) ≤ deriv (fun t => t ^ e / f t) t := by
     filter_upwards [hf.ae_differentiableAt, hder] with t hd hb ht
