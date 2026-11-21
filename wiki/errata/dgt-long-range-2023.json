@@ -22,6 +22,26 @@
         "scale": "local",
         "impact": "The summable bound keeps its exponent; this repairs the cited estimate only."
       }
+    },
+    {
+      "id": "bridge-box-edge-bound",
+      "title": "The edge-joining term in the bridge estimate",
+      "status": "provisional",
+      "locator": "arXiv:2011.04642v2, section 2.4, proof of Lemma 3 (lem:2 in the e-print TeX source), display (ojs) and the first line of (3a). Versioned HTML and e-print TeX source compared; no visual PDF check.",
+      "claim": "The probability that some edge of omega other than {x,y} joins [x-R,x+R) and [y-R,y+R) is bounded above by |B_R|^2 e^{-beta(K-2R)}.",
+      "problem": "This is not an upper bound. Each such edge has length greater than K-2R and is open with probability 1-e^{-beta/l^2}, of order beta/l^2, so the true probability is of polynomial order R^2 beta/K^2, which exceeds |B_R|^2 e^{-beta(K-2R)} for large K.",
+      "correction": "Replace |B_R|^2 e^{-beta(K-2R)} by |B_R|^2 (1-e^{-beta/(K-2R)^2}), which is at most |B_R|^2 beta/(K-2R)^2. The argument only needs this term to tend to 0 as K tends to infinity with R fixed, so the lemma and Theorem 1(ii) are unaffected.",
+      "tags": [
+        "67W9"
+      ],
+      "issues": [],
+      "leanImpact": "The wiki proof of 67W9 bounds the corresponding probability by 4R^2L'/(25K^2) from the tail of q and does not use the source's exponential term. No compiled declaration is supplied. The published theorem is not contradicted by this estimate.",
+      "resolution": {
+        "status": "found",
+        "summary": "Bound the joining probability by the inverse-square opening probability of the shortest possible joining edge.",
+        "scale": "local",
+        "impact": "The term still tends to zero as K grows with R fixed; Lemma 3 and Theorem 1(ii) are unaffected."
+      }
     }
   ],
   "versionAudit": {

@@ -123,7 +123,7 @@
       "locator": "Proposition 1.1, pp. 613\u2013614, equations (1.5)\u2013(1.6)",
       "relationship": "Written deduction or explicitly cited input",
       "status": "pending",
-      "note": "67W9 is explicitly cited, with regularity and the limsup coefficient retained."
+      "note": "67W9 states this result with regularity and the limsup coefficient retained, and is proved on the page following Duminil-Copin, Garban and Tassion, section 2.4."
     },
     {
       "source": "dgt-long-range-2023",
@@ -154,7 +154,7 @@
         "0OQL",
         "6B9V"
       ],
-      "reason": "Sublattice domination proves a finite threshold. The cited density bound and written right continuity give a positive critical density; positive isolation probability makes the lower threshold bound strict."
+      "reason": "Sublattice domination proves a finite threshold. The density bound 67W9 and written right continuity give a positive critical density; positive isolation probability makes the lower threshold bound strict."
     },
     {
       "order": 2,
@@ -169,7 +169,7 @@
         "L0TE",
         "RDF0"
       ],
-      "reason": "An embedded plane, the heavy-edge theorem, closed cuts and the cited inverse-square inputs give the classification. Sharpness identifies the susceptibility endpoint; finite-cluster atoms give continuity."
+      "reason": "An embedded plane, the heavy-edge theorem, closed cuts and the inverse-square theorem give the classification. Sharpness identifies the susceptibility endpoint; finite-cluster atoms give continuity."
     },
     {
       "order": 3,
