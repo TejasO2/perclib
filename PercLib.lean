@@ -74,8 +74,10 @@ public import PercLib.Combinatorics.BooleanCoefficients.Defs
 public import PercLib.Combinatorics.DoubleFactorialConvolution
 public import PercLib.Combinatorics.FiniteEdgeChange
 public import PercLib.Combinatorics.ForestBranching
+public import PercLib.Combinatorics.SAWGenerating
 public import PercLib.Combinatorics.Tags.BooleanCoefficients
 public import PercLib.Combinatorics.Tags.ForestConnections
+public import PercLib.Combinatorics.Tags.SAWGenerating
 public import PercLib.Combinatorics.Tags.TreeSplitting
 public import PercLib.Combinatorics.TreeSplitting
 public import PercLib.Meta.Tag
