@@ -74,13 +74,9 @@ open Classical in
 real form, the form used by `deriv_law_escape_ge`. -/
 theorem boundaryFlux_eq_ofReal (J : Sym2 V → ℝ≥0)
     (hJ : ∀ u, Summable fun v => (J s(u, v) : ℝ)) (β : ℝ≥0) (T : Finset V) (o : V) :
-    ∑ u ∈ T, ∑' v, (if v ∈ T then 0 else
-      law (intensityProfile J β) {ω | ∃ ho : o ∈ (T : Set V), ∃ hu : u ∈ (T : Set V),
-        ((openGraph ω).induce (T : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
-      (unitInterval.toNNReal (intensityProfile J β s(u, v)) : ℝ≥0∞)) =
+    boundaryFlux (intensityProfile J β) T o =
     ENNReal.ofReal (∑ u ∈ T, (law (intensityProfile J β)).real
-          {ω | ∃ ho : o ∈ T, ∃ hu : u ∈ T,
-            ((openGraph ω).induce (T : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
+          (localConn (T : Set V) o u) *
         ∑' v, if v ∈ T then 0 else (intensityProfile J β s(u, v) : ℝ)) := by
   have hnn : ∀ u v, 0 ≤ if v ∈ T then (0 : ℝ) else (intensityProfile J β s(u, v) : ℝ) :=
     fun u v => by split_ifs <;> simp [unitInterval.nonneg]
@@ -111,10 +107,7 @@ escape probability `f_Λ` has a derivative with `f_Λ' ≥ (1 - f_Λ)/β`, in th
 theorem escape_deriv_of_one_le_boundaryFlux [Countable V] (J : Sym2 V → ℝ≥0)
     (hJ : ∀ u, Summable fun v => (J s(u, v) : ℝ)) (o : V) {t : ℝ} (ht : 0 ≤ t)
     (hΦ : ∀ β : ℝ≥0, t < β → ∀ T : Finset V, o ∈ T →
-      1 ≤ ∑ u ∈ T, ∑' v, (if v ∈ T then 0 else
-        law (intensityProfile J β) {ω | ∃ ho : o ∈ (T : Set V), ∃ hu : u ∈ (T : Set V),
-          ((openGraph ω).induce (T : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
-        (unitInterval.toNNReal (intensityProfile J β s(u, v)) : ℝ≥0∞))) :
+      1 ≤ boundaryFlux (intensityProfile J β) T o) :
     ∀ Λ : Finset V, o ∈ Λ → ∀ s, t < s →
       HasDerivAt (fun r : ℝ =>
         (law (intensityProfile J r.toNNReal) (⋃ y ∈ (Λ : Set V)ᶜ, conn o y)).toReal)
@@ -150,10 +143,7 @@ theorem sSup_boundaryFlux_lt_one_le_rootCriticalIntensity [Countable V] (J : Sym
     (hT : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e)
     (hJ : ∀ u, Summable fun v => (J s(u, v) : ℝ)) (o : V) :
     sSup ((↑) '' {β : ℝ≥0 | ∃ S : Finset V, o ∈ S ∧
-      ∑ u ∈ S, ∑' v, (if v ∈ S then 0 else
-        law (intensityProfile J β) {ω | ∃ ho : o ∈ (S : Set V), ∃ hu : u ∈ (S : Set V),
-          ((openGraph ω).induce (S : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
-        (unitInterval.toNNReal (intensityProfile J β s(u, v)) : ℝ≥0∞)) < 1}) ≤
+      boundaryFlux (intensityProfile J β) S o < 1}) ≤
       rootCriticalIntensity J o := by
   refine sSup_le ?_
   rintro _ ⟨β, ⟨S, hoS, hΦ⟩, rfl⟩
@@ -167,15 +157,9 @@ theorem rootCriticalIntensity_le_sSup_boundaryFlux_lt_one [Countable V] (J : Sym
     (hJ : ∀ u, Summable fun v => (J s(u, v) : ℝ)) (o : V) :
     rootCriticalIntensity J o ≤
       sSup ((↑) '' {β : ℝ≥0 | ∃ S : Finset V, o ∈ S ∧
-        ∑ u ∈ S, ∑' v, (if v ∈ S then 0 else
-          law (intensityProfile J β) {ω | ∃ ho : o ∈ (S : Set V), ∃ hu : u ∈ (S : Set V),
-            ((openGraph ω).induce (S : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
-          (unitInterval.toNNReal (intensityProfile J β s(u, v)) : ℝ≥0∞)) < 1}) := by
+        boundaryFlux (intensityProfile J β) S o < 1}) := by
   set t : ℝ≥0∞ := sSup ((↑) '' {β : ℝ≥0 | ∃ S : Finset V, o ∈ S ∧
-        ∑ u ∈ S, ∑' v, (if v ∈ S then 0 else
-          law (intensityProfile J β) {ω | ∃ ho : o ∈ (S : Set V), ∃ hu : u ∈ (S : Set V),
-            ((openGraph ω).induce (S : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
-          (unitInterval.toNNReal (intensityProfile J β s(u, v)) : ℝ≥0∞)) < 1}) with ht
+        boundaryFlux (intensityProfile J β) S o < 1}) with ht
   rcases eq_or_ne t ⊤ with htop | htop
   · rw [htop]
     exact le_top
@@ -199,10 +183,7 @@ theorem rootCriticalIntensity_eq_sSup_boundaryFlux_lt_one [Countable V] (J : Sym
     (hJ : ∀ u, Summable fun v => (J s(u, v) : ℝ)) (o : V) :
     rootCriticalIntensity J o =
       sSup ((↑) '' {β : ℝ≥0 | ∃ S : Finset V, o ∈ S ∧
-        ∑ u ∈ S, ∑' v, (if v ∈ S then 0 else
-          law (intensityProfile J β) {ω | ∃ ho : o ∈ (S : Set V), ∃ hu : u ∈ (S : Set V),
-            ((openGraph ω).induce (S : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
-          (unitInterval.toNNReal (intensityProfile J β s(u, v)) : ℝ≥0∞)) < 1}) :=
+        boundaryFlux (intensityProfile J β) S o < 1}) :=
   le_antisymm (rootCriticalIntensity_le_sSup_boundaryFlux_lt_one J hJ o)
     (sSup_boundaryFlux_lt_one_le_rootCriticalIntensity J hT hJ o)
 
@@ -262,10 +243,7 @@ theorem globalCriticalIntensity_eq_sSup_boundaryFlux_lt_one [Countable V] (J : S
     (hJ : ∀ u, Summable fun v => (J s(u, v) : ℝ)) (o : V) :
     globalCriticalIntensity J =
       sSup ((↑) '' {β : ℝ≥0 | ∃ S : Finset V, o ∈ S ∧
-        ∑ u ∈ S, ∑' v, (if v ∈ S then 0 else
-          law (intensityProfile J β) {ω | ∃ ho : o ∈ (S : Set V), ∃ hu : u ∈ (S : Set V),
-            ((openGraph ω).induce (S : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
-          (unitInterval.toNNReal (intensityProfile J β s(u, v)) : ℝ≥0∞)) < 1}) := by
+        boundaryFlux (intensityProfile J β) S o < 1}) := by
   rw [← rootCriticalIntensity_eq_globalCriticalIntensity_of_transitive J hT o]
   exact rootCriticalIntensity_eq_sSup_boundaryFlux_lt_one J hT hJ o
 
@@ -284,10 +262,7 @@ theorem one_le_boundaryFlux_of_rootCriticalIntensity_le [Countable V] (J : Sym2 
     (hT : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e)
     (hJ : ∀ u, Summable fun v => (J s(u, v) : ℝ)) {o : V} {β : ℝ≥0}
     (hβ : rootCriticalIntensity J o ≤ β) (T : Finset V) (hoT : o ∈ T) :
-    1 ≤ ∑ u ∈ T, ∑' v, (if v ∈ T then 0 else
-        law (intensityProfile J β) {ω | ∃ ho : o ∈ (T : Set V), ∃ hu : u ∈ (T : Set V),
-          ((openGraph ω).induce (T : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
-        (unitInterval.toNNReal (intensityProfile J β s(u, v)) : ℝ≥0∞)) := by
+    1 ≤ boundaryFlux (intensityProfile J β) T o := by
   by_contra h
   rw [not_le] at h
   exact absurd hβ (not_le.2 (lt_rootCriticalIntensity_of_boundaryFlux_lt_one J hT

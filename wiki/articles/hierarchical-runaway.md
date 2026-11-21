@@ -14,6 +14,8 @@
   ],
   "related": [
     "hierarchical-two-point",
+    "hierarchical-block-coalescent",
+    "multiplicative-coalescent",
     "finite-random-graphs",
     "exponential-moments",
     "multipoint-trees",
@@ -266,132 +268,21 @@ O(\varepsilon^{(4d-11\alpha)/(2d-5\alpha)}).
 
 
 
-## Exact block layers {#section-exact-block-layers}
+## Exact block layers {#section-exact-model}
 
-<p>We now specialize to the exact radial law used in <a href="https://arxiv.org/html/2211.05686v1#S1.SS1">Critical cluster volumes in hierarchical percolation</a>. Fix integers $L\geq2$, $d\geq1$, an exponent $\alpha&gt;0$ and an intensity $\beta\geq0$. Write $s=d+\alpha$, $Q=L^d$, and let $h(x,y)$ be the least level of a block containing distinct vertices $x,y$ of $\mathbb H_L^d$. Thus $\|x-y\|=L^{h(x,y)}$. The construction below works for every such $\alpha$; the paper's critical-volume theorems assume $0&lt;\alpha&lt;d$.</p>
+<p><em>Main article: <a href="/articles/hierarchical-block-coalescent/">Exact block layers of hierarchical percolation</a>.</em></p>
+<p>Fix integers $L\geq2$, $d\geq1$, an exponent $\alpha&gt;0$ and an intensity $\beta\geq0$. Write $s=d+\alpha$, $Q=L^d$, and let $h(x,y)$ be the least level of a block containing distinct vertices $x,y$ of $\mathbb H_L^d$. Thus $\|x-y\|=L^{h(x,y)}$. By the <a href="/tag/VI3Y/">layer decomposition</a>, percolation at intensity $\beta$ with the exact radial kernel $J_\infty(x,y)=\frac{L^s}{L^s-1}\|x-y\|^{-s}$ is the union of independent layers, one for each finite block; the layer of an $n$-block is independent percolation on the complete graph on that block with edge probability $1-e^{-t_n}$, where $t_n=\beta L^{-sn}$. The union $\eta_B$ of the layers of the blocks inside $B$ is the truncated block law. Its clusters are contained in the intersections of the full clusters with $B$, which may also contain vertices reached by paths leaving $B$.</p>
+<p>Inside an $n$-block, start from the terminal cluster partitions of its $Q$ children and run the parent layer for time $t\in[0,t_n]$. The resulting partition $X_{n,t}$ is a <a href="/articles/multiplicative-coalescent/">finite multiplicative coalescent</a>, and its terminal state is the cluster partition of $\eta_{B_n}$. By <a href="/tag/54V4/">independent-child gluing</a>, its power sums $S_p(n,t)=\sum_{A\in X_{n,t}}|A|^p$ start each level as sums over $Q$ independent children, and the cluster $K_{n,t}(o)$ of the root satisfies $\mathbb E|K_{n,t}(o)|^q=Q^{-n}\mathbb ES_{q+1}(n,t)$. Let $Z_{n,t}$ be the largest cluster size, $Z_n=Z_{n,t_n}$ its terminal value, $M_n$ the integer quantile of $Z_n$ and $\mu_n(t)=\mathbb ES_2(n,t)$. The <a href="/tag/X2A4/">uniform moment control</a> bounds the expected power sums by $\mu_n$ and powers of $M_n$ and gives the mean equation $\mu_n'=(1-\epsilon_n)\mu_n^2$ with $0\leq\epsilon_n\leq\min\{1,CM_n^2/\mu_n\}$.</p>
 
-<a id="tag-VI3Y" data-assertion="proposition" data-title="Independent complete-block layers and the hierarchical cluster law"></a>
-<p>For every finite hierarchical block $B$ and every unordered pair $\{x,y\}\subset B$, take independent rate-one exponential variables $T_{B,\{x,y\}}$. The layer of an $n$-block $B$ contains the edges with $T_{B,\{x,y\}}\leq t_n$, where $t_n=\beta L^{-sn}$. Let $\eta_B$ be the union of the layers of all blocks contained in $B$, and let $\omega$ be the union of all layers. Then $\omega$ is independent bond percolation with probabilities $1-e^{-\beta J_\infty(x,y)}$, where</p>
-<div class="math-display">$$J_\infty(x,y)=\sum_{m=h(x,y)}^\infty L^{-sm}
-=\frac{L^s}{L^s-1}\|x-y\|^{-s}.$$</div>
-<p>For an $n$-block $B$, the law of $\eta_B$ is instead given by the truncated weights</p>
-<div class="math-display">$$J_n(x,y)=\sum_{m=h(x,y)}^n L^{-sm}
-=J_\infty(x,y)-\frac{L^{-sn}}{L^s-1}\qquad(x,y\in B,\ x\ne y).$$</div>
-<p>In this coupling the induced graph $\omega[B]$ is $\eta_B$ together with an independent complete-graph layer whose edge probability is $1-\exp[-\beta L^{-sn}/(L^s-1)]$. If $B_n$ is the $n$-block containing $o$, then the clusters of $o$ in $\eta_{B_n}$ increase to its cluster in $\omega$.</p>
-<p><em>Proof.</em> The blocks containing a fixed pair are its unique common blocks at levels $m\geq h(x,y)$. The probability that all their copies of the edge are absent is the product of their exponential survival probabilities. The geometric series gives $J_\infty$ and $J_n$. Different physical pairs use disjoint collections of independent variables, even when they lie in the same block. Their open indicators are therefore independent.</p>
-<p>For endpoints in $B$, the remaining copies lie in the strict ancestors of $B$. Their total weight is $\sum_{m=n+1}^\infty L^{-sm}=L^{-sn}/(L^s-1)$, independently of the endpoints. These variables are independent of those defining $\eta_B$. Notice that a block layer includes pairs in the same child block as well as pairs in different children; omitting the former would change the law.</p>
-<p>Finally every open edge of $\omega$ occurs in at least one finite-level layer. A finite open path uses only finitely many such layers, all eventually contained in some $B_n$. This proves the increasing-cluster assertion. The full law has finite intensity row sum, since the number of vertices at distance $L^m$ is $Q^m-Q^{m-1}$ and $\sum_m L^{-\alpha m}&lt;\infty$.</p>
-<p>In particular, if $K_{\eta_B}(o)$ and $K_{\omega[B]}(o)$ denote the two internal clusters, the coupling gives</p>
-<div class="math-display">$$K_{\eta_B}(o)\subseteq K_{\omega[B]}(o)\subseteq K_\omega(o)\cap B.$$</div>
-<p>The last set can include vertices reached by paths leaving $B$. Neither inclusion is an identification of laws. The paper's finite-block moments concern $\eta_B$, whereas the earlier sections of this article use the full law restricted to a block.</p>
+## The finite multiplicative coalescent {#section-coalescent-summary}
 
-## Merging the block clusters {#section-block-coalescent}
+<p><em>Main article: <a href="/articles/multiplicative-coalescent/">The finite multiplicative coalescent</a>.</em></p>
+<p>In a finite multiplicative coalescent two blocks of sizes $a$ and $b$ merge at rate $ab$; its <a href="/tag/Z960/">generator</a> $\mathcal L$ is a finite matrix. The <a href="/tag/22H8/">moment equations</a> give exact equations for all mixed moments of the power sums, for example $\frac{d}{dt}\mathbb ES_2=\mathbb E(S_2^2-S_4)$ and $\frac{d}{dt}\mathbb ES_3=3\mathbb E(S_2S_3-S_5)$. On a set of $N$ points the expectations of the products of $S_2,\ldots,S_N$ <a href="/tag/W8PB/">determine the law of the block sizes</a>.</p>
 
-<a id="tag-Z960" data-assertion="proposition" data-title="The finite edge-clock coalescent and its generator"></a>
-<p>Let $\Omega$ be a finite set of size $N$, with an initial partition $P_0$. Add independent rate-one edge clocks between its vertices, independently of $P_0$, and at time $t$ take the partition $X_t$ obtained by joining the initial blocks along edges whose clocks have rung. Each unordered pair of current blocks $\{A,B\}$ merges at rate $|A||B|$. For any function $F$ on the finite set of partitions,</p>
-<div class="math-display">$$\frac{d}{dt}\mathbb E F(X_t)=\mathbb E[\mathcal L F(X_t)],\qquad
-\mathcal L F(P)=\sum_{\{A,B\}\subset P}|A||B|\bigl[F(P^{A,B})-F(P)\bigr],$$</div>
-<p>where the sum is over two distinct blocks without ordering, and $P^{A,B}=(P\setminus\{A,B\})\cup\{A\cup B\}$. Expectations are smooth in $t$, including right derivatives at zero, for every initial law independent of the clocks.</p>
-<p><em>Proof.</em> If $A$ and $B$ are distinct current blocks, none of their $|A||B|$ joining clocks has rung. Conditional on the clock history, their residual times are independent rate-one exponentials by memorylessness. Their minimum has rate $|A||B|$. All other rings either merge another pair or leave the partition unchanged. There are finitely many clocks, so the probability of two or more rings during an interval of length $\varepsilon$ is $O(\varepsilon^2)$, uniformly over states. This gives the generator and the Markov property. The transition matrix is the exponential of a finite matrix, which proves smoothness and the expectation identity, also after averaging over $P_0$.</p>
-<p>The holding rate is consequently</p>
-<div class="math-display">$$\lambda(P)=\sum_{\{A,B\}\subset P}|A||B|
-=\frac12\sum_{A\ne B}|A||B|=\frac{N^2-\sum_A|A|^2}{2},\qquad
-\mathbb P(X_{t+\varepsilon}=P\mid X_t=P)=1-\varepsilon\lambda(P)+O(\varepsilon^2).$$</div>
-<p>For two singleton blocks this is $e^{-\varepsilon}=1-\varepsilon+O(\varepsilon^2)$. The initial transition display in the source's section 2 omits the factor $1/2$ from the ordered sum in its holding line. Equation (2.1) immediately afterward has the correct factor. This local correction is recorded in the <a href="/errata/hutchcroft-hierarchical-volumes-2022/">provisional errata</a>; it does not change that equation or the moment identities derived from it.</p>
+## The periodic block kernel {#section-periodic-kernel-summary}
 
-<p>For a hierarchical $n$-block, start from the terminal partitions of its $Q$ children and run the parent clocks for $0\leq t\leq t_n$. Call the resulting partition $X_{n,t}$. Its terminal state is the component partition of $\eta_{B_n}$ by VI3Y. At an intermediate time its edges are independent, with open probabilities</p>
-<div class="math-display">$$1-\exp\!\left[-t-\beta\sum_{m=h(x,y)}^{n-1}L^{-sm}\right].$$</div>
-<p>The sum is empty for endpoints in different children. This formulation also covers $\beta=0$, when the time interval is a singleton. Thus Harris and BK apply at each intermediate time; the coalescent representation has not introduced dependence between physical edge indicators.</p>
-
-## The exact moment hierarchy {#section-coalescent-moments}
-
-<a id="tag-22H8" data-assertion="theorem" data-title="Single and mixed cluster-mass moment equations"></a>
-<p>For a partition $P$ of a finite set, put $S_p(P)=\sum_{A\in P}|A|^p$. Then $S_1=N$ is constant. For every integer $p\geq2$, the coalescent of Z960 satisfies</p>
-<div class="math-display">$$\frac{d}{dt}\mathbb E S_p(X_t)
-=\frac12\sum_{k=1}^{p-1}\binom pk\mathbb E\bigl[S_{k+1}(X_t)S_{p-k+1}(X_t)-S_{p+2}(X_t)\bigr].$$</div>
-<p>In particular, writing the arguments $X_t$ implicitly,</p>
-<div class="math-display">$$\frac{d}{dt}\mathbb E S_2=\mathbb E(S_2^2-S_4),\qquad
-\frac{d}{dt}\mathbb E S_3=3\mathbb E(S_2S_3-S_5).$$</div>
-<p>There is an explicit formula for every mixed moment. Let $p_1,\ldots,p_r\geq2$ be integers, with repeated indices permitted, and for $I\subseteq\{1,\ldots,r\}$ put $D_I=\sum_{i\in I}p_i$. Then</p>
-<div class="math-display">$$\begin{aligned}
-\mathcal L\!\left(\prod_{i=1}^r S_{p_i}\right)
-={}&\frac12\sum_{\varnothing\ne I\subseteq\{1,\ldots,r\}}
-\left(\prod_{i\notin I}S_{p_i}\right)
-\sum_{\substack{1\leq k_i\leq p_i-1\\i\in I}}
-\left(\prod_{i\in I}\binom{p_i}{k_i}\right)\\
-&\hspace{12mm}\cdot\left[S_{1+\sum_{i\in I}k_i}\,
-S_{1+D_I-\sum_{i\in I}k_i}-S_{2+D_I}\right].
-\end{aligned}$$</div>
-<p>Taking expectations gives the derivative of the mixed moment. If $S_p$ is assigned degree $p$, every term on the right has degree $2+\sum_i p_i$. The empty product has derivative zero.</p>
-<p><em>Proof.</em> Merging masses $a,b$ changes $S_p$ by</p>
-<div class="math-display">$$\Delta_p(a,b)=(a+b)^p-a^p-b^p
-=\sum_{k=1}^{p-1}\binom pk a^k b^{p-k}.$$</div>
-<p>Use the ordered-pair form of the generator, including its factor $1/2$. For a single factor, the term indexed by $k$ sums $a^{k+1}b^{p-k+1}$ over distinct blocks. Summing over all ordered pairs and subtracting the diagonal gives $S_{k+1}S_{p-k+1}-S_{p+2}$.</p>
-<p>For several labelled factors, expand $\prod_i(S_{p_i}+\Delta_{p_i})-\prod_i S_{p_i}$ according to the nonempty set $I$ of factors from which an increment is chosen. Expand each increment by the binomial theorem and multiply by the merger rate $ab$. The two exponents of $a,b$ are $1+\sum_{i\in I}k_i$ and $1+D_I-\sum_{i\in I}k_i$. Subtracting the diagonal now gives the displayed bracket. The untouched factors supply the remaining degree. All sums and all state spaces are finite, so differentiation requires no moment or convergence assumption.</p>
-<p>For example the product rule has a genuine merger correction:</p>
-<div class="math-display">$$\mathcal L(S_pS_q)=S_p\mathcal L S_q+S_q\mathcal L S_p
-+\sum_{\{A,B\}\subset P}|A||B|\Delta_p(|A|,|B|)\Delta_q(|A|,|B|).$$</div>
-<p>In particular $\mathcal L(S_2^2)=2S_2(S_2^2-S_4)+2(S_3^2-S_6)$. There is no factorization of expectations in these identities. Replacing mixed moments by products of their means is an additional asymptotic step, requiring estimates beyond the finite generator calculation.</p>
-
-## Passing between scales and rooted moments {#section-coalescent-gluing}
-
-<a id="tag-54V4" data-assertion="proposition" data-title="Independent-child gluing and the rooted cluster identity"></a>
-<p>For the exact model of VI3Y, let $S_p(n,t)=S_p(X_{n,t})$. At level zero all these variables equal one. For $n\geq1$ the initial variables satisfy</p>
-<div class="math-display">$$S_p(n,0)=\sum_{\ell=1}^{Q}S_p^{(\ell)}(n-1,t_{n-1}),$$</div>
-<p>where the child vectors, including all their coordinates $p$, are independent and identically distributed. Hence, for every finitely supported sequence $m=(m_p)_{p\geq2}$ of nonnegative integers,</p>
-<div class="math-display">$$\mathbb E\prod_{p\geq2}S_p(n,0)^{m_p}
-=\sum_{m^{(1)}+\cdots+m^{(Q)}=m}
-\left[\prod_{p\geq2}\binom{m_p}{m_p^{(1)},\ldots,m_p^{(Q)}}\right]
-\prod_{\ell=1}^Q\mathbb E\prod_{p\geq2}S_p(n-1,t_{n-1})^{m_p^{(\ell)}}.$$</div>
-<p>For example, if $Y_p=S_p(n-1,t_{n-1})$, then</p>
-<div class="math-display">$$\mathbb E S_p(n,0)=Q\mathbb E Y_p,\qquad
-\mathbb E[S_p(n,0)S_q(n,0)]
-=Q\mathbb E(Y_pY_q)+Q(Q-1)\mathbb E Y_p\,\mathbb E Y_q.$$</div>
-<p>Write $K_{n,t}(o)$ for the cluster of $o$ in the intermediate block graph. For every integer $q\geq0$ and every $0\leq t\leq t_n$,</p>
-<div class="math-display">$$\mathbb E|K_{n,t}(o)|^q=Q^{-n}\mathbb E S_{q+1}(n,t).$$</div>
-<p><em>Proof.</em> All coordinates defining different child interiors are independent, and their translated laws agree. At time zero their components have not yet been joined, so the sums of their powers add. Apply the multinomial theorem to each $p$ and then use independence between children. The terms with both factors in one child and in two distinct children give the stated two-factor example.</p>
-<p>For any deterministic partition of $B_n$, summing $|K(x)|^q$ over vertices counts each component of size $a$ exactly $a$ times, giving $\sum_x|K(x)|^q=S_{q+1}$. Translations of $B_n$, viewed as a finite subgroup, preserve hierarchical distances, the block decomposition and all clock laws. Every root therefore has the same cluster-size law at time $t$. Take expectations and divide the deterministic identity by $|B_n|=Q^n$.</p>
-<p>Together, 22H8 and 54V4 give the exact equations and initial values at every scale. They retain the same-child mixed moments in the initial data and the diagonal terms in the generator. Neither can be dropped merely because different child blocks start independently.</p>
-
-<a id="tag-W8PB" data-assertion="proposition" data-title="Mixed mass moments determine the finite component-size law"></a>
-<p>For a random partition of a fixed $N$-element set with $N\geq1$, the expectations of all products of $S_2,\ldots,S_N$ determine the law of its multiset of component sizes. They need not determine the labelled partition law.</p>
-<p><em>Proof.</em> Let $c_a$ be the number of components of size $a$, for $1\leq a\leq N$. Then $S_p=\sum_{a=1}^N a^p c_a$. The matrix $(a^p)_{1\leq p,a\leq N}$ is invertible: factor $a$ from column $a$ to leave the Vandermonde matrix on the distinct points $1,\ldots,N$. Since $S_1=N$ is fixed, the vector $(S_2,\ldots,S_N)$ distinguishes all possible component-size multisets.</p>
-<p>There are finitely many such multisets. For a fixed one $\lambda$ and each other one $\mu$, choose $k(\mu)\in\{2,\ldots,N\}$ with $S_{k(\mu)}(\lambda)\ne S_{k(\mu)}(\mu)$. The polynomial</p>
-<div class="math-display">$$I_\lambda(S)=\prod_{\mu\ne\lambda}
-\frac{S_{k(\mu)}-S_{k(\mu)}(\mu)}
-{S_{k(\mu)}(\lambda)-S_{k(\mu)}(\mu)}$$</div>
-<p>is one at $\lambda$ and zero at every other possible multiset. Its expectation is therefore the probability of $\lambda$, determined by the mixed moments. For $N=1$ there is only one possible multiset and the assertion is immediate. This is a finite determination argument at each scale, not a uniqueness claim for arbitrary solutions of an infinite system of differential equations.</p>
-
-<p>The <a href="/coverage/sources/hierarchical-volumes-2211.05686v1/">source reading map</a> records the exact scope of these identities. The matching volume tails, the critical logarithm and the moment asymptotics still require the later analytic estimates. The exact radial law above is also stronger than a comparable-kernel hypothesis; that generalization is not supplied by this construction.</p>
-
-
-
-## Uniform moment control for the block process {#section-coalescent-concentration}
-
-<a id="tag-X2A4" data-assertion="theorem" data-title="Block moment comparisons, concentration and the mean-equation error"></a>
-<p>Use the exact block process of <a href="/tag/VI3Y/">VI3Y</a> and <a href="/tag/Z960/">Z960</a>, at any fixed $\beta\geq0$. Let $Z_{n,t}$ be its largest cluster, let $S_p(n,t)$ be its mass power sums, and define the terminal integer quantile</p>
-<div class="math-display">$$M_n=\min\{m\geq1:\mathbb P(Z_{n,t_n}\geq m)\leq e^{-1}\}.$$</div>
-<p>For every fixed list of indices $p_i\geq1$, the mixed-moment comparisons of <a href="/tag/25TW/">25TW</a> hold uniformly in $n$ and $0\leq t\leq t_n$. For fixed $p,q\geq1$ one also has</p>
-<div class="math-display">$$\mathbb E S_{p+q}(n,t)\leq\mathbb E[S_p(n,t)Z_{n,t}^{q}]
-\leq C_{p,q}M_n^q\mathbb E S_p(n,t).$$</div>
-<p>For $n\geq1$,</p>
-<div class="math-display">$$\mathbb E S_p(n,t)\geq\mathbb E Z_{n,t}^p\geq\frac{M_{n-1}^p}{2^p e}.$$</div>
-<p>At $n=0$ all power sums and the maximum are identically one; no negative-index quantile is needed.</p>
-<p>Put $\mu_n(t)=\mathbb E S_2(n,t)$. There is a universal finite constant $C$ such that</p>
-<div class="math-display">$$\frac{\operatorname{Var}(S_2(n,t))}{\mu_n(t)^2}\leq C\frac{M_n^2}{\mu_n(t)},\qquad
-\mu_n'(t)=(1-\epsilon_n(t))\mu_n(t)^2,$$</div>
-<div class="math-display">$$\epsilon_n(t)=\frac{\mathbb E S_4(n,t)-\operatorname{Var}(S_2(n,t))}{\mu_n(t)^2},\qquad
-0\leq\epsilon_n(t)\leq\min\!\left\{1,C\frac{M_n^2}{\mu_n(t)}\right\}.$$</div>
-<p>If $\sup_{0\leq t\leq t_n}M_n^2/\mu_n(t)\to0$, then $S_2(n,t)/\mu_n(t)\to1$ in $L^r$ for every fixed $1\leq r&lt;\infty$, uniformly over $0\leq t\leq t_n$, and $\sup_t\epsilon_n(t)\to0$. A sufficient pair of hypotheses is</p>
-<div class="math-display">$$\inf_{0\leq t\leq t_n}\mu_n(t)\geq c_0 L^{(d+\alpha)n}\quad\text{for all sufficiently large }n,\qquad
-M_n=o\!\left(L^{(d+\alpha)n/2}\right),\qquad c_0&gt;0.$$</div>
-<p>This last implication keeps the mean lower bound and the hydrodynamic condition as separate inputs.</p>
-<p><em>Proof.</em> At every intermediate time the graph has independent bonds, by Z960. Apply 25TW with the whole block as the window. The current maximum is bounded by its terminal maximum in the clock coupling, so its integer quantile is at most $M_n$. This gives the uniform upper comparisons. The parent maximum is at least the terminal maximum of any one child. Minimality of the child's integer quantile gives $\mathbb P(Z_{n-1,t_{n-1}}\geq M_{n-1}-1)&gt;e^{-1}$, and $M_{n-1}\geq2$. This proves the lower comparison.</p>
-<p>The covariance estimate <a href="/tag/25Z4/">25Z4</a> and the upper comparison with $p=q=2$ give</p>
-<div class="math-display">$$\operatorname{Var}(S_2(n,t))\leq\mathbb E S_4(n,t)\leq C M_n^2\mu_n(t).$$</div>
-<p>The exact derivative in <a href="/tag/22H8/">22H8</a> is $\mu_n'=\mathbb E S_2^2-\mathbb E S_4$. Subtracting and adding $\mu_n^2$ gives the stated error. The covariance bound makes it nonnegative; nonnegativity of the variance gives its upper bound by $\mathbb E S_4/\mu_n^2$. Finally $S_2^2-S_4\geq0$ pointwise, so $\mu_n'\geq0$ and $\epsilon_n\leq1$. Derivatives at the time endpoints have their one-sided coalescent meaning.</p>
-<p>The displayed ratio bound proves uniform $L^2$ convergence under its stated hypothesis. For every fixed larger exponent the normalized power sums have uniformly bounded higher moments by 25TW. Splitting according to whether $|S_2/\mu_n-1|$ exceeds a threshold and applying Hölder upgrades the convergence to any fixed finite $L^r$; exponents at most two follow directly from $L^2$. All these bounds are uniform in the intermediate time. The sufficient pair of hypotheses makes $M_n^2/\mu_n(t)$ tend to zero uniformly.</p>
-<p>This supplies Corollary 3.7 and the variance/error argument of Proposition 4.5 and Lemma 4.8, with the required hypotheses visible. It does not itself prove the critical lower mean estimate, the hydrodynamic condition, the later moment equivalents or the critical volume-tail logarithm. The source's overstrong uniform-index bound and its zero-level conventions have <a href="/errata/hutchcroft-hierarchical-volumes-2022/">provisional corrections</a>; the fixed-index conclusions used here survive those repairs.</p>
+<p><em>Main article: <a href="/articles/hierarchical-block-coalescent/#section-periodic-block-kernel">Exact block layers of hierarchical percolation</a>.</em></p>
+<p>Periodizing the exact kernel on an $n$-block, by summing it over the fibres of the projection of $\mathbb H$ onto $B_n$ that forgets the coordinates above $n$, adds the constant $\frac{q}{1-q}L^{-(d+\alpha)n}$ to the truncated kernel, where $q=L^{-\alpha}$. Periodic percolation on $B_n$ is independent bond percolation on $B_n$ with edge probabilities $1-\exp(-\beta J_n^{\mathrm{per}}(x,y))$ for this periodized kernel $J_n^{\mathrm{per}}$. By the <a href="/tag/YY9S/">periodic-kernel identity</a>, it has the cluster law of the block process with its last coalescent stage run to time $\beta L^{-(d+\alpha)n}/(1-q)$.</p>
 
 
 
@@ -951,27 +842,10 @@ C_0=2C_\alpha+\frac{L^{-d}}{1-L^{-d}}.$$</div>
 <p>For a nonnegative variable $Z$, $\mathbb E(Z-\mathbb EZ)^4\leq\mathbb EZ^4$. To check this when $m=\mathbb EZ&gt;0$, Cauchy–Schwarz gives $\mathbb EZ^3\geq(\mathbb EZ^2)^2/m$. Writing $x=\mathbb EZ^2/m^2\geq1$, the difference between the raw and centered fourth moments is at least $m^4(4x^2-6x+3)\geq0$. The case $m=0$ is immediate. Also $\operatorname{Var}(Z_i)\leq\mathbb EZ_i^2$. The preceding display is therefore at most $\sum_i\mathbb EZ_i^4+3(\sum_i\mathbb EZ_i^2)^2$, as required.</p>
 <p>This supplies the fourth-moment estimate needed in section 6.3, with coefficient three. The source's independent fourth-moment expansion has coefficient two instead of six on unordered pairs, and its last BK equality drops the avoidance condition. The corrected bound suffices for all subsequent negligible-error estimates; no assertion that the sharper printed bound is false is needed.</p>
 
-## Exact variance and covariance equations {#section-norm-covariance-equations}
+## Exact variance and covariance equations {#section-variance-covariance-summary}
 
-<a id="tag-C1BP" data-assertion="theorem" data-title="Exact coalescent equations for the variance of S2 and its covariance with S3"></a>
-<p>For a finite multiplicative coalescent, write $f_j=\mathbb ES_j$, $\mu=f_2$, $\nu=f_3$, $V=\operatorname{Var}(S_2)$, $C=\operatorname{Cov}(S_2,S_3)$ and $\Delta_j=S_j-f_j$. Then</p>
-<div class="math-display">$$\begin{aligned}
-V'&amp;=4\mu V+2\nu^2+2\operatorname{Var}(S_3)+2\mathbb E\Delta_2^3
--2\operatorname{Cov}(S_2,S_4)-2f_6,\\
-C'&amp;=5\mu C+3\nu V+6\nu f_4+4\mathbb E(\Delta_3\Delta_2^2)
--3\operatorname{Cov}(S_2,S_5)+5\operatorname{Cov}(S_3,S_4)-6f_7.
-\end{aligned}$$</div>
-<p><em>Proof.</em> A merger of components of sizes $a,b$ has rate $ab$ and increments $S_2$ by $2ab$ and $S_3$ by $3ab(a+b)$. Applying the finite generator and writing distinct-pair sums as products minus diagonals gives</p>
-<div class="math-display">$$\begin{aligned}
-\mathcal L S_2&amp;=S_2^2-S_4,&amp;\mathcal L S_3&amp;=3(S_2S_3-S_5),\\
-\mathcal L(S_2^2)&amp;=2(S_2^3-S_2S_4+S_3^2-S_6),\\
-\mathcal L(S_2S_3)&amp;=4S_2^2S_3-3S_2S_5+5S_3S_4-6S_7.
-\end{aligned}$$</div>
-<p>For example the product increment is $3ab(a+b)S_2+2abS_3+6a^2b^2(a+b)$; summation over unordered pairs gives the last formula. Differentiate $V=\mathbb ES_2^2-\mu^2$ and $C=\mathbb E(S_2S_3)-\mu\nu$, then use</p>
-<div class="math-display">$$\mathbb ES_2^3=\mu^3+3\mu V+\mathbb E\Delta_2^3,\qquad
-\mathbb E(S_2^2S_3)=\mu^2\nu+2\mu C+\nu V+\mathbb E(\Delta_3\Delta_2^2).$$</div>
-<p>Collecting the remaining mixed products into covariances proves both identities. They hold for every finite initial distribution, without hydrodynamics.</p>
-<p>For the hierarchical process, independent children additionally give the exact gluing identities $V_{n+1}(0)=QV_n(t_n)$ and $C_{n+1}(0)=QC_n(t_n)$.</p>
+<p><em>Main article: <a href="/articles/multiplicative-coalescent/">The finite multiplicative coalescent</a>.</em></p>
+<p>In the block process write $f_{j,n}(t)=\mathbb ES_j(n,t)$, $\nu_n=f_{3,n}$, $V_n(t)=\operatorname{Var}(S_2(n,t))$ and $C_n(t)=\operatorname{Cov}(S_2(n,t),S_3(n,t))$. Within a level, $V_n$ and $C_n$ satisfy the <a href="/tag/C1BP/">exact variance and covariance equations</a> of the finite multiplicative coalescent, in terms of the means and centred mixed moments, and independent children give the gluing identities $V_{n+1}(0)=QV_n(t_n)$ and $C_{n+1}(0)=QC_n(t_n)$.</p>
 
 ## The leading norm correlations {#section-leading-norm-correlations}
 
@@ -1145,26 +1019,6 @@ c_*=\frac{\beta_cL^{-\alpha}}{1-L^{-\alpha}}.$$</div>
 <p>The tail just proved makes the integral at infinity comparable to $\int_2^\infty t^{p-3/2}(\log t)^{1/4}\,dt$. It converges exactly when $p&lt;1/2$, including divergence at equality. Finally, the upper bound on $M(h)$ was already established, and its matching lower bound follows from $M(h)\geq(1-e^{-1})\mathbb P(T\geq1/h)$.</p>
 <p>This proves Theorem 1.7, whose original statement correctly uses thresholds at least two. The logarithmic exponent is unaffected by the provisional amplitude correction in WQ7B. In the proof, the logarithmic expression for $M(h)$ is used only for small $h$; it cannot hold for every $h&gt;0$ as written after the optimization in section 6.4. The scale choice above displays the logarithm of the full balancing product without ambiguity.</p>
 
-
-## The periodic block kernel {#section-periodic-block-kernel}
-
-<a id="tag-YY9S" data-assertion="proposition" data-title="Periodizing the hierarchical kernel adds an explicit final coalescent time"></a>
-<p>Write the hierarchical group as $\mathbb H=\bigoplus_{j\geq1}(\mathbb Z/L\mathbb Z)^d$. Let $B_n$ be the subgroup supported on coordinates $1,\ldots,n$, let $T_n$ be the subgroup supported on coordinates greater than $n$, and let $\pi_n:\mathbb H\to B_n$ be the coordinate projection. Thus $\mathbb H/T_n\cong B_n$. For distinct $x,y\in B_n$, define</p>
-<div class="math-display">$$J_n^{\mathrm{per}}(x,y)=\sum_{z:\pi_nz=y}J_\infty(x,z),\qquad
-J_n^{\mathrm{free}}(x,y)=\sum_{j=h(x,y)}^nL^{-(d+\alpha)j}.$$</div>
-<p>With $s=d+\alpha$ and $q=L^{-\alpha}$, the sum converges and</p>
-<div class="math-display">$$J_n^{\mathrm{per}}(x,y)=J_n^{\mathrm{free}}(x,y)
-+\frac{q}{1-q}L^{-sn}.\tag{9}$$</div>
-<p>At any intensity $\beta\geq0$, periodic percolation on $B_n$ therefore has the cluster law obtained by running the last coalescent stage to time $\beta L^{-sn}/(1-q)$, leaving the earlier stages unchanged.</p>
-<p><em>Proof.</em> Put $Q=L^d$ and $r=L^{-s}$, so that $Qr=q&lt;1$. In the fibre $\pi_nz=y$, the point $z=y$ contributes $J_n^{\mathrm{free}}(x,y)+r^{n+1}/(1-r)$. For each $k\geq1$, there are $(Q-1)Q^{k-1}$ other points whose highest nonzero tail coordinate is $n+k$. Each has distance $L^{n+k}$ from $x$, and hence weight $r^{n+k}/(1-r)$. Summing the geometric series gives</p>
-<div class="math-display">$$\begin{aligned}
-J_n^{\mathrm{per}}-J_n^{\mathrm{free}}
-&amp;=\frac{r^n}{1-r}\left[r+(Q-1)\sum_{k\geq1}Q^{k-1}r^k\right]\\
-&amp;=\frac{r^n}{1-r}\left[r+\frac{(Q-1)r}{1-Qr}\right]
-=r^n\frac{q}{1-q}.
-\end{aligned}$$</div>
-<p>This proves convergence and (9). The extra constant kernel is an independent layer with edge probability $1-\exp[-\beta r^nq/(1-q)]$. Between current components of sizes $a,b$, its absent-edge probability is $\exp[-\beta r^nqab/(1-q)]$. It is therefore an additional coalescent time $\beta r^nq/(1-q)$ after the usual final time $\beta r^n$, proving the distributional assertion. Diagonal fibre weights are irrelevant to bond clusters and were excluded in the definition.</p>
-<p>The quotient in section 7.1 must be by the tail subgroup. Literal congruence modulo $B_n$ makes every $y\in B_n$ represent the same coset and cannot give the stated finite-block kernel. The corrected projection preserves the following calculation in the source. At criticality the periodic final time is $At_n$, where $A=(1-q)^{-1}$; periodic asymptotics require control beyond the interval $[0,t_n]$ used in the truncated-block estimates.</p>
 
 ## A continuous renormalization map {#section-renormalization-map}
 
