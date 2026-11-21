@@ -14,6 +14,7 @@ module
 public import Mathlib.Analysis.Convex.Continuous
 public import Mathlib.Analysis.Convex.Deriv
 public import Mathlib.Data.Rat.Denumerable
+public import Mathlib.MeasureTheory.Constructions.Polish.Basic
 public import Mathlib.MeasureTheory.Function.Floor
 public import Mathlib.MeasureTheory.Integral.DominatedConvergence
 public import Mathlib.MeasureTheory.Integral.Prod
@@ -39,6 +40,17 @@ supporting lines.
 * `eq_add_sum_sum_mixedDiff`: two-dimensional telescoping on `ℕ × ℕ`.
 * `integral_comp_min_le_integral_prod_of_tail_le`: the discrete comparison.
 * `integral_comp_add_le_integral_prod_of_tail_le`: two variables, convex Lipschitz `φ`.
+* `integral_comp_sum_le_of_tail_le_of_lipschitzWith`: `n` increments, convex Lipschitz `φ`.
+* `ConvexOn.exists_lipschitzWith_tendsto`: convex Lipschitz approximation from below.
+* `convex_comparison_of_lipschitzWith_comparison`: from Lipschitz to general convex `φ`.
+* `convex_comparison_sum_of_tail_le`, `integral_max_sub_le_of_tail_le`,
+  `lintegral_abs_sub_integral_rpow_le_of_tail_le`: the comparison for `n` increments.
+* `ae_summable_abs_and_tendsto_integral_abs_sum_range_sub_tsum`: absolute a.e. and `L¹`
+  convergence of a series with `∑ E |Y_i| < ∞`.
+* `convex_comparison_tsum_of_tail_le`, `lintegral_exp_mul_sub_integral_le_of_tail_le`,
+  `lintegral_abs_sub_integral_tsum_rpow_le_of_tail_le`: the comparison for countable sums.
+
+No definition is introduced.
 -/
 
 @[expose] public section
@@ -593,7 +605,7 @@ theorem ConvexOn.exists_lipschitzWith_tendsto {φ : ℝ → ℝ} (hφ : ConvexOn
 
 /-- Monotone convergence along the approximants of `ConvexOn.exists_lipschitzWith_tendsto`. -/
 theorem tendsto_ofReal_integral_sub_of_tendsto {ρ : Measure γ} [IsProbabilityMeasure ρ]
-    {Y : γ → ℝ} (hYm : Measurable Y) (hY : Integrable Y ρ) {φ : ℝ → ℝ}
+    {Y : γ → ℝ} (hYm : AEMeasurable Y ρ) (hY : Integrable Y ρ) {φ : ℝ → ℝ}
     {F : ℕ → ℝ → ℝ} (hFK : ∀ m, ∃ K, LipschitzWith K (F m)) (hFm : ∀ x, Monotone fun m => F m x)
     (hFt : ∀ x, Tendsto (fun m => F m x) atTop (𝓝 (φ x))) :
     Tendsto (fun m => ENNReal.ofReal (∫ t, (F m (Y t) - F 0 (Y t)) ∂ρ)) atTop
@@ -609,8 +621,8 @@ theorem tendsto_ofReal_integral_sub_of_tendsto {ρ : Measure γ} [IsProbabilityM
   refine lintegral_tendsto_of_tendsto_of_monotone (fun m => ?_) (Eventually.of_forall fun t =>
     fun m m' hmm' => ENNReal.ofReal_le_ofReal (sub_le_sub_right (hFm _ hmm') _))
     (Eventually.of_forall fun t => ?_)
-  · exact (ENNReal.measurable_ofReal.comp (((hcF m).measurable.comp hYm).sub
-      ((hcF 0).measurable.comp hYm))).aemeasurable
+  · exact ENNReal.measurable_ofReal.comp_aemeasurable
+      (((hcF m).measurable.comp_aemeasurable hYm).sub ((hcF 0).measurable.comp_aemeasurable hYm))
   · exact (ENNReal.continuous_ofReal.tendsto _).comp ((hFt _).sub tendsto_const_nhds)
 
 /-- **From Lipschitz to general convex comparison.** If `E ψ(X) ≤ E ψ(X')` for every convex
@@ -619,7 +631,8 @@ integrable, and integrability of `φ(X')` implies that of `φ(X)` with `E φ(X) 
 is, `E φ(X) ≤ E φ(X')` as extended expectations in `(-∞, ∞]`. -/
 theorem convex_comparison_of_lipschitzWith_comparison {μ : Measure Ω} [IsProbabilityMeasure μ]
     {μ' : Measure Ω'} [IsProbabilityMeasure μ'] {X : Ω → ℝ} {X' : Ω' → ℝ}
-    (hXm : Measurable X) (hX'm : Measurable X') (hX : Integrable X μ) (hX' : Integrable X' μ')
+    (hXm : AEMeasurable X μ) (hX'm : AEMeasurable X' μ') (hX : Integrable X μ)
+    (hX' : Integrable X' μ')
     (h : ∀ (ψ : ℝ → ℝ) (K : ℝ≥0), ConvexOn ℝ univ ψ → LipschitzWith K ψ →
       ∫ ω, ψ (X ω) ∂μ ≤ ∫ ω, ψ (X' ω) ∂μ')
     {φ : ℝ → ℝ} (hφ : ConvexOn ℝ univ φ) :
@@ -646,9 +659,9 @@ theorem convex_comparison_of_lipschitzWith_comparison {μ : Measure Ω} [IsProba
   have hneg : ∀ y, ‖(φ y)⁻‖ ≤ |F 0 y| := fun y => by
     rw [Real.norm_eq_abs, abs_of_nonneg (negPart_nonneg _), negPart_def]
     exact max_le (by linarith [neg_abs_le (F 0 y), hFle 0 y]) (abs_nonneg _)
-  refine ⟨hF0X.abs.mono' (hcont.measurable.comp hXm).aestronglyMeasurable.negPart
+  refine ⟨hF0X.abs.mono' (hcont.measurable.comp_aemeasurable hXm).aestronglyMeasurable.negPart
       (Eventually.of_forall fun ω => hneg _),
-    hF0X'.abs.mono' (hcont.measurable.comp hX'm).aestronglyMeasurable.negPart
+    hF0X'.abs.mono' (hcont.measurable.comp_aemeasurable hX'm).aestronglyMeasurable.negPart
       (Eventually.of_forall fun ω => hneg _), fun hφX' => ?_⟩
   have hL := tendsto_ofReal_integral_sub_of_tendsto hXm hX hFK hFm hFt
   have hL' := tendsto_ofReal_integral_sub_of_tendsto hX'm hX' hFK hFm hFt
@@ -665,7 +678,7 @@ theorem convex_comparison_of_lipschitzWith_comparison {μ : Measure Ω} [IsProba
     ne_top_of_le_ne_top (hE' ▸ ENNReal.ofReal_ne_top) hle
   have hD : Integrable (fun ω => φ (X ω) - F 0 (X ω)) μ :=
     (lintegral_ofReal_ne_top_iff_integrable
-      ((hcont.measurable.comp hXm).aestronglyMeasurable.sub hF0X.1)
+      ((hcont.measurable.comp_aemeasurable hXm).aestronglyMeasurable.sub hF0X.1)
       (Eventually.of_forall fun ω => hnn _)).1 htop
   have hE := ofReal_integral_eq_lintegral_ofReal hD (Eventually.of_forall fun ω => hnn _)
   have hφX : Integrable (fun ω => φ (X ω)) μ :=
@@ -737,8 +750,8 @@ theorem convex_comparison_sum_of_tail_le {μ : Measure Ω} [IsProbabilityMeasure
         Integrable (fun ω => φ (∑ i ∈ range n, Z i ω)) μ ∧
           ∫ ω, φ (∑ i ∈ range n, Z i ω) ∂μ ≤ ∫ ω, φ (∑ i ∈ range n, Z' i ω) ∂μ') :=
   convex_comparison_of_lipschitzWith_comparison
-    (Finset.measurable_sum _ fun i hi => hZm i (Finset.mem_range.1 hi))
-    (Finset.measurable_sum _ fun i hi => hZ'm i (Finset.mem_range.1 hi))
+    (Finset.measurable_sum _ fun i hi => hZm i (Finset.mem_range.1 hi)).aemeasurable
+    (Finset.measurable_sum _ fun i hi => hZ'm i (Finset.mem_range.1 hi)).aemeasurable
     (integrable_finsetSum _ fun i hi => hZ i (Finset.mem_range.1 hi))
     (integrable_finsetSum _ fun i hi => integrable_of_map_eq (hZm i (Finset.mem_range.1 hi))
       (hZ'm i (Finset.mem_range.1 hi)) (hZ i (Finset.mem_range.1 hi))
@@ -839,5 +852,228 @@ theorem lintegral_abs_sub_integral_rpow_le_of_tail_le {μ : Measure Ω} [IsProba
   rw [← ofReal_integral_eq_lintegral_ofReal hI (Eventually.of_forall fun ω => hnn _),
     ← ofReal_integral_eq_lintegral_ofReal hI' (Eventually.of_forall fun ω => hnn _)]
   exact ENNReal.ofReal_le_ofReal hle
+
+
+/-! ### Absolutely summable sequences -/
+
+/-- A nonnegative comparison `E f ≤ E f'` stated through integrability transfers to lower
+Lebesgue integrals. -/
+theorem lintegral_ofReal_le_of_integrable_imp {ρ : Measure γ} {ρ' : Measure α} {f : γ → ℝ}
+    {f' : α → ℝ} (hf'm : AEStronglyMeasurable f' ρ') (hf0 : ∀ w, 0 ≤ f w)
+    (hf'0 : ∀ w, 0 ≤ f' w) (h : Integrable f' ρ' → Integrable f ρ ∧ ∫ w, f w ∂ρ ≤ ∫ w, f' w ∂ρ') :
+    ∫⁻ w, ENNReal.ofReal (f w) ∂ρ ≤ ∫⁻ w, ENNReal.ofReal (f' w) ∂ρ' := by
+  by_cases htop : ∫⁻ w, ENNReal.ofReal (f' w) ∂ρ' = ⊤
+  · rw [htop]; exact le_top
+  have hI' := (lintegral_ofReal_ne_top_iff_integrable hf'm (Eventually.of_forall hf'0)).1 htop
+  obtain ⟨hI, hle⟩ := h hI'
+  rw [← ofReal_integral_eq_lintegral_ofReal hI (Eventually.of_forall hf0),
+    ← ofReal_integral_eq_lintegral_ofReal hI' (Eventually.of_forall hf'0)]
+  exact ENNReal.ofReal_le_ofReal hle
+
+/-- If `∑ E |Y_i| < ∞`, the series `∑ Y_i` converges absolutely almost everywhere, its sum is
+integrable, and the partial sums converge to it in `L¹`. -/
+theorem ae_summable_abs_and_tendsto_integral_abs_sum_range_sub_tsum {ρ : Measure γ}
+    {Y : ℕ → γ → ℝ} (hY : ∀ i, Integrable (Y i) ρ)
+    (hsum : Summable fun i => ∫ w, |Y i w| ∂ρ) :
+    (∀ᵐ w ∂ρ, Summable fun i => |Y i w|) ∧ Integrable (fun w => ∑' i, Y i w) ρ ∧
+      Tendsto (fun n => ∫ w, |∑ i ∈ range n, Y i w - ∑' i, Y i w| ∂ρ) atTop (𝓝 0) := by
+  have hmeas : ∀ i, AEMeasurable (fun w => ENNReal.ofReal |Y i w|) ρ := fun i =>
+    ENNReal.measurable_ofReal.comp_aemeasurable
+      (continuous_abs.measurable.comp_aemeasurable (hY i).1.aemeasurable)
+  have hlin : ∫⁻ w, ∑' i, ENNReal.ofReal |Y i w| ∂ρ ≠ ⊤ := by
+    rw [lintegral_tsum hmeas]
+    simp_rw [fun i => (ofReal_integral_eq_lintegral_ofReal (hY i).abs
+      (Eventually.of_forall fun w => abs_nonneg (Y i w))).symm]
+    rw [← ENNReal.ofReal_tsum_of_nonneg (fun i => integral_nonneg fun w => abs_nonneg _) hsum]
+    exact ENNReal.ofReal_ne_top
+  have hfin : ∀ᵐ w ∂ρ, ∑' i, ENNReal.ofReal |Y i w| ≠ ⊤ :=
+    (ae_lt_top' (AEMeasurable.tsum hmeas) hlin).mono fun w hw => hw.ne
+  have hsumm : ∀ᵐ w ∂ρ, Summable fun i => |Y i w| := hfin.mono fun w hw =>
+    (NNReal.summable_coe.2 (ENNReal.tsum_coe_ne_top_iff_summable.1 hw)).congr
+      fun i => Real.coe_toNNReal _ (abs_nonneg _)
+  set G : γ → ℝ := fun w => ∑' i, |Y i w| with hG
+  have hGeq : ∀ w, G w = (∑' i, ENNReal.ofReal |Y i w|).toReal := fun w => by
+    rw [ENNReal.tsum_toReal_eq fun i => ENNReal.ofReal_ne_top]
+    exact tsum_congr fun i => (ENNReal.toReal_ofReal (abs_nonneg _)).symm
+  have hGi : Integrable G ρ := by
+    rw [show G = fun w => (∑' i, ENNReal.ofReal |Y i w|).toReal from funext hGeq]
+    exact integrable_toReal_of_lintegral_ne_top (AEMeasurable.tsum hmeas) hlin
+  have hlim : ∀ᵐ w ∂ρ, Tendsto (fun n => ∑ i ∈ range n, Y i w) atTop (𝓝 (∑' i, Y i w)) :=
+    hsumm.mono fun w hw => (Summable.of_abs hw).hasSum.tendsto_sum_nat
+  have hSm : AEStronglyMeasurable (fun w => ∑' i, Y i w) ρ :=
+    aestronglyMeasurable_of_tendsto_ae atTop
+      (fun n => (integrable_finsetSum (range n) fun i _ => hY i).1) hlim
+  have hpart : ∀ᵐ w ∂ρ, ∀ n, |∑ i ∈ range n, Y i w| ≤ G w := hsumm.mono fun w hw n =>
+    (Finset.abs_sum_le_sum_abs _ _).trans (hw.sum_le_tsum _ fun i _ => abs_nonneg _)
+  have htot : ∀ᵐ w ∂ρ, |∑' i, Y i w| ≤ G w := hsumm.mono fun w hw => by
+    simpa [Real.norm_eq_abs] using norm_tsum_le_tsum_norm (f := fun i => Y i w)
+      (by simpa [Real.norm_eq_abs] using hw)
+  refine ⟨hsumm, hGi.mono' hSm (htot.mono fun w hw => by rwa [Real.norm_eq_abs]), ?_⟩
+  have := tendsto_integral_of_dominated_convergence (fun w => 2 * G w)
+    (F := fun n w => |∑ i ∈ range n, Y i w - ∑' i, Y i w|) (f := fun _ => (0 : ℝ))
+    (fun n => continuous_abs.comp_aestronglyMeasurable
+      ((integrable_finsetSum (range n) fun i _ => hY i).1.sub hSm))
+    (hGi.const_mul 2)
+    (fun n => (hpart.and htot).mono fun w ⟨h1, h2⟩ => by
+      rw [Real.norm_eq_abs, abs_abs]
+      linarith [abs_sub (∑ i ∈ range n, Y i w) (∑' i, Y i w), h1 n])
+    (hlim.mono fun w hw => by
+      simpa using (hw.sub_const (∑' i, Y i w)).abs)
+  simpa using this
+
+/-- `L¹` convergence carries integrals of a Lipschitz function. -/
+theorem tendsto_integral_comp_of_tendsto_integral_abs_sub {ρ : Measure γ} [IsFiniteMeasure ρ]
+    {X : ℕ → γ → ℝ} {Y : γ → ℝ} (hX : ∀ n, Integrable (X n) ρ) (hY : Integrable Y ρ)
+    (hlim : Tendsto (fun n => ∫ w, |X n w - Y w| ∂ρ) atTop (𝓝 0)) {ψ : ℝ → ℝ} {K : ℝ≥0}
+    (hψ : LipschitzWith K ψ) :
+    Tendsto (fun n => ∫ w, ψ (X n w) ∂ρ) atTop (𝓝 (∫ w, ψ (Y w) ∂ρ)) := by
+  rw [tendsto_iff_dist_tendsto_zero]
+  refine squeeze_zero (fun n => dist_nonneg) (fun n => ?_) (by simpa using hlim.const_mul (K : ℝ))
+  rw [Real.dist_eq, ← integral_sub (integrable_comp_of_lipschitzWith (hX n) hψ)
+    (integrable_comp_of_lipschitzWith hY hψ), ← integral_const_mul]
+  refine abs_integral_le_integral_abs.trans (integral_mono
+    ((integrable_comp_of_lipschitzWith (hX n) hψ).sub
+      (integrable_comp_of_lipschitzWith hY hψ)).abs (((hX n).sub hY).abs.const_mul _)
+    fun w => ?_)
+  have := hψ.dist_le_mul (X n w) (Y w)
+  rwa [Real.dist_eq, Real.dist_eq] at this
+
+
+theorem integral_comp_eq_of_map_eq {μ : Measure Ω} {μ' : Measure Ω'} {X : Ω → ℝ} {X' : Ω' → ℝ}
+    (hXm : Measurable X) (hX'm : Measurable X') (h : μ'.map X' = μ.map X) {f : ℝ → ℝ}
+    (hf : Continuous f) : ∫ ω, f (X' ω) ∂μ' = ∫ ω, f (X ω) ∂μ := by
+  rw [← integral_map hX'm.aemeasurable hf.aestronglyMeasurable, h,
+    integral_map hXm.aemeasurable hf.aestronglyMeasurable]
+
+theorem summable_integral_abs_of_map_eq {μ : Measure Ω} {μ' : Measure Ω'} {Z : ℕ → Ω → ℝ}
+    {Z' : ℕ → Ω' → ℝ} (hZm : ∀ i, Measurable (Z i)) (hZ'm : ∀ i, Measurable (Z' i))
+    (hsum : Summable fun i => ∫ ω, |Z i ω| ∂μ) (hlaw : ∀ i, μ'.map (Z' i) = μ.map (Z i)) :
+    Summable fun i => ∫ ω, |Z' i ω| ∂μ' :=
+  hsum.congr fun i =>
+    (integral_comp_eq_of_map_eq (hZm i) (hZ'm i) (hlaw i) continuous_abs).symm
+
+/-- Equal finite means of the two series. -/
+theorem integral_tsum_eq_of_map_eq {μ : Measure Ω} {μ' : Measure Ω'} {Z : ℕ → Ω → ℝ}
+    {Z' : ℕ → Ω' → ℝ} (hZm : ∀ i, Measurable (Z i)) (hZ : ∀ i, Integrable (Z i) μ)
+    (hZ'm : ∀ i, Measurable (Z' i)) (hsum : Summable fun i => ∫ ω, |Z i ω| ∂μ)
+    (hlaw : ∀ i, μ'.map (Z' i) = μ.map (Z i)) :
+    ∫ ω, ∑' i, Z i ω ∂μ = ∫ ω, ∑' i, Z' i ω ∂μ' := by
+  have hZ' : ∀ i, Integrable (Z' i) μ' := fun i =>
+    integrable_of_map_eq (hZm i) (hZ'm i) (hZ i) (hlaw i)
+  rw [← integral_tsum_of_summable_integral_norm hZ (by simpa [Real.norm_eq_abs] using hsum),
+    ← integral_tsum_of_summable_integral_norm hZ' (by
+      simpa [Real.norm_eq_abs] using summable_integral_abs_of_map_eq hZm hZ'm hsum hlaw)]
+  exact tsum_congr fun i =>
+    (integral_comp_eq_of_map_eq (hZm i) (hZ'm i) (hlaw i) continuous_id).symm
+
+theorem integral_comp_tsum_le_of_tail_le_of_lipschitzWith
+    {μ : Measure Ω} [IsProbabilityMeasure μ] {μ' : Measure Ω'} [IsProbabilityMeasure μ']
+    {Z : ℕ → Ω → ℝ} {Z' : ℕ → Ω' → ℝ} (hZm : ∀ i, Measurable (Z i))
+    (hZ : ∀ i, Integrable (Z i) μ) (hZ'm : ∀ i, Measurable (Z' i))
+    (htail : ∀ i, 1 ≤ i → ∀ u v,
+      μ.real ({ω | u ≤ ∑ j ∈ range i, Z j ω} ∩ {ω | v ≤ Z i ω}) ≤
+        μ.real {ω | u ≤ ∑ j ∈ range i, Z j ω} * μ.real {ω | v ≤ Z i ω})
+    (hsum : Summable fun i => ∫ ω, |Z i ω| ∂μ) (hind : iIndepFun Z' μ')
+    (hlaw : ∀ i, μ'.map (Z' i) = μ.map (Z i))
+    {φ : ℝ → ℝ} {K : ℝ≥0} (hφ : ConvexOn ℝ univ φ) (hφK : LipschitzWith K φ) :
+    ∫ ω, φ (∑' i, Z i ω) ∂μ ≤ ∫ ω, φ (∑' i, Z' i ω) ∂μ' := by
+  have hZ' : ∀ i, Integrable (Z' i) μ' := fun i =>
+    integrable_of_map_eq (hZm i) (hZ'm i) (hZ i) (hlaw i)
+  obtain ⟨-, hS, hL⟩ := ae_summable_abs_and_tendsto_integral_abs_sum_range_sub_tsum hZ hsum
+  obtain ⟨-, hS', hL'⟩ := ae_summable_abs_and_tendsto_integral_abs_sum_range_sub_tsum hZ'
+    (summable_integral_abs_of_map_eq hZm hZ'm hsum hlaw)
+  refine le_of_tendsto_of_tendsto'
+    (tendsto_integral_comp_of_tendsto_integral_abs_sub
+      (fun n => integrable_finsetSum (range n) fun i _ => hZ i) hS hL hφK)
+    (tendsto_integral_comp_of_tendsto_integral_abs_sub
+      (fun n => integrable_finsetSum (range n) fun i _ => hZ' i) hS' hL' hφK) fun n => ?_
+  exact integral_comp_sum_le_of_tail_le_of_iIndepFun_of_lipschitzWith (n := n)
+    (fun i _ => hZm i) (fun i _ => hZ i) (fun i _ => hZ'm i) (fun i h1 _ => htail i h1)
+    (hind.precomp Fin.val_injective) (fun i _ => hlaw i) hφ hφK
+
+/-- **Convex comparison for absolutely integrable series.** Under the hypotheses of
+`convex_comparison_sum_of_tail_le` at every finite index and `∑ E |Z_i| < ∞`, the sums
+`S = ∑ Z_i` and `S' = ∑ Z'_i` satisfy `E φ(S) ≤ E φ(S')` in `(-∞, ∞]` for every convex `φ`. -/
+theorem convex_comparison_tsum_of_tail_le
+    {μ : Measure Ω} [IsProbabilityMeasure μ] {μ' : Measure Ω'} [IsProbabilityMeasure μ']
+    {Z : ℕ → Ω → ℝ} {Z' : ℕ → Ω' → ℝ} (hZm : ∀ i, Measurable (Z i))
+    (hZ : ∀ i, Integrable (Z i) μ) (hZ'm : ∀ i, Measurable (Z' i))
+    (htail : ∀ i, 1 ≤ i → ∀ u v,
+      μ.real ({ω | u ≤ ∑ j ∈ range i, Z j ω} ∩ {ω | v ≤ Z i ω}) ≤
+        μ.real {ω | u ≤ ∑ j ∈ range i, Z j ω} * μ.real {ω | v ≤ Z i ω})
+    (hsum : Summable fun i => ∫ ω, |Z i ω| ∂μ) (hind : iIndepFun Z' μ')
+    (hlaw : ∀ i, μ'.map (Z' i) = μ.map (Z i))
+    {φ : ℝ → ℝ} (hφ : ConvexOn ℝ univ φ) :
+    Integrable (fun ω => (φ (∑' i, Z i ω))⁻) μ ∧
+      Integrable (fun ω => (φ (∑' i, Z' i ω))⁻) μ' ∧
+      (Integrable (fun ω => φ (∑' i, Z' i ω)) μ' →
+        Integrable (fun ω => φ (∑' i, Z i ω)) μ ∧
+          ∫ ω, φ (∑' i, Z i ω) ∂μ ≤ ∫ ω, φ (∑' i, Z' i ω) ∂μ') := by
+  have hZ' : ∀ i, Integrable (Z' i) μ' := fun i =>
+    integrable_of_map_eq (hZm i) (hZ'm i) (hZ i) (hlaw i)
+  obtain ⟨-, hS, -⟩ := ae_summable_abs_and_tendsto_integral_abs_sum_range_sub_tsum hZ hsum
+  obtain ⟨-, hS', -⟩ := ae_summable_abs_and_tendsto_integral_abs_sum_range_sub_tsum hZ'
+    (summable_integral_abs_of_map_eq hZm hZ'm hsum hlaw)
+  exact convex_comparison_of_lipschitzWith_comparison hS.1.aemeasurable hS'.1.aemeasurable hS
+    hS'
+    (fun _ _ hψ hψK => integral_comp_tsum_le_of_tail_le_of_lipschitzWith hZm hZ hZ'm htail hsum
+      hind hlaw hψ hψK) hφ
+
+/-- The exponential-moment comparison `E e^{t(S - E S)} ≤ E e^{t(S' - E S')}`. -/
+theorem lintegral_exp_mul_sub_integral_le_of_tail_le
+    {μ : Measure Ω} [IsProbabilityMeasure μ] {μ' : Measure Ω'} [IsProbabilityMeasure μ']
+    {Z : ℕ → Ω → ℝ} {Z' : ℕ → Ω' → ℝ} (hZm : ∀ i, Measurable (Z i))
+    (hZ : ∀ i, Integrable (Z i) μ) (hZ'm : ∀ i, Measurable (Z' i))
+    (htail : ∀ i, 1 ≤ i → ∀ u v,
+      μ.real ({ω | u ≤ ∑ j ∈ range i, Z j ω} ∩ {ω | v ≤ Z i ω}) ≤
+        μ.real {ω | u ≤ ∑ j ∈ range i, Z j ω} * μ.real {ω | v ≤ Z i ω})
+    (hsum : Summable fun i => ∫ ω, |Z i ω| ∂μ) (hind : iIndepFun Z' μ')
+    (hlaw : ∀ i, μ'.map (Z' i) = μ.map (Z i)) (t : ℝ) :
+    ∫⁻ ω, ENNReal.ofReal (Real.exp (t * (∑' i, Z i ω - ∫ ω', ∑' i, Z i ω' ∂μ))) ∂μ ≤
+      ∫⁻ ω, ENNReal.ofReal (Real.exp (t * (∑' i, Z' i ω - ∫ ω', ∑' i, Z' i ω' ∂μ'))) ∂μ' := by
+  rw [integral_tsum_eq_of_map_eq hZm hZ hZ'm hsum hlaw]
+  set c := ∫ ω', ∑' i, Z' i ω' ∂μ'
+  have hc : ConvexOn ℝ univ fun x : ℝ => Real.exp (t * (x - c)) :=
+    ⟨convex_univ, fun x _ y _ a b ha hb hab => by
+      have := convexOn_exp.2 (mem_univ (t * (x - c))) (mem_univ (t * (y - c))) ha hb hab
+      simp only [smul_eq_mul] at this ⊢
+      rw [show t * (a * x + b * y - c) = a * (t * (x - c)) + b * (t * (y - c)) by
+        linear_combination (t * c) * hab]
+      exact this⟩
+  have hZ' : ∀ i, Integrable (Z' i) μ' := fun i =>
+    integrable_of_map_eq (hZm i) (hZ'm i) (hZ i) (hlaw i)
+  obtain ⟨-, hS', -⟩ := ae_summable_abs_and_tendsto_integral_abs_sum_range_sub_tsum hZ'
+    (summable_integral_abs_of_map_eq hZm hZ'm hsum hlaw)
+  exact lintegral_ofReal_le_of_integrable_imp
+    ((Real.continuous_exp.comp (continuous_const.mul
+      (continuous_id.sub continuous_const))).comp_aestronglyMeasurable hS'.1)
+    (fun _ => (Real.exp_pos _).le) (fun _ => (Real.exp_pos _).le)
+    (convex_comparison_tsum_of_tail_le hZm hZ hZ'm htail hsum hind hlaw hc).2.2
+
+/-- The central moment comparison `E |S - E S|^r ≤ E |S' - E S'|^r` for `r ≥ 1`. -/
+theorem lintegral_abs_sub_integral_tsum_rpow_le_of_tail_le
+    {μ : Measure Ω} [IsProbabilityMeasure μ] {μ' : Measure Ω'} [IsProbabilityMeasure μ']
+    {Z : ℕ → Ω → ℝ} {Z' : ℕ → Ω' → ℝ} (hZm : ∀ i, Measurable (Z i))
+    (hZ : ∀ i, Integrable (Z i) μ) (hZ'm : ∀ i, Measurable (Z' i))
+    (htail : ∀ i, 1 ≤ i → ∀ u v,
+      μ.real ({ω | u ≤ ∑ j ∈ range i, Z j ω} ∩ {ω | v ≤ Z i ω}) ≤
+        μ.real {ω | u ≤ ∑ j ∈ range i, Z j ω} * μ.real {ω | v ≤ Z i ω})
+    (hsum : Summable fun i => ∫ ω, |Z i ω| ∂μ) (hind : iIndepFun Z' μ')
+    (hlaw : ∀ i, μ'.map (Z' i) = μ.map (Z i)) {r : ℝ}
+    (hr : 1 ≤ r) :
+    ∫⁻ ω, ENNReal.ofReal (|∑' i, Z i ω - ∫ ω', ∑' i, Z i ω' ∂μ| ^ r) ∂μ ≤
+      ∫⁻ ω, ENNReal.ofReal (|∑' i, Z' i ω - ∫ ω', ∑' i, Z' i ω' ∂μ'| ^ r) ∂μ' := by
+  rw [integral_tsum_eq_of_map_eq hZm hZ hZ'm hsum hlaw]
+  set c := ∫ ω', ∑' i, Z' i ω' ∂μ'
+  have hZ' : ∀ i, Integrable (Z' i) μ' := fun i =>
+    integrable_of_map_eq (hZm i) (hZ'm i) (hZ i) (hlaw i)
+  obtain ⟨-, hS', -⟩ := ae_summable_abs_and_tendsto_integral_abs_sum_range_sub_tsum hZ'
+    (summable_integral_abs_of_map_eq hZm hZ'm hsum hlaw)
+  exact lintegral_ofReal_le_of_integrable_imp
+    (((continuous_abs.comp (continuous_id.sub continuous_const)).rpow_const
+      fun _ => Or.inr (zero_le_one.trans hr)).comp_aestronglyMeasurable hS'.1)
+    (fun _ => Real.rpow_nonneg (abs_nonneg _) r) (fun _ => Real.rpow_nonneg (abs_nonneg _) r)
+    (convex_comparison_tsum_of_tail_le hZm hZ hZ'm htail hsum hind hlaw
+      (convexOn_abs_sub_rpow c hr)).2.2
 
 end PercLib.Probability
