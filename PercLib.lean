@@ -46,6 +46,7 @@ public import PercLib.Analysis.Tauberian.Laplace
 public import PercLib.Analysis.Tauberian.Converse
 public import PercLib.Analysis.Tauberian.Endpoints
 public import PercLib.Analysis.Tauberian.Complete
+public import PercLib.Analysis.VolumeTail.A3Limit
 public import PercLib.Analysis.VolumeTail.ChiSquareConstants
 public import PercLib.Analysis.VolumeTail.Endpoint
 public import PercLib.Analysis.VolumeTail.MGFAssembly
