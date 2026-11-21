@@ -19,13 +19,15 @@
 # scripts/automerge_classify.py and .github/automerge-authors. It merges the pull request,
 # with a merge commit, only if every condition below holds; otherwise it does nothing and
 # the pull request waits for a maintainer.
-#   - The author is listed in .github/automerge-authors on the default branch.
+#   - The author is listed in .github/automerge-authors on the default branch. The author
+#     is the pull request's opener; anyone with write access can push commits to a listed
+#     author's branch in this repository, which is accepted because writers are trusted.
 #   - The run is of the default branch's CI workflow (by workflow id), on a `pull_request`
-#     event, completed with success, and its job `gate` succeeded (a skipped job does not
-#     count) for exactly the pull request's current head commit and its current base
-#     commit (D-29); the base is the tip of the default branch and the head contains it,
-#     so the merged tree is the tree CI checked. Pull requests from forks are not bound
-#     to a base by the API and always wait for a maintainer.
+#     event, completed with success, and its jobs `gate` and `kernel-replay` both succeeded
+#     (a skipped job does not count) for exactly the pull request's current head commit
+#     and its current base commit (D-29); the base is the tip of the default branch and
+#     the head contains it, so the merged tree is the tree CI checked. Pull requests
+#     from forks are not bound to a base by the API and always wait for a maintainer.
 #   - The diff, from `GET /repos/{o}/{r}/pulls/{n}/files` and the files fetched through
 #     the contents API at the two bound commits, is proof-only as decided by
 #     scripts/automerge_classify.py: only existing `.lean` files under PercLib/ change, no
@@ -33,6 +35,10 @@
 #     under tasks/ at most a move of its own task to tasks/done/, and no definition,
 #     structure, class, instance, abbrev, notation, axiom, tag attribute or tagged
 #     statement is added or changed. When in doubt it does not merge.
+#
+# The merge is made with the workflow's GITHUB_TOKEN, and GitHub starts no workflow run
+# for events caused by GITHUB_TOKEN: an automatic merge does not start CI on `main`. This
+# is why the pull request run itself must include a successful `kernel-replay`.
 #
 # Security: the workflow token has no permissions by default; the deciding job may only
 # read; only the merge job, which runs a single API call on validated values, can write.
