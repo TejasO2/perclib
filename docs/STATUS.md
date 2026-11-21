@@ -5,11 +5,15 @@ coordinator round 4 of a new series (twenty-second coordinator overall; the prev
 older rounds are in `git log -p docs/STATUS.md`, the long per-round gate records up to round 3 in `git show
 47b6ffa:docs/STATUS.md`). A coordinator with no memory resumes from this file, [COORDINATOR.md](COORDINATOR.md),
 [COORDINATION.md](COORDINATION.md), [DECISIONS.md](DECISIONS.md) (D-34 to D-37) and `/home/user/reports/RULINGS.md`
-(rulings 1-15; obey them). **Ruling 15 (new, Tom: "get the auto-merge and task board completed and merged as a matter
+(rulings 1-16; obey them). **Ruling 16 (new, 17:30, Tom: the wiki on GitHub Pages so he can view it): Pages is part of
+the top-priority batch, equal with the task board; a first version without the manifest is acceptable (banner then
+says "formal status is not shown in this build"); its audit is scoped to (B) only; `READY-FOR-MAIN` is written only
+when board, CI and Pages are all gated and pushed, naming https://tomhutchcroft.github.io/perclib/.** **Ruling 15 (new, Tom: "get the auto-merge and task board completed and merged as a matter
 of top priority") outranks everything else this round and the next:** (a) task board and contributor docs (done this
 round), (b) CI workflow (done this round), (c) auto-merge after one scoped audit, fix once, re-audit once, else merge
-the auto-merge job disabled (`if: false`) — in progress, see "Auto-merge"; (d) pages workflow when audited; (e) keep
-`/home/user/reports/READY-FOR-MAIN` current (written this round; rewrite it when (c) lands). Ruling 14 (Codex owns the
+the auto-merge job disabled (`if: false`) — in progress, see "Auto-merge"; (d) pages workflow (made equal priority by
+ruling 16); (e) `READY-FOR-MAIN`: a draft was written this round, then withdrawn under ruling 16 (Pages not yet
+gated): it is at `/home/user/reports/READY-FOR-MAIN.pending`; rename and update it when Pages is gated and pushed. Ruling 14 (Codex owns the
 lace-expansion Lean area; each round `git ls-remote`, fetch outside heads, queue reviews, `git fetch origin main` and
 merge it if it moved) stands. Container-local reports and briefs are copied for durability to `lrp/docs/reports/` at
 each round's lrp commit (ruling 9i).
@@ -187,13 +191,18 @@ keep in mind: board tasks `restricted-cluster-strict`, `finite-edge-change-infin
   (expected clean: the auditor merged all pairs; `ci.yml` identical), gate, push; on FAIL merge `fix-scanner-r5` and
   `fix-workflows-r6` with `if: false` on the `merge` job of `automerge.yml`, a comment giving the reason, and one
   paragraph in `docs/CI_KNOWN_LIMITATIONS.md`; list it "For Tom". Either way rewrite `/home/user/reports/READY-FOR-MAIN`.
-- `pages-deploy` (ruling 12, 15d) claimed 17:11 (brief `002`); its audit is written when it finishes (workflow
-  privileges/pinning/injection + the strings for Tom).
+- **Pages (rulings 12, 16):** `work/pages-deploy` = `eea6ceb` (one commit on `df5d0fd`; `pages.yml` with jobs
+  `configure` (pages: read), `build` (contents: read, builds Lean and the manifest, `WIKI_REQUIRE_MANIFEST=1`), `deploy`
+  (pages: write, id-token: write); banner, About page, noindex, draft markers, base path; author reports all five items
+  met). Scoped audit **`000-audit-pages-deploy` released** ((B) only, ruling 16). On APPROVE merge it in the same batch
+  as auto-merge, gate, push, then write `/home/user/reports/READY-FOR-MAIN` (from `READY-FOR-MAIN.pending`) naming
+  https://tomhutchcroft.github.io/perclib/ and the merged state of auto-merge.
 
 ## Finished, not merged (each waits for the item named)
 
 **Ready for the next batch (one gated batch; merge in this order, then `scripts/gate.sh df5d0fd`, push):**
-1. `work/fix-scanner-r5` and `work/fix-workflows-r6` per "Auto-merge" (only after the r6 verdict).
+1. `work/fix-scanner-r5` and `work/fix-workflows-r6` per "Auto-merge" (only after the r6 verdict), and `work/pages-deploy`
+   (`eea6ceb`) after `000-audit-pages-deploy` approves (rulings 15, 16: top priority).
 2. `work/hier-j98j-tag` (`4fd9f49`, J98J; the Prop `HierarchicalTwoPointAveraged` loses `c ≤ C`): `audit-hier-j98j-tag`
    APPROVE (fresh, binder table, no required change). Then `work/hier-cor12` (`eace6cc`, proof-only, Corollary 1.2 / W498
    Prop, V4QQ/YWTU untagged) **with the one-token merge repair**: delete the argument ` hcC` at the end of
@@ -253,13 +262,14 @@ matching board tasks to `tasks/claimed/`. If (e) has not merged by the end of ro
 ## Queue (`/home/user/reports/queue/`)
 
 A brief is startable when it has no `HOLD-` prefix and no `claims/<id>`; claimed briefs stay in the directory.
-**Startable at 17:29 (8; window (e): no Lean except the claimed migration):** `011-scout-defs-2`,
+**Startable at 17:31 (9; window (e): no Lean except the claimed migration):** `000-audit-pages-deploy` (first),
+`011-scout-defs-2`,
 `012-critic-proof-sections-c` (adaptive-three-point, critical-exponents), `013-scout-held-briefs-e`,
 `014-tooling-task-board-check`, `015-critic-reread-proof-sections-a` (on the branch, before it merges),
 `016-scout-d33-volume-law` (prepares D-33 package 17 for release after (e)), `154-audit-nm-multipoint-geometry`,
 `155-audit-wiki-revise-regular-variation-r3`.
 Written and already claimed or done this round: 000-audit-fix-workflows-r5 (done), 000-fix-workflows-r6 (done),
-001-mig-model-norm, 002-pages-deploy, 003-docs-contrib-followup (done), 004-wiki-nc7f-precision (done),
+001-mig-model-norm, 002-pages-deploy (done), 003-docs-contrib-followup (done), 004-wiki-nc7f-precision (done),
 005-critic-proof-sections-b (done), 006-audit-hier-j98j-tag (done), 007-audit-nm-tree-depth (done),
 008-audit-docs-contrib-followup (done), 009-audit-wiki-nc7f-precision (done), 000-audit-fix-workflows-r6,
 010-wiki-revise-proof-sections-b, 020-audit-nm-uniform-volume-r2 (done),
@@ -352,11 +362,12 @@ the fold's clean-up list; the NC7F-style precision points as they come; restruct
 
 - **Pull request to `main` (rulings 13a, 15e):** open and merge
   https://github.com/tomhutchcroft/perclib/compare/main...claude/zen-lovelace-rvlcw2 when you wish (summary in
-  `/home/user/reports/READY-FOR-MAIN`). It brings the task board, the self-sufficient `AGENTS.md`/`CONTRIBUTING.md`,
+  `/home/user/reports/READY-FOR-MAIN.pending`: under ruling 16 the "ready" notice waits for the Pages workflow). It brings the task board, the self-sufficient `AGENTS.md`/`CONTRIBUTING.md`,
   the lace-expansion map, the CI workflow (build and checks only, read-only token) and ten new proved tagged assertions.
   Last gated commit `df5d0fd` (gate passed 17:19); the commits after it touch only `tasks/` and docs. No kernel replay
   has passed since the baseline `4c72765` (two local runs were killed for memory; one is running at `df5d0fd`); once
-  `ci.yml` is on `main`, CI runs the replay on every push. Auto-merge is not in it yet (final audit running, ruling 15c).
+  `ci.yml` is on `main`, CI runs the replay on every push. Auto-merge and the Pages workflow are not in it yet (their final scoped audits are running, rulings 15c, 16); the
+  site will be at https://tomhutchcroft.github.io/perclib/ once the Pages workflow is on `main`.
 - **Wiki-original results, all nine now audited:** Q7QG, V7MP and 9FO5 (`hierarchical-runaway`) are judged CORRECT by a
   fresh correctness audit (`audit-wiki-original-runaway-c`), like J0DE, MFGT, OQV3, Q4PO, F7Q2, NC7F before them. They
   stay marked "original to this wiki; proof not independently checked" until you say how the marking should change; the
