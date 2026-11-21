@@ -2,6 +2,7 @@ module
 
 public import PercLib.Analysis.AbelianSums
 public import PercLib.Analysis.CriticalDrivenODE
+public import PercLib.Analysis.CriticalLogODE
 public import PercLib.Analysis.DiscreteConvolution
 public import PercLib.Analysis.DominatedDerivative
 public import PercLib.Analysis.DrivenODE
@@ -10,6 +11,7 @@ public import PercLib.Analysis.FirstMomentAsymptotic
 public import PercLib.Analysis.FirstMomentBootstrap
 public import PercLib.Analysis.GoodScales
 public import PercLib.Analysis.GyrationODE
+public import PercLib.Analysis.GyrationReduction
 public import PercLib.Analysis.HadamardPowers
 public import PercLib.Analysis.HardyMajorant
 public import PercLib.Analysis.HomogeneousBallIntegrals
