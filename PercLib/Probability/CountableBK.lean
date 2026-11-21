@@ -3,21 +3,19 @@ Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
 Corresponds to `truncation`, `disjointOccurrence_eq_iUnion_truncation`,
-`measurableSet_disjointOccurrence` and `percolation_bk` in NearCritical/CountableBK.lean,
-to `profileEventProbability_cylinder`, `percolationProfile_cylinder_bk_of_uniform_lt_one`
-and `percolationProfile_bk_of_uniform_lt_one` in NearCritical/ProfileCountableBKStrict.lean,
-and to `eventProbability_cylinder` in NearCritical/CylinderBK.lean, all at
-tomhutchcroft/near-critical-diffusivity, revision
-c820fea91a7482c1755de0ec94ecb9f59ccfcacc (reuse permission: DECISIONS R-3).
-The uniform bound `P < 1` of the profile source is removed: endpoint-complete finite BK
-(ProfileBK.lean) is applied on each finite truncation. The lattice cylinder bridge is
-replaced by the general-index marginal identity `prodBernoulli_map_restrict`.
-Under D-24 this proof file adds no definition: the truncation of an event `A` to a
-finite coordinate set `s` is written out as `(fun η : Set s => Subtype.val '' η) ⁻¹' A`.
-The exhaustion is the directed family of all finite coordinate sets, so no sequence
-is chosen. The upstream source was not readable from the session that wrote this
-file, so the Lean text is new; no upstream code is copied and no upstream licence is
-asserted.
+`measurableSet_disjointOccurrence` and `percolation_bk` in NearCritical/CountableBK.lean, to
+`profileEventProbability_cylinder`, `percolationProfile_cylinder_bk_of_uniform_lt_one` and
+`percolationProfile_bk_of_uniform_lt_one` in NearCritical/ProfileCountableBKStrict.lean, and to
+`eventProbability_cylinder` in NearCritical/CylinderBK.lean, all at
+tomhutchcroft/near-critical-diffusivity, revision c820fea91a7482c1755de0ec94ecb9f59ccfcacc (reuse
+permission recorded in `docs/DECISIONS.md`). The uniform bound `P < 1` of the profile source is
+removed: endpoint-complete finite BK (ProfileBK.lean) is applied on each finite truncation. The
+lattice cylinder bridge is replaced by the general-index marginal identity
+`prodBernoulli_map_restrict`. This proof file adds no definition: the truncation of an event `A` to
+a finite coordinate set `s` is written out as `(fun η : Set s => Subtype.val '' η) ⁻¹' A`. The
+exhaustion is the directed family of all finite coordinate sets, so no sequence is chosen. The
+upstream source was not readable from the session that wrote this file, so the Lean text is new; no
+upstream code is copied and no upstream licence is asserted.
 -/
 module
 

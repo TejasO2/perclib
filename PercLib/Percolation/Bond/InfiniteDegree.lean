@@ -2,9 +2,8 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for issue 120 (Q-4), written on 2026-11-14 by PROVER-E. No upstream proof is
-copied: the probabilistic input is mathlib's second Borel–Cantelli lemma
-`ProbabilityTheory.measure_limsup_eq_one`.
+New proofs, written on 2026-11-14. No upstream proof is copied: the probabilistic input is mathlib's
+second Borel–Cantelli lemma `ProbabilityTheory.measure_limsup_eq_one`.
 -/
 module
 
@@ -23,7 +22,7 @@ surely. For an intensity kernel `J` with an infinite row sum at `v`, the row sum
 `intensityProfile J β` at `v` is infinite for every `β > 0`, because
 `1 - e^{-t} ≥ (1 - e^{-1}) min(t, 1)`; hence both critical intensities vanish.
 
-Row sums exclude the diagonal (D-2). The hypothesis is about the one vertex `v`. This
+Row sums exclude the diagonal. The hypothesis is about the one vertex `v`. This
 file adds no definition.
 -/
 
@@ -72,11 +71,11 @@ theorem tsum_min_one_eq_top {α : Type*} {f : α → ℝ≥0∞} (hf : ∀ a, f 
 /-- **Second Borel–Cantelli for the neighbours of a vertex.** If the row sum of `q` at `v`
 is infinite, then almost surely `v` has infinitely many open neighbours. -/
 theorem ae_infinite_neighbors_of_rowSum_eq_top [Countable V] (q : Sym2 V → unitInterval)
-    (v : V) (h : (∑' w, if w = v then 0 else (unitInterval.toNNReal (q s(v, w)) : ℝ≥0∞)) = ∞) :
+    (v : V) (h : rowSum (fun e => unitInterval.toENNReal (q e)) v = ∞) :
     ∀ᵐ ω ∂law q, {w | (openGraph ω).Adj v w}.Infinite := by
   set N : Set V := {w | w ≠ v}
   have hsum : ∑' w : N, (unitInterval.toNNReal (q s(v, w)) : ℝ≥0∞) = ∞ := by
-    rw [tsum_ite_eq_tsum_ne v] at h
+    rw [rowSum_toENNReal, tsum_ite_eq_tsum_ne v] at h
     exact h
   have : Infinite N := by
     by_contra hfin
@@ -117,7 +116,7 @@ theorem ae_infinite_neighbors_of_rowSum_eq_top [Countable V] (q : Sym2 V → uni
 
 /-- **An infinite row sum at `v` makes the cluster of `v` infinite almost surely.** -/
 theorem law_cluster_infinite_eq_one_of_rowSum_eq_top [Countable V] (q : Sym2 V → unitInterval)
-    (v : V) (h : (∑' w, if w = v then 0 else (unitInterval.toNNReal (q s(v, w)) : ℝ≥0∞)) = ∞) :
+    (v : V) (h : rowSum (fun e => unitInterval.toENNReal (q e)) v = ∞) :
     law q {ω | (cluster ω v).Infinite} = 1 := by
   have hae : ∀ᵐ ω ∂law q, (cluster ω v).Infinite :=
     (ae_infinite_neighbors_of_rowSum_eq_top q v h).mono fun ω hω =>
@@ -140,9 +139,8 @@ theorem one_sub_exp_neg_one_mul_min_le (t : ℝ) (ht : 0 ≤ t) :
 /-- **An infinite row sum of `J` gives an infinite row sum of the profile at every
 positive intensity.** -/
 theorem rowSum_intensityProfile_eq_top (J : Sym2 V → ℝ≥0) (v : V) {β : ℝ≥0} (hβ : 0 < β)
-    (hJ : (∑' w, if w = v then 0 else (J s(v, w) : ℝ≥0∞)) = ∞) :
-    (∑' w, if w = v then 0 else
-      (unitInterval.toNNReal (intensityProfile J β s(v, w)) : ℝ≥0∞)) = ∞ := by
+    (hJ : rowSum (fun e => (J e : ℝ≥0∞)) v = ∞) :
+    rowSum (fun e => unitInterval.toENNReal (intensityProfile J β e)) v = ∞ := by
   set c : ℝ≥0 := ⟨1 - Real.exp (-1), sub_nonneg.2 (Real.exp_le_one_iff.2 (by norm_num))⟩
   have hc : c ≠ 0 := by
     intro h0
@@ -162,10 +160,11 @@ theorem rowSum_intensityProfile_eq_top (J : Sym2 V → ℝ≥0) (v : V) {β : �
       change (1 - Real.exp (-1)) * min ((β : ℝ) * (J s(v, w) : ℝ)) 1 ≤
         1 - Real.exp (-(β : ℝ) * (J s(v, w) : ℝ))
       rwa [neg_mul]
-  have hmin : (∑' w, if w = v then 0 else min ((β * J s(v, w) : ℝ≥0) : ℝ≥0∞) 1) = ∞ := by
+  have hmin : rowSum (fun e => min ((β * J e : ℝ≥0) : ℝ≥0∞) 1) v = ∞ := by
     have heq : ∀ w, (if w = v then 0 else min ((β * J s(v, w) : ℝ≥0) : ℝ≥0∞) 1) =
         min (if w = v then 0 else ((β * J s(v, w) : ℝ≥0) : ℝ≥0∞)) 1 := by
       intro w; split_ifs <;> simp
+    simp only [rowSum_def]
     simp_rw [heq]
     refine tsum_min_one_eq_top (fun w => by
       split_ifs
@@ -174,11 +173,12 @@ theorem rowSum_intensityProfile_eq_top (J : Sym2 V → ℝ≥0) (v : V) {β : �
     have : ∀ w, (if w = v then 0 else ((β * J s(v, w) : ℝ≥0) : ℝ≥0∞)) =
         (β : ℝ≥0∞) * (if w = v then 0 else (J s(v, w) : ℝ≥0∞)) := by
       intro w; split_ifs <;> simp
+    simp only [rowSum_def] at hJ
     simp_rw [this]
     rw [ENNReal.tsum_mul_left, hJ, ENNReal.mul_top (by exact_mod_cast hβ.ne')]
   refine top_le_iff.1 ?_
-  calc (∞ : ℝ≥0∞) = (c : ℝ≥0∞) * ∑' w, (if w = v then 0 else
-        min ((β * J s(v, w) : ℝ≥0) : ℝ≥0∞) 1) := by
+  calc (∞ : ℝ≥0∞)
+      = (c : ℝ≥0∞) * rowSum (fun e => min ((β * J e : ℝ≥0) : ℝ≥0∞) 1) v := by
         rw [hmin, ENNReal.mul_top (by exact_mod_cast hc)]
     _ = ∑' w, (c : ℝ≥0∞) * (if w = v then 0 else
         min ((β * J s(v, w) : ℝ≥0) : ℝ≥0∞) 1) := (ENNReal.tsum_mul_left).symm
@@ -186,7 +186,7 @@ theorem rowSum_intensityProfile_eq_top (J : Sym2 V → ℝ≥0) (v : V) {β : �
 
 /-- **A kernel with an infinite row sum at `v` has root critical intensity zero at `v`.** -/
 theorem rootCriticalIntensity_eq_zero_of_rowSum_eq_top [Countable V] (J : Sym2 V → ℝ≥0)
-    (v : V) (hJ : (∑' w, if w = v then 0 else (J s(v, w) : ℝ≥0∞)) = ∞) :
+    (v : V) (hJ : rowSum (fun e => (J e : ℝ≥0∞)) v = ∞) :
     rootCriticalIntensity J v = 0 := by
   refine le_antisymm (ENNReal.le_of_forall_pos_le_add fun ε hε _ => ?_) (by simp)
   rw [zero_add]
@@ -199,7 +199,7 @@ theorem rootCriticalIntensity_eq_zero_of_rowSum_eq_top [Countable V] (J : Sym2 V
 /-- **A kernel with an infinite row sum at one vertex has global critical intensity
 zero.** -/
 theorem globalCriticalIntensity_eq_zero_of_rowSum_eq_top [Countable V] (J : Sym2 V → ℝ≥0)
-    (v : V) (hJ : (∑' w, if w = v then 0 else (J s(v, w) : ℝ≥0∞)) = ∞) :
+    (v : V) (hJ : rowSum (fun e => (J e : ℝ≥0∞)) v = ∞) :
     globalCriticalIntensity J = 0 := by
   refine le_antisymm (ENNReal.le_of_forall_pos_le_add fun ε hε _ => ?_) (by simp)
   rw [zero_add]
@@ -225,7 +225,7 @@ theorem tsum_ite_const_eq_top [Infinite V] (v : V) {c : ℝ≥0∞} (hc : c ≠ 
 example : law (fun _ : Sym2 ℕ => (⟨1 / 2, by norm_num, by norm_num⟩ : unitInterval))
     {ω | (cluster ω 0).Infinite} = 1 :=
   law_cluster_infinite_eq_one_of_rowSum_eq_top _ 0 (tsum_ite_const_eq_top 0 (by
-    rw [Ne, ENNReal.coe_eq_zero]
+    rw [Ne, unitInterval.toENNReal_apply, ENNReal.coe_eq_zero]
     intro h
     have := congrArg NNReal.toReal h
     change (1 / 2 : ℝ) = 0 at this

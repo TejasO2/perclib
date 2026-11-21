@@ -1,17 +1,15 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
 
-Adapted from pull request 488: source repository `yujinhkim/lrp`, branch
-`critical-lrp-1`, commit d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc, file
-`PercLib/CriticalLRP/Tightness/RealMomentRatio.lean`, contributed by `yujinhkim`.
-Licence: Apache-2.0, as declared in that file's header and in
+Adapted from the source repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
+d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc, file `PercLib/CriticalLRP/Tightness/RealMomentRatio.lean`,
+contributed by `yujinhkim`. Licence: Apache-2.0, as declared in that file's header and in
 `third_party/critical-lrp/NOTICE.md` of that commit (upstream origin
-`yujinhkim/Critical-Long-range-percolation` at
-3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf, not independently verified).
-Changes: namespace `PercLib.Probability`; the definition `momentConstR` and its
-positivity lemma are removed and the constant is written out; `lintegral_rpow_eq_meas`
-is removed in favour of mathlib's `lintegral_rpow_eq_lintegral_meas_le_mul`, of which
-it was a restatement; focused imports; `autoImplicit` off.
+`yujinhkim/Critical-Long-range-percolation` at 3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf, not
+independently verified). Changes: namespace `PercLib.Probability`; the definition `momentConstR` and
+its positivity lemma are removed and the constant is written out; `lintegral_rpow_eq_meas` is
+removed in favour of mathlib's `lintegral_rpow_eq_lintegral_meas_le_mul`, of which it was a
+restatement; focused imports; `autoImplicit` off.
 -/
 module
 
@@ -32,7 +30,7 @@ analytic step). For measurable `f ≥ 0`, `M ≥ 1`, and the tail
   `∫⁻ f^r ≤ (1 + e r 9^r Γ(r)) M^r`.
 
 The tail hypothesis is the third conjunct of `PercLib.Percolation.Bond.UniversalTightness`
-at `t = aM`; that instantiation is a separate package.
+at `t = aM`; that instantiation is made in `PercLib/Percolation/Bond/Tightness/MomentRatio.lean`.
 -/
 
 @[expose] public section
@@ -472,7 +470,7 @@ theorem moment_le_rpow_of_tail {μ : Measure Ω} [IsProbabilityMeasure μ] {f : 
           ← ENNReal.ofReal_add zero_le_one hcpos]
 
 
-/-! ### D-5 witness: `μ = δ_()`, `f = 1`, `M = 1` -/
+/-! ### Non-vacuity witness: `μ = δ_()`, `f = 1`, `M = 1` -/
 
 /-- The tail hypothesis holds for `μ = δ_()`, `f = 1`, `M = 1`: at `t = 1` the right side
 is `e^{8/9} ≥ 1`, and for `t > 1` the left side is `0`. -/

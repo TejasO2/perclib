@@ -80,7 +80,7 @@ every finite `S ∋ o` has boundary flux at least one at `β_c`, bounded by
 @[tag "R84Z"]
 theorem one_le_boundaryFlux_at_globalCriticalIntensity [Countable V] (J : Sym2 V → ℝ≥0)
     (hT : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e)
-    (hrow : ∀ u, (∑' v, if v = u then 0 else (J s(u, v) : ℝ≥0∞)) < ∞) {o : V}
+    (hrow : ∀ u, rowSum (fun e => (J e : ℝ≥0∞)) u < ∞) {o : V}
     (hc : globalCriticalIntensity J < ⊤) (S : Finset V) (hoS : o ∈ S) :
     1 ≤ ∑ u ∈ S, ∑' v, (if v ∈ S then 0 else
       law (intensityProfile J (globalCriticalIntensity J).toNNReal)

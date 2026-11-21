@@ -16,6 +16,22 @@ public import PercLib.Percolation.Bond.Susceptibility
 public import PercLib.Probability.DeterministicModification
 public import PercLib.Probability.Transport.Pullback
 
+/-!
+# Finite volume: correspondence
+
+Wiki correspondence for finite-window witnesses, local domains, finite-edge exhaustions and cluster
+partitions.
+
+## Main results
+
+* `local_domain_restriction_and_exhaustion`
+* `finite_window_tail_representation`
+* `root_clusters_partition`
+* `finite_root_component_sums`
+* `finite_edge_exhaustion_limits`
+* `escape_and_order_of_volume_limits`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set

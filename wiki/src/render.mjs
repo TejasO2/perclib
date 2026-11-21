@@ -88,6 +88,10 @@ export function transform(html, articles, baseline) {
 }
 export const heading = (title, summary = "", kind = "") =>
   `<header class="article-header">${kind ? `<p class="eyebrow">${esc(kind)}</p>` : ""}<h1 class="page-title">${esc(title)}</h1>${summary ? `<p class="lede">${esc(summary)}</p>` : ""}</header>`;
+// The lead of an article (wiki/README.md, "Lead"): before the contents box,
+// with the id that backlinks to it use.
+export const leadSection = (html) =>
+  `<div class="article-section article-lead" id="section-lead">${html}</div>`;
 export const item = (p) =>
   `<a class="item-row" href="${articleUrl(p.id)}"><span class="item-main"><span class="item-title">${esc(p.title)}</span><span class="item-desc">${esc(p.subtitle || p.summary)}</span></span></a>`;
 export const railBlock = (title, body) =>

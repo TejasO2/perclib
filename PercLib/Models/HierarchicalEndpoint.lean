@@ -124,7 +124,7 @@ theorem rootCriticalIntensity_pos_of_powerLaw [NeZero L] (hL : 2 ≤ L) {α C : 
     (x : ℕ →₀ (Fin d → ZMod L)) :
     0 < rootCriticalIntensity J x := by
   set K : ℝ := C * (1 - (L : ℝ) ^ (-(d : ℝ))) / ((L : ℝ) ^ α - 1)
-  have hrow : ∀ v, (∑' w, if w = v then 0 else (J s(v, w) : ℝ≥0∞)) ≤
+  have hrow : ∀ v, rowSum (fun e => (J e : ℝ≥0∞)) v ≤
       ((K.toNNReal : ℝ≥0) : ℝ≥0∞) := fun v => rowSum_le_of_powerLaw hL hα J hJ v
   have h := inv_le_rootCriticalIntensity J K.toNNReal (fun v => by convert hrow v) x
   exact (ENNReal.inv_pos.2 ENNReal.coe_ne_top).trans_le h

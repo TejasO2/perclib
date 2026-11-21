@@ -2,8 +2,7 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for issue 469 (Q-135, part 2), written on 2026-11-16 by PROVER-F. No upstream
-proof is copied and no definition is added.
+New proofs, written on 2026-11-16. No upstream proof is copied and no definition is added.
 -/
 module
 
@@ -18,7 +17,7 @@ public import PercLib.Probability.OpenEventHarris
 public import PercLib.Models.HierarchicalCutoff
 
 /-!
-# Hierarchical block-quantile amplification: the assembly (Q-135, part 2)
+# Hierarchical block-quantile amplification: the assembly
 
 Part 1 (`HierarchicalAmplification.lean`) proved the scale, the no-direct-edge bound, the
 connection threshold, the amplification arithmetic and the Hoeffding count. This file
@@ -500,7 +499,7 @@ theorem level_sub_le_of_mem_level_ball {u v : ℕ →₀ (Fin d → ZMod L)} {m 
   exact h.trans (max_le hu hv)
 
 open Classical in
-/-- **Hierarchical block-quantile amplification** (7AER, issue 469). On the hierarchical
+/-- **Hierarchical block-quantile amplification.** On the hierarchical
 lattice `ℕ →₀ (Fin d → ZMod L)` with `L ≥ 2`, let `c, α > 0` and let `J` be a
 translation-invariant kernel with `J(u, v) ≥ c L^{-(d+α)j}` when `u ≠ v` first share a
 level-`j` block. Write `R_n(β)` for the quantile `tightnessScale` of the level-`n` block of the
@@ -509,7 +508,7 @@ origin under `q_β = intensityProfile J β` restricted to the pairs inside that 
 `A = (4/c) L^{(d+α)ℓ} log(2N²)`. Then for every `β > 0` and `n ≥ 0`,
 `R_n(β)² ≥ (A/β) L^{(d+α)n}` implies `R_{n+ℓ}(β)² ≥ (A/β) L^{(d+α)(n+ℓ)}`.
 
-The issue's hypotheses `ℓ ≥ 1` and `α < d` are not needed here: they serve only to produce
+The hypotheses `ℓ ≥ 1` and `α < d` are not needed here: they serve only to produce
 such an `ℓ` (`exists_amplification_scale`). The kernel bound is assumed for `u ≠ v` only. -/
 theorem tightnessScale_hierarchical_amplification [NeZero L] (hL : 2 ≤ L) {α c : ℝ}
     (hc : 0 < c) (hα : 0 < α) (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0)
@@ -730,9 +729,9 @@ theorem tightnessScale_hierarchical_amplification [NeZero L] (hL : 2 ≤ L) {α 
   have h0 : 0 ≤ (K : ℝ) * ((R : ℝ) - 1) := mul_nonneg (Nat.cast_nonneg _) (by linarith)
   exact hamp.trans (pow_le_pow_left₀ h0 hle 2)
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
-/-- The scale of the issue's example `L = 2`, `d = 3`, `α = 1`: `ℓ = 4` satisfies
+/-- The scale of the example `L = 2`, `d = 3`, `α = 1`: `ℓ = 4` satisfies
 `e^{-2^{12}/(8e)} ≤ 1/4`. -/
 theorem amplification_scale_example_exp :
     Real.exp (-(((2 : ℕ) : ℝ) ^ (3 * 4) / (8 * Real.exp 1))) ≤ 1 / 4 := by
@@ -746,7 +745,7 @@ theorem amplification_scale_example_exp :
   rw [Real.exp_neg, inv_eq_one_div, div_le_div_iff₀ (Real.exp_pos _) (by norm_num)]
   linarith [Real.add_one_le_exp x]
 
-/-- The scale of the issue's example: `ℓ = 4` satisfies `16 e² ≤ 2^{(3-1)·4} = 256`. -/
+/-- The scale of that example: `ℓ = 4` satisfies `16 e² ≤ 2^{(3-1)·4} = 256`. -/
 theorem amplification_scale_example_pow :
     16 * Real.exp 1 ^ 2 ≤ ((2 : ℕ) : ℝ) ^ ((((3 : ℕ) : ℝ) - 1) * ((4 : ℕ) : ℝ)) := by
   have h8 : ((2 : ℕ) : ℝ) ^ ((((3 : ℕ) : ℝ) - 1) * ((4 : ℕ) : ℝ)) = 256 := by
@@ -759,10 +758,10 @@ theorem amplification_scale_example_pow :
   nlinarith
 
 open Classical in
-/-- **D-5 witness** for `tightnessScale_hierarchical_amplification`: `L = 2`, `d = 3`, `α = 1`,
-`c = 1`, `ℓ = 4` and the kernel `J(u, v) = 2^{-4 j}` when `u, v` first share a level-`j`
-block. At `β = 1638400` the hypothesis holds at `n = 0` (the origin block is a single vertex,
-of quantile `2`), so the amplified bound holds at `n = 4`. -/
+/-- **Non-vacuity witness** for `tightnessScale_hierarchical_amplification`: `L = 2`, `d = 3`,
+`α = 1`, `c = 1`, `ℓ = 4` and the kernel `J(u, v) = 2^{-4 j}` when `u, v` first share a level-`j`
+block. At `β = 1638400` the hypothesis holds at `n = 0` (the origin block is a single vertex, of
+quantile `2`), so the amplified bound holds at `n = 4`. -/
 example : ∃ J : Sym2 (ℕ →₀ (Fin 3 → ZMod 2)) → ℝ≥0,
     (∀ x u v, J s(u + x, v + x) = J s(u, v)) ∧
     (∀ u v, u ≠ v → (1 : ℝ) * ((2 : ℕ) : ℝ) ^ (-((((3 : ℕ) : ℝ) + 1) *
@@ -821,7 +820,7 @@ example : ∃ J : Sym2 (ℕ →₀ (Fin 3 → ZMod 2)) → ℝ≥0,
 open Classical in
 /-- **Hierarchical block-quantile amplification, translation invariance off the diagonal.**
 The statement of `tightnessScale_hierarchical_amplification` with translation invariance assumed
-for distinct pairs only (the diagonal is arbitrary, D-2). -/
+for distinct pairs only (the diagonal is arbitrary). -/
 theorem tightnessScale_hierarchical_amplification_of_ne [NeZero L] (hL : 2 ≤ L) {α c : ℝ}
     (hc : 0 < c) (hα : 0 < α) (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0)
     (hJt : ∀ x u v, u ≠ v → J s(u + x, v + x) = J s(u, v))

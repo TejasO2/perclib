@@ -62,6 +62,12 @@
         "8EIH"
       ],
       "reason": "The degree bound 2d excludes percolation below the reciprocal threshold, and the capped infimum preserves the lower bound."
+    },
+    {
+      "order": 3,
+      "tag": "8FLS",
+      "proof_uses": [],
+      "reason": "A definition; it invokes no other wiki assertion."
     }
   ]
 }

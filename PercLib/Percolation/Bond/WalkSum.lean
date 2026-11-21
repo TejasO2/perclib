@@ -21,8 +21,7 @@ diagonal-masked specialization is the form used for bond percolation.
 may repeat edges: interpreting the product as an independent-edge probability
 requires a separate restriction to paths with distinct edges.
 
-New proofs for PercLib, using the pinned mathlib API located by SCOUT in
-issue #17; no upstream proof is copied.
+New proofs for PercLib, using the pinned mathlib API; no upstream proof is copied.
 -/
 
 @[expose] public section
@@ -120,7 +119,8 @@ def offDiagonal (a : V → V → ℝ≥0∞) (v w : V) : ℝ≥0∞ := by
   classical
   exact if w = v then 0 else a v w
 
-/-- Unfolding the mask gives the explicit row-sum spelling used in P-5. -/
+/-- Unfolding the mask gives the explicit row-sum spelling used in
+`PercLib.Percolation.Bond.RowSum`. -/
 theorem offDiagonal_apply (a : V → V → ℝ≥0∞) (v w : V) :
     offDiagonal a v w = if w = v then 0 else a v w := rfl
 

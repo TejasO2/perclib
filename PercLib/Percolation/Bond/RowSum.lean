@@ -2,7 +2,7 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 New proofs using pinned mathlib's simple paths, cylinder probabilities and
-ENNReal sums. No upstream proof is copied; reuse findings are on issue #39.
+ENNReal sums. No upstream proof is copied.
 -/
 module
 
@@ -124,8 +124,7 @@ theorem chi_le_tsum_walkSum [Countable V] (q : Sym2 V → unitInterval) (x : V) 
 condition, host graph, transitivity or finite-degree assumption is needed. -/
 theorem chi_le_inv_one_sub_of_rowSum [Countable V] (q : Sym2 V → unitInterval)
     (m : ℝ≥0∞)
-    (hrow : ∀ v, (∑' w, if w = v then 0 else
-      (unitInterval.toNNReal (q s(v,w)) : ℝ≥0∞)) ≤ m)
+    (hrow : ∀ v, rowSum (fun e => unitInterval.toENNReal (q e)) v ≤ m)
     (hm : m < 1) (x : V) : chi q x ≤ (1 - m)⁻¹ :=
   (chi_le_tsum_walkSum q x).trans
     (walkSum_masked_total_le _ m hrow hm x)
@@ -133,8 +132,7 @@ theorem chi_le_inv_one_sub_of_rowSum [Countable V] (q : Sym2 V → unitInterval)
 /-- Subunit off-diagonal rows imply finite susceptibility at every vertex. -/
 theorem chi_lt_top_of_rowSum [Countable V] (q : Sym2 V → unitInterval)
     (m : ℝ≥0∞)
-    (hrow : ∀ v, (∑' w, if w = v then 0 else
-      (unitInterval.toNNReal (q s(v,w)) : ℝ≥0∞)) ≤ m)
+    (hrow : ∀ v, rowSum (fun e => unitInterval.toENNReal (q e)) v ≤ m)
     (hm : m < 1) (x : V) : chi q x < ⊤ :=
   lt_of_le_of_lt (chi_le_tsum_walkSum q x)
     (walkSum_total_lt_top _ m hrow hm x)
@@ -142,8 +140,7 @@ theorem chi_lt_top_of_rowSum [Countable V] (q : Sym2 V → unitInterval)
 /-- With probability one all clusters are finite simultaneously for the fixed profile. -/
 theorem ae_all_clusters_finite_of_rowSum [Countable V] (q : Sym2 V → unitInterval)
     (m : ℝ≥0∞)
-    (hrow : ∀ v, (∑' w, if w = v then 0 else
-      (unitInterval.toNNReal (q s(v,w)) : ℝ≥0∞)) ≤ m)
+    (hrow : ∀ v, rowSum (fun e => unitInterval.toENNReal (q e)) v ≤ m)
     (hm : m < 1) : ∀ᵐ ω ∂law q, ∀ x, (cluster ω x).Finite := by
   rw [ae_all_iff]
   intro x
@@ -163,8 +160,7 @@ theorem one_le_chi [Countable V] (q : Sym2 V → unitInterval) (x : V) :
 theorem chi_eq_one_of_offDiagonal_zero [Countable V] (q : Sym2 V → unitInterval)
     (hq : ∀ v w, w ≠ v → q s(v,w) = 0) (x : V) : chi q x = 1 := by
   apply le_antisymm _ (one_le_chi q x)
-  have hrow : ∀ v, (∑' w, if w = v then 0 else
-      (unitInterval.toNNReal (q s(v,w)) : ℝ≥0∞)) ≤ 0 := by
+  have hrow : ∀ v, rowSum (fun e => unitInterval.toENNReal (q e)) v ≤ 0 := by
     intro v
     apply le_of_eq
     calc
@@ -192,7 +188,7 @@ example : chi (fun _ : Sym2 Bool => (⟨1/2, by norm_num⟩ : unitInterval)) fal
     simp
   have hbound := chi_le_inv_one_sub_of_rowSum
     (fun _ : Sym2 Bool => (⟨1/2, by norm_num⟩ : unitInterval)) (1/2)
-    (by intro v; cases v <;> norm_num [tsum_fintype, hp]) (by norm_num) false
+    (by intro v; cases v <;> norm_num [rowSum_toENNReal, tsum_fintype, hp]) (by norm_num) false
   convert hbound using 1; norm_num
 
 -- A backtracking walk uses one unordered coordinate twice. Its open event has

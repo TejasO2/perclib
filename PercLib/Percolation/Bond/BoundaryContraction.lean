@@ -613,7 +613,7 @@ theorem tsum_law_induce_conn_le_of_boundary_contraction [Countable V]
 
 /-! ## Uniform boundary contraction (YLZV) -/
 
-/-- **Uniform boundary contraction (YLZV).** If every `x` has a finite `S_x ∋ x` with
+/-- **Uniform boundary contraction.** If every `x` has a finite `S_x ∋ x` with
 `∑_{u ∈ S_x} τ_{S_x}(x,u) ≤ B` and `Φ_q(x,S_x) ≤ a < 1`, then `χ(x) ≤ B (1 - a)⁻¹`. -/
 theorem chi_le_of_boundary_contraction [Countable V] (q : Sym2 V → unitInterval)
     (Sx : V → Finset V) (hSx : ∀ x, x ∈ Sx x) {B a : ℝ≥0∞} (ha : a < 1)
@@ -669,7 +669,7 @@ theorem chi_le_of_boundary_contraction_card [Countable V] (q : Sym2 V → unitIn
 /-- Singleton domains: an off-diagonal row-sum bound `a < 1` gives `χ ≤ (1 - a)⁻¹`. -/
 theorem chi_le_of_rowSum_le [Countable V] (q : Sym2 V → unitInterval) {a : ℝ≥0∞}
     (ha : a < 1)
-    (hrow : ∀ x, (∑' v, if v = x then 0 else (unitInterval.toNNReal (q s(x, v)) : ℝ≥0∞)) ≤ a)
+    (hrow : ∀ x, rowSum (fun e => unitInterval.toENNReal (q e)) x ≤ a)
     (x : V) : chi q x ≤ (1 - a)⁻¹ := by
   have h := chi_le_of_boundary_contraction_card q (fun x => {x}) (fun x => by simp)
     (N := 1) (fun x => by simp) ha (fun y => ?_) x
@@ -690,14 +690,13 @@ example (x : Bool) :
   have hq : unitInterval.toNNReal (⟨1/2, by norm_num, by norm_num⟩ : unitInterval) = 2⁻¹ :=
     NNReal.eq (by norm_num [unitInterval.toNNReal]; rfl)
   refine chi_le_of_rowSum_le _ (ENNReal.inv_lt_one.mpr ENNReal.one_lt_two) (fun y => ?_) x
-  rw [tsum_fintype, hq, ENNReal.coe_inv two_ne_zero, ENNReal.coe_ofNat]
+  rw [rowSum_toENNReal, tsum_fintype, hq, ENNReal.coe_inv two_ne_zero, ENNReal.coe_ofNat]
   cases y <;> simp
 
 -- Non-vacuity at `a = 0`: the zero profile.
 example [Countable V] (x : V) : chi (fun _ : Sym2 V => 0) x ≤ 1 := by
-  have h0 : unitInterval.toNNReal 0 = 0 := NNReal.eq (by simp [unitInterval.toNNReal]; rfl)
   have h := chi_le_of_rowSum_le (V := V) (fun _ => 0) (a := 0) (by norm_num)
-    (fun y => by simp [h0]) x
+    (fun y => by simp) x
   simpa using h
 
 end PercLib.Percolation.Bond

@@ -8,6 +8,22 @@ module
 public import PercLib.Percolation.Bond.Basic
 public import PercLib.Probability.Coupling.Monotone
 
+/-!
+# Deterministic modification of product laws
+
+Closing, opening or deleting a deterministic set of coordinates changes the product law by fixing
+those marginals, and compares increasing events monotonically.
+
+## Main results
+
+* `prodBernoulli_map_inter`
+* `prodBernoulli_map_union`
+* `prodBernoulli_map_sdiff`
+* `prodBernoulli_preimage_inter_le`
+* `prodBernoulli_le_preimage_union`
+* `tau_mask_edgeSet_le`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory ProbabilityTheory Set

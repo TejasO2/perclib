@@ -75,6 +75,21 @@ class ExportTests(unittest.TestCase):
                 self.assertEqual(offline.digest(z.read(prefix + name)), digest)
         self.assertEqual(report["sourceFiles"], 1)
 
+    def test_collapsed_blocks_are_expanded_in_the_offline_reader(self):
+        page = self.build / "articles/c/index.html"
+        page.parent.mkdir(parents=True)
+        page.write_text('<html><body><details class="collapsible"><summary>Proof</summary><p id="s">Step $a&lt;b$</p></details>'
+                        '<details open><summary>Open</summary></details><DETAILS><summary>Upper</summary></DETAILS>'
+                        '<detailsx>not a block</detailsx><a href="#s">Step</a></body></html>')
+        dest, _ = self.export()
+        html = (dest / ("perclib-wiki-" + self.sha[:12]) / "articles/c/index.html").read_text()
+        self.assertIn('<details open class="collapsible"><summary>Proof</summary>', html)
+        self.assertIn('<details open><summary>Open</summary>', html)
+        self.assertNotIn("open open", html)
+        self.assertIn('<details open><summary>Upper</summary>', html)
+        self.assertIn('<detailsx>not a block</detailsx>', html)
+        self.assertEqual(offline.parse_html(html).text, offline.parse_html(page.read_text()).text)
+
     def test_same_input_produces_identical_zip(self):
         a, ra = self.export("one")
         b, rb = self.export("two")

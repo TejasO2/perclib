@@ -10,6 +10,23 @@ public import PercLib.Probability.ProdBernoulliIndependence
 public import Mathlib.Analysis.SpecialFunctions.Log.Summable
 public import Mathlib.Topology.Algebra.InfiniteSum.Real
 
+/-!
+# Cut points for one-dimensional long-range percolation
+
+A closed gap (no open pair crossing it) separates clusters; two cuts around the origin make its
+cluster finite. The probability of a cut is the product of the closed probabilities of its crossing
+pairs, positive when the weighted distance profile is summable and zero when it is not.
+
+## Main results
+
+* `cluster_subset_of_cuts`
+* `finite_cluster_of_cuts`
+* `law_cut_eq_tprod`
+* `law_cut_pos`
+* `law_cut_eq_zero_of_not_summable`
+* `law_cut_eq_zero_of_certain_length`
+-/
+
 @[expose] public section
 
 open MeasureTheory ProbabilityTheory PercLib.Probability PercLib.Percolation.Bond

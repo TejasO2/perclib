@@ -1,9 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs for issue 435 (Q-101), written on 2026-11-16 by PROVER-E: the three-vertex
-counterexample showing that the lower bound for the boundary functional of the wiki page
-boundary-susceptibility (tag 67GX) needs the positive part (tag JTBG). No upstream proof is
-copied, no definition is added and no Input is introduced.
+New proofs, written on 2026-11-16: the three-vertex counterexample showing that the lower bound for
+the boundary functional of the wiki page boundary-susceptibility (tag 67GX) needs the positive part
+(tag JTBG). No upstream proof is copied, no definition is added and no Input is introduced.
 -/
 module
 
@@ -235,10 +234,10 @@ theorem unsigned_square_three_path_gt (h01 : J s(0, 1) = 99 / 100)
   rw [lt_div_iff₀ hD0]
   nlinarith
 
-/-- **The positive part is needed (JTBG).** In the three-vertex model at `β = 1` with
-`S = {0, 1}`, the boundary functional `Φ_1(S) = 1/100` is smaller than the unsigned square
-`(χ_min |S| - ∑_{u,v ∈ S} τ(u,v))² / (β² χ_max Q(S))`. So the lower bound of 67GX fails if
-the positive part is dropped. -/
+/-- **The positive part is needed.** In the three-vertex model at `β = 1` with `S = {0, 1}`, the
+boundary functional `Φ_1(S) = 1/100` is smaller than the unsigned square
+`(χ_min |S| - ∑_{u,v ∈ S} τ(u,v))² / (β² χ_max Q(S))`. So the lower bound of
+`boundary_susceptibility_bound` fails if the positive part is dropped. -/
 theorem not_boundary_bound_unsigned (h01 : J s(0, 1) = 99 / 100)
     (h12 : J s(1, 2) = 1 / 100) (h02 : J s(0, 2) = 0) :
     ¬ (((⨅ u, chi (intensityProfile J 1) u).toReal * (({0, 1} : Finset (Fin 3)).card : ℝ) -
@@ -261,7 +260,7 @@ end Model
 
 /-! ### Non-vacuity -/
 
-/-- The kernel of the issue satisfies the three hypotheses, so the failing inequality
+/-- The three-vertex kernel satisfies the three hypotheses, so the failing inequality
 `not_boundary_bound_unsigned` holds for an actual model. -/
 example := not_boundary_bound_unsigned (J := fun e : Sym2 (Fin 3) =>
     if e = s(0, 1) then 99 / 100 else if e = s(1, 2) then 1 / 100 else 0)

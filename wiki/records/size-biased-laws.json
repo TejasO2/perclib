@@ -250,6 +250,79 @@
         "BSI3"
       ],
       "reason": "The cited construction requires a global two-sided critical spatial bound. BSI3 supplies the asymptotic in the stated model ranges; positivity and finitely many exceptional sites give global constants."
+    },
+    {
+      "order": 14,
+      "tag": "6L9Z",
+      "proof_uses": [],
+      "reason": "A definition; it invokes no other wiki assertion."
+    },
+    {
+      "order": 15,
+      "tag": "0N85",
+      "proof_uses": [],
+      "reason": "The proof uses tightness, uniform integrability and the moment generating function of N^2; it invokes no other wiki assertion."
+    },
+    {
+      "order": 16,
+      "tag": "9PSJ",
+      "proof_uses": [
+        "7W00",
+        "SLGY"
+      ],
+      "reason": "The proof takes the fixed-scale ghost-transform limit (7W00), squeezes the transform with the comparison, and applies the Karamata Laplace-tail theorem (SLGY) to obtain the tail."
+    },
+    {
+      "order": 17,
+      "tag": "26NT",
+      "proof_uses": [
+        "K3DB",
+        "0N85",
+        "C4E9",
+        "BEJT",
+        "0CUF",
+        "9PSJ"
+      ],
+      "reason": "The proof gets the biased limit from K3DB and 0N85, the ghost comparison from C4E9 and BEJT with cutoff finiteness from 0CUF, and applies the transfer theorem 9PSJ."
+    },
+    {
+      "order": 18,
+      "tag": "SBWK",
+      "proof_uses": [
+        "8WO7",
+        "UKY4"
+      ],
+      "reason": "The proof writes the survival probability through the branching property and uses the critical survival asymptotic (8WO7) and E Z_r=1 (UKY4) for dominated convergence."
+    },
+    {
+      "order": 19,
+      "tag": "XCA8",
+      "proof_uses": [],
+      "reason": "The proof uses the martingale identity E[Z_r|F_s]=Z_s of a critical process; it invokes no other wiki assertion."
+    },
+    {
+      "order": 20,
+      "tag": "JNOW",
+      "proof_uses": [
+        "UKY4",
+        "XCA8"
+      ],
+      "reason": "The proof computes E Z_r^2 by induction using E Z_r=1 (UKY4) and transfers means to earlier levels by consistency of the size-biased restrictions (XCA8)."
+    },
+    {
+      "order": 21,
+      "tag": "4AVL",
+      "proof_uses": [
+        "UKY4",
+        "8WO7"
+      ],
+      "reason": "The proof uses E Z_n=1 (UKY4) and absorption of extinction, and the asymptotic comes from Q_r ~ 2/(sigma^2 r) (8WO7)."
+    },
+    {
+      "order": 22,
+      "tag": "XA7C",
+      "proof_uses": [],
+      "reason": "The proof expands the products and applies Tonelli; it invokes no other wiki assertion."
     }
   ]
 }

@@ -37,5 +37,27 @@
     }
   ],
   "occursIn": [],
-  "proofUses": []
+  "proofUses": [
+    {
+      "order": 0,
+      "tag": "67VP",
+      "proof_uses": [],
+      "reason": "A definition; it invokes no other wiki assertion."
+    },
+    {
+      "order": 1,
+      "tag": "7UDJ",
+      "proof_uses": [],
+      "reason": "A definition; it invokes no other wiki assertion."
+    },
+    {
+      "order": 2,
+      "tag": "P9JD",
+      "proof_uses": [
+        "2ZI0",
+        "CSY8"
+      ],
+      "reason": "The critical tail estimate of 2ZI0 forces the tail probabilities to zero, giving no percolation, and its n^(-1/2) lower bound makes the tail sum of CSY8 diverge."
+    }
+  ]
 }

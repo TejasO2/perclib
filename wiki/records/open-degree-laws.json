@@ -126,6 +126,12 @@
         "1C8G"
       ],
       "reason": "Truncate the divergent finite intensity row, compare it to the probability row, then apply the independent degree criterion and the threshold definitions."
+    },
+    {
+      "order": 8,
+      "tag": "PMHN",
+      "proof_uses": [],
+      "reason": "A definition; it invokes no other wiki assertion."
     }
   ]
 }

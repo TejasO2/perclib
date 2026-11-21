@@ -8,6 +8,17 @@ module
 public import PercLib.Meta.Tag
 public import PercLib.Analysis.LinearODEAsymptotics
 
+/-!
+# Spatial cutoff moments: correspondence
+
+Wiki correspondence for the asymptotics of the linear spatial-moment ODE of
+`PercLib/Analysis/LinearODEAsymptotics.lean`.
+
+## Main results
+
+* `linearODE_asymptotics`
+-/
+
 @[expose] public section
 noncomputable section
 
