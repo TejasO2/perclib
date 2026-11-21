@@ -53,10 +53,10 @@ public import PercLib.Analysis.Tags.ReciprocalCutoff
 public import PercLib.Analysis.Tags.SpatialCutoffMoments
 public import PercLib.Analysis.Tags.SpatialNormalization
 public import PercLib.Analysis.Tags.SqrtLowerBound
-public import PercLib.Analysis.Tauberian.Laplace
+public import PercLib.Analysis.Tauberian.Complete
 public import PercLib.Analysis.Tauberian.Converse
 public import PercLib.Analysis.Tauberian.Endpoints
-public import PercLib.Analysis.Tauberian.Complete
+public import PercLib.Analysis.Tauberian.Laplace
 public import PercLib.Analysis.VolumeTail.A3Limit
 public import PercLib.Analysis.VolumeTail.ChiSquareConstants
 public import PercLib.Analysis.VolumeTail.Endpoint
@@ -161,8 +161,8 @@ public import PercLib.Percolation.Bond.Basic
 public import PercLib.Percolation.Bond.BoundaryContraction
 public import PercLib.Percolation.Bond.BoundarySusceptibility
 public import PercLib.Percolation.Bond.ClosedCertificates
-public import PercLib.Percolation.Bond.ClusterCorrelation.Defs
 public import PercLib.Percolation.Bond.ClusterCorrelation.CovarianceGap
+public import PercLib.Percolation.Bond.ClusterCorrelation.Defs
 public import PercLib.Percolation.Bond.ClusterCorrelation.Inequalities
 public import PercLib.Percolation.Bond.ClusterCorrelation.Restoration
 public import PercLib.Percolation.Bond.ClusterCorrelation.TwoClusterGap
@@ -245,8 +245,8 @@ public import PercLib.Percolation.Bond.Tags.CoreClosedProducts
 public import PercLib.Percolation.Bond.Tags.CoreConnectivity
 public import PercLib.Percolation.Bond.Tags.CoreCorrelationLength
 public import PercLib.Percolation.Bond.Tags.CoreFiniteVolume
-public import PercLib.Percolation.Bond.Tags.CoreGraphCertificates
 public import PercLib.Percolation.Bond.Tags.CoreGlobalConnectivity
+public import PercLib.Percolation.Bond.Tags.CoreGraphCertificates
 public import PercLib.Percolation.Bond.Tags.CoreIntegratedSusceptibility
 public import PercLib.Percolation.Bond.Tags.CoreIntensity
 public import PercLib.Percolation.Bond.Tags.CoreNearMisses
@@ -363,6 +363,7 @@ public import PercLib.Probability.Tags.GhostTransform
 public import PercLib.Probability.Tags.Harris
 public import PercLib.Probability.Tags.IntegratedLowerTail
 public import PercLib.Probability.Tags.MonotoneCoupling
+public import PercLib.Probability.Tags.NearMisses
 public import PercLib.Probability.Tags.ProductModel
 public import PercLib.Probability.Tags.ProfileContinuity
 public import PercLib.Probability.Tags.RevealmentDerivative
