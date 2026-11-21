@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 The converse (Tauberian) direction toward Theorem I.2.11 of T. Hutchcroft,
 *Critical long-range percolation I*, arXiv:2508.18807v1, p. 26 (citing Feller XIII.5.2).
 
@@ -452,7 +456,7 @@ variable {α : ℝ} {L : {q : ℚ // 0 < q} → ℝ}
 
 /-- The set `{L q : q > u}` whose supremum is the limit profile at `u` is bounded above. -/
 theorem limitProfile_bddAbove (hα0 : 0 ≤ α) (hα1 : α < 1)
-    (hLb : ∀ q, L q ≤ Real.Gamma (1 - α) * ((3/2) * Real.exp 1 * (q:ℝ) ^ (-α)))
+    (hLb : ∀ q, L q ≤ Real.Gamma (1 - α) * ((3 / 2) * Real.exp 1 * (q : ℝ) ^ (-α)))
     {u : ℝ} (hu : 0 < u) :
     BddAbove {x : ℝ | ∃ q : {q : ℚ // 0 < q}, u < (q:ℝ) ∧ L q = x} := by
   refine ⟨Real.Gamma (1 - α) * ((3/2) * Real.exp 1 * u ^ (-α)), ?_⟩
@@ -467,13 +471,13 @@ theorem limitProfile_nonempty {u : ℝ} (hu : 0 < u) :
   exact ⟨L ⟨q, hq0⟩, ⟨⟨q, hq0⟩, hq, rfl⟩⟩
 
 theorem le_limitProfile (hα0 : 0 ≤ α) (hα1 : α < 1)
-    (hLb : ∀ q, L q ≤ Real.Gamma (1 - α) * ((3/2) * Real.exp 1 * (q:ℝ) ^ (-α)))
-    {u : ℝ} (hu : 0 < u) {q : {q : ℚ // 0 < q}} (hq : u < (q:ℝ)) :
+    (hLb : ∀ q, L q ≤ Real.Gamma (1 - α) * ((3 / 2) * Real.exp 1 * (q : ℝ) ^ (-α)))
+    {u : ℝ} (hu : 0 < u) {q : {q : ℚ // 0 < q}} (hq : u < (q : ℝ)) :
     L q ≤ sSup {x : ℝ | ∃ q : {q : ℚ // 0 < q}, u < (q:ℝ) ∧ L q = x} :=
   le_csSup (limitProfile_bddAbove hα0 hα1 hLb hu) ⟨q, hq, rfl⟩
 
 theorem limitProfile_le_bound (hα0 : 0 ≤ α) (hα1 : α < 1)
-    (hLb : ∀ q, L q ≤ Real.Gamma (1 - α) * ((3/2) * Real.exp 1 * (q:ℝ) ^ (-α)))
+    (hLb : ∀ q, L q ≤ Real.Gamma (1 - α) * ((3 / 2) * Real.exp 1 * (q : ℝ) ^ (-α)))
     {u : ℝ} (hu : 0 < u) :
     sSup {x : ℝ | ∃ q : {q : ℚ // 0 < q}, u < (q:ℝ) ∧ L q = x}
       ≤ Real.Gamma (1 - α) * ((3/2) * Real.exp 1 * u ^ (-α)) :=
@@ -482,7 +486,7 @@ theorem limitProfile_le_bound (hα0 : 0 ≤ α) (hα1 : α < 1)
     exact le_trans (hLb q) (profileBound_antitone hα0 hα1 hu (le_of_lt hq)))
 
 theorem limitProfile_nonneg (hα0 : 0 ≤ α) (hα1 : α < 1)
-    (hLb : ∀ q, L q ≤ Real.Gamma (1 - α) * ((3/2) * Real.exp 1 * (q:ℝ) ^ (-α)))
+    (hLb : ∀ q, L q ≤ Real.Gamma (1 - α) * ((3 / 2) * Real.exp 1 * (q : ℝ) ^ (-α)))
     (hLnn : ∀ q, 0 ≤ L q) {u : ℝ} (hu : 0 < u) :
     0 ≤ sSup {x : ℝ | ∃ q : {q : ℚ // 0 < q}, u < (q:ℝ) ∧ L q = x} := by
   obtain ⟨x, hx⟩ := limitProfile_nonempty (L := L) hu
@@ -491,7 +495,7 @@ theorem limitProfile_nonneg (hα0 : 0 ≤ α) (hα1 : α < 1)
   exact hLnn q
 
 theorem limitProfile_antitone (hα0 : 0 ≤ α) (hα1 : α < 1)
-    (hLb : ∀ q, L q ≤ Real.Gamma (1 - α) * ((3/2) * Real.exp 1 * (q:ℝ) ^ (-α))) :
+    (hLb : ∀ q, L q ≤ Real.Gamma (1 - α) * ((3 / 2) * Real.exp 1 * (q : ℝ) ^ (-α))) :
     ∀ u v : ℝ, 0 < u → u ≤ v →
       sSup {x : ℝ | ∃ q : {q : ℚ // 0 < q}, v < (q:ℝ) ∧ L q = x}
         ≤ sSup {x : ℝ | ∃ q : {q : ℚ // 0 < q}, u < (q:ℝ) ∧ L q = x} := by
@@ -509,7 +513,7 @@ theorem limitProfile_spec {u : ℝ} (hu : 0 < u) {ε : ℝ} (hε : 0 < ε) :
 
 /-- The limit profile is antitone after extending by a constant below any `c > 0`. -/
 theorem antitone_limitProfile_ext (hα0 : 0 ≤ α) (hα1 : α < 1)
-    (hLb : ∀ q, L q ≤ Real.Gamma (1 - α) * ((3/2) * Real.exp 1 * (q:ℝ) ^ (-α)))
+    (hLb : ∀ q, L q ≤ Real.Gamma (1 - α) * ((3 / 2) * Real.exp 1 * (q : ℝ) ^ (-α)))
     {c : ℝ} (hc : 0 < c) :
     Antitone (fun u : ℝ => if u ≤ c
       then sSup {x : ℝ | ∃ q : {q : ℚ // 0 < q}, c < (q:ℝ) ∧ L q = x}
@@ -532,7 +536,7 @@ functions converging at the positive rationals to `L` converges at almost every 
 theorem ae_tendsto_limitProfile_ge {g : ℕ → ℝ → ℝ}
     (hα0 : 0 ≤ α) (hα1 : α < 1)
     (hanti : ∀ k, Antitone (g k))
-    (hLb : ∀ q, L q ≤ Real.Gamma (1 - α) * ((3/2) * Real.exp 1 * (q:ℝ) ^ (-α)))
+    (hLb : ∀ q, L q ≤ Real.Gamma (1 - α) * ((3 / 2) * Real.exp 1 * (q : ℝ) ^ (-α)))
     (hconv : ∀ q : {q : ℚ // 0 < q}, Tendsto (fun k => g k (q:ℝ)) atTop (𝓝 (L q)))
     {c : ℝ} (hc : 0 < c) :
     ∀ᵐ u ∂(volume.restrict (Ioi c)), Tendsto (fun k => g k u) atTop
@@ -600,7 +604,7 @@ theorem ae_tendsto_limitProfile_ge {g : ℕ → ℝ → ℝ}
 theorem ae_tendsto_limitProfile {g : ℕ → ℝ → ℝ}
     (hα0 : 0 ≤ α) (hα1 : α < 1)
     (hanti : ∀ k, Antitone (g k))
-    (hLb : ∀ q, L q ≤ Real.Gamma (1 - α) * ((3/2) * Real.exp 1 * (q:ℝ) ^ (-α)))
+    (hLb : ∀ q, L q ≤ Real.Gamma (1 - α) * ((3 / 2) * Real.exp 1 * (q : ℝ) ^ (-α)))
     (hconv : ∀ q : {q : ℚ // 0 < q}, Tendsto (fun k => g k (q:ℝ)) atTop (𝓝 (L q))) :
     ∀ᵐ u ∂(volume.restrict (Ioi (0:ℝ))), Tendsto (fun k => g k u) atTop
       (𝓝 (sSup {x : ℝ | ∃ q : {q : ℚ // 0 < q}, u < (q:ℝ) ∧ L q = x})) := by

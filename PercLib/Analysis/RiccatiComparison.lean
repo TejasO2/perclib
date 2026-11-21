@@ -1,14 +1,16 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-
-Ported for package Q-148 (issue 515) from pull request 488: source repository
-`yujinhkim/lrp`, branch `critical-lrp-1`, commit `d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`,
-file `PercLib/CriticalLRP/ODE.lean` (blob `2294eb5a37`), contributed by `yujinhkim`; licence
-Apache-2.0 as declared in that commit's file headers and `third_party/critical-lrp/NOTICE.md`.
-Upstream origin `yujinhkim/Critical-Long-range-percolation` at
-`3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf` (not independently verified).
-Changes: focused imports, no disabled linters or `autoImplicit`, namespace `PercLib.Analysis`,
-and the helper `intervalIntegrable_of_integrableOn_uIcc` replaced by mathlib's
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
+Ported from the source repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
+`d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, file `PercLib/CriticalLRP/ODE.lean` (blob `2294eb5a37`),
+contributed by `yujinhkim`; licence Apache-2.0 as declared in that commit's file headers and
+`third_party/critical-lrp/NOTICE.md`. Upstream origin `yujinhkim/Critical-Long-range-percolation` at
+`3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf` (not independently verified). Changes: focused imports,
+no disabled linters or `autoImplicit`, namespace `PercLib.Analysis`, and the helper
+`intervalIntegrable_of_integrableOn_uIcc` replaced by mathlib's
 `MeasureTheory.IntegrableOn.intervalIntegrable`.
 
 Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1, Lemma I.4.5 (p. 35).
@@ -71,7 +73,8 @@ theorem lemma_I_4_5_one_nocont {f f' : ℝ → ℝ} {A α r₀ : ℝ}
   -- the auxiliary function
   set H : ℝ → ℝ := fun x => (f x)⁻¹ - (A / α) * x ^ (-α) with hH
   -- its derivative on `(r₀, ∞)`
-  have hHderiv : ∀ x, r₀ < x → HasDerivAt H (-(f' x / (f x) ^ 2) - (A / α) * (-α * x ^ (-α - 1))) x := by
+  have hHderiv : ∀ x, r₀ < x → HasDerivAt H (-(f' x / (f x) ^ 2) - (A / α) *
+      (-α * x ^ (-α - 1))) x := by
     intro x hx
     have hxr : r₀ ≤ x := le_of_lt hx
     have hxpos : 0 < x := lt_of_lt_of_le hr₀ hxr
@@ -498,15 +501,15 @@ theorem isEquivalent_rpow_of_hasDerivWithinAt_riccati {f f' h : ℝ → ℝ} {A 
   rw [Pi.div_apply, hform]
   field_simp
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
 /-- `x^{-2} x² = 1` for `x > 0`. -/
 private theorem rpow_neg_two_mul_sq {x : ℝ} (hx : 0 < x) : x ^ (-1 - 1 : ℝ) * x ^ 2 = 1 := by
   rw [show (-1 - 1 : ℝ) = -((2 : ℕ) : ℝ) by norm_num, Real.rpow_neg hx.le, Real.rpow_natCast,
     inv_mul_cancel₀ (by positivity)]
 
-/-- D-5: `f r = (α/A) r^α = r` with `h = 0`, at `A = α = r₀ = 1`, satisfies the hypotheses of
-all three items, with equality in the differential inequalities. -/
+/-- Non-vacuity: `f r = (α/A) r^α = r` with `h = 0`, at `A = α = r₀ = 1`, satisfies the hypotheses
+of all three items, with equality in the differential inequalities. -/
 example :
     (∀ r : ℝ, 1 ≤ r → r ≤ 1 / 1 * r ^ (1 : ℝ)) ∧ (∀ r : ℝ, 1 ≤ r → 1 / 1 * r ^ (1 : ℝ) ≤ r) ∧
       ∀ r : ℝ, 1 ≤ r → r = (1 / 1) * r ^ (1 : ℝ) /

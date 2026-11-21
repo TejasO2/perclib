@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Correspondence wrappers for the displacement-kernel assertions on `ℤ^d` and `ℤ`.
 All mathematical inputs are proved in the imported modules.
 -/
@@ -9,6 +13,19 @@ public import PercLib.Meta.Tag
 public import PercLib.Models.LongRange.PowerLaw
 public import PercLib.Models.LongRange.CutPoints
 public import PercLib.Percolation.Bond.Diagonal.Probability
+
+/-!
+# Displacement kernels: correspondence
+
+Wiki correspondence for the power-law kernel on `ℤ^d`, sup-norm ball counts and cut probabilities on
+`ℤ`.
+
+## Main results
+
+* `powerLaw_kernel_properties`
+* `supNorm_ball_sphere_counts`
+* `law_cut_eq_tprod_and_pos_iff`
+-/
 
 @[expose] public section
 noncomputable section
@@ -67,9 +84,9 @@ arbitrary): the probability that no open bond crosses the gap after `j` is
 @[tag "BQ44"]
 theorem law_cut_eq_tprod_and_pos_iff (p : ℕ → unitInterval) (q : Sym2 ℤ → unitInterval)
     (hq : ∀ a b, a ≠ b → q s(a, b) = p (Int.natAbs (b - a))) (j : ℤ) :
-    law q {ω | ∀ a b, a ≤ j → j < b → s(a, b) ∉ ω} =
+    law q {ω | IsCut ω j} =
         ∏' n : ℕ, (unitInterval.toNNReal (unitInterval.symm (p n)) : ℝ≥0∞) ^ n ∧
-    (0 < law q {ω | ∀ a b, a ≤ j → j < b → s(a, b) ∉ ω} ↔
+    (0 < law q {ω | IsCut ω j} ↔
         (∀ n, 1 ≤ n → p n < 1) ∧ Summable fun n : ℕ => (n : ℝ) * (p n : ℝ)) := by
   classical
   set q' : Sym2 ℤ → unitInterval := fun e => if e.IsDiag then p 0 else q e with hq'def
@@ -79,9 +96,8 @@ theorem law_cut_eq_tprod_and_pos_iff (p : ℕ → unitInterval) (q : Sym2 ℤ �
     · subst hab; simp [q']
     · simp only [q', Sym2.mk_isDiag_iff, hab, ite_false]
       exact hq a b hab
-  have hlaw : law q {ω | ∀ a b, a ≤ j → j < b → s(a, b) ∉ ω} =
-      law q' {ω | ∀ a b, a ≤ j → j < b → s(a, b) ∉ ω} := by
-    refine law_event_eq_of_offDiagonal q q' (fun e he => ?_) (measurableSet_cut j) ?_
+  have hlaw : law q {ω | IsCut ω j} = law q' {ω | IsCut ω j} := by
+    refine law_event_eq_of_offDiagonal q q' (fun e he => ?_) (measurableSet_setOf_isCut j) ?_
     · simp [q', he]
     · intro ω ω' h
       have key : ∀ a b : ℤ, a ≤ j → j < b → (s(a, b) ∈ ω ↔ s(a, b) ∈ ω') := by

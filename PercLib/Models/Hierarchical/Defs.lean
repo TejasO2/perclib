@@ -1,11 +1,14 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Statements (D-16) written on 2026-11-20 for package hier-stmt: Theorem 1.1 and Corollary 1.2
-of T. Hutchcroft, *The critical two-point function for long-range percolation on the
-hierarchical lattice*,
-arXiv:2103.17013v1, on the bond interface of D-2. New statements; no upstream code is copied
-and no new notion is introduced (lattice, level, balls, `intensityProfile`,
-`rootCriticalIntensity`, `law`, `tau` and `openGraph` are the library's).
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
+Statements written on 2026-11-20: Theorem 1.1 and Corollary 1.2 of T. Hutchcroft, *The critical
+two-point function for long-range percolation on the hierarchical lattice*, arXiv:2103.17013v1, on
+the bond interface. New statements; no upstream code is copied and no new notion is introduced
+(lattice, level, balls, `intensityProfile`, `rootCriticalIntensity`, `law`, `tau` and `openGraph`
+are the library's).
 -/
 module
 

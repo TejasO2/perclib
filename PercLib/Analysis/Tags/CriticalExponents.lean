@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Correspondence wrapper for the critical-exponents assertion UBFE, proved from
 `LogExponent.lean`. No new definitions.
 -/
@@ -7,6 +11,17 @@ module
 
 public import PercLib.Meta.Tag
 public import PercLib.Analysis.LogExponent
+
+/-!
+# Critical exponents: correspondence
+
+Wiki correspondence for the hierarchy of asymptotic notions, from
+`PercLib/Analysis/LogExponent.lean`.
+
+## Main results
+
+* `log_exponent_hierarchy`
+-/
 
 @[expose] public section
 noncomputable section

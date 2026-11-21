@@ -1,8 +1,11 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written for package Q-109 (issue 443), on the D-2 interface and the intensity
-family `intensityProfile`. The statements follow the wiki tags 1EWX (bounds only) and MTYL.
-No source text or code is copied.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
+New proofs, on the bond interface and the intensity family `intensityProfile`. The
+statements follow the wiki tags 1EWX (bounds only) and MTYL. No source text or code is copied.
 -/
 module
 
@@ -21,10 +24,10 @@ Let `J` be an intensity whose off-diagonal rows sum to exactly one, and let
 * `chi_bounds` (1EWX): `1 + β - β²/2 ≤ χ(o) ≤ (1 - β)⁻¹`;
 * `triangle_bounds` (1EWX): `1 ≤ Δ ≤ 1 + 3 m² + m³` with `m = β / (1 - β)`.
 
-Neither bound uses transitivity: they hold at every root under the row hypothesis
-alone. `chi_bounds_of_transitive` and `triangle_bounds_of_transitive` restate them with
-the transitivity hypothesis of the package, which is then unused. The local Lipschitz
-statement `χ' ≤ (1 - β)⁻²` of 1EWX needs MXGM (package Q-99) and is not proved here.
+Neither bound uses transitivity: they hold at every root under the row hypothesis alone.
+`chi_bounds_of_transitive` and `triangle_bounds_of_transitive` restate them with a transitivity
+hypothesis, which is then unused. The local Lipschitz statement `χ' ≤ (1 - β)⁻²` needs the
+integrated mean-field inequality for the susceptibility and is not proved here.
 
 The deterministic core is `tsum_triangle_le`: for a nonnegative matrix that is one on the
 diagonal and whose off-diagonal rows sum to at most `m`, the closed triangle at a vertex
@@ -36,7 +39,6 @@ noncomputable section
 
 open MeasureTheory PercLib.Probability PercLib.Percolation.Bond
 open scoped ENNReal NNReal
-open Classical
 
 namespace PercLib.Models.NormalizedSmallIntensity
 
@@ -83,18 +85,21 @@ theorem ofReal_mul_le_intensityProfile (J : Sym2 V → ℝ≥0) (β : ℝ≥0) (
 
 /-! ### The deterministic triangle bound -/
 
+open Classical in
 /-- Picking the diagonal entry from the left. -/
 theorem tsum_ite_eq_mul_left (u : V) (f : V → ℝ≥0∞) :
     ∑' v, (if u = v then (1 : ℝ≥0∞) else 0) * f v = f u := by
   rw [tsum_eq_single u (fun v hv => by simp [Ne.symm hv])]
   simp
 
+open Classical in
 /-- Picking the diagonal entry from the right. -/
 theorem tsum_mul_ite_eq_right (o : V) (f : V → ℝ≥0∞) :
     ∑' v, f v * (if v = o then (1 : ℝ≥0∞) else 0) = f o := by
   rw [tsum_eq_single o (fun v hv => by simp [hv])]
   simp
 
+open Classical in
 /-- **Closed triangle of `δ + t`.** If `t` vanishes on the diagonal and its rows sum to at
 most `m`, the closed triangle of `δ + t` at `o` is at most `1 + 3 m² + m³`. -/
 theorem tsum_triangle_le_of_add (t : V → V → ℝ≥0∞) (m : ℝ≥0∞) (ht0 : ∀ x, t x x = 0)
@@ -150,6 +155,7 @@ theorem tsum_triangle_le_of_add (t : V → V → ℝ≥0∞) (m : ℝ≥0∞) (h
         · exact hrow o
     _ = 1 + 3 * m ^ 2 + m ^ 3 := by ring
 
+open Classical in
 /-- **Closed triangle.** For `a` equal to one on the diagonal, with off-diagonal rows
 summing to at most `m`, `∑' u v, a o u * a u v * a v o ≤ 1 + 3 m² + m³`. -/
 theorem tsum_triangle_le (a : V → V → ℝ≥0∞) (m : ℝ≥0∞) (ha : ∀ x, a x x = 1)
@@ -179,10 +185,11 @@ theorem inv_one_sub_eq_one_add (β : ℝ≥0) (hβ : β < 1) :
     _ = (1 - β) / (1 - β) + β / (1 - β) := (ENNReal.div_add_div_same).symm
     _ = 1 + (β : ℝ≥0∞) / (1 - β) := by rw [ENNReal.div_self h1 h2]
 
+open Classical in
 /-- If off-diagonal rows of `J` sum to at most one and `β < 1`, every off-diagonal row of
 the two-point function sums to at most `β / (1 - β)`. -/
 theorem tsum_tau_offDiag_le (J : Sym2 V → ℝ≥0)
-    (hrow : ∀ v, (∑' w, if w = v then 0 else (J s(v, w) : ℝ≥0∞)) ≤ 1) (β : ℝ≥0)
+    (hrow : ∀ v, rowSum (fun e => (J e : ℝ≥0∞)) v ≤ 1) (β : ℝ≥0)
     (hβ : β < 1) (x : V) :
     (∑' y, if y = x then 0 else tau (intensityProfile J β) x y) ≤ (β : ℝ≥0∞) / (1 - β) := by
   have hchi := chi_intensity_le J 1 (by simpa using hrow) β (by simpa using hβ) x
@@ -190,10 +197,11 @@ theorem tsum_tau_offDiag_le (J : Sym2 V → ℝ≥0)
     inv_one_sub_eq_one_add β hβ] at hchi
   exact (ENNReal.add_le_add_iff_left ENNReal.one_ne_top).1 hchi
 
-/-- **1EWX, susceptibility bounds.** If every off-diagonal row of `J` sums to exactly one
+open Classical in
+/-- **Susceptibility bounds.** If every off-diagonal row of `J` sums to exactly one
 and `0 ≤ β < 1`, then `1 + β - β²/2 ≤ χ(o) ≤ (1 - β)⁻¹` at every root. -/
 theorem chi_bounds (J : Sym2 V → ℝ≥0)
-    (hrow : ∀ v, (∑' w, if w = v then 0 else (J s(v, w) : ℝ≥0∞)) = 1) (β : ℝ≥0)
+    (hrow : ∀ v, rowSum (fun e => (J e : ℝ≥0∞)) v = 1) (β : ℝ≥0)
     (hβ : β < 1) (o : V) :
     ENNReal.ofReal (1 + β - (β : ℝ) ^ 2 / 2) ≤ chi (intensityProfile J β) o ∧
       chi (intensityProfile J β) o ≤ (1 - (β : ℝ≥0∞))⁻¹ := by
@@ -201,6 +209,7 @@ theorem chi_bounds (J : Sym2 V → ℝ≥0)
   have hβ1 : (β : ℝ) < 1 := by exact_mod_cast hβ
   have hβ0 : (0 : ℝ) ≤ β := β.coe_nonneg
   have hc0 : 0 ≤ (β : ℝ) * (1 - (β : ℝ) / 2) := mul_nonneg hβ0 (by linarith)
+  simp only [rowSum_def] at hrow
   have hJle : ∀ y, y ≠ o → J s(o, y) ≤ 1 := by
     intro y hy
     have h := ENNReal.le_tsum (f := fun w => if w = o then 0 else (J s(o, w) : ℝ≥0∞)) y
@@ -210,23 +219,24 @@ theorem chi_bounds (J : Sym2 V → ℝ≥0)
       = 1 + ENNReal.ofReal ((β : ℝ) * (1 - (β : ℝ) / 2)) * 1 := by
         rw [mul_one, ← ENNReal.ofReal_one, ← ENNReal.ofReal_add zero_le_one hc0]
         congr 1; ring
-    _ = 1 + ∑' y, if y = o then 0 else
-          ENNReal.ofReal ((β : ℝ) * (1 - (β : ℝ) / 2)) * (J s(o, y) : ℝ≥0∞) := by
+    _ = 1 + rowSum (fun e => ENNReal.ofReal ((β : ℝ) * (1 - (β : ℝ) / 2)) * (J e : ℝ≥0∞))
+        o := by
+        simp only [rowSum_def]
         rw [← hrow o, ← ENNReal.tsum_mul_left]
         congr 1
         exact tsum_congr fun y => by split_ifs <;> simp
-    _ ≤ 1 + ∑' y, if y = o then 0 else
-          (unitInterval.toNNReal (intensityProfile J β s(o, y)) : ℝ≥0∞) := by
+    _ ≤ 1 + rowSum (fun e => unitInterval.toENNReal (intensityProfile J β e)) o := by
+        simp only [rowSum_def]
         gcongr with y
         split_ifs with hy
         · exact le_rfl
         · exact ofReal_mul_le_intensityProfile J β _ (hJle y hy)
     _ ≤ chi (intensityProfile J β) o := one_add_rowSum_le_chi _ o
 
-/-- **1EWX, triangle bounds.** If every off-diagonal row of `J` sums to at most one and
+/-- **Triangle bounds.** If every off-diagonal row of `J` sums to at most one and
 `β < 1`, then `1 ≤ Δ ≤ 1 + 3 m² + m³` with `m = β / (1 - β)`, at every root. -/
 theorem triangle_bounds (J : Sym2 V → ℝ≥0)
-    (hrow : ∀ v, (∑' w, if w = v then 0 else (J s(v, w) : ℝ≥0∞)) ≤ 1) (β : ℝ≥0)
+    (hrow : ∀ v, rowSum (fun e => (J e : ℝ≥0∞)) v ≤ 1) (β : ℝ≥0)
     (hβ : β < 1) (o : V) :
     1 ≤ ∑' u, ∑' v, tau (intensityProfile J β) o u * tau (intensityProfile J β) u v *
         tau (intensityProfile J β) v o ∧
@@ -240,18 +250,18 @@ theorem triangle_bounds (J : Sym2 V → ℝ≥0)
         ENNReal.le_tsum (f := fun v => tau q o o * tau q o v * tau q v o) o
     _ ≤ _ := ENNReal.le_tsum (f := fun u => ∑' v, tau q o u * tau q u v * tau q v o) o
 
-/-- 1EWX bounds on `χ`, with the transitivity hypothesis of the package (unused). -/
+/-- The bounds on `χ`, with an (unused) transitivity hypothesis. -/
 theorem chi_bounds_of_transitive (J : Sym2 V → ℝ≥0)
-    (hrow : ∀ v, (∑' w, if w = v then 0 else (J s(v, w) : ℝ≥0∞)) = 1)
+    (hrow : ∀ v, rowSum (fun e => (J e : ℝ≥0∞)) v = 1)
     (_htrans : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e)
     (β : ℝ≥0) (_hβ0 : 0 < β) (hβ : β < 1) (o : V) :
     ENNReal.ofReal (1 + β - (β : ℝ) ^ 2 / 2) ≤ chi (intensityProfile J β) o ∧
       chi (intensityProfile J β) o ≤ (1 - (β : ℝ≥0∞))⁻¹ :=
   chi_bounds J hrow β hβ o
 
-/-- 1EWX bounds on `Δ`, with the transitivity hypothesis of the package (unused). -/
+/-- The bounds on `Δ`, with an (unused) transitivity hypothesis. -/
 theorem triangle_bounds_of_transitive (J : Sym2 V → ℝ≥0)
-    (hrow : ∀ v, (∑' w, if w = v then 0 else (J s(v, w) : ℝ≥0∞)) = 1)
+    (hrow : ∀ v, rowSum (fun e => (J e : ℝ≥0∞)) v = 1)
     (_htrans : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e)
     (β : ℝ≥0) (_hβ0 : 0 < β) (hβ : β < 1) (o : V) :
     1 ≤ ∑' u, ∑' v, tau (intensityProfile J β) o u * tau (intensityProfile J β) u v *
@@ -261,7 +271,7 @@ theorem triangle_bounds_of_transitive (J : Sym2 V → ℝ≥0)
         1 + 3 * ((β : ℝ≥0∞) / (1 - β)) ^ 2 + ((β : ℝ≥0∞) / (1 - β)) ^ 3 :=
   triangle_bounds J (fun v => (hrow v).le) β hβ o
 
-/-! ### Non-vacuity (D-5): the nearest-neighbour kernel `1/2` on `ℤ` -/
+/-! ### Non-vacuity: the nearest-neighbour kernel `1/2` on `ℤ` -/
 
 /-- The nearest-neighbour kernel of weight `1/2` on `ℤ` exists. -/
 theorem exists_line_kernel :
@@ -271,8 +281,8 @@ theorem exists_line_kernel :
 
 /-- Every off-diagonal row of the nearest-neighbour kernel `1/2` sums to exactly one. -/
 theorem line_rowSum (J : Sym2 ℤ → ℝ≥0) (hJ : ∀ a b, J s(a, b) = if |b - a| = 1 then 1 / 2 else 0)
-    (v : ℤ) : (∑' w, if w = v then 0 else (J s(v, w) : ℝ≥0∞)) = 1 := by
-  rw [tsum_eq_sum (s := {v - 1, v + 1})]
+    (v : ℤ) : rowSum (fun e => (J e : ℝ≥0∞)) v = 1 := by
+  rw [rowSum_def, tsum_eq_sum (s := {v - 1, v + 1})]
   · rw [Finset.sum_pair (by omega)]
     simp only [hJ, show v - 1 ≠ v by omega, show v + 1 ≠ v by omega, ite_false,
       show v - 1 - v = -1 by ring, show v + 1 - v = 1 by ring, abs_neg, abs_one, ite_true]
@@ -287,7 +297,7 @@ theorem line_rowSum (J : Sym2 ℤ → ℝ≥0) (hJ : ∀ a b, J s(a, b) = if |b 
         rcases abs_eq (zero_le_one' ℤ) |>.1 h1 with h2 | h2 <;> omega
       simp [this]
 
-/-- The nearest-neighbour kernel is transitive in the spelling of the package. -/
+/-- The nearest-neighbour kernel is transitive in the spelling of `chi_bounds_of_transitive`. -/
 theorem line_transitive (J : Sym2 ℤ → ℝ≥0)
     (hJ : ∀ a b, J s(a, b) = if |b - a| = 1 then 1 / 2 else 0) :
     ∀ x y : ℤ, ∃ σ : ℤ ≃ ℤ, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e := by
@@ -299,7 +309,7 @@ theorem line_transitive (J : Sym2 ℤ → ℝ≥0)
     congr 3
     ring
 
-/-- D-5: the hypotheses of `chi_bounds_of_transitive` and `triangle_bounds_of_transitive`
+/-- Non-vacuity: the hypotheses of `chi_bounds_of_transitive` and `triangle_bounds_of_transitive`
 hold on `ℤ` with the kernel `1/2` on nearest-neighbour pairs, for every `0 < β < 1`. -/
 example (β : ℝ≥0) (hβ0 : 0 < β) (hβ : β < 1) :
     ∃ J : Sym2 ℤ → ℝ≥0,

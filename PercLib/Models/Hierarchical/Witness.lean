@@ -1,15 +1,18 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Non-vacuity witness (D-5) written on 2026-11-20 for package hier-stmt, for the statements of
-`PercLib.Models.Hierarchical.Defs`. New proofs; no upstream code is copied and no definition
-is added.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
+Non-vacuity witness written on 2026-11-20, for the statements of `PercLib.Models.Hierarchical.Defs`.
+New proofs; no upstream code is copied and no definition is added.
 -/
 module
 
 public import PercLib.Models.Hierarchical.Defs
 public import PercLib.Models.HierarchicalGeometry
 
-/-! # Non-vacuity of the hierarchical two-point statements (D-5)
+/-! # Non-vacuity of the hierarchical two-point statements
 
 For every `d, L, α` and `0 < c ≤ C`, the exact power-law kernel
 `J s(u,v) = c L^{-(d+α) h(v-u)}` (written as a `Sym2.lift` lambda; its value `c` on the
@@ -26,7 +29,7 @@ open scoped NNReal
 
 namespace PercLib.Models
 
-/-- **D-5 witness.** The exact kernel `J s(u,v) = c L^{-(d+α) h(v-u)}` is translation
+/-- **Non-vacuity witness.** The exact kernel `J s(u,v) = c L^{-(d+α) h(v-u)}` is translation
 invariant, radial, and satisfies `c L^{-(d+α) h(v-u)} ≤ J s(u,v) ≤ C L^{-(d+α) h(v-u)}` (here
 for all `u, v`, in particular for `u ≠ v`) whenever `0 < c ≤ C`. -/
 theorem hierarchicalTwoPoint_kernel_witness (d L : ℕ) (α c C : ℝ) (hc : 0 < c) (hcC : c ≤ C) :
@@ -56,8 +59,8 @@ theorem hierarchicalTwoPoint_kernel_witness (d L : ℕ) (α c C : ℝ) (hc : 0 <
   · rw [hJ, Real.coe_toNNReal _ (hpos u v)]
     exact mul_le_mul_of_nonneg_right hcC (Real.rpow_nonneg (Nat.cast_nonneg L) _)
 
-/-- **D-5, existence form.** For every admissible `(d, L, α, c, C)` some kernel satisfies all
-kernel hypotheses of `HierarchicalTwoPointAveraged` and `HierarchicalTwoPointRadial`. -/
+/-- **Non-vacuity, existence form.** For every admissible `(d, L, α, c, C)` some kernel satisfies
+all kernel hypotheses of `HierarchicalTwoPointAveraged` and `HierarchicalTwoPointRadial`. -/
 theorem exists_hierarchicalTwoPoint_kernel (d L : ℕ) (α c C : ℝ) (hc : 0 < c) (hcC : c ≤ C) :
     ∃ J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0,
       (∀ x u v, J s(u + x, v + x) = J s(u, v)) ∧

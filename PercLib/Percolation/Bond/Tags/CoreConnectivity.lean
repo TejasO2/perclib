@@ -1,5 +1,7 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
 -/
 module
 
@@ -34,11 +36,8 @@ two-point function. -/
 @[tag "5UJQ"]
 theorem conn_eq_iUnion_localConn_and_tendsto (q : Sym2 V → unitInterval)
     {S : ℕ → Set V} (hS : Monotone S) (hcover : ∀ v, ∃ n, v ∈ S n) (x y : V) :
-    (conn x y : Set (Config V)) = ⋃ n, {ω : Config V |
-      ∃ hx : x ∈ S n, ∃ hy : y ∈ S n,
-        ((openGraph ω).induce (S n)).Reachable ⟨x, hx⟩ ⟨y, hy⟩} ∧
-    Filter.Tendsto (fun n => law q {ω : Config V | ∃ hx : x ∈ S n, ∃ hy : y ∈ S n,
-      ((openGraph ω).induce (S n)).Reachable ⟨x, hx⟩ ⟨y, hy⟩})
+    (conn x y : Set (Config V)) = ⋃ n, localConn (S n) x y ∧
+    Filter.Tendsto (fun n => law q (localConn (S n) x y))
       Filter.atTop (nhds (tau q x y)) :=
   ⟨conn_eq_iUnion_localConn hS hcover x y, tendsto_localConn_probability q hS hcover x y⟩
 

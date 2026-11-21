@@ -1,8 +1,12 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-85: the connection kernel `τ` is positive semidefinite, with the Cauchy–Schwarz bounds for
-the triangle diagram that follow. New for this project; no upstream proof is copied, and no
-new definition is introduced: matrix powers of `τ` are written out as sums.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
+The connection kernel `τ` is positive semidefinite, with the Cauchy–Schwarz bounds for the triangle
+diagram that follow. New for this project; no upstream proof is copied, and no new definition is
+introduced: matrix powers of `τ` are written out as sums.
 -/
 module
 
@@ -34,7 +38,7 @@ and `Δₓ = T³(x,x)` (the triangle diagram at `x`).
 noncomputable section
 
 open MeasureTheory Finset
-open scoped ENNReal Classical
+open scoped ENNReal
 
 namespace PercLib.Percolation.Bond
 
@@ -63,6 +67,7 @@ theorem sum_sum_mul_ite_eq_sum_sq {ι κ : Type*} [Fintype ι] [DecidableEq κ] 
   refine Finset.sum_congr rfl fun i hi => ?_
   rw [(Finset.mem_filter.mp hi).2]
 
+open Classical in
 /-- Pointwise, the connection indicator quadratic form is the sum over open clusters of the
 squared cluster masses. -/
 theorem sum_mul_indicator_conn_eq_tsum (ω : Config V) {ι : Type*} [Fintype ι] (f : ι → V)
@@ -117,7 +122,8 @@ theorem sum_mul_tau_eq_integral_indicator [Countable V] (q : Sym2 V → unitInte
     smul_eq_mul, mul_one, measureReal_def]
   rfl
 
-/-- **70KD**, identity. For a finite family of vertices `f i` and real weights `a i`,
+open Classical in
+/-- Identity. For a finite family of vertices `f i` and real weights `a i`,
 `∑ᵢⱼ aᵢ aⱼ T(f i, f j) = E[∑_C (∑_{f i ∈ C} aᵢ)²]`, the sum over the open clusters `C`. -/
 theorem sum_mul_tau_eq_integral [Countable V] (q : Sym2 V → unitInterval)
     {ι : Type*} [Fintype ι] (f : ι → V) (a : ι → ℝ) :
@@ -131,14 +137,14 @@ theorem sum_mul_tau_eq_integral [Countable V] (q : Sym2 V → unitInterval)
   funext ω
   convert sum_mul_indicator_conn_eq_tsum ω f a
 
-/-- **70KD**, nonnegativity. -/
+/-- Nonnegativity. -/
 theorem sum_mul_tau_nonneg [Countable V] (q : Sym2 V → unitInterval)
     {ι : Type*} [Fintype ι] (f : ι → V) (a : ι → ℝ) :
     0 ≤ ∑ i, ∑ j, a i * a j * (tau q (f i) (f j)).toReal := by
   rw [sum_mul_tau_eq_integral_indicator]
   exact integral_nonneg fun ω => sum_mul_indicator_conn_nonneg ω f a
 
-/-- **70KD**, matrix form: every finite submatrix `(T(f i, f j))ᵢⱼ` of the connection kernel
+/-- Matrix form: every finite submatrix `(T(f i, f j))ᵢⱼ` of the connection kernel
 is positive semidefinite. With `f` injective (e.g. `Subtype.val` on a finset) these are the
 principal submatrices. -/
 theorem posSemidef_tau [Countable V] (q : Sym2 V → unitInterval)
@@ -152,7 +158,7 @@ theorem posSemidef_tau [Countable V] (q : Sym2 V → unitInterval)
     convert h using 2 with i _
     exact Finset.sum_congr rfl fun j _ => by ring
 
-/-- Finset form of 70KD nonnegativity, for a real family on vertices. -/
+/-- Finset form of the nonnegativity of the connection kernel, for a real family on vertices. -/
 theorem sum_finset_mul_tau_nonneg [Countable V] (q : Sym2 V → unitInterval) (F : Finset V)
     (a : V → ℝ) :
     0 ≤ ∑ u ∈ F, ∑ v ∈ F, a u * a v * (tau q u v).toReal := by
@@ -237,7 +243,8 @@ private theorem sum_triangle_sq_le [Countable V] (q : Sym2 V → unitInterval) (
           rw [hsym y u]
     _ ≤ _ := mul_le_mul' (sum_triangle_le_tsum q F x x) (sum_triangle_le_tsum q F y y)
 
-/-- **UZ7J**, square-root form: `T³(x,y) ≤ (Δₓ Δ_y)^{1/2}`. No finiteness hypothesis is
+open Classical in
+/-- Square-root form: `T³(x,y) ≤ (Δₓ Δ_y)^{1/2}`. No finiteness hypothesis is
 needed. -/
 theorem triangle_le_rpow [Countable V] (q : Sym2 V → unitInterval) (x y : V) :
     ∑' u, ∑' v, tau q x u * tau q u v * tau q v y ≤
@@ -264,7 +271,7 @@ theorem triangle_le_rpow [Countable V] (q : Sym2 V → unitInterval) (x y : V) :
       (fun p : V × V => tau q x p.1 * tau q p.1 p.2 * tau q p.2 y))
   exact (pow_le_pow_left₀ bot_le hle 2).trans (sum_triangle_sq_le q F x y)
 
-/-- **UZ7J**, squared form: `T³(x,y)² ≤ Δₓ Δ_y`. -/
+/-- Squared form: `T³(x,y)² ≤ Δₓ Δ_y`. -/
 theorem triangle_sq_le [Countable V] (q : Sym2 V → unitInterval) (x y : V) :
     (∑' u, ∑' v, tau q x u * tau q u v * tau q v y) ^ 2 ≤
       (∑' u, ∑' v, tau q x u * tau q u v * tau q v x) *
@@ -274,7 +281,7 @@ theorem triangle_sq_le [Countable V] (q : Sym2 V → unitInterval) (x y : V) :
   rw [← ENNReal.rpow_natCast, ← ENNReal.rpow_mul]
   norm_num
 
-/-- **UZ7J**, as stated with finite triangles: if `Δₓ, Δ_y < ⊤` then
+/-- As stated with finite triangles: if `Δₓ, Δ_y < ⊤` then
 `T³(x,y) ≤ √(Δₓ Δ_y)` (real square root of the finite product). -/
 theorem triangle_le_sqrt [Countable V] (q : Sym2 V → unitInterval) (x y : V)
     (hx : ∑' u, ∑' v, tau q x u * tau q u v * tau q v x < ⊤)
@@ -287,7 +294,7 @@ theorem triangle_le_sqrt [Countable V] (q : Sym2 V → unitInterval) (x y : V)
     ← ENNReal.ofReal_rpow_of_nonneg ENNReal.toReal_nonneg (by norm_num),
     ENNReal.ofReal_toReal (ENNReal.mul_ne_top hx.ne hy.ne)]
 
-/-- **UZ7J**, diagonal bound: `∑' u, T(x,u)² ≤ Δₓ`. -/
+/-- Diagonal bound: `∑' u, T(x,u)² ≤ Δₓ`. -/
 theorem tsum_tau_sq_le_triangle (q : Sym2 V → unitInterval) (x : V) :
     ∑' u, tau q x u ^ 2 ≤ ∑' u, ∑' v, tau q x u * tau q u v * tau q v x := by
   refine ENNReal.tsum_le_tsum fun u => ?_
@@ -309,7 +316,7 @@ theorem triangle_eq_tsum_tau_mul (q : Sym2 V → unitInterval) (o : V) :
   rw [tau_comm q v o]
   ring
 
-/-- **C2YT.** With `D = ⨆ x, Δₓ`: `∑' v, T(o,v) T²(o,v) T³(o,v) ≤ D Δₒ ≤ D²`. -/
+/-- **Weighted triangle bound.** With `D = ⨆ x, Δₓ`: `∑' v, T(o,v) T²(o,v) T³(o,v) ≤ D Δₒ ≤ D²`. -/
 theorem triangle_weighted_le [Countable V] (q : Sym2 V → unitInterval) (o : V) :
     ∑' v, tau q o v * (∑' u, tau q o u * tau q u v) *
         (∑' u, ∑' w, tau q o u * tau q u w * tau q w v) ≤
@@ -340,7 +347,7 @@ theorem triangle_weighted_le [Countable V] (q : Sym2 V → unitInterval) (o : V)
   · rw [sq]
     exact mul_le_mul' le_rfl (hΔD o)
 
-/-- **C2YT**, finiteness: if `D < ⊤` then the weighted triangle is finite. -/
+/-- Finiteness: if `D < ⊤` then the weighted triangle is finite. -/
 theorem triangle_weighted_lt_top [Countable V] (q : Sym2 V → unitInterval) (o : V)
     (hD : (⨆ x, ∑' u, ∑' v, tau q x u * tau q u v * tau q v x) < ⊤) :
     ∑' v, tau q o v * (∑' u, tau q o u * tau q u v) *
@@ -348,7 +355,7 @@ theorem triangle_weighted_lt_top [Countable V] (q : Sym2 V → unitInterval) (o 
   have h := triangle_weighted_le q o
   exact (h.1.trans h.2).trans_lt (ENNReal.pow_lt_top hD)
 
-/-! ### Non-vacuity witness (D-5) -/
+/-! ### Non-vacuity witness -/
 
 private theorem tau_bool_half :
     tau (fun _ : Sym2 Bool => (⟨1 / 2, by norm_num, by norm_num⟩ : unitInterval)) false true =
@@ -380,7 +387,8 @@ example :
       (tau (fun _ : Sym2 Bool => (⟨1 / 2, by norm_num, by norm_num⟩ : unitInterval)) i j).toReal) =
       Matrix.of (fun i j : Bool => if i = j then (1 : ℝ) else 1 / 2) ∧
     (Matrix.of fun i j : Bool =>
-      (tau (fun _ : Sym2 Bool => (⟨1 / 2, by norm_num, by norm_num⟩ : unitInterval)) i j).toReal).PosSemidef := by
+      (tau (fun _ : Sym2 Bool => (⟨1 / 2, by norm_num, by norm_num⟩ : unitInterval)) i
+          j).toReal).PosSemidef := by
   refine ⟨?_, posSemidef_tau _ id⟩
   ext i j
   simp only [Matrix.of_apply]

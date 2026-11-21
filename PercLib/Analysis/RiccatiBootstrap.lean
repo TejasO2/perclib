@@ -1,20 +1,18 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
+Adapted from contributor yujinhkim, repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
+`d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, file `PercLib/CriticalLRP/VolumeMoments/Bootstrap.lean`
+(blob `a2ff52d99c`). Licence: Apache-2.0 as declared in that revision's header and
+`third_party/critical-lrp/NOTICE.md`. Upstream origin: `yujinhkim/Critical-Long-range-percolation`,
+revision `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf` (not independently verified). Changes: reuse
+PercLib's Riccati comparison, namespace PercLib.Analysis, remove disabled linters and
+implicit-parameter override, and add witnesses.
 
-Adapted for Q-149 (issue 516) from contributor yujinhkim, repository
-`yujinhkim/lrp`, branch `critical-lrp-1`, commit
-`d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, file
-`PercLib/CriticalLRP/VolumeMoments/Bootstrap.lean` (blob `a2ff52d99c`).
-Licence: Apache-2.0 as declared in that revision's header and
-`third_party/critical-lrp/NOTICE.md`. Upstream origin:
-`yujinhkim/Critical-Long-range-percolation`, revision
-`3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf` (not independently verified).
-Changes: reuse PercLib's Riccati comparison, namespace PercLib.Analysis,
-remove disabled linters and implicit-parameter override, and add witnesses.
-
-Salvaged from branch `work/Q-149-riccati-bootstrap` at tip commit `771ec8a`
-and rebased onto the current tree; the helper `rpow_cube` is replaced by
-mathlib's `Real.rpow_mul_natCast`.
+The helper `rpow_cube` is replaced by mathlib's `Real.rpow_mul_natCast`.
 
 Analytic bootstrap for Hutchcroft, Critical long-range percolation I,
 arXiv:2508.18807v1, Lemma I.4.9, pp. 37–38. The source's hypotheses and
@@ -24,6 +22,19 @@ No continuity of the error function is assumed.
 module
 
 public import PercLib.Analysis.RiccatiComparison
+
+/-!
+# Analytic bootstrap for the volume moments
+
+The bootstrapping argument of Lemma I.4.9 of Hutchcroft, *Critical long-range percolation I*, and a
+general form of the same step that also covers Lemma I.4.10.
+
+## Main results
+
+* `error_bound_eight`
+* `bootstrap_high_dim`
+* `bootstrap_general`
+-/
 
 @[expose] public section
 noncomputable section
@@ -318,7 +329,7 @@ theorem bootstrap_general
     {r₀ : ℝ} (hr₀ : 1 ≤ r₀) (hbdd : ∀ r, r₀ ≤ r → F r ≤ 2 * α / β * r ^ α)
     (hmin : ∀ b, 1 ≤ b → (∀ r, b ≤ r → F r ≤ 2 * α / β * r ^ α) → r₀ ≤ b)
     {r : ℝ} (hr1 : 1 ≤ r)
-    (hsmall : (2:ℝ) ^ q * ε r * ((max r r₀ / r) ^ (α * q)) ≤ 1 / 4) :
+    (hsmall : (2 : ℝ) ^ q * ε r * ((max r r₀ / r) ^ (α * q)) ≤ 1 / 4) :
     r₀ ≤ r := by
   -- step 1: the error is controlled by `2^q ε(s) (max s r₀ / s)^{αq}`
   have hbound : ∀ s, 1 ≤ s → |e s| ≤ (2:ℝ) ^ q * ε s * (((max s r₀) / s) ^ (α * q)) := by
@@ -451,7 +462,7 @@ theorem bootstrap_general
     linarith
   exact hmin r hr1 hadm
 
-/-- D-5: the exact profile F(r) = r at α = β = 1, with zero error,
+/-- Non-vacuity: the exact profile F(r) = r at α = β = 1, with zero error,
 meets both bootstrap contracts. The general smallness condition is attained
 at q = 1 and ε = 1/8. The high-dimensional example uses d = 4 and C = 1/64,
 so the retained max 1 is exercised. -/

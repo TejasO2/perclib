@@ -1,8 +1,11 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written for package Q-102 (issue 436, roadmap T-6), on the D-2 interface.
-Source motivation: T. Hutchcroft, arXiv:2008.11197v2, §2.1, proof of Theorem 2.3.
-No source text or code is copied.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
+New proofs, on the bond interface. Source motivation: T. Hutchcroft, arXiv:2008.11197v2,
+§2.1, proof of Theorem 2.3. No source text or code is copied.
 -/
 module
 
@@ -13,11 +16,10 @@ public import PercLib.Combinatorics.TreeSplitting
 
 /-! # The BK step for the largest cluster intersection
 
-`tightnessBK : TightnessBK V` for every countable `V`, on the reading `k ≥ 1` of issue 52
-(the definition in `Tightness/Defs.lean` is used unchanged), and the corollary
-`universalTightness : UniversalTightness V`. Each conjunct of both statements is also a
-named lemma (`law_three_pow_mul_le_maxClusterIntersection_le`,
-`law_three_pow_mul_le_clusterIntersection_le`,
+`tightnessBK : TightnessBK V` for every countable `V`, on the reading `k ≥ 1` (see
+`Tightness/Defs.lean`; the definition in `Tightness/Defs.lean` is used unchanged), and the corollary
+`universalTightness : UniversalTightness V`. Each conjunct of both statements is also a named lemma
+(`law_three_pow_mul_le_maxClusterIntersection_le`, `law_three_pow_mul_le_clusterIntersection_le`,
 `law_mul_tightnessScale_le_maxClusterIntersection_le`,
 `law_maxClusterIntersection_lt_mul_tightnessScale_le`,
 `law_mul_tightnessScale_le_clusterIntersection_le`); downstream code uses those.
@@ -56,11 +58,13 @@ theorem clusterIntersection_le_max (Λ : Finset V) (ω : Config V) {v : V} (hv :
 
 theorem isUpperSet_real_le_clusterIntersection (Λ : Finset V) (u : V) (l : ℝ) :
     IsUpperSet {ω : Config V | l ≤ (clusterIntersection Λ ω u : ℝ)} :=
-  fun _ _ h (hω : l ≤ _) => show l ≤ _ from le_trans hω (by exact_mod_cast clusterIntersection_mono Λ h u)
+  fun _ _ h (hω : l ≤ _) => show l ≤ _ from le_trans hω
+      (by exact_mod_cast clusterIntersection_mono Λ h u)
 
 theorem isUpperSet_real_le_maxClusterIntersection (Λ : Finset V) (l : ℝ) :
     IsUpperSet {ω : Config V | l ≤ (maxClusterIntersection Λ ω : ℝ)} :=
-  fun _ _ h (hω : l ≤ _) => show l ≤ _ from le_trans hω (by exact_mod_cast maxClusterIntersection_mono Λ h)
+  fun _ _ h (hω : l ≤ _) => show l ≤ _ from le_trans hω
+      (by exact_mod_cast maxClusterIntersection_mono Λ h)
 
 /-! ### Iterated disjoint occurrence from disjoint finite witnesses -/
 
@@ -247,7 +251,7 @@ private theorem law_foldl_replicate_le [Countable V] (q : Sym2 V → unitInterva
   rwa [List.map_replicate, List.prod_replicate] at h
 
 /-- **The BK step for the largest intersection** (Hutchcroft, arXiv:2008.11197v2,
-Theorem 2.3, first bound, reading `k ≥ 1` of issue 52):
+Theorem 2.3, first bound, reading `k ≥ 1`):
 `P(max ≥ 3^k λ) ≤ P(max ≥ λ)^(3^(k-1) + 1)` for `λ ≥ 1` and `k ≥ 1`. -/
 theorem law_three_pow_mul_le_maxClusterIntersection_le [Countable V]
     (q : Sym2 V → unitInterval) {Λ : Finset V} (hΛ : Λ.Nonempty) {l : ℝ} (hl : 1 ≤ l)
@@ -268,7 +272,7 @@ theorem law_three_pow_mul_le_maxClusterIntersection_le [Countable V]
     (by exact_mod_cast clusterIntersection_le_max Λ η hvΛ)
 
 /-- **The BK step for one cluster** (Hutchcroft, arXiv:2008.11197v2, Theorem 2.3, second
-bound, reading `k ≥ 1` of issue 52):
+bound, reading `k ≥ 1`):
 `P(|K_u ∩ Λ| ≥ 3^k λ) ≤ P(max ≥ λ)^(3^(k-1)) · P(|K_u ∩ Λ| ≥ λ)` for `λ ≥ 1`, `k ≥ 1`. -/
 theorem law_three_pow_mul_le_clusterIntersection_le [Countable V]
     (q : Sym2 V → unitInterval) (Λ : Finset V) (u : V) {l : ℝ} (hl : 1 ≤ l)
@@ -281,8 +285,8 @@ theorem law_three_pow_mul_le_clusterIntersection_le [Countable V]
   rw [mul_comm]
   exact law_foldl_replicate_le q Λ l _ (isUpperSet_real_le_clusterIntersection Λ u l)
 
-/-- **The BK step** (Hutchcroft, arXiv:2008.11197v2, Theorem 2.3, reading `k ≥ 1` of
-issue 52) for every countable vertex type and every profile. -/
+/-- **The BK step** (Hutchcroft, arXiv:2008.11197v2, Theorem 2.3, reading `k ≥ 1`) for every
+countable vertex type and every profile. -/
 @[tag "JGZB"]
 theorem tightnessBK (V : Type*) [Countable V] : TightnessBK V := fun q Λ hΛ _l hl _k hk =>
   ⟨law_three_pow_mul_le_maxClusterIntersection_le q hΛ hl hk,
@@ -330,7 +334,7 @@ theorem universalTightness (V : Type*) [Countable V] : UniversalTightness V := f
     fun _ε hε hε1 => law_maxClusterIntersection_lt_mul_tightnessScale_le q hΛ hε hε1,
     fun u _a ha => law_mul_tightnessScale_le_clusterIntersection_le q hΛ u ha⟩
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
 example : TightnessBK Unit := tightnessBK Unit
 

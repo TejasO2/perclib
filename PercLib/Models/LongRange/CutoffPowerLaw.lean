@@ -1,10 +1,13 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-193 (issue 621): proofs of the targets PVA8, MQNP, LF50 and 6YYS of the wiki article
-`cutoff-families` (Definitions I.1.3 and I.1.5 of T. Hutchcroft, *Critical long-range
-percolation I*, arXiv:2508.18807v1), stated in `PercLib/Models/LongRange/Defs.lean`.
-New proofs from pinned mathlib's `integral_rpow`, `Real.hasDerivAt_rpow_const` and
-`tendsto_rpow_neg_atTop`. No upstream code is copied.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
+Proofs of the targets PVA8, MQNP, LF50 and 6YYS of the wiki article `cutoff-families` (Definitions
+I.1.3 and I.1.5 of T. Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1), stated
+in `PercLib/Models/LongRange/Defs.lean`. New proofs from pinned mathlib's `integral_rpow`,
+`Real.hasDerivAt_rpow_const` and `tendsto_rpow_neg_atTop`. No upstream code is copied.
 -/
 module
 
@@ -51,7 +54,8 @@ theorem coe_cutoffKernel_of_le (hN : ∀ v, N v = 0 → v = 0) (hKa : AntitoneOn
     Real.coe_toNNReal _ (sub_nonneg.2 (hKa hs (hs.trans_le h) h))]
 
 /-- Outside the cut-off, `J_r(x, y) = 0`. -/
-theorem cutoffKernel_of_lt {r : ℝ} {x y : Fin d → ℤ} (hxy : x ≠ y) (h : r < N (Int.cast ∘ (x - y))) :
+theorem cutoffKernel_of_lt {r : ℝ} {x y : Fin d → ℤ} (hxy : x ≠ y)
+    (h : r < N (Int.cast ∘ (x - y))) :
     cutoffKernel N K r s(x, y) = 0 := by
   rw [cutoffKernel_def, radialKernel_of_ne hxy, cutoffProfile_of_lt h, Real.toNNReal_zero]
 
@@ -183,10 +187,10 @@ theorem cutoffPowerLawDerivative : CutoffPowerLawDerivative := by
     (fun h0 => hasDerivAt_powerLawProfile_inv ha h0) hxy hr
   exact ⟨hJ, hasDerivAt_intensityProfile_of_hasDerivAt _ β _ hJ⟩
 
-/-! ### Witnesses (D-5) -/
+/-! ### Witnesses -/
 
-/-- PVA8 at `d = 1`, `α = 1`, the sup norm, `r = 2` and `N(x - y) = 1`: the value is
-`(1 - 2^{-2})/2`. -/
+/-- The cut-off power-law formula at `d = 1`, `α = 1`, the sup norm, `r = 2` and `N(x - y) = 1`: the
+value is `(1 - 2^{-2})/2`. -/
 example : (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (powerLawProfile (1 / ((1 : ℕ) + 1))
     ((1 : ℕ) + 1)) 2 s(fun _ => 1, 0) : ℝ) = (1 - 2 ^ (-(2 : ℝ))) / 2 := by
   have h := (cutoffPowerLawFormula 1 1 (normSeminorm ℝ (Fin 1 → ℝ)) 2 (fun _ => 1) 0
@@ -212,7 +216,8 @@ example : (radialKernel (normSeminorm ℝ (Fin 1 → ℝ))
     cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ))
       (powerLawProfile (1 / ((1 : ℕ) + 1)) ((1 : ℕ) + 1)) 2 s(fun _ => 1, 0) =
     2 ^ (-(((1 : ℕ) : ℝ) + 1)) / (((1 : ℕ) : ℝ) + 1) :=
-  cutoffPowerLawDeficit 1 1 _ 2 (fun _ => 1) 0 normSeminorm_eq_zero one_pos (fun h => by simpa using congrFun h 0)
+  cutoffPowerLawDeficit 1 1 _ 2 (fun _ => 1) 0 normSeminorm_eq_zero one_pos
+      (fun h => by simpa using congrFun h 0)
     (by simp [normSeminorm_intCast, Pi.norm_def])
 
 example (β : ℝ≥0) := cutoffPowerLawDerivative 1 1 (normSeminorm ℝ (Fin 1 → ℝ)) β 2

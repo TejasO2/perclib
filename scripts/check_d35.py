@@ -88,14 +88,53 @@ def check_tags(raw_path: pathlib.Path) -> list[str]:
 
 
 def header_text(text: str) -> str:
-    """The leading comment block(s) and the first module docstring."""
+    """The header comments and the first module docstring, joined by newlines.
+
+    The header is every block comment (`/- … -/`, `/-! … -/`, nested comments handled as
+    Lean does: strings are not special inside a comment, so a `"-/"` there closes it in
+    Lean and here alike) before the first token that is not a comment: normally the `module`
+    keyword, after a copyright block and a provenance block. Blank space and `--` line
+    comments between them are skipped; line comments are part of the result. The
+    first `/-!` comment after the header is added as well (if it is not already
+    one of the header comments).
+    """
+    def comment_end(start: int) -> int:
+        # Lean starts the body after the third character of every opener (`/-x`, `/--`, `/-!`)
+        depth, i = 1, start + 3
+        while i < n:
+            if text.startswith('-/', i):
+                depth -= 1
+                i += 2
+                if depth == 0:
+                    return i
+            elif text.startswith('/-', i):
+                depth += 1
+                i += 2
+            else:
+                i += 1
+        return n
+
     parts = []
-    m = re.match(r'\s*(/-.*?-/)', text, re.S)
-    if m:
-        parts.append(m.group(1))
-    m = re.search(r'/-!.*?-/', text, re.S)
-    if m:
-        parts.append(m.group(0))
+    i, n = 0, len(text)
+    while True:
+        while i < n and text[i] in '\ufeff \t\r\n':
+            i += 1
+        if text.startswith('/-', i):
+            j = comment_end(i)
+            parts.append(text[i:j])
+            i = j
+        elif text.startswith('--', i):
+            j = text.find('\n', i)
+            j = n if j < 0 else j
+            parts.append(text[i:j])
+            i = j
+        else:
+            break
+    k = text.find('/-!', i)
+    if k >= 0:
+        doc = text[k:comment_end(k)]
+        if doc not in parts:
+            parts.append(doc)
     return '\n'.join(parts)
 
 

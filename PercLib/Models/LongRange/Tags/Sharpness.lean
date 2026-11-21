@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Correspondence wrapper for sharpness of translation-invariant long-range percolation on `ℤ^d`.
 All mathematical inputs are proved in the imported modules.
 -/
@@ -7,6 +11,16 @@ module
 
 public import PercLib.Meta.Tag
 public import PercLib.Models.LongRange.FiniteSusceptibility
+
+/-!
+# Sharpness on `ℤ^d`: correspondence
+
+Wiki correspondence for sharpness of translation-invariant long-range percolation on `ℤ^d`.
+
+## Main results
+
+* `sharpness_translationInvariant_int`
+-/
 
 @[expose] public section
 noncomputable section
@@ -21,7 +35,7 @@ and above `β_c` the probability of an infinite cluster is at least `(β - β_c)
 @[tag "DYUM"]
 theorem sharpness_translationInvariant_int {d : ℕ} (J : Sym2 (Fin d → ℤ) → ℝ≥0)
     (k : (Fin d → ℤ) → ℝ≥0)
-    (hJ : ∀ x y, J s(x,y) = k (y - x)) (hk : ∑' z, (k z : ℝ≥0∞) < ⊤)
+    (hJ : ∀ x y, J s(x, y) = k (y - x)) (hk : ∑' z, (k z : ℝ≥0∞) < ⊤)
     (_hβc : 0 < globalCriticalIntensity J ∧ globalCriticalIntensity J < ⊤) :
     (∀ x, rootCriticalIntensity J x = globalCriticalIntensity J) ∧
     (∀ β : ℝ≥0, (β : ℝ≥0∞) < globalCriticalIntensity J → ∀ x,

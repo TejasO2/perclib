@@ -1,8 +1,10 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
-New for this project (issue 191, Q-31). No upstream proof is copied.
+Authors: PercLib contributors
+-/
+/-
+New for this project. No upstream proof is copied.
 -/
 module
 
@@ -220,7 +222,8 @@ variable {V : Type*}
 
 /-- **One-pair Russo for `τ`.** Along `t ↦ q[e ↦ t]`, the two-point function is affine with
 slope the probability that `e` is pivotal for `x ↔ y`. -/
-theorem tau_update_real_eq [Countable V] [DecidableEq V] (q : Sym2 V → unitInterval) (e : Sym2 V) (x y : V)
+theorem tau_update_real_eq [Countable V] [DecidableEq V] (q : Sym2 V → unitInterval) (e : Sym2 V)
+    (x y : V)
     (t : unitInterval) :
     (tau (update q e t) x y).toReal =
       (law q).real {ω | ω \ {e} ∈ conn x y} +

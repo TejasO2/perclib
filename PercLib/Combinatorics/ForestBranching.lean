@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New finite-forest degree accounting from mathlib's tree edge count and handshaking
 identity. No encounter-point or probabilistic uniqueness statement is assumed.
 -/
@@ -9,10 +13,26 @@ public import Mathlib.Combinatorics.SimpleGraph.Star
 public import Mathlib.Tactic.Linarith
 public import Mathlib.Tactic.NormNum
 
+/-!
+# Branch vertices and leaves of finite forests
+
+Degree accounting for finite trees and forests from mathlib's edge count and handshaking identity: a
+finite forest has no more branch vertices than leaves, with a sharp correction by the number of
+components and isolated vertices.
+
+## Main results
+
+* `tree_sum_degree_sub_two`
+* `forest_sum_degree_sub_two`
+* `tree_card_branch_add_two_le_leaves`
+* `forest_card_branch_le_leaves`
+* `tree_card_branch_le_card_sub_two`
+* `forest_card_branch_le_leaves_sub_two_mul`
+-/
+
 @[expose] public section
 noncomputable section
 open Finset
-open scoped Classical
 namespace PercLib
 variable {W : Type*} [Fintype W]
 
@@ -26,6 +46,7 @@ theorem tree_sum_degree_sub_two (T : SimpleGraph W) [DecidableRel T.Adj] (hT : T
   simp only [sum_sub_distrib,sum_const,card_univ,nsmul_eq_mul]
   omega
 
+open Classical in
 /-- Finite sums can be partitioned by connected-component supports. -/
 theorem sum_vertices_eq_sum_components (T : SimpleGraph W)
     [Fintype T.ConnectedComponent] {R : Type*} [AddCommMonoid R] (f : W → R) :
@@ -42,6 +63,7 @@ theorem sum_vertices_eq_sum_components (T : SimpleGraph W)
   rw [← e.sum_comp f,Fintype.sum_sigma]
   rfl
 
+open Classical in
 /-- Passing to a component preserves the degree of each of its vertices. -/
 theorem degree_component (T : SimpleGraph W) [DecidableRel T.Adj]
     (c : T.ConnectedComponent) (v : c.supp) : c.toSimpleGraph.degree v = T.degree v := by
@@ -53,6 +75,7 @@ theorem degree_component (T : SimpleGraph W) [DecidableRel T.Adj]
   simp only [SimpleGraph.mem_neighborFinset]
   rfl
 
+open Classical in
 /-- Euler's degree-excess identity for a finite forest, with signed subtraction. -/
 theorem forest_sum_degree_sub_two (T : SimpleGraph W) [DecidableRel T.Adj]
     (hT : T.IsAcyclic) :
@@ -94,6 +117,7 @@ theorem tree_card_branch_le_leaves (T : SimpleGraph W) [DecidableRel T.Adj] (hT 
     simp
   | inr h => exact (Nat.le_add_right _ 2).trans (tree_card_branch_add_two_le_leaves T hT)
 
+open Classical in
 /-- Summing the tree inequalities over components gives the finite-forest branch bound. -/
 theorem forest_card_branch_le_leaves (T : SimpleGraph W) [DecidableRel T.Adj]
     (hT : T.IsAcyclic) :
@@ -103,10 +127,13 @@ theorem forest_card_branch_le_leaves (T : SimpleGraph W) [DecidableRel T.Adj]
   have hb := sum_vertices_eq_sum_components T (fun v => if 3 ≤ T.degree v then (1:ℕ) else 0)
   have hl := sum_vertices_eq_sum_components T (fun v => if T.degree v = 1 then (1:ℕ) else 0)
   calc
-    _ = ∑ c : T.ConnectedComponent, (univ.filter fun v : c.supp => 3 ≤ c.toSimpleGraph.degree v).card := by
+    _ = ∑ c : T.ConnectedComponent, (univ.filter fun v : c.supp => 3 ≤
+        c.toSimpleGraph.degree v).card := by
       simpa only [card_eq_sum_ones,sum_filter,degree_component] using hb
-    _ ≤ ∑ c : T.ConnectedComponent, (univ.filter fun v : c.supp => c.toSimpleGraph.degree v = 1).card :=
-      sum_le_sum (fun c _ => tree_card_branch_le_leaves c.toSimpleGraph (hT.isTree_connectedComponent c))
+    _ ≤ ∑ c : T.ConnectedComponent, (univ.filter fun v : c.supp => c.toSimpleGraph.degree v =
+        1).card :=
+      sum_le_sum (fun c _ => tree_card_branch_le_leaves c.toSimpleGraph
+          (hT.isTree_connectedComponent c))
     _ = _ := by simpa only [card_eq_sum_ones,sum_filter,degree_component] using hl.symm
 
 /-- If every leaf lies in L, the number of branch vertices is at most |L|-2. -/
@@ -200,7 +227,8 @@ example :
     T.IsTree ∧ (univ.filter fun v => 3 ≤ T.degree v).card = 0 := by
   dsimp
   refine ⟨SimpleGraph.isTree_starGraph _,?_⟩
-  have he : (univ.filter fun v : Fin 3 => 3 ≤ (SimpleGraph.starGraph (0 : Fin 3)).degree v) = ∅ := by
+  have he : (univ.filter fun v : Fin 3 => 3 ≤ (SimpleGraph.starGraph (0 : Fin 3)).degree v)
+      = ∅ := by
     ext v
     by_cases hv : v = 0
     · subst v; simp [SimpleGraph.degree_starGraph_center]

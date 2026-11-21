@@ -1,5 +1,7 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
 -/
 module
 
@@ -17,28 +19,22 @@ All mathematical inputs are proved in the imported modules. -/
 @[expose] public section
 noncomputable section
 open MeasureTheory Set ProbabilityTheory
-open scoped ENNReal NNReal Classical
+open scoped ENNReal NNReal
 
 namespace PercLib.Percolation.Bond
 variable {V : Type*}
 
+open Classical in
 /-- Boundary contraction: finite sets `S_x ∋ x` with internal mass at most `B` and boundary
 flux at most `a < 1` give `χ(x) ≤ B/(1-a)`, almost surely finite clusters when `B < ∞`, and
 the choice `B = N` when `|S_x| ≤ N`. -/
 @[tag "YLZV"]
 theorem boundary_contraction_bounds [Countable V] (q : Sym2 V → unitInterval)
     (Sx : V → Finset V) (hSx : ∀ x, x ∈ Sx x) {a : ℝ≥0∞} (ha : a < 1)
-    (hΦ : ∀ x, ∑ u ∈ Sx x, ∑' v, (if v ∈ Sx x then 0 else
-      law q {ω | ∃ hx : x ∈ (Sx x : Set V), ∃ hu : u ∈ (Sx x : Set V),
-        ((openGraph ω).induce (Sx x : Set V)).Reachable ⟨x, hx⟩ ⟨u, hu⟩} *
-      (unitInterval.toNNReal (q s(u, v)) : ℝ≥0∞)) ≤ a) :
-    (∀ B : ℝ≥0∞, (∀ x, ∑ u ∈ Sx x, law q {ω | ∃ hx : x ∈ (Sx x : Set V),
-        ∃ hu : u ∈ (Sx x : Set V),
-        ((openGraph ω).induce (Sx x : Set V)).Reachable ⟨x, hx⟩ ⟨u, hu⟩} ≤ B) →
+    (hΦ : ∀ x, boundaryFlux q (Sx x) x ≤ a) :
+    (∀ B : ℝ≥0∞, (∀ x, ∑ u ∈ Sx x, law q (localConn (Sx x : Set V) x u) ≤ B) →
       ∀ x, chi q x ≤ B * (1 - a)⁻¹) ∧
-    (∀ B : ℝ≥0∞, B < ∞ → (∀ x, ∑ u ∈ Sx x, law q {ω | ∃ hx : x ∈ (Sx x : Set V),
-        ∃ hu : u ∈ (Sx x : Set V),
-        ((openGraph ω).induce (Sx x : Set V)).Reachable ⟨x, hx⟩ ⟨u, hu⟩} ≤ B) →
+    (∀ B : ℝ≥0∞, B < ∞ → (∀ x, ∑ u ∈ Sx x, law q (localConn (Sx x : Set V) x u) ≤ B) →
       ∀ᵐ ω ∂law q, ∀ x, (cluster ω x).Finite) ∧
     (∀ N : ℕ, (∀ x, (Sx x).card ≤ N) → ∀ x, chi q x ≤ N * (1 - a)⁻¹) :=
   ⟨fun _ hB x => chi_le_of_boundary_contraction q Sx hSx ha hB hΦ x,
@@ -74,30 +70,20 @@ theorem exterior_law_given_cluster [Countable V] (q : Sym2 V → unitInterval) (
   · rw [cond_apply hmeas, law_cluster_eq_inter_localConn_compl q x C hx y z]
     exact hcancel hpos
 
+open Classical in
 /-- For a transitive kernel with finite rows and finite global critical intensity `β_c`,
 every finite `S ∋ o` has boundary flux at least one at `β_c`, bounded by
 `β_c ∑_{u ∈ S} τ_S(o,u) ∑_{v ∉ S} J(u,v)`. -/
 @[tag "R84Z"]
 theorem one_le_boundaryFlux_at_globalCriticalIntensity [Countable V] (J : Sym2 V → ℝ≥0)
     (hT : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e)
-    (hrow : ∀ u, (∑' v, if v = u then 0 else (J s(u, v) : ℝ≥0∞)) < ∞) {o : V}
+    (hrow : ∀ u, rowSum (fun e => (J e : ℝ≥0∞)) u < ∞) {o : V}
     (hc : globalCriticalIntensity J < ⊤) (S : Finset V) (hoS : o ∈ S) :
-    1 ≤ ∑ u ∈ S, ∑' v, (if v ∈ S then 0 else
-      law (intensityProfile J (globalCriticalIntensity J).toNNReal)
-        {ω | ∃ ho : o ∈ (S : Set V), ∃ hu : u ∈ (S : Set V),
-          ((openGraph ω).induce (S : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
-      (unitInterval.toNNReal (intensityProfile J (globalCriticalIntensity J).toNNReal
-        s(u, v)) : ℝ≥0∞)) ∧
-    ∑ u ∈ S, ∑' v, (if v ∈ S then 0 else
-      law (intensityProfile J (globalCriticalIntensity J).toNNReal)
-        {ω | ∃ ho : o ∈ (S : Set V), ∃ hu : u ∈ (S : Set V),
-          ((openGraph ω).induce (S : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
-      (unitInterval.toNNReal (intensityProfile J (globalCriticalIntensity J).toNNReal
-        s(u, v)) : ℝ≥0∞)) ≤
+    1 ≤ boundaryFlux (intensityProfile J (globalCriticalIntensity J).toNNReal) S o ∧
+    boundaryFlux (intensityProfile J (globalCriticalIntensity J).toNNReal) S o ≤
     globalCriticalIntensity J * ∑ u ∈ S,
       law (intensityProfile J (globalCriticalIntensity J).toNNReal)
-        {ω | ∃ ho : o ∈ (S : Set V), ∃ hu : u ∈ (S : Set V),
-          ((openGraph ω).induce (S : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
+        (localConn (S : Set V) o u) *
       ∑' v, (if v ∈ S then 0 else (J s(u, v) : ℝ≥0∞)) := by
   have h := rootCriticalIntensity_eq_globalCriticalIntensity_of_transitive J hT o
   have key := one_le_boundaryFlux_at_rootCriticalIntensity J hT hrow (h ▸ hc) S hoS

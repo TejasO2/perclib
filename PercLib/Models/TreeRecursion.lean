@@ -1,10 +1,12 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
-New proofs for issue 197 (Q-37, the depth recursion), written on 2026-11-15 by PROVER-E.
-No upstream proof is copied. The recursion is the standard Galton–Watson recursion for
-binomial offspring (G. Grimmett, *Percolation*, 2nd ed., 1999, the rooted tree example).
+Authors: PercLib contributors
+-/
+/-
+New proofs, written on 2026-11-15. No upstream proof is copied. The recursion is the standard
+Galton–Watson recursion for binomial offspring (G. Grimmett, *Percolation*, 2nd ed., 1999, the
+rooted tree example).
 -/
 module
 
@@ -53,7 +55,8 @@ private theorem biInter_of_determined {ι α : Type*} (p : ι → unitInterval) 
     rw [Finset.set_biInter_insert, Finset.prod_insert ha,
       ← ih hS' (fun b hb => hE b (Finset.mem_insert_of_mem hb))
         (fun b hb => hEd b (Finset.mem_insert_of_mem hb))]
-    refine PercLib.Probability.prodBernoulli_inter_of_determined_inter p (S a) (⋃ b ∈ s, S b) ?_ (hE a (Finset.mem_insert_self a s))
+    refine PercLib.Probability.prodBernoulli_inter_of_determined_inter p (S a) (⋃ b ∈ s, S b) ?_
+        (hE a (Finset.mem_insert_self a s))
       (Finset.measurableSet_biInter s fun b hb => hE b (Finset.mem_insert_of_mem hb))
       (hEd a (Finset.mem_insert_self a s)) ?_
     · refine Set.disjoint_iUnion₂_right.2 fun b hb => hS a (Finset.mem_insert_self a s) b
@@ -214,7 +217,8 @@ theorem law_depth_succ (p : unitInterval) (n : ℕ) :
       prodBernoulli q₀ (B n) := by
     intro a
     rw [← hedge a, ← hpull a]
-    refine PercLib.Probability.prodBernoulli_inter_of_determined_inter q₀ {s([], [a])} {e | ∀ v ∈ e, v.getLast? = some a} ?_
+    refine PercLib.Probability.prodBernoulli_inter_of_determined_inter q₀ {s([], [a])}
+        {e | ∀ v ∈ e, v.getLast? = some a} ?_
       (measurableSet_mem _) (hpullm a hBm) ?_ ?_
     · refine Set.disjoint_singleton_left.2 fun h => ?_
       have := h [] (Sym2.mem_mk_left _ _)

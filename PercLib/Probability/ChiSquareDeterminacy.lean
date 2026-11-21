@@ -1,20 +1,17 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-
-Adapted for Q-154 (issue 521) from contributor yujinhkim, repository
-`yujinhkim/lrp`, branch `critical-lrp-1`, commit
-`d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, file
-`PercLib/CriticalLRP/MomentProblem/ChiSquare.lean` (blob `cf6b336a11`).
-Licence: Apache-2.0 as declared in that revision's header and
-`third_party/critical-lrp/NOTICE.md`. Upstream origin:
-`yujinhkim/Critical-Long-range-percolation`, revision
-`3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf` (not independently verified).
-Changes: use Nat.doubleFactorial and Real.Gamma_nat_add_half instead of the
-source's odd-factorial definition and Gamma recurrence; use native moment
-determinacy, focused imports, enabled linters and an explicit witness.
-Salvaged from branch `work/Q-154-chi-square-determinacy` at tip commit
-`c81742d` and rebased onto the current tree; the private helper
-`doubleFactorial_odd_succ` is replaced by PercLib's
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
+Adapted from contributor yujinhkim, repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
+`d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, file `PercLib/CriticalLRP/MomentProblem/ChiSquare.lean`
+(blob `cf6b336a11`). Licence: Apache-2.0 as declared in that revision's header and
+`third_party/critical-lrp/NOTICE.md`. Upstream origin: `yujinhkim/Critical-Long-range-percolation`,
+revision `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf` (not independently verified). Changes: use
+Nat.doubleFactorial and Real.Gamma_nat_add_half instead of the source's odd-factorial definition and
+Gamma recurrence; use native moment determinacy, focused imports, enabled linters and an explicit
+witness. The private helper `doubleFactorial_odd_succ` is replaced by PercLib's
 `PercLib.Combinatorics.doubleFactorial_two_mul_succ_sub_one`.
 
 Chi-square moments and determinacy, supporting Hutchcroft, Critical long-range
@@ -27,6 +24,19 @@ public import PercLib.Probability.MomentDeterminacy
 public import Mathlib.Probability.Distributions.Gamma
 public import Mathlib.Analysis.SpecialFunctions.Gaussian.GaussianIntegral
 public import Mathlib.Data.Nat.Factorial.DoubleFactorial
+
+/-!
+# Chi-square moments and determinacy
+
+The chi-square law with one degree of freedom has moments `(2n-1)!!`, its moment series converges
+near zero, and it is determined by its moments.
+
+## Main results
+
+* `integral_pow_gammaMeasure_one_half`
+* `summable_gammaMeasure_moment_series`
+* `eq_gammaMeasure_of_forall_moment_eq`
+-/
 
 @[expose] public section
 noncomputable section
@@ -100,8 +110,10 @@ theorem integral_pow_gammaMeasure_one_half (n : ℕ) :
   rw [show (1 / (1 / 2 : ℝ)) = 2 by norm_num, hT, hgn, Real.Gamma_one_half_eq]
   have h2n : (0 : ℝ) < (2 : ℝ) ^ n := by positivity
   rw [show (1 / 2 : ℝ) ^ (1 / 2 : ℝ) / Real.sqrt Real.pi
-      * ((2 : ℝ) ^ n * Real.sqrt 2 * (Real.sqrt Real.pi * (((Nat.doubleFactorial (2 * n - 1)) : ℝ) / 2 ^ n)))
-      = ((1 / 2 : ℝ) ^ (1 / 2 : ℝ) * Real.sqrt 2) * (((Nat.doubleFactorial (2 * n - 1)) : ℝ) / 2 ^ n) * 2 ^ n
+      * ((2 : ℝ) ^ n * Real.sqrt 2 * (Real.sqrt Real.pi *
+          (((Nat.doubleFactorial (2 * n - 1)) : ℝ) / 2 ^ n)))
+      = ((1 / 2 : ℝ) ^ (1 / 2 : ℝ) * Real.sqrt 2) *
+          (((Nat.doubleFactorial (2 * n - 1)) : ℝ) / 2 ^ n) * 2 ^ n
       by field_simp]
   rw [hA2, one_mul]
   exact div_mul_cancel₀ _ h2n.ne'
@@ -112,7 +124,8 @@ namespace PercLib.Probability
 
 /-! ### The moment series of the chi-square law and its determinacy -/
 
-lemma doubleFactorial_odd_le_two_pow_mul_factorial (n : ℕ) : (Nat.doubleFactorial (2 * n - 1)) ≤ 2 ^ n * n.factorial := by
+lemma doubleFactorial_odd_le_two_pow_mul_factorial (n : ℕ) : (Nat.doubleFactorial (2 * n - 1)) ≤ 2 ^
+    n * n.factorial := by
   induction n with
   | zero => simp
   | succ n ih =>
@@ -129,7 +142,8 @@ lemma doubleFactorial_odd_le_two_pow_mul_factorial (n : ℕ) : (Nat.doubleFactor
 `(2n-1)!! / n! = binom(2n,n) / 2^n ≤ 2^n`. -/
 lemma summable_gammaMeasure_moment_series {r : ℝ} (hr0 : 0 ≤ r) (hr : r < 1 / 2) :
     Summable (fun n : ℕ => r ^ n / n.factorial * ((Nat.doubleFactorial (2 * n - 1)) : ℝ)) := by
-  have hbound : ∀ n : ℕ, r ^ n / n.factorial * ((Nat.doubleFactorial (2 * n - 1)) : ℝ) ≤ (2 * r) ^ n := by
+  have hbound : ∀ n : ℕ, r ^ n / n.factorial * ((Nat.doubleFactorial (2 * n - 1)) : ℝ) ≤
+      (2 * r) ^ n := by
     intro n
     have hfac : (0 : ℝ) < (n.factorial : ℝ) := by exact_mod_cast n.factorial_pos
     have h1 : ((Nat.doubleFactorial (2 * n - 1)) : ℝ) ≤ 2 ^ n * (n.factorial : ℝ) := by
@@ -223,7 +237,8 @@ lemma integrable_pow_of_forall_moment_eq_gammaMeasure {ν : Measure ℝ} [IsFini
     rw [Real.norm_eq_abs, abs_of_nonneg (by positivity), hx']
   refine ⟨hmeas.congr (by filter_upwards [habs] with x hx; exact hx.symm), ?_⟩
   rw [hasFiniteIntegral_iff_norm, hlin]
-  have hreal : (∫⁻ x, ENNReal.ofReal (x ^ n) ∂ν).toReal = ((Nat.doubleFactorial (2 * n - 1)) : ℝ) := by
+  have hreal : (∫⁻ x, ENNReal.ofReal (x ^ n) ∂ν).toReal =
+      ((Nat.doubleFactorial (2 * n - 1)) : ℝ) := by
     rw [← integral_eq_lintegral_of_nonneg_ae hnn hmeas, hmom n,
       integral_pow_gammaMeasure_one_half n]
   have hpos : (0 : ℝ) < ((Nat.doubleFactorial (2 * n - 1)) : ℝ) := by
@@ -244,7 +259,8 @@ theorem eq_gammaMeasure_of_forall_moment_eq {ν : Measure ℝ} [IsFiniteMeasure 
   have : IsProbabilityMeasure (gammaMeasure (1 / 2) (1 / 2)) :=
     isProbabilityMeasure_gammaMeasure (by norm_num) (by norm_num)
   -- the moment values
-  have hval : ∀ n : ℕ, ∫ x, x ^ n ∂(gammaMeasure (1 / 2) (1 / 2)) = ((Nat.doubleFactorial (2 * n - 1)) : ℝ) :=
+  have hval : ∀ n : ℕ, ∫ x, x ^ n ∂(gammaMeasure (1 / 2) (1 / 2)) =
+      ((Nat.doubleFactorial (2 * n - 1)) : ℝ) :=
     integral_pow_gammaMeasure_one_half
   -- the moment series of `ν` converges at `r = 1/4`
   have hsum : Summable (fun n : ℕ => (1 / 4 : ℝ) ^ n / n.factorial * ∫ x, |x| ^ n ∂ν) := by
@@ -265,7 +281,7 @@ end PercLib.Probability
 
 namespace PercLib.Probability
 
-/-- D-5: the gamma law itself satisfies the determinacy hypotheses;
+/-- Non-vacuity: the gamma law itself satisfies the determinacy hypotheses;
 its zeroth, first and second moments are 1, 1 and 3. -/
 example :
     (∫ x : ℝ, x ^ 0 ∂gammaMeasure (1 / 2) (1 / 2)) = 1 ∧

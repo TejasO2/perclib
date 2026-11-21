@@ -1,7 +1,11 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-90 correspondence wrappers for the universal tightness, quantile moment and finite-set
-hyperscaling assertions. All mathematical inputs are proved in the imported modules.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
+Correspondence wrappers for the universal tightness, quantile moment and finite-set hyperscaling
+assertions. All mathematical inputs are proved in the imported modules.
 -/
 module
 
@@ -12,10 +16,28 @@ public import PercLib.Percolation.Bond.Tightness.TruncatedMean
 public import PercLib.Percolation.Bond.Tightness.WindowTails
 public import PercLib.Percolation.Bond.Forest
 
+/-!
+# Universal tightness and hyperscaling: correspondence
+
+Wiki correspondence for universal tightness, quantile moments and finite-set hyperscaling.
+
+## Main results
+
+* `universal_upper_lower_tails`
+* `rooted_upper_tail`
+* `tails_from_witness_splitting`
+* `moment_le_quantile_pow`
+* `expected_maximum_comparable`
+* `finite_set_hyperscaling`
+* `finite_window_hyperscaling`
+* `hyperscaling_exponent_inequalities`
+* `exponent_relations_sampled_root`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set Filter Topology
-open scoped ENNReal NNReal Nat Classical
+open scoped ENNReal NNReal Nat
 
 namespace PercLib.Percolation.Bond
 variable {V : Type*}
@@ -306,6 +328,7 @@ theorem hyperscaling_exponent_inequalities [Countable V] (q : Sym2 V → unitInt
   norm_num at h2
   linarith
 
+open Classical in
 /-- Exponent relations for the sampled-root variable and the window intersections of a
 family of profiles and windows; the counting identity is proved, not assumed. When
 `κ = 0`, `d_f = dδ/(δ+1)` and `α = d(δ-1)/(δ+1)`. -/
@@ -357,7 +380,7 @@ theorem exponent_relations_sampled_root [Countable V] (q : ℝ → Sym2 V → un
   field_simp
   ring
 
-/-! ### Non-vacuity of 7VCS (D-5)
+/-! ### Non-vacuity of 7VCS
 
 The zero profile on `ℕ` with windows `{0, …, ⌈R⌉₊ - 1}`: every cluster is a single
 vertex almost surely, so `C = 1`, `δ = 2` give the cluster tail, `M = 2`, the averaged

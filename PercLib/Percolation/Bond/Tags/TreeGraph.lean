@@ -1,12 +1,26 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-90 correspondence wrapper for the cluster moments from the tree-graph bound.
-All mathematical inputs are proved in the imported modules.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
+Correspondence wrapper for the cluster moments from the tree-graph bound. All mathematical inputs
+are proved in the imported modules.
 -/
 module
 
 public import PercLib.Meta.Tag
 public import PercLib.Percolation.Bond.TreeGraph.Moments
+
+/-!
+# Cluster moments from the tree-graph bound: correspondence
+
+Wiki correspondence for the cluster moments under a uniform susceptibility bound.
+
+## Main results
+
+* `cluster_moments_le_susceptibility`
+-/
 
 @[expose] public section
 noncomputable section

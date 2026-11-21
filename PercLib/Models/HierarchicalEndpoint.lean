@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs from this library's runaway, block-restricted quantile, power-law kernel and
 critical boundary flux theorems, and pinned mathlib 56a005855ea17e0b0958f73ec801ae140b0a1679.
 No upstream code is copied and no definition is added. Mathematical reference: T. Hutchcroft,
@@ -59,7 +61,7 @@ variable {V : Type*}
 `ω ∩ D.sym2` exactly when it is joined to `o` inside `D` in `ω`. -/
 theorem mem_cluster_inter_sym2_iff (ω : Config V) {D : Set V} {o : V} (ho : o ∈ D) (u : V) :
     u ∈ cluster (ω ∩ D.sym2) o ↔
-      ∃ ho : o ∈ D, ∃ hu : u ∈ D, ((openGraph ω).induce D).Reachable ⟨o, ho⟩ ⟨u, hu⟩ := by
+      ω ∈ localConn D o u := by
   constructor
   · intro h
     change (openGraph (ω ∩ D.sym2)).Reachable o u at h
@@ -90,24 +92,22 @@ theorem lintegral_clusterIntersection_restrict_eq_sum [Countable V]
     (q : Sym2 V → unitInterval) (S : Finset V) {D : Set V} (hS : (S : Set V) = D)
     [DecidablePred (· ∈ D.sym2)] {o : V} (ho : o ∈ S) :
     ∫⁻ ω, (clusterIntersection S ω o : ℝ≥0∞) ∂law (fun e => if e ∈ D.sym2 then q e else 0) =
-      ∑ u ∈ S, law q {ω | ∃ ho : o ∈ (S : Set V), ∃ hu : u ∈ (S : Set V),
-        ((openGraph ω).induce (S : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} := by
+      ∑ u ∈ S, law q (localConn (S : Set V) o u) := by
   subst hS
   classical
   rw [← lintegral_comp_inter_eq q _ (measurable_clusterIntersection_ennreal S o)]
   have hpt : ∀ ω : Config V, (clusterIntersection S (ω ∩ (S : Set V).sym2) o : ℝ≥0∞) =
-      ∑ u ∈ S, ({ω : Config V | ∃ ho : o ∈ (S : Set V), ∃ hu : u ∈ (S : Set V),
-        ((openGraph ω).induce (S : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩}).indicator 1 ω := by
+      ∑ u ∈ S, (localConn (S : Set V) o u).indicator 1 ω := by
     intro ω
     rw [clusterIntersection_eq_card_filter, Finset.card_filter]
     push_cast
     refine Finset.sum_congr rfl fun u _ => ?_
     simp only [mem_cluster_inter_sym2_iff ω (Finset.mem_coe.2 ho) u, Set.indicator_apply,
-      Set.mem_ofPred_eq, Pi.one_apply]
+      Pi.one_apply, mem_localConn]
   simp_rw [hpt]
   rw [lintegral_finsetSum _ fun u _ =>
-    (measurable_one.indicator (measurableSet_induce_conn _ o u))]
-  exact Finset.sum_congr rfl fun u _ => lintegral_indicator_one (measurableSet_induce_conn _ o u)
+    (measurable_one.indicator (measurableSet_localConn _ o u))]
+  exact Finset.sum_congr rfl fun u _ => lintegral_indicator_one (measurableSet_localConn _ o u)
 
 end General
 
@@ -124,7 +124,7 @@ theorem rootCriticalIntensity_pos_of_powerLaw [NeZero L] (hL : 2 ≤ L) {α C : 
     (x : ℕ →₀ (Fin d → ZMod L)) :
     0 < rootCriticalIntensity J x := by
   set K : ℝ := C * (1 - (L : ℝ) ^ (-(d : ℝ))) / ((L : ℝ) ^ α - 1)
-  have hrow : ∀ v, (∑' w, if w = v then 0 else (J s(v, w) : ℝ≥0∞)) ≤
+  have hrow : ∀ v, rowSum (fun e => (J e : ℝ≥0∞)) v ≤
       ((K.toNNReal : ℝ≥0) : ℝ≥0∞) := fun v => rowSum_le_of_powerLaw hL hα J hJ v
   have h := inv_le_rootCriticalIntensity J K.toNNReal (fun v => by convert hrow v) x
   exact (ENNReal.inv_pos.2 ENNReal.coe_ne_top).trans_le h
@@ -246,8 +246,7 @@ theorem ofReal_le_lintegral_clusterIntersection_at_rootCriticalIntensity [NeZero
   have h0S : (0 : ℕ →₀ (Fin d → ZMod L)) ∈ S := by simp [hmemS]
   rw [lintegral_clusterIntersection_restrict_eq_sum _ S (Set.Finite.coe_toFinset _) h0S]
   set P : (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0∞ := fun u =>
-    law (intensityProfile J βc.toNNReal) {ω | ∃ ho : (0 : ℕ →₀ (Fin d → ZMod L)) ∈ (S : Set _),
-      ∃ hu : u ∈ (S : Set _), ((openGraph ω).induce (S : Set _)).Reachable ⟨0, ho⟩ ⟨u, hu⟩}
+    law (intensityProfile J βc.toNNReal) (localConn (S : Set _) 0 u)
     with hP_def
   have hflux := one_le_boundaryFlux_at_rootCriticalIntensity J
     (transitive_of_powerLaw_translationInvariant J hJt)
@@ -266,7 +265,8 @@ theorem ofReal_le_lintegral_clusterIntersection_at_rootCriticalIntensity [NeZero
   have h1 : 1 ≤ βc * (∑ u ∈ S, P u) * ENNReal.ofReal K := by
     refine (hflux.1.trans hflux.2).trans ?_
     rw [mul_assoc, Finset.sum_mul]
-    exact mul_le_mul' le_rfl (Finset.sum_le_sum fun u hu => mul_le_mul' le_rfl (by convert hrow u hu))
+    exact mul_le_mul' le_rfl (Finset.sum_le_sum fun u hu =>
+        mul_le_mul' le_rfl (by convert hrow u hu))
   change _ ≤ ∑ u ∈ S, P u
   set a := ∑ u ∈ S, P u with ha_def
   rcases eq_or_ne a ⊤ with hat | hat

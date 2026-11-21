@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Correspondence wrappers for the marginal-ODE assertions DUWG and OBTO, proved from
 `RiccatiComparison.lean` and `MomentHierarchy.lean`. No new definitions.
 -/
@@ -8,6 +12,18 @@ module
 public import PercLib.Meta.Tag
 public import PercLib.Analysis.RiccatiComparison
 public import PercLib.Analysis.MomentHierarchy
+
+/-!
+# Marginal ODE: correspondence
+
+Wiki correspondence for the Riccati comparison and the moment hierarchy with a slowly varying
+correction.
+
+## Main results
+
+* `riccati_comparison_hasDerivWithinAt`
+* `isEquivalent_moment_hierarchy_slowlyVarying_eventually`
+-/
 
 @[expose] public section
 noncomputable section
@@ -54,7 +70,7 @@ theorem riccati_comparison_hasDerivWithinAt {f f' : ℝ → ℝ} {A α r₀ : �
         (eventually_nhdsWithin_of_forall fun x hx => key x hx)
     · exact key r hlt
 
-/-- **OBTO.** The hypotheses of `isEquivalent_moment_hierarchy` (5O1G), with `m₂ ~ C r^{3α} L(r)`
+/-- **OBTO.** The hypotheses of `isEquivalent_moment_hierarchy`, with `m₂ ~ C r^{3α} L(r)`
 for an `L` that is positive and `C¹` on `[R_L, ∞)` with `r L'(r)/L(r) → 0`. Then for every
 `1 ≤ p ≤ P`, `m_p ~ (2p−3)‼ C^{p−1} B^{2−p} r^{(2p−1)α} L(r)^{p−1}`, and this is
 `~ (2p−3)‼ (m₂/m₁)^{p−1} m₁`. -/

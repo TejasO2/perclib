@@ -1,9 +1,10 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
-New proofs for the hierarchical programme (package H2, row U8), written on 2026-11-20.
-No upstream proof is copied and no definition is added.
+Authors: PercLib contributors
+-/
+/-
+New proofs, written on 2026-11-20. No upstream proof is copied and no definition is added.
 -/
 module
 
@@ -22,7 +23,7 @@ Let `S` be a finite set of vertices of a countable vertex type `V`, let `Λ ⊆ 
 * `maxClusterIntersection_inter_sym2`: for every configuration `ω`, the largest
   intersection with `Λ` of the clusters of `ω ∩ S.sym2` equals the one for the pulled-back
   configuration on `↥S` and the pulled-back set `Λ.subtype (· ∈ S)`. No open pair of
-  `ω ∩ S.sym2` leaves `S`, and loops are discarded by the open graph (D-2), so these
+  `ω ∩ S.sym2` leaves `S`, and loops are discarded by the open graph, so these
   clusters stay in `S`.
 * `law_restrict_le_maxClusterIntersection`: the tail laws agree.
 * `tightnessScale_restrict`: `tightnessScale (q|S) Λ = tightnessScale q_S (Λ.subtype (· ∈ S))`.

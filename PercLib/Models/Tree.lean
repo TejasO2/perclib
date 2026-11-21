@@ -1,9 +1,10 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
-New proofs for issue 197 (Q-37, deterministic part and the union bound), written on
-2026-11-15 by PROVER-E. No upstream proof is copied. Source of the model: G. Grimmett,
+Authors: PercLib contributors
+-/
+/-
+New proofs, written on 2026-11-15. No upstream proof is copied. Source of the model: G. Grimmett,
 *Percolation* (2nd ed., 1999), the rooted tree example; the statements here are elementary.
 -/
 module

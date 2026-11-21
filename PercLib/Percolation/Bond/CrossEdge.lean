@@ -1,9 +1,11 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
-New proofs for the hierarchical programme (package H6, the cross-edge estimate), written on
-2026-11-20. No upstream proof is copied and no definition is added.
+Authors: PercLib contributors
+-/
+/-
+New proofs (the cross-edge estimate), written on 2026-11-20. No upstream proof is copied and no
+definition is added.
 -/
 module
 
@@ -269,7 +271,7 @@ theorem coe_toNNReal_symm_le_ofReal_exp {x : unitInterval} {r : ℝ}
     (unitInterval.toNNReal (unitInterval.symm x) : ℝ≥0∞) ≤ ENNReal.ofReal (Real.exp (-r)) := by
   rw [← ENNReal.ofReal_coe_nnreal]
   refine ENNReal.ofReal_le_ofReal ?_
-  show 1 - (x : ℝ) ≤ Real.exp (-r)
+  change 1 - (x : ℝ) ≤ Real.exp (-r)
   linarith
 
 /-- **Cross-edge estimate, exponential form.** Under the hypotheses of
