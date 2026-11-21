@@ -24,6 +24,9 @@ Fix a finite nonempty `Λ`, write `X_x = |K_x ∩ Λ|`, `Z = max_{x ∈ Λ} X_x`
 * `sum_function_clusterIntersection`: `∑_{x ∈ Λ} f(X_x) = ∑_D |D| f(|D|)` for every `f`.
 * OB0A, `avg_lintegral_pow_clusterIntersection` and its window form: under a uniform root,
   `E X_U^m = |Λ|⁻¹ E ∑_D |D|^(m+1)`, under any measure on configurations.
+* OB0A for real `m ≥ 0`, `lintegral_avg_rpow_clusterIntersection` and the window bounds
+  `rpow_div_mul_lintegral_card_le_window`, `window_le_rpow_div_mul_lintegral_card` via the
+  expected number `E N` of traces with size in `[a v, b v]`.
 * LQ6Y, `lintegral_rpow_max_le_sum` and `le_lintegral_rpow_max`:
   `∑_{x ∈ Λ} E X_x^p ≥ E Z^(p+1) ≥ M^(p+1) / (e 2^(p+1))` for real `p ≥ 0`.
 * `lintegral_clusterIntersection_le_of_tail`: a window tail `P(n ≤ X_u) ≤ A n^(-θ)`,
@@ -688,5 +691,113 @@ example (q : Sym2 Unit → unitInterval) (m : ℕ) :
         (fun x => ({()} : Finset Unit).filter (· ∈ cluster ω x)),
         (D.card : ℝ≥0∞) ^ (m + 1) ∂(law q) :=
   avg_lintegral_pow_clusterIntersection (law q) {()} m
+
+
+/-! ### OB0A for real exponents, inside the expectation -/
+
+open Classical in
+/-- **Sampled-root expectation of a trace functional.** With `U` uniform on `Λ` and
+independent of `ω`, written as the average over `u ∈ Λ` inside the expectation,
+`E f(X_U) = |Λ|⁻¹ E ∑_D |D| f(|D|)` under any measure on configurations. -/
+theorem lintegral_avg_function_clusterIntersection [Countable V] (μ : Measure (Config V))
+    (Λ : Finset V) (f : ℕ → ℝ≥0∞) :
+    ∫⁻ ω, (Λ.card : ℝ≥0∞)⁻¹ * ∑ u ∈ Λ, f (clusterIntersection Λ ω u) ∂μ =
+      (Λ.card : ℝ≥0∞)⁻¹ * ∫⁻ ω, ∑ D ∈ Λ.image (fun x => Λ.filter (· ∈ cluster ω x)),
+        (D.card : ℝ≥0∞) * f D.card ∂μ := by
+  have hm : Measurable fun ω : Config V => ∑ u ∈ Λ, f (clusterIntersection Λ ω u) :=
+    Finset.measurable_sum Λ fun u _ =>
+      measurable_from_nat.comp (measurable_clusterIntersection Λ u)
+  rw [lintegral_const_mul _ hm]
+  congr 1
+  refine lintegral_congr fun ω => ?_
+  rw [sum_function_clusterIntersection]
+  simp only [nsmul_eq_mul]
+
+/-- `n · n^m = n^(m+1)` in `ℝ≥0∞` for real `m ≥ 0`. -/
+theorem mul_rpow_eq_rpow_add_one (x : ℝ≥0∞) {m : ℝ} (hm : 0 ≤ m) :
+    x * x ^ m = x ^ (m + 1) := by
+  rw [ENNReal.rpow_add_of_nonneg _ _ hm zero_le_one, ENNReal.rpow_one, mul_comm]
+
+open Classical in
+/-- **Sampled-root moments, real exponent.** For real `m ≥ 0` and `U` uniform on `Λ`
+independent of `ω`, `E X_U^m = |Λ|⁻¹ E ∑_D |D|^(m+1)`, under any measure on configurations. -/
+theorem lintegral_avg_rpow_clusterIntersection [Countable V] (μ : Measure (Config V))
+    (Λ : Finset V) {m : ℝ} (hm : 0 ≤ m) :
+    ∫⁻ ω, (Λ.card : ℝ≥0∞)⁻¹ * ∑ u ∈ Λ, (clusterIntersection Λ ω u : ℝ≥0∞) ^ m ∂μ =
+      (Λ.card : ℝ≥0∞)⁻¹ * ∫⁻ ω, ∑ D ∈ Λ.image (fun x => Λ.filter (· ∈ cluster ω x)),
+        (D.card : ℝ≥0∞) ^ (m + 1) ∂μ := by
+  rw [lintegral_avg_function_clusterIntersection μ Λ fun n => (n : ℝ≥0∞) ^ m]
+  simp only [mul_rpow_eq_rpow_add_one _ hm]
+
+open Classical in
+/-- **Window form, real exponent.** For real `m ≥ 0` and `a, b, v ∈ ℝ`,
+`E[X_U^m 1{a v ≤ X_U ≤ b v}] = |Λ|⁻¹ E ∑_{D : a v ≤ |D| ≤ b v} |D|^(m+1)`. -/
+theorem lintegral_avg_rpow_clusterIntersection_window [Countable V] (μ : Measure (Config V))
+    (Λ : Finset V) {m : ℝ} (hm : 0 ≤ m) (a b v : ℝ) :
+    ∫⁻ ω, (Λ.card : ℝ≥0∞)⁻¹ * ∑ u ∈ Λ,
+        (if a * v ≤ (clusterIntersection Λ ω u : ℝ) ∧ (clusterIntersection Λ ω u : ℝ) ≤ b * v
+          then (clusterIntersection Λ ω u : ℝ≥0∞) ^ m else 0) ∂μ =
+      (Λ.card : ℝ≥0∞)⁻¹ * ∫⁻ ω, ∑ D ∈ Λ.image (fun x => Λ.filter (· ∈ cluster ω x)),
+        (if a * v ≤ (D.card : ℝ) ∧ (D.card : ℝ) ≤ b * v
+          then (D.card : ℝ≥0∞) ^ (m + 1) else 0) ∂μ := by
+  rw [lintegral_avg_function_clusterIntersection μ Λ fun n =>
+    if a * v ≤ (n : ℝ) ∧ (n : ℝ) ≤ b * v then (n : ℝ≥0∞) ^ m else 0]
+  congr 1
+  refine lintegral_congr fun ω => Finset.sum_congr rfl fun D _ => ?_
+  split_ifs <;> simp [mul_rpow_eq_rpow_add_one _ hm]
+
+open Classical in
+/-- `c · #{D : P D} = ∑_D (if P D then c else 0)` for the traces of clusters on `Λ`. -/
+theorem mul_card_filter_image_eq_sum_ite (Λ : Finset V) (ω : Config V) (P : Finset V → Prop)
+    [DecidablePred P] (c : ℝ≥0∞) :
+    c * (((Λ.image fun x => Λ.filter (· ∈ cluster ω x)).filter P).card : ℝ≥0∞) =
+      ∑ D ∈ Λ.image (fun x => Λ.filter (· ∈ cluster ω x)), if P D then c else 0 := by
+  rw [← Finset.sum_filter, Finset.sum_const, nsmul_eq_mul, mul_comm]
+
+open Classical in
+/-- **Lower window bound.** For real `m ≥ 0`, with `N` the number of traces of size in
+`[a v, b v]`, `(a v)^(m+1) / |Λ| · E N ≤ E[X_U^m 1{a v ≤ X_U ≤ b v}]`. -/
+theorem rpow_div_mul_lintegral_card_le_window [Countable V] (μ : Measure (Config V))
+    (Λ : Finset V) {m : ℝ} (hm : 0 ≤ m) (a b v : ℝ) :
+    ENNReal.ofReal (a * v) ^ (m + 1) / Λ.card *
+        ∫⁻ ω, (((Λ.image fun x => Λ.filter (· ∈ cluster ω x)).filter
+          fun D => a * v ≤ (D.card : ℝ) ∧ (D.card : ℝ) ≤ b * v).card : ℝ≥0∞) ∂μ ≤
+      ∫⁻ ω, (Λ.card : ℝ≥0∞)⁻¹ * ∑ u ∈ Λ,
+        (if a * v ≤ (clusterIntersection Λ ω u : ℝ) ∧ (clusterIntersection Λ ω u : ℝ) ≤ b * v
+          then (clusterIntersection Λ ω u : ℝ≥0∞) ^ m else 0) ∂μ := by
+  have hc : ENNReal.ofReal (a * v) ^ (m + 1) ≠ ⊤ :=
+    ENNReal.rpow_ne_top_of_nonneg (by linarith) ENNReal.ofReal_ne_top
+  rw [lintegral_avg_rpow_clusterIntersection_window μ Λ hm, ENNReal.div_eq_inv_mul, mul_assoc,
+    ← lintegral_const_mul' _ _ hc]
+  refine mul_le_mul' le_rfl (lintegral_mono fun ω => ?_)
+  rw [mul_card_filter_image_eq_sum_ite]
+  refine Finset.sum_le_sum fun D _ => ?_
+  split_ifs with h
+  · rw [← ENNReal.ofReal_natCast]
+    exact ENNReal.rpow_le_rpow (ENNReal.ofReal_le_ofReal h.1) (by linarith)
+  · exact le_rfl
+
+open Classical in
+/-- **Upper window bound.** For real `m ≥ 0`, with `N` the number of traces of size in
+`[a v, b v]`, `E[X_U^m 1{a v ≤ X_U ≤ b v}] ≤ (b v)^(m+1) / |Λ| · E N`. -/
+theorem window_le_rpow_div_mul_lintegral_card [Countable V] (μ : Measure (Config V))
+    (Λ : Finset V) {m : ℝ} (hm : 0 ≤ m) (a b v : ℝ) :
+    ∫⁻ ω, (Λ.card : ℝ≥0∞)⁻¹ * ∑ u ∈ Λ,
+        (if a * v ≤ (clusterIntersection Λ ω u : ℝ) ∧ (clusterIntersection Λ ω u : ℝ) ≤ b * v
+          then (clusterIntersection Λ ω u : ℝ≥0∞) ^ m else 0) ∂μ ≤
+      ENNReal.ofReal (b * v) ^ (m + 1) / Λ.card *
+        ∫⁻ ω, (((Λ.image fun x => Λ.filter (· ∈ cluster ω x)).filter
+          fun D => a * v ≤ (D.card : ℝ) ∧ (D.card : ℝ) ≤ b * v).card : ℝ≥0∞) ∂μ := by
+  have hc : ENNReal.ofReal (b * v) ^ (m + 1) ≠ ⊤ :=
+    ENNReal.rpow_ne_top_of_nonneg (by linarith) ENNReal.ofReal_ne_top
+  rw [lintegral_avg_rpow_clusterIntersection_window μ Λ hm, ENNReal.div_eq_inv_mul, mul_assoc,
+    ← lintegral_const_mul' _ _ hc]
+  refine mul_le_mul' le_rfl (lintegral_mono fun ω => ?_)
+  rw [mul_card_filter_image_eq_sum_ite]
+  refine Finset.sum_le_sum fun D _ => ?_
+  split_ifs with h
+  · rw [← ENNReal.ofReal_natCast]
+    exact ENNReal.rpow_le_rpow (ENNReal.ofReal_le_ofReal h.2) (by linarith)
+  · exact le_rfl
 
 end PercLib.Percolation.Bond

@@ -160,6 +160,7 @@ public import PercLib.Percolation.Bond.BoundarySusceptibility
 public import PercLib.Percolation.Bond.ClosedCertificates
 public import PercLib.Percolation.Bond.ClusterCorrelation.Defs
 public import PercLib.Percolation.Bond.ClusterCorrelation.CovarianceGap
+public import PercLib.Percolation.Bond.ClusterCorrelation.FunctionalChain
 public import PercLib.Percolation.Bond.ClusterCorrelation.Inequalities
 public import PercLib.Percolation.Bond.ClusterCorrelation.Restoration
 public import PercLib.Percolation.Bond.ClusterCorrelation.TwoClusterGap
@@ -258,6 +259,7 @@ public import PercLib.Percolation.Bond.Tags.RootGlobalPercolation
 public import PercLib.Percolation.Bond.Tags.SubcriticalBound
 public import PercLib.Percolation.Bond.Tags.Tightness
 public import PercLib.Percolation.Bond.Tags.TreeGraph
+public import PercLib.Percolation.Bond.Tags.WindowAndCorrelation
 public import PercLib.Percolation.Bond.ThetaSemicontinuity
 public import PercLib.Percolation.Bond.Tightness.BKStep
 public import PercLib.Percolation.Bond.Tightness.Defs
