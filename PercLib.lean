@@ -255,6 +255,7 @@ public import PercLib.Percolation.Bond.Sharpness
 public import PercLib.Percolation.Bond.SpatialMoments.Defs
 public import PercLib.Percolation.Bond.SpatialMoments.Derivative
 public import PercLib.Percolation.Bond.SpatialMoments.Localization
+public import PercLib.Percolation.Bond.SpatialMoments.LocalizationMetric
 public import PercLib.Percolation.Bond.SupercriticalDensity
 public import PercLib.Percolation.Bond.Susceptibility
 public import PercLib.Percolation.Bond.SusceptibilityContinuity
@@ -281,6 +282,7 @@ public import PercLib.Percolation.Bond.Tags.CoreRussoContinuity
 public import PercLib.Percolation.Bond.Tags.CoreSymmetries
 public import PercLib.Percolation.Bond.Tags.CoreThresholdsAndSymmetries
 public import PercLib.Percolation.Bond.Tags.CoreZeroOne
+public import PercLib.Percolation.Bond.Tags.CutoffLocalization
 public import PercLib.Percolation.Bond.Tags.DomainIndependence
 public import PercLib.Percolation.Bond.Tags.FiniteVolume
 public import PercLib.Percolation.Bond.Tags.FourthMoment
