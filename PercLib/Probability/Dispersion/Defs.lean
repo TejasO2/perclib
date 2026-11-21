@@ -20,6 +20,7 @@ exponent. The API lemmas and witnesses are new.
 -/
 module
 
+public import PercLib.Analysis.ModelNorm.Defs
 public import Mathlib.MeasureTheory.Measure.CharacteristicFunction.Basic
 public import Mathlib.MeasureTheory.Measure.Haar.OfBasis
 public import Mathlib.MeasureTheory.Measure.WithDensity
@@ -38,9 +39,10 @@ On a finite-dimensional real inner product space `E` of dimension `d`, with Lebe
   α/(d+α) (N(x)^(-d-α) - l^(-d-α))₊` (the closed form is the definition; `Π₁` is `l = 1`);
 * the stable Lévy measure `Π_∞` with density `α/(d+α) N(x)^(-d-α)`.
 
-A seminorm is absolutely homogeneous (`map_smul_eq_mul`). Definiteness
-`∀ x, N x = 0 → x = 0` is not part of the type: it is a hypothesis of the statements that use
-it. When `N` is definite (so a norm on `E`), `E` has positive dimension, `0 < α < 2` (the
+A seminorm is absolutely homogeneous (`map_smul_eq_mul`). The densities do not need
+definiteness, so they take a seminorm; the statements that use definiteness take a
+`ModelNorm E` (a seminorm that vanishes only at `0`), which coerces to a seminorm. When `N` is
+definite (so a norm on `E`), `E` has positive dimension, `0 < α < 2` (the
 paper's jump regime) and, for `Π_l`, `l > 0`, these are Lévy measures
 (`∫ min (‖x‖², 1) dΠ < ∞`), and `Π_∞` is the Lévy measure of a symmetric `α`-stable process.
 
@@ -69,6 +71,8 @@ open MeasureTheory Module
 open scoped ENNReal RealInnerProductSpace
 
 namespace PercLib.Probability
+
+open PercLib.Analysis
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 
@@ -186,10 +190,9 @@ theorem levyExponent_mono [MeasurableSpace E] {L L' : Measure E} (h : L ≤ L') 
   lintegral_mono' h le_rfl
 
 /-- For a definite `N`, the stable density is positive away from `0`. -/
-theorem stableLevyDensity_pos_of_ne {N : Seminorm ℝ E} (hN : ∀ x, N x = 0 → x = 0) {α : ℝ}
-    (hα : 0 < α) {x : E} (hx : x ≠ 0) : 0 < stableLevyDensity N α x :=
-  ENNReal.ofReal_pos.2 (mul_pos (by positivity)
-    (Real.rpow_pos_of_pos ((apply_nonneg N x).lt_of_ne fun h => hx (hN x h.symm)) _))
+theorem stableLevyDensity_pos_of_ne {N : ModelNorm E} {α : ℝ} (hα : 0 < α) {x : E}
+    (hx : x ≠ 0) : 0 < stableLevyDensity N α x :=
+  ENNReal.ofReal_pos.2 (mul_pos (by positivity) (Real.rpow_pos_of_pos (N.pos_iff_ne_zero.2 hx) _))
 
 /-! ### Witnesses -/
 
@@ -239,6 +242,6 @@ theorem lintegral_min_sq_cutoffLevyMeasure_lt_top :
 /-- At `d = 1`, `α = 1`, the stable density is positive away from `0`. -/
 theorem stableLevyDensity_pos {x : ℝ} (hx : x ≠ 0) :
     0 < stableLevyDensity (normSeminorm ℝ ℝ) 1 x :=
-  stableLevyDensity_pos_of_ne (fun _ h => norm_eq_zero.1 h) one_pos hx
+  stableLevyDensity_pos_of_ne (N := ModelNorm.ofNorm ℝ) one_pos hx
 
 end PercLib.Probability
