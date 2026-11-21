@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-90 correspondence wrappers for boundary, forest and walk-kernel assertions.
-All mathematical inputs are proved in the imported modules.
+Correspondence wrappers for boundary, forest and walk-kernel assertions. All mathematical inputs are
+proved in the imported modules.
 -/
 module
 
@@ -12,6 +12,22 @@ public import PercLib.Percolation.Bond.SelfAvoidingChi
 public import PercLib.Percolation.Bond.Wiring.BoundaryLaw
 public import PercLib.Percolation.Bond.Wiring.Collapse
 public import PercLib.Probability.Transport.Pullback
+
+/-!
+# Boundaries, forests and walk kernels: correspondence
+
+Wiki correspondence for boundary laws, the first-exit inequality, forest hosts, walk kernels,
+bounded-degree path counts and intensity bounds.
+
+## Main results
+
+* `boundary_mark_exponential`
+* `boundary_escape_and_percolation`
+* `forest_path_and_susceptibility`
+* `walk_kernel_row_bounds`
+* `bounded_degree_susceptibility_and_finiteness`
+* `intensity_susceptibility_and_thresholds`
+-/
 
 @[expose] public section
 noncomputable section
@@ -49,7 +65,7 @@ theorem boundary_escape_and_percolation [Countable V] (q : Sym2 V → unitInterv
           ((openGraph ω).induce (S : Set V)).Reachable ⟨x,hx⟩ ⟨y,hy⟩} *
             (unitInterval.toNNReal (q s(y,z)) : ℝ≥0∞)) ∧
     (law q {ω | cluster ω x ≠ {x}} ≤
-      ∑' z, if z = x then 0 else (unitInterval.toNNReal (q s(x,z)) : ℝ≥0∞)) ∧
+      rowSum (fun e => unitInterval.toENNReal (q e)) x) ∧
     ((∀ y ∈ S, ∀ z ∉ S, q s(y,z) = 0) →
       law q {ω | ¬ cluster ω x ⊆ S} = 0) := by
   have heq (T : Set V) : {ω : Config V | ¬ cluster ω x ⊆ T} =
@@ -246,7 +262,7 @@ thresholds at every root and susceptibility one at every finite parameter. -/
 @[tag "BPR6"]
 theorem intensity_susceptibility_and_thresholds [Countable V] (J : Sym2 V → ℝ≥0) :
     (∀ x, chi (intensityProfile J 0) x = 1) ∧
-    (∀ M : ℝ≥0, (∀ v, (∑' w, if w = v then 0 else (J s(v,w) : ℝ≥0∞)) ≤ M) →
+    (∀ M : ℝ≥0, (∀ v, rowSum (fun e => (J e : ℝ≥0∞)) v ≤ M) →
       (∀ β : ℝ≥0, (β : ℝ≥0∞)*M < 1 →
         (∀ x, 1 ≤ chi (intensityProfile J β) x ∧
           chi (intensityProfile J β) x ≤ (1-(β : ℝ≥0∞)*M)⁻¹) ∧
@@ -266,7 +282,7 @@ theorem intensity_susceptibility_and_thresholds [Countable V] (J : Sym2 V → �
       ae_all_clusters_finite_of_rowSum _ _ (intensity_rowSum_le J M hJ β) hβ⟩
   · intro hzero
     subst M
-    have hz : ∀ v, (∑' w, if w = v then 0 else (J s(v,w) : ℝ≥0∞)) ≤ 0 := by
+    have hz : ∀ v, rowSum (fun e => (J e : ℝ≥0∞)) v ≤ 0 := by
       simpa using hJ
     exact ⟨chi_intensity_eq_one_of_rowSum_zero J hz,
       globalCriticalIntensity_eq_top_of_rowSum_zero J hz,
@@ -359,7 +375,7 @@ example (t : unitInterval) (d : ℕ → unitInterval) :
 example : chi (intensityProfile (fun _ : Sym2 Bool => (1 : ℝ≥0)) (1/2)) false ≤
     (1 - ((1/2 : ℝ≥0) : ℝ≥0∞))⁻¹ := by
   have h := (intensity_susceptibility_and_thresholds (fun _ : Sym2 Bool => (1 : ℝ≥0))).2 1
-    (fun v => by cases v <;> simp [tsum_fintype])
+    (fun v => by cases v <;> simp [rowSum_def, tsum_fintype])
   have hb := (h.1 (1/2) (by norm_num) ).1 false
   simpa using hb.2
 

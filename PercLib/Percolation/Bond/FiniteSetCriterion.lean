@@ -48,7 +48,8 @@ theorem law_intensityProfile_map_eq (J : Sym2 V → ℝ≥0) (σ : V ≃ V)
   PercLib.Probability.prodBernoulli_map_image_sym2_invariant _ σ fun e =>
     Subtype.ext (by simp only [intensityProfile, hσ])
 
-/-- **QXWF.** Under transitivity the susceptibility does not depend on the root. -/
+/-- **Root independence of the susceptibility.** Under transitivity the susceptibility does not
+depend on the root. -/
 theorem chi_eq_of_transitive [Countable V] (J : Sym2 V → ℝ≥0)
     (hT : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e) (β : ℝ≥0)
     (x y : V) : chi (intensityProfile J β) x = chi (intensityProfile J β) y := by
@@ -56,8 +57,8 @@ theorem chi_eq_of_transitive [Countable V] (J : Sym2 V → ℝ≥0)
   rw [← hσx]
   exact (chi_apply_eq_of_map_law_eq σ (law_intensityProfile_map_eq J σ hσ β) x).symm
 
-/-- **XONW.** Under transitivity the probability of an infinite cluster does not depend on
-the root. -/
+/-- **Root independence of the percolation probability.** Under transitivity the probability of an
+infinite cluster does not depend on the root. -/
 theorem law_cluster_infinite_eq_of_transitive [Countable V] (J : Sym2 V → ℝ≥0)
     (hT : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e) (β : ℝ≥0)
     (x y : V) :
@@ -68,16 +69,17 @@ theorem law_cluster_infinite_eq_of_transitive [Countable V] (J : Sym2 V → ℝ�
   exact (law_cluster_infinite_apply_eq_of_map_law_eq σ
     (law_intensityProfile_map_eq J σ hσ β) x).symm
 
-/-- **XONW.** Under transitivity the root threshold does not depend on the root. -/
+/-- **Root independence of the threshold.** Under transitivity the root threshold does not depend on
+the root. -/
 theorem rootCriticalIntensity_eq_of_transitive [Countable V] (J : Sym2 V → ℝ≥0)
     (hT : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e) (x y : V) :
     rootCriticalIntensity J x = rootCriticalIntensity J y := by
   unfold rootCriticalIntensity
   simp_rw [law_cluster_infinite_eq_of_transitive J hT _ x y]
 
-/-- **XONW.** Under transitivity the root threshold equals the global threshold. No
-connectivity of the support of `J` is assumed: the event that some cluster is infinite is a
-countable union of root events of equal probability. -/
+/-- **Root and global thresholds agree.** Under transitivity the root threshold equals the global
+threshold. No connectivity of the support of `J` is assumed: the event that some cluster is infinite
+is a countable union of root events of equal probability. -/
 theorem rootCriticalIntensity_eq_globalCriticalIntensity_of_transitive [Countable V] (J : Sym2 V → ℝ≥0)
     (hT : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e) (x : V) :
     rootCriticalIntensity J x = globalCriticalIntensity J := by
@@ -137,7 +139,7 @@ theorem continuous_law_localConn_intensity (J : Sym2 V → ℝ≥0) (S : Finset 
 at `u` is finite. -/
 theorem continuous_exteriorRow_intensity (J : Sym2 V → ℝ≥0) (S : Finset V) {u : V}
     (huS : u ∈ S)
-    (hrow : (∑' v, if v = u then 0 else (J s(u, v) : ℝ≥0∞)) < ∞) :
+    (hrow : rowSum (fun e => (J e : ℝ≥0∞)) u < ∞) :
     Continuous fun β : ℝ≥0 => ∑' v, (if v ∈ S then 0 else
       (unitInterval.toNNReal (intensityProfile J β s(u, v)) : ℝ≥0∞)) := by
   classical
@@ -202,7 +204,7 @@ theorem continuous_exteriorRow_intensity (J : Sym2 V → ℝ≥0) (S : Finset V)
 /-- **Regularity of `Φ`, continuity.** If the off-diagonal rows of `J` are finite, then
 for a fixed finite `S` the boundary functional `β ↦ Φ_{q_β}(o,S)` is continuous on `ℝ≥0`. -/
 theorem continuous_boundaryFlux_intensity (J : Sym2 V → ℝ≥0)
-    (hrow : ∀ u, (∑' v, if v = u then 0 else (J s(u, v) : ℝ≥0∞)) < ∞) (S : Finset V)
+    (hrow : ∀ u, rowSum (fun e => (J e : ℝ≥0∞)) u < ∞) (S : Finset V)
     (o : V) :
     Continuous fun β : ℝ≥0 => ∑ u ∈ S, ∑' v, (if v ∈ S then 0 else
       law (intensityProfile J β) {ω | ∃ ho : o ∈ (S : Set V), ∃ hu : u ∈ (S : Set V),
@@ -230,7 +232,7 @@ theorem continuous_boundaryFlux_intensity (J : Sym2 V → ℝ≥0)
   · -- The exterior row is finite.
     refine ne_of_lt (lt_of_le_of_lt ?_ (ENNReal.mul_lt_top (ENNReal.coe_lt_top (r := β))
       (hrow u)))
-    rw [← ENNReal.tsum_mul_left]
+    rw [rowSum_def, ← ENNReal.tsum_mul_left]
     refine ENNReal.tsum_le_tsum fun v => ?_
     split_ifs with h1 h2
     · exact zero_le
@@ -312,7 +314,7 @@ theorem boundaryFlux_map_le [Countable V] (J : Sym2 V → ℝ≥0) (σ : V ≃ V
 `chi q_{β₀+ε} x < ⊤` for every `x`. -/
 theorem exists_chi_lt_top_of_boundaryFlux_lt_one [Countable V] (J : Sym2 V → ℝ≥0)
     (hT : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e)
-    (hrow : ∀ u, (∑' v, if v = u then 0 else (J s(u, v) : ℝ≥0∞)) < ∞)
+    (hrow : ∀ u, rowSum (fun e => (J e : ℝ≥0∞)) u < ∞)
     (S : Finset V) {o : V} (hoS : o ∈ S) (β₀ : ℝ≥0)
     (hΦ : ∑ u ∈ S, ∑' v, (if v ∈ S then 0 else
       law (intensityProfile J β₀) {ω | ∃ ho : o ∈ (S : Set V), ∃ hu : u ∈ (S : Set V),
@@ -361,7 +363,7 @@ theorem exists_chi_lt_top_of_boundaryFlux_lt_one [Countable V] (J : Sym2 V → �
 `β₀ < rootCriticalIntensity J o`. -/
 theorem lt_rootCriticalIntensity_of_boundaryFlux_lt_one [Countable V] (J : Sym2 V → ℝ≥0)
     (hT : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e)
-    (hrow : ∀ u, (∑' v, if v = u then 0 else (J s(u, v) : ℝ≥0∞)) < ∞)
+    (hrow : ∀ u, rowSum (fun e => (J e : ℝ≥0∞)) u < ∞)
     (S : Finset V) {o : V} (hoS : o ∈ S) (β₀ : ℝ≥0)
     (hΦ : ∑ u ∈ S, ∑' v, (if v ∈ S then 0 else
       law (intensityProfile J β₀) {ω | ∃ ho : o ∈ (S : Set V), ∃ hu : u ∈ (S : Set V),
@@ -384,12 +386,12 @@ theorem lt_rootCriticalIntensity_of_boundaryFlux_lt_one [Countable V] (J : Sym2 
 
 /-! ### R84Z (item 4) -/
 
-/-- **R84Z.** Under transitivity and finite off-diagonal rows, if the root threshold
-`β_c` is finite then for every finite `S ∋ o`:
+/-- **The boundary flux at the threshold.** Under transitivity and finite off-diagonal rows, if the
+root threshold `β_c` is finite then for every finite `S ∋ o`:
 `1 ≤ Φ_{q_{β_c}}(o,S) ≤ β_c ∑_{u ∈ S} τ_{S,β_c}(o,u) ∑'_{v ∉ S} J s(u,v)`. -/
 theorem one_le_boundaryFlux_at_rootCriticalIntensity [Countable V] (J : Sym2 V → ℝ≥0)
     (hT : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e)
-    (hrow : ∀ u, (∑' v, if v = u then 0 else (J s(u, v) : ℝ≥0∞)) < ∞) {o : V}
+    (hrow : ∀ u, rowSum (fun e => (J e : ℝ≥0∞)) u < ∞) {o : V}
     (hc : rootCriticalIntensity J o < ⊤) (S : Finset V) (hoS : o ∈ S) :
     1 ≤ ∑ u ∈ S, ∑' v, (if v ∈ S then 0 else
       law (intensityProfile J (rootCriticalIntensity J o).toNNReal)
@@ -432,7 +434,7 @@ theorem one_le_boundaryFlux_at_rootCriticalIntensity [Countable V] (J : Sym2 V �
             exact ENNReal.coe_le_coe.2 (intensityProfile_toNNReal_le J βc _)
         _ = _ := by ring
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
 /-- The constant kernel on `ZMod 2` is transitive, by the translations `σ = (· + c)`. -/
 theorem transitive_const_zmod_two :
@@ -464,17 +466,18 @@ example (β : ℝ≥0) :
   ⟨chi_eq_of_transitive _ transitive_const_zmod_two β 0 1,
     rootCriticalIntensity_eq_globalCriticalIntensity_of_transitive _ transitive_const_zmod_two 0,
     by convert continuous_boundaryFlux_intensity (V := ZMod 2) (fun _ => 1) (fun u => by
-      rw [tsum_fintype]
+      rw [rowSum_def, tsum_fintype]
       exact ENNReal.sum_lt_top.2 fun _ _ => by split_ifs <;> simp) {0} 0⟩
 
-/-- The zero kernel with `S = {o}`: `Φ = 0 < 1`, so the susceptibility is finite just
-above `β₀ = 1` and `1 < rootCriticalIntensity` (in fact it is `⊤`, and R84Z is vacuous). -/
+/-- The zero kernel with `S = {o}`: `Φ = 0 < 1`, so the susceptibility is finite just above `β₀ = 1`
+and `1 < rootCriticalIntensity` (in fact it is `⊤`, and
+`one_le_boundaryFlux_at_rootCriticalIntensity` is vacuous). -/
 example (o : ZMod 2) :
     (∃ ε : ℝ≥0, 0 < ε ∧ ∀ x, chi (intensityProfile (fun _ : Sym2 (ZMod 2) => (0 : ℝ≥0))
       (1 + ε)) x < ⊤) ∧
       ((1 : ℝ≥0) : ℝ≥0∞) < rootCriticalIntensity (fun _ : Sym2 (ZMod 2) => (0 : ℝ≥0)) o := by
   have hrow : ∀ u : ZMod 2,
-      (∑' v, if v = u then 0 else ((fun _ : Sym2 (ZMod 2) => (0 : ℝ≥0)) s(u, v) : ℝ≥0∞)) < ∞ :=
+      rowSum (fun e => ((fun _ : Sym2 (ZMod 2) => (0 : ℝ≥0)) e : ℝ≥0∞)) u < ∞ :=
     fun u => by simp
   have hΦ : ∑ u ∈ ({o} : Finset (ZMod 2)), ∑' v, (if v ∈ ({o} : Finset (ZMod 2)) then 0 else
       law (intensityProfile (fun _ : Sym2 (ZMod 2) => (0 : ℝ≥0)) 1)

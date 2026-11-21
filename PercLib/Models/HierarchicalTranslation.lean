@@ -1,12 +1,11 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written on 2026-11-20 for package hier-translate: the upper two-point bound on the
-hierarchical lattice from bounds on the block means, for kernels that are translation invariant
-with an antitone radial upper envelope (not necessarily radial). Adapted from
-`PercLib/Models/HierarchicalTwoPointUpper.lean` of this library (same licence), where the radial
-hypothesis is replaced by translation invariance plus the envelope. No upstream code is copied,
-no definition is added and no Input is introduced; the block-mean bound is an ordinary
-hypothesis.
+New proofs, written on 2026-11-20: the upper two-point bound on the hierarchical lattice from bounds
+on the block means, for kernels that are translation invariant with an antitone radial upper
+envelope (not necessarily radial). Adapted from `PercLib/Models/HierarchicalTwoPointUpper.lean` of
+this library (same licence), where the radial hypothesis is replaced by translation invariance plus
+the envelope. No upstream code is copied, no definition is added and no Input is introduced; the
+block-mean bound is an ordinary hypothesis.
 -/
 module
 

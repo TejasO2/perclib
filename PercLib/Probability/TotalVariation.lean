@@ -2,9 +2,8 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for issue 233 (Q-50), written on 2026-11-15 by PROVER-E. No upstream proof is
-copied: the bound is derived from the merged monotone coupling
-`PercLib.Probability.exists_prodBernoulli_monotone_coupling`, through the profile
+New proofs, written on 2026-11-15. No upstream proof is copied: the bound is derived from the merged
+monotone coupling `PercLib.Probability.exists_prodBernoulli_monotone_coupling`, through the profile
 `min q q'`.
 -/
 module

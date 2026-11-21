@@ -2,12 +2,12 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-Adapted from NearCritical/BK.lean at tomhutchcroft/near-critical-diffusivity,
-revision c820fea91a7482c1755de0ec94ecb9f59ccfcacc, under Tom Hutchcroft's reuse
-permission (DECISIONS R-3). The native source has no licence header; this is not
-an assertion of an upstream Apache licence. No vendored network code is copied.
-The adaptation uses Set configurations, IsUpperSet, and the single finite-certificate
-convention. Standard image/preimage/insert replace auxiliary Boolean definitions.
+Adapted from NearCritical/BK.lean at tomhutchcroft/near-critical-diffusivity, revision
+c820fea91a7482c1755de0ec94ecb9f59ccfcacc, under Tom Hutchcroft's reuse permission recorded in
+`docs/DECISIONS.md`. The native source has no licence header; this is not an assertion of an
+upstream Apache licence. No vendored network code is copied. The adaptation uses Set configurations,
+IsUpperSet, and the single finite-certificate convention. Standard image/preimage/insert replace
+auxiliary Boolean definitions.
 -/
 module
 

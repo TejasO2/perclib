@@ -3,6 +3,16 @@ module
 public import Mathlib.Basic.Real.Basic
 import Mathlib.Tactic.Linarith
 
+/-!
+# Basic smoke test
+
+A single elementary inequality that exercises mathlib and `nlinarith`.
+
+## Main results
+
+* `two_mul_le_add_sq`
+-/
+
 @[expose] public section
 
 namespace PercLib

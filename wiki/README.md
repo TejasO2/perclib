@@ -44,6 +44,7 @@ article discovery metadata and the original `context` array of running notation
 and assumptions. It contains no assertion tag, authored formal status, or Lean
 declaration name. Article filenames match their `id`.
 
+An optional lead precedes the first section (see "Lead").
 Sections use `## Heading {#section-section-id}`. Their bodies retain the original
 HTML, valid inside Markdown, so mathematical delimiters, links, whitespace, and
 hypothesis placement survive the migration without a conversion round trip.
@@ -69,6 +70,111 @@ they are not assertion identities. `prototypeUses` preserves editorial reading
 links, not extracted Lean dependency data. The build converts old hash links to
 static paths while leaving the authored article bodies unchanged. Each assertion's
 destination is `/articles/<id>/#tag-XXXX`.
+
+## Lead
+
+The body may open, before its first `## … {#section-…}` heading, with a lead of one
+to three paragraphs and no heading. A paragraph is either a block of complete
+`<p>…</p>` elements or bare text (rendered inside `<p>`); paragraphs are separated by
+one blank line, and the lead by one blank line from the first heading. Inline
+mathematics, links and wanted links work as in sections. The lead renders after the
+article header and before the running context and the contents box, which does not
+list it; its element has id `section-lead`, so the section id `lead` is reserved.
+Search, "What links here", "Assertion citations" (as "Introduction"), the dead-link
+check and the link report treat it as body text (`<article>#section-lead`). An
+assertion anchor, a heading (`#` or `<h1>`–`<h6>`), a collapsible block (`:::` or
+`<details>`), any other block element or a fourth paragraph in the lead fails the
+build with the article file and line: assertions belong in sections.
+
+Frozen-article digests: the lead is not article metadata and not a section. An article
+without a lead hashes exactly as before. A baseline entry may carry
+`"lead": {"sha256": …}`, the SHA-256 of the lead text as written (from its first
+character to the end of its last paragraph, without the separating blank line). The
+check requires that digest exactly when the article has a lead, so adding a lead to a
+frozen article adds this one digest and changes no other.
+
+## Collapsible blocks
+
+Full proofs, long computations, technical lemmas used once, Lean statements and
+provenance are written as collapsed blocks. Put the fences on lines of their own
+inside a section body:
+
+```html
+<p>Idea of the proof, visible by default.</p>
+:::details Proof of the lower bound
+<p>Every step of the proof. Mathematics such as $\chi_q(v)\le 1/(1-m)$ and
+display formulas render as everywhere else.</p>
+:::
+```
+
+The text after `:::details` is the summary line shown when the block is closed.
+It is mandatory and says what is inside ("Proof", "Proof of the lower bound",
+"Verification of (3)"); it may contain inline mathematics. The closing fence is
+the same run of colons alone on its line. To nest a block, give the outer block
+more colons:
+
+```html
+::::details Proof of Theorem 2
+<p>…</p>
+:::details Verification of (3)
+<p>…</p>
+:::
+<p>…</p>
+::::
+```
+
+The build renders each block as `<details class="collapsible"><summary>…</summary>`
+`<div class="collapsible-body">…</div></details>`. An unclosed block, a stray closing
+fence, a missing summary or an unknown directive fails the build with the article,
+section and line. Hand-written `<details>` elements are also accepted, provided they
+begin with a `<summary>`.
+
+On the site: a link to an anchor inside collapsed blocks (`#tag-XXXX`, `/tag/XXXX/`, or
+any other fragment) opens every enclosing block and scrolls to the anchor, on page load
+and on clicks within the page. Articles with collapsed blocks get "Expand all" and
+"Collapse all" buttons. Printing opens every block (print stylesheet plus a
+`beforeprint` handler that restores the reader's state afterwards), and the offline
+export writes every block expanded. Search indexes the text of collapsed blocks with
+the rest of the article. Without JavaScript the blocks still open with one click; only
+the automatic opening for links needs JavaScript.
+
+## Links, backlinks and the link report
+
+Link a concept, result or model with its own article in running text, on the natural
+phrase: `<a href="/articles/connectivity/">open clusters</a>`, or for a cited result its
+assertion, `<a href="/tag/53Z9/">uniform row-sum bound</a>`. Legacy `#/article` links
+still work.
+
+A term whose article does not exist yet may be marked as a wanted page:
+
+```html
+<a data-wanted="random-cluster-model">random-cluster model</a>
+```
+
+The value is the intended article id. It renders as a marked phrase without a
+destination. Once an article with that id exists, the build renders it as an ordinary
+link and lists it in the report for cleanup.
+
+Every article page has a contents box listing its sections (and any `<h3 id="…">`
+sub-headings) and the generated panels. "What links here" in the Connections panel lists
+every article whose body links to this one, in any link form; "Assertion citations" lists,
+for each assertion, the article sections that link to it. Internal links in an article
+body show a hover preview (kind, title and article or summary of the target, with
+mathematics rendered at build time); the preview data are embedded in each page, so
+previews also work offline.
+
+The build fails on a dead internal link in an article body (unknown article, unknown
+or withdrawn assertion, missing section or anchor), naming the article and section,
+before the whole-site link check runs. It also writes an advisory report, which never
+fails the build, to `dist/link-report.txt` (and `dist/link-report.json`):
+
+- articles whose body has no inline link to another article (sections titled
+  "See also" do not count);
+- concepts mentioned without a link although an article exists: in each section, the
+  title or a multi-word alias of another article occurring in the text (outside links,
+  mathematics, code, headings and summaries) while that section has no link to it;
+- wanted pages, with the phrases used and the sections that want them, for the wiki
+  queue.
 
 ## Allocate and withdraw
 
@@ -100,7 +206,8 @@ two different mathematical statements mean the same thing.
 ## Migration evidence
 
 `migration-baseline.json` records SHA-256 digests of each original section body and
-article metadata, plus the original Git revision. Checks strip only the exact
+article metadata (and of a lead, if one is added later; see "Lead"), plus the original
+Git revision. Checks strip only the exact
 assertion anchor syntax and compare every section. The original JSON remains in
 Git history; it is no longer an independently editable source. The digests prove
 preservation relative to that recorded snapshot, not mathematical correctness.

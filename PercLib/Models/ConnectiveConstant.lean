@@ -2,9 +2,9 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for issue 222 (Q-46), written on 2026-11-15 by PROVER-E. No upstream proof is
-copied. Source of the statements: J. M. Hammersley and K. W. Morton (1954); N. Madras and
-G. Slade, *The Self-Avoiding Walk* (1993), §1.2 (locators to be checked).
+New proofs, written on 2026-11-15. No upstream proof is copied. Source of the statements: J. M.
+Hammersley and K. W. Morton (1954); N. Madras and G. Slade, *The Self-Avoiding Walk* (1993), §1.2
+(locators to be checked).
 -/
 module
 

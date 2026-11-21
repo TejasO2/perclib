@@ -71,7 +71,7 @@ theorem law_localConn_le_tau (q : Sym2 V → unitInterval) (T : Set V) (o u : V)
 omit [Countable V] in
 /-- The exterior tails of a finite off-diagonal row tend to zero along an exhaustion. -/
 theorem tendsto_exteriorRow_zero (q : Sym2 V → unitInterval) (u : V)
-    (hrow : (∑' v, if v = u then 0 else (unitInterval.toNNReal (q s(u, v)) : ℝ≥0∞)) ≠ ∞)
+    (hrow : rowSum (fun e => unitInterval.toENNReal (q e)) u ≠ ∞)
     {T : ℕ → Finset V} (hT : Monotone T) (hcov : ∀ v, ∃ n, v ∈ T n) :
     Tendsto (fun n => ∑' v, if v ∈ T n then 0 else
       (if v = u then 0 else (unitInterval.toNNReal (q s(u, v)) : ℝ≥0∞))) atTop (𝓝 0) := by
@@ -83,13 +83,12 @@ theorem tendsto_exteriorRow_zero (q : Sym2 V → unitInterval) (u : V)
     (unitInterval.toNNReal (q s(u, v)) : ℝ≥0∞))).trans (tsum_congr fun v => ?_)
   by_cases hv : v ∈ T n <;> simp [Set.indicator, hv]
 
-/-- **RDF0, `⇒` direction.** If the off-diagonal rows of `q` are bounded by `Q < ⊤` and
+/-- **`⇒` direction.** If the off-diagonal rows of `q` are bounded by `Q < ⊤` and
 `chi q o < ⊤`, then along any increasing sequence of finite sets `T_n` exhausting `V`,
-`Φ_q(o, T_n) → 0`. (The issue's hypothesis `o ∈ T_n` is not needed: the internal
+`Φ_q(o, T_n) → 0`. (The hypothesis `o ∈ T_n` is not needed: the internal
 connection probability vanishes when `o ∉ T_n`.) -/
 theorem tendsto_boundaryFlux_exhaustion (q : Sym2 V → unitInterval) {Q : ℝ≥0∞} (hQ : Q < ⊤)
-    (hrow : ∀ u, (∑' v, if v = u then 0 else
-      (unitInterval.toNNReal (q s(u, v)) : ℝ≥0∞)) ≤ Q)
+    (hrow : ∀ u, rowSum (fun e => unitInterval.toENNReal (q e)) u ≤ Q)
     {o : V} (hchi : chi q o < ⊤) {T : ℕ → Finset V} (hT : Monotone T)
     (hcov : ∀ v, ∃ n, v ∈ T n) :
     Tendsto (fun n => ∑ u ∈ T n, ∑' v, (if v ∈ T n then 0 else
@@ -100,7 +99,8 @@ theorem tendsto_boundaryFlux_exhaustion (q : Sym2 V → unitInterval) {Q : ℝ�
   set R : ℕ → V → ℝ≥0∞ := fun n u => ∑' v, if v ∈ T n then 0 else
       (if v = u then 0 else (unitInterval.toNNReal (q s(u, v)) : ℝ≥0∞)) with hR
   have hRle : ∀ n u, R n u ≤ Q := fun n u =>
-    (ENNReal.tsum_le_tsum fun v => by split_ifs <;> simp).trans (hrow u)
+    (ENNReal.tsum_le_tsum fun v => by split_ifs <;> simp).trans
+      ((rowSum_toENNReal q u).ge.trans (hrow u))
   have hRlim : ∀ u, Tendsto (fun n => R n u) atTop (𝓝 0) := fun u =>
     tendsto_exteriorRow_zero q u ((hrow u).trans_lt hQ).ne hT hcov
   -- The dominating summable sequence `Q · tau q o u`.
@@ -154,11 +154,10 @@ theorem tendsto_boundaryFlux_exhaustion (q : Sym2 V → unitInterval) {Q : ℝ�
   exact tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds hlim
     (fun n => zero_le) hle
 
-/-- **RDF0, `⇒` direction, existence form.** Under the same hypotheses, some finite `T ∋ o`
+/-- **`⇒` direction, existence form.** Under the same hypotheses, some finite `T ∋ o`
 has `Φ_q(o,T) < 1`. -/
 theorem exists_boundaryFlux_lt_one (q : Sym2 V → unitInterval) {Q : ℝ≥0∞} (hQ : Q < ⊤)
-    (hrow : ∀ u, (∑' v, if v = u then 0 else
-      (unitInterval.toNNReal (q s(u, v)) : ℝ≥0∞)) ≤ Q)
+    (hrow : ∀ u, rowSum (fun e => unitInterval.toENNReal (q e)) u ≤ Q)
     {o : V} (hchi : chi q o < ⊤) :
     ∃ T : Finset V, o ∈ T ∧ ∑ u ∈ T, ∑' v, (if v ∈ T then 0 else
       law q {ω | ∃ ho : o ∈ (T : Set V), ∃ hu : u ∈ (T : Set V),
@@ -174,7 +173,7 @@ theorem exists_boundaryFlux_lt_one (q : Sym2 V → unitInterval) {Q : ℝ≥0∞
 /-- **Corollary for intensity kernels.** If every off-diagonal row of `J` is at most `M` and
 `chi q_β o < ⊤`, then some finite `T ∋ o` has `Φ_{q_β}(o,T) < 1`. -/
 theorem exists_boundaryFlux_lt_one_of_chi_lt_top (J : Sym2 V → ℝ≥0) (M : ℝ≥0)
-    (hJ : ∀ v, (∑' w, if w = v then 0 else (J s(v, w) : ℝ≥0∞)) ≤ M) (β : ℝ≥0) {o : V}
+    (hJ : ∀ v, rowSum (fun e => (J e : ℝ≥0∞)) v ≤ M) (β : ℝ≥0) {o : V}
     (hchi : chi (intensityProfile J β) o < ⊤) :
     ∃ T : Finset V, o ∈ T ∧ ∑ u ∈ T, ∑' v, (if v ∈ T then 0 else
       law (intensityProfile J β) {ω | ∃ ho : o ∈ (T : Set V), ∃ hu : u ∈ (T : Set V),
@@ -183,7 +182,7 @@ theorem exists_boundaryFlux_lt_one_of_chi_lt_top (J : Sym2 V → ℝ≥0) (M : �
   exists_boundaryFlux_lt_one _ (ENNReal.mul_lt_top ENNReal.coe_lt_top ENNReal.coe_lt_top)
     (fun u => by convert intensity_rowSum_le J M hJ β u) hchi
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
 /-- The nearest-neighbour intensity on `ℤ`. -/
 theorem exists_nearestNeighbour_kernel :
@@ -212,9 +211,8 @@ example : ∃ T : Finset ℤ, 0 ∈ T ∧ ∑ u ∈ T, ∑' v, (if v ∈ T then 
       {ω | ∃ ho : (0 : ℤ) ∈ (T : Set ℤ), ∃ hu : u ∈ (T : Set ℤ),
         ((openGraph ω).induce (T : Set ℤ)).Reachable ⟨0, ho⟩ ⟨u, hu⟩} *
     (unitInterval.toNNReal (0 : unitInterval) : ℝ≥0∞)) < 1 := by
-  have h0 : unitInterval.toNNReal 0 = 0 := NNReal.eq (by simp [unitInterval.toNNReal]; rfl)
   have := exists_boundaryFlux_lt_one (V := ℤ) (fun _ => 0) (Q := 0) ENNReal.zero_lt_top
-    (fun u => by simp [h0]) (o := 0)
+    (fun u => by simp) (o := 0)
     (by rw [chi_eq_one_of_offDiagonal_zero _ (fun _ _ _ => rfl)]; exact ENNReal.one_lt_top)
   obtain ⟨T, hT, h⟩ := this
   exact ⟨T, hT, by convert h⟩

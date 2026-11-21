@@ -1,9 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs for issue 647 (Q-219), written on 2026-11-16 by PROVER-G: the Paley–Zygmund
-inequality and the second-moment method, from pinned mathlib's Hölder inequality for lower
-Lebesgue integrals, and the cluster-volume corollary. No upstream code is copied, no definition
-is added and no Input is introduced.
+New proofs, written on 2026-11-16: the Paley–Zygmund inequality and the second-moment method, from
+pinned mathlib's Hölder inequality for lower Lebesgue integrals, and the cluster-volume corollary.
+No upstream code is copied, no definition is added and no Input is introduced.
 -/
 module
 
@@ -178,7 +177,7 @@ theorem paleyZygmund_cluster_of_chi_le {V : Type*} [Countable V] (q : Sym2 V →
       _ = _ := by ring
   exact (ENNReal.mul_le_mul_iff_left hχ0 hχ).1 h3
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
 /-- A Bernoulli(1/2) variable (`X = 1` on `true` under `Ber(true, false, 1/2)`): every hypothesis of the
 second-moment method holds (here it is an equality, `1/4 = 1/2 · 1/2`). -/

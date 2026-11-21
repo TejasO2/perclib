@@ -1,11 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs for issue 601 (Q-173, F-1 leaves R11 and R12, conditional form), written on
-2026-11-16 by PROVER-G: the upper two-point bound on the hierarchical lattice from bounds
-on the block means. From the first-exit inequality and the hierarchical symmetries of this
-library and pinned mathlib's ENNReal powers and geometric series. No upstream code is
-copied, no definition is added and no Input is introduced; the block-mean bound is an
-ordinary hypothesis.
+New proofs, written on 2026-11-16: the upper two-point bound on the hierarchical lattice from bounds
+on the block means. From the first-exit inequality and the hierarchical symmetries of this library
+and pinned mathlib's ENNReal powers and geometric series. No upstream code is copied, no definition
+is added and no Input is introduced; the block-mean bound is an ordinary hypothesis.
 -/
 module
 
@@ -393,7 +391,7 @@ theorem tsum_tau_ball_le_powerLaw (hL : 1 ≤ L) {α : ℝ} (hα : 0 < α) (C₀
     ring
   rw [mul_comm, mul_assoc, mul_comm _ (((L ^ d) ^ N : ℕ) : ℝ≥0∞), e]
 
-/-! ### Non-vacuity (D-5): `d = 1`, `L = 2`, `f j = 4^(-j)`, `α = 1`, `β = 1/8` -/
+/-! ### Non-vacuity: `d = 1`, `L = 2`, `f j = 4^(-j)`, `α = 1`, `β = 1/8` -/
 
 /-- The block means are bounded by the susceptibility. -/
 theorem tsum_localConn_le_chi {W : Type*} [Countable W] (q : Sym2 W → unitInterval) (D : Set W)

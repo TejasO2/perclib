@@ -8,6 +8,17 @@ module
 public import PercLib.Meta.Tag
 public import PercLib.Models.LongRange.OneDimensional
 
+/-!
+# One-dimensional finite clusters: correspondence
+
+Wiki correspondence for finiteness of clusters of one-dimensional long-range percolation with finite
+first moment.
+
+## Main results
+
+* `oneDimensional_clusters_finite_criticalIntensity_eq_top`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory PercLib.Percolation.Bond

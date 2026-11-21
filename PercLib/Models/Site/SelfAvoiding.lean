@@ -8,6 +8,21 @@ module
 public import PercLib.Percolation.Bond.SelfAvoiding
 public import Mathlib.Order.SuccPred.Int
 
+/-!
+# Self-avoiding paths and subcritical site percolation
+
+An infinite site cluster contains open simple paths of every length; counting such paths shows that
+site percolation on a graph of maximum degree `Δ` has no infinite cluster when `(Δ - 1) p < 1`.
+
+## Main results
+
+* `exists_path_length_of_siteCluster_infinite`
+* `siteBernoulli_siteInfinite_eq_zero_of_degree_le`
+* `ae_all_siteClusters_finite_of_degree_le`
+* `thetaSite_eq_zero_of_lt_inv`
+* `inv_le_criticalProbSite`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set PercLib.Probability PercLib.Percolation.Bond
@@ -137,7 +152,7 @@ theorem ae_all_siteClusters_finite_of_degree_le [Countable V]
     siteBernoulli_siteInfinite_eq_zero_of_degree_le G hΔ w p hw hp x
 
 /-- A finite cover of each lattice neighbour set by signed coordinate steps.
-This local degree bound avoids a dependency on the pending Q-32 lattice package. -/
+This local degree bound keeps the file independent of `PercLib.Models.Lattice`. -/
 private theorem lattice_neighbors_subset (d : ℕ) (x : LatticeSite d) :
     (zdGraph d).neighborSet x ⊆ Set.range
       (fun t : Fin d × Bool => Function.update x t.1 (x t.1 + if t.2 then 1 else -1)) := by

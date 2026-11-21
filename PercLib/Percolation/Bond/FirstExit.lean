@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
 New first-exit and internal/boundary independence proofs on the canonical bond law.
-This is the elementary q-normalized boundary bound of issue 193, not a sharpness
+This is the elementary q-normalized boundary bound, not a sharpness
 or BK iteration theorem. No upstream proof is copied and no Input is introduced.
 -/
 module
@@ -10,6 +10,23 @@ public import PercLib.Percolation.Bond.LocalConnectivity
 public import PercLib.Percolation.Bond.Forest
 public import PercLib.Probability.ProdBernoulliIndependence
 public import PercLib.Probability.OpenEventHarris
+
+/-!
+# The first-exit inequality
+
+A connection leaving a domain has a first exiting edge preceded by an internal connection; internal
+connectivity is independent of the boundary pairs, which bounds escape and infinite-cluster
+probabilities by the boundary functional of a finite set.
+
+## Main results
+
+* `exists_first_exit`
+* `law_localConn_inter_boundary`
+* `law_escape_le_phi`
+* `law_cluster_infinite_le_phi`
+* `law_escape_singleton_le_rowSum`
+* `phi_nat_range`
+-/
 
 @[expose] public section
 noncomputable section
@@ -138,7 +155,8 @@ theorem law_cluster_infinite_le_phi [Countable V] (q : Sym2 V → unitInterval)
 /-- A singleton domain gives the explicit off-diagonal row sum. -/
 theorem law_escape_singleton_le_rowSum [Countable V] (q : Sym2 V → unitInterval) (x : V) :
     law q (⋃ w ∈ ({x} : Set V)ᶜ, conn x w) ≤
-      ∑' z, if z = x then 0 else (unitInterval.toNNReal (q s(x,z)) : ℝ≥0∞) := by
+      rowSum (fun e => unitInterval.toENNReal (q e)) x := by
+  rw [rowSum_toENNReal]
   simpa using law_escape_le_phi q {x} (Finset.mem_singleton_self x)
 
 /-- A finite domain with zero boundary profile has zero escape probability. -/
@@ -227,7 +245,7 @@ theorem phi_nat_range (q : Sym2 ℕ → unitInterval) (t : unitInterval)
 -- Non-vacuity: singleton and zero-boundary cases instantiate the public bounds.
 example [Countable V] (q : Sym2 V → unitInterval) (x : V) :
     law q (⋃ w ∈ ({x} : Set V)ᶜ, conn x w) ≤
-      ∑' z, if z = x then 0 else (unitInterval.toNNReal (q s(x,z)) : ℝ≥0∞) :=
+      rowSum (fun e => unitInterval.toENNReal (q e)) x :=
   law_escape_singleton_le_rowSum q x
 
 example (n : ℕ) : law (fun _ : Sym2 ℕ => 0)

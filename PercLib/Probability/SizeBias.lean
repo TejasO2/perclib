@@ -12,6 +12,22 @@ public import PercLib.Percolation.Bond.RowSum
 public import Mathlib.MeasureTheory.Measure.WithDensity
 public import Mathlib.MeasureTheory.Integral.Lebesgue.Countable
 
+/-!
+# Truncated first moments and size-biased laws
+
+Truncated means of a nonnegative random variable from its first two moments, the size-biased law as
+a `withDensity` measure, and its instance for the cluster volume.
+
+## Main results
+
+* `le_setLIntegral_le_of_le`
+* `le_lintegral_min`
+* `isProbabilityMeasure_withDensity_div`
+* `lintegral_withDensity_div`
+* `isProbabilityMeasure_sizeBiased_cluster`
+* `lintegral_sizeBiased_cluster`
+-/
+
 @[expose] public section
 
 noncomputable section
@@ -44,7 +60,7 @@ theorem lintegral_eq_zero_of_lintegral_sq_eq_zero (P : Measure Ω) {X : Ω → �
   filter_upwards [h] with ω hω
   simpa using hω
 
-/-- **LLGA, truncated mean.** If `μ = E X < ∞`, `ν = E X²` and `λ > 1`, then for every
+/-- **Truncated mean.** If `μ = E X < ∞`, `ν = E X²` and `λ > 1`, then for every
 threshold `t ≥ λν/μ`, `E[X 1{X ≤ t}] ≥ (1 − λ⁻¹) μ`. -/
 theorem le_setLIntegral_le_of_le (P : Measure Ω) {X : Ω → ℝ≥0∞} (hX : Measurable X)
     (hμ : ∫⁻ ω, X ω ∂P ≠ ∞) {l t : ℝ≥0∞} (hl : 1 < l)
@@ -89,14 +105,14 @@ theorem le_setLIntegral_le_of_le (P : Measure Ω) {X : Ω → ℝ≥0∞} (hX : 
     _ ≤ A := by rw [← hAB]; exact le_of_eq (ENNReal.add_sub_cancel_right
         (ne_top_of_le_ne_top hμ (hAB ▸ le_add_self)))
 
-/-- **LLGA, truncated mean at the threshold `λν/μ`.** -/
+/-- **Truncated mean at the threshold `λν/μ`.** -/
 theorem le_setLIntegral_le (P : Measure Ω) {X : Ω → ℝ≥0∞} (hX : Measurable X)
     (hμ : ∫⁻ ω, X ω ∂P ≠ ∞) {l : ℝ≥0∞} (hl : 1 < l) :
     (1 - l⁻¹) * ∫⁻ ω, X ω ∂P ≤
       ∫⁻ ω in {ω | X ω ≤ l * (∫⁻ ω, X ω ^ 2 ∂P) / (∫⁻ ω, X ω ∂P)}, X ω ∂P :=
   le_setLIntegral_le_of_le P hX hμ hl le_rfl
 
-/-- **LLGA, truncation by a minimum.** If `N ≥ λν/μ` then `E[min X N] ≥ (1 − λ⁻¹) μ`. -/
+/-- **Truncation by a minimum.** If `N ≥ λν/μ` then `E[min X N] ≥ (1 − λ⁻¹) μ`. -/
 theorem le_lintegral_min (P : Measure Ω) {X : Ω → ℝ≥0∞} (hX : Measurable X)
     (hμ : ∫⁻ ω, X ω ∂P ≠ ∞) {l N : ℝ≥0∞} (hl : 1 < l)
     (hN : l * (∫⁻ ω, X ω ^ 2 ∂P) / (∫⁻ ω, X ω ∂P) ≤ N) :
@@ -146,7 +162,7 @@ open PercLib.Probability
 
 variable {V : Type*} [Countable V]
 
-/-- **6L9Z, cluster instance.** With `T = |K_o|` and `χ(o) < ∞`, the size-biased law of
+/-- **Cluster instance.** With `T = |K_o|` and `χ(o) < ∞`, the size-biased law of
 `T` is a probability measure and its mean is `E T² / χ(o)`. -/
 theorem isProbabilityMeasure_sizeBiased_cluster (q : Sym2 V → unitInterval) (o : V)
     (hχ : chi q o < ∞) :
@@ -156,14 +172,14 @@ theorem isProbabilityMeasure_sizeBiased_cluster (q : Sym2 V → unitInterval) (o
     ((measurable_of_countable (fun n : ℕ∞ => (n : ℝ≥0∞))).comp (measurable_encard_cluster o))
     (zero_lt_one.trans_le (one_le_chi q o)).ne' hχ.ne
 
-/-- **6L9Z, cluster instance.** `Ê T = E T² / χ(o)` for `T = |K_o|`. -/
+/-- **Cluster instance.** `Ê T = E T² / χ(o)` for `T = |K_o|`. -/
 theorem lintegral_sizeBiased_cluster (q : Sym2 V → unitInterval) (o : V) :
     ∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ∂((law q).withDensity fun ω =>
         ((cluster ω o).encard : ℝ≥0∞) / chi q o) =
       (∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ^ 2 ∂law q) / chi q o :=
   lintegral_self_withDensity_div (law q) ((measurable_of_countable (fun n : ℕ∞ => (n : ℝ≥0∞))).comp (measurable_encard_cluster o))
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
 /-- The singleton cluster: on `Unit`, `T = 1`, so `χ = 1 < ∞` and `Ê T = E T² / χ = 1`. -/
 example (q : Sym2 Unit → unitInterval) :

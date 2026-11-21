@@ -14,6 +14,22 @@ public import Mathlib.MeasureTheory.Integral.Lebesgue.Markov
 public import Mathlib.RingTheory.Binomial
 public import Mathlib.Data.Nat.Factorial.DoubleFactorial
 
+/-!
+# Exponential moments from double-factorial moment bounds
+
+If `E X^m ≤ (2m-3)!! χ^{2m-1}` for all `m ≥ 1`, then `X` has explicit exponential moments and
+explicit tail bounds.
+
+## Main results
+
+* `hasSum_inv_sqrt_one_sub`
+* `lintegral_mul_exp_le`
+* `lintegral_exp_le`
+* `measure_le_le_sqrt_two_mul`
+* `measure_le_le_min`
+* `measure_le_le_exp`
+-/
+
 @[expose] public section
 
 open Real Filter MeasureTheory Set
@@ -151,7 +167,7 @@ theorem lintegral_pow_succ_le
   rwa [show 2 * (k + 1) - 3 = 2 * k - 1 by omega, show 2 * (k + 1) - 1 = 2 * k + 1 by omega]
     at h
 
-/-- **0BQB, first bound.** If `X ≥ 0`, `χ > 0` and `E X^m ≤ (2m−3)!! χ^{2m−1}` for all
+/-- **First bound.** If `X ≥ 0`, `χ > 0` and `E X^m ≤ (2m−3)!! χ^{2m−1}` for all
 `m ≥ 1`, then for `0 ≤ r < (2χ²)⁻¹`: `E[X e^{rX}] ≤ χ / √(1 − 2rχ²)`. -/
 theorem lintegral_mul_exp_le (hX : Measurable X) (hX0 : ∀ ω, 0 ≤ X ω) (hχ : 0 < χ)
     (hmom : ∀ m : ℕ, 1 ≤ m → ∫⁻ ω, ENNReal.ofReal (X ω ^ m) ∂P ≤
@@ -186,7 +202,7 @@ theorem lintegral_mul_exp_le (hX : Measurable X) (hX0 : ∀ ω, 0 ≤ X ω) (hχ
         rw [← ENNReal.ofReal_tsum_of_nonneg (fun k => by positivity) hs.summable, hs.tsum_eq,
           mul_one_div]
 
-/-- **0BQB, second bound.** Under the same hypotheses, for a probability measure and
+/-- **Second bound.** Under the same hypotheses, for a probability measure and
 `0 ≤ r ≤ (2χ²)⁻¹` (endpoint included): `E e^{rX} ≤ 1 + (1 − √(1 − 2rχ²))/χ`. -/
 theorem lintegral_exp_le [IsProbabilityMeasure P] (hX : Measurable X) (hX0 : ∀ ω, 0 ≤ X ω)
     (hχ : 0 < χ)
@@ -247,7 +263,7 @@ theorem measure_le_ofReal_div {f : Ω → ℝ} (hf : Measurable f) {s : Set Ω} 
     (Or.inl ENNReal.ofReal_ne_top), mul_comm]
   exact (mul_le_mul_right (measure_mono hsub) _ |>.trans hm).trans hB
 
-/-- **SNB3, second bound.** `P(X ≥ n) ≤ (√2 χ / n) e^{−n/(4χ²)}` for `n > 0`. -/
+/-- **Second bound.** `P(X ≥ n) ≤ (√2 χ / n) e^{−n/(4χ²)}` for `n > 0`. -/
 theorem measure_le_le_sqrt_two_mul (hX : Measurable X) (hX0 : ∀ ω, 0 ≤ X ω) (hχ : 0 < χ)
     (hmom : ∀ m : ℕ, 1 ≤ m → ∫⁻ ω, ENNReal.ofReal (X ω ^ m) ∂P ≤
       ENNReal.ofReal (Nat.doubleFactorial (2 * m - 3) * χ ^ (2 * m - 1)))
@@ -270,7 +286,7 @@ theorem measure_le_le_sqrt_two_mul (hX : Measurable X) (hX0 : ∀ ω, 0 ≤ X ω
     rw [hs2, exp_neg, hrdef]
     field_simp
 
-/-- **SNB3, third bound.** `P(X ≥ n) ≤ (1 + χ⁻¹) e^{−n/(2χ²)}` for a probability measure. -/
+/-- **Third bound.** `P(X ≥ n) ≤ (1 + χ⁻¹) e^{−n/(2χ²)}` for a probability measure. -/
 theorem measure_le_le_one_add_inv_mul [IsProbabilityMeasure P] (hX : Measurable X)
     (hX0 : ∀ ω, 0 ≤ X ω) (hχ : 0 < χ)
     (hmom : ∀ m : ℕ, 1 ≤ m → ∫⁻ ω, ENNReal.ofReal (X ω ^ m) ∂P ≤
@@ -289,7 +305,7 @@ theorem measure_le_le_one_add_inv_mul [IsProbabilityMeasure P] (hX : Measurable 
   congr 2
   field_simp
 
-/-- **SNB3.** For every real `n > 0`,
+/-- **Tail bounds.** For every real `n > 0`,
 `P(X ≥ n) ≤ min{1, (√2 χ/n) e^{−n/(4χ²)}, (1 + χ⁻¹) e^{−n/(2χ²)}}`. -/
 theorem measure_le_le_min [IsProbabilityMeasure P] (hX : Measurable X) (hX0 : ∀ ω, 0 ≤ X ω)
     (hχ : 0 < χ)
@@ -306,7 +322,7 @@ theorem measure_le_le_min [IsProbabilityMeasure P] (hX : Measurable X) (hX0 : �
     · exact measure_le_le_sqrt_two_mul hX hX0 hχ hmom hn
     · exact measure_le_le_one_add_inv_mul hX hX0 hχ hmom n
 
-/-- **SNB3, last bound.** `P(X ≥ n) ≤ e^{−n/(4χ²)}` once `n ≥ 4χ² log(1 + χ⁻¹)`. -/
+/-- **Last bound.** `P(X ≥ n) ≤ e^{−n/(4χ²)}` once `n ≥ 4χ² log(1 + χ⁻¹)`. -/
 theorem measure_le_le_exp [IsProbabilityMeasure P] (hX : Measurable X) (hX0 : ∀ ω, 0 ≤ X ω)
     (hχ : 0 < χ)
     (hmom : ∀ m : ℕ, 1 ≤ m → ∫⁻ ω, ENNReal.ofReal (X ω ^ m) ∂P ≤
@@ -324,7 +340,7 @@ theorem measure_le_le_exp [IsProbabilityMeasure P] (hX : Measurable X) (hX0 : �
     _ = exp (-(n / (4 * χ ^ 2))) := by
         rw [← exp_add]; congr 1; field_simp; ring
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
 /-- The point mass `X = χ` with `χ ≥ 1` satisfies the moment hypothesis for every `m ≥ 1`. -/
 theorem dirac_moment_hyp {χ : ℝ} (hχ : 1 ≤ χ) (m : ℕ) (hm : 1 ≤ m) :

@@ -2,8 +2,7 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for issue 644 (Q-216), written on 2026-11-16 by PROVER-F. No upstream proof is
-copied and no definition is added.
+New proofs, written on 2026-11-16. No upstream proof is copied and no definition is added.
 -/
 module
 
@@ -314,11 +313,11 @@ end Balls
 
 /-! ### Lower semicontinuity of the threshold (468P) -/
 
-/-- **468P.** Let `G` be connected and locally finite on a countable type, and let every
-`G_n` be vertex-transitive and locally finite on a countable type. If for every `R` the
-closed balls of radius `R` about `o_n` in `G_n` are eventually isomorphic, as rooted graphs,
-to the closed ball of radius `R` about `o` in `G`, then for homogeneous nearest-neighbour
-percolation (the intensity profiles of the edge indicators),
+/-- **Lower semicontinuity of the threshold under local convergence.** Let `G` be connected and
+locally finite on a countable type, and let every `G_n` be vertex-transitive and locally finite on a
+countable type. If for every `R` the closed balls of radius `R` about `o_n` in `G_n` are eventually
+isomorphic, as rooted graphs, to the closed ball of radius `R` about `o` in `G`, then for
+homogeneous nearest-neighbour percolation (the intensity profiles of the edge indicators),
 `β_c(G) ≤ liminf_n β_c(G_n)`. -/
 theorem rootCriticalIntensity_le_liminf [Countable V] {W : ℕ → Type*} [∀ n, Countable (W n)]
     (G : SimpleGraph V) (Gs : ∀ n, SimpleGraph (W n)) (o : V) (os : ∀ n, W n)
@@ -351,7 +350,7 @@ theorem rootCriticalIntensity_le_liminf [Countable V] {W : ℕ → Type*} [∀ n
     (offDiag_rowSum_lt_top_of_summable _ (summable_indicator_edgeSet (hGsf n))) S' hoS' β
     hΦ).le
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
 section Witness
 
@@ -377,8 +376,8 @@ example (S : Finset (Fin 1 → ℤ)) (hoS : 0 ∈ S) (r : ℕ∞)
           ℝ≥0∞)) := by
   convert boundaryFlux_eq_of_ballIso SimpleGraph.Iso.refl (fun _ => rfl) S hoS hS β
 
-/-- 468P for the constant sequence `G_n = G = ℤ` (nearest-neighbour line, `zdGraph 1`):
-every hypothesis holds. -/
+/-- `rootCriticalIntensity_le_liminf` for the constant sequence `G_n = G = ℤ` (nearest-neighbour
+line, `zdGraph 1`): every hypothesis holds. -/
 example : rootCriticalIntensity ((zdGraph 1).edgeSet.indicator fun _ => (1 : ℝ≥0)) 0 ≤
     liminf (fun _ : ℕ => rootCriticalIntensity
       ((zdGraph 1).edgeSet.indicator fun _ => (1 : ℝ≥0)) (0 : Fin 1 → ℤ)) atTop :=

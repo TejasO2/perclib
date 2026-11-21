@@ -1,9 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs for issue 434 (Q-100), written on 2026-11-16 by PROVER-E: connection loss on
-deleting a vertex set (wiki integrated-susceptibility, tag 7902) and the lower bound for the
-boundary functional by the boundary susceptibility (wiki boundary-susceptibility, tag 67GX).
-No upstream proof is copied, no definition is added and no Input is introduced.
+New proofs, written on 2026-11-16: connection loss on deleting a vertex set (wiki
+integrated-susceptibility, tag 7902) and the lower bound for the boundary functional by the boundary
+susceptibility (wiki boundary-susceptibility, tag 67GX). No upstream proof is copied, no definition
+is added and no Input is introduced.
 -/
 module
 
@@ -100,7 +100,8 @@ theorem conn_subset_deleted_union (S : Set V) (y w : V) :
     refine Or.inr (mem_iUnion.2 ⟨⟨c, not_not.1 hcS⟩, ?_⟩)
     exact mem_disjointOccurrence_of_path p hp hc
 
-/-- **7902.** For `y, w ∉ S`, `τ(y,w) ≤ τ^S(y,w) + ∑_{c ∈ S} τ(y,c) τ(c,w)`. -/
+/-- **Connection loss on deleting a set.** For `y, w ∉ S`,
+`τ(y,w) ≤ τ^S(y,w) + ∑_{c ∈ S} τ(y,c) τ(c,w)`. -/
 theorem tau_le_deleted_add [Countable V] (q : Sym2 V → unitInterval) (S : Set V) (y w : V) :
     tau q y w ≤ law q {ω | ∃ hy : y ∈ Sᶜ, ∃ hw : w ∈ Sᶜ,
         ((openGraph ω).induce Sᶜ).Reachable ⟨y, hy⟩ ⟨w, hw⟩} +
@@ -240,7 +241,7 @@ theorem boundarySum_le_intensity [Countable V] (J : Sym2 V → ℝ≥0) (β : �
 
 /-- With off-diagonal row sums of `J` at most `1`, `φ_y ≤ χ_max` for `y ∈ S`. -/
 theorem boundaryRow_le_iSup_chi [Countable V] (J : Sym2 V → ℝ≥0) (β : ℝ≥0)
-    (hJ : ∀ u, ∑' v, (if v = u then 0 else (J s(u, v) : ℝ≥0∞)) ≤ 1) (S : Finset V)
+    (hJ : ∀ u, rowSum (fun e => (J e : ℝ≥0∞)) u ≤ 1) (S : Finset V)
     {y : V} (hy : y ∈ S) :
     ∑' x, (if x ∈ S then 0 else (J s(y, x) : ℝ≥0∞)) *
         ∑' w, law (intensityProfile J β) {ω | ∃ hx : x ∈ (S : Set V)ᶜ,
@@ -255,8 +256,8 @@ theorem boundaryRow_le_iSup_chi [Countable V] (J : Sym2 V → ℝ≥0) (β : ℝ
         · have hxy : x ≠ y := fun h => hx (h ▸ hy)
           rw [ite_eq_right hx, ite_eq_right hxy]
           exact mul_le_mul_right ((tsum_law_deleted_le_chi _ _ x).trans (le_iSup _ x)) _
-    _ = (∑' x, if x = y then 0 else (J s(y, x) : ℝ≥0∞)) *
-        ⨆ u, chi (intensityProfile J β) u := ENNReal.tsum_mul_right
+    _ = rowSum (fun e => (J e : ℝ≥0∞)) y *
+        ⨆ u, chi (intensityProfile J β) u := by rw [rowSum_def, ENNReal.tsum_mul_right]
     _ ≤ 1 * ⨆ u, chi (intensityProfile J β) u := mul_le_mul_left (hJ y) _
     _ = _ := one_mul _
 
@@ -292,13 +293,13 @@ theorem toReal_boundaryRow (hχ : (⨆ u, chi (intensityProfile J β) u) ≠ ⊤
   rw [ENNReal.toReal_mul, toReal_tsum_law_deleted]
   split_ifs <;> simp
 
-/-- **67GX, first inequality.** In the intensity family with off-diagonal row sums of `J` at
+/-- **First inequality.** In the intensity family with off-diagonal row sums of `J` at
 most `1` and `χ_max = ⨆ u, χ(u) < ∞`, for every finite `S`,
 `L(S)² / (β² χ_max Q(S)) ≤ Φ_β(S)`, where `L(S) = ∑_{u ∈ S} ∑_{w ∉ S} τ(u,w)`,
 `Q(S) = ∑_{u ∈ S} (∑_{v ∈ S} τ(u,v))²` and
 `Φ_β(S) = ∑_{v ∈ S} ∑_{z ∉ S} J(v,z) χ_{Sᶜ}(z)`. -/
 theorem boundarySum_sq_div_le
-    (hJ : ∀ u, ∑' v, (if v = u then 0 else (J s(u, v) : ℝ≥0∞)) ≤ 1)
+    (hJ : ∀ u, rowSum (fun e => (J e : ℝ≥0∞)) u ≤ 1)
     (hχ : (⨆ u, chi (intensityProfile J β) u) ≠ ⊤) :
     (∑ u ∈ S, ∑' w, if w ∈ S then 0 else (tau (intensityProfile J β) u w).toReal) ^ 2 /
         ((β : ℝ) ^ 2 * (⨆ u, chi (intensityProfile J β) u).toReal *
@@ -406,7 +407,7 @@ theorem toReal_chi_eq_add [Countable V] (q : Sym2 V → unitInterval) (u : V)
   congr 1
   exact tsum_congr fun w => by split_ifs <;> simp
 
-/-- **67GX, second inequality.** `(χ_min |S| - ∑_{u,v ∈ S} τ(u,v))₊ ≤ L(S)`, so the
+/-- **Second inequality.** `(χ_min |S| - ∑_{u,v ∈ S} τ(u,v))₊ ≤ L(S)`, so the
 positive-part square is at most `L(S)²` over any nonnegative denominator. -/
 theorem posPart_sq_div_le_boundarySum_sq_div (q : Sym2 V → unitInterval)
     (hχ : (⨆ u, chi q u) ≠ ⊤) {D : ℝ} (hD : 0 ≤ D) :
@@ -432,11 +433,11 @@ theorem posPart_sq_div_le_boundarySum_sq_div (q : Sym2 V → unitInterval)
   exact div_le_div_of_nonneg_right
     (pow_le_pow_left₀ (le_max_right _ _) (max_le hle hL0) 2) hD
 
-/-- **67GX.** In the intensity family with off-diagonal row sums of `J` at most `1` and
-`χ_max < ∞`, for every finite `S`,
+/-- **Boundary susceptibility bound.** In the intensity family with off-diagonal row sums of `J` at
+most `1` and `χ_max < ∞`, for every finite `S`,
 `Φ_β(S) ≥ L(S)² / (β² χ_max Q(S)) ≥ (χ_min |S| - ∑_{u,v ∈ S} τ(u,v))₊² / (β² χ_max Q(S))`. -/
 theorem boundary_susceptibility_bound
-    (hJ : ∀ u, ∑' v, (if v = u then 0 else (J s(u, v) : ℝ≥0∞)) ≤ 1)
+    (hJ : ∀ u, rowSum (fun e => (J e : ℝ≥0∞)) u ≤ 1)
     (hχ : (⨆ u, chi (intensityProfile J β) u) ≠ ⊤) :
     (∑ u ∈ S, ∑' w, if w ∈ S then 0 else (tau (intensityProfile J β) u w).toReal) ^ 2 /
         ((β : ℝ) ^ 2 * (⨆ u, chi (intensityProfile J β) u).toReal *
@@ -459,14 +460,15 @@ end Real
 
 /-! ### Non-vacuity -/
 
-/-- 7902 with `S = ∅`: deleting nothing loses nothing, and both bounds are equalities. -/
+/-- `tau_le_deleted_add` with `S = ∅`: deleting nothing loses nothing, and both bounds are
+equalities. -/
 example [Countable V] (q : Sym2 V → unitInterval) (y w : V) :
     law q {ω | ∃ hy : y ∈ (∅ : Set V)ᶜ, ∃ hw : w ∈ (∅ : Set V)ᶜ,
       ((openGraph ω).induce (∅ : Set V)ᶜ).Reachable ⟨y, hy⟩ ⟨w, hw⟩} = tau q y w := by
   refine le_antisymm (law_deleted_le_tau q ∅ y w) ?_
   simpa using tau_le_deleted_add q ∅ y w
 
-/-- 7902 with `S = {1}` on the path `0 - 1 - 2`. -/
+/-- `tau_le_deleted_add` with `S = {1}` on the path `0 - 1 - 2`. -/
 example (q : Sym2 (Fin 3) → unitInterval) :
     tau q 0 2 ≤ law q {ω | ∃ hy : (0 : Fin 3) ∈ ({1} : Set (Fin 3))ᶜ,
         ∃ hw : (2 : Fin 3) ∈ ({1} : Set (Fin 3))ᶜ,
@@ -474,12 +476,12 @@ example (q : Sym2 (Fin 3) → unitInterval) :
       ∑' c : ({1} : Set (Fin 3)), tau q 0 c * tau q c 2 :=
   tau_le_deleted_add q {1} 0 2
 
-/-- On two vertices with `J = 1` on the one pair, the hypotheses of 67GX hold at every
-`β`: the row sums are `1` and every susceptibility is at most `2`. -/
+/-- On two vertices with `J = 1` on the one pair, the hypotheses of `boundary_susceptibility_bound`
+hold at every `β`: the row sums are `1` and every susceptibility is at most `2`. -/
 example (β : ℝ≥0) :=
   boundary_susceptibility_bound (fun e : Sym2 Bool => if e = s(false, true) then 1 else 0) β
     {false}
-    (fun u => by cases u <;> simp [tsum_fintype, Sym2.eq_swap])
+    (fun u => by cases u <;> simp [rowSum_def, tsum_fintype, Sym2.eq_swap])
     (by
       refine ne_top_of_le_ne_top (b := 2) ENNReal.ofNat_ne_top (iSup_le fun u => ?_)
       rw [chi_eq_tsum_tau, tsum_fintype, Fintype.sum_bool]

@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-92 correspondence wrappers assembled from the existing finite-product,
-ordered-coupling and Harris APIs. No upstream proof is copied.
+Correspondence wrappers assembled from the existing finite-product, ordered-coupling and Harris
+APIs. No upstream proof is copied.
 -/
 module
 
@@ -12,6 +12,21 @@ public import PercLib.Probability.FiniteContinuity
 public import PercLib.Probability.Harris
 public import PercLib.Probability.Tags.ProductModel
 public import PercLib.Probability.TotalVariation
+
+/-!
+# Profile continuity and association: correspondence
+
+Wiki correspondence for finite-profile continuity, the ordered coupling, and Harris-type
+association.
+
+## Main results
+
+* `finite_restrictions_and_weighted_expectations`
+* `continuous_finite_observations`
+* `ordered_product_coupling_and_comparison`
+* `ordered_coordinate_association`
+* `ordered_product_association`
+-/
 
 @[expose] public section
 noncomputable section

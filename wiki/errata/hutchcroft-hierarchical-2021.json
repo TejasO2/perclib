@@ -93,13 +93,10 @@
       "locator": "arXiv:2103.17013v1, Section 2.4, Proposition 2.12, its second conclusion and final boundary-flux estimate.",
       "claim": "The internal critical susceptibility is bounded below by the geometric scale with coefficient one.",
       "problem": "FIXER gives a positive radial counterexample with $d=1$, $L=2$, $\\alpha=1/2$, first-shell rate $2^{-30}$ and rate $2^{-3\\ell/2}$ on shells $\\ell\\geq2$. FIXER’s estimate $\\beta_c<2^{26}$ gives $\\mu_1(\\beta_c)\\leq17/16<\\sqrt2$. This refutes the coefficient-one conclusion, not the comparability theorem.",
-      "correction": "For $0<\\beta_c<\\infty$, retain $\\mu_n(\\beta_c)\\geq[(L^\\alpha-1)/(C\\beta_c)]L^{\\alpha n}$. The zero kernel shows that an upper envelope alone does not ensure finite critical intensity. FF30 supplies finiteness under a positive lower envelope; 7YNX retains the boundary-flux coefficient. The comparability statements W498, V4QQ and YWTU remain unchanged.",
+      "correction": "For $0<\\beta_c<\\infty$, retain $\\mu_n(\\beta_c)\\geq[(L^\\alpha-1)/(C\\beta_c)]L^{\\alpha n}$. The zero kernel shows that an upper envelope alone does not ensure finite critical intensity. FF30 supplies finiteness under a positive lower envelope; 7YNX retains the boundary-flux coefficient. The comparability statements W498, V4QQ and YWTU remain unchanged. Corollary 2.3 bounds $\\beta_c$ above in terms of $d,L,\\alpha,c$, so the retained coefficient is bounded below by a constant depending only on $d,L,\\alpha,c,C$, as Theorem 1.1 requires.",
       "tags": [
         "FF30",
-        "7YNX",
-        "W498",
-        "V4QQ",
-        "YWTU"
+        "7YNX"
       ],
       "issues": [],
       "leanImpact": "Retain the explicit coefficient and the finite positive critical-intensity hypotheses in the lower-bound step of 7YNX. FF30 supplies finiteness under a positive lower envelope; an upper envelope alone is insufficient. The comparability targets W498, V4QQ and YWTU need no change, but proving a coefficient-one intermediate statement would not be a faithful route to them.",

@@ -59,7 +59,7 @@ support walks from `x` have length at least `k` is at most `m^k/(1-m)`, the poin
 and the two-point function vanishes off the support component. -/
 @[tag "VYCM"]
 theorem tau_walk_length_decay [Countable V] (q : Sym2 V → unitInterval) (m : ℝ≥0∞)
-    (hrow : ∀ v, (∑' w, if w = v then 0 else (unitInterval.toNNReal (q s(v,w)) : ℝ≥0∞)) ≤ m)
+    (hrow : ∀ v, rowSum (fun e => unitInterval.toENNReal (q e)) v ≤ m)
     (hm : m < 1) (x : V) :
     (∀ k : ℕ, ∑' y, (if ∀ p : (SimpleGraph.fromEdgeSet {e | 0 < q e}).Walk x y, k ≤ p.length
       then tau q x y else 0) ≤ m ^ k * (1 - m)⁻¹) ∧

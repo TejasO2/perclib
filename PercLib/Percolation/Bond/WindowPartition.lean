@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written for package Q-82 (issue 389, supports T-6), on the D-2 interface,
-using mathlib's `Finset.sum_comp`. No source text or code is copied.
+New proofs, on the bond interface, using mathlib's `Finset.sum_comp`. No source text or
+code is copied.
 -/
 module
 
@@ -55,7 +55,7 @@ theorem filter_cluster_eq_iff (Λ : Finset V) (ω : Config V) {x a : V} (ha : a 
       (cluster_eq_iff_conn ω a x).2 ((mem_cluster_iff ω x a).1 h).symm
     rw [hc]
 
-/-- **Window partition** (wiki tag RU6O), item 1:
+/-- **Window partition**, item 1:
 `∑_{x ∈ Λ} |K(x) ∩ Λ| = ∑_{D ∈ 𝒞_Λ} |D|²`. -/
 theorem sum_clusterIntersection_eq_sum_sq (Λ : Finset V) (ω : Config V) :
     ∑ x ∈ Λ, clusterIntersection Λ ω x =
@@ -107,7 +107,7 @@ theorem measurable_clusterIntersection [Countable V] (Λ : Finset V) (x : V) :
   rw [h]
   exact (measurableSet_cluster_tail x Λ n).diff (measurableSet_cluster_tail x Λ (n + 1))
 
-/-- **Window partition** (wiki tag RU6O), item 3: on a countable vertex type, for every
+/-- **Window partition**, item 3: on a countable vertex type, for every
 profile, `∑_{x ∈ Λ} E|K(x) ∩ Λ| = E ∑_{D ∈ 𝒞_Λ} |D|²`. -/
 theorem sum_lintegral_clusterIntersection_eq [Countable V] (q : Sym2 V → unitInterval)
     (Λ : Finset V) :
@@ -119,7 +119,7 @@ theorem sum_lintegral_clusterIntersection_eq [Countable V] (q : Sym2 V → unitI
   refine lintegral_congr fun ω => ?_
   rw [← sum_clusterIntersection_eq_sum_sq, Nat.cast_sum]
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
 /-- A singleton window: the sum is one. -/
 example (ω : Config Unit) :

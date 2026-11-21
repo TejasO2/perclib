@@ -8,6 +8,17 @@ module
 public import PercLib.Meta.Tag
 public import PercLib.Analysis.LogExponent
 
+/-!
+# Critical exponents: correspondence
+
+Wiki correspondence for the hierarchy of asymptotic notions, from
+`PercLib/Analysis/LogExponent.lean`.
+
+## Main results
+
+* `log_exponent_hierarchy`
+-/
+
 @[expose] public section
 noncomputable section
 

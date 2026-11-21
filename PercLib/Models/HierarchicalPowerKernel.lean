@@ -134,7 +134,7 @@ theorem rowSum_le_of_powerLaw [NeZero L] (hL : 2 ≤ L) {α C : ℝ} (hα : 0 < 
     (hJ : ∀ u v, u ≠ v → (J s(u, v) : ℝ) ≤
       C * (L : ℝ) ^ (-(((d : ℝ) + α) * (((v - u).support.sup Nat.succ : ℕ) : ℝ))))
     (u : ℕ →₀ (Fin d → ZMod L)) :
-    (∑' v, if v = u then 0 else (J s(u, v) : ℝ≥0∞)) ≤
+    rowSum (fun e => (J e : ℝ≥0∞)) u ≤
       ENNReal.ofReal (C * (1 - (L : ℝ) ^ (-(d : ℝ))) / ((L : ℝ) ^ α - 1)) := by
   have h := tsum_level_sub_gt_le_of_powerLaw hL hα J hJ 0 u
   simp only [Nat.cast_zero, mul_zero, neg_zero, Real.rpow_zero, mul_one] at h
@@ -155,12 +155,12 @@ theorem summable_of_powerLaw [NeZero L] (hL : 2 ≤ L) {α C : ℝ} (hα : 0 < �
   intro u
   refine NNReal.summable_coe.2 (ENNReal.tsum_coe_ne_top_iff_summable.1 ?_)
   have hsplit : (∑' v, (J s(u, v) : ℝ≥0∞)) =
-      (J s(u, u) : ℝ≥0∞) + ∑' v, if v = u then 0 else (J s(u, v) : ℝ≥0∞) := by
+      (J s(u, u) : ℝ≥0∞) + rowSum (fun e => (J e : ℝ≥0∞)) u := by
     calc (∑' v, (J s(u, v) : ℝ≥0∞))
         = ∑' v, ((if v = u then (J s(u, u) : ℝ≥0∞) else 0) +
             if v = u then 0 else (J s(u, v) : ℝ≥0∞)) :=
           tsum_congr fun v => by by_cases hv : v = u <;> simp [hv]
-      _ = _ := by rw [ENNReal.tsum_add, tsum_ite_eq]
+      _ = _ := by rw [ENNReal.tsum_add, tsum_ite_eq, rowSum_def]
   rw [hsplit]
   exact ENNReal.add_ne_top.2 ⟨ENNReal.coe_ne_top,
     ne_top_of_le_ne_top ENNReal.ofReal_ne_top (rowSum_le_of_powerLaw hL hα J hJ u)⟩
@@ -208,7 +208,7 @@ theorem ofReal_le_rootCriticalIntensity_of_powerLaw [NeZero L] (hL : 2 ≤ L) {�
   rcases le_or_gt K 0 with hK | hK
   · rw [ENNReal.ofReal_of_nonpos (inv_nonpos.2 hK)]
     exact zero_le
-  · have hrow : ∀ v, (∑' w, if w = v then 0 else (J s(v, w) : ℝ≥0∞)) ≤
+  · have hrow : ∀ v, rowSum (fun e => (J e : ℝ≥0∞)) v ≤
         ((K.toNNReal : ℝ≥0) : ℝ≥0∞) := fun v => rowSum_le_of_powerLaw hL hα J hJ v
     have h := inv_le_rootCriticalIntensity J K.toNNReal (fun v => by convert hrow v) x
     rwa [show ((K.toNNReal : ℝ≥0) : ℝ≥0∞) = ENNReal.ofReal K from rfl,
@@ -313,7 +313,7 @@ theorem le_card_mul_lintegral_clusterIntersection_levelBall [NeZero L]
 
 end PercLib.Models
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 section Witnesses
 
 open PercLib.Models

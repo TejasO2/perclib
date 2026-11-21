@@ -8,6 +8,16 @@ module
 public import PercLib.Meta.Tag
 public import PercLib.Models.LongRange.FiniteSusceptibility
 
+/-!
+# Sharpness on `ℤ^d`: correspondence
+
+Wiki correspondence for sharpness of translation-invariant long-range percolation on `ℤ^d`.
+
+## Main results
+
+* `sharpness_translationInvariant_int`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory PercLib.Percolation.Bond

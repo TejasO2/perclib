@@ -2,8 +2,7 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for issue 641 (Q-213, item 3), written on 2026-11-16 by PROVER-F. No upstream
-proof is copied and no definition is added.
+New proofs, written on 2026-11-16. No upstream proof is copied and no definition is added.
 -/
 module
 
@@ -186,7 +185,7 @@ allowed). -/
 @[tag "F4RR"]
 theorem lintegral_encard_union_mul_le [Countable V] (q₀ s : Sym2 V → I) (o : V)
     {ε χ : ℝ≥0∞}
-    (hε : ∀ u, (∑' w, if w = u then 0 else (unitInterval.toNNReal (s s(u, w)) : ℝ≥0∞)) ≤ ε)
+    (hε : ∀ u, rowSum (fun e => unitInterval.toENNReal (s e)) u ≤ ε)
     (hχ : ∀ v, chi (fun e => σ (σ (q₀ e) * σ (s e))) v ≤ χ)
     (f : Set V → ℝ≥0∞) (hf : Measurable fun ω : Config V => f (cluster ω o)) :
     ∫⁻ x, ((cluster (x.1 ∪ x.2) o).encard : ℝ≥0∞) * f (cluster x.1 o)
@@ -412,9 +411,9 @@ theorem lintegral_encard_union_mul_le [Countable V] (q₀ s : Sym2 V → I) (o :
         exact tsum_law_cluster_eq_finset_mul_le_set q₀ o (fun T => (T.encard : ℝ≥0∞) * f T)
     _ = _ := by ring
 
-/-! ### Non-vacuity witness (D-5) -/
+/-! ### Non-vacuity witness -/
 
-/-- **D-5 witness.** On `Bool` with no first layer (`q₀ = 0`) and a fully open second layer,
+/-- **Non-vacuity witness.** On `Bool` with no first layer (`q₀ = 0`) and a fully open second layer,
 the hypotheses of `lintegral_encard_union_mul_le` hold with `ε = 1` (one pair per row) and
 `χ₊ = 2` (two vertices), for every `f`. -/
 example (f : Set Bool → ℝ≥0∞) :
@@ -424,7 +423,7 @@ example (f : Set Bool → ℝ≥0∞) :
         ∂(law (fun _ : Sym2 Bool => (0 : I))) := by
   refine lintegral_encard_union_mul_le _ _ false ?_ ?_ f (measurable_of_countable _)
   · intro u
-    rw [tsum_fintype]
+    rw [rowSum_toENNReal, tsum_fintype]
     cases u <;> simp [Fintype.univ_bool]
   · intro v
     refine le_trans (lintegral_mono (g := fun _ => (2 : ℝ≥0∞)) fun ω => ?_) (by simp)

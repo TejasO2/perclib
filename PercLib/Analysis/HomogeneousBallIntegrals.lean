@@ -1,19 +1,17 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
 
-Ported for package Q-152 (issue 519) from pull request 488: source repository
-`yujinhkim/lrp`, branch `critical-lrp-1`, commit `d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`,
-files `PercLib/CriticalLRP/LevyAnalysis/Radial.lean` (blob `bde47c1551`),
-`PercLib/CriticalLRP/LevyAnalysis/Rpow.lean` (blob `bc4e3f889a`) and
-`PercLib/CriticalLRP/LevyAnalysis/Homogeneous.lean` (blob `2858fcb2a7`), contributed by
-`yujinhkim`; licence Apache-2.0 as declared in that commit's file headers and
-`third_party/critical-lrp/NOTICE.md`. Upstream origin
-`yujinhkim/Critical-Long-range-percolation` at `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf`
-(not independently verified). Formalization derived from T. Hutchcroft, "Critical long-range
-percolation I: High effective dimension", arXiv:2508.18807v1, Section I.5.2.
-Changes: the three files are merged into one, focused imports, no disabled linters or
-`autoImplicit`, namespace `PercLib.Analysis`, and the helper `measurable_rpow_const'` replaced
-by mathlib's `Measurable.pow_const`.
+Ported from the source repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
+`d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, files `PercLib/CriticalLRP/LevyAnalysis/Radial.lean`
+(blob `bde47c1551`), `PercLib/CriticalLRP/LevyAnalysis/Rpow.lean` (blob `bc4e3f889a`) and
+`PercLib/CriticalLRP/LevyAnalysis/Homogeneous.lean` (blob `2858fcb2a7`), contributed by `yujinhkim`;
+licence Apache-2.0 as declared in that commit's file headers and
+`third_party/critical-lrp/NOTICE.md`. Upstream origin `yujinhkim/Critical-Long-range-percolation` at
+`3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf` (not independently verified). Formalization derived from
+T. Hutchcroft, "Critical long-range percolation I: High effective dimension", arXiv:2508.18807v1,
+Section I.5.2. Changes: the three files are merged into one, focused imports, no disabled linters or
+`autoImplicit`, namespace `PercLib.Analysis`, and the helper `measurable_rpow_const'` replaced by
+mathlib's `Measurable.pow_const`.
 -/
 module
 
@@ -368,9 +366,9 @@ theorem lintegral_ball_hom_rpow (μ : Measure E) [μ.IsAddHaarMeasure] [Nontrivi
     ← ENNReal.ofReal_mul hs.le, ← add_mul,
     ← ENNReal.ofReal_add (by positivity) hb, hreal]
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
-/-- D-5: `E = ℝ`, `P = 1` (`k = 0`), `s = 1/2`: the hypotheses hold, and
+/-- Non-vacuity: `E = ℝ`, `P = 1` (`k = 0`), `s = 1/2`: the hypotheses hold, and
 `∫⁻_{(-R, R)} |x|^{-1/2} = 2 R^{1/2} · vol(ball 0 1)`. -/
 example {R : ℝ} (hR : 0 < R) :
     ∫⁻ x in ball (0 : ℝ) R, ENNReal.ofReal ((fun _ : ℝ => (1 : ℝ)) x * ‖x‖ ^ (-(1 / 2 : ℝ)))

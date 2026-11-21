@@ -1,20 +1,19 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-162 (issue 529): Karamata's integral theorem under Potter bounds, Lemma I.2.10 of
-T. Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1, p. 26 (citing Feller,
-Theorem VIII.9.1).
+Karamata's integral theorem under Potter bounds, Lemma I.2.10 of T. Hutchcroft, *Critical long-range
+percolation I*, arXiv:2508.18807v1, p. 26 (citing Feller, Theorem VIII.9.1).
 
-Ported from pull request 488 (contributor `yujinhkim`): repository `yujinhkim/lrp`, branch
+Ported from the work of contributor `yujinhkim`: repository `yujinhkim/lrp`, branch
 `critical-lrp-1`, commit `d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, files
 `PercLib/CriticalLRP/Analysis/Karamata.lean` and `PercLib/CriticalLRP/Analysis/KaramataMain.lean`;
 licence Apache-2.0 as declared in that commit's file headers and
 `third_party/critical-lrp/NOTICE.md`; upstream `yujinhkim/Critical-Long-range-percolation` at
 `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf`. Modified: the two files are merged; the source's
-definition `HasPotterBounds f α` is written out as the explicit hypothesis it abbreviates
-(issue 529; Potter's bounds, Bingham–Goldie–Teugels Theorem 1.5.6, are removed by Q-164);
-`RegularlyVaryingAtTop f α` becomes `RegularlyVarying α f` of
-`PercLib/Analysis/RegularVariation/Defs.lean`; `import Mathlib`, `autoImplicit` and disabled
-linters are removed.
+definition `HasPotterBounds f α` is written out as the explicit hypothesis it abbreviates (Potter's
+bounds, Bingham–Goldie–Teugels Theorem 1.5.6, are proved in
+`PercLib/Analysis/RegularVariation/UniformConvergence.lean`); `RegularlyVaryingAtTop f α` becomes
+`RegularlyVarying α f` of `PercLib/Analysis/RegularVariation/Defs.lean`; `import Mathlib`,
+`autoImplicit` and disabled linters are removed.
 -/
 module
 
@@ -524,7 +523,7 @@ theorem lemma_I_2_10 {f : ℝ → ℝ} {α : ℝ} (hα : -1 < α)
     rw [Real.dist_eq]
     exact hN n hn⟩
 
-/-! ### Witness (D-5): the constant function `1` (index `0`) -/
+/-! ### Witness: the constant function `1` (index `0`) -/
 
 example : Tendsto (fun r => (∫ s in (1 : ℝ)..r, (fun _ : ℝ => (1 : ℝ)) s) / (r * 1)) atTop
     (𝓝 (1 / (0 + 1))) :=

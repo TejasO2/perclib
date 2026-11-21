@@ -2,7 +2,7 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New for this project (issue 121, Q-5). No upstream proof is copied.
+New for this project. No upstream proof is copied.
 -/
 module
 
@@ -155,9 +155,10 @@ theorem toNNReal_le_tau (q : Sym2 V → unitInterval) {x y : V} (hxy : x ≠ y) 
 open Classical in
 /-- The susceptibility is at least one plus the row sum of the edge probabilities. -/
 theorem one_add_rowSum_le_chi [Countable V] (q : Sym2 V → unitInterval) (x : V) :
-    1 + (∑' y, if y = x then 0 else (unitInterval.toNNReal (q s(x, y)) : ℝ≥0∞)) ≤
+    1 + rowSum (fun e => unitInterval.toENNReal (q e)) x ≤
       chi q x := by
-  rw [chi_eq_tsum_tau, ENNReal.tsum_eq_add_tsum_ite (f := fun y => tau q x y) x, tau_self]
+  rw [rowSum_toENNReal, chi_eq_tsum_tau,
+    ENNReal.tsum_eq_add_tsum_ite (f := fun y => tau q x y) x, tau_self]
   gcongr with y
   split_ifs with hy
   · exact le_rfl

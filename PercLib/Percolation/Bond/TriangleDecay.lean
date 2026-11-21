@@ -1,8 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written for package Q-113 (issue 447), on the D-2 interface, from the positive
-semidefiniteness of the connection kernel (`ConnectionKernel.lean`). The statements follow
-the wiki tag 96A2 (connection kernels). No source text or code is copied.
+New proofs, on the bond interface, from the positive semidefiniteness of the connection
+kernel (`ConnectionKernel.lean`). The statements follow the wiki tag 96A2 (connection kernels). No
+source text or code is copied.
 -/
 module
 
@@ -227,7 +227,7 @@ theorem tendsto_tau_sq_cofinite [Countable V] (q : Sym2 V → unitInterval)
 
 /-! ### Item 1: decay of the open triangle -/
 
-/-- **96A2, item 1.** If `D = ⨆ x, Δₓ < ⊤`, then for every `o`, `T³(o,x) → 0` as `x` leaves
+/-- **Item 1.** If `D = ⨆ x, Δₓ < ⊤`, then for every `o`, `T³(o,x) → 0` as `x` leaves
 finite sets. -/
 theorem tendsto_triangle_cofinite [Countable V] (q : Sym2 V → unitInterval)
     (hD : (⨆ x, ∑' u, ∑' v, tau q x u * tau q u v * tau q v x) < ⊤) (o : V) :
@@ -287,7 +287,7 @@ theorem tendsto_triangle_cofinite [Countable V] (q : Sym2 V → unitInterval)
     _ ≤ η + η := by gcongr
     _ = ε := ENNReal.add_halves ε
 
-/-- **96A2, item 1, finite-set form.** If `D = ⨆ x, Δₓ < ⊤`, then for every `o` and `ε > 0`
+/-- **Item 1, finite-set form.** If `D = ⨆ x, Δₓ < ⊤`, then for every `o` and `ε > 0`
 there is a finite `E` with `T³(o,x) < ε` for every `x ∉ E`. -/
 theorem exists_finset_triangle_lt [Countable V] (q : Sym2 V → unitInterval)
     (hD : (⨆ x, ∑' u, ∑' v, tau q x u * tau q u v * tau q v x) < ⊤) (o : V) {ε : ℝ≥0∞}
@@ -312,7 +312,7 @@ theorem triangle_map_eq [Countable V] (q : Sym2 V → unitInterval) (σ : V ≃ 
   rw [← σ.tsum_eq]
   exact tsum_congr fun v => by rw [hT, hT, hT]
 
-/-- **96A2, item 2.** Suppose bijections of `V` preserving `q` and a function `d : V → V → ℝ`
+/-- **Item 2.** Suppose bijections of `V` preserving `q` and a function `d : V → V → ℝ`
 act transitively, and `Δ_o < ⊤`. Then `⨆_{d(u,v) ≥ r} T³(u,v) → 0` as `r → ∞` (the empty
 supremum is `0`). -/
 theorem tendsto_iSup_triangle [Countable V] (q : Sym2 V → unitInterval) (d : V → V → ℝ)
@@ -343,9 +343,9 @@ theorem tendsto_iSup_triangle [Countable V] (q : Sym2 V → unitInterval) (d : V
   have h3 := le_abs_self (d o (σ v))
   linarith
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
-/-- D-5, item 1 on a finite vertex type: `D < ⊤` holds since every `Δₓ ≤ |V|²`. -/
+/-- Non-vacuity, item 1 on a finite vertex type: `D < ⊤` holds since every `Δₓ ≤ |V|²`. -/
 example (q : Sym2 Bool → unitInterval) (o : Bool) {ε : ℝ≥0∞} (hε : 0 < ε) :
     ∃ E : Finset Bool, ∀ x ∉ E, ∑' u, ∑' v, tau q o u * tau q u v * tau q v x < ε := by
   refine exists_finset_triangle_lt q (lt_of_le_of_lt (iSup_le fun x => ?_)
@@ -357,7 +357,7 @@ example (q : Sym2 Bool → unitInterval) (o : Bool) {ε : ℝ≥0∞} (hε : 0 <
             _ = 1 := by ring
     _ = 4 := by simp [tsum_fintype]; norm_num
 
-/-- D-5, item 2 on `ℤ` with `q = p < 1` on nearest-neighbour pairs (and `0` elsewhere),
+/-- Non-vacuity, item 2 on `ℤ` with `q = p < 1` on nearest-neighbour pairs (and `0` elsewhere),
 `d(a,b) = |b - a|`, transitive by translations; `Δ₀ ≤ χ² < ⊤`. -/
 example (p : unitInterval) (hp : p < 1) :
     ∃ q : Sym2 ℤ → unitInterval, (∀ a b, a ≠ b → q s(a, b) = if |b - a| = 1 then p else 0) ∧

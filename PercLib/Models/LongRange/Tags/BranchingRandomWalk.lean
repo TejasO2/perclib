@@ -8,6 +8,16 @@ module
 public import PercLib.Meta.Tag
 public import PercLib.Models.LongRange.FourierSymbol
 
+/-!
+# Branching random walk: correspondence
+
+Wiki correspondence for the Fourier symbol of a lazy power-law step distribution.
+
+## Main results
+
+* `fourierSymbol_properties`
+-/
+
 @[expose] public section
 noncomputable section
 open Real
