@@ -20,7 +20,7 @@ test('migration preserves all twelve articles, contexts, section titles, prose, 
   const result = await checkArticles();
   const original = result.articles.filter(a => Object.hasOwn(result.baseline.articles, a.id));
   assert.equal(original.length, 12);
-  assert.equal(assertionsIn(original).length, 65);
+  assert.equal(assertionsIn(original).length, 66);
 });
 
 test('duplicate assertion across articles is rejected', () => {

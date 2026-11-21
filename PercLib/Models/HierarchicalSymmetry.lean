@@ -215,10 +215,8 @@ bijection mapping `S` onto `T`. -/
 theorem law_localConn_eq_of_image [Countable (ℕ →₀ A)] (J : Sym2 (ℕ →₀ A) → ℝ≥0)
     (φ : (ℕ →₀ A) ≃ (ℕ →₀ A)) (hφ : ∀ e, J (Sym2.map φ e) = J e) (β : ℝ≥0)
     {S T : Set (ℕ →₀ A)} (hST : ∀ v, v ∈ T ↔ φ.symm v ∈ S) (a b : ℕ →₀ A) :
-    law (intensityProfile J β) {ω | ∃ ha : φ a ∈ T, ∃ hb : φ b ∈ T,
-        ((openGraph ω).induce T).Reachable ⟨φ a, ha⟩ ⟨φ b, hb⟩} =
-      law (intensityProfile J β) {ω | ∃ ha : a ∈ S, ∃ hb : b ∈ S,
-        ((openGraph ω).induce S).Reachable ⟨a, ha⟩ ⟨b, hb⟩} := by
+    law (intensityProfile J β) (localConn T (φ a) (φ b)) =
+      law (intensityProfile J β) (localConn S a b) := by
   refine le_antisymm (law_localConn_image_le J φ hφ β (fun v hv => (hST v).1 hv) a b) ?_
   have hφ' : ∀ e, J (Sym2.map φ.symm e) = J e := fun e => by
     rw [← hφ (Sym2.map φ.symm e), Sym2.map_map]
@@ -268,14 +266,9 @@ theorem map_encard_cluster_eq_of_radial [Countable A] (β : ℝ≥0) (x : ℕ �
 internal connection in `B(x + g, n)`. -/
 theorem law_localConn_ball_add_right_of_radial [Countable A] (β : ℝ≥0) (g x a b : ℕ →₀ A)
     (n : ℕ) :
-    law (intensityProfile J β) {ω | ∃ ha : a + g ∈ {c | (c - (x + g)).support.sup Nat.succ ≤ n},
-        ∃ hb : b + g ∈ {c | (c - (x + g)).support.sup Nat.succ ≤ n},
-        ((openGraph ω).induce {c | (c - (x + g)).support.sup Nat.succ ≤ n}).Reachable
-          ⟨a + g, ha⟩ ⟨b + g, hb⟩} =
-      law (intensityProfile J β) {ω | ∃ ha : a ∈ {c | (c - x).support.sup Nat.succ ≤ n},
-        ∃ hb : b ∈ {c | (c - x).support.sup Nat.succ ≤ n},
-        ((openGraph ω).induce {c | (c - x).support.sup Nat.succ ≤ n}).Reachable
-          ⟨a, ha⟩ ⟨b, hb⟩} :=
+    law (intensityProfile J β) (localConn {c | (c - (x + g)).support.sup Nat.succ ≤ n}
+      (a + g) (b + g)) =
+      law (intensityProfile J β) (localConn {c | (c - x).support.sup Nat.succ ≤ n} a b) :=
   law_localConn_eq_of_image J (Equiv.addRight g)
     (radial_map_eq_of_levelIsometry J f hJ _ (level_addRight g)) β
     (fun v => by
@@ -297,17 +290,9 @@ around `x` (which contains both) depends only on `h (y - x)`. -/
 theorem law_localConn_ball_eq_of_level_eq [Countable A] (β : ℝ≥0) {x y x' y' : ℕ →₀ A}
     (hxy : (y - x).support.sup Nat.succ = (y' - x').support.sup Nat.succ) :
     law (intensityProfile J β)
-        {ω | ∃ ha : x ∈ {c | (c - x).support.sup Nat.succ ≤ (y - x).support.sup Nat.succ},
-          ∃ hb : y ∈ {c | (c - x).support.sup Nat.succ ≤ (y - x).support.sup Nat.succ},
-          ((openGraph ω).induce
-            {c | (c - x).support.sup Nat.succ ≤ (y - x).support.sup Nat.succ}).Reachable
-            ⟨x, ha⟩ ⟨y, hb⟩} =
+        (localConn {c | (c - x).support.sup Nat.succ ≤ (y - x).support.sup Nat.succ} x y) =
       law (intensityProfile J β)
-        {ω | ∃ ha : x' ∈ {c | (c - x').support.sup Nat.succ ≤ (y' - x').support.sup Nat.succ},
-          ∃ hb : y' ∈ {c | (c - x').support.sup Nat.succ ≤ (y' - x').support.sup Nat.succ},
-          ((openGraph ω).induce
-            {c | (c - x').support.sup Nat.succ ≤ (y' - x').support.sup Nat.succ}).Reachable
-            ⟨x', ha⟩ ⟨y', hb⟩} := by
+        (localConn {c | (c - x').support.sup Nat.succ ≤ (y' - x').support.sup Nat.succ} x' y') := by
   obtain ⟨φ, hφ, hx, hy⟩ := exists_levelIsometry x y x' y' hxy
   have h := law_localConn_eq_of_image J φ (radial_map_eq_of_levelIsometry J f hJ φ hφ) β
     (S := {c | (c - x).support.sup Nat.succ ≤ (y - x).support.sup Nat.succ})
