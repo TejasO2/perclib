@@ -1012,7 +1012,7 @@ theorem one_sub_fourierSymbol_asymp_of_two_lt (hd : 1 ≤ d) {p : (Fin d → ℤ
 
 /-! ### Non-vacuity witnesses -/
 
-/-- The witness of the issue: on `ℤ`, `p(0) = 1/2` and `p(x) = c₀ |x|^{-2}` with
+/-- Non-vacuity witness: on `ℤ`, `p(0) = 1/2` and `p(x) = c₀ |x|^{-2}` with
 `c₀ = 3/(2π²)`, so that the masses sum to one (`∑_{x ≠ 0} x^{-2} = π²/3`). -/
 theorem hasSum_lazy_inverse_square :
     HasSum (fun x : Fin 1 → ℤ => if x = 0 then (1 / 2 : ℝ) else

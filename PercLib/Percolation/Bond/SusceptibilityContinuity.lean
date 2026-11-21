@@ -85,7 +85,7 @@ theorem tendsto_exteriorRow_zero (q : Sym2 V → unitInterval) (u : V)
 
 /-- **`⇒` direction.** If the off-diagonal rows of `q` are bounded by `Q < ⊤` and
 `chi q o < ⊤`, then along any increasing sequence of finite sets `T_n` exhausting `V`,
-`Φ_q(o, T_n) → 0`. (The issue's hypothesis `o ∈ T_n` is not needed: the internal
+`Φ_q(o, T_n) → 0`. (The hypothesis `o ∈ T_n` is not needed: the internal
 connection probability vanishes when `o ∉ T_n`.) -/
 theorem tendsto_boundaryFlux_exhaustion (q : Sym2 V → unitInterval) {Q : ℝ≥0∞} (hQ : Q < ⊤)
     (hrow : ∀ u, rowSum (fun e => unitInterval.toENNReal (q e)) u ≤ Q)

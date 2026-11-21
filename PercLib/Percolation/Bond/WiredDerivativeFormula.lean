@@ -605,7 +605,7 @@ end Main
 
 /-! ### Non-vacuity -/
 
-/-- The smallest case of the issue: `Λ = {false}` in `Bool`, with `J` supported on the one
+/-- The smallest case: `Λ = {false}` in `Bool`, with `J` supported on the one
 pair `s(false, true)`. Rows are finite sums, so every hypothesis holds, at every `β > 0`. -/
 example {β : ℝ} (hβ : 0 < β) :
     ∃ d, HasDerivAt (fun b : ℝ => (law (intensityProfile

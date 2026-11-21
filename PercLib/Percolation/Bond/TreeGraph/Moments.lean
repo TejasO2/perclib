@@ -26,10 +26,9 @@ With `M ≥ χ(x)` for every `x` and `m ≥ 1`,
   `t_m = (2m-3)‼`, proved through Catalan numbers.
 * `lintegral_encard_pow_le`: the bound, by strong induction on `m`.
 
-**Strengthening, stated explicitly.** The issue assumes `M = ⨆ x, χ(x) < ⊤`. The bound is
+**Strengthening, stated explicitly.** The usual statement assumes `M = ⨆ x, χ(x) < ⊤`. The bound is
 proved for every `M` with `χ(x) ≤ M` for all `x`, finite or not (in `ℝ≥0∞` it is trivial
-when `M = ⊤` and `m ≥ 2`), and `lintegral_encard_pow_le_iSup` is the issue's form with the
-finiteness hypothesis omitted.
+when `M = ⊤` and `m ≥ 2`), and `lintegral_encard_pow_le_iSup` is the form with `M = ⨆ x, χ(x)` and the finiteness hypothesis omitted.
 -/
 
 @[expose] public section

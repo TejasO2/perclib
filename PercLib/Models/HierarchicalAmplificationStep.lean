@@ -508,7 +508,7 @@ origin under `q_β = intensityProfile J β` restricted to the pairs inside that 
 `A = (4/c) L^{(d+α)ℓ} log(2N²)`. Then for every `β > 0` and `n ≥ 0`,
 `R_n(β)² ≥ (A/β) L^{(d+α)n}` implies `R_{n+ℓ}(β)² ≥ (A/β) L^{(d+α)(n+ℓ)}`.
 
-The issue's hypotheses `ℓ ≥ 1` and `α < d` are not needed here: they serve only to produce
+The hypotheses `ℓ ≥ 1` and `α < d` are not needed here: they serve only to produce
 such an `ℓ` (`exists_amplification_scale`). The kernel bound is assumed for `u ≠ v` only. -/
 theorem tightnessScale_hierarchical_amplification [NeZero L] (hL : 2 ≤ L) {α c : ℝ}
     (hc : 0 < c) (hα : 0 < α) (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0)
@@ -731,7 +731,7 @@ theorem tightnessScale_hierarchical_amplification [NeZero L] (hL : 2 ≤ L) {α 
 
 /-! ### Non-vacuity witnesses -/
 
-/-- The scale of the issue's example `L = 2`, `d = 3`, `α = 1`: `ℓ = 4` satisfies
+/-- The scale of the example `L = 2`, `d = 3`, `α = 1`: `ℓ = 4` satisfies
 `e^{-2^{12}/(8e)} ≤ 1/4`. -/
 theorem amplification_scale_example_exp :
     Real.exp (-(((2 : ℕ) : ℝ) ^ (3 * 4) / (8 * Real.exp 1))) ≤ 1 / 4 := by
@@ -745,7 +745,7 @@ theorem amplification_scale_example_exp :
   rw [Real.exp_neg, inv_eq_one_div, div_le_div_iff₀ (Real.exp_pos _) (by norm_num)]
   linarith [Real.add_one_le_exp x]
 
-/-- The scale of the issue's example: `ℓ = 4` satisfies `16 e² ≤ 2^{(3-1)·4} = 256`. -/
+/-- The scale of that example: `ℓ = 4` satisfies `16 e² ≤ 2^{(3-1)·4} = 256`. -/
 theorem amplification_scale_example_pow :
     16 * Real.exp 1 ^ 2 ≤ ((2 : ℕ) : ℝ) ^ ((((3 : ℕ) : ℝ) - 1) * ((4 : ℕ) : ℝ)) := by
   have h8 : ((2 : ℕ) : ℝ) ^ ((((3 : ℕ) : ℝ) - 1) * ((4 : ℕ) : ℝ)) = 256 := by

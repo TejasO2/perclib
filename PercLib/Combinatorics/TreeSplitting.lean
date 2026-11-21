@@ -27,7 +27,7 @@ edge of `E`, `k ≥ 1` and `N = |A| ≥ 3^k`, then `E` is partitioned into at le
 `3^(k-1) + 1` nonempty connected pieces, each with at least `3^(-k) N` and strictly fewer
 than `3^(1-k) N` marked vertices, whose endpoints cover every endpoint of `E`.
 
-**Generalisation, stated explicitly.** The issue asks for a finite tree. Acyclicity is not
+**Generalisation, stated explicitly.** The source step uses a finite tree. Acyclicity is not
 used, so the statement is proved for every finite connected loopless edge set; the tree
 case is `exists_connected_split_of_isTree`, for a tree on a finite vertex type.
 

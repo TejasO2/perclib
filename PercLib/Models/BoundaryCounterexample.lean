@@ -260,7 +260,7 @@ end Model
 
 /-! ### Non-vacuity -/
 
-/-- The kernel of the issue satisfies the three hypotheses, so the failing inequality
+/-- The three-vertex kernel satisfies the three hypotheses, so the failing inequality
 `not_boundary_bound_unsigned` holds for an actual model. -/
 example := not_boundary_bound_unsigned (J := fun e : Sym2 (Fin 3) =>
     if e = s(0, 1) then 99 / 100 else if e = s(1, 2) then 1 / 100 else 0)

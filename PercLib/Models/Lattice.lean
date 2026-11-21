@@ -79,7 +79,7 @@ theorem zdGraph_adj_iff_l1 (x y : Fin d → ℤ) :
     have := hrest j (mem_erase.2 ⟨hji, mem_univ j⟩)
     omega
 
-/-- **Adjacency in `ℤ^d`** (`ℓ¹` form with absolute values, as in the issue). -/
+/-- **Adjacency in `ℤ^d`** (`ℓ¹` form with absolute values). -/
 theorem zdGraph_adj_iff (x y : Fin d → ℤ) :
     (zdGraph d).Adj x y ↔ ∑ i, |y i - x i| = 1 := by
   rw [zdGraph_adj_iff_l1]

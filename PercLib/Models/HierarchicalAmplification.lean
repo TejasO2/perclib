@@ -260,7 +260,7 @@ theorem exp_neg_two_mul_sq_le {N : ℝ} (hN : 0 < N) :
 
 /-! ### Non-vacuity witnesses -/
 
-/-- The issue's example `L = 2`, `d = 3`, `α = 1`: a scale `ℓ` exists. -/
+/-- The example `L = 2`, `d = 3`, `α = 1`: a scale `ℓ` exists. -/
 example : ∃ ℓ : ℕ, 1 ≤ ℓ ∧ Real.exp (-(((2 : ℕ) : ℝ) ^ (3 * ℓ) / (8 * Real.exp 1))) ≤ 1 / 4 ∧
     16 * Real.exp 1 ^ 2 ≤ ((2 : ℕ) : ℝ) ^ ((((3 : ℕ) : ℝ) - 1) * ℓ) :=
   exists_amplification_scale le_rfl one_pos (by norm_num)

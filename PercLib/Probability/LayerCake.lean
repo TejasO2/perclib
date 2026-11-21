@@ -22,7 +22,7 @@ Let `T : Ω → ℕ∞` be measurable under a measure `μ`.
 * `lintegral_indicator_lt_eq`: for a real `X ≥ 0` and `t ≥ 0`,
   `∫⁻ X 1{X > t} = t μ{X > t} + ∫_t^∞ μ{X > s} ds`, from mathlib's layer cake.
 
-The ghost identity of item 3 of the issue,
+The ghost identity
 `∫⁻ (1 - e^{-hT}) = (1 - e^{-h}) ∑_{n ≥ 1} e^{-h(n-1)} μ {n ≤ T}`, is
 `PercLib.Probability.lintegral_ghost_eq_tsum` (`GhostTransform.lean`) and is not repeated.
 The cluster case of the first identity is `chi_eq_tsum_law_le_encard`.
