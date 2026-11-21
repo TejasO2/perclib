@@ -281,4 +281,20 @@ theorem higherCorrelation_indicator_fin_of_monotone (μ : Measure Ω) [IsProbabi
     have : (1 : ℝ) ≤ (j : ℕ) := by exact_mod_cast hj1
     linarith
 
+/-- The correlation of nested events is `a_0 ∏_{j ≥ 1} (j - a_j)`. -/
+theorem higherCorrelation_indicator_fin_eq_of_monotone (μ : Measure Ω) [IsProbabilityMeasure μ]
+    {n : ℕ} (hn : 0 < n) (A : Fin n → Set Ω) (hA : ∀ i, MeasurableSet (A i)) (hmono : Monotone A) :
+    higherCorrelation μ univ (fun i ↦ (A i).indicator 1) =
+      μ.real (A ⟨0, hn⟩) *
+        ∏ j ∈ (univ : Finset (Fin n)).erase ⟨0, hn⟩, (((j : ℕ) : ℝ) - μ.real (A j)) :=
+  (higherCorrelation_indicator_fin_of_monotone μ hn A hA hmono).1
+
+/-- The nested-event product `a_0 ∏_{j ≥ 1} (j - a_j)` is nonnegative. -/
+theorem measureReal_mul_prod_sub_measureReal_nonneg_of_monotone (μ : Measure Ω)
+    [IsProbabilityMeasure μ] {n : ℕ} (hn : 0 < n) (A : Fin n → Set Ω)
+    (hA : ∀ i, MeasurableSet (A i)) (hmono : Monotone A) :
+    0 ≤ μ.real (A ⟨0, hn⟩) *
+        ∏ j ∈ (univ : Finset (Fin n)).erase ⟨0, hn⟩, (((j : ℕ) : ℝ) - μ.real (A j)) :=
+  (higherCorrelation_indicator_fin_of_monotone μ hn A hA hmono).2
+
 end PercLib
