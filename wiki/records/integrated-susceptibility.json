@@ -132,7 +132,7 @@
       "locator": "Theorem 1(i); section 2.3, Lemma 2 proof, PDF p. 4; HTML equations (12)\u2013(15)",
       "relationship": "Written deduction or explicitly cited input",
       "status": "pending",
-      "note": "JZG4 is cited. PAFY supplies a local numerical repair, provisional pending Tom confirmation; no full renormalization proof or compiled association is claimed."
+      "note": "JZG4 is proved in the wiki by a written block renormalization following section 2.3, with its own constants and discrete comparison; it uses PAFY's integral identity but not the source's Lemma 2 numerics. PAFY supplies a local numerical repair of the source's estimate, provisional pending Tom confirmation; no compiled association is claimed."
     }
   ],
   "occursIn": [],
