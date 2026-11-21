@@ -28,7 +28,7 @@ whose means `m t` are positive, finite, continuous and unbounded on `I`, with
 * `lintegral_le_lintegral_of_meas_lt_le`: stochastic domination in the form
   `μ {x < f} ≤ μ {x < g}` for all `x` gives `∫⁻ f ≤ ∫⁻ g`.
 * `lintegral_min_le_lintegral_min_of_meas_lt_le`: the same for truncations `min f c`.
-* `exists_mem_toReal_eq_of_not_bddAbove`: intermediate values above the value at a point of
+* `exists_mem_eq_of_not_bddAbove`: intermediate values above the value at a point of
   a preconnected set are attained by a continuous function unbounded above on it.
 * `le_lintegral_min_of_lintegral_sq_le`: the integrated lower bound `E[Xs ∧ N]`.
 * `le_sum_meas_le_of_lintegral_sq_le`: the tail-sum lower bound for `ℕ∞`-valued `T`.
