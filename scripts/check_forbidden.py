@@ -10,7 +10,8 @@ elaboration time: `sorry`, `admit`, `native_decide`, `axiom`, `by_elab`, `run_ta
 `initialize`, `unsafe`, `implemented_by`, `extern`, `skipKernelTC` (however quoted),
 `addDecl`, `command_elab`, `term_elab`, `tactic_elab`, `run_meta`, `meta`, `simproc`,
 `dsimproc`, `cbv_simproc`, `simproc_pattern`, `grind_propagator` and their `builtin_`/`_decl`
-variants, the attributes `delab`, `app_delab`, `app_unexpander`, `tactic`, `init`,
+variants, the token-declaring commands `notation`, `notation3`, `infix`, `infixl`, `infixr`,
+`prefix`, `postfix` and `binder_predicate`, the attributes `delab`, `app_delab`, `app_unexpander`, `tactic`, `init`,
 `norm_num`, `positivity` and the `builtin_…` code-registering attributes (in `@[…]` or
 `attribute […]`; the tactics `norm_num`, `positivity` and `done` are allowed), or a
 `set_option` outside a short allowlist (D-35: no `maxHeartbeats` and no `linter.*`). The tag
@@ -35,7 +36,11 @@ FORBIDDEN = set('sorry admit native_decide axiom axioms by_elab run_tac run_cmd 
                 'tactic_elab simproc dsimproc simproc_decl dsimproc_decl run_meta meta '
                 'cbv_simproc cbv_simproc_decl cbv_simproc_pattern simproc_pattern '
                 'grind_propagator builtin_simproc builtin_dsimproc '
-                'builtin_grind_propagator'.split())
+                'builtin_grind_propagator notation notation3 infix infixl infixr prefix '
+                'postfix binder_predicate'.split())
+# The token-declaring commands above (`notation` … `binder_predicate`) are refused because a
+# token declared in the scanned code changes Lean's lexing (longest match) in ways the scanner
+# cannot follow, e.g. a `(--` token makes `--` code; a real need is an audited `EXEMPT` entry.
 # Attributes that register code run by the elaborator, simp or a tactic; flagged only inside
 # attribute brackets, since `norm_num` and `positivity` are also ordinary tactics.
 FORBIDDEN_ATTRIBUTES = set('delab app_unexpander norm_num positivity tactic app_delab init '

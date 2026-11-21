@@ -139,6 +139,72 @@ class ForbiddenScanTests(unittest.TestCase):
             with self.subTest(line=line):
                 self.assertFalse(flagged(line + '\n'))
 
+    # Findings S3, S4, S5 / GS5: Lean resumes three characters after a failing character
+    # literal, reads `2r"…"` as `2` and a raw string, and lexes tokens the file declares.
+    B = 'theorem b : True := trivial '
+
+    def assert_all_flagged(self, probes):
+        for probe in probes:
+            with self.subTest(probe=probe):
+                self.assertTrue(flagged(self.HEAD + self.B + probe + '\n'))
+
+    def test_unterminated_char_literal_probes(self):
+        # GS5 (a): a `'` at a token start that fits no character literal.
+        self.assert_all_flagged([f"'-- run_meta {self.W}",                # p1
+                                 f"'/- run_meta {self.W} -- -/",          # p2
+                                 f"'x-- run_meta {self.W}",               # p13
+                                 f"'x/- run_meta {self.W} -- -/",         # p14
+                                 f"(' -- run_meta {self.W}",              # p20
+                                 f"'a\" run_meta {self.W} -- \""])        # p16
+
+    def test_kept_quote_alternative_reading_probes(self):
+        # GS5 (b): a `'` kept as code after a symbol, where Lean may start a character
+        # literal, skip two characters and resume.
+        self.assert_all_flagged([f"+'-- run_meta {self.W}",               # p17
+                                 f"+'a\" run_meta {self.W} -- \"",        # p18
+                                 f"+'ab2'\"' run_meta {self.W} -- \"",    # p21
+                                 f"''a\" run_meta {self.W} -- \""])       # p19
+
+    def test_kept_quote_each_disagreement(self):
+        # GS5 (b), one line per way the two readings can disagree before they meet.
+        for probe in ['+\'-- run_meta pure ()',  # only the main reading opens something (`--`)
+                      "+'a2'c' = d",             # only the other one does (`'c'` after `2`)
+                      "+'ab'c' = d",             # the other reading raises (`'c'` after `b`)
+                      "+'ab'c2'd' = e",          # a `'` kept by the other reading, read on
+                      "+'a.«b» = c"]:            # `«…»` opened by the other reading only
+            with self.subTest(probe=probe):
+                self.assertTrue(flagged(self.HEAD + self.B + probe + '\n'))
+
+    def test_raw_string_after_numeral_probes(self):
+        # GS5 (c).
+        self.assert_all_flagged([f'2r"\\" " /- " run_meta {self.W} -- -/',      # p12
+                                 f'2r#"\\"# " /- " run_meta {self.W} -- -/'])   # p15
+
+    def test_token_declaring_commands(self):
+        # GS5 (d): probe n5 is error-free in Lean and runs `run_tac` IO through `(--`.
+        n5 = ('import Lean\nnotation:max "(--" x ")" => x\ntheorem b : True := (-- by run_tac do '
+              'IO.FS.writeFile (toString (Char.ofNat 113) ++ toString (Char.ofNat 84)) '
+              '(toString (Char.ofNat 120)); Lean.Elab.Tactic.evalTactic (← `(tactic| trivial))\n'
+              '  )\n')
+        self.assertTrue(flagged(n5))
+        for cmd in ['notation "‖" x "‖" => abs x', 'notation3 "∑ "(...)", "r:67:(scoped f => s f) => r',
+                    'infix:50 " ≺ " => Foo', 'infixl:65 " +' + "'" + ' " => f',
+                    'infixr:67 " ::: " => g', 'prefix:max "√" => Real.sqrt',
+                    'postfix:max "⁺" => pos', 'binder_predicate x " > " y:term => `($x > $y)']:
+            with self.subTest(cmd=cmd):
+                self.assertIn('forbidden tokens', ' '.join(check_file(REL, cmd + '\n')))
+
+    def test_kept_quote_legitimate_forms_pass(self):
+        for line in ["theorem t : μ.real (A' ∩ Tn ⁻¹' B') = 0 := rfl",
+                     "theorem t : f = Sum.inl ⁻¹' η' := rfl",
+                     "theorem t : (Subtype.val : S → V) ⁻¹' ω' = s := rfl",
+                     "theorem t : ∑' (i : ℕ), f i = 0 := rfl",
+                     "theorem t : f '' (s ∩ t) = u := rfl",
+                     "theorem t : 2 = 2 := rfl -- 2r and r\"x\" in a comment",
+                     "theorem t : (fun x => x) 2 = 2 := rfl"]:
+            with self.subTest(line=line):
+                self.assertFalse(flagged(line + '\n'))
+
     def test_elaborator_registering_attributes(self):
         # Finding R1 / GS2: attributes that register elaborator, delaborator or initializer code.
         for text in ['@[tactic X] def evalX : Tactic := fun _ => pure ()',

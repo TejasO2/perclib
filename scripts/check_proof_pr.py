@@ -41,6 +41,7 @@ CHAR_LITERAL = re.compile("'(?:" + ESCAPE.pattern + r"|[^\\])'", re.S)
 # longest token in its token table, so `<--`, `//-`, `]'"'` or `∑'` are code, not comments
 # or character literals.
 TOKEN_BOUNDARY = set(' \t\r\n([{⟨,')
+RAW_START = re.compile(r'r#*"')
 
 
 def code_without_literals(text):
@@ -55,9 +56,54 @@ def code_without_literals(text):
     `\\` + newline) is refused, since Lean then abandons the literal and lexes on as code.
     A comment opener directly after a symbol (`<--`, `//-`) is refused, and so is a character
     literal there (`]'"'`, `'''`), since Lean may read the pair as one longer token; a lone
-    `'` after a symbol (`∑'`, `''`, `⁻¹'`) is kept as code."""
-    result, i, depth = [], 0, 0
+    `'` after a symbol (`∑'`, `''`, `⁻¹'`) is kept as code.
+
+    A `'` at a token start that fits no character literal is refused (Lean always errors
+    there and resumes three characters later). Lean may also start a character literal at a
+    `'` kept as code (unless it opens `''`); that literal fails after two more characters and
+    Lean resumes there, so the text is rescanned from that point until the rescan meets the
+    main scan at a token start, and refused if either reading opens a comment, string, raw
+    string, character literal or `«…»` before they meet. A raw string directly after a
+    numeral containing `r` (`2r"…"`, read by Lean as `2` and `r"…"`) is refused."""
+    visited, events, kept = set(), [], []
+    code = _scan(text, 0, visited, events, kept)
+    todo, done = list(kept), set()
+    while todo:
+        k = todo.pop()
+        if k + 3 in done:
+            continue
+        done.add(k + 3)
+        alt_events, alt_kept = [], []
+        try:
+            meet = _scan(text, k + 3, set(), alt_events, alt_kept, stop=visited)
+        except ValueError as e:
+            raise ValueError("the text after `'` reads differently if Lean starts a character "
+                             f'literal there ({e})') from None
+        if any(e < meet for e in alt_events) or any(k < e < meet for e in events):
+            raise ValueError("the text after `'` reads differently if Lean starts a character "
+                             'literal there')
+        todo += alt_kept
+    return code
+
+
+def _scan(text, start, visited, events, kept, stop=None):
+    """One reading of `text` from `start` (a token start), as in `code_without_literals`.
+
+    Records in `visited` every position where an iteration begins in code state, in `events`
+    those of them that open a comment, string, raw string, character literal or `«…»`, and
+    in `kept` every `'` kept as code that Lean might instead read as a character literal.
+    Without `stop`, returns the code with literals erased; with `stop` (the positions the
+    main reading visited), returns the first such position reached in code state, at which
+    both readings agree from then on, or `len(text)`."""
+    result, i, depth = [], start, 0
     while i < len(text):
+        if not depth:
+            if stop is not None and i in stop:
+                return i
+            visited.add(i)
+            if (text.startswith(('/-', '--', '"', '«'), i) or RAW_START.match(text, i)
+                    or CHAR_LITERAL.match(text, i)):
+                events.append(i)
         if depth:
             if text.startswith('/-', i):
                 depth += 1
@@ -134,14 +180,20 @@ def code_without_literals(text):
             start = i
             while i < len(text) and text[i].isascii() and (text[i].isalnum() or text[i] == '_'):
                 i += 1
+            if 'r' in text[start:i] and text.startswith(('"', '#'), i):
+                raise ValueError('raw string directly after a numeral')
             result.append(text[start:i])
             continue
         if text[i] == "'" and (text.startswith("''", i) or i > 0 and not (
                 text[i - 1] in TOKEN_BOUNDARY or text[i - 1].isascii() and text[i - 1].isdigit())):
-            # Lean either continues a token here (`]'`, `∑'`, `''`) or errors and resumes at
-            # the next character; a fitting literal would be read differently, so refuse it.
+            # Lean either continues a token here (`]'`, `∑'`, `''`) or starts a character
+            # literal; a fitting literal would be read differently, so refuse it. A failing
+            # literal resumes three characters later; `code_without_literals` checks that
+            # reading for a kept `'` (Lean never starts a literal at the first `'` of `''`).
             if CHAR_LITERAL.match(text, i) or text.startswith("'\\", i):
                 raise ValueError('character literal directly after a symbol')
+            if not text.startswith("''", i):
+                kept.append(i)
             result.append("'")
             i += 1
             continue
@@ -153,11 +205,12 @@ def code_without_literals(text):
                 continue
             if text.startswith('\\', i + 1):
                 raise ValueError('invalid escape in character literal')
+            raise ValueError('unterminated character literal')
         result.append(text[i])
         i += 1
     if depth:
         raise ValueError('Unterminated comment')
-    return ''.join(result)
+    return ''.join(result) if stop is None else len(text)
 
 
 def check_paths_and_source(changes):

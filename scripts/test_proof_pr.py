@@ -80,6 +80,21 @@ class ProofGateTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             check_paths_and_source({'PercLib/Proof.lean': probe})
 
+    def test_char_literal_resynchronisation_and_numeral_raw_strings(self):
+        # Findings S3, S4 / GS5 (a)-(c), through the proof gate as well as the lexer.
+        tail = " run_meta IO.FS.writeFile (toString 'q' ++ toString '1') (toString 'x')"
+        for text, reason in [("trivial '--" + tail, 'unterminated character literal'),
+                             ("trivial +'--" + tail, 'reads differently'),
+                             ("trivial +'ab2'\"'" + tail + ' -- "', 'reads differently'),
+                             ('trivial 2r"\\" " /- "' + tail + ' -- -/', 'raw string directly'),
+                             ('trivial 2r#"x"#', 'raw string directly')]:
+            with self.subTest(text=text):
+                with self.assertRaisesRegex(ValueError, reason):
+                    code_without_literals(text)
+                with self.assertRaises(ValueError):
+                    check_paths_and_source({'PercLib/Proof.lean': 'theorem b : True := ' + text})
+        self.assertEqual(code_without_literals("(f ⁻¹' B') ∑' f '' s"), "(f ⁻¹' B') ∑' f '' s")
+
     def test_valid_escapes_pass(self):
         # Each escape Lean v4.35.0 accepts, in a string and (except the gap) a character.
         for esc in ['\\\\', '\\"', "\\'", '\\n', '\\t', '\\r', '\\x41', '\\x4f', '\\xA0',
