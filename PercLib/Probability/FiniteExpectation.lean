@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 Adapted from NearCritical/FiniteExpectation.lean at
 tomhutchcroft/near-critical-diffusivity@c820fea91a7482c1755de0ec94ecb9f59ccfcacc,
-under Tom Hutchcroft's reuse permission (docs/DECISIONS.md R-3).
+under Tom Hutchcroft's reuse permission recorded in `docs/DECISIONS.md`.
 The native upstream file has no licence header; no upstream Apache licence is asserted.
 Changed on 2026-11-14: Set configurations, PercLib namespace and boundary examples.
 -/

@@ -10,6 +10,19 @@ public import PercLib.Models.LongRange.PowerLaw
 public import PercLib.Models.LongRange.CutPoints
 public import PercLib.Percolation.Bond.Diagonal.Probability
 
+/-!
+# Displacement kernels: correspondence
+
+Wiki correspondence for the power-law kernel on `ℤ^d`, sup-norm ball counts and cut probabilities on
+`ℤ`.
+
+## Main results
+
+* `powerLaw_kernel_properties`
+* `supNorm_ball_sphere_counts`
+* `law_cut_eq_tprod_and_pos_iff`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory PercLib.Percolation.Bond

@@ -1,11 +1,11 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-138 (issue 472), part 1: leaf-labelled trivalent tree shapes `𝒯_k` (wiki tag SO5J,
-article `multipoint-trees`) and the multipoint tree-graph target AFH6, on the D-2
-interface. New definitions and proofs; nothing is copied. Mathlib at the pinned revision has
-trees (`SimpleGraph.IsTree`) and star graphs, which are used, but no leaf-labelled tree
-shapes; `Mathlib/Combinatorics/Enumerative/Catalan/Tree.lean` has rooted plane binary trees,
-which are a different notion (ordered children, unlabelled leaves).
+Leaf-labelled trivalent tree shapes `𝒯_k` (wiki tag SO5J, article `multipoint-trees`) and the
+multipoint tree-graph target AFH6, on the bond interface. New definitions and proofs;
+nothing is copied. Mathlib at the pinned revision has trees (`SimpleGraph.IsTree`) and star graphs,
+which are used, but no leaf-labelled tree shapes;
+`Mathlib/Combinatorics/Enumerative/Catalan/Tree.lean` has rooted plane binary trees, which are a
+different notion (ordered children, unlabelled leaves).
 -/
 module
 
@@ -42,7 +42,7 @@ namespace PercLib.Percolation.Bond
 
 /-- A **leaf-labelled trivalent tree with `k` leaves** on `Fin k ⊕ Fin (k - 2)`: a tree in
 which every leaf `Sum.inl i` has degree one and every internal vertex `Sum.inr j` has
-degree three (wiki tag SO5J). -/
+degree three. -/
 structure IsTrivalentTree (k : ℕ) (G : SimpleGraph (Fin k ⊕ Fin (k - 2))) : Prop where
   isTree : G.IsTree
   ncard_leaf : ∀ i, (G.neighborSet (Sum.inl i)).ncard = 1
@@ -56,7 +56,7 @@ def treeShapeSetoid (k : ℕ) : Setoid {G : SimpleGraph (Fin k ⊕ Fin (k - 2)) 
     fun ⟨φ, h⟩ => ⟨φ.symm, fun i => by rw [RelIso.symm_apply_eq, h i]⟩,
     fun ⟨φ, h⟩ ⟨ψ, h'⟩ => ⟨φ.trans ψ, fun i => by simp [h, h']⟩⟩
 
-/-- The **tree shapes** `𝒯_k` (wiki tag SO5J): isomorphism classes of finite unrooted trees
+/-- The **tree shapes** `𝒯_k`: isomorphism classes of finite unrooted trees
 with `k` labelled leaves and all other vertices of degree three. -/
 def TreeShape (k : ℕ) : Type :=
   Quotient (treeShapeSetoid k)
@@ -65,7 +65,7 @@ variable {V : Type*}
 
 /-- The **tree weight** of a trivalent tree `G` with leaves at `x`:
 `∑_{z ∈ V^{Int}} ∏_{{u,v} ∈ E(G)} τ(ξ_u, ξ_v)` with `ξ = x` on leaves and `ξ = z` on internal
-vertices (wiki tag AFH6). -/
+vertices. -/
 def treeWeight (q : Sym2 V → unitInterval) {k : ℕ} (x : Fin k → V)
     (G : SimpleGraph (Fin k ⊕ Fin (k - 2))) : ℝ≥0∞ :=
   ∑' z : Fin (k - 2) → V, ∏ᶠ e ∈ G.edgeSet,
@@ -95,7 +95,7 @@ theorem subsingleton_treeShape_of_eq {k : ℕ}
   obtain rfl : G = H := Subtype.ext (h _ _ G.2 H.2)
   exact ⟨Iso.refl, fun _ => rfl⟩
 
-/-! ### Witnesses (D-5): `|𝒯_2| = |𝒯_3| = 1` -/
+/-! ### Witnesses: `|𝒯_2| = |𝒯_3| = 1` -/
 
 /-- The neighbours of the centre of a star are all other vertices. -/
 private theorem neighborSet_starGraph_center {W : Type*} (r : W) :
@@ -202,7 +202,7 @@ theorem card_treeShape_three : Nat.card (TreeShape 3) = 1 := by
 
 /-! ### Multipoint geometry: the recursive three-part distance and the sweep product
 
-Part 2 of Q-138 (issue 472): wiki tags Y4H4 and CS13 (article `multipoint-trees`). A finite
+Wiki tags Y4H4 and CS13 (article `multipoint-trees`). A finite
 metric space `(A, d)` is a `Finset` in a metric space; for `A ⊆ ℝ^d` with the Euclidean
 distance (`EuclideanSpace ℝ (Fin d)`), `threePartDistance` is the `S(A)` of Y4H4, and in
 general it is the `S_d(A)` of CS13. -/
@@ -211,7 +211,7 @@ section Geometry
 
 variable {X : Type*} [MetricSpace X] [DecidableEq X]
 
-/-- The **recursive three-part distance** `S(A)` (wiki tags Y4H4, CS13): for `|A| ≤ 2` it is
+/-- The **recursive three-part distance** `S(A)`: for `|A| ≤ 2` it is
 `diam(A)²`, so `S({x, y}) = d(x, y)²`; for `|A| ≥ 3` it is the minimum over ordered
 partitions `A = A₁ ⊔ A₂ ⊔ A₃` into nonempty parts of
 `√(S(A₁ ∪ A₂) S(A₂ ∪ A₃) S(A₃ ∪ A₁))`. A partition is encoded by `(A₁, A₂)`, with
@@ -270,12 +270,12 @@ theorem threePartDistance_pair (x y : X) :
   simp only [Finset.card_le_two, ↓reduceIte, Finset.coe_insert, Finset.coe_singleton,
     Metric.diam_pair]
 
-/-- Y4H4 witness: in `ℝ^d`, `S({x, y}) = ‖x - y‖₂²`. -/
+/-- Non-vacuity: in `ℝ^d`, `S({x, y}) = ‖x - y‖₂²`. -/
 example {d : ℕ} (x y : EuclideanSpace ℝ (Fin d)) :
     threePartDistance ({x, y} : Finset _) = ‖x - y‖ ^ 2 := by
   rw [threePartDistance_pair, dist_eq_norm]
 
-/-- CS13 witness: the sweep product of a two-point space is `d(x, y)²`. -/
+/-- Non-vacuity: the sweep product of a two-point space is `d(x, y)²`. -/
 theorem sweepProduct_pair {x y : X} (hxy : x ≠ y) :
     sweepProduct ({x, y} : Finset X) = dist x y ^ 2 := by
   classical

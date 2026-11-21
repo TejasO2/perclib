@@ -2,8 +2,7 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for issue 640 (Q-212, part 1), written on 2026-11-16 by PROVER-F. No upstream
-proof is copied and no definition is added.
+New proofs, written on 2026-11-16. No upstream proof is copied and no definition is added.
 -/
 module
 
@@ -315,7 +314,7 @@ theorem add_pow_succ_sub_pow_sub_pow (A B : ℝ) (k : ℕ) :
   rw [Finset.sum_congr rfl h]
   ring
 
-/-- **C9Y8, exact formula.** Let `V` be finite and the intensities `λ_u` invariant under a
+/-- **Exact formula.** Let `V` be finite and the intensities `λ_u` invariant under a
 group acting transitively (`∀ x y, ∃ σ, σ x = y` preserving every `λ_u`), with derivatives
 `w` at `t`. Then for every `k ≥ 0`, `m_k(u) = E_u |K_o|^k` satisfies
 `m_k'(t) = (1/2) ∑_{y ≠ o} w(o, y) E_t[1{o ↮ y} ∑_{j=1}^k C(k+1, j) |K_o|^j |K_y|^{k+1-j}]`. -/
@@ -398,7 +397,7 @@ theorem hasDerivAt_moment_of_transitive (lam : ℝ → Sym2 V → ℝ≥0) (w : 
   rw [Finset.sum_congr rfl hcongr]
   field_simp
 
-/-- **C9Y8, sign.** For nondecreasing intensities (`w ≥ 0`) the derivative in
+/-- **Sign.** For nondecreasing intensities (`w ≥ 0`) the derivative in
 `hasDerivAt_moment_of_transitive` is nonnegative. -/
 theorem moment_derivative_nonneg (w : Sym2 V → ℝ) (hw : ∀ e, 0 ≤ w e)
     (q : Sym2 V → unitInterval) (o : V) (k : ℕ) :
@@ -411,9 +410,9 @@ theorem moment_derivative_nonneg (w : Sym2 V → ℝ) (hw : ∀ e, 0 ≤ w e)
   · exact le_rfl
   · exact Finset.sum_nonneg fun j _ => by positivity
 
-/-! ### Non-vacuity witness (D-5) -/
+/-! ### Non-vacuity witness -/
 
-/-- **D-5 witness.** On `ZMod 2` with `λ_u = u⁺` on every pair (so `λ_u = u` near `t = 1`),
+/-- **Non-vacuity witness.** On `ZMod 2` with `λ_u = u⁺` on every pair (so `λ_u = u` near `t = 1`),
 the hypotheses of `hasDerivAt_moment_of_transitive` hold, with `w = 1` and the translations
 of `ZMod 2` as the transitive group. -/
 example (k : ℕ) :

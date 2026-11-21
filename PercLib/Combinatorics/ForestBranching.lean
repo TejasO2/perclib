@@ -9,6 +9,23 @@ public import Mathlib.Combinatorics.SimpleGraph.Star
 public import Mathlib.Tactic.Linarith
 public import Mathlib.Tactic.NormNum
 
+/-!
+# Branch vertices and leaves of finite forests
+
+Degree accounting for finite trees and forests from mathlib's edge count and handshaking identity: a
+finite forest has no more branch vertices than leaves, with a sharp correction by the number of
+components and isolated vertices.
+
+## Main results
+
+* `tree_sum_degree_sub_two`
+* `forest_sum_degree_sub_two`
+* `tree_card_branch_add_two_le_leaves`
+* `forest_card_branch_le_leaves`
+* `tree_card_branch_le_card_sub_two`
+* `forest_card_branch_le_leaves_sub_two_mul`
+-/
+
 @[expose] public section
 noncomputable section
 open Finset

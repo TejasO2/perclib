@@ -10,6 +10,21 @@ public import PercLib.Percolation.Bond.Basic
 public import PercLib.Probability.ProdBernoulliIndependence
 public import Mathlib.Analysis.SpecialFunctions.Exponential
 
+/-!
+# Boundary wiring
+
+The ghost indicators of the boundary of a domain are independent of the internal edges; a ghost is
+closed exactly when all its exterior bonds are, with an exponential formula for summable
+intensities.
+
+## Main results
+
+* `law_iIndepFun_injective_blocks`
+* `law_iIndepFun_boundary_internal`
+* `law_boundary_closed`
+* `law_boundary_closed_exponential`
+-/
+
 @[expose] public section
 
 open MeasureTheory ProbabilityTheory Set PercLib.Probability

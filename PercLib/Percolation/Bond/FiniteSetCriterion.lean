@@ -48,7 +48,8 @@ theorem law_intensityProfile_map_eq (J : Sym2 V → ℝ≥0) (σ : V ≃ V)
   PercLib.Probability.prodBernoulli_map_image_sym2_invariant _ σ fun e =>
     Subtype.ext (by simp only [intensityProfile, hσ])
 
-/-- **QXWF.** Under transitivity the susceptibility does not depend on the root. -/
+/-- **Root independence of the susceptibility.** Under transitivity the susceptibility does not
+depend on the root. -/
 theorem chi_eq_of_transitive [Countable V] (J : Sym2 V → ℝ≥0)
     (hT : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e) (β : ℝ≥0)
     (x y : V) : chi (intensityProfile J β) x = chi (intensityProfile J β) y := by
@@ -56,8 +57,8 @@ theorem chi_eq_of_transitive [Countable V] (J : Sym2 V → ℝ≥0)
   rw [← hσx]
   exact (chi_apply_eq_of_map_law_eq σ (law_intensityProfile_map_eq J σ hσ β) x).symm
 
-/-- **XONW.** Under transitivity the probability of an infinite cluster does not depend on
-the root. -/
+/-- **Root independence of the percolation probability.** Under transitivity the probability of an
+infinite cluster does not depend on the root. -/
 theorem law_cluster_infinite_eq_of_transitive [Countable V] (J : Sym2 V → ℝ≥0)
     (hT : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e) (β : ℝ≥0)
     (x y : V) :
@@ -68,16 +69,17 @@ theorem law_cluster_infinite_eq_of_transitive [Countable V] (J : Sym2 V → ℝ�
   exact (law_cluster_infinite_apply_eq_of_map_law_eq σ
     (law_intensityProfile_map_eq J σ hσ β) x).symm
 
-/-- **XONW.** Under transitivity the root threshold does not depend on the root. -/
+/-- **Root independence of the threshold.** Under transitivity the root threshold does not depend on
+the root. -/
 theorem rootCriticalIntensity_eq_of_transitive [Countable V] (J : Sym2 V → ℝ≥0)
     (hT : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e) (x y : V) :
     rootCriticalIntensity J x = rootCriticalIntensity J y := by
   unfold rootCriticalIntensity
   simp_rw [law_cluster_infinite_eq_of_transitive J hT _ x y]
 
-/-- **XONW.** Under transitivity the root threshold equals the global threshold. No
-connectivity of the support of `J` is assumed: the event that some cluster is infinite is a
-countable union of root events of equal probability. -/
+/-- **Root and global thresholds agree.** Under transitivity the root threshold equals the global
+threshold. No connectivity of the support of `J` is assumed: the event that some cluster is infinite
+is a countable union of root events of equal probability. -/
 theorem rootCriticalIntensity_eq_globalCriticalIntensity_of_transitive [Countable V] (J : Sym2 V → ℝ≥0)
     (hT : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e) (x : V) :
     rootCriticalIntensity J x = globalCriticalIntensity J := by
@@ -384,8 +386,8 @@ theorem lt_rootCriticalIntensity_of_boundaryFlux_lt_one [Countable V] (J : Sym2 
 
 /-! ### R84Z (item 4) -/
 
-/-- **R84Z.** Under transitivity and finite off-diagonal rows, if the root threshold
-`β_c` is finite then for every finite `S ∋ o`:
+/-- **The boundary flux at the threshold.** Under transitivity and finite off-diagonal rows, if the
+root threshold `β_c` is finite then for every finite `S ∋ o`:
 `1 ≤ Φ_{q_{β_c}}(o,S) ≤ β_c ∑_{u ∈ S} τ_{S,β_c}(o,u) ∑'_{v ∉ S} J s(u,v)`. -/
 theorem one_le_boundaryFlux_at_rootCriticalIntensity [Countable V] (J : Sym2 V → ℝ≥0)
     (hT : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e)
@@ -432,7 +434,7 @@ theorem one_le_boundaryFlux_at_rootCriticalIntensity [Countable V] (J : Sym2 V �
             exact ENNReal.coe_le_coe.2 (intensityProfile_toNNReal_le J βc _)
         _ = _ := by ring
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
 /-- The constant kernel on `ZMod 2` is transitive, by the translations `σ = (· + c)`. -/
 theorem transitive_const_zmod_two :
@@ -467,8 +469,9 @@ example (β : ℝ≥0) :
       rw [rowSum_def, tsum_fintype]
       exact ENNReal.sum_lt_top.2 fun _ _ => by split_ifs <;> simp) {0} 0⟩
 
-/-- The zero kernel with `S = {o}`: `Φ = 0 < 1`, so the susceptibility is finite just
-above `β₀ = 1` and `1 < rootCriticalIntensity` (in fact it is `⊤`, and R84Z is vacuous). -/
+/-- The zero kernel with `S = {o}`: `Φ = 0 < 1`, so the susceptibility is finite just above `β₀ = 1`
+and `1 < rootCriticalIntensity` (in fact it is `⊤`, and
+`one_le_boundaryFlux_at_rootCriticalIntensity` is vacuous). -/
 example (o : ZMod 2) :
     (∃ ε : ℝ≥0, 0 < ε ∧ ∀ x, chi (intensityProfile (fun _ : Sym2 (ZMod 2) => (0 : ℝ≥0))
       (1 + ε)) x < ⊤) ∧

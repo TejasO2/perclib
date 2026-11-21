@@ -2,8 +2,8 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for the hierarchical programme (package H6, the cross-edge estimate), written on
-2026-11-20. No upstream proof is copied and no definition is added.
+New proofs (the cross-edge estimate), written on 2026-11-20. No upstream proof is copied and no
+definition is added.
 -/
 module
 

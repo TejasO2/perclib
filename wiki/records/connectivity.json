@@ -28,5 +28,26 @@
     }
   ],
   "occursIn": [],
-  "proofUses": []
+  "proofUses": [
+    {
+      "order": 0,
+      "tag": "T90E",
+      "proof_uses": [],
+      "reason": "A definition; it invokes no other wiki assertion."
+    },
+    {
+      "order": 1,
+      "tag": "OG96",
+      "proof_uses": [],
+      "reason": "A definition; it invokes no other wiki assertion."
+    },
+    {
+      "order": 2,
+      "tag": "HQ6X",
+      "proof_uses": [
+        "OG96"
+      ],
+      "reason": "Unfolding the two objects of OG96, a path inside the region is a path in the host, so the restricted cluster lies in the full-cluster intersection."
+    }
+  ]
 }

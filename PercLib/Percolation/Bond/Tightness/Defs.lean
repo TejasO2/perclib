@@ -1,10 +1,10 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-New statement definitions for T-6 (issue 46), written on 2026-11-14, on the D-2 interface.
-Source: T. Hutchcroft, "Power-law bounds for critical long-range percolation below the
-upper-critical dimension", arXiv:2008.11197v2, §2.1, Theorem 2.2 and Theorem 2.3
-(printed p. 14). No code is copied.
+New statement definitions, written on 2026-11-14, on the bond interface. Source: T.
+Hutchcroft, "Power-law bounds for critical long-range percolation below the upper-critical
+dimension", arXiv:2008.11197v2, §2.1, Theorem 2.2 and Theorem 2.3 (printed p. 14). No code is
+copied.
 -/
 module
 
@@ -23,23 +23,21 @@ Fix a finite nonempty set `Λ` of vertices. The open cluster of `v` is the full 
 * `tightnessScale q Λ = min {n ∈ ℕ : P(max ≥ n) ≤ e⁻¹}` (the source's `M`). The set is
   nonempty because the maximum is at most `|Λ|`.
 
-Two target statements, with no proof in this file (D-16):
+Two target statements, with no proof in this file:
 
 * `UniversalTightness`, Theorem 2.2 with the source's constants `1/9` and `27`, for every
   `a ≥ 1` and `0 < ε ≤ 1`:
   `P(max ≥ a M) ≤ exp(-a/9)`, `P(max < ε M) ≤ 27 ε`, and
   `P(|K_u ∩ Λ| ≥ a M) ≤ e · P(|K_u ∩ Λ| ≥ M) · exp(-a/9)`.
-* `TightnessBK`, Theorem 2.3, **on the reading `k ≥ 1` of issue 52.** The source prints
-  `k ≥ 0`; issue 52 gives a counterexample at `k = 0` (one edge with `p = 1/2`, `Λ` its
-  endpoints, `λ = 2`), confirmed by AUDITOR, and the source's proof of Theorem 2.2 uses
-  only `k ≥ 1`. Tom's decision on issue 52 is pending; this statement follows ARCHITECT's
-  instruction on #34 to proceed on `k ≥ 1`, marked as such.
+* `TightnessBK`, Theorem 2.3, **on the reading `k ≥ 1`.** The source prints
+  `k ≥ 0`, which fails at `k = 0` (one edge with `p = 1/2`, `Λ` its endpoints, `λ = 2`), and
+  the source's proof of Theorem 2.2 uses only `k ≥ 1`.
 
 **Generalisation, stated explicitly.** The source works with the profile
 `1 - exp(-β J e)` of a countable weighted graph. These statements quantify over every
 profile `q : Sym2 V → unitInterval` on a countable vertex type, including the values `0`
 and `1`; every profile with values below one is of the source's form. The diagonal of `q`
-is irrelevant because the open graph discards loops (D-2).
+is irrelevant because the open graph discards loops.
 -/
 
 @[expose] public section
@@ -84,9 +82,8 @@ def UniversalTightness (V : Type*) [Countable V] : Prop :=
           law q {ω | tightnessScale q Λ ≤ clusterIntersection Λ ω u} *
           ENNReal.ofReal (Real.exp (-a / 9)))
 
-/-- **The BK step** (Hutchcroft, arXiv:2008.11197v2, Theorem 2.3), **on the reading
-`k ≥ 1` of issue 52**; the printed `k ≥ 0` is false at `k = 0`. For every `λ ≥ 1` and
-`k ≥ 1`:
+/-- **The BK step** (Hutchcroft, arXiv:2008.11197v2, Theorem 2.3), **on the reading `k ≥ 1`**; the
+printed `k ≥ 0` is false at `k = 0`. For every `λ ≥ 1` and `k ≥ 1`:
 `P(max ≥ 3^k λ) ≤ P(max ≥ λ)^(3^(k-1) + 1)` and
 `P(|K_u ∩ Λ| ≥ 3^k λ) ≤ P(max ≥ λ)^(3^(k-1)) · P(|K_u ∩ Λ| ≥ λ)`. -/
 @[tag "JGZB"]

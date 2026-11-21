@@ -313,7 +313,7 @@ theorem le_card_mul_lintegral_clusterIntersection_levelBall [NeZero L]
 
 end PercLib.Models
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 section Witnesses
 
 open PercLib.Models

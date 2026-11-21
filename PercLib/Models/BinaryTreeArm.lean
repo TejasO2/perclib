@@ -1,8 +1,7 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-73: the critical arm recursion on the rooted binary tree and the exact two-point function
-on rooted trees. New for this project; no upstream proof is copied, and no new definition
-is introduced.
+The critical arm recursion on the rooted binary tree and the exact two-point function on rooted
+trees. New for this project; no upstream proof is copied, and no new definition is introduced.
 -/
 module
 
@@ -84,7 +83,7 @@ theorem reachable_kTree (w : List (Fin k)) :
 
 /-! ### The two-point function -/
 
-/-- **NDIC, item 2.** On the rooted `k`-ary tree with open probability `p` on tree edges and
+/-- **Item 2.** On the rooted `k`-ary tree with open probability `p` on tree edges and
 `0` on all other pairs (any value on the diagonal), `tau q x y = p ^ dist(x,y)` for every
 `p ∈ [0,1]` and all vertices, with `p ^ 0 = 1`. -/
 theorem tau_kTree_eq_pow (p : unitInterval) (q : Sym2 (List (Fin k)) → unitInterval)
@@ -199,7 +198,7 @@ private theorem toReal_half :
   rw [ENNReal.coe_toReal]
   rfl
 
-/-- **NDIC, item 1**, start: `r_0 = 1`. -/
+/-- **Item 1**, start: `r_0 = 1`. -/
 theorem binaryArm_zero :
     (law (fun e : Sym2 (List (Fin 2)) =>
         if e ∈ (SimpleGraph.fromRel fun u w : List (Fin 2) => ∃ b, w = b :: u).edgeSet then
@@ -211,7 +210,7 @@ theorem binaryArm_zero :
     Set.eq_univ_of_forall fun ω => ⟨[], rfl, fun m hm => absurd hm (Nat.not_lt_zero m)⟩
   rw [this, measure_univ, ENNReal.toReal_one]
 
-/-- **NDIC, item 1**, recursion: `r_(n+1) = r_n − r_n²/4` at `p = 1/2`. -/
+/-- **Item 1**, recursion: `r_(n+1) = r_n − r_n²/4` at `p = 1/2`. -/
 theorem binaryArm_succ (n : ℕ) :
     (law (fun e : Sym2 (List (Fin 2)) =>
         if e ∈ (SimpleGraph.fromRel fun u w : List (Fin 2) => ∃ b, w = b :: u).edgeSet then
@@ -245,7 +244,7 @@ theorem binaryArm_succ (n : ℕ) :
     ENNReal.toReal_one]
   ring
 
-/-- **NDIC, item 1**, asymptotics: `n · r_n → 4` at `p = 1/2`. -/
+/-- **Item 1**, asymptotics: `n · r_n → 4` at `p = 1/2`. -/
 theorem tendsto_mul_binaryArm :
     Tendsto (fun n : ℕ => (n : ℝ) *
       (law (fun e : Sym2 (List (Fin 2)) =>
@@ -294,7 +293,7 @@ theorem law_reach_depth_eq_binaryArm (q : Sym2 (List (Fin 2)) → unitInterval)
   · subst hl
     exact (reachable_nil_iff_of_subset hω w).2 h
 
-/-- **NDIC, item 1**, start, for any diagonal: `r_0 = 1`. -/
+/-- **Item 1**, start, for any diagonal: `r_0 = 1`. -/
 theorem binaryTree_law_reach_depth_zero (q : Sym2 (List (Fin 2)) → unitInterval)
     (hq : ∀ e, ¬ e.IsDiag → q e =
       if e ∈ (SimpleGraph.fromRel fun u w : List (Fin 2) => ∃ b, w = b :: u).edgeSet then
@@ -303,7 +302,7 @@ theorem binaryTree_law_reach_depth_zero (q : Sym2 (List (Fin 2)) → unitInterva
   rw [law_reach_depth_eq_binaryArm q hq]
   exact binaryArm_zero
 
-/-- **NDIC, item 1**, recursion, for any diagonal: `r_(n+1) = r_n − r_n²/4`. -/
+/-- **Item 1**, recursion, for any diagonal: `r_(n+1) = r_n − r_n²/4`. -/
 theorem binaryTree_law_reach_depth_succ (q : Sym2 (List (Fin 2)) → unitInterval)
     (hq : ∀ e, ¬ e.IsDiag → q e =
       if e ∈ (SimpleGraph.fromRel fun u w : List (Fin 2) => ∃ b, w = b :: u).edgeSet then
@@ -315,7 +314,7 @@ theorem binaryTree_law_reach_depth_succ (q : Sym2 (List (Fin 2)) → unitInterva
   exact binaryArm_succ n
 
 open Asymptotics in
-/-- **NDIC, item 1**, asymptotics, for any diagonal: `r_n ~ 4/n`. -/
+/-- **Item 1**, asymptotics, for any diagonal: `r_n ~ 4/n`. -/
 theorem binaryTree_law_reach_depth_isEquivalent (q : Sym2 (List (Fin 2)) → unitInterval)
     (hq : ∀ e, ¬ e.IsDiag → q e =
       if e ∈ (SimpleGraph.fromRel fun u w : List (Fin 2) => ∃ b, w = b :: u).edgeSet then
@@ -330,7 +329,7 @@ theorem binaryTree_law_reach_depth_isEquivalent (q : Sym2 (List (Fin 2)) → uni
   simp only [Pi.div_apply]
   rw [div_div_eq_mul_div, mul_comm]
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
 /-- `r_1 = 3/4`. -/
 example :

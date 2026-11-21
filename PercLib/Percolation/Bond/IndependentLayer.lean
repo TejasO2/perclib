@@ -2,8 +2,7 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for issue 432 (Q-98, part 3), written on 2026-11-16 by PROVER-G. No upstream proof
-is copied.
+New proofs, written on 2026-11-16. No upstream proof is copied.
 -/
 module
 
@@ -53,7 +52,8 @@ variable {V : Type*}
 theorem exists_symm_eq_exp {h : ℝ} (hh : 0 ≤ h) : ∃ p : I, ((σ p : I) : ℝ) = Real.exp (-h) :=
   ⟨σ ⟨Real.exp (-h), (Real.exp_pos _).le, Real.exp_le_one_iff.2 (by linarith)⟩, by simp⟩
 
-/-- **Lower bound of BEJT.** Adding a layer only increases the ghost transform. -/
+/-- **Two-layer ghost comparison, lower bound.** Adding a layer only increases the ghost transform.
+-/
 theorem lintegral_ghost_le_union [Countable V] (q₀ s : Sym2 V → I) (o : V) {h : ℝ}
     (hh : 0 < h) :
     ∫⁻ ω, (1 - EReal.exp (-((h : EReal) * (((cluster ω o).encard : ℝ≥0∞) : EReal))))
@@ -78,10 +78,9 @@ theorem tsum_ite_not_mem_le (s : Sym2 V → I) (C : Finset V) {u : V} (hu : u �
   · have : v ≠ u := fun h => hv (h ▸ hu)
     simp [hv, this]
 
-/-- **Upper bound of BEJT, with explicit bounds.** If the `q₀`-cluster of `o` is finite
-almost surely, every off-diagonal row sum of `s` is at most `δ` and every ghost transform
-`G_v(h)` of the union law is at most `G`, then
-`G_o(h) ≤ E[1 - e^{-hX}] + δ · E[X e^{-hX}] · G`. -/
+/-- **Two-layer ghost comparison, upper bound, with explicit bounds.** If the `q₀`-cluster of `o` is
+finite almost surely, every off-diagonal row sum of `s` is at most `δ` and every ghost transform
+`G_v(h)` of the union law is at most `G`, then `G_o(h) ≤ E[1 - e^{-hX}] + δ · E[X e^{-hX}] · G`. -/
 theorem lintegral_ghost_union_le [Countable V] (q₀ s : Sym2 V → I) (o : V) {h : ℝ}
     (hh : 0 < h) (hfin : ∀ᵐ ω ∂(law q₀), (cluster ω o).Finite) {δ G : ℝ≥0∞}
     (hδ : ∀ u, rowSum (fun e => unitInterval.toENNReal (s e)) u ≤ δ)
@@ -315,7 +314,7 @@ theorem ae_cluster_finite_of_chi_lt_top [Countable V] {q : Sym2 V → I} {v : V}
   filter_upwards [ae_lt_top hmeas h.ne] with ω hω
   exact Set.encard_lt_top_iff.mp (ENat.toENNReal_lt_top.mp hω)
 
-/-- **MLLO, ghost form.** Under the hypotheses of `chi_union_le_of_bounds`, every ghost
+/-- **Ghost form.** Under the hypotheses of `chi_union_le_of_bounds`, every ghost
 transform of the union law satisfies `G_v(h) ≤ h χ_{q₀}(v) / (1 - δM)`. -/
 theorem lintegral_ghost_union_le_mul [Countable V] (q₀ s : Sym2 V → I) {δ M : ℝ≥0∞}
     (hδ : ∀ u, rowSum (fun e => unitInterval.toENNReal (s e)) u ≤ δ)
@@ -366,8 +365,9 @@ theorem lintegral_ghost_union_le_mul [Countable V] (q₀ s : Sym2 V → I) {δ M
         simp only [div_eq_mul_inv, one_mul]
         ring
 
-/-- **MLLO.** Let `δ` bound the off-diagonal row sums of `s`, `M` bound `χ_{q₀}`, `M < ⊤` and
-`δM < 1`. Then `χ_r(v) ≤ χ_{q₀}(v) / (1 - δM)` for the union law `r`. -/
+/-- **Susceptibility of a union with an independent layer.** Let `δ` bound the off-diagonal row sums
+of `s`, `M` bound `χ_{q₀}`, `M < ⊤` and `δM < 1`. Then `χ_r(v) ≤ χ_{q₀}(v) / (1 - δM)` for the union
+law `r`. -/
 theorem chi_union_le_of_bounds [Countable V] (q₀ s : Sym2 V → I) {δ M : ℝ≥0∞}
     (hδ : ∀ u, rowSum (fun e => unitInterval.toENNReal (s e)) u ≤ δ)
     (hchi : ∀ v, chi q₀ v ≤ M) (hM : M < ⊤) (hδM : δ * M < 1) (v : V) :
@@ -456,8 +456,8 @@ example (V : Type*) :
       0 := by
   simp
 
-/-- `s = 0`, `q₀ = 0` on `ℕ`: the hypotheses of BEJT and MLLO hold (`X = 1`, `M = 1`,
-`δ = 0`), and MLLO gives `χ_r ≤ χ_{q₀}`. -/
+/-- `s = 0`, `q₀ = 0` on `ℕ`: the hypotheses of `lintegral_ghost_le_layer` and
+`chi_union_le_of_bounds` hold (`X = 1`, `M = 1`, `δ = 0`), and the latter gives `χ_r ≤ χ_{q₀}`. -/
 example :
     ∀ᵐ ω ∂(law (fun _ : Sym2 ℕ => (0 : I))), (cluster ω 0).Finite := by
   refine ae_cluster_finite_of_chi_lt_top ?_
@@ -472,14 +472,14 @@ example : chi (fun e => σ (σ ((fun _ : Sym2 ℕ => (0 : I)) e) * σ ((fun _ =>
     (fun u => by simp) (fun v => (hchi v).le) ENNReal.one_lt_top (by simp) 0
   exact this
 
-/-- On a finite vertex type every cluster is finite, so BEJT applies to the one-edge example
-below. -/
+/-- On a finite vertex type every cluster is finite, so `lintegral_ghost_le_layer` applies to the
+one-edge example below. -/
 example : ∀ᵐ ω ∂(law (fun _ : Sym2 Bool => (0 : I))), (cluster ω false).Finite :=
   ae_of_all _ fun _ => Set.toFinite _
 
 /-- One blue edge: on `Bool`, `q₀ = 0` and `s ≡ 1/2` (the only non-loop pair is
 `s(false, true)`). Every off-diagonal row sum of `s` is `1/2`, `χ_{q₀} = 1`, so
-`δ M = 1/2 < 1` and MLLO gives `χ_r ≤ 2`; the true value is `3/2`. -/
+`δ M = 1/2 < 1` and `chi_union_le_of_bounds` gives `χ_r ≤ 2`; the true value is `3/2`. -/
 example : chi (fun e => σ (σ ((fun _ : Sym2 Bool => (0 : I)) e) *
       σ ((fun _ => (⟨1 / 2, by norm_num, by norm_num⟩ : I)) e))) false ≤ 2 := by
   have hchi : ∀ v, chi (fun _ : Sym2 Bool => (0 : I)) v = 1 :=

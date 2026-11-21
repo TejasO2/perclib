@@ -2,19 +2,16 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-Corresponds to `finite_bernoulliProfile_bk_of_uniform_lt_one` in
-NearCritical/ProfileBKStrict.lean at tomhutchcroft/near-critical-diffusivity,
-revision c820fea91a7482c1755de0ec94ecb9f59ccfcacc (reuse permission: DECISIONS R-3),
-and removes its restriction that every coordinate be below one, as issue 71 asks.
-Route: low-density BK for profiles bounded by `1/2` (the induction of BKLowDensity.lean
-with a coordinate-dependent parameter), exact OR-refinement of each coordinate into
-`m` copies with its own parameter, and continuity in the profile for coordinates equal
-to one (`q_t = (1 - t) q`). The three refinement lemmas of the first section correspond
-to the same-named lemmas of NearCritical/BKAllParameters.lean at the same revision;
-the homogeneous-only results of that file are not needed and are not ported. The
-upstream source was not readable from the session that
-wrote this file, so the Lean text is new; no upstream code is copied and no upstream
-licence is asserted.
+Corresponds to `finite_bernoulliProfile_bk_of_uniform_lt_one` in NearCritical/ProfileBKStrict.lean
+at tomhutchcroft/near-critical-diffusivity, revision c820fea91a7482c1755de0ec94ecb9f59ccfcacc (reuse
+permission recorded in `docs/DECISIONS.md`), and removes its restriction that every coordinate be
+below one. Route: low-density BK for profiles bounded by `1/2` (the induction of BKLowDensity.lean
+with a coordinate-dependent parameter), exact OR-refinement of each coordinate into `m` copies with
+its own parameter, and continuity in the profile for coordinates equal to one (`q_t = (1 - t) q`).
+The three refinement lemmas of the first section correspond to the same-named lemmas of
+NearCritical/BKAllParameters.lean at the same revision; the homogeneous-only results of that file
+are not needed and are not ported. The upstream source was not readable from the session that wrote
+this file, so the Lean text is new; no upstream code is copied and no upstream licence is asserted.
 -/
 module
 

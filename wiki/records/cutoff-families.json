@@ -50,5 +50,15 @@
     }
   ],
   "occursIn": [],
-  "proofUses": []
+  "proofUses": [
+    {
+      "order": 0,
+      "tag": "4OFD",
+      "proof_uses": [
+        "6YYS",
+        "WU9R"
+      ],
+      "reason": "The edge-probability derivative of 6YYS is substituted as the profile derivative in the finite-profile Russo formula for increasing events."
+    }
+  ]
 }

@@ -2,10 +2,9 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for issue 638 (Q-210, items 1–2 in finite volume), written on 2026-11-16 by
-PROVER-F. Statements from the wiki article `spatial-cutoff-moments` (tags 57RX, 1K61); source
-T. Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1, §I.4.1 and §I.5.1.
-No upstream proof is copied and no definition is added.
+New proofs, written on 2026-11-16. Statements from the wiki article `spatial-cutoff-moments` (tags
+57RX, 1K61); source T. Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1, §I.4.1
+and §I.5.1. No upstream proof is copied and no definition is added.
 -/
 module
 
@@ -124,7 +123,7 @@ theorem hasDerivAt_integral_cluster_functional (lam : ℝ → Sym2 V → ℝ≥0
   push_cast at h2
   linarith
 
-/-- **57RX, finite volume.** For every weight `g : V → ℝ` (for instance
+/-- **Finite volume.** For every weight `g : V → ℝ` (for instance
 `g(z) = ⟨z - o, u⟩²` on a box of `ℤ^d`),
 `d/dt E_t[∑_{z ∈ K_o} g(z)] = ∑_{x, y} w(x, y) E_t[1{x ∈ K_o, y ∉ K_o} ∑_{z ∈ K_y} g(z)]`. -/
 theorem hasDerivAt_integral_sum_cluster (lam : ℝ → Sym2 V → ℝ≥0) (w : Sym2 V → ℝ) (t : ℝ)
@@ -159,7 +158,7 @@ theorem prod_add_sub_prod {ι : Type*} [Fintype ι] [DecidableEq ι] (a b : ι �
   simp only [Finset.prod_empty, one_mul, Finset.sdiff_empty, add_sub_cancel_left]
   exact Finset.sum_congr rfl fun I _ => mul_comm _ _
 
-/-- **1K61, finite volume.** For polynomial functionals `F(A) = ∏_i ∑_{z ∈ A} P_i(z)`,
+/-- **Finite volume.** For polynomial functionals `F(A) = ∏_i ∑_{z ∈ A} P_i(z)`,
 `d/dt E_t F(K_o) = ∑_{x, y} w(x, y) E_t[1{x ∈ K_o, y ∉ K_o}
   ∑_{∅ ≠ I} (∏_{i ∉ I} ∑_{K_o} P_i)(∏_{i ∈ I} ∑_{K_y} P_i)]`. -/
 theorem hasDerivAt_integral_prod_sum_cluster {ι : Type*} [Fintype ι] [DecidableEq ι]
@@ -191,9 +190,9 @@ theorem hasDerivAt_integral_prod_sum_cluster {ι : Type*} [Fintype ι] [Decidabl
     exact prod_add_sub_prod _ _
   · rfl
 
-/-! ### Non-vacuity witness (D-5) -/
+/-! ### Non-vacuity witness -/
 
-/-- **D-5 witness.** Two points (`Bool`), `λ_u = u⁺` on the pair (`= u` near `t = 1`), and
+/-- **Non-vacuity witness.** Two points (`Bool`), `λ_u = u⁺` on the pair (`= u` near `t = 1`), and
 the weight `g = 1{·= true}`: the hypotheses of `hasDerivAt_integral_sum_cluster` hold. -/
 example :
     HasDerivAt (fun u : ℝ => ∫ ω, ∑ z, (cluster ω false).indicator

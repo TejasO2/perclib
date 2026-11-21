@@ -2,7 +2,7 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New for this project (issue 194, Q-34). No upstream proof is copied.
+New for this project. No upstream proof is copied.
 -/
 module
 

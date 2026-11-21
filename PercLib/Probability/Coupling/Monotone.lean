@@ -11,6 +11,21 @@ public import PercLib.Probability.ProdBernoulli
 public import Mathlib.MeasureTheory.Integral.Lebesgue.Map
 public import Mathlib.Data.Sym.Sym2
 
+/-!
+# Monotone coupling of product Bernoulli laws
+
+Ordered profiles admit a coupling of their product laws with ordered configurations, so increasing
+events and nonnegative increasing observables are monotone in the profile.
+
+## Main results
+
+* `exists_bernoulli_order_coupling`
+* `exists_prodBernoulli_monotone_coupling`
+* `prodBernoulli_mono_event`
+* `lintegral_prodBernoulli_mono`
+* `exists_bond_monotone_coupling`
+-/
+
 @[expose] public section
 
 open MeasureTheory ProbabilityTheory

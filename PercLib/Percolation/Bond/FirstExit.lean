@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
 New first-exit and internal/boundary independence proofs on the canonical bond law.
-This is the elementary q-normalized boundary bound of issue 193, not a sharpness
+This is the elementary q-normalized boundary bound, not a sharpness
 or BK iteration theorem. No upstream proof is copied and no Input is introduced.
 -/
 module
@@ -10,6 +10,23 @@ public import PercLib.Percolation.Bond.LocalConnectivity
 public import PercLib.Percolation.Bond.Forest
 public import PercLib.Probability.ProdBernoulliIndependence
 public import PercLib.Probability.OpenEventHarris
+
+/-!
+# The first-exit inequality
+
+A connection leaving a domain has a first exiting edge preceded by an internal connection; internal
+connectivity is independent of the boundary pairs, which bounds escape and infinite-cluster
+probabilities by the boundary functional of a finite set.
+
+## Main results
+
+* `exists_first_exit`
+* `law_localConn_inter_boundary`
+* `law_escape_le_phi`
+* `law_cluster_infinite_le_phi`
+* `law_escape_singleton_le_rowSum`
+* `phi_nat_range`
+-/
 
 @[expose] public section
 noncomputable section

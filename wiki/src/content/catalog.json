@@ -65,6 +65,17 @@
       "coverageNote": "The percolation statements are a source for the planned shared critical theory. The prototype does not include a Lean implementation of the finite-size criterion or the sharpness proof."
     },
     {
+      "id": "dt-sharpness-zd",
+      "shortName": "Duminil-Copin\u2013Tassion, Z^d note",
+      "title": "A new proof of the sharpness of the phase transition for Bernoulli percolation on Z^d",
+      "author": "Hugo Duminil-Copin and Vincent Tassion",
+      "year": 2015,
+      "edition": "arXiv:1502.03051v1 \u00b7 10 February 2015",
+      "url": "https://arxiv.org/abs/1502.03051v1",
+      "description": "The finite-set criterion and the identification of its threshold with p_c for nearest-neighbour bond percolation on Z^d.",
+      "coverageNote": "Theorem 1.1 is the source of the lattice identification of the certificate threshold with p_c."
+    },
+    {
       "id": "hutchcroft-triangle-2021",
       "shortName": "Quantitative triangle bounds",
       "title": "On the derivation of mean-field percolation critical exponents from the triangle condition",

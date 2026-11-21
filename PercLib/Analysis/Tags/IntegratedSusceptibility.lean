@@ -8,6 +8,17 @@ module
 public import PercLib.Meta.Tag
 public import PercLib.Analysis.LogarithmicCorrections
 
+/-!
+# Integrated susceptibility: correspondence
+
+Wiki correspondence for the logarithmic correction bounds of
+`PercLib/Analysis/LogarithmicCorrections.lean`.
+
+## Main results
+
+* `integrated_susceptibility_bounds`
+-/
+
 @[expose] public section
 noncomputable section
 

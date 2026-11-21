@@ -2,8 +2,8 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for the hierarchical programme (package H6, the sibling-block recursion), written on
-2026-11-20. No upstream proof is copied and no definition is added.
+New proofs (the sibling-block recursion), written on 2026-11-20. No upstream proof is copied and no
+definition is added.
 -/
 module
 
@@ -127,11 +127,11 @@ theorem law_restrict_level_ball_map_addLeft (J : Sym2 (ℕ →₀ (Fin d → ZMo
     · rfl
 
 open Classical in
-/-- **Sibling-block recursion** (Hutchcroft, arXiv:2103.17013v1, Lemma 2.8; wiki 655W,
-recursion part). On `ℕ →₀ (Fin d → ZMod L)` with `L ≥ 2`, `d ≥ 1`, let `c, α, β > 0` and let
-`J` be translation invariant with `J(u, v) ≥ c L^{-(d+α) h(v-u)}` for `u ≠ v`. Write `q_m` for
-`intensityProfile J β` restricted to the pairs inside `Λ_m = {h ≤ m}`, `M_n` for the quantile
-`tightnessScale q_n Λ_n` and `a_n = E_{q_n} |K_0 ∩ Λ_n|`. If `M_n² ≤ (A/β) L^{(d+α)n}`, then
+/-- **Sibling-block recursion** (Hutchcroft, arXiv:2103.17013v1, Lemma 2.8, recursion part). On
+`ℕ →₀ (Fin d → ZMod L)` with `L ≥ 2`, `d ≥ 1`, let `c, α, β > 0` and let `J` be translation
+invariant with `J(u, v) ≥ c L^{-(d+α) h(v-u)}` for `u ≠ v`. Write `q_m` for `intensityProfile J β`
+restricted to the pairs inside `Λ_m = {h ≤ m}`, `M_n` for the quantile `tightnessScale q_n Λ_n` and
+`a_n = E_{q_n} |K_0 ∩ Λ_n|`. If `M_n² ≤ (A/β) L^{(d+α)n}`, then
 
 `k β L^{-αn} a_n² ≤ ∑_{x ∈ Λ_{n+1} \ Λ_n} P_{q_{n+1}}(0 ↔ x)`
 

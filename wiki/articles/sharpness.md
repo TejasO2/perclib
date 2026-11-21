@@ -51,7 +51,10 @@
 <a id="tag-6EIM" data-assertion="definition" data-title="Expected open boundary influence"></a><p>For a finite set $S\ni0$, define the expected open boundary influence</p>
       $$\varphi_p(S)=p\!\!\sum_{\substack{x\in S,\;y\notin S\\x\sim y}}\mathbb P_p(0\leftrightarrow x\text{ inside }S).$$
       <p>The probability in the definition uses <a href="#/connectivity">connectivity restricted to the set</a>. The useful certificate is $\varphi_p(S)&lt;1$. It says that an <a href="#/exploration">exploration</a> reaching the boundary of this region produces less than one unit of expected outgoing influence. A decomposition at successive exits turns the certificate into decay estimates. Taking $S=\{0\}$ recovers the simple criterion $2dp&lt;1$; larger sets account for the connections already formed inside a region.</p>
-      <a id="tag-FCU7" data-assertion="theorem" data-title="Subcritical finite-set certificate"></a><p>The deeper step is to prove that a certificate exists for every $p&lt;p_c$. The proof combines a differential inequality with a boundary exploration, identifying the threshold defined by finite certificates with the threshold defined by infinite clusters.</p>
+      <a id="tag-FCU7" data-assertion="theorem" data-title="Subcritical finite-set certificate"></a><div class="theorem-statement"><p>Define the certificate threshold</p>
+      $$\tilde p_c=\sup\{p\in[0,1]:\ \varphi_p(S)&lt;1\text{ for some finite }S\ni0\}.$$
+      <p>For the lattice model, $\tilde p_c=p_c$. In particular, for every $p&lt;p_c$ there is a finite set $S\ni0$ with $\varphi_p(S)&lt;1$.</p></div>
+      <p>The proof combines a differential inequality with a boundary exploration. Since $p\mapsto\varphi_p(S)$ is a nondecreasing polynomial for each finite $S$, the set of parameters admitting a certificate is an interval $[0,\tilde p_c)$ that is open at its right end; consequently $\varphi_p(S)\ge1$ for every finite $S\ni0$ when $p\ge p_c$. For transitive summable intensity kernels, the same identification is the <a href="/tag/RDF0/">finite-set contraction characterization</a>: some finite set containing the root contracts exactly when $\beta&lt;\beta_c$.</p>
 
 ## What survives for long-range percolation {#section-long-range}
 

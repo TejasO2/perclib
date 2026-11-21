@@ -10,6 +10,22 @@ public import PercLib.Probability.OpenEventHarris
 public import Mathlib.MeasureTheory.Measure.Continuity
 public import Mathlib.Data.Set.Finite.Lattice
 
+/-!
+# Cluster-tail events
+
+The event that a cluster meets at least `n` vertices of a finite domain is an increasing, measurable
+union of intersections of connection events, with finite open witnesses, and its probability is the
+limit along finite-edge restrictions.
+
+## Main results
+
+* `cluster_tail_eq_iUnion`
+* `isUpperSet_cluster_tail`
+* `measurableSet_cluster_tail`
+* `exists_finset_of_cluster_tail`
+* `tendsto_cluster_tail_probability`
+-/
+
 @[expose] public section
 
 open MeasureTheory Set

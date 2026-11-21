@@ -2,9 +2,9 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for issue 197 (Q-37, the depth recursion), written on 2026-11-15 by PROVER-E.
-No upstream proof is copied. The recursion is the standard Galton–Watson recursion for
-binomial offspring (G. Grimmett, *Percolation*, 2nd ed., 1999, the rooted tree example).
+New proofs, written on 2026-11-15. No upstream proof is copied. The recursion is the standard
+Galton–Watson recursion for binomial offspring (G. Grimmett, *Percolation*, 2nd ed., 1999, the
+rooted tree example).
 -/
 module
 
