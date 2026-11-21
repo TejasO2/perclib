@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-16. No upstream proof is copied.
 -/
 module
@@ -42,7 +44,6 @@ noncomputable section
 
 open MeasureTheory Set PercLib.Probability
 open scoped ENNReal unitInterval
-open Classical
 
 namespace PercLib.Percolation.Bond
 
@@ -66,6 +67,7 @@ theorem lintegral_ghost_le_union [Countable V] (q₀ s : Sym2 V → I) (o : V) {
   exact measure_mono fun η hη => hη.mono (inter_subset_inter_left _
     (cluster_mono subset_union_left o))
 
+open Classical in
 /-- The off-diagonal row sum over the vertices outside a set containing `u` is at most the
 full off-diagonal row sum. -/
 theorem tsum_ite_not_mem_le (s : Sym2 V → I) (C : Finset V) {u : V} (hu : u ∈ C) :

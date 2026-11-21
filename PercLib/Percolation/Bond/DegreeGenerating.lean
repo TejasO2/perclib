@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-15. No upstream proof is copied.
 -/
 module
@@ -31,12 +33,12 @@ isolated (`law_isolated_eq_iInf`). This file adds no definition.
 
 open MeasureTheory ProbabilityTheory Set PercLib.Probability
 open scoped ENNReal
-open Classical
 
 namespace PercLib.Percolation.Bond
 
 variable {V : Type*}
 
+open Classical in
 /-- The factor of one pair: `s` if it is open, `1` if it is closed. -/
 theorem lintegral_ite_mem (q : Sym2 V → unitInterval) (e : Sym2 V) (s : ℝ≥0∞) :
     ∫⁻ ω, (if e ∈ ω then s else 1) ∂law q =
@@ -54,6 +56,7 @@ theorem lintegral_ite_mem (q : Sym2 V → unitInterval) (e : Sym2 V) (s : ℝ≥
   change s * prodBernoulli q _ + (1 - prodBernoulli q _) = _
   rw [prodBernoulli_setOf_mem]
 
+open Classical in
 /-- The factors of distinct pairs at `v` are independent. -/
 theorem iIndepFun_ite_mem (q : Sym2 V → unitInterval) (v : V) (s : ℝ≥0∞) :
     iIndepFun (fun (w : V) (ω : Config V) => if s(v, w) ∈ ω then s else (1 : ℝ≥0∞)) (law q) := by
@@ -63,6 +66,7 @@ theorem iIndepFun_ite_mem (q : Sym2 V → unitInterval) (v : V) (s : ℝ≥0∞)
   exact h.comp (fun _ (P : Prop) => if P then s else (1 : ℝ≥0∞))
     (fun _ => measurable_from_top)
 
+open Classical in
 /-- **The generating function of the number of open pairs to a finite set.** -/
 theorem lintegral_pow_card_open (q : Sym2 V → unitInterval) (v : V) (F : Finset V)
     (s : ℝ≥0∞) :
@@ -107,6 +111,7 @@ theorem law_forall_not_mem (q : Sym2 V → unitInterval) (v : V) (F : Finset V) 
     exact Finset.measurableSet_biInter F fun w _ => (measurableSet_mem _).compl
   rw [lintegral_indicator_const hm, one_mul]
 
+open Classical in
 /-- **Monotone limit along increasing finite sets.** For `s ≤ 1` the generating functions
 decrease to that of the number of open pairs to the union. -/
 theorem lintegral_iInf_pow_card_open (q : Sym2 V → unitInterval) (v : V) {F : ℕ → Finset V}
@@ -133,6 +138,7 @@ theorem lintegral_iInf_pow_card_open (q : Sym2 V → unitInterval) (v : V) {F : 
           lintegral_mono fun ω => pow_le_one₀ zero_le hs
       _ = 1 := by simp
 
+open Classical in
 /-- **The probability that `v` is isolated**, along an increasing exhaustion of the other
 vertices by finite sets. -/
 theorem law_isolated_eq_iInf [Countable V] (q : Sym2 V → unitInterval) (v : V)
@@ -163,6 +169,7 @@ theorem law_isolated_eq_iInf [Countable V] (q : Sym2 V → unitInterval) (v : V)
 
 /-! ### Non-vacuity -/
 
+open Classical in
 /-- On `Bool`, the generating function of the degree of `false` is `s t + (1 - t)`. -/
 example (q : Sym2 Bool → unitInterval) (s : ℝ≥0∞) :
     ∫⁻ ω, s ^ (({true} : Finset Bool).filter fun w => s(false, w) ∈ ω).card ∂law q =
@@ -170,6 +177,7 @@ example (q : Sym2 Bool → unitInterval) (s : ℝ≥0∞) :
         (1 - (unitInterval.toNNReal (q s(false, true)) : ℝ≥0∞)) := by
   rw [lintegral_pow_card_open, Finset.prod_singleton]
 
+open Classical in
 /-- On `ℕ`, the probability that `0` is isolated, along the exhaustion `{0, …, n}`. -/
 example (q : Sym2 ℕ → unitInterval) :
     law q {ω : Config ℕ | ∀ w, ¬ (openGraph ω).Adj 0 w} =

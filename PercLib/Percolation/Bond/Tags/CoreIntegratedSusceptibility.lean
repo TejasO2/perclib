@@ -1,5 +1,7 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
 -/
 module
 
@@ -15,7 +17,7 @@ All mathematical inputs are proved in the imported modules. -/
 @[expose] public section
 noncomputable section
 open MeasureTheory Set Filter
-open scoped ENNReal NNReal Topology Classical
+open scoped ENNReal NNReal Topology
 
 namespace PercLib.Percolation.Bond
 variable {V : Type*}
@@ -31,6 +33,7 @@ theorem tau_deleted_loss [Countable V] (q : Sym2 V → unitInterval) (S : Set V)
       ∑' c : S, tau q y c * tau q c w :=
   ⟨law_deleted_le_tau q S y w, tau_le_deleted_add q S y w⟩
 
+open Classical in
 /-- The boundary susceptibility lower bound with positive part, and, when the
 susceptibility does not depend on the root, the identification of the expression inside the
 positive part with `L(S)`. -/

@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New for this project: the measure form of mathlib's `fkg` and `holley`
 (`Mathlib/Combinatorics/SetFamily/FourFunctions.lean`). No upstream proof is copied.
 -/
@@ -63,7 +65,8 @@ theorem integral_mul_integral_le_of_latticeCondition (μ : Measure (Set E))
   rw [integral_fintype Integrable.of_finite, integral_fintype Integrable.of_finite,
     integral_fintype Integrable.of_finite]
   simp only [smul_eq_mul]
-  have h := fkg (f := f) (g := g) (μ := fun ω : Set E => μ.real {ω}) (fun _ => measureReal_nonneg) hf₀ hg₀ hf hg
+  have h := fkg (f := f) (g := g) (μ := fun ω : Set E => μ.real {ω})
+      (fun _ => measureReal_nonneg) hf₀ hg₀ hf hg
     (real_latticeCondition μ hμ)
   have hsum : ∑ ω : Set E, μ.real {ω} = 1 := by
     rw [sum_measureReal_singleton, Finset.coe_univ]
@@ -80,8 +83,10 @@ theorem measure_inter_ge_of_latticeCondition (μ : Measure (Set E)) [IsProbabili
   have h := integral_mul_integral_le_of_latticeCondition μ hμ
     (f := fun ω => if ω ∈ A then (1 : ℝ) else 0) (g := fun ω => if ω ∈ B then (1 : ℝ) else 0)
     (fun ω => by dsimp; split_ifs <;> norm_num) (fun ω => by dsimp; split_ifs <;> norm_num)
-    (fun ω η hle => by dsimp; split_ifs with h1 h2 <;> first | exact absurd (hA hle h1) h2 | norm_num)
-    (fun ω η hle => by dsimp; split_ifs with h1 h2 <;> first | exact absurd (hB hle h1) h2 | norm_num)
+    (fun ω η hle => by
+      dsimp; split_ifs with h1 h2 <;> first | exact absurd (hA hle h1) h2 | norm_num)
+    (fun ω η hle => by
+      dsimp; split_ifs with h1 h2 <;> first | exact absurd (hB hle h1) h2 | norm_num)
   rw [integral_fintype Integrable.of_finite, integral_fintype Integrable.of_finite,
     integral_fintype Integrable.of_finite] at h
   simp only [smul_eq_mul] at h
@@ -116,7 +121,8 @@ theorem measure_le_of_holley (μ ν : Measure (Set E)) [IsProbabilityMeasure μ]
     (f := fun ω => μ.real {ω}) (g := fun ω => ν.real {ω})
     (fun ω => by dsimp; split_ifs <;> norm_num) (fun _ => measureReal_nonneg)
     (fun _ => measureReal_nonneg)
-    (fun ω η hle => by dsimp; split_ifs with h1 h2 <;> first | exact absurd (hA hle h1) h2 | norm_num)
+    (fun ω η hle => by
+      dsimp; split_ifs with h1 h2 <;> first | exact absurd (hA hle h1) h2 | norm_num)
     hsum hr
   have e1 : ∑ ω : Set E, (if ω ∈ A then (1 : ℝ) else 0) * μ.real {ω} = μ.real A := by
     rw [measureReal_eq_sum_indicator μ A]

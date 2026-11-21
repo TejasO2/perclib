@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-14, extending the path sums of `PercLib.Percolation.Bond.RowSum`. No
 upstream proof is copied.
 -/
@@ -30,7 +32,6 @@ noncomputable section
 
 open MeasureTheory Set PercLib.Probability
 open scoped ENNReal NNReal
-open Classical
 
 namespace PercLib.Percolation.Bond
 
@@ -67,6 +68,7 @@ theorem exists_support_walk_of_forall_pos (q : Sym2 V → unitInterval) {x y : V
   rw [SimpleGraph.edgeSet_fromEdgeSet]
   exact ⟨hpos e he, SimpleGraph.not_isDiag_of_mem_edgeSet _ (p.edges_subset_edgeSet he)⟩
 
+open Classical in
 /-- A path that is too short for the support graph has zero cylinder product. -/
 theorem path_prod_eq_zero_of_length_lt (q : Sym2 V → unitInterval) {x y : V} {k : ℕ}
     (hk : ∀ p : (SimpleGraph.fromEdgeSet {e | 0 < q e}).Walk x y, k ≤ p.length)
@@ -147,6 +149,7 @@ theorem tau_eq_zero_of_not_reachable [Countable V] (q : Sym2 V → unitInterval)
   exact path_prod_eq_zero_of_length_lt q (k := p.1.length + 1)
     (fun w => absurd ⟨w⟩ h) p (Nat.lt_succ_self _)
 
+open Classical in
 /-- **Tail of the susceptibility.** The vertices that the support graph keeps at walk
 distance at least `k` from `x` carry total connection probability at most
 `m ^ k (1 - m)⁻¹`. -/

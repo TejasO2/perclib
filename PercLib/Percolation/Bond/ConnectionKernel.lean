@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 The connection kernel `τ` is positive semidefinite, with the Cauchy–Schwarz bounds for the triangle
 diagram that follow. New for this project; no upstream proof is copied, and no new definition is
 introduced: matrix powers of `τ` are written out as sums.
@@ -34,7 +38,7 @@ and `Δₓ = T³(x,x)` (the triangle diagram at `x`).
 noncomputable section
 
 open MeasureTheory Finset
-open scoped ENNReal Classical
+open scoped ENNReal
 
 namespace PercLib.Percolation.Bond
 
@@ -63,6 +67,7 @@ theorem sum_sum_mul_ite_eq_sum_sq {ι κ : Type*} [Fintype ι] [DecidableEq κ] 
   refine Finset.sum_congr rfl fun i hi => ?_
   rw [(Finset.mem_filter.mp hi).2]
 
+open Classical in
 /-- Pointwise, the connection indicator quadratic form is the sum over open clusters of the
 squared cluster masses. -/
 theorem sum_mul_indicator_conn_eq_tsum (ω : Config V) {ι : Type*} [Fintype ι] (f : ι → V)
@@ -117,6 +122,7 @@ theorem sum_mul_tau_eq_integral_indicator [Countable V] (q : Sym2 V → unitInte
     smul_eq_mul, mul_one, measureReal_def]
   rfl
 
+open Classical in
 /-- Identity. For a finite family of vertices `f i` and real weights `a i`,
 `∑ᵢⱼ aᵢ aⱼ T(f i, f j) = E[∑_C (∑_{f i ∈ C} aᵢ)²]`, the sum over the open clusters `C`. -/
 theorem sum_mul_tau_eq_integral [Countable V] (q : Sym2 V → unitInterval)
@@ -237,6 +243,7 @@ private theorem sum_triangle_sq_le [Countable V] (q : Sym2 V → unitInterval) (
           rw [hsym y u]
     _ ≤ _ := mul_le_mul' (sum_triangle_le_tsum q F x x) (sum_triangle_le_tsum q F y y)
 
+open Classical in
 /-- Square-root form: `T³(x,y) ≤ (Δₓ Δ_y)^{1/2}`. No finiteness hypothesis is
 needed. -/
 theorem triangle_le_rpow [Countable V] (q : Sym2 V → unitInterval) (x y : V) :
@@ -380,7 +387,8 @@ example :
       (tau (fun _ : Sym2 Bool => (⟨1 / 2, by norm_num, by norm_num⟩ : unitInterval)) i j).toReal) =
       Matrix.of (fun i j : Bool => if i = j then (1 : ℝ) else 1 / 2) ∧
     (Matrix.of fun i j : Bool =>
-      (tau (fun _ : Sym2 Bool => (⟨1 / 2, by norm_num, by norm_num⟩ : unitInterval)) i j).toReal).PosSemidef := by
+      (tau (fun _ : Sym2 Bool => (⟨1 / 2, by norm_num, by norm_num⟩ : unitInterval)) i
+          j).toReal).PosSemidef := by
   refine ⟨?_, posSemidef_tau _ id⟩
   ext i j
   simp only [Matrix.of_apply]

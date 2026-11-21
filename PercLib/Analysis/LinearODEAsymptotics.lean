@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-16, against pinned mathlib. No upstream proof is copied.
 -/
 module
@@ -163,7 +165,7 @@ theorem linearODE_core (hr₀ : 1 ≤ r₀) (hc : 0 < c)
     have hexp : AbsolutelyContinuousOnInterval (fun r => Real.exp (-E r)) r₀ R :=
       hK.comp_absolutelyContinuousOnInterval (g := fun r => -E r) (fun r hr => by
         have : |-E r| ≤ B := by simpa only [Real.norm_eq_abs, Pi.neg_apply] using hB r hr
-        show -E r ∈ Icc (-B) B
+        change -E r ∈ Icc (-B) B
         exact ⟨by linarith [neg_abs_le (-E r)], (le_abs_self _).trans this⟩) hEac.neg
     have hpow : AbsolutelyContinuousOnInterval (fun r : ℝ => r ^ (-(2 * α))) r₀ R := by
       refine ContDiffOn.absolutelyContinuousOnInterval fun r hr => ?_
@@ -578,7 +580,7 @@ example : (fun r : ℝ => r ^ 4 * Real.log r) ~[atTop] fun r => 1 * r ^ (4 : ℝ
     (Eventually.of_forall fun r hr => by
       have hr0 : r ≠ 0 := by linarith
       have hd := ((hasDerivAt_pow 4 r).mul (Real.hasDerivAt_log hr0))
-      show deriv ((fun x : ℝ => x ^ 4) * Real.log) r = _
+      change deriv ((fun x : ℝ => x ^ 4) * Real.log) r = _
       rw [hd.deriv, show (2 : ℝ) + 1 = (3 : ℕ) by norm_num, Real.rpow_natCast]
       field_simp
       ring)
@@ -598,7 +600,7 @@ example : ∃ K > 0, (fun r : ℝ => r ^ 6 - r ^ 5) ~[atTop] fun r => K * r ^ (2
     (Eventually.of_forall fun r hr => by
       have hr0 : r ≠ 0 := by linarith
       have hd := (hasDerivAt_pow 6 r).sub (hasDerivAt_pow 5 r)
-      show deriv ((fun x : ℝ => x ^ 6) - fun x : ℝ => x ^ 5) r = _
+      change deriv ((fun x : ℝ => x ^ 6) - fun x : ℝ => x ^ 5) r = _
       rw [hd.deriv, show (3 : ℝ) + 1 = (4 : ℕ) by norm_num, Real.rpow_natCast]
       field_simp
       ring)

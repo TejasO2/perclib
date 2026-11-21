@@ -15,7 +15,7 @@
         "JZG4"
       ],
       "issues": [],
-      "leanImpact": "Use the corrected integral identity and an explicit integer truncation. The comparison and summable-tail argument are written in PAFY, but no compiled declaration or full renormalization proof is supplied. The published theorem is not contradicted by this numerical error.",
+      "leanImpact": "Use the corrected integral identity and an explicit integer truncation. The comparison and summable-tail argument are written in PAFY. A complete wiki proof of JZG4 uses only PAFY's integral identity, with its own discrete comparison, and not the source's Lemma 2 numerics. No compiled declaration is supplied. The published theorem is not contradicted by this numerical error.",
       "resolution": {
         "status": "found",
         "summary": "Evaluate the block integral correctly and enlarge the separation constant.",

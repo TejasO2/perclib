@@ -1,4 +1,9 @@
 /-
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 The integration and exhaustion steps of the supercritical density bound (L0TE, second
 half), with the finite-volume differential inequality as an ordinary hypothesis. New proofs
 from the escape-probability theorems of this library and pinned mathlib
@@ -24,7 +29,8 @@ public import Mathlib.Analysis.Calculus.Deriv.Inv
   closing real inequality.
 
 The escape probability from a finite `Λ` is `law q_β (⋃ w ∉ Λ, conn o w)`; along the real
-parameter it is written `(law (intensityProfile J s.toNNReal) (⋃ y ∈ (Λ : Set V)ᶜ, conn o y)).toReal`.
+parameter it is written
+`(law (intensityProfile J s.toNNReal) (⋃ y ∈ (Λ : Set V)ᶜ, conn o y)).toReal`.
 -/
 
 @[expose] public section

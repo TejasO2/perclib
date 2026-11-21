@@ -1,6 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs using pinned mathlib's simple paths, cylinder probabilities and
 ENNReal sums. No upstream proof is copied.
 -/
@@ -20,10 +23,10 @@ The subsequent enlargement to arbitrary sequences is a deterministic inequality.
 noncomputable section
 open MeasureTheory Set PercLib.Probability
 open scoped ENNReal NNReal
-open Classical
 namespace PercLib.Percolation.Bond
 variable {V : Type*}
 
+open Classical in
 /-- Every connection has a deterministic simple-path certificate in the complete graph. -/
 theorem conn_subset_iUnion_path (x y : V) :
     conn x y ⊆ ⋃ p : (⊤ : SimpleGraph V).Path x y,
@@ -33,8 +36,10 @@ theorem conn_subset_iUnion_path (x y : V) :
   refine mem_iUnion.mpr ⟨⟨p.mapLe le_top, hp.mapLe le_top⟩, ?_⟩
   intro e he
   have he' : e ∈ (openGraph ω).edgeSet := p.edges_subset_edgeSet (by simpa using he)
-  exact (show e ∈ ω \ Sym2.diagSet by simpa [openGraph, SimpleGraph.edgeSet_fromEdgeSet] using he').1
+  exact (show e ∈ ω \ Sym2.diagSet by simpa [openGraph, SimpleGraph.edgeSet_fromEdgeSet]
+      using he').1
 
+open Classical in
 /-- The probability bound sums only simple paths, including the empty path when x=y. -/
 @[tag "5C44"]
 theorem tau_le_tsum_paths [Countable V] (q : Sym2 V → unitInterval) (x y : V) :
@@ -73,6 +78,7 @@ theorem walk_edges_prod_eq_weight (q : Sym2 V → unitInterval) {G : SimpleGraph
     rw [← p.cons_tail_support, walkWeight_list_cons, ← ih]
     simp [offDiagonal, h.ne.symm]
 
+open Classical in
 /-- A simple path's distinct-coordinate cylinder product equals its sequence weight. -/
 theorem path_prod_eq_weight (q : Sym2 V → unitInterval) {x y : V}
     (p : (⊤ : SimpleGraph V).Path x y) :
@@ -96,6 +102,7 @@ theorem path_tail_injective (x : V) :
   subst r
   rfl
 
+open Classical in
 /-- Expected cluster volume is bounded by the sum of masked walk weights. -/
 theorem chi_le_tsum_walkSum [Countable V] (q : Sym2 V → unitInterval) (x : V) :
     chi q x ≤ ∑' n, walkSum
@@ -158,7 +165,7 @@ theorem one_le_chi [Countable V] (q : Sym2 V → unitInterval) (x : V) :
 
 /-- Vanishing off-diagonal rates give susceptibility exactly one, regardless of loops. -/
 theorem chi_eq_one_of_offDiagonal_zero [Countable V] (q : Sym2 V → unitInterval)
-    (hq : ∀ v w, w ≠ v → q s(v,w) = 0) (x : V) : chi q x = 1 := by
+    (hq : ∀ v w, w ≠ v → q s(v, w) = 0) (x : V) : chi q x = 1 := by
   apply le_antisymm _ (one_le_chi q x)
   have hrow : ∀ v, rowSum (fun e => unitInterval.toENNReal (q e)) v ≤ 0 := by
     intro v
@@ -174,6 +181,7 @@ theorem chi_eq_one_of_offDiagonal_zero [Countable V] (q : Sym2 V → unitInterva
   simpa using chi_le_inv_one_sub_of_rowSum q 0 hrow (by simp) x
 
 -- Arbitrary diagonal rates are allowed, including probability one.
+open Classical in
 example [Countable V] (x : V) :
     chi (fun e : Sym2 V => if e.IsDiag then 1 else 0) x = 1 := by
   apply chi_eq_one_of_offDiagonal_zero

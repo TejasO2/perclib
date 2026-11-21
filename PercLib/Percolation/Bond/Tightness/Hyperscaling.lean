@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs, on the bond interface. Source motivation: T. Hutchcroft, arXiv:2008.11197v2,
 §2 (consequences of universal tightness), and the wiki statements LQ6Y, OB0A, WRHL and UVQ6. No
 source text or code is copied.
@@ -34,7 +38,7 @@ Fix a finite nonempty `Λ`, write `X_x = |K_x ∩ Λ|`, `Z = max_{x ∈ Λ} X_x`
 noncomputable section
 
 open MeasureTheory Set
-open scoped ENNReal Classical
+open scoped ENNReal
 
 namespace PercLib.Percolation.Bond
 
@@ -42,6 +46,7 @@ variable {V : Type*}
 
 /-! ### The partition identity for every function of the trace size -/
 
+open Classical in
 /-- `∑_{x ∈ Λ} f(|K_x ∩ Λ|) = ∑_D |D| • f(|D|)` over the traces `D` of clusters on `Λ`. -/
 theorem sum_function_clusterIntersection {β : Type*} [AddCommMonoid β] (Λ : Finset V)
     (ω : Config V) (f : ℕ → β) :
@@ -56,6 +61,7 @@ theorem sum_function_clusterIntersection {β : Type*} [AddCommMonoid β] (Λ : F
     Finset.filter_congr fun a ha => filter_cluster_eq_iff Λ ω ha
   rw [hfib]
 
+open Classical in
 /-- The expectation form: `∑_{x ∈ Λ} E f(X_x) = E ∑_D |D| f(|D|)`. -/
 theorem sum_lintegral_function_clusterIntersection [Countable V] (q : Sym2 V → unitInterval)
     (Λ : Finset V) (f : ℕ → ℝ≥0∞) :
@@ -70,6 +76,7 @@ theorem sum_lintegral_function_clusterIntersection [Countable V] (q : Sym2 V →
 
 /-! ### OB0A: moments under a uniform root -/
 
+open Classical in
 /-- **Sampled-root moments.** Under a uniform root `U` on `Λ` independent of `ω`,
 `E X_U^m = |Λ|⁻¹ E ∑_D |D|^(m+1)`. -/
 theorem avg_lintegral_pow_clusterIntersection [Countable V] (q : Sym2 V → unitInterval)
@@ -80,6 +87,7 @@ theorem avg_lintegral_pow_clusterIntersection [Countable V] (q : Sym2 V → unit
   rw [sum_lintegral_function_clusterIntersection q Λ fun n => (n : ℝ≥0∞) ^ m]
   simp only [pow_succ']
 
+open Classical in
 /-- **Window form.** For `a, b, v ∈ ℝ`, the moment restricted to the window
 `a v ≤ X_U ≤ b v` is `|Λ|⁻¹ E ∑_{D : a v ≤ |D| ≤ b v} |D|^(m+1)`. -/
 theorem avg_lintegral_pow_clusterIntersection_window [Countable V]
@@ -98,6 +106,7 @@ theorem avg_lintegral_pow_clusterIntersection_window [Countable V]
 
 /-! ### LQ6Y: the partition bound and the quantile lower bound -/
 
+open Classical in
 /-- The largest trace is one of the traces. -/
 theorem exists_trace_eq_max (Λ : Finset V) (hΛ : Λ.Nonempty) (ω : Config V) :
     ∃ D ∈ Λ.image (fun x => Λ.filter (· ∈ cluster ω x)),
@@ -501,7 +510,7 @@ theorem law_le_clusterIntersection_le_cluster (q : Sym2 V → unitInterval) (Λ 
     (u : V) (n : ℕ) :
     law q {ω | n ≤ clusterIntersection Λ ω u} ≤ law q {ω | (n : ℕ∞) ≤ (cluster ω u).encard} := by
   refine measure_mono fun ω (hω : n ≤ clusterIntersection Λ ω u) => ?_
-  show (n : ℕ∞) ≤ (cluster ω u).encard
+  change (n : ℕ∞) ≤ (cluster ω u).encard
   calc (n : ℕ∞) ≤ (clusterIntersection Λ ω u : ℕ∞) := by exact_mod_cast hω
     _ = (cluster ω u ∩ (Λ : Set V)).encard :=
         (Λ.finite_toSet.subset Set.inter_subset_right).cast_ncard_eq
@@ -671,6 +680,7 @@ example (q : Sym2 Unit → unitInterval) :
     (lintegral_rpow_max_le_sum q (Finset.singleton_nonempty ()) zero_le_one)
   rwa [tightnessScale_singleton, Nat.cast_ofNat] at h
 
+open Classical in
 example (q : Sym2 Unit → unitInterval) (m : ℕ) :
     (({()} : Finset Unit).card : ℝ≥0∞)⁻¹ *
         ∑ x ∈ ({()} : Finset Unit), ∫⁻ ω, (clusterIntersection {()} ω x : ℝ≥0∞) ^ m ∂(law q) =

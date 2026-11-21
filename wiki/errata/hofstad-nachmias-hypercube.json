@@ -122,14 +122,14 @@
   "versionAudit": {
     "checkedVersion": "Published article: Journal of the European Mathematical Society 19 (2017), 725–814",
     "checkedUrl": "https://ems.press/content/serial-article-files/32188",
-    "method": "The publisher PDF was read in extracted text at the five reported passages. Selected Appendix A passages were also compared with arXiv v1. This summary consolidates the existing entry locators and reading records; it is not a fresh primary-text or visual-PDF audit.",
-    "scope": "All five reports identify published PDF locations. The preprint comparison covers three Appendix A entries only, not the directed-edge clock or the separate upper-field event repair. The source findings remain provisional, and partial or substantial replacement arguments do not certify the rest of the paper.",
+    "method": "The publisher PDF was read in extracted text at the five reported passages. Selected Appendix A passages were also compared with arXiv v1. Section 3.4 of arXiv v1 (the directed-edge definition and Lemma 3.11, printed p.19) was read afresh in extracted PDF text on 21 November 2026; the journal Section 3.4 was not re-read for that comparison. Apart from that reading, this summary consolidates the existing entry locators and reading records; it is not a fresh primary-text or visual-PDF audit.",
+    "scope": "All five reports identify published PDF locations. The arXiv v1 comparison covers three Appendix A entries and the directed-edge clock (walk-time-boundary: Section 3.4, Lemma 3.11, printed p.19), not the separate upper-field event repair. The source findings remain provisional, and partial or substantial replacement arguments do not certify the rest of the paper.",
     "comparisons": [
       {
         "version": "arXiv:1201.3953v1",
         "url": "https://arxiv.org/abs/1201.3953v1",
         "status": "compared",
-        "findings": "Matching text was recorded at pp.63–65 for the lower-field derivative, rectangle remainder and upper-extrapolation error entries, corresponding to journal (A.45), (A.49)–(A.54) and (A.55)–(A.58), pp.804–806. No broader edition equivalence is claimed."
+        "findings": "Matching text was recorded at pp.63–65 for the lower-field derivative, rectangle remainder and upper-extrapolation error entries, corresponding to journal (A.45), (A.49)–(A.54) and (A.55)–(A.58), pp.804–806. For walk-time-boundary, v1 Section 3.4, printed p.19, gives the same directed-edge definition and states Lemma 3.11 without the factor m/(m-1), as sum_u p1(0,u)pt(u,z)=p(t+1)(0,z)+p(t-1)(0,z)/(m-1) for t>=0 with p(-1)=0; its left side has total mass one and, for every t>=1, its right side has total mass 1+1/(m-1), so the v1 identity fails for every t>=1. The journal statement differs from v1 here, as recorded in that entry's locator from an earlier reading not repeated in this comparison. No broader edition equivalence is claimed."
       }
     ]
   }

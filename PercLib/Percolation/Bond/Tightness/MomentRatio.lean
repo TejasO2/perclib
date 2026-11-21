@@ -1,6 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Adapted from the source repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
 d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc, files `PercLib/CriticalLRP/Tightness/MomentRatio.lean`
 (blob 331d362155) and `PercLib/CriticalLRP/Tightness/RealExponent.lean` (blob e177d7bd87),
@@ -67,7 +70,8 @@ theorem moment_ratio_le {μ : Measure Ω} {X : Ω → ℝ≥0∞} (hX : Measurab
     (p q : ℕ) (hp : 1 ≤ p) :
     ∫⁻ ω, X ω ^ (p + q) ∂μ
       ≤ ENNReal.ofReal (((p + q : ℕ) : ℝ) *
-        (2 ^ q + Real.exp 1 * 2 ^ (p + q) * ((p + q).factorial : ℝ) * 9 ^ (p + q) * 36)) * ENNReal.ofReal (M ^ q) * ∫⁻ ω, X ω ^ p ∂μ := by
+        (2 ^ q + Real.exp 1 * 2 ^ (p + q) * ((p + q).factorial : ℝ) * 9 ^ (p + q) * 36)) *
+            ENNReal.ofReal (M ^ q) * ∫⁻ ω, X ω ^ p ∂μ := by
   classical
   have hM0 : (0:ℝ) < M := by linarith
   set k : ℕ := p + q with hk
@@ -279,7 +283,8 @@ theorem moment_ratio_le {μ : Measure Ω} {X : Ω → ℝ≥0∞} (hX : Measurab
           ≤ (2 : ℝ) ^ k * ((k).factorial : ℝ) * 9 ^ k :=
         mul_le_mul s1 h9p (by positivity) (by positivity)
       exact mul_le_mul_of_nonneg_right s2 (by norm_num)
-    have h1 : (k : ℝ) * Real.exp 1 * ((2 : ℝ) ^ (k - 1) * ((k - 1).factorial : ℝ) * 9 ^ (k - 1) * 36)
+    have h1 : (k : ℝ) * Real.exp 1 * ((2 : ℝ) ^ (k - 1) * ((k - 1).factorial : ℝ) * 9 ^
+        (k - 1) * 36)
         ≤ (k : ℝ) * Real.exp 1 * ((2 : ℝ) ^ k * ((k).factorial : ℝ) * 9 ^ k * 36) :=
       mul_le_mul_of_nonneg_left step (by positivity)
     have hconst_k : (k : ℝ) * 2 ^ q + (k : ℝ) * Real.exp 1 *
@@ -423,6 +428,7 @@ theorem law_clusterIntersection_eq_top (q : Sym2 V → unitInterval) (Λ : Finse
     law q {ω | (clusterIntersection Λ ω u : ℝ≥0∞) = ⊤} = 0 := by
   simp
 
+open Classical in
 /-- **The rooted tail (I.2.6)** from `universalTightness`, in the form of the abstract
 moment-ratio theorems: for real `t ≥ M`,
 `P(X_u ≥ t) ≤ e · e^{-t/(9M)} · P(X_u ≥ M)`. -/
@@ -433,7 +439,8 @@ theorem law_clusterIntersection_tail_le [Countable V] (q : Sym2 V → unitInterv
         law q {ω | ENNReal.ofReal (tightnessScale q Λ : ℝ) ≤
           (clusterIntersection Λ ω u : ℝ≥0∞)} := by
   set M := tightnessScale q Λ with hM
-  have hM0 : (0 : ℝ) < M := by exact_mod_cast (show 0 < M by have := two_le_tightnessScale q hΛ; omega)
+  have hM0 : (0 : ℝ) < M := by
+    exact_mod_cast (show 0 < M by have := two_le_tightnessScale q hΛ; omega)
   have ha : 1 ≤ t / M := by rwa [le_div_iff₀ hM0, one_mul]
   have h := (universalTightness V q Λ hΛ).2.2 u (t / M) ha
   have hs1 : {ω | ENNReal.ofReal t ≤ (clusterIntersection Λ ω u : ℝ≥0∞)} =

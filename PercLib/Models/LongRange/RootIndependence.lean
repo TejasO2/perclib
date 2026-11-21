@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Discharge of the premise `hG` that the formalisation of contributor yujinhkim cited below adds to
 Proposition I.3.1 of T. Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1. The
 premise is read from the repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit

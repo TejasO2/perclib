@@ -1,6 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-16, against pinned mathlib. No upstream proof is copied. The
 combinatorial identity is `lemma_I_4_23` of `PercLib.Combinatorics.DoubleFactorialConvolution`.
 -/
@@ -400,7 +403,8 @@ theorem isEquivalent_moment_hierarchy {P : ℕ} {r₀ α B C : ℝ} (hr₀ : 0 <
           have hℓ' := Finset.mem_range.1 hℓ
           exact (tendsto_const_nhds.mul (ih (ℓ + 1 + 1) (by omega) (by omega) (by omega))).mul
             (ih (k + 3 - (ℓ + 1)) (by omega) (by omega) (by omega))
-        have h := (((tendsto_const_nhds (x := (1 : ℝ))).add (hε (k + 3) (by omega) hP)).mul hA).mul hsum
+        have h := (((tendsto_const_nhds (x := (1 : ℝ))).add (hε (k + 3) (by omega) hP)).mul
+            hA).mul hsum
         refine h.congr' ?_
         filter_upwards [eventually_gt_atTop 0] with r hr
         simp only [Finset.mul_sum, Finset.sum_div]
@@ -572,7 +576,7 @@ theorem tendsto_div_rpow_mul_of_ae_deriv {S u g Λ : ℝ → ℝ} {r₀ R_L q β
       rw [sub_zero] at h
       exact h.congr' (Eventually.of_forall fun r => by ring))
     (hg.congr' (Eventually.of_forall fun r => by
-      show _ = g r / Λ r / r ^ (β - 1)
+      change _ = g r / Λ r / r ^ (β - 1)
       rw [div_div, mul_comm]))
   exact key.congr' (Eventually.of_forall fun r => by simp only; ring)
 

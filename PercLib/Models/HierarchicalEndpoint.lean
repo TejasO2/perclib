@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs from this library's runaway, block-restricted quantile, power-law kernel and
 critical boundary flux theorems, and pinned mathlib 56a005855ea17e0b0958f73ec801ae140b0a1679.
 No upstream code is copied and no definition is added. Mathematical reference: T. Hutchcroft,
@@ -266,7 +268,8 @@ theorem ofReal_le_lintegral_clusterIntersection_at_rootCriticalIntensity [NeZero
   have h1 : 1 ≤ βc * (∑ u ∈ S, P u) * ENNReal.ofReal K := by
     refine (hflux.1.trans hflux.2).trans ?_
     rw [mul_assoc, Finset.sum_mul]
-    exact mul_le_mul' le_rfl (Finset.sum_le_sum fun u hu => mul_le_mul' le_rfl (by convert hrow u hu))
+    exact mul_le_mul' le_rfl (Finset.sum_le_sum fun u hu =>
+        mul_le_mul' le_rfl (by convert hrow u hu))
   change _ ≤ ∑ u ∈ S, P u
   set a := ∑ u ∈ S, P u with ha_def
   rcases eq_or_ne a ⊤ with hat | hat

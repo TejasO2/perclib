@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New for this project. An application of mathlib's Hoeffding inequality; no upstream proof is copied.
 -/
 module
@@ -100,7 +102,8 @@ theorem prodBernoulli_real_sum_sub_ge_le (p : ι → unitInterval) (F : Finset �
     (prodBernoulli p).real {ω | t ≤ ((ω ∩ (F : Set ι)).ncard : ℝ) - ∑ i ∈ F, (p i : ℝ)} ≤
       Real.exp (-2 * t ^ 2 / F.card) := by
   classical
-  have h := HasSubgaussianMGF.measure_sum_ge_le_of_iIndepFun (iIndepFun_centred_indicator p) (s := F)
+  have h := HasSubgaussianMGF.measure_sum_ge_le_of_iIndepFun (iIndepFun_centred_indicator p)
+      (s := F)
     (fun i _ => hasSubgaussianMGF_centred_indicator p i) ht
   rw [sum_subgaussian_const] at h
   have hset : {ω : Set ι | t ≤ ((ω ∩ (F : Set ι)).ncard : ℝ) - ∑ i ∈ F, (p i : ℝ)} =

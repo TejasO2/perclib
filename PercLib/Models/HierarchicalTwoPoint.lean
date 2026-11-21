@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New for this project. No upstream proof is copied.
 -/
 module
@@ -29,7 +31,6 @@ noncomputable section
 
 open MeasureTheory Set
 open scoped ENNReal NNReal
-open Classical
 open PercLib.Percolation.Bond
 
 namespace PercLib.Models
@@ -143,7 +144,8 @@ example (x y : ℕ →₀ (Fin 1 → ZMod 2)) (hxy : x ≠ y) (β : ℝ≥0) :
           ((1 - 2 * (β : ℝ≥0∞) * ∑' z : ℕ →₀ (Fin 1 → ZMod 2),
               (if z = 0 then 0 else ((1 * (1 / 4) ^ (z.support.sup Nat.succ) : ℝ≥0) : ℝ≥0∞)))⁻¹ *
             (1 - (β : ℝ≥0∞) * ∑' z : ℕ →₀ (Fin 1 → ZMod 2),
-              (if z = 0 then 0 else ((1 * (1 / 4) ^ (z.support.sup Nat.succ) : ℝ≥0) : ℝ≥0∞)))⁻¹) := by
+              (if z = 0 then 0 else ((1 * (1 / 4) ^ (z.support.sup Nat.succ) : ℝ≥0) :
+                  ℝ≥0∞)))⁻¹) := by
   obtain ⟨J, hJ⟩ := exists_hierarchical_kernel (d := 1) (L := 2) 1 (1 / 4)
   refine ⟨J, by rw [hJ]; positivity, tau_intensity_le_hierarchical J 1 (1 / 4) hJ
     (NNReal.coe_le_coe.1 (by norm_num)) β hxy⟩

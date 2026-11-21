@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs, on the bond interface. Source motivation: M. Aizenman and C. M. Newman, "Tree
 graph inequalities and critical behavior in percolation models", J. Stat. Phys. 36 (1984), and the
 wiki proof of L82Q. No source text or code is copied.
@@ -73,7 +77,8 @@ theorem exists_nbr_reachable_avoid [DecidableEq V] {F : Finset (Sym2 V)} {o v : 
 graph of a finite edge set `F` and `|I| ≥ 2`, then there are `z`, a split of `I` into
 nonempty parts `A` and `I \ A`, and pairwise disjoint `F₀, F_A, F_B ⊆ F` with `o ↔ z` in
 `F₀`, `z ↔ x i` in `F_A` for `i ∈ A` and `z ↔ x i` in `F_B` for `i ∈ I \ A`. -/
-theorem exists_branch_finset [DecidableEq V] [DecidableEq ι] (x : ι → V) (I : Finset ι) (hI : 1 < I.card)
+theorem exists_branch_finset [DecidableEq V] [DecidableEq ι] (x : ι → V) (I : Finset ι)
+    (hI : 1 < I.card)
     (F : Finset (Sym2 V)) (o : V)
     (ho : ∀ i ∈ I, (fromEdgeSet (F : Set (Sym2 V))).Reachable o (x i)) :
     ∃ z : V, ∃ A ⊆ I, A.Nonempty ∧ (I \ A).Nonempty ∧

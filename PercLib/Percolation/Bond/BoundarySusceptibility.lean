@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-16: connection loss on deleting a vertex set (wiki
 integrated-susceptibility, tag 7902) and the lower bound for the boundary functional by the boundary
 susceptibility (wiki boundary-susceptibility, tag 67GX). No upstream proof is copied, no definition
@@ -39,7 +43,7 @@ last-exit bound `τ(u,w) ≤ ∑_{y ∈ S} ∑_x τ(u,y) q(y,x) τ^S(x,w)`. Summ
 @[expose] public section
 noncomputable section
 open MeasureTheory Set PercLib.Probability
-open scoped ENNReal NNReal Classical
+open scoped ENNReal NNReal
 
 namespace PercLib.Percolation.Bond
 variable {V : Type*}
@@ -59,6 +63,7 @@ theorem edges_mem_conn {ω : Config V} {x y : V} (p : (openGraph ω).Walk x y) :
     {e | e ∈ p.edges} ∈ conn x y :=
   mem_conn_of_walk_edges p fun _ he => he
 
+open Classical in
 /-- If an open path from `x` to `y` passes through `c`, then `x ↔ c` and `c ↔ y` occur
 disjointly. -/
 theorem mem_disjointOccurrence_of_path {ω : Config V} {x y c : V}
@@ -133,6 +138,7 @@ theorem setOf_deleted_comm (S : Set V) (z w : V) :
   ext ω
   exact ⟨fun ⟨hz, hw, h⟩ => ⟨hw, hz, h.symm⟩, fun ⟨hw, hz, h⟩ => ⟨hz, hw, h.symm⟩⟩
 
+open Classical in
 /-- **Last exit.** For `u ∈ S` and `w ∉ S`, an open path from `u` to `w` has a last pair
 `s(y,x)` with `y ∈ S`, `x ∉ S`, after which it avoids `S`:
 `τ(u,w) ≤ ∑_{x} ∑_{y ∈ S} τ^S(w,x) q(x,y) τ(y,u)`. -/
@@ -156,6 +162,7 @@ theorem tau_le_lastExit [Countable V] (q : Sym2 V → unitInterval) (S : Set V) 
     rfl
   · rw [ite_eq_left (show y ∈ Sᶜ from hy), ite_eq_right hy]
 
+open Classical in
 /-- **The boundary sum by last exit.** For finite `S`,
 `L(S) = ∑_{u ∈ S} ∑_{w ∉ S} τ(u,w) ≤ ∑_{y ∈ S} (∑_{u ∈ S} τ(y,u)) ∑_x q(y,x) χ_{Sᶜ}(x)`,
 where `χ_{Sᶜ}(x) = ∑_w τ^S(x,w)`. -/
@@ -215,6 +222,7 @@ theorem setOf_deleted_of_mem (S : Set V) {x : V} (hx : x ∈ S) (w : V) :
   simp only [mem_ofPred_eq, mem_empty_iff_false, iff_false]
   exact fun ⟨hx', _⟩ => hx' hx
 
+open Classical in
 /-- `L(S) ≤ β ∑_{y ∈ S} (∑_{u ∈ S} τ(y,u)) φ_y` with
 `φ_y = ∑_{x ∉ S} J(y,x) χ_{Sᶜ}(x)`, in the intensity family. -/
 theorem boundarySum_le_intensity [Countable V] (J : Sym2 V → ℝ≥0) (β : ℝ≥0) (S : Finset V) :
@@ -239,6 +247,7 @@ theorem boundarySum_le_intensity [Countable V] (J : Sym2 V → ℝ≥0) (β : �
     have := intensityProfile_toNNReal_le J β s(y, x)
     exact_mod_cast this
 
+open Classical in
 /-- With off-diagonal row sums of `J` at most `1`, `φ_y ≤ χ_max` for `y ∈ S`. -/
 theorem boundaryRow_le_iSup_chi [Countable V] (J : Sym2 V → ℝ≥0) (β : ℝ≥0)
     (hJ : ∀ u, rowSum (fun e => (J e : ℝ≥0∞)) u ≤ 1) (S : Finset V)
@@ -275,6 +284,7 @@ theorem toReal_tsum_law_deleted (q : Sym2 V → unitInterval) (x : V) :
       ((openGraph ω).induce (S : Set V)ᶜ).Reachable ⟨x, hx⟩ ⟨w, hw⟩} :=
   ENNReal.tsum_toReal_eq fun _ => measure_ne_top _ _
 
+open Classical in
 theorem toReal_boundaryRow (hχ : (⨆ u, chi (intensityProfile J β) u) ≠ ⊤) (y : V) :
     (∑' x, (if x ∈ S then 0 else (J s(y, x) : ℝ≥0∞)) *
         ∑' w, law (intensityProfile J β) {ω | ∃ hx : x ∈ (S : Set V)ᶜ,
@@ -293,6 +303,7 @@ theorem toReal_boundaryRow (hχ : (⨆ u, chi (intensityProfile J β) u) ≠ ⊤
   rw [ENNReal.toReal_mul, toReal_tsum_law_deleted]
   split_ifs <;> simp
 
+open Classical in
 /-- **First inequality.** In the intensity family with off-diagonal row sums of `J` at
 most `1` and `χ_max = ⨆ u, χ(u) < ∞`, for every finite `S`,
 `L(S)² / (β² χ_max Q(S)) ≤ Φ_β(S)`, where `L(S) = ∑_{u ∈ S} ∑_{w ∉ S} τ(u,w)`,
@@ -386,6 +397,7 @@ theorem boundarySum_sq_div_le
     linarith
 
 omit [Countable V] in
+open Classical in
 /-- `χ(u) = ∑_{w ∈ S} τ(u,w) + ∑_{w ∉ S} τ(u,w)` in real numbers, when `χ(u) < ∞`. -/
 theorem toReal_chi_eq_add [Countable V] (q : Sym2 V → unitInterval) (u : V)
     (hu : chi q u ≠ ⊤) :
@@ -407,6 +419,7 @@ theorem toReal_chi_eq_add [Countable V] (q : Sym2 V → unitInterval) (u : V)
   congr 1
   exact tsum_congr fun w => by split_ifs <;> simp
 
+open Classical in
 /-- **Second inequality.** `(χ_min |S| - ∑_{u,v ∈ S} τ(u,v))₊ ≤ L(S)`, so the
 positive-part square is at most `L(S)²` over any nonnegative denominator. -/
 theorem posPart_sq_div_le_boundarySum_sq_div (q : Sym2 V → unitInterval)
@@ -433,6 +446,7 @@ theorem posPart_sq_div_le_boundarySum_sq_div (q : Sym2 V → unitInterval)
   exact div_le_div_of_nonneg_right
     (pow_le_pow_left₀ (le_max_right _ _) (max_le hle hL0) 2) hD
 
+open Classical in
 /-- **Boundary susceptibility bound.** In the intensity family with off-diagonal row sums of `J` at
 most `1` and `χ_max < ∞`, for every finite `S`,
 `Φ_β(S) ≥ L(S)² / (β² χ_max Q(S)) ≥ (χ_min |S| - ∑_{u,v ∈ S} τ(u,v))₊² / (β² χ_max Q(S))`. -/

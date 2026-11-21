@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-14. No upstream proof is copied.
 -/
 module
@@ -31,7 +33,6 @@ derivative. This file adds no definition.
 
 open MeasureTheory Set PercLib.Probability
 open scoped NNReal
-open Classical
 
 namespace PercLib.Percolation.Bond
 
@@ -110,6 +111,7 @@ theorem localConn_congr_openGraph (S : Set V) (x y : S) (ω ω' : Config V)
       ω' ∈ {ω : Config V | ((openGraph ω).induce S).Reachable x y} := by
   simp only [mem_ofPred_eq, h]
 
+open Classical in
 /-- **The Russo derivative is at most the sum of `J` over off-diagonal internal pairs.** -/
 theorem localConn_russo_le (J : Sym2 V → ℝ≥0) (S : Finset V) (x y : (S : Set V)) {β : ℝ}
     (hβ : 0 ≤ β) :
