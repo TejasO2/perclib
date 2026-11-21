@@ -8,6 +8,8 @@ labels: []
 
 # Kernel comparison with domination only off the diagonal
 
+Being done by the project's own agents; do not start it.
+
 ## Goal
 Prove wiki assertion **CKJQ** (article `intensity-comparison`) in full and tag it. The library
 compares two kernels `J ≤ J'` only when the inequality holds on **every** pair, diagonal

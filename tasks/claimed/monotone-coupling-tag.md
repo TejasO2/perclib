@@ -8,6 +8,8 @@ labels: [good-first-task]
 
 # Monotone product coupling
 
+Being done by the project's own agents; do not start it.
+
 ## Goal
 Tag wiki assertion **2ML7** (article `product-model`). The mathematics is essentially
 `PercLib/Probability/Coupling/Monotone.lean`; it is a shared prerequisite of the lace-expansion

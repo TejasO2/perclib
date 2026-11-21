@@ -8,6 +8,8 @@ labels: []
 
 # A linear error preserves subthreshold Riccati propagation
 
+Being done by the project's own agents; do not start it.
+
 ## Goal
 Prove and tag wiki assertion **19IN** (article `mesoscopic-tail-transfer`, anchor
 `tag-19IN`). It is on the frontier: no recorded prerequisites.

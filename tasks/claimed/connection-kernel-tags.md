@@ -8,6 +8,8 @@ labels: [good-first-task]
 
 # Positive semidefiniteness and cubic bounds of the connection kernel
 
+Being done by the project's own agents; do not start it.
+
 ## Goal
 Tag wiki assertions **70KD** and **UZ7J** (article `connection-kernels`). The mathematics is
 already proved, untagged, in `PercLib/Percolation/Bond/ConnectionKernel.lean`; these are shared

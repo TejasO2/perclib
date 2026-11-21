@@ -8,6 +8,8 @@ labels: []
 
 # Pointwise sibling and outer-shell bounds for non-radial hierarchical kernels
 
+Being done by the project's own agents; do not start it.
+
 ## Goal
 Prove the two pointwise ingredients of two-sided pointwise bounds on the critical two-point
 function of long-range percolation on the hierarchical lattice for a translation-invariant
