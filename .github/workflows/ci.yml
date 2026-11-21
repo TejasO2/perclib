@@ -5,9 +5,13 @@
 #                  forbidden constructs, classifier tests, manifest extraction, D-35 checks,
 #                  and the proof-only/interface classification against the base commit.
 #                  Its check name, `CI / gate`, is the one to require in branch protection
-#                  and the one the auto-merge workflow reads.
-#   kernel-replay  scripts/kernel_replay.sh 6 after a green gate, on every push and on
-#                  pull requests classified `interface` or labelled `interface`.
+#                  and the one the auto-merge workflow reads. The classification is the
+#                  job output `classification` and a line of the step summary, not a
+#                  GitHub label: setting a label needs a token that can write to pull
+#                  requests, which this workflow never has. It is advisory; the
+#                  auto-merge workflow decides on its own from the API.
+#   kernel-replay  scripts/kernel_replay.sh 6 after a green gate, on every push and every
+#                  pull request (ruling 9d); the auto-merge workflow requires it.
 #   scripts        every script test (scripts/ci_script_tests.sh).
 #   wiki           the wiki build, only once wiki/package.json exists; skips otherwise.
 #
@@ -22,6 +26,7 @@ name: CI
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches:
       - main
@@ -71,6 +76,9 @@ jobs:
           key: lake-build-${{ runner.os }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.sha }}
           restore-keys: |
             lake-build-${{ runner.os }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
+
+      - name: Forbidden-construct scan before any build
+        run: python3 scripts/check_forbidden.py PercLib
 
       - name: Fetch dependencies and the mathlib build cache
         run: |
@@ -144,12 +152,10 @@ jobs:
 
   kernel-replay:
     needs: gate
-    # Implicitly also requires the gate to have succeeded. The hosted runner has about
-    # 16 GB; kernel_replay.sh 6 replays six modules per process (about 4 GB each batch).
-    if: >-
-      github.event_name == 'push'
-      || needs.gate.outputs.classification == 'interface'
-      || contains(github.event.pull_request.labels.*.name, 'interface')
+    # Runs on every push and every pull request; `needs` also requires the gate to have
+    # succeeded. The auto-merge workflow requires this job to succeed. The hosted runner
+    # has about 16 GB; kernel_replay.sh 6 replays six modules per process (about 4 GB
+    # each batch).
     runs-on: ubuntu-latest
     timeout-minutes: 360
     steps:
