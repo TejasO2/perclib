@@ -1,6 +1,7 @@
 module
 
 public import PercLib.Analysis.AbelianSums
+public import PercLib.Analysis.CriticalDrivenODE
 public import PercLib.Analysis.DiscreteConvolution
 public import PercLib.Analysis.DominatedDerivative
 public import PercLib.Analysis.DrivenODE
