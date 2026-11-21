@@ -57,6 +57,17 @@
         "MIQ7"
       ],
       "reason": "Markov's inequality for the largest squared component, bounded by the second component moment of XCGS, combined with the susceptibility bound MIQ7."
+    },
+    {
+      "order": 4,
+      "tag": "F9EV",
+      "proof_uses": [
+        "38XP",
+        "Y0FX",
+        "25Z4",
+        "TUD2"
+      ],
+      "reason": "With theta = lambda the window is that of 38XP, which gives the two-sided bound for L_1 and the upper bound for every L_j <= L_1. For j >= 2, the Y0FX tails bound the mean of the vertex count in components of size between n^{2/3}/A and n^{2/3}, the 25Z4 distinct-cluster comparison and the TUD2 root-sum identity bound its variance, and Chebyshev's inequality gives at least j such components."
     }
   ]
 }

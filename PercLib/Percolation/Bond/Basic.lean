@@ -393,6 +393,265 @@ theorem rowSum_toENNReal [DecidableEq V] (q : Sym2 V → unitInterval) (v : V) :
 
 end RowSum
 
+/-! ### Connection inside a set
+
+The event `localConn S x y` that `x` and `y` are joined by an open path all of whose
+vertices lie in `S`, the restricted cluster `localCluster ω S x`, ordered cuts `IsCut`, and
+the boundary flux `boundaryFlux q S o` of a finite set. -/
+
+section LocalConn
+
+/-- The event that `x` and `y` are joined by a path of open edges all of whose vertices lie
+in `S`: both endpoints lie in `S`, and they are joined in the open graph induced on `S`.
+It is empty unless `x ∈ S` and `y ∈ S`, and for `S = univ` it is `conn x y`. -/
+def localConn (S : Set V) (x y : V) : Set (Config V) :=
+  {ω | ∃ hx : x ∈ S, ∃ hy : y ∈ S, ((openGraph ω).induce S).Reachable ⟨x, hx⟩ ⟨y, hy⟩}
+
+@[simp]
+theorem mem_localConn {S : Set V} {x y : V} {ω : Config V} :
+    ω ∈ localConn S x y ↔
+      ∃ hx : x ∈ S, ∃ hy : y ∈ S, ((openGraph ω).induce S).Reachable ⟨x, hx⟩ ⟨y, hy⟩ :=
+  Iff.rfl
+
+/-- For endpoints in `S`, the event is reachability in the induced open graph. -/
+theorem mem_localConn_iff_reachable {S : Set V} {x y : V} (hx : x ∈ S) (hy : y ∈ S)
+    (ω : Config V) :
+    ω ∈ localConn S x y ↔ ((openGraph ω).induce S).Reachable ⟨x, hx⟩ ⟨y, hy⟩ :=
+  ⟨fun ⟨_, _, h⟩ => h, fun h => ⟨hx, hy, h⟩⟩
+
+/-- Inside the whole vertex set, connection inside the set is connection. -/
+theorem localConn_univ (x y : V) : localConn (Set.univ : Set V) x y = conn x y := by
+  ext ω
+  rw [mem_localConn_iff_reachable (Set.mem_univ x) (Set.mem_univ y), mem_conn_iff,
+    ← SimpleGraph.Iso.reachable_iff (φ := SimpleGraph.induceUnivIso (openGraph ω))]
+  rfl
+
+/-- A connection inside a set is a connection. -/
+theorem localConn_subset_conn (S : Set V) (x y : V) : localConn S x y ⊆ conn x y :=
+  fun _ ⟨_, _, h⟩ => h.map (SimpleGraph.Embedding.induce S).toHom
+
+/-- Connection inside a set grows with the set. -/
+theorem localConn_mono_set {S T : Set V} (h : S ⊆ T) (x y : V) :
+    localConn S x y ⊆ localConn T x y :=
+  fun ω ⟨hx, hy, hxy⟩ => ⟨h hx, h hy, hxy.map ((openGraph ω).induceHomOfLE h).toHom⟩
+
+/-- Connection inside a set is symmetric. -/
+theorem localConn_comm (S : Set V) (x y : V) : localConn S x y = localConn S y x := by
+  ext ω
+  exact ⟨fun ⟨hx, hy, h⟩ => ⟨hy, hx, h.symm⟩, fun ⟨hy, hx, h⟩ => ⟨hx, hy, h.symm⟩⟩
+
+/-- Connection inside a set is transitive. -/
+theorem localConn_trans {S : Set V} {x y z : V} {ω : Config V} (hxy : ω ∈ localConn S x y)
+    (hyz : ω ∈ localConn S y z) : ω ∈ localConn S x z := by
+  obtain ⟨hx, hy, h₁⟩ := hxy
+  obtain ⟨_, hz, h₂⟩ := hyz
+  exact ⟨hx, hz, h₁.trans h₂⟩
+
+/-- A vertex of `S` is connected to itself inside `S` in every configuration: the event is
+not empty when it should not be. -/
+theorem localConn_self {S : Set V} {x : V} (hx : x ∈ S) :
+    localConn S x x = (Set.univ : Set (Config V)) :=
+  Set.eq_univ_of_forall fun _ => ⟨hx, hx, SimpleGraph.Reachable.refl _⟩
+
+/-- No vertex outside `S` is connected to anything inside `S`. -/
+theorem localConn_of_notMem {S : Set V} {x : V} (hx : x ∉ S) (y : V) :
+    localConn S x y = ∅ :=
+  Set.eq_empty_of_forall_notMem fun _ ⟨h, _, _⟩ => hx h
+
+/-- No vertex is connected to a vertex outside `S` inside `S`. -/
+theorem localConn_of_notMem_right {S : Set V} {y : V} (hy : y ∉ S) (x : V) :
+    localConn S x y = ∅ :=
+  Set.eq_empty_of_forall_notMem fun _ ⟨_, h, _⟩ => hy h
+
+/-- Inside the empty set nothing is connected. -/
+@[simp]
+theorem localConn_empty (x y : V) : localConn (∅ : Set V) x y = ∅ :=
+  localConn_of_notMem (Set.notMem_empty x) y
+
+/-- Connection inside a set is an increasing event. -/
+theorem localConn_mono {S : Set V} {x y : V} {ω ω' : Config V} (h : ω ⊆ ω')
+    (hxy : ω ∈ localConn S x y) : ω' ∈ localConn S x y := by
+  obtain ⟨hx, hy, hr⟩ := hxy
+  exact ⟨hx, hy, hr.mono fun _ _ hadj => openGraph_mono h hadj⟩
+
+/-- Connection inside a set is an upper set of configurations. -/
+theorem isUpperSet_localConn' (S : Set V) (x y : V) : IsUpperSet (localConn S x y) :=
+  fun _ _ h hxy => localConn_mono h hxy
+
+/-- Connection inside a countable set is measurable, whatever the cardinality of the
+vertex type. -/
+theorem measurableSet_localConn' (S : Set V) [Countable S] (x y : V) :
+    MeasurableSet (localConn S x y) := by
+  by_cases hx : x ∈ S
+  · by_cases hy : y ∈ S
+    · have hmeas : Measurable fun ω : Config V => Sym2.map (Subtype.val : S → V) ⁻¹' ω :=
+        measurable_set_iff.mpr fun e => measurable_set_mem (Sym2.map Subtype.val e)
+      have hset : localConn S x y =
+          (fun ω : Config V => Sym2.map (Subtype.val : S → V) ⁻¹' ω) ⁻¹'
+            conn (⟨x, hx⟩ : S) ⟨y, hy⟩ := by
+        ext ω
+        rw [mem_localConn_iff_reachable hx hy, Set.mem_preimage, mem_conn_iff]
+        have hG : (openGraph ω).induce S =
+            openGraph (Sym2.map (Subtype.val : S → V) ⁻¹' ω) := by
+          ext a b
+          simp [SimpleGraph.induce, SimpleGraph.comap_adj, openGraph_adj_iff, Subtype.coe_inj]
+        rw [hG]
+      rw [hset]
+      exact (measurableSet_conn _ _).preimage hmeas
+    · rw [localConn_of_notMem_right hy]
+      exact MeasurableSet.empty
+  · rw [localConn_of_notMem hx]
+    exact MeasurableSet.empty
+
+/-- The restricted cluster `K_x^S` of `x` in `S`: the vertices joined to `x` by an open path
+all of whose vertices lie in `S`. It is empty when `x ∉ S`, and contains `x` when
+`x ∈ S`. -/
+@[tag "OG96"]
+def localCluster (ω : Config V) (S : Set V) (x : V) : Set V := {y | ω ∈ localConn S x y}
+
+@[simp]
+theorem mem_localCluster {ω : Config V} {S : Set V} {x y : V} :
+    y ∈ localCluster ω S x ↔ ω ∈ localConn S x y :=
+  Iff.rfl
+
+/-- A vertex of `S` belongs to its own restricted cluster. -/
+theorem mem_localCluster_self (ω : Config V) {S : Set V} {x : V} (hx : x ∈ S) :
+    x ∈ localCluster ω S x := by
+  rw [mem_localCluster, localConn_self hx]
+  exact Set.mem_univ ω
+
+/-- The restricted cluster in the whole vertex set is the cluster. -/
+theorem localCluster_univ (ω : Config V) (x : V) :
+    localCluster ω Set.univ x = cluster ω x := by
+  ext y
+  rw [mem_localCluster, localConn_univ, mem_cluster_iff]
+
+/-- The restricted cluster lies in the intersection of the cluster with the set. -/
+theorem localCluster_subset (ω : Config V) (S : Set V) (x : V) :
+    localCluster ω S x ⊆ cluster ω x ∩ S :=
+  fun y hy => ⟨(mem_cluster_iff ω x y).2 (localConn_subset_conn S x y hy), hy.2.1⟩
+
+/-- The restricted cluster grows with the set. -/
+theorem localCluster_mono_set (ω : Config V) {S T : Set V} (h : S ⊆ T) (x : V) :
+    localCluster ω S x ⊆ localCluster ω T x :=
+  fun _ hy => localConn_mono_set h _ _ hy
+
+/-- The restricted cluster of a vertex outside the set is empty. -/
+theorem localCluster_of_notMem (ω : Config V) {S : Set V} {x : V} (hx : x ∉ S) :
+    localCluster ω S x = ∅ := by
+  ext y
+  rw [mem_localCluster, localConn_of_notMem hx]
+  simp
+
+/-! #### Ordered cuts -/
+
+section IsCut
+
+variable [Preorder V]
+
+/-- `k` is a cut of the configuration `ω`: no open pair joins a vertex `a ≤ k` to a vertex
+`b > k`. -/
+def IsCut (ω : Config V) (k : V) : Prop := ∀ a b, a ≤ k → k < b → s(a, b) ∉ ω
+
+theorem isCut_iff {ω : Config V} {k : V} :
+    IsCut ω k ↔ ∀ a b, a ≤ k → k < b → s(a, b) ∉ ω :=
+  Iff.rfl
+
+/-- A cut of a configuration is a cut of every smaller configuration. -/
+theorem IsCut.mono {ω ω' : Config V} {k : V} (h : ω' ⊆ ω) (hk : IsCut ω k) : IsCut ω' k :=
+  fun a b ha hb hab => hk a b ha hb (h hab)
+
+/-- Every vertex is a cut of the empty configuration. -/
+@[simp]
+theorem isCut_empty (k : V) : IsCut (∅ : Config V) k :=
+  fun _ _ _ _ h => h
+
+/-- Being a cut at `k` is a measurable event when there are countably many vertices. -/
+theorem measurableSet_setOf_isCut [Countable V] (k : V) :
+    MeasurableSet {ω : Config V | IsCut ω k} := by
+  simp only [IsCut, Set.ofPred_forall]
+  exact MeasurableSet.iInter fun a => MeasurableSet.iInter fun b =>
+    MeasurableSet.iInter fun _ => MeasurableSet.iInter fun _ =>
+      (measurableSet_mem s(a, b)).compl
+
+end IsCut
+
+/-! #### Boundary flux -/
+
+open Classical in
+/-- The boundary flux of a finite set `S` seen from `o`:
+`∑_{u ∈ S} ∑_{v ∉ S} P_q(o ↔ u inside S) q(u, v)`, the expected weight of the pairs leaving
+`S` from a vertex joined to `o` inside `S`. It is `0` when `o ∉ S`. For `q` equal to `p`
+on the nearest-neighbour edges and `0` elsewhere it is
+`p ∑_{u ∈ S, v ∉ S, u ∼ v} P_p(o ↔ u inside S)`. -/
+@[tag "6EIM"]
+def boundaryFlux (q : Sym2 V → unitInterval) (S : Finset V) (o : V) : ℝ≥0∞ :=
+  ∑ u ∈ S, ∑' v, (if v ∈ S then 0 else
+    law q (localConn (S : Set V) o u) * (unitInterval.toNNReal (q s(u, v)) : ℝ≥0∞))
+
+open Classical in
+theorem boundaryFlux_def (q : Sym2 V → unitInterval) (S : Finset V) (o : V) :
+    boundaryFlux q S o = ∑ u ∈ S, ∑' v, (if v ∈ S then 0 else
+      law q (localConn (S : Set V) o u) * (unitInterval.toNNReal (q s(u, v)) : ℝ≥0∞)) :=
+  rfl
+
+/-- Unfolding `boundaryFlux`, for any decidability instance on `V`. -/
+theorem boundaryFlux_eq [DecidableEq V] (q : Sym2 V → unitInterval) (S : Finset V) (o : V) :
+    boundaryFlux q S o = ∑ u ∈ S, ∑' v, (if v ∈ S then 0 else
+      law q (localConn (S : Set V) o u) * (unitInterval.toNNReal (q s(u, v)) : ℝ≥0∞)) := by
+  simp only [boundaryFlux]
+  exact Finset.sum_congr rfl fun u _ => tsum_congr fun v => by congr
+
+/-- The boundary flux of a set not containing `o` vanishes. -/
+theorem boundaryFlux_of_notMem (q : Sym2 V → unitInterval) {S : Finset V} {o : V}
+    (ho : o ∉ S) : boundaryFlux q S o = 0 := by
+  classical
+  rw [boundaryFlux_eq]
+  simp [localConn_of_notMem (Finset.mem_coe.not.2 ho)]
+
+@[simp]
+theorem boundaryFlux_empty (q : Sym2 V → unitInterval) (o : V) :
+    boundaryFlux q (∅ : Finset V) o = 0 :=
+  boundaryFlux_of_notMem q (Finset.notMem_empty o)
+
+/-- For `S = {o}` the boundary flux is the row sum of the profile at `o`: the boundary
+flux is not identically zero. -/
+theorem boundaryFlux_singleton (q : Sym2 V → unitInterval) (o : V) :
+    boundaryFlux q {o} o = rowSum (fun e => unitInterval.toENNReal (q e)) o := by
+  classical
+  rw [boundaryFlux_eq, Finset.sum_singleton, rowSum_def, Finset.coe_singleton,
+    localConn_self (Set.mem_singleton o), measure_univ]
+  refine tsum_congr fun v => ?_
+  simp only [Finset.mem_singleton, one_mul]
+  rfl
+
+end LocalConn
+
+/-! ### Non-vacuity of the restricted notions -/
+
+/-- On the path `0 - 1 - 2` with both edges open, `0` and `2` are connected, but not inside
+`{0, 2}`: connection inside a set is not connection of two vertices of the set. -/
+example : ({s(0, 1), s(1, 2)} : Config (Fin 3)) ∈ conn 0 2 ∧
+    ({s(0, 1), s(1, 2)} : Config (Fin 3)) ∉ localConn {0, 2} 0 2 := by
+  refine ⟨conn_trans (y := 1) (mem_conn_of_mem (by decide) (by simp))
+    (mem_conn_of_mem (by decide) (by simp)), ?_⟩
+  rintro ⟨h0, h2, hr⟩
+  have hbot : (openGraph ({s(0, 1), s(1, 2)} : Config (Fin 3))).induce {0, 2} = ⊥ := by
+    ext a b
+    obtain ⟨a, ha⟩ := a
+    obtain ⟨b, hb⟩ := b
+    simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at ha hb
+    simp only [SimpleGraph.comap_adj, Function.Embedding.coe_subtype, openGraph_adj_iff,
+      SimpleGraph.bot_adj, iff_false, not_and]
+    rcases ha with rfl | rfl <;> rcases hb with rfl | rfl <;> decide
+  rw [hbot, SimpleGraph.reachable_bot] at hr
+  exact absurd (congrArg Subtype.val hr) (show (0 : Fin 3) ≠ 2 by decide)
+
+/-- With every pair open, `0` is not a cut of the integers. -/
+example : ¬ IsCut (Set.univ : Config ℤ) 0 :=
+  fun h => h 0 1 le_rfl zero_lt_one (Set.mem_univ _)
+
+
 end PercLib.Percolation.Bond
 
 end
