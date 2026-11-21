@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-16. No upstream proof is copied and no definition is added.
 -/
 module
@@ -30,13 +32,14 @@ two disjoint clusters (`integral_not_conn_mul_le`); the first inequality is
 noncomputable section
 
 open MeasureTheory Set
-open scoped ENNReal NNReal Classical
+open scoped ENNReal NNReal
 
 namespace PercLib.Percolation.Bond
 
 variable {V : Type*} [Fintype V] [DecidableEq V]
 
 omit [DecidableEq V] in
+open Classical in
 /-- **Opening one pair** changes `∑_v h(|K_v|)` by
 `1{a ↮ b} (A (h(A + B) - h(A)) + B (h(A + B) - h(B)))`, `A = |K_a|`, `B = |K_b|`. -/
 theorem sum_cluster_fun_insert_sub (ω : Config V) (a b : V) (h : ℝ → ℝ) :
@@ -94,6 +97,7 @@ theorem sum_cluster_fun_insert_sub (ω : Config V) (a b : V) (h : ℝ → ℝ) :
       ext v; simp
     rw [hca, hcb]
 
+open Classical in
 /-- The derivative of `E_t ∑_v h(|K_v|)` as a sum over ordered pairs:
 `(1/2) ∑_a ∑_b w(a, b) E_t[1{a ↮ b} Φ_h(|K_a|, |K_b|)]`. -/
 theorem hasDerivAt_integral_sum_cluster_fun (lam : ℝ → Sym2 V → ℝ≥0) (w : Sym2 V → ℝ)
@@ -134,6 +138,7 @@ theorem hasDerivAt_integral_sum_cluster_fun (lam : ℝ → Sym2 V → ℝ≥0) (
   push_cast
   ring
 
+open Classical in
 /-- **Derivative of `E h(|K_o|)` under transitivity.**
 `d/dt E_t h(|K_o|) = (1/2) ∑_{y ≠ o} w(o, y) E_t[1{o ↮ y} Φ_h(|K_o|, |K_y|)]`. -/
 theorem hasDerivAt_integral_fun_of_transitive (lam : ℝ → Sym2 V → ℝ≥0) (w : Sym2 V → ℝ)
@@ -211,6 +216,7 @@ theorem hasDerivAt_integral_fun_of_transitive (lam : ℝ → Sym2 V → ℝ≥0)
 
 /-! ### MIJ7 -/
 
+open Classical in
 /-- **Derivative of the truncated moment.** Let `V` be finite with intensities `λ_u` invariant under
 a transitively acting group, differentiable at `t` with derivatives `w ≥ 0`. For every real `m > 0`,
 `T_m(u) = E_u min(|K_o|, m)` is differentiable at `t`, and its derivative satisfies

@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs, from pinned mathlib's spectral theorem for Hermitian matrices and the positive
 semidefinite cone. The statement follows the wiki tag CS16 (connection kernels). No source text or
 code is copied.

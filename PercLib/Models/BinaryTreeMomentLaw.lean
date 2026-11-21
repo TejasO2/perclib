@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-16. No upstream proof is copied.
 -/
 module
@@ -31,7 +33,6 @@ noncomputable section
 
 open MeasureTheory Set PercLib.Probability PercLib.Percolation.Bond
 open scoped ENNReal NNReal
-open Classical
 
 namespace PercLib.Models
 
@@ -92,6 +93,7 @@ theorem summable_moment_terms {p : ℝ} (hp0 : 0 < p) (hp1 : p < 1) (hp : p ≠ 
         gcongr
     _ = _ := by ring
 
+open Classical in
 /-- **Identification.** On the rooted binary tree with open probability `p ∈ (0,1)`,
 `p ≠ 1/2`, `E_p[|K|^s; |K| < ∞] = ((1-p)/p) ∑_{n≥1} n^s Cat(n) 4^{-n} e^{-λ(p) n}`. -/
 theorem lintegral_cluster_rpow_eq_moment (p : unitInterval)

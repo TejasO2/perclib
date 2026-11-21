@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 The Karamata primitive `∫_{r₀}^r h s / s ds ∼ h r / b` of a regularly varying function of
 index `b > 0`, the divergence of the primitive of a regularly varying function of index
 `> -1`, and the shift `f + λ ∫ h s / s ds` used in the proof of Lemma I.5.26 of

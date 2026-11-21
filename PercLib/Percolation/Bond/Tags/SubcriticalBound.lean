@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Correspondence wrappers for the subcritical-bound article. All mathematical inputs are proved in the
 imported modules; no literature assumptions are added.
 -/
@@ -27,7 +31,7 @@ thresholds.
 @[expose] public section
 noncomputable section
 open MeasureTheory Set PercLib.Probability
-open scoped ENNReal NNReal Classical
+open scoped ENNReal NNReal
 
 namespace PercLib.Percolation.Bond
 variable {V : Type*}
@@ -40,6 +44,7 @@ theorem subcritical_bound_and_finiteness [Countable V] (q : Sym2 V → unitInter
     (∀ v, chi q v ≤ (1-m)⁻¹) ∧ (∀ᵐ ω ∂law q, ∀ v, (cluster ω v).Finite) :=
   ⟨chi_le_inv_one_sub_of_rowSum q m hrow hm, ae_all_clusters_finite_of_rowSum q m hrow hm⟩
 
+open Classical in
 /-- Simple-path witnesses and their exact distinct-coordinate cylinder probability. -/
 @[tag "YFF7"]
 theorem simple_path_certificates_and_probability (q : Sym2 V → unitInterval) (x y : V) :
@@ -103,6 +108,7 @@ theorem intensity_row_and_susceptibility_bound [Countable V]
       chi (intensityProfile J β) v ≤ (1-(β : ℝ≥0∞)*M)⁻¹) :=
   ⟨intensity_rowSum_le J M hJ β, chi_intensity_le J M hJ β⟩
 
+open Classical in
 /-- Both threshold bounds, including the zero-row case and its vanishing off-diagonal rates. -/
 @[tag "JZ47"]
 theorem critical_intensity_bounds_and_zero_case [Countable V]

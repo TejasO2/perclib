@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Potter bounds and uniform ratios for solutions of the logarithmic ODE `f' = a (1 - h) f / t`, and
 Karamata's theorem (Lemma I.2.10 of T. Hutchcroft, *Critical long-range percolation I*,
 arXiv:2508.18807v1, p. 26) for that class.

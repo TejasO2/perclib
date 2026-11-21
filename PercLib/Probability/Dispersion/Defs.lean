@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 The Lévy measures of display (I.5.16), the Lévy exponent, and the law of a symmetric Lévy process
 stopped at an independent `Exp(1)` time (the displacement law `ν_disp` of Definition I.5.16), from
 T. Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1, §I.5.2.
@@ -102,7 +106,8 @@ def levyExponent [MeasurableSpace E] (L : Measure E) (u : E) : ℝ≥0∞ :=
 /-- `ν` is the **law at an independent `Exp(1)` time** of a symmetric Lévy process with exponent
 `ψ`: a probability measure with characteristic function `u ↦ (1 + ψ u)⁻¹`. With
 `ψ u = (levyExponent (cutoffLevyMeasure N α 1) u).toReal` (`N` definite, `0 < α < 2`) or
-`ψ u = ⟪Σ u, u⟫ / 2` (`α ≥ 2`) this characterises the displacement law `ν_disp` of Definition I.5.16. -/
+`ψ u = ⟪Σ u, u⟫ / 2` (`α ≥ 2`) this characterises the displacement law `ν_disp` of Definition
+I.5.16. -/
 def IsExpTimeStoppedLaw [MeasurableSpace E] (ψ : E → ℝ) (ν : Measure E) : Prop :=
   IsProbabilityMeasure ν ∧ ∀ u, charFun ν u = ((1 + ψ u : ℝ) : ℂ)⁻¹
 
@@ -171,7 +176,8 @@ theorem cutoffLevyMeasure_le_stable [FiniteDimensional ℝ E] [MeasurableSpace E
   withDensity_mono (Filter.Eventually.of_forall (cutoffLevyDensity_le_stable hα hl))
 
 /-- The Lévy exponent vanishes at `u = 0`. -/
-@[simp] theorem levyExponent_zero_right [MeasurableSpace E] (L : Measure E) : levyExponent L 0 = 0 := by
+@[simp] theorem levyExponent_zero_right [MeasurableSpace E]
+    (L : Measure E) : levyExponent L 0 = 0 := by
   simp [levyExponent]
 
 /-- Monotonicity of the Lévy exponent in the Lévy measure. -/
@@ -188,7 +194,8 @@ theorem stableLevyDensity_pos_of_ne {N : Seminorm ℝ E} (hN : ∀ x, N x = 0 �
 /-! ### Witnesses -/
 
 /-- The point mass at `0` is the stopped law of the zero exponent. -/
-theorem isExpTimeStoppedLaw_dirac_zero [MeasurableSpace E] [BorelSpace E] : IsExpTimeStoppedLaw (fun _ : E => 0) (Measure.dirac 0) :=
+theorem isExpTimeStoppedLaw_dirac_zero [MeasurableSpace E] [BorelSpace E] : IsExpTimeStoppedLaw
+    (fun _ : E => 0) (Measure.dirac 0) :=
   ⟨inferInstance, fun u => by simp⟩
 
 /-- At `d = 1`, `α = 1`, `l = 1` (on `ℝ`), `Π₁` is a Lévy measure:
@@ -197,7 +204,8 @@ theorem lintegral_min_sq_cutoffLevyMeasure_lt_top :
     ∫⁻ x, ENNReal.ofReal (min (‖x‖ ^ 2) 1) ∂cutoffLevyMeasure (normSeminorm ℝ ℝ) 1 1 < ⊤ := by
   have hN : ∀ x : ℝ, normSeminorm ℝ ℝ x = ‖x‖ := fun _ => rfl
   rw [cutoffLevyMeasure_def, lintegral_withDensity_eq_lintegral_mul₀
-    (measurable_cutoffLevyDensity (N := normSeminorm ℝ ℝ) continuous_norm.measurable 1 1).aemeasurable
+    (measurable_cutoffLevyDensity (N := normSeminorm ℝ ℝ) continuous_norm.measurable 1
+        1).aemeasurable
     (by fun_prop)]
   have hb : ∀ x : ℝ, cutoffLevyDensity (normSeminorm ℝ ℝ) 1 1 x *
       ENNReal.ofReal (min (‖x‖ ^ 2) 1) ≤

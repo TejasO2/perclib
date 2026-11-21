@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Correspondence wrappers for the binary-tree-percolation article.
 Every statement is assembled from lemmas proved in the imported modules; no new
 definition is introduced.
@@ -72,7 +76,8 @@ theorem binaryTree_arm_and_two_point :
     fun p q hq x y => tau_kTree_eq_pow p q (fun u w huw => hq s(u, w) (by simpa using huw)) x y⟩
 
 /-- For `0 < p < 1`, `P_p(|K| = n) ~ (1-p)/(p√π) n^{-3/2} (4p(1-p))^n` with relative error
-depending only on `n`, hence uniformly in `p`; and if `p_n = 1/2 + ε_n` with `ε_n → 0` and `n ε_n^4 → 0`, then
+depending only on `n`, hence uniformly in `p`; and if `p_n = 1/2 + ε_n` with `ε_n → 0` and
+`n ε_n^4 → 0`, then
 `P_{p_n}(|K| = n) ~ n^{-3/2} e^{-4nε_n^2}/√π`. -/
 @[tag "V5OZ"]
 theorem binaryTree_law_card_uniform_and_nearCritical :

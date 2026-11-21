@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Proof of Lemma I.4.12, the two-cluster gap inequality, of T. Hutchcroft, *Critical long-range
 percolation I*, arXiv:2508.18807v1, the target `TwoClusterGap` of
 `PercLib/Percolation/Bond/ClusterCorrelation/Defs.lean`, for every profile. The argument follows the
@@ -90,7 +94,7 @@ theorem twoClusterGap [Countable V] : TwoClusterGap V := by
         mem_disjointOccurrence_of_trail w' hw'.isTrail hbw⟩)
     · simp only [not_exists, not_and] at hb
       refine Or.inl ⟨⟨?_, ?_⟩, ?_⟩
-      · show x ∈ cluster (restoreMap o p) o
+      · change x ∈ cluster (restoreMap o p) o
         rw [cluster_restoreMap]; exact hx
       · refine mem_conn_of_walk_edges w' fun e he => ?_
         have hnt : ¬∃ v ∈ e, v ∈ cluster p.1 o := by

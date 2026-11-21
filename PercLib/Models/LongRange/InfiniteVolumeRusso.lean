@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Discharge of the premise `hunif` that the formalisation of contributor yujinhkim cited below adds to
 Lemma I.4.1 of T. Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1. The argument
 is read from the repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
@@ -262,7 +266,8 @@ theorem image_val_preimage_val (S : Finset (Sym2 V)) (ω : Config V) :
     exact ⟨⟨f, hfS⟩, hf, rfl⟩
 
 theorem image_val_insert_preimage_val (S : Finset (Sym2 V)) (e : S) (ω : Config V) :
-    (Subtype.val '' insert e (Subtype.val ⁻¹' ω : Set S) : Config V) = insert (e : Sym2 V) ω ∩ S := by
+    (Subtype.val '' insert e (Subtype.val ⁻¹' ω : Set S) : Config V) =
+        insert (e : Sym2 V) ω ∩ S := by
   rw [image_insert_eq, image_val_preimage_val]
   ext f
   by_cases hf : f = e
@@ -398,7 +403,8 @@ theorem integral_sub_eq_integral_flux [Countable V] {F : ℕ∞ → ℝ} {m : �
     refine tendsto_tsum_of_dominated_convergence hsum (fun e => ?_) (Eventually.of_forall
       fun k e => ?_)
     · obtain ⟨k₀, hk₀⟩ := hS e
-      refine Tendsto.congr' (eventually_atTop.2 ⟨k₀, fun k hk => (ite_eq_left_iff.2 fun h => absurd (hSm hk hk₀) h).symm⟩) ?_
+      refine Tendsto.congr' (eventually_atTop.2 ⟨k₀,
+          fun k hk => (ite_eq_left_iff.2 fun h => absurd (hSm hk hk₀) h).symm⟩) ?_
       exact (tendsto_integral_window_pivotal hFm hF o hSm hS e _).const_mul _
     · split_ifs
       · rw [Real.norm_eq_abs, abs_mul]
@@ -406,7 +412,8 @@ theorem integral_sub_eq_integral_flux [Countable V] {F : ℕ∞ → ℝ} {m : �
       · rw [norm_zero]
         positivity
   -- step 4: the window identities
-  have hBnull : ∀ᵐ x ∂(volume : Measure ℝ), x ∉ B := measure_eq_zero_iff_ae_notMem.1 (hB.measure_zero volume)
+  have hBnull : ∀ᵐ x ∂(volume : Measure ℝ), x ∉ B :=
+      measure_eq_zero_iff_ae_notMem.1 (hB.measure_zero volume)
   have h4 : ∀ k, ψk k t - ψk k s = ∫ r in s..t, deriv (ψk k) r := by
     intro k
     refine (integral_eq_of_hasDerivAt_off_countable_of_le (ψk k) (deriv (ψk k)) hst hB
@@ -535,7 +542,8 @@ theorem hasDerivAt_cutoff_prob (hN0 : ∀ v, N v = 0 → v = 0) (hKa : AntitoneO
       simp only [hgt, ite_true, Real.toNNReal_one, NNReal.coe_one, one_mul]
       rw [hJ]
       refine HasDerivAt.congr_of_eventuallyEq ?_ hev
-      have h := (((hK' r hr).const_sub (K (N (Int.cast ∘ (x - y))))).const_mul (-(β : ℝ))).exp.const_sub 1
+      have h := (((hK' r hr).const_sub (K (N (Int.cast ∘ (x - y))))).const_mul
+          (-(β : ℝ))).exp.const_sub 1
       convert h using 1
       ring
 
@@ -562,7 +570,8 @@ theorem tsum_row_count (x : Fin d → ℤ) (R : ℝ) :
     ∑' y, (if x ≠ y ∧ N (Int.cast ∘ (x - y)) < R then (1 : ℝ≥0∞) else 0) =
       ({z : Fin d → ℤ | z ≠ 0 ∧ N (Int.cast ∘ z) < R}.encard : ℝ≥0∞) := by
   classical
-  rw [← (Equiv.subLeft x).tsum_eq, ← mul_one ({z : Fin d → ℤ | z ≠ 0 ∧ N (Int.cast ∘ z) < R}.encard : ℝ≥0∞),
+  rw [← (Equiv.subLeft x).tsum_eq, ← mul_one ({z : Fin d → ℤ | z ≠ 0 ∧ N (Int.cast ∘ z) <
+      R}.encard : ℝ≥0∞),
     ← tsum_ite_const_eq (fun z : Fin d → ℤ => z ≠ 0 ∧ N (Int.cast ∘ z) < R)]
   refine tsum_congr fun z => ?_
   simp only [Equiv.subLeft_apply, sub_sub_cancel]
@@ -574,7 +583,8 @@ theorem tsum_row_count (x : Fin d → ℤ) (R : ℝ) :
 /-- **Item 1, the dominator.** On `(u, R)`, if `|K'| ≤ L` there,
 the cut-off family satisfies the dominator of `integral_sub_eq_integral_flux` with
 `M = (β L · 2 · #{z ≠ 0 : N (Int.cast ∘ z) < R} · E_{μ_R}|K_o|).toReal`. -/
-theorem cutoff_dominator (hN0 : ∀ v, N v = 0 → v = 0) (hKa : AntitoneOn K (Ioi 0)) (β : ℝ≥0) {L : ℝ} {u R : ℝ}
+theorem cutoff_dominator (hN0 : ∀ v, N v = 0 → v = 0) (hKa : AntitoneOn K (Ioi 0))
+    (β : ℝ≥0) {L : ℝ} {u R : ℝ}
     (hL : ∀ r ∈ Ioo u R, |K' r| ≤ L) (o : Fin d → ℤ)
     (hχ : chi (intensityProfile (cutoffKernel N K R) β) o ≠ ⊤) :
     ∀ r ∈ Ioo u R, ∀ S : Finset (Sym2 (Fin d → ℤ)),
@@ -588,14 +598,16 @@ theorem cutoff_dominator (hN0 : ∀ v, N v = 0 → v = 0) (hKa : AntitoneOn K (I
   intro r hr S
   set q := intensityProfile (cutoffKernel N K r) β
   set nR : ℝ≥0∞ := ({z : Fin d → ℤ | z ≠ 0 ∧ N (Int.cast ∘ z) < R}.encard : ℝ≥0∞)
-  set c : Sym2 (Fin d → ℤ) → ℝ := fun e => (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+  set c : Sym2 (Fin d → ℤ) → ℝ := fun e => (radialKernel N
+      (fun s => if s < r then 1 else 0) e : ℝ) *
     ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ)))
   set w : (Fin d → ℤ) × (Fin d → ℤ) → ℝ≥0∞ := fun p =>
     if p.1 ≠ p.2 ∧ N (Int.cast ∘ (p.1 - p.2)) < R then tau q o p.1 else 0
   have hβL : 0 ≤ (β : ℝ) * L := mul_nonneg β.coe_nonneg ((abs_nonneg _).trans (hL r hr))
   -- the per-pair bound
   have hpair : ∀ e, ENNReal.ofReal |c e| * law q {ω | ∃ x ∈ e, x ∈ cluster ω o} ≤
-      ENNReal.ofReal (β * L) * (w (Quot.out e) + w (Quot.out e : (Fin d → ℤ) × (Fin d → ℤ)).swap) := by
+      ENNReal.ofReal (β * L) * (w (Quot.out e) + w
+          (Quot.out e : (Fin d → ℤ) × (Fin d → ℤ)).swap) := by
     intro e
     obtain ⟨⟨a, b⟩, hab⟩ : ∃ p, Quot.out e = p := ⟨_, rfl⟩
     have he : e = s(a, b) := by rw [← Quot.out_eq e, hab]
@@ -607,7 +619,8 @@ theorem cutoff_dominator (hN0 : ∀ v, N v = 0 → v = 0) (hKa : AntitoneOn K (I
       simp [c, radialKernel_diag]
     by_cases hlt : N (Int.cast ∘ (a - b)) < r
     · have hab' : N (Int.cast ∘ (a - b)) < R := hlt.trans hr.2
-      have hba' : N (Int.cast ∘ (b - a)) < R := by rwa [intCast_comp_sub, map_sub_rev, ← intCast_comp_sub]
+      have hba' : N (Int.cast ∘ (b - a)) < R := by
+          rwa [intCast_comp_sub, map_sub_rev, ← intCast_comp_sub]
       simp only [w, Ne, hdiag, not_false_eq_true, true_and, hab', ite_true,
         show ¬ b = a from fun h => hdiag h.symm, hba']
       refine mul_le_mul' (ENNReal.ofReal_le_ofReal ?_) ?_
@@ -621,7 +634,8 @@ theorem cutoff_dominator (hN0 : ∀ v, N v = 0 → v = 0) (hKa : AntitoneOn K (I
             ≤ (β : ℝ) * L * 1 := mul_le_mul (mul_le_mul_of_nonneg_left (hL r hr) β.coe_nonneg)
               hexp (Real.exp_pos _).le hβL
           _ = β * L := mul_one _
-      · have h : {ω : Config (Fin d → ℤ) | ∃ x ∈ s(a, b), x ∈ cluster ω o} = conn o a ∪ conn o b := by
+      · have h : {ω : Config (Fin d → ℤ) | ∃ x ∈ s(a, b), x ∈ cluster ω o} = conn o a ∪
+          conn o b := by
           ext ω
           simp only [Sym2.mem_iff, mem_ofPred_eq, mem_union]
           constructor
@@ -659,9 +673,11 @@ theorem cutoff_dominator (hN0 : ∀ v, N v = 0 → v = 0) (hKa : AntitoneOn K (I
     calc ∑ e ∈ S, ENNReal.ofReal |c e| * law q {ω | ∃ x ∈ e, x ∈ cluster ω o}
         ≤ ∑' e, ENNReal.ofReal |c e| * law q {ω | ∃ x ∈ e, x ∈ cluster ω o} :=
           ENNReal.sum_le_tsum S
-      _ ≤ ∑' e, ENNReal.ofReal (β * L) * (w (Quot.out e) + w (Quot.out e : (Fin d → ℤ) × (Fin d → ℤ)).swap) :=
+      _ ≤ ∑' e, ENNReal.ofReal (β * L) * (w (Quot.out e) +
+          w (Quot.out e : (Fin d → ℤ) × (Fin d → ℤ)).swap) :=
           ENNReal.tsum_le_tsum hpair
-      _ = ENNReal.ofReal (β * L) * (∑' e, w (Quot.out e) + ∑' e, w (Quot.out e : (Fin d → ℤ) × (Fin d → ℤ)).swap) := by
+      _ = ENNReal.ofReal (β * L) * (∑' e, w (Quot.out e) + ∑' e,
+          w (Quot.out e : (Fin d → ℤ) × (Fin d → ℤ)).swap) := by
           rw [ENNReal.tsum_mul_left, ENNReal.tsum_add]
       _ ≤ ENNReal.ofReal (β * L) * (∑' p, w p + ∑' p, w p) := by
           gcongr
@@ -689,7 +705,8 @@ the cut-off law at scale `R` have finite expected cluster volume at `o`. Then fo
 `0 < s ≤ t < R`, with `c_r(e) = 1{N(e) < r} β (-K'(r)) e^{-β J_r(e)}`,
 `ψ t - ψ s = ∫_s^t ∑' e, c_r(e) ∫ (F |K_o(ω ∪ {e})| - F |K_o(ω \ {e})|) dμ_r dr`.
 No locally uniform convergence of window fluxes is assumed. -/
-theorem integral_sub_eq_integral_flux_cutoff (hN0 : ∀ v, N v = 0 → v = 0) (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+theorem integral_sub_eq_integral_flux_cutoff (hN0 : ∀ v, N v = 0 → v = 0)
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
     (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) {F : ℕ∞ → ℝ} {m : ℝ} (hFm : ∀ n, |F n| ≤ m)
     (hF : ∃ n₀ : ℕ, ∀ n : ℕ∞, (n₀ : ℕ∞) ≤ n → F n = F ⊤) (o : Fin d → ℤ) {R : ℝ}
     (hχ : chi (intensityProfile (cutoffKernel N K R) β) o ≠ ⊤) {s t : ℝ} (hs : 0 < s)
@@ -752,7 +769,8 @@ theorem continuousOn_integral_of_dominator [Countable V] {F : ℕ∞ → ℝ} {m
     {M : ℝ} (hdom : ∀ r ∈ Ioo u v, ∀ S : Finset (Sym2 V),
       ∑ e ∈ S, |c r e| * (law (p r)).real {ω | ∃ x ∈ e, x ∈ cluster ω o} ≤ M) :
     ContinuousOn (fun r => ∫ ω, F (cluster ω o).encard ∂(law (p r))) (Ioo u v) := by
-  refine (LipschitzOnWith.of_dist_le_mul (K := (2 * m * M).toNNReal) fun x hx y hy => ?_).continuousOn
+  refine (LipschitzOnWith.of_dist_le_mul (K := (2 * m * M).toNNReal) fun x hx y hy =>
+      ?_).continuousOn
   have key : ∀ x ∈ Ioo u v, ∀ y ∈ Ioo u v, y ≤ x →
       dist (∫ ω, F (cluster ω o).encard ∂(law (p x))) (∫ ω, F (cluster ω o).encard ∂(law (p y)))
         ≤ (2 * m * M).toNNReal * dist x y := by
@@ -770,7 +788,8 @@ theorem continuousOn_integral_of_dominator [Countable V] {F : ℕ∞ → ℝ} {m
     exact key y hy x hx hxy
 
 /-- Forcing a pair open is the update of its probability to `1`. -/
-theorem integral_insert_eq_update [Countable V] [DecidableEq V] {G : Config V → ℝ} (hG : Measurable G)
+theorem integral_insert_eq_update [Countable V] [DecidableEq V] {G : Config V → ℝ}
+    (hG : Measurable G)
     (q : Sym2 V → unitInterval) (e : Sym2 V) :
     ∫ ω, G (insert e ω) ∂(law q) = ∫ ω, G ω ∂(law (Function.update q e 1)) := by
   simp only [law]
@@ -811,7 +830,8 @@ theorem tsum_touch_le (q : Sym2 (Fin d → ℤ) → unitInterval) (R : ℝ) (o :
     · subst hdiag
       simp [radialKernel_diag]
     by_cases hlt : N (Int.cast ∘ (a - b)) < R
-    · have hba : N (Int.cast ∘ (b - a)) < R := by rwa [intCast_comp_sub, map_sub_rev, ← intCast_comp_sub]
+    · have hba : N (Int.cast ∘ (b - a)) < R := by rwa [intCast_comp_sub, map_sub_rev,
+        ← intCast_comp_sub]
       simp only [w, Ne, hdiag, not_false_eq_true, true_and, hlt, ite_true,
         show ¬ b = a from fun h => hdiag h.symm, hba, radialKernel_of_ne hdiag,
         Real.toNNReal_one, ENNReal.coe_one, one_mul]
@@ -828,7 +848,8 @@ theorem tsum_touch_le (q : Sym2 (Fin d → ℤ) → unitInterval) (R : ℝ) (o :
       rw [h]
       exact measure_union_le _ _
     · simp [radialKernel_of_ne hdiag, hlt]
-  have hw : ∑' p, w p = ({z : Fin d → ℤ | z ≠ 0 ∧ N (Int.cast ∘ z) < R}.encard : ℝ≥0∞) * chi q o := by
+  have hw : ∑' p, w p = ({z : Fin d → ℤ | z ≠ 0 ∧ N (Int.cast ∘ z) < R}.encard : ℝ≥0∞) *
+      chi q o := by
     rw [ENNReal.tsum_prod', chi_eq_tsum_tau, ← ENNReal.tsum_mul_left]
     refine tsum_congr fun x => ?_
     simp only [w]
@@ -878,7 +899,8 @@ theorem touch_insert_subset (o a b : Fin d → ℤ) (f : Sym2 (Fin d → ℤ)) :
 
 /-- **Continuity of the pivotal terms.** For the cut-off family, `r ↦ Δ_e(r)` is continuous
 on `(u, R)` for every pair `e` and every `u > 0`. -/
-theorem continuousOn_pivotal_cutoff (hN0 : ∀ v, N v = 0 → v = 0) (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+theorem continuousOn_pivotal_cutoff (hN0 : ∀ v, N v = 0 → v = 0) (hKa : AntitoneOn K (Ioi 0))
+    (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
     (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) {F : ℕ∞ → ℝ} {m : ℝ} (hFm : ∀ n, |F n| ≤ m)
     (hF : ∃ n₀ : ℕ, ∀ n : ℕ∞, (n₀ : ℕ∞) ≤ n → F n = F ⊤) (o : Fin d → ℤ) {R : ℝ}
     (hχ : chi (intensityProfile (cutoffKernel N K R) β) o ≠ ⊤) {u : ℝ} (hu : 0 < u)
@@ -910,11 +932,13 @@ theorem continuousOn_pivotal_cutoff (hN0 : ∀ v, N v = 0 → v = 0) (hKa : Anti
       fun x y he h => hrC ⟨x, y, he, h⟩
   have hdom : ∀ (x : Fin d → ℤ), ∀ r ∈ Ioo u R, ∀ S : Finset (Sym2 (Fin d → ℤ)),
       ∑ f ∈ S, |c r f| * (law (q r)).real {ω | ∃ y ∈ f, y ∈ cluster ω x} ≤
-        (ENNReal.ofReal (β * L) * 2 * ({z : Fin d → ℤ | z ≠ 0 ∧ N (Int.cast ∘ z) < R}.encard : ℝ≥0∞) *
+        (ENNReal.ofReal (β * L) * 2 * ({z : Fin d → ℤ | z ≠ 0 ∧ N (Int.cast ∘ z) <
+            R}.encard : ℝ≥0∞) *
           chi (intensityProfile (cutoffKernel N K R) β) o).toReal := fun x => by
     rw [chi_cutoff_eq K R β o x]
     exact cutoff_dominator hN0 hKa β hL' x (by rwa [← chi_cutoff_eq K R β o x])
-  set M := (ENNReal.ofReal (β * L) * 2 * ({z : Fin d → ℤ | z ≠ 0 ∧ N (Int.cast ∘ z) < R}.encard : ℝ≥0∞) *
+  set M := (ENNReal.ofReal (β * L) * 2 * ({z : Fin d → ℤ | z ≠ 0 ∧ N (Int.cast ∘ z) <
+      R}.encard : ℝ≥0∞) *
     chi (intensityProfile (cutoffKernel N K R) β) o).toReal
   -- the two forced families
   set c' : ℝ → Sym2 (Fin d → ℤ) → ℝ := fun r f => if f = e then 0 else c r f
@@ -983,7 +1007,8 @@ theorem radialKernel_indicator_mono {r r' : ℝ} (h : r ≤ r') (e : Sym2 (Fin d
 
 /-- **Item 2.** On an interval `(u, v) ⊆ (0, R)` that contains no value `N (Int.cast ∘ z)`,
 the infinite pivotal flux of the cut-off family is continuous. -/
-theorem continuousOn_flux_cutoff (hN0 : ∀ v, N v = 0 → v = 0) (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+theorem continuousOn_flux_cutoff (hN0 : ∀ v, N v = 0 → v = 0) (hKa : AntitoneOn K (Ioi 0))
+    (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
     (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) {F : ℕ∞ → ℝ} {m : ℝ} (hFm : ∀ n, |F n| ≤ m)
     (hF : ∃ n₀ : ℕ, ∀ n : ℕ∞, (n₀ : ℕ∞) ≤ n → F n = F ⊤) (o : Fin d → ℤ) {R : ℝ}
     (hχ : chi (intensityProfile (cutoffKernel N K R) β) o ≠ ⊤) {u v : ℝ} (hu : 0 < u)
@@ -1084,8 +1109,8 @@ theorem continuousOn_flux_cutoff (hN0 : ∀ v, N v = 0 → v = 0) (hKa : Antiton
           (2 * m * P v e) := by gcongr
       _ = B e := by simp only [B]; ring
 
-/-- Around a parameter `r₀ ∈ (0, R)` that is not a value `N (Int.cast ∘ z)`, there is a corner-free open
-interval inside `(0, R)`. -/
+/-- Around a parameter `r₀ ∈ (0, R)` that is not a value `N (Int.cast ∘ z)`, there is a corner-free
+open interval inside `(0, R)`. -/
 theorem exists_corner_free (hN0 : ∀ v, N v = 0 → v = 0) {r₀ R : ℝ}
     (hr₀ : 0 < r₀) (hr₀R : r₀ < R) (hcorner : ∀ z, N (Int.cast ∘ z) ≠ r₀) :
     ∃ δ > 0, 0 < r₀ - δ ∧ r₀ + δ ≤ R ∧ ∀ z, N (Int.cast ∘ z) ∉ Ioo (r₀ - δ) (r₀ + δ) := by
@@ -1106,15 +1131,17 @@ theorem exists_corner_free (hN0 : ∀ v, N v = 0 → v = 0) {r₀ R : ℝ}
     rw [show (Int.cast ∘ (0 : Fin d → ℤ) : Fin d → ℝ) = 0 from funext fun _ => by simp,
       map_zero] at hz
     linarith [hz.1]
-  · refine hball (show N (Int.cast ∘ z) ∈ Metric.ball r₀ ε from ?_) ⟨z, ⟨hz0, by linarith [hz.2]⟩, rfl⟩
+  · refine hball (show N (Int.cast ∘ z) ∈ Metric.ball r₀ ε from ?_)
+      ⟨z, ⟨hz0, by linarith [hz.2]⟩, rfl⟩
     rw [Metric.mem_ball, Real.dist_eq, abs_lt]
     constructor <;> linarith [hz.1, hz.2]
 
 /-- **Item 3: Lemma I.4.1 without `hunif`.** For the cut-off family with finite
 expected cluster volume at scale `R`, the expectation `ψ(r) = ∫ F |K_o| dμ_r` is
-differentiable at every `r₀ ∈ (0, R)` that is not a value `N (Int.cast ∘ z)`, with derivative the infinite
-pivotal flux `∑' e, c_{r₀}(e) ∫ (F |K_o(ω ∪ {e})| - F |K_o(ω \ {e})|) dμ_{r₀}`. -/
-theorem hasDerivAt_integral_cutoff (hN0 : ∀ v, N v = 0 → v = 0) (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+differentiable at every `r₀ ∈ (0, R)` that is not a value `N (Int.cast ∘ z)`, with derivative the
+infinite pivotal flux `∑' e, c_{r₀}(e) ∫ (F |K_o(ω ∪ {e})| - F |K_o(ω \ {e})|) dμ_{r₀}`. -/
+theorem hasDerivAt_integral_cutoff (hN0 : ∀ v, N v = 0 → v = 0) (hKa : AntitoneOn K (Ioi 0))
+    (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
     (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) {F : ℕ∞ → ℝ} {m : ℝ} (hFm : ∀ n, |F n| ≤ m)
     (hF : ∃ n₀ : ℕ, ∀ n : ℕ∞, (n₀ : ℕ∞) ≤ n → F n = F ⊤) (o : Fin d → ℤ) {R : ℝ}
     (hχ : chi (intensityProfile (cutoffKernel N K R) β) o ≠ ⊤) {r₀ : ℝ} (hr₀ : 0 < r₀)
@@ -1174,7 +1201,8 @@ theorem chi_cutoff_example_ne_top :
     · by_cases hz : z = 0
       · simp [k, hz, cutoffKernel_def]
       have h1 : 1 ≤ ‖z‖ := one_le_norm_of_ne_zero hz
-      have hle := cutoffKernel_le_radialKernel (N := N) normSeminorm_eq_zero hK (by norm_num : (0 : ℝ) < 5 / 2)
+      have hle := cutoffKernel_le_radialKernel (N := N) normSeminorm_eq_zero hK
+          (by norm_num : (0 : ℝ) < 5 / 2)
         s(0, z)
       rw [radialKernel_of_ne (Ne.symm hz)] at hle
       refine (ENNReal.coe_le_coe.2 hle).trans_eq ?_

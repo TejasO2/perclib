@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-16: the probability generating function of an offspring law on `ℕ`,
 the iteration from `0` and the extinction criterion (wiki branching-processes, tags 8TFY and BFM4,
 analytic content). The argument follows the binomial case of `PercLib/Models/TreeRecursion.lean`; no

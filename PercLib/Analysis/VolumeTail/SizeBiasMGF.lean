@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Size-biased Laplace identities and the fixed-rate cut-off limit in the proof of
 Proposition I.3.2 of T. Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1.
 
@@ -12,10 +16,10 @@ Modified: the source's `mean`, `secMoment`, `sbMean` and `sizeBiasedLaw` are wri
 the size-biased law `(P.withDensity fun ω => ENNReal.ofReal (X ω / ∫ X ∂P)).map (X / a)` of
 `PercLib/Probability/SizeBiasLimits.lean`, and the source's change of variables
 `integral_sizeBiasedLaw` is `integral_withDensity_ofReal_div` of
-`PercLib/Probability/ChiSquareMoments.lean` composed with `integral_map`; the source's kernel `kern` (value `0` at `0`) is
-replaced by the kernel `f_λ` of that file (value `λ` at `0`), and the source's kernel lemmas
-by `laplaceKernel_mem_Icc` and `abs_laplaceKernel_sub_le`; the identities are stated for a
-random variable `X ≥ 0` a.e. on any measure space and any scale `a > 0`, with the source's
+`PercLib/Probability/ChiSquareMoments.lean` composed with `integral_map`; the source's kernel `kern`
+(value `0` at `0`) is replaced by the kernel `f_λ` of that file (value `λ` at `0`), and the source's
+kernel lemmas by `laplaceKernel_mem_Icc` and `abs_laplaceKernel_sub_le`; the identities are stated
+for a random variable `X ≥ 0` a.e. on any measure space and any scale `a > 0`, with the source's
 form on `ℝ` as a corollary; `import Mathlib`, `autoImplicit`, disabled linters and `#print`
 lines are removed.
 -/
@@ -107,7 +111,8 @@ theorem integral_one_sub_exp_eq_mul_integral_laplaceKernel (P : Measure Ω) {X :
       (∫ ω, X ω ∂P) / a * ∫ y, (if y = 0 then h * a else (1 - exp (-(h * a * y))) / y)
         ∂((P.withDensity fun ω => ENNReal.ofReal (X ω / ∫ ω, X ω ∂P)).map fun ω => X ω / a) := by
   rw [integral_map (hXm.div_const a).aemeasurable
-    (continuous_laplaceKernel (h * a)).aestronglyMeasurable, integral_withDensity_ofReal_div P hXm hX0]
+    (continuous_laplaceKernel (h * a)).aestronglyMeasurable,
+        integral_withDensity_ofReal_div P hXm hX0]
   have hpt : ∀ ω, X ω * (if X ω / a = 0 then h * a else
       (1 - exp (-(h * a * (X ω / a)))) / (X ω / a)) = a * (1 - exp (-(h * X ω))) := by
     intro ω

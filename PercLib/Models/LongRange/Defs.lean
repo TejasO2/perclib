@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Radial long-range kernels on `ℤ^d` with the norm as a parameter, the cut-off kernels of Definition
 I.1.5 of T. Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1, for a general
 profile, and the power-law profile of Definition I.1.3 as an instance; with the wiki targets PVA8,
@@ -190,7 +194,8 @@ theorem exists_le_mul_norm (N : Seminorm ℝ (Fin d → ℝ)) :
   have hv : v = ∑ i, v i • Pi.single i (1 : ℝ) := by
     ext j; simp [Finset.sum_apply, Pi.single_apply]
   calc N v = N (∑ i, v i • Pi.single i (1 : ℝ)) := by rw [← hv]
-    _ ≤ ∑ i, N (v i • Pi.single i (1 : ℝ)) := Finset.le_sum_of_subadditive N (map_zero N).le (map_add_le_add N) _ _
+    _ ≤ ∑ i, N (v i • Pi.single i (1 : ℝ)) := Finset.le_sum_of_subadditive N (map_zero N).le
+        (map_add_le_add N) _ _
     _ = ∑ i, ‖v i‖ * N (Pi.single i 1) := by simp only [map_smul_eq_mul]
     _ ≤ ∑ i, ‖v‖ * N (Pi.single i 1) := Finset.sum_le_sum fun i _ =>
         mul_le_mul_of_nonneg_right (norm_le_pi_norm v i) (apply_nonneg N _)

@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Leaf-labelled trivalent tree shapes `𝒯_k` (wiki tag SO5J, article `multipoint-trees`) and the
 multipoint tree-graph target AFH6, on the bond interface. New definitions and proofs;
 nothing is copied. Mathlib at the pinned revision has trees (`SimpleGraph.IsTree`) and star graphs,
@@ -50,7 +54,8 @@ structure IsTrivalentTree (k : ℕ) (G : SimpleGraph (Fin k ⊕ Fin (k - 2))) : 
 
 /-- Two leaf-labelled trivalent trees are equivalent when a graph isomorphism between them
 fixes every leaf label. -/
-def treeShapeSetoid (k : ℕ) : Setoid {G : SimpleGraph (Fin k ⊕ Fin (k - 2)) // IsTrivalentTree k G} where
+def treeShapeSetoid (k : ℕ) : Setoid {G : SimpleGraph (Fin k ⊕ Fin (k - 2)) //
+    IsTrivalentTree k G} where
   r G H := ∃ φ : G.1 ≃g H.1, ∀ i, φ (Sum.inl i) = Sum.inl i
   iseqv := ⟨fun _ => ⟨Iso.refl, fun _ => rfl⟩,
     fun ⟨φ, h⟩ => ⟨φ.symm, fun i => by rw [RelIso.symm_apply_eq, h i]⟩,

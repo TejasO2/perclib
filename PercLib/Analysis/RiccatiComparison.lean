@@ -1,6 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Ported from the source repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
 `d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, file `PercLib/CriticalLRP/ODE.lean` (blob `2294eb5a37`),
 contributed by `yujinhkim`; licence Apache-2.0 as declared in that commit's file headers and
@@ -70,7 +73,8 @@ theorem lemma_I_4_5_one_nocont {f f' : ℝ → ℝ} {A α r₀ : ℝ}
   -- the auxiliary function
   set H : ℝ → ℝ := fun x => (f x)⁻¹ - (A / α) * x ^ (-α) with hH
   -- its derivative on `(r₀, ∞)`
-  have hHderiv : ∀ x, r₀ < x → HasDerivAt H (-(f' x / (f x) ^ 2) - (A / α) * (-α * x ^ (-α - 1))) x := by
+  have hHderiv : ∀ x, r₀ < x → HasDerivAt H (-(f' x / (f x) ^ 2) - (A / α) *
+      (-α * x ^ (-α - 1))) x := by
     intro x hx
     have hxr : r₀ ≤ x := le_of_lt hx
     have hxpos : 0 < x := lt_of_lt_of_le hr₀ hxr
