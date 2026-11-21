@@ -64,8 +64,8 @@ Mark it ready for review when it is done. The description follows
 - tags added or changed;
 - the lemmas you searched for, in mathlib and in PercLib, and what you found;
 - the gate result: the commit you ran `scripts/gate.sh` on and its final lines, pasted
-  (see "Running the gate locally" in [AGENTS.md](AGENTS.md)); CI is not active yet, so
-  this is the only automatic check a reviewer sees;
+  (see "Running the gate locally" in [AGENTS.md](AGENTS.md)); CI is being added; until it
+  runs on your pull request, this is the only automatic check a reviewer sees;
 - **interface changes**: every new or changed definition, structure, class, instance,
   notation or tagged statement, and any change outside `PercLib/`. If there are none,
   say "none (proof-only)".
@@ -75,13 +75,13 @@ late. Interface changes and proofs go in separate pull requests, the interface f
 
 ## 5. Checks and merging
 
-> **Today: no CI and no auto-merge.** The CI and auto-merge workflows are being reviewed
-> and are not yet active on `main`. Until they are, run the gate locally (the commands in
+> **Today: CI is being added; no auto-merge.** The CI workflow (build and checks only) is
+> being added to `main`; the auto-merge workflow is still under review. Until they are, run the gate locally (the commands in
 > [AGENTS.md](AGENTS.md), "Running the gate locally") and paste its final lines into the
 > pull request. Every pull request is merged by a maintainer, Tom Hutchcroft, even when
 > it is proof-only and the gate passes.
 
-**What CI will check, once it is active** (planned, not yet running): on every pull
+**What CI checks** (being added): on every pull
 request,
 
 - `gate`: `scripts/gate.sh` against the merge base: full `lake build --wfail`, axiom
@@ -139,7 +139,7 @@ good-first-task if you are new), or from docs/FRONTIER.md while tasks/ does not 
 that no open pull request has claimed and that is not in an area CONTRIBUTING.md lists as
 taken; claim it with a draft pull request against main titled "<task-id>: ...", from a
 branch of main in your fork. Build only the modules you change, after
-`lake exe cache get`. CI is not active yet: before marking the pull request ready, run
+`lake exe cache get`. CI is being added: before marking the pull request ready, run
 scripts/gate.sh as AGENTS.md describes and paste its final lines into it. Never use
 sorry, admit, axiom or native_decide; never redefine an existing notion; never alter a
 tagged statement to make a proof close (report a counterexample in a math-gap issue

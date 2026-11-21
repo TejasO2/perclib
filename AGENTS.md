@@ -7,7 +7,9 @@ and the rules for the Lean. The workflow (tasks, areas taken by other contributo
 claims, pull requests, checks, merging, issues) is in [CONTRIBUTING.md](CONTRIBUTING.md); the
 detailed rules are in [docs/COORDINATION.md](docs/COORDINATION.md); the reasons are in
 [docs/DECISIONS.md](docs/DECISIONS.md) (later decisions override earlier ones; D-35 and
-D-37 are the current rules).
+D-37 are the current rules). Where `docs/COORDINATION.md` or `docs/DECISIONS.md`
+describe the project's internal roles (ARCHITECT, LEAD, workers, `work/<package>` branches, who runs full builds), they
+do not bind outside contributors; where they differ from this file or CONTRIBUTING.md, these two files win.
 
 ## Start
 
@@ -27,8 +29,8 @@ python3 scripts/check_forbidden.py PercLib # forbidden-construct scan (seconds)
 
 ## Running the gate locally
 
-**CI is not active yet.** The CI and auto-merge workflows are being reviewed and are not
-yet active on `main`. Until they are, the gate you run yourself is the only automatic
+**CI is being added; auto-merge is not active.** The CI workflow (build and checks only) is
+being added to `main`; the auto-merge workflow is still under review. Until they are, the gate you run yourself is the only automatic
 check: run it before you mark a pull request ready, and paste the commit it ran on and its
 final lines (`== gate passed on <sha>` and any `NOTICE:` line, or the failure) into the
 pull request. Every pull request is merged by a maintainer (see
@@ -84,7 +86,7 @@ from the gate and optional for contributors: it replays every module through
 `leanchecker`, 6 modules per process at about 4 GB each, and must not run beside a build.
 Never run `lake env leanchecker PercLib`: one process needs more than 15 GB and is killed.
 
-**What CI will check, once it is active** (not yet): on every pull request it will run
+**What CI checks** (being added): on every pull request it will run
 `scripts/gate.sh` against the merge base, the kernel replay (for pushes and interface
 changes), the unit tests of `scripts/`, and the wiki build, and label the pull request
 `proof-only` or `interface`. Until then, the commands above are the check.
