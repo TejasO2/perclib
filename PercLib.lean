@@ -316,6 +316,7 @@ public import PercLib.Probability.Tags.Correlation
 public import PercLib.Probability.Tags.DisjointOccurrence
 public import PercLib.Probability.Tags.Ergodicity
 public import PercLib.Probability.Tags.ExponentialMoments
+public import PercLib.Probability.Tags.FiniteCoordinates
 public import PercLib.Probability.Tags.GhostTransform
 public import PercLib.Probability.Tags.Harris
 public import PercLib.Probability.Tags.ProductModel
