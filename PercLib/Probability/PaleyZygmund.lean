@@ -1,9 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs for issue 647 (Q-219), written on 2026-11-16 by PROVER-G: the Paley–Zygmund
-inequality and the second-moment method, from pinned mathlib's Hölder inequality for lower
-Lebesgue integrals, and the cluster-volume corollary. No upstream code is copied, no definition
-is added and no Input is introduced.
+New proofs, written on 2026-11-16: the Paley–Zygmund inequality and the second-moment method, from
+pinned mathlib's Hölder inequality for lower Lebesgue integrals, and the cluster-volume corollary.
+No upstream code is copied, no definition is added and no Input is introduced.
 -/
 module
 

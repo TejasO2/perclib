@@ -2,8 +2,7 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for issue 445 (Q-111, part 1), written on 2026-11-16 by PROVER-F. No upstream
-proof is copied.
+New proofs, written on 2026-11-16. No upstream proof is copied.
 -/
 module
 
@@ -19,9 +18,9 @@ most `D`, then `E|B_ω(o,r)| ≤ ∑_{j ≤ r} D^j` (`lintegral_encard_ball_le_o
 at intrinsic distance at most `r` is the end of an open simple path of length at most `r`
 (`edist_le_subset_iUnion_path`), and the weights of such paths are summed by `walkSum`.
 
-`lintegral_encard_ball_le_of_transitive` is the form of issue 445: for a transitive profile
+`lintegral_encard_ball_le_of_transitive` is the transitive form: for a transitive profile
 the bound holds with `D = ∑'_{v ≠ o} q s(o,v)`. It needs neither `D < ⊤` nor `χ = ⊤`.
-The lower bounds of issue 445 are part 2. This file adds no definition.
+The lower bounds are in `IntrinsicRenewal.lean`. This file adds no definition.
 -/
 
 @[expose] public section

@@ -1,10 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs for issue 598 (Q-170, roadmap T-5), written on 2026-11-16 by PROVER-G: finite
-susceptibility below the threshold for summable translation-invariant kernels on countable
-additive groups and on `ℤ^d`, from the transitive sharpness theorem of
-`Percolation/Bond/Sharpness.lean`. No upstream code is copied, no definition is added and no
-Input is introduced.
+New proofs, written on 2026-11-16: finite susceptibility below the threshold for summable
+translation-invariant kernels on countable additive groups and on `ℤ^d`, from the transitive
+sharpness theorem of `Percolation/Bond/Sharpness.lean`. No upstream code is copied, no definition is
+added and no Input is introduced.
 -/
 module
 
@@ -12,7 +11,7 @@ public import PercLib.Percolation.Bond.Sharpness
 public import PercLib.Models.Hierarchical
 public import PercLib.Models.LongRange.PowerLaw
 
-/-! # T-5: finite susceptibility below the threshold on `ℤ^d`
+/-! # Finite susceptibility below the threshold on `ℤ^d`
 
 Let `G` be a countable additive group, `k : G → ℝ≥0` with `∑' z, k z < ⊤`, and `J` a pair
 intensity with `J s(x,y) = k (y - x)` (such a `J` exists exactly when `k` is even,
@@ -22,7 +21,7 @@ intensity with `J s(x,y) = k (y - x)` (such a `J` exists exactly when `k` is eve
   translations are automorphisms of `J`, and the rows of `J` are summable.
 * `chi_lt_top_of_lt_globalCriticalIntensity_of_translationInvariant` and
   `rootCriticalIntensity_eq_globalCriticalIntensity_of_translationInvariant` (item 2).
-* `chi_lt_top_of_lt_globalCriticalIntensity_int` (item 3, the roadmap form of T-5):
+* `chi_lt_top_of_lt_globalCriticalIntensity_int` (item 3):
   the same on `ℤ^d = Fin d → ℤ`.
 * `chi_lt_top_of_lt_globalCriticalIntensity_powerLaw` and
   `chi_lt_top_of_lt_globalCriticalIntensity_hierarchical` (item 4): the power law

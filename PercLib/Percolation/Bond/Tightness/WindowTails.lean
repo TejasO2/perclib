@@ -1,9 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written for package Q-105 (issue 439, roadmap T-6), on the D-2 interface.
-Source motivation: T. Hutchcroft, arXiv:2008.11197v2, §2 (consequences of universal
-tightness), and the wiki statements MJEP, 7VCS and DEZI.
-No source text or code is copied.
+New proofs, on the bond interface. Source motivation: T. Hutchcroft, arXiv:2008.11197v2,
+§2 (consequences of universal tightness), and the wiki statements MJEP, 7VCS and DEZI. No source
+text or code is copied.
 -/
 module
 

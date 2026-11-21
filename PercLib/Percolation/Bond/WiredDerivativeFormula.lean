@@ -1,9 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs for issue 371 (Q-64, items 2 and 3), written on 2026-11-16 by PROVER-E: the exact
-derivative of the escape probability from a finite domain and the finite-size differential
-inequality (wiki finite-size-sharpness, tag HATE). No upstream proof is copied, no definition
-is added and no Input is introduced.
+New proofs, written on 2026-11-16: the exact derivative of the escape probability from a finite
+domain and the finite-size differential inequality (wiki finite-size-sharpness, tag HATE). No
+upstream proof is copied, no definition is added and no Input is introduced.
 -/
 module
 

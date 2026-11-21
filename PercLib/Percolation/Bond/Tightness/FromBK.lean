@@ -1,8 +1,7 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written for package Q-65 (issue 372, roadmap T-6), on the D-2 interface.
-Source motivation: T. Hutchcroft, arXiv:2008.11197v2, §2.1, deduction of Theorem 2.2
-from Theorem 2.3. No source text or code is copied.
+New proofs, on the bond interface. Source motivation: T. Hutchcroft, arXiv:2008.11197v2,
+§2.1, deduction of Theorem 2.2 from Theorem 2.3. No source text or code is copied.
 -/
 module
 
@@ -15,7 +14,7 @@ The three bounds of `UniversalTightness`, each deduced for fixed `q` and `Λ` fr
 corresponding BK bound of `TightnessBK` written out as a hypothesis. With `M` the quantile
 scale, the BK step at `λ = M` gives the upper and rooted tails, and the BK step at
 `λ = ε M` together with `P(max ≥ M - 1) > e⁻¹` gives the lower tail. The definitions
-in `Tightness/Defs.lean` are used unchanged (reading `k ≥ 1` of issue 52).
+in `Tightness/Defs.lean` are used unchanged (reading `k ≥ 1`).
 
 ## Main results
 

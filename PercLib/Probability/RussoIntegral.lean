@@ -1,6 +1,6 @@
 /-
 Integrated and open-pivotal forms of Russo's identity. New consequences of PercLib's
-Russo.lean (native NearCritical source c820fea91a7482c1755de0ec94ecb9f59ccfcacc, R-3)
+Russo.lean (native NearCritical source c820fea91a7482c1755de0ec94ecb9f59ccfcacc, reused with Tom Hutchcroft's permission)
 and mathlib 56a005855ea17e0b0958f73ec801ae140b0a1679's fundamental theorem of calculus.
 No new law or pivotal convention is introduced.
 -/

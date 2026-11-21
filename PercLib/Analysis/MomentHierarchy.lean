@@ -1,9 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
 
-New proofs for issue 457 (Q-123), written on 2026-11-16 by PROVER-G, against pinned mathlib.
-No upstream proof is copied. The combinatorial identity is `lemma_I_4_23` of
-`PercLib.Combinatorics.DoubleFactorialConvolution`.
+New proofs, written on 2026-11-16, against pinned mathlib. No upstream proof is copied. The
+combinatorial identity is `lemma_I_4_23` of `PercLib.Combinatorics.DoubleFactorialConvolution`.
 -/
 module
 

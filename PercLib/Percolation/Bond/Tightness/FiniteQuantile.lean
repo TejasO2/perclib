@@ -2,7 +2,7 @@
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
 New proofs using the existing quantile and pinned mathlib order/topology APIs.
 Source motivation: arXiv:2103.17013v1, section 2.1. The assertion of continuity is
-replaced by left stability, following FIXER's provisional resolution of issue 53.
+replaced by left stability.
 No source code is copied; no two-sided continuity of the integer quantile is claimed.
 -/
 module

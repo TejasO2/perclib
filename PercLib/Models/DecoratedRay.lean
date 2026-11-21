@@ -1,9 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written for package Q-74 (issue 381), on the D-2 interface and the intensity
-family `intensityProfile`. The construction (a ray with pendant paths of length `2^k` and
-intensity `k^2`) follows the wiki article on the infinite-cluster zero-one law (tag SA9P).
-No source text or code is copied.
+New proofs, on the bond interface and the intensity family `intensityProfile`. The
+construction (a ray with pendant paths of length `2^k` and intensity `k^2`) follows the wiki article
+on the infinite-cluster zero-one law (tag SA9P). No source text or code is copied.
 -/
 module
 

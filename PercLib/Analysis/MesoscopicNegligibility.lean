@@ -1,9 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs for issue 467 (Q-133), written on 2026-11-16 by PROVER-E: truncated moment
-inequalities force mesoscopic negligibility (wiki mesoscopic-tail-transfer, tag KKGL, with the
-conclusion QMN5 written out). No upstream proof is copied, no definition is added and no Input
-is introduced.
+New proofs, written on 2026-11-16: truncated moment inequalities force mesoscopic negligibility
+(wiki mesoscopic-tail-transfer, tag KKGL, with the conclusion QMN5 written out). No upstream proof
+is copied, no definition is added and no Input is introduced.
 -/
 module
 

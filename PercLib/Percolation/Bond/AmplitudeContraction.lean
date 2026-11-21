@@ -1,9 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written for package Q-106 (issue 440), on the D-2 interface.
-Source motivation: T. Hutchcroft, "Power-law bounds for critical long-range percolation below
-the upper-critical dimension", arXiv:2008.11197v2, §4, and the wiki statement C9N6.
-No source text or code is copied.
+New proofs, on the bond interface. Source motivation: T. Hutchcroft, "Power-law bounds for
+critical long-range percolation below the upper-critical dimension", arXiv:2008.11197v2, §4, and the
+wiki statement C9N6. No source text or code is copied.
 -/
 module
 

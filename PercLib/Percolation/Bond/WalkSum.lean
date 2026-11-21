@@ -21,8 +21,7 @@ diagonal-masked specialization is the form used for bond percolation.
 may repeat edges: interpreting the product as an independent-edge probability
 requires a separate restriction to paths with distinct edges.
 
-New proofs for PercLib, using the pinned mathlib API located by SCOUT in
-issue #17; no upstream proof is copied.
+New proofs for PercLib, using the pinned mathlib API; no upstream proof is copied.
 -/
 
 @[expose] public section

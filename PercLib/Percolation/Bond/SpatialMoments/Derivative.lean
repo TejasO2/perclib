@@ -2,10 +2,9 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for issue 638 (Q-210, items 1–2 in finite volume), written on 2026-11-16 by
-PROVER-F. Statements from the wiki article `spatial-cutoff-moments` (tags 57RX, 1K61); source
-T. Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1, §I.4.1 and §I.5.1.
-No upstream proof is copied and no definition is added.
+New proofs, written on 2026-11-16. Statements from the wiki article `spatial-cutoff-moments` (tags
+57RX, 1K61); source T. Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1, §I.4.1
+and §I.5.1. No upstream proof is copied and no definition is added.
 -/
 module
 

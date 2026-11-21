@@ -1,10 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-193 (issue 621): proofs of the targets PVA8, MQNP, LF50 and 6YYS of the wiki article
-`cutoff-families` (Definitions I.1.3 and I.1.5 of T. Hutchcroft, *Critical long-range
-percolation I*, arXiv:2508.18807v1), stated in `PercLib/Models/LongRange/Defs.lean`.
-New proofs from pinned mathlib's `integral_rpow`, `Real.hasDerivAt_rpow_const` and
-`tendsto_rpow_neg_atTop`. No upstream code is copied.
+Proofs of the targets PVA8, MQNP, LF50 and 6YYS of the wiki article `cutoff-families` (Definitions
+I.1.3 and I.1.5 of T. Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1), stated
+in `PercLib/Models/LongRange/Defs.lean`. New proofs from pinned mathlib's `integral_rpow`,
+`Real.hasDerivAt_rpow_const` and `tendsto_rpow_neg_atTop`. No upstream code is copied.
 -/
 module
 

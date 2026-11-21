@@ -1,8 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written for package Q-115 (issue 449), from pinned mathlib's Stirling formula
-(`Stirling.tendsto_stirlingSeq_sqrt_pi`) and Catalan numbers. The statements follow the
-wiki tags AAZS and V5OZ (binary-tree percolation). No source text or code is copied.
+New proofs, from pinned mathlib's Stirling formula (`Stirling.tendsto_stirlingSeq_sqrt_pi`) and
+Catalan numbers. The statements follow the wiki tags AAZS and V5OZ (binary-tree percolation). No
+source text or code is copied.
 -/
 module
 

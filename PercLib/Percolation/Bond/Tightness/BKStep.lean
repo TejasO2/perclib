@@ -1,8 +1,7 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written for package Q-102 (issue 436, roadmap T-6), on the D-2 interface.
-Source motivation: T. Hutchcroft, arXiv:2008.11197v2, §2.1, proof of Theorem 2.3.
-No source text or code is copied.
+New proofs, on the bond interface. Source motivation: T. Hutchcroft, arXiv:2008.11197v2,
+§2.1, proof of Theorem 2.3. No source text or code is copied.
 -/
 module
 
@@ -13,8 +12,7 @@ public import PercLib.Combinatorics.TreeSplitting
 
 /-! # The BK step for the largest cluster intersection
 
-`tightnessBK : TightnessBK V` for every countable `V`, on the reading `k ≥ 1` of issue 52
-(the definition in `Tightness/Defs.lean` is used unchanged), and the corollary
+`tightnessBK : TightnessBK V` for every countable `V`, on the reading `k ≥ 1` (see `Tightness/Defs.lean`; the definition in `Tightness/Defs.lean` is used unchanged), and the corollary
 `universalTightness : UniversalTightness V`. Each conjunct of both statements is also a
 named lemma (`law_three_pow_mul_le_maxClusterIntersection_le`,
 `law_three_pow_mul_le_clusterIntersection_le`,

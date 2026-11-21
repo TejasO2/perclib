@@ -2,7 +2,7 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New for this project (issue 214, Q-43, item 3). No upstream proof is copied.
+New for this project. No upstream proof is copied.
 -/
 module
 
@@ -18,7 +18,7 @@ On `ℕ →₀ (Fin d → ZMod L)` with the radial kernel `J s(x, y) = C r^{h(y 
 convolution bound `∑_z J(x, z) J(z, y) ≤ 2 M J(x, y)` for `x ≠ y`, where
 `M = ∑_{z ≠ 0} C r^{h(z)}`. With the convolution bound of `ConvolutionBound.lean`,
 `τ_β(x, y) ≤ β J(x, y) (1 - 2βM)⁻¹ (1 - βM)⁻¹`: at small `β` the two-point function decays like
-the kernel. The ultrametric inequality is proved inline here (the general geometry is Q-40).
+the kernel. The ultrametric inequality is proved inline here (the general geometry is in `PercLib/Models/HierarchicalGeometry.lean`).
 This is a subcritical bound and says nothing at criticality.
 -/
 

@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New site-percolation corollaries of PercLib's canonical Bernoulli Harris inequality
-and monotone coupling. Uses the existing D-3 definitions; no upstream proof copied.
+New site-percolation corollaries of PercLib's canonical Bernoulli Harris inequality and monotone
+coupling. Uses the existing site-percolation definitions; no upstream proof copied.
 -/
 module
 

@@ -1,19 +1,17 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-200 (issue 628): the restoration map preserves the product law (the coupling in the
-proof of Lemma I.4.12 of T. Hutchcroft, *Critical long-range percolation I*,
-arXiv:2508.18807v1).
-The statements are ported from pull request 488: repository `yujinhkim/lrp`, branch
-`critical-lrp-1`, commit `d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, files
+The restoration map preserves the product law (the coupling in the proof of Lemma I.4.12 of T.
+Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1). The statements are ported from
+the repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
+`d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, files
 `PercLib/CriticalLRP/CountableProduct/RandomRestoration.lean`,
 `PercLib/CriticalLRP/CountableProduct/EdgeTouch.lean` and
 `PercLib/CriticalLRP/Correlation/TwoClusterGap.lean` (`cluster_eq_of_eqOn_touchSet`,
 `map_restoreMap`); licence Apache-2.0 as declared in those file headers and
-`third_party/critical-lrp/NOTICE.md`; upstream `yujinhkim/Critical-Long-range-percolation`
-at `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf` (not independently verified). Contributor:
-yujinhkim. The proofs are new: law preservation is proved by restoring along truncated
-clusters (finite, hence countably many values, each a stopping set) and passing to the limit
-on the generating cylinders.
+`third_party/critical-lrp/NOTICE.md`; upstream `yujinhkim/Critical-Long-range-percolation` at
+`3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf` (not independently verified). Contributor: yujinhkim. The
+proofs are new: law preservation is proved by restoring along truncated clusters (finite, hence
+countably many values, each a stopping set) and passing to the limit on the generating cylinders.
 -/
 module
 
@@ -33,7 +31,7 @@ public import Mathlib.MeasureTheory.Measure.Prod
 
 Write `T(ω) = {e | ∃ v ∈ e, v ∈ cluster ω o}` for the pairs touching the cluster of `o`.
 
-* `cluster_eq_of_eqOn_touch` (item 1 of issue 628): a configuration that agrees with `ω` on
+* `cluster_eq_of_eqOn_touch` (item 1): a configuration that agrees with `ω` on
   `T(ω)` has the same cluster of `o`; in particular `cluster_restoreMap`.
 * `map_restoreMap` (item 2): `(μ ⊗ μ).map (restoreMap o) = μ` for `μ = law q`, every
   profile `q` and countable `V`.

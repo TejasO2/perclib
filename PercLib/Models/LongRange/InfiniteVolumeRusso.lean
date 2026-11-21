@@ -1,18 +1,17 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-198 (issue 626): discharge of the premise `hunif` that pull request 488 adds to
-Lemma I.4.1 of T. Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1.
-The argument is read from pull request 488: repository `yujinhkim/lrp`, branch
-`critical-lrp-1`, commit `d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, files
-`PercLib/CriticalLRP/RussoInf/DominatedFlux.lean`, `PercLib/CriticalLRP/RussoInf/Exchange.lean`,
-`PercLib/CriticalLRP/RussoInf/FluxMain.lean`, `PercLib/CriticalLRP/RussoInf/CutoffFlux.lean`
-and `PercLib/CriticalLRP/RussoInf/Capstone.lean`; licence Apache-2.0 as declared in those
-file headers and `third_party/critical-lrp/NOTICE.md`; upstream
-`yujinhkim/Critical-Long-range-percolation` at `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf`
-(not independently verified). Contributor: yujinhkim. No code is copied: the fork's
-definitions (`cutConfig`, `cutFun`, `cappedClusterVol`, `pivotalFlux`, `cutoffEdgeDeriv`) are
-written out as expressions on the D-2 interface, and the proofs are new, from the finite
-Russo formula of this library and the dominated limit-of-derivatives theorem of
+Discharge of the premise `hunif` that the formalisation of contributor yujinhkim cited below adds to
+Lemma I.4.1 of T. Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1. The argument
+is read from the repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
+`d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, files `PercLib/CriticalLRP/RussoInf/DominatedFlux.lean`,
+`PercLib/CriticalLRP/RussoInf/Exchange.lean`, `PercLib/CriticalLRP/RussoInf/FluxMain.lean`,
+`PercLib/CriticalLRP/RussoInf/CutoffFlux.lean` and `PercLib/CriticalLRP/RussoInf/Capstone.lean`;
+licence Apache-2.0 as declared in those file headers and `third_party/critical-lrp/NOTICE.md`;
+upstream `yujinhkim/Critical-Long-range-percolation` at `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf`
+(not independently verified). Contributor: yujinhkim. No code is copied: the fork's definitions
+(`cutConfig`, `cutFun`, `cappedClusterVol`, `pivotalFlux`, `cutoffEdgeDeriv`) are written out as
+expressions on the bond interface, and the proofs are new, from the finite Russo formula
+of this library and the dominated limit-of-derivatives theorem of
 `PercLib/Analysis/DominatedDerivative.lean`.
 -/
 module
@@ -47,7 +46,7 @@ family of profiles `p r` write `ψ(r) = ∫ F |K_o| d(law (p r))` and, for a pai
   functional `F |K_o(ω ∩ S_k)|` is eventually equal to `F |K_o(ω)|`;
 * `hasDerivAt_integral_window`: the finite-window Russo formula;
 * `abs_integral_pivotal_le`: `|Δ_e| ≤ 2 m P(e touches K_o)`, also for every window;
-* `integral_sub_eq_integral_flux` (the integrated form of item 3 of issue 626): if
+* `integral_sub_eq_integral_flux` (the integrated form of item 3): if
   `r ↦ p r e` is continuous and differentiable with derivative `c r e` off a countable set
   of `r` for each `e`, and `∑_{e ∈ S} |c r e| P_r(e touches K_o) ≤ M` for every finite `S`
   (the dominator), then `ψ t - ψ s = ∫_s^t ∑' e, c r e Δ_e(r) dr`, and the flux is bounded

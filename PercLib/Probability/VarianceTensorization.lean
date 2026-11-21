@@ -1,9 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-70: variance tensorisation (Efron–Stein) for finite Bernoulli profiles, the
-variance lower bound on the homogeneous Russo derivative of an increasing event, and the
-odds-ratio monotonicity it implies. Uses the finite-profile vocabulary of Russo.lean; no
-new definition is introduced.
+Variance tensorisation (Efron–Stein) for finite Bernoulli profiles, the variance lower bound on the
+homogeneous Russo derivative of an increasing event, and the odds-ratio monotonicity it implies.
+Uses the finite-profile vocabulary of Russo.lean; no new definition is introduced.
 -/
 module
 

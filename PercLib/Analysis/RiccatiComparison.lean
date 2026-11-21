@@ -1,14 +1,13 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
 
-Ported for package Q-148 (issue 515) from pull request 488: source repository
-`yujinhkim/lrp`, branch `critical-lrp-1`, commit `d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`,
-file `PercLib/CriticalLRP/ODE.lean` (blob `2294eb5a37`), contributed by `yujinhkim`; licence
-Apache-2.0 as declared in that commit's file headers and `third_party/critical-lrp/NOTICE.md`.
-Upstream origin `yujinhkim/Critical-Long-range-percolation` at
-`3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf` (not independently verified).
-Changes: focused imports, no disabled linters or `autoImplicit`, namespace `PercLib.Analysis`,
-and the helper `intervalIntegrable_of_integrableOn_uIcc` replaced by mathlib's
+Ported from the source repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
+`d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, file `PercLib/CriticalLRP/ODE.lean` (blob `2294eb5a37`),
+contributed by `yujinhkim`; licence Apache-2.0 as declared in that commit's file headers and
+`third_party/critical-lrp/NOTICE.md`. Upstream origin `yujinhkim/Critical-Long-range-percolation` at
+`3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf` (not independently verified). Changes: focused imports,
+no disabled linters or `autoImplicit`, namespace `PercLib.Analysis`, and the helper
+`intervalIntegrable_of_integrableOn_uIcc` replaced by mathlib's
 `MeasureTheory.IntegrableOn.intervalIntegrable`.
 
 Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1, Lemma I.4.5 (p. 35).

@@ -1,8 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-205 (issue 633), part 1: positivity, monotonicity and scaling of the recursive three-part
-distance `S(A)` (wiki tag Y4H4, article `multipoint-trees`; T. Hutchcroft, *Critical
-long-range percolation I*, arXiv:2508.18807v1, §I.2). New proofs; no upstream code is copied.
+Positivity, monotonicity and scaling of the recursive three-part distance `S(A)` (wiki tag Y4H4,
+article `multipoint-trees`; T. Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1,
+§I.2). New proofs; no upstream code is copied.
 -/
 module
 

@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-75: two examples around the zero-one law. New for this project; no upstream proof is
-copied, and no new definition is introduced.
+Two examples around the zero-one law. New for this project; no upstream proof is copied, and no new
+definition is introduced.
 -/
 module
 

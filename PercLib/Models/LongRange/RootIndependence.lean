@@ -1,16 +1,16 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-197 (issue 625): discharge of the premise `hG` that pull request 488 adds to
-Proposition I.3.1 of T. Hutchcroft, *Critical long-range percolation I*,
-arXiv:2508.18807v1. The premise is read from pull request 488: repository
-`yujinhkim/lrp`, branch `critical-lrp-1`, commit `d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`,
-files `PercLib/CriticalLRP/Analysis/VolumeTailAllN.lean`,
+Discharge of the premise `hG` that the formalisation of contributor yujinhkim cited below adds to
+Proposition I.3.1 of T. Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1. The
+premise is read from the repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
+`d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, files
+`PercLib/CriticalLRP/Analysis/VolumeTailAllN.lean`,
 `PercLib/CriticalLRP/Analysis/VolumeTailUpper.lean` and
-`PercLib/CriticalLRP/CountableProduct/GhostField.lean` (`ghostHits`, hypothesis `hG`);
-licence Apache-2.0 as declared in those file headers and
-`third_party/critical-lrp/NOTICE.md`; upstream `yujinhkim/Critical-Long-range-percolation`
-at `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf` (not independently verified). Contributor:
-yujinhkim. No code is copied: the proofs are new, from the transport lemmas of this library.
+`PercLib/CriticalLRP/CountableProduct/GhostField.lean` (`ghostHits`, hypothesis `hG`); licence
+Apache-2.0 as declared in those file headers and `third_party/critical-lrp/NOTICE.md`; upstream
+`yujinhkim/Critical-Long-range-percolation` at `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf` (not
+independently verified). Contributor: yujinhkim. No code is copied: the proofs are new, from the
+transport lemmas of this library.
 -/
 module
 

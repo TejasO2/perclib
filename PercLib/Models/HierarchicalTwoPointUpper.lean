@@ -1,11 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs for issue 601 (Q-173, F-1 leaves R11 and R12, conditional form), written on
-2026-11-16 by PROVER-G: the upper two-point bound on the hierarchical lattice from bounds
-on the block means. From the first-exit inequality and the hierarchical symmetries of this
-library and pinned mathlib's ENNReal powers and geometric series. No upstream code is
-copied, no definition is added and no Input is introduced; the block-mean bound is an
-ordinary hypothesis.
+New proofs, written on 2026-11-16: the upper two-point bound on the hierarchical lattice from bounds
+on the block means. From the first-exit inequality and the hierarchical symmetries of this library
+and pinned mathlib's ENNReal powers and geometric series. No upstream code is copied, no definition
+is added and no Input is introduced; the block-mean bound is an ordinary hypothesis.
 -/
 module
 

@@ -1,21 +1,19 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
 
-Adapted from pull request 488: source repository `yujinhkim/lrp`, branch
-`critical-lrp-1`, commit d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc, files
-`PercLib/CriticalLRP/Tightness/MomentRatio.lean` (blob 331d362155) and
-`PercLib/CriticalLRP/Tightness/RealExponent.lean` (blob e177d7bd87), contributed by
-`yujinhkim`. Licence: Apache-2.0, as declared in those files' headers and in
+Adapted from the source repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
+d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc, files `PercLib/CriticalLRP/Tightness/MomentRatio.lean`
+(blob 331d362155) and `PercLib/CriticalLRP/Tightness/RealExponent.lean` (blob e177d7bd87),
+contributed by `yujinhkim`. Licence: Apache-2.0, as declared in those files' headers and in
 `third_party/critical-lrp/NOTICE.md` of that commit (upstream origin
-`yujinhkim/Critical-Long-range-percolation` at 3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf,
-not independently verified).
-Changes: the abstract results are in namespace `PercLib.Probability`; the source's
-definitions `momentConst`, `momentConstR`, `momentConstFull` are written out as expressions
+`yujinhkim/Critical-Long-range-percolation` at 3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf, not
+independently verified). Changes: the abstract results are in namespace `PercLib.Probability`; the
+source's definitions `momentConst`, `momentConstR`, `momentConstFull` are written out as expressions
 and its `edianOf`/`edianMaxVol`/`clusterMaxVol`/`clusterVolIn`/`TailI26` are replaced by this
-library's `tightnessScale`, `maxClusterIntersection`, `clusterIntersection` and the rooted
-conjunct of `universalTightness` (D-33); the D-2 statements of Corollary I.2.5 and of the
-lower bound are new; the window-monotonicity and edian-existence parts of
-`RealExponent.lean` are not ported; focused imports; `autoImplicit` off; linters on.
+library's `tightnessScale`, `maxClusterIntersection`, `clusterIntersection` and the rooted conjunct
+of `universalTightness`; the bond-interface statements of Corollary I.2.5 and of the lower bound are new; the
+window-monotonicity and edian-existence parts of `RealExponent.lean` are not ported; focused
+imports; `autoImplicit` off; linters on.
 -/
 module
 
@@ -37,7 +35,7 @@ exponential tail `μ{X ≥ t} ≤ e · e^{-t/(9M)} · μ{X ≥ M}` (`t ≥ M`, `
 * `moment_ratio_le_rpow_ennreal`, `moment_le_rpow_ennreal_of_tail`,
   `moment_ratio_le_rpow_ennreal_of_nonneg`: real exponents, `X` almost surely finite.
 
-On the D-2 interface (namespace `PercLib.Percolation.Bond`), with `X = |K_u ∩ Λ|` and
+On the bond interface (namespace `PercLib.Percolation.Bond`), with `X = |K_u ∩ Λ|` and
 `M = tightnessScale q Λ`:
 * `law_clusterIntersection_tail_le`: the rooted tail, from `universalTightness`;
 * `lintegral_rpow_clusterIntersection_add_le` and `..._of_nonneg` (Corollary I.2.5):

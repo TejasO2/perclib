@@ -1,19 +1,17 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
 
-Ported for package Q-152 (issue 519) from pull request 488: source repository
-`yujinhkim/lrp`, branch `critical-lrp-1`, commit `d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`,
-files `PercLib/CriticalLRP/LevyAnalysis/Radial.lean` (blob `bde47c1551`),
-`PercLib/CriticalLRP/LevyAnalysis/Rpow.lean` (blob `bc4e3f889a`) and
-`PercLib/CriticalLRP/LevyAnalysis/Homogeneous.lean` (blob `2858fcb2a7`), contributed by
-`yujinhkim`; licence Apache-2.0 as declared in that commit's file headers and
-`third_party/critical-lrp/NOTICE.md`. Upstream origin
-`yujinhkim/Critical-Long-range-percolation` at `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf`
-(not independently verified). Formalization derived from T. Hutchcroft, "Critical long-range
-percolation I: High effective dimension", arXiv:2508.18807v1, Section I.5.2.
-Changes: the three files are merged into one, focused imports, no disabled linters or
-`autoImplicit`, namespace `PercLib.Analysis`, and the helper `measurable_rpow_const'` replaced
-by mathlib's `Measurable.pow_const`.
+Ported from the source repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
+`d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, files `PercLib/CriticalLRP/LevyAnalysis/Radial.lean`
+(blob `bde47c1551`), `PercLib/CriticalLRP/LevyAnalysis/Rpow.lean` (blob `bc4e3f889a`) and
+`PercLib/CriticalLRP/LevyAnalysis/Homogeneous.lean` (blob `2858fcb2a7`), contributed by `yujinhkim`;
+licence Apache-2.0 as declared in that commit's file headers and
+`third_party/critical-lrp/NOTICE.md`. Upstream origin `yujinhkim/Critical-Long-range-percolation` at
+`3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf` (not independently verified). Formalization derived from
+T. Hutchcroft, "Critical long-range percolation I: High effective dimension", arXiv:2508.18807v1,
+Section I.5.2. Changes: the three files are merged into one, focused imports, no disabled linters or
+`autoImplicit`, namespace `PercLib.Analysis`, and the helper `measurable_rpow_const'` replaced by
+mathlib's `Measurable.pow_const`.
 -/
 module
 

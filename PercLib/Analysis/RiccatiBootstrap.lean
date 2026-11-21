@@ -1,20 +1,15 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
 
-Adapted for Q-149 (issue 516) from contributor yujinhkim, repository
-`yujinhkim/lrp`, branch `critical-lrp-1`, commit
-`d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, file
-`PercLib/CriticalLRP/VolumeMoments/Bootstrap.lean` (blob `a2ff52d99c`).
-Licence: Apache-2.0 as declared in that revision's header and
-`third_party/critical-lrp/NOTICE.md`. Upstream origin:
-`yujinhkim/Critical-Long-range-percolation`, revision
-`3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf` (not independently verified).
-Changes: reuse PercLib's Riccati comparison, namespace PercLib.Analysis,
-remove disabled linters and implicit-parameter override, and add witnesses.
+Adapted from contributor yujinhkim, repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
+`d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, file `PercLib/CriticalLRP/VolumeMoments/Bootstrap.lean`
+(blob `a2ff52d99c`). Licence: Apache-2.0 as declared in that revision's header and
+`third_party/critical-lrp/NOTICE.md`. Upstream origin: `yujinhkim/Critical-Long-range-percolation`,
+revision `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf` (not independently verified). Changes: reuse
+PercLib's Riccati comparison, namespace PercLib.Analysis, remove disabled linters and
+implicit-parameter override, and add witnesses.
 
-Salvaged from branch `work/Q-149-riccati-bootstrap` at tip commit `771ec8a`
-and rebased onto the current tree; the helper `rpow_cube` is replaced by
-mathlib's `Real.rpow_mul_natCast`.
+The helper `rpow_cube` is replaced by mathlib's `Real.rpow_mul_natCast`.
 
 Analytic bootstrap for Hutchcroft, Critical long-range percolation I,
 arXiv:2508.18807v1, Lemma I.4.9, pp. 37–38. The source's hypotheses and

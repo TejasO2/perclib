@@ -1,8 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-85: the connection kernel `τ` is positive semidefinite, with the Cauchy–Schwarz bounds for
-the triangle diagram that follow. New for this project; no upstream proof is copied, and no
-new definition is introduced: matrix powers of `τ` are written out as sums.
+The connection kernel `τ` is positive semidefinite, with the Cauchy–Schwarz bounds for the triangle
+diagram that follow. New for this project; no upstream proof is copied, and no new definition is
+introduced: matrix powers of `τ` are written out as sums.
 -/
 module
 

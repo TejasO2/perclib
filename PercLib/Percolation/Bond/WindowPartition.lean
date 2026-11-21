@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written for package Q-82 (issue 389, supports T-6), on the D-2 interface,
-using mathlib's `Finset.sum_comp`. No source text or code is copied.
+New proofs, on the bond interface, using mathlib's `Finset.sum_comp`. No source text or
+code is copied.
 -/
 module
 

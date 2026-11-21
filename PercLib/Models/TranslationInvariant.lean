@@ -1,8 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-New proofs for P-7 (issue 41), written on 2026-11-14, from pinned mathlib's `Sym2.lift`,
-`Equiv.tsum_eq` and ENNReal sums, and the P-5 and P-6 theorems. No upstream code is copied.
+New proofs, written on 2026-11-14, from pinned mathlib's `Sym2.lift`, `Equiv.tsum_eq` and ENNReal
+sums, and the row-sum theorems of `PercLib.Percolation.Bond.RowSum` and the intensity bounds of `PercLib.Percolation.Bond.Intensity`. No upstream code is copied.
 -/
 module
 
@@ -10,11 +10,11 @@ public import PercLib.Percolation.Bond.Intensity
 
 /-! # Translation-invariant kernels on additive groups, and `ℤ^d`
 
-On an additive group `G`, a pair intensity is translation invariant when
-`J s(x,y) = k (y - x)` for a displacement kernel `k`. Such a `J` exists exactly when `k`
-is even, because pairs are unordered (`exists_sym2_kernel`). The off-diagonal row of `J`
-at every vertex is `∑'_{z ≠ 0} k z` (`rowSum_eq_of_translationInvariant`), so P-5 and
-P-6 apply with `M` any bound on `∑' z, k z`.
+On an additive group `G`, a pair intensity is translation invariant when `J s(x,y) = k (y - x)` for
+a displacement kernel `k`. Such a `J` exists exactly when `k` is even, because pairs are unordered
+(`exists_sym2_kernel`). The off-diagonal row of `J` at every vertex is `∑'_{z ≠ 0} k z`
+(`rowSum_eq_of_translationInvariant`), so the row-sum and intensity bounds apply with `M` any bound
+on `∑' z, k z`.
 
 `ℤ^d` is `Fin d → ℤ`. The compiled witness at the end uses the nearest-neighbour kernel
 along one coordinate axis; it is nonzero, its row sum is two, and at `β = 1/4` the

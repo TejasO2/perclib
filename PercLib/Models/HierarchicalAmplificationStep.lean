@@ -2,8 +2,7 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for issue 469 (Q-135, part 2), written on 2026-11-16 by PROVER-F. No upstream
-proof is copied and no definition is added.
+New proofs, written on 2026-11-16. No upstream proof is copied and no definition is added.
 -/
 module
 
@@ -18,7 +17,7 @@ public import PercLib.Probability.OpenEventHarris
 public import PercLib.Models.HierarchicalCutoff
 
 /-!
-# Hierarchical block-quantile amplification: the assembly (Q-135, part 2)
+# Hierarchical block-quantile amplification: the assembly
 
 Part 1 (`HierarchicalAmplification.lean`) proved the scale, the no-direct-edge bound, the
 connection threshold, the amplification arithmetic and the Hoeffding count. This file

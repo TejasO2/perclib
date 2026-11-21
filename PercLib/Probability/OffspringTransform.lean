@@ -2,8 +2,8 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for issue 452 (Q-118), written on 2026-11-16 by PROVER-G, against pinned mathlib.
-No upstream proof is copied. Reuses `PercLib/Probability/GeneratingFunction.lean` (Q-80).
+New proofs, written on 2026-11-16, against pinned mathlib. No upstream proof is copied. Reuses
+`PercLib/Probability/GeneratingFunction.lean`.
 -/
 module
 
@@ -20,7 +20,7 @@ Let `p : PMF ℕ` be an offspring law with mean `1`, written `∑' k, k p(k) = 1
 `φ(x) = ∑' k, p(k) x^k`.
 
 1. **Expansion** (`tendsto_one_sub_genFun_expansion`). `φ(1-u) = 1 - u + (σ²/2) u² + o(u²)` as
-   `u → 0⁺`. It is stated in the form of Q-117 for `ψ(u) = 1 - φ(1-u)` and `a = σ²/2`.
+   `u → 0⁺`. It is stated in the form used by `PercLib/Analysis/QuadraticRecursion.lean` for `ψ(u) = 1 - φ(1-u)` and `a = σ²/2`.
 2. **Transform equation.** Fix `0 ≤ s < 1`.
    * `x ↦ s φ(x) - x` is strictly decreasing on `[0,1]`.
    * `existsUnique_transform_root`: it has exactly one zero `F(s)` in `[0,1)`.

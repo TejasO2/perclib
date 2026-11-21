@@ -1,9 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New glue on the D-2 interface, using mathlib infinitePi_map_pi and
-map_bernoulliMeasure at revision 56a005855ea17e0b0958f73ec801ae140b0a1679.
-No upstream proof is copied. The probability space retains diagonal coordinates;
-only observables insensitive to them have equal distributions.
+New glue on the bond interface, using mathlib infinitePi_map_pi and map_bernoulliMeasure
+at revision 56a005855ea17e0b0958f73ec801ae140b0a1679. No upstream proof is copied. The probability
+space retains diagonal coordinates; only observables insensitive to them have equal distributions.
 -/
 module
 

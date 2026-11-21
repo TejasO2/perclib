@@ -1,10 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs for issue 599 (Q-171, F-1 leaves G2 and G3), written on 2026-11-16 by PROVER-G:
-translations and ultrametric isometries of the hierarchical lattice preserve radial
-percolation laws. From the hierarchical geometry and transport theorems of this library
-and pinned mathlib's finitely supported functions. No upstream code is copied, no definition
-is added and no Input is introduced.
+New proofs, written on 2026-11-16: translations and ultrametric isometries of the hierarchical
+lattice preserve radial percolation laws. From the hierarchical geometry and transport theorems of
+this library and pinned mathlib's finitely supported functions. No upstream code is copied, no
+definition is added and no Input is introduced.
 -/
 module
 
@@ -12,7 +11,7 @@ public import PercLib.Models.HierarchicalGeometry
 public import PercLib.Percolation.Bond.FiniteSetCriterion
 public import PercLib.Percolation.Bond.Susceptibility
 
-/-! # Symmetries of the hierarchical lattice (F-1, G2 and G3)
+/-! # Symmetries of the hierarchical lattice
 
 On `ℕ →₀ A` the level of `z` is `h z = z.support.sup Nat.succ`, and `h (a - b) ≤ k` exactly
 when `a` and `b` agree at every index `≥ k` (`level_sub_le_iff_forall`). A pair intensity is

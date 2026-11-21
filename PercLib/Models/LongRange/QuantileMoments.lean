@@ -1,20 +1,20 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
 
-Adapted from pull request 488: source repository `yujinhkim/lrp`, branch
-`critical-lrp-1`, commit d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc, files
+Adapted from the source repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
+d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc, files
 `PercLib/CriticalLRP/Tightness/LemmaI26Averaging.lean` (blob 817aa6d768) and
 `PercLib/CriticalLRP/Analysis/LatticeBallAsymptotic.lean` (blob 245577addf), contributed by
 `yujinhkim`. Licence: Apache-2.0, as declared in those files' headers and in
 `third_party/critical-lrp/NOTICE.md` of that commit (upstream origin
-`yujinhkim/Critical-Long-range-percolation` at 3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf,
-not independently verified).
-Changes: the argument (deterministic counting, translation averaging, Markov) is kept and
-rewritten on the D-2 interface: the source's `FiniteVolume.box`, `linfNorm`, `latticeBall`,
-`clusterVolIn`, `ballClusterCount`, `shiftConfig` and `edianMaxVol` are replaced by
-mathlib's sup norm on `Fin d → ℤ`, the `Finset.Icc` ball of `Models/LongRange/PowerLaw.lean`,
-`clusterIntersection`, the push-forward `Sym2.map σ ''` of `Percolation/Bond/Transport.lean`
-and `tightnessScale` (D-33); no definition is added; focused imports; `autoImplicit` off.
+`yujinhkim/Critical-Long-range-percolation` at 3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf, not
+independently verified). Changes: the argument (deterministic counting, translation averaging,
+Markov) is kept and rewritten on the bond interface: the source's `FiniteVolume.box`,
+`linfNorm`, `latticeBall`, `clusterVolIn`, `ballClusterCount`, `shiftConfig` and `edianMaxVol` are
+replaced by mathlib's sup norm on `Fin d → ℤ`, the `Finset.Icc` ball of
+`Models/LongRange/PowerLaw.lean`, `clusterIntersection`, the push-forward `Sym2.map σ ''` of
+`Percolation/Bond/Transport.lean` and `tightnessScale`; no definition is added; focused imports;
+`autoImplicit` off.
 -/
 module
 

@@ -1,15 +1,14 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Non-vacuity witness (D-5) written on 2026-11-20 for package hier-stmt, for the statements of
-`PercLib.Models.Hierarchical.Defs`. New proofs; no upstream code is copied and no definition
-is added.
+Non-vacuity witness written on 2026-11-20, for the statements of `PercLib.Models.Hierarchical.Defs`.
+New proofs; no upstream code is copied and no definition is added.
 -/
 module
 
 public import PercLib.Models.Hierarchical.Defs
 public import PercLib.Models.HierarchicalGeometry
 
-/-! # Non-vacuity of the hierarchical two-point statements (D-5)
+/-! # Non-vacuity of the hierarchical two-point statements
 
 For every `d, L, α` and `0 < c ≤ C`, the exact power-law kernel
 `J s(u,v) = c L^{-(d+α) h(v-u)}` (written as a `Sym2.lift` lambda; its value `c` on the

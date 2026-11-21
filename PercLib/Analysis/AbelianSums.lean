@@ -2,9 +2,9 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for issue 450 (Q-116, part 1), written on 2026-11-16 by PROVER-F against pinned
-mathlib. No upstream proof is copied. The statements are the standard Abelian theorems for
-power series (e.g. Feller, *An Introduction to Probability Theory*, vol. II, XIII.5).
+New proofs, written on 2026-11-16 against pinned mathlib. No upstream proof is copied. The
+statements are the standard Abelian theorems for power series (e.g. Feller, *An Introduction to
+Probability Theory*, vol. II, XIII.5).
 -/
 module
 

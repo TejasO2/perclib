@@ -1,8 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-49: the three-point Aizenman–Newman tree-graph target on the D-2 interface.
-The full inequality is a target, not an assumed theorem. Its BK-dependent proof
-belongs to a later package. The elementary witnesses below are new proofs.
+The three-point Aizenman–Newman tree-graph target on the bond interface. The full
+inequality is a target, not an assumed theorem. Its BK-dependent proof belongs to a later package.
+The elementary witnesses below are new proofs.
 -/
 module
 

@@ -1,9 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs for issue 434 (Q-100), written on 2026-11-16 by PROVER-E: connection loss on
-deleting a vertex set (wiki integrated-susceptibility, tag 7902) and the lower bound for the
-boundary functional by the boundary susceptibility (wiki boundary-susceptibility, tag 67GX).
-No upstream proof is copied, no definition is added and no Input is introduced.
+New proofs, written on 2026-11-16: connection loss on deleting a vertex set (wiki
+integrated-susceptibility, tag 7902) and the lower bound for the boundary functional by the boundary
+susceptibility (wiki boundary-susceptibility, tag 67GX). No upstream proof is copied, no definition
+is added and no Input is introduced.
 -/
 module
 

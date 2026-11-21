@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-92 correspondence wrappers assembled from the existing finite-product,
-ordered-coupling and Harris APIs. No upstream proof is copied.
+Correspondence wrappers assembled from the existing finite-product, ordered-coupling and Harris
+APIs. No upstream proof is copied.
 -/
 module
 

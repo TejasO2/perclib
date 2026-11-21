@@ -1,9 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs for issue 597 (Q-169, roadmap T-5), written on 2026-11-16 by PROVER-G: sharpness of
-the phase transition for transitive summable kernels, assembled from the finite-set criterion,
-the escape-probability derivative and the supercritical density bound of this library. No
-upstream code is copied, no definition is added and no Input is introduced.
+New proofs, written on 2026-11-16: sharpness of the phase transition for transitive summable
+kernels, assembled from the finite-set criterion, the escape-probability derivative and the
+supercritical density bound of this library. No upstream code is copied, no definition is added and
+no Input is introduced.
 -/
 module
 
@@ -14,7 +14,7 @@ public import PercLib.Percolation.Bond.ProfileRegularity
 public import PercLib.Percolation.Bond.VolumeTails
 public import PercLib.Models.FreeGroupTree
 
-/-! # Sharpness for transitive summable kernels (T-5, L0TE)
+/-! # Sharpness for transitive summable kernels
 
 Let `V` be countable, `J : Sym2 V → ℝ≥0` transitive
 (`∀ x y, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e`) with summable rows, and
@@ -23,7 +23,7 @@ Let `V` be countable, `J : Sym2 V → ℝ≥0` transitive
 `lt_rootCriticalIntensity_of_boundaryFlux_lt_one`) and
 `t = sup {β | ∃ S ∋ o finite, Φ_β(o,S) < 1}` in `ℝ≥0∞`.
 
-* `chi_lt_top_of_lt_rootCriticalIntensity` (item 1, T-5 core): `β < β_c ⇒ χ(q_β, o) < ⊤`;
+* `chi_lt_top_of_lt_rootCriticalIntensity` (item 1): `β < β_c ⇒ χ(q_β, o) < ⊤`;
   `chi_lt_top_of_lt_rootCriticalIntensity'` gives it at every vertex.
 * `rootCriticalIntensity_eq_sSup_boundaryFlux_lt_one` and
   `rootCriticalIntensity_eq_sSup_chi_lt_top` (item 2): `β_c = t = sup {β | χ(q_β, o) < ⊤}`;

@@ -1,11 +1,11 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-138 (issue 472), part 1: leaf-labelled trivalent tree shapes `𝒯_k` (wiki tag SO5J,
-article `multipoint-trees`) and the multipoint tree-graph target AFH6, on the D-2
-interface. New definitions and proofs; nothing is copied. Mathlib at the pinned revision has
-trees (`SimpleGraph.IsTree`) and star graphs, which are used, but no leaf-labelled tree
-shapes; `Mathlib/Combinatorics/Enumerative/Catalan/Tree.lean` has rooted plane binary trees,
-which are a different notion (ordered children, unlabelled leaves).
+Leaf-labelled trivalent tree shapes `𝒯_k` (wiki tag SO5J, article `multipoint-trees`) and the
+multipoint tree-graph target AFH6, on the bond interface. New definitions and proofs;
+nothing is copied. Mathlib at the pinned revision has trees (`SimpleGraph.IsTree`) and star graphs,
+which are used, but no leaf-labelled tree shapes;
+`Mathlib/Combinatorics/Enumerative/Catalan/Tree.lean` has rooted plane binary trees, which are a
+different notion (ordered children, unlabelled leaves).
 -/
 module
 

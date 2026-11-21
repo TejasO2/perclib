@@ -2,13 +2,12 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for issue 69 (REUSE OpenEventHarris), written on 2026-11-14. They cover the
-role of `percolation_harris_of_finite_witnesses`, `escapeEvent_eq_iUnion_truncation` and
-`percolation_escape_harris` in NearCritical/OpenEventHarris.lean of
-tomhutchcroft/near-critical-diffusivity at revision
-c820fea91a7482c1755de0ec94ecb9f59ccfcacc. That source was not consulted and no code was
-copied: every statement here is derived from the canonical Harris inequality
-`PercLib.Probability.prodBernoulli_harris` on the D-2 interface.
+New proofs, written on 2026-11-14. They cover the role of `percolation_harris_of_finite_witnesses`,
+`escapeEvent_eq_iUnion_truncation` and `percolation_escape_harris` in
+NearCritical/OpenEventHarris.lean of tomhutchcroft/near-critical-diffusivity at revision
+c820fea91a7482c1755de0ec94ecb9f59ccfcacc. That source was not consulted and no code was copied:
+every statement here is derived from the canonical Harris inequality
+`PercLib.Probability.prodBernoulli_harris` on the bond interface.
 -/
 module
 
@@ -27,7 +26,7 @@ measurable events. This file adds no definition. It proves:
   a finite open witness of the event is a countable union of cylinder events, hence
   measurable when the index type is countable, so Harris needs no measurability
   hypothesis for it (`prodBernoulli_harris_of_finite_witness`).
-* On the D-2 bond interface: every open connection has a finite open witness
+* On the bond interface: every open connection has a finite open witness
   (`exists_finset_of_mem_conn`), and the same holds for escaping a set of vertices,
   written `⋃ y ∈ Fᶜ, conn x y`. Connection, escape and infinite-cluster events are
   increasing, so they satisfy Harris (`law_harris_conn`, `law_harris_escape`,

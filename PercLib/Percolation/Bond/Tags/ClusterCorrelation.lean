@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-90 correspondence wrapper for the cluster correlation gap.
-All mathematical inputs are proved in the imported modules.
+Correspondence wrapper for the cluster correlation gap. All mathematical inputs are proved in the
+imported modules.
 -/
 module
 

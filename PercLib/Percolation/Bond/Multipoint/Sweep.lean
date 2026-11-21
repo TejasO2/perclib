@@ -2,10 +2,9 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for issue 633 (Q-205, part 2), written on 2026-11-16 by PROVER-F. Statements from
-the wiki article `multipoint-trees` (tags CS13, 9YE6); T. Hutchcroft, *Critical long-range
-percolation I*, arXiv:2508.18807v1, §I.2. No upstream proof is copied and no definition is
-added.
+New proofs, written on 2026-11-16. Statements from the wiki article `multipoint-trees` (tags CS13,
+9YE6); T. Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1, §I.2. No upstream
+proof is copied and no definition is added.
 -/
 module
 

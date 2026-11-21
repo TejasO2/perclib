@@ -1,9 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-76: the covariance form of the finite Russo formula. The covariance of an observable
-with a coordinate indicator is `qₑ(1-qₑ)` times the expected forced increment, and in
-intensity coordinates the Russo derivative is a sum of covariances with the coefficients
-`J/(1 - e^{-βJ})`. Uses the finite-profile vocabulary of Russo.lean; no new definition.
+The covariance form of the finite Russo formula. The covariance of an observable with a coordinate
+indicator is `qₑ(1-qₑ)` times the expected forced increment, and in intensity coordinates the Russo
+derivative is a sum of covariances with the coefficients `J/(1 - e^{-βJ})`. Uses the finite-profile
+vocabulary of Russo.lean; no new definition.
 -/
 module
 

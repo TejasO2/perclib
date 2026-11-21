@@ -1,22 +1,21 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-164 (issue 531): the Kestelman–Borwein–Ditor theorem, the uniform convergence
-theorem for measurable regularly varying functions (Bingham–Goldie–Teugels, Theorem 1.2.1),
-and Potter's bounds (BGT Theorem 1.5.6), as used on p. 25 and in Lemma I.2.10 of
-T. Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1.
+The Kestelman–Borwein–Ditor theorem, the uniform convergence theorem for measurable regularly
+varying functions (Bingham–Goldie–Teugels, Theorem 1.2.1), and Potter's bounds (BGT Theorem 1.5.6),
+as used on p. 25 and in Lemma I.2.10 of T. Hutchcroft, *Critical long-range percolation I*,
+arXiv:2508.18807v1.
 
-Ported from pull request 488 (contributor `yujinhkim`): repository `yujinhkim/lrp`, branch
+Ported from the work of contributor `yujinhkim`: repository `yujinhkim/lrp`, branch
 `critical-lrp-1`, commit `d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, file
 `PercLib/CriticalLRP/Analysis/UniformConvergence.lean` (its first part, through
-`hasPotterBounds_of_regularlyVarying`); licence Apache-2.0 as declared in that commit's file
-headers and `third_party/critical-lrp/NOTICE.md`; upstream
-`yujinhkim/Critical-Long-range-percolation` at `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf`.
-Modified: `RegularlyVaryingAtTop f α` becomes `RegularlyVarying α f` of
-`PercLib/Analysis/RegularVariation/Defs.lean` (each proof first recovers the source's two
-components from it); `HasPotterBounds f α` is written out, so
+`hasPotterBounds_of_regularlyVarying`); licence Apache-2.0 as declared in that commit's file headers
+and `third_party/critical-lrp/NOTICE.md`; upstream `yujinhkim/Critical-Long-range-percolation` at
+`3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf`. Modified: `RegularlyVaryingAtTop f α` becomes
+`RegularlyVarying α f` of `PercLib/Analysis/RegularVariation/Defs.lean` (each proof first recovers
+the source's two components from it); `HasPotterBounds f α` is written out, so
 `hasPotterBounds_of_regularlyVarying` is `potterBounds_of_regularlyVarying`; the source's
-`volume_preimage_add_right` is mathlib's `measure_preimage_add_right`, used directly;
-`import Mathlib`, `autoImplicit`, disabled linters and `#print` lines are removed.
+`volume_preimage_add_right` is mathlib's `measure_preimage_add_right`, used directly; `import
+Mathlib`, `autoImplicit`, disabled linters and `#print` lines are removed.
 -/
 module
 

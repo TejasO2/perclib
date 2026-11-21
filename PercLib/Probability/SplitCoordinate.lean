@@ -1,9 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs for issue 462 (Q-128), written on 2026-11-16 by PROVER-E: the exact increment of a
-disjoint-occurrence probability when one shared coordinate is split into two independent copies
-(wiki backbone-connections, tag XWH4). No upstream proof is copied, no definition is added and
-no Input is introduced.
+New proofs, written on 2026-11-16: the exact increment of a disjoint-occurrence probability when one
+shared coordinate is split into two independent copies (wiki backbone-connections, tag XWH4). No
+upstream proof is copied, no definition is added and no Input is introduced.
 -/
 module
 

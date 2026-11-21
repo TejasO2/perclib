@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
 New first-exit and internal/boundary independence proofs on the canonical bond law.
-This is the elementary q-normalized boundary bound of issue 193, not a sharpness
+This is the elementary q-normalized boundary bound, not a sharpness
 or BK iteration theorem. No upstream proof is copied and no Input is introduced.
 -/
 module

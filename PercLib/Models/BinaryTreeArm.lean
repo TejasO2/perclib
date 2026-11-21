@@ -1,8 +1,7 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-73: the critical arm recursion on the rooted binary tree and the exact two-point function
-on rooted trees. New for this project; no upstream proof is copied, and no new definition
-is introduced.
+The critical arm recursion on the rooted binary tree and the exact two-point function on rooted
+trees. New for this project; no upstream proof is copied, and no new definition is introduced.
 -/
 module
 

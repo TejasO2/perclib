@@ -2,8 +2,7 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for issue 450 (Q-116, part 3), written on 2026-11-16 by PROVER-F. No upstream
-proof is copied.
+New proofs, written on 2026-11-16. No upstream proof is copied.
 -/
 module
 
@@ -21,7 +20,7 @@ and every real `s`,
 `E_p[|K|^s; |K| < ∞] = ((1-p)/p) ∑_{n ≥ 1} n^s Cat(n) 4^{-n} e^{-λ(p) n}`,
 `λ(p) = -log(4p(1-p))` (`lintegral_cluster_rpow_eq_moment`). The right side is the series
 `M_s(p)` of `PercLib/Models/BinaryTreeMoments.lean`, written with the index `n + 1`. The
-proof sums the Catalan law `binaryTree_law_cluster_card_eq_catalan` (PR #419).
+proof sums the Catalan law `binaryTree_law_cluster_card_eq_catalan`.
 At `p = 1/2` the real series need not converge, which is why `p ≠ 1/2` is assumed.
 This file adds no definition.
 -/

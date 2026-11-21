@@ -1,8 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs for issue 463 (Q-129), written on 2026-11-16 by PROVER-E: volume bias bounds absolute
-mixed spatial moments of a random finite set (wiki spatial-cutoff-moments, tag VMEJ). No
-upstream proof is copied, no definition is added and no Input is introduced.
+New proofs, written on 2026-11-16: volume bias bounds absolute mixed spatial moments of a random
+finite set (wiki spatial-cutoff-moments, tag VMEJ). No upstream proof is copied, no definition is
+added and no Input is introduced.
 -/
 module
 

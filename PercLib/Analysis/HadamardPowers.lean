@@ -1,8 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written for package Q-112 (issue 446), from pinned mathlib's spectral theorem
-for Hermitian matrices and the positive semidefinite cone. The statement follows the wiki
-tag CS16 (connection kernels). No source text or code is copied.
+New proofs, from pinned mathlib's spectral theorem for Hermitian matrices and the positive
+semidefinite cone. The statement follows the wiki tag CS16 (connection kernels). No source text or
+code is copied.
 -/
 module
 

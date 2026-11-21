@@ -1,8 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written for package Q-71 (issue 378), on the D-2 interface and the rooted-tree
-conventions of `PercLib.Models.Tree`. Source of the model: G. Grimmett, *Percolation*
-(2nd ed., 1999), the rooted tree example. No source text or code is copied.
+New proofs, on the bond interface and the rooted-tree conventions of
+`PercLib.Models.Tree`. Source of the model: G. Grimmett, *Percolation* (2nd ed., 1999), the rooted
+tree example. No source text or code is copied.
 -/
 module
 

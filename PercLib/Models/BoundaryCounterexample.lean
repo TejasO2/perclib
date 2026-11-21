@@ -1,9 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs for issue 435 (Q-101), written on 2026-11-16 by PROVER-E: the three-vertex
-counterexample showing that the lower bound for the boundary functional of the wiki page
-boundary-susceptibility (tag 67GX) needs the positive part (tag JTBG). No upstream proof is
-copied, no definition is added and no Input is introduced.
+New proofs, written on 2026-11-16: the three-vertex counterexample showing that the lower bound for
+the boundary functional of the wiki page boundary-susceptibility (tag 67GX) needs the positive part
+(tag JTBG). No upstream proof is copied, no definition is added and no Input is introduced.
 -/
 module
 

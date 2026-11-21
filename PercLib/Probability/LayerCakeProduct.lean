@@ -1,13 +1,12 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Ported for issue 527 (Q-160) on 2026-11-16 by PROVER-E from pull request 488 of this
-repository, contributed by yujinhkim: source repository `yujinhkim/lrp`, branch
-`critical-lrp-1`, commit `d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, file
+Ported on 2026-11-16 from the work of contributor yujinhkim: source repository `yujinhkim/lrp`,
+branch `critical-lrp-1`, commit `d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, file
 `PercLib/CriticalLRP/BK/LayerCake.lean`; licence Apache-2.0, as declared in that commit's file
 headers and `third_party/critical-lrp/NOTICE.md`. Upstream origin
 `yujinhkim/Critical-Long-range-percolation` at `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf` (not
-independently verified). Source of the mathematics: T. Hutchcroft, *Critical long-range
-percolation I*, arXiv:2508.18807v1, Lemma I.2.1, p. 21 (measure-theoretic core).
+independently verified). Source of the mathematics: T. Hutchcroft, *Critical long-range percolation
+I*, arXiv:2508.18807v1, Lemma I.2.1, p. 21 (measure-theoretic core).
 
 Changes from the source: focused imports instead of `import Mathlib`; no `autoImplicit` and no
 disabled linters; the namespace is `PercLib.Probability`; the helper definition

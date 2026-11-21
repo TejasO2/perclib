@@ -1,9 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written for package Q-66 (issue 373, roadmap T-6), using mathlib's
-`SimpleGraph.fromEdgeSet`, walks and finite sets. Source motivation: T. Hutchcroft,
-arXiv:2008.11197v2, §2.1, the tree-splitting step in the proof of Theorem 2.3.
-No source text or code is copied.
+New proofs, using mathlib's `SimpleGraph.fromEdgeSet`, walks and finite sets. Source motivation: T.
+Hutchcroft, arXiv:2008.11197v2, §2.1, the tree-splitting step in the proof of Theorem 2.3. No source
+text or code is copied.
 -/
 module
 

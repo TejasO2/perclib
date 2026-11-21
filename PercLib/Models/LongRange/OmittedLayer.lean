@@ -1,17 +1,16 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-196 (issue 624): discharge of the premise `hD` that pull request 488 adds to
+Discharge of the premise `hD` that the formalisation of contributor yujinhkim cited below adds to
 Propositions I.3.1 and I.3.2 of T. Hutchcroft, *Critical long-range percolation I*,
-arXiv:2508.18807v1. The premise is read from pull request 488: repository
-`yujinhkim/lrp`, branch `critical-lrp-1`, commit `d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`,
-files `PercLib/CriticalLRP/Analysis/VolumeTailAllN.lean`,
+arXiv:2508.18807v1. The premise is read from the repository `yujinhkim/lrp`, branch
+`critical-lrp-1`, commit `d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, files
+`PercLib/CriticalLRP/Analysis/VolumeTailAllN.lean`,
 `PercLib/CriticalLRP/Analysis/VolumeTailUpper.lean` (hypothesis `hD`) and
-`PercLib/CriticalLRP/CountableProduct/GhostCoupling.lean` (`shiftProb`, written out here);
-licence Apache-2.0 as declared in those file headers and
-`third_party/critical-lrp/NOTICE.md`; upstream `yujinhkim/Critical-Long-range-percolation`
-at `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf` (not independently verified). Contributor:
-yujinhkim. No code is copied: the proofs are new, from the ball counts and power-law tail
-bounds of `PowerLaw.lean`.
+`PercLib/CriticalLRP/CountableProduct/GhostCoupling.lean` (`shiftProb`, written out here); licence
+Apache-2.0 as declared in those file headers and `third_party/critical-lrp/NOTICE.md`; upstream
+`yujinhkim/Critical-Long-range-percolation` at `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf` (not
+independently verified). Contributor: yujinhkim. No code is copied: the proofs are new, from the
+ball counts and power-law tail bounds of `PowerLaw.lean`.
 -/
 module
 
@@ -25,7 +24,7 @@ For a norm `N` on `ℝ^d` (evaluated on `ℤ^d`), a profile `K` and a scale `r`,
 `J = radialKernel N K` and the cut-off kernel `J_r = cutoffKernel N K r`. The omitted kernel
 is `J - J_r` (pointwise truncated subtraction in `ℝ≥0`, which is exact since `J_r ≤ J`).
 
-* `law_intensityProfile_eq_map_union_omitted` (item 1 of issue 624): the full law is the
+* `law_intensityProfile_eq_map_union_omitted` (item 1): the full law is the
   law of `ω ∪ ξ` for independent `ω ~ law (intensityProfile J_r β)` and
   `ξ ~ law (intensityProfile (J - J_r) β)`;
 * `coe_omittedKernel_of_ne` (item 2): `(J - J_r)(x,y) = K r` if `N(x-y) ≤ r` and

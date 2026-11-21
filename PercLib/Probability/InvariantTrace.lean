@@ -1,8 +1,7 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written for package Q-114 (issue 448), from pinned mathlib's series lemmas.
-The statements are the trace step of the wiki tags IZAO and 87W3 (connection kernels).
-No source text or code is copied.
+New proofs, from pinned mathlib's series lemmas. The statements are the trace step of the wiki tags
+IZAO and 87W3 (connection kernels). No source text or code is copied.
 -/
 module
 

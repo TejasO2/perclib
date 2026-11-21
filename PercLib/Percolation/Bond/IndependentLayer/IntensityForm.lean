@@ -2,8 +2,7 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for issue 432 (Q-98, part 4), written on 2026-11-16 by PROVER-G. No upstream proof
-is copied.
+New proofs, written on 2026-11-16. No upstream proof is copied.
 -/
 module
 
@@ -28,7 +27,7 @@ with `φ o = x` preserves `J`. Write `q_β = intensityProfile J β`,
 2. `inv_le_chiCriticalIntensity`. `b_χ = sSup {β | χ_β < ⊤} ≥ 1/L`.
 3. `exists_pos_chi_intensity_add_lt_top`: if `χ_β < ⊤`, then `χ_{β+ε} < ⊤` for some `ε > 0`
    (finite susceptibility is right-open). The endpoint form "`b_χ < ⊤` implies
-   `χ_{b_χ} = ⊤`" needs a compiled example with `b_χ < ⊤` (D-5) and is left to a follow-up.
+   `χ_{b_χ} = ⊤`" needs a compiled example with `b_χ < ⊤` and is left to a follow-up.
 
 The threshold `b_χ` is written out as a supremum of a set of finite parameters; no
 definition is added.

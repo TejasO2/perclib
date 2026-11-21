@@ -1,8 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written for package Q-72 (issue 379), on the D-2 interface and the rooted-tree
-conventions of `PercLib.Models.Tree`, using mathlib's `BinaryTree.treesOfNumNodesEq` and
-`catalan`. No source text or code is copied.
+New proofs, on the bond interface and the rooted-tree conventions of
+`PercLib.Models.Tree`, using mathlib's `BinaryTree.treesOfNumNodesEq` and `catalan`. No source text
+or code is copied.
 -/
 module
 

@@ -1,19 +1,18 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-161 (issue 528): the logarithmic ODE identities and Lemma I.2.12 of T. Hutchcroft,
-*Critical long-range percolation I*, arXiv:2508.18807v1, §I.2.2, pp. 25-26.
+The logarithmic ODE identities and Lemma I.2.12 of T. Hutchcroft, *Critical long-range percolation
+I*, arXiv:2508.18807v1, §I.2.2, pp. 25-26.
 
-Ported from pull request 488 (contributor `yujinhkim`): repository `yujinhkim/lrp`, branch
+Ported from the work of contributor `yujinhkim`: repository `yujinhkim/lrp`, branch
 `critical-lrp-1`, commit `d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, file
 `PercLib/CriticalLRP/Analysis/RegularVariation.lean`; licence Apache-2.0 as declared in that
 commit's file headers and `third_party/critical-lrp/NOTICE.md`; upstream
-`yujinhkim/Critical-Long-range-percolation` at `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf`.
-Modified: the definitions of that file are those of `PercLib/Analysis/RegularVariation/Defs.lean`
-(Q-136, Q-140); `RegularlyVaryingAtTop f a` becomes `RegularlyVarying a f`, which also
-requires measurability on a tail and eventual positivity, both derived here from the existing
-hypotheses (no statement changes); the helper
-`intervalIntegrable_of_integrableOn_uIcc` is mathlib's `IntegrableOn.intervalIntegrable`;
-`import Mathlib`, `autoImplicit` and disabled linters are removed.
+`yujinhkim/Critical-Long-range-percolation` at `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf`. Modified:
+the definitions of that file are those of `PercLib/Analysis/RegularVariation/Defs.lean`; `RegularlyVaryingAtTop f a` becomes `RegularlyVarying a f`, which also requires
+measurability on a tail and eventual positivity, both derived here from the existing hypotheses (no
+statement changes); the helper `intervalIntegrable_of_integrableOn_uIcc` is mathlib's
+`IntegrableOn.intervalIntegrable`; `import Mathlib`, `autoImplicit` and disabled linters are
+removed.
 -/
 module
 

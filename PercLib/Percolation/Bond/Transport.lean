@@ -2,7 +2,7 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New for this project (issue 125, Q-9). No upstream proof is copied.
+New for this project. No upstream proof is copied.
 -/
 module
 
@@ -19,8 +19,7 @@ clusters are carried along, that the push-forward is a measurable equivalence, a
 whenever it carries one law to another, the two-point function, the probability of an
 infinite cluster and the susceptibility are carried along too. No countability is needed.
 
-The hypothesis `(law q).map (fun ω => Sym2.map σ '' ω) = law q'` is supplied elsewhere
-(S-1) when `q = q' ∘ Sym2.map σ`; it is not proved here.
+The hypothesis `(law q).map (fun ω => Sym2.map σ '' ω) = law q'` is supplied elsewhere (`prodBernoulli_map_image_sym2_invariant`) when `q = q' ∘ Sym2.map σ`; it is not proved here.
 -/
 
 @[expose] public section

@@ -1,9 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs for issue 433 (Q-99), written on 2026-11-16 by PROVER-E: the derivative bound for
-the finite-volume susceptibility (wiki integrated-susceptibility, tag TAVM) and the integrated
-mean-field inequality for the susceptibility of a transitive kernel (tag MXGM). No upstream
-proof is copied, no definition is added and no Input is introduced.
+New proofs, written on 2026-11-16: the derivative bound for the finite-volume susceptibility (wiki
+integrated-susceptibility, tag TAVM) and the integrated mean-field inequality for the susceptibility
+of a transitive kernel (tag MXGM). No upstream proof is copied, no definition is added and no Input
+is introduced.
 -/
 module
 

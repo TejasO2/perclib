@@ -1,20 +1,14 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
 
-Adapted for Q-154 (issue 521) from contributor yujinhkim, repository
-`yujinhkim/lrp`, branch `critical-lrp-1`, commit
-`d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, file
-`PercLib/CriticalLRP/MomentProblem/ChiSquare.lean` (blob `cf6b336a11`).
-Licence: Apache-2.0 as declared in that revision's header and
-`third_party/critical-lrp/NOTICE.md`. Upstream origin:
-`yujinhkim/Critical-Long-range-percolation`, revision
-`3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf` (not independently verified).
-Changes: use Nat.doubleFactorial and Real.Gamma_nat_add_half instead of the
-source's odd-factorial definition and Gamma recurrence; use native moment
-determinacy, focused imports, enabled linters and an explicit witness.
-Salvaged from branch `work/Q-154-chi-square-determinacy` at tip commit
-`c81742d` and rebased onto the current tree; the private helper
-`doubleFactorial_odd_succ` is replaced by PercLib's
+Adapted from contributor yujinhkim, repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
+`d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, file `PercLib/CriticalLRP/MomentProblem/ChiSquare.lean`
+(blob `cf6b336a11`). Licence: Apache-2.0 as declared in that revision's header and
+`third_party/critical-lrp/NOTICE.md`. Upstream origin: `yujinhkim/Critical-Long-range-percolation`,
+revision `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf` (not independently verified). Changes: use
+Nat.doubleFactorial and Real.Gamma_nat_add_half instead of the source's odd-factorial definition and
+Gamma recurrence; use native moment determinacy, focused imports, enabled linters and an explicit
+witness. The private helper `doubleFactorial_odd_succ` is replaced by PercLib's
 `PercLib.Combinatorics.doubleFactorial_two_mul_succ_sub_one`.
 
 Chi-square moments and determinacy, supporting Hutchcroft, Critical long-range

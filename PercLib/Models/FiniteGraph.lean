@@ -1,8 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-New proofs for P-7 (issue 41), written on 2026-11-14, from pinned mathlib's finite sums
-and simple-graph degrees and the P-5 theorems. No upstream code is copied.
+New proofs, written on 2026-11-14, from pinned mathlib's finite sums and simple-graph degrees and
+the row-sum theorems of `PercLib.Percolation.Bond.RowSum`. No upstream code is copied.
 -/
 module
 

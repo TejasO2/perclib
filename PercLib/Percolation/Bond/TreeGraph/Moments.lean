@@ -1,9 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written for package Q-103 (issue 437, roadmap T-6), on the D-2 interface.
-Source motivation: M. Aizenman and C. M. Newman, J. Stat. Phys. 36 (1984), the moment
-bounds from the tree-graph inequalities, and the wiki statement Y84V.
-No source text or code is copied.
+New proofs, on the bond interface. Source motivation: M. Aizenman and C. M. Newman, J.
+Stat. Phys. 36 (1984), the moment bounds from the tree-graph inequalities, and the wiki statement
+Y84V. No source text or code is copied.
 -/
 module
 

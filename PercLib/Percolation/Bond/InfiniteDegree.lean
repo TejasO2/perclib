@@ -2,9 +2,8 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for issue 120 (Q-4), written on 2026-11-14 by PROVER-E. No upstream proof is
-copied: the probabilistic input is mathlib's second Borel–Cantelli lemma
-`ProbabilityTheory.measure_limsup_eq_one`.
+New proofs, written on 2026-11-14. No upstream proof is copied: the probabilistic input is mathlib's
+second Borel–Cantelli lemma `ProbabilityTheory.measure_limsup_eq_one`.
 -/
 module
 
@@ -23,7 +22,7 @@ surely. For an intensity kernel `J` with an infinite row sum at `v`, the row sum
 `intensityProfile J β` at `v` is infinite for every `β > 0`, because
 `1 - e^{-t} ≥ (1 - e^{-1}) min(t, 1)`; hence both critical intensities vanish.
 
-Row sums exclude the diagonal (D-2). The hypothesis is about the one vertex `v`. This
+Row sums exclude the diagonal. The hypothesis is about the one vertex `v`. This
 file adds no definition.
 -/
 

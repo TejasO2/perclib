@@ -1,13 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-136 (issue 470): slow and regular variation at infinity (wiki tag 3491), following
-Bingham–Goldie–Teugels, *Regular Variation*, §1.1–1.4, and the wiki article
-`regular-variation`. Mathlib at the pinned revision has no such notion. New definitions
-and proofs; nothing is copied for them. Q-140 (issue 507) adds `LogarithmicallyIntegrable`,
-`IsLogErrorFunction` and `genInv`, adapted from pull request 488 as recorded in the section
-header below (licence Apache-2.0). Pull request 488 (`yujinhkim/lrp`, branch `critical-lrp-1`)
-has a variant `RegularlyVaryingAtTop` that asks only for eventual non-vanishing and no
-measurability; it is not used here.
+Slow and regular variation at infinity (wiki tag 3491), following Bingham–Goldie–Teugels, *Regular
+Variation*, §1.1–1.4, and the wiki article `regular-variation`. Mathlib at the pinned revision has
+no such notion. New definitions and proofs; nothing is copied for them. The definitions `LogarithmicallyIntegrable`, `IsLogErrorFunction` and `genInv` are adapted from the repository `yujinhkim/lrp` of contributor yujinhkim, as recorded in the section header below (licence Apache-2.0). That repository (branch `critical-lrp-1`) has a variant `RegularlyVaryingAtTop` that asks only for eventual non-vanishing
+and no measurability; it is not used here.
 -/
 module
 

@@ -1,7 +1,6 @@
 /-
 Cutoff clusters and the exact omitted row on the hierarchical lattice, and the sharp
-small-intensity bound. New proofs from the existing hierarchical geometry, the P-5/P-6
-intensity theorems and pinned mathlib 56a005855ea17e0b0958f73ec801ae140b0a1679's ENNReal
+small-intensity bound. New proofs from the existing hierarchical geometry, the row-sum and intensity theorems of `PercLib.Percolation.Bond.RowSum` and `PercLib.Percolation.Bond.Intensity` and pinned mathlib 56a005855ea17e0b0958f73ec801ae140b0a1679's ENNReal
 geometric series and graph reachability. No upstream code is copied.
 -/
 module

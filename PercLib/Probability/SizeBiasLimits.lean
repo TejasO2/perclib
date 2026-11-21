@@ -1,9 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs for issue 460 (Q-126), written on 2026-11-16 by PROVER-E: escaping point masses
-converge vaguely to zero but have no weakly convergent subsequence (wiki size-biased-laws, tag
-WGQ7), and the Laplace limit of a size-biased weak limit (tag 7W00). No upstream proof is
-copied, no definition is added and no Input is introduced.
+New proofs, written on 2026-11-16: escaping point masses converge vaguely to zero but have no weakly
+convergent subsequence (wiki size-biased-laws, tag WGQ7), and the Laplace limit of a size-biased
+weak limit (tag 7W00). No upstream proof is copied, no definition is added and no Input is
+introduced.
 -/
 module
 

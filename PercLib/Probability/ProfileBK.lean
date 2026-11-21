@@ -4,8 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 Corresponds to `finite_bernoulliProfile_bk_of_uniform_lt_one` in
 NearCritical/ProfileBKStrict.lean at tomhutchcroft/near-critical-diffusivity,
-revision c820fea91a7482c1755de0ec94ecb9f59ccfcacc (reuse permission: DECISIONS R-3),
-and removes its restriction that every coordinate be below one, as issue 71 asks.
+revision c820fea91a7482c1755de0ec94ecb9f59ccfcacc (reuse permission recorded in `docs/DECISIONS.md`), and removes its restriction that every coordinate be below one.
 Route: low-density BK for profiles bounded by `1/2` (the induction of BKLowDensity.lean
 with a coordinate-dependent parameter), exact OR-refinement of each coordinate into
 `m` copies with its own parameter, and continuity in the profile for coordinates equal

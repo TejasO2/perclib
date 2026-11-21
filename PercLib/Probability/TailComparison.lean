@@ -2,8 +2,7 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for issue 458 (Q-124), written on 2026-11-16 by PROVER-G, against pinned mathlib.
-No upstream proof is copied.
+New proofs, written on 2026-11-16, against pinned mathlib. No upstream proof is copied.
 -/
 module
 

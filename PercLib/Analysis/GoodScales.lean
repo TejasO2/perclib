@@ -1,9 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs for issue 468 (Q-134), written on 2026-11-16 by PROVER-E: higher moments under a
-uniform exponential tail, the interval bound between good scales and the persistence of good
-scales (wiki cutoff-hydrodynamics, tags BZDZ, DISO and YEVN). No upstream proof is copied,
-no definition is added and no Input is introduced.
+New proofs, written on 2026-11-16: higher moments under a uniform exponential tail, the interval
+bound between good scales and the persistence of good scales (wiki cutoff-hydrodynamics, tags BZDZ,
+DISO and YEVN). No upstream proof is copied, no definition is added and no Input is introduced.
 -/
 module
 

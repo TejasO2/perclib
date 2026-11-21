@@ -1,21 +1,18 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-137 and Q-141 (issues 471 and 508, one interface by the ARCHITECT ruling D-33): radial
-long-range kernels on `ℤ^d` with the norm as a parameter, the cut-off kernels of
-Definition I.1.5 of T. Hutchcroft, *Critical long-range percolation I*,
-arXiv:2508.18807v1, for a general profile, and the power-law profile of Definition I.1.3
-as an instance; with the wiki targets PVA8, MQNP, LF50 and 6YYS (article
-`cutoff-families`) for the power law.
+Radial long-range kernels on `ℤ^d` with the norm as a parameter, the cut-off kernels of Definition
+I.1.5 of T. Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1, for a general
+profile, and the power-law profile of Definition I.1.3 as an instance; with the wiki targets PVA8,
+MQNP, LF50 and 6YYS (article `cutoff-families`) for the power law.
 
-`cutoffProfile` and the `if x = y then 0` kernel shape are adapted from pull request 488:
-repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
-`d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, file `PercLib/CriticalLRP/KernelGeometry.lean`
-(`cutoffProfile`, `radialKernel`, `cutoffKernel`, `modelProfile`); licence Apache-2.0 as
-declared in that file's header; upstream `yujinhkim/Critical-Long-range-percolation` at
-`3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf`. Modified: kernels are functions on
-`Sym2 (Fin d → ℤ)` with values in `ℝ≥0` (D-2, for `intensityProfile`), the distance is a
-norm on `ℝ^d` (a `Seminorm ℝ (Fin d → ℝ)` that vanishes only at `0`) evaluated at integer
-points, instead of an arbitrary function `V → V → ℝ`, and the power-law profile carries a
+`cutoffProfile` and the `if x = y then 0` kernel shape are adapted from the repository
+`yujinhkim/lrp`, branch `critical-lrp-1`, commit `d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, file
+`PercLib/CriticalLRP/KernelGeometry.lean` (`cutoffProfile`, `radialKernel`, `cutoffKernel`,
+`modelProfile`); licence Apache-2.0 as declared in that file's header; upstream
+`yujinhkim/Critical-Long-range-percolation` at `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf`. Modified:
+kernels are functions on `Sym2 (Fin d → ℤ)` with values in `ℝ≥0` (as `intensityProfile` requires), the
+distance is a norm on `ℝ^d` (a `Seminorm ℝ (Fin d → ℝ)` that vanishes only at `0`) evaluated at
+integer points, instead of an arbitrary function `V → V → ℝ`, and the power-law profile carries a
 normalising constant. The API lemmas, targets and witnesses are new.
 -/
 module
@@ -30,17 +27,16 @@ public import Mathlib.Topology.MetricSpace.ProperSpace
 
 /-! # Long-range kernels and their cut-offs on `ℤ^d`
 
-As in Definition I.1.3, the norm is a norm `N` on `ℝ^d`, restricted to `ℤ^d`: it is a
-`Seminorm ℝ (Fin d → ℝ)`, so it is absolutely homogeneous, and it is a norm when it vanishes
-only at `0` (`∀ x, N x = 0 → x = 0`), which is a hypothesis wherever it is used. An integer
-point `z : Fin d → ℤ` is evaluated through the coercion `Int.cast ∘ z : Fin d → ℝ`.
-For a profile `K : ℝ → ℝ`, the radial kernel is `J(x, y) = K (N (x - y))` for `x ≠ y` and `0`
-on the diagonal. Definition I.1.5 cuts it off at scale `r` by `J_r(s) = ∫_s^r |K'| = K s - K r`
-for `s ≤ r` and `0` for `s > r`; for a decreasing differentiable profile the two forms agree
-by the fundamental theorem of calculus, and the closed form is taken as the definition
-(`cutoffProfile`), as in pull request 488. Values are truncated at `0` (`Real.toNNReal`), which
-changes nothing for a nonnegative profile. Probabilities are `intensityProfile J β` (no new
-profile definition).
+As in Definition I.1.3, the norm is a norm `N` on `ℝ^d`, restricted to `ℤ^d`: it is a `Seminorm ℝ
+(Fin d → ℝ)`, so it is absolutely homogeneous, and it is a norm when it vanishes only at `0` (`∀ x,
+N x = 0 → x = 0`), which is a hypothesis wherever it is used. An integer point `z : Fin d → ℤ` is
+evaluated through the coercion `Int.cast ∘ z : Fin d → ℝ`. For a profile `K : ℝ → ℝ`, the radial
+kernel is `J(x, y) = K (N (x - y))` for `x ≠ y` and `0` on the diagonal. Definition I.1.5 cuts it
+off at scale `r` by `J_r(s) = ∫_s^r |K'| = K s - K r` for `s ≤ r` and `0` for `s > r`; for a
+decreasing differentiable profile the two forms agree by the fundamental theorem of calculus, and
+the closed form is taken as the definition (`cutoffProfile`), as in the source formalisation cited
+in the header. Values are truncated at `0` (`Real.toNNReal`), which changes nothing for a
+nonnegative profile. Probabilities are `intensityProfile J β` (no new profile definition).
 
 Every norm on `ℝ^d` is comparable with the sup norm (`exists_pos_mul_norm_le`,
 `exists_le_mul_norm`, and their integer forms), so no comparability hypothesis is needed.

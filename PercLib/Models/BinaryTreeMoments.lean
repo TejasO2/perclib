@@ -2,9 +2,8 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for issue 450 (Q-116, part 2), written on 2026-11-16 by PROVER-F against pinned
-mathlib. No upstream proof is copied. The statements follow the wiki tag GGVG
-(binary-tree percolation), analytic part.
+New proofs, written on 2026-11-16 against pinned mathlib. No upstream proof is copied. The
+statements follow the wiki tag GGVG (binary-tree percolation), analytic part.
 -/
 module
 
@@ -28,7 +27,7 @@ written out in each statement with the index `n + 1`, `n : ℕ`. As `p → 1/2`,
   `M_s(p) → M_s(1/2)`;
 * `moment_ratio_isEquivalent` (`s > 1/2`): `M_{s+1}(p)/M_s(p) ~ (s-1/2)/(4(p-1/2)²)`.
 
-The inputs are `catalan_div_four_pow_isEquivalent` (Q-115) and the Abelian theorems of
+The inputs are `catalan_div_four_pow_isEquivalent` (`PercLib/Models/BinaryTreeAsymptotics.lean`) and the Abelian theorems of
 `PercLib/Analysis/AbelianSums.lean`. The identification of `M_s(p)` with
 `E_p[|K|^s; |K| < ∞]` is not part of this file. This file adds no definition.
 -/

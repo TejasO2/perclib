@@ -1,8 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-83: the mass-transport principle on groups. New for this project; no upstream proof is
-copied. No new definition: the action, its measure preservation and the diagonal
-invariance of the transport are explicit hypotheses.
+The mass-transport principle on groups. New for this project; no upstream proof is copied. No new
+definition: the action, its measure preservation and the diagonal invariance of the transport are
+explicit hypotheses.
 -/
 module
 

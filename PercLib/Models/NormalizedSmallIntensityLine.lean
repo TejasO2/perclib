@@ -1,8 +1,7 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written for package Q-109 (issue 443), on the D-2 interface and the intensity
-family `intensityProfile`. The statements follow the wiki tag MTYL. No source text or code
-is copied.
+New proofs, on the bond interface and the intensity family `intensityProfile`. The
+statements follow the wiki tag MTYL. No source text or code is copied.
 -/
 module
 

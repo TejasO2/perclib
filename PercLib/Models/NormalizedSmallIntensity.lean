@@ -1,8 +1,7 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written for package Q-109 (issue 443), on the D-2 interface and the intensity
-family `intensityProfile`. The statements follow the wiki tags 1EWX (bounds only) and MTYL.
-No source text or code is copied.
+New proofs, on the bond interface and the intensity family `intensityProfile`. The
+statements follow the wiki tags 1EWX (bounds only) and MTYL. No source text or code is copied.
 -/
 module
 
@@ -21,10 +20,10 @@ Let `J` be an intensity whose off-diagonal rows sum to exactly one, and let
 * `chi_bounds` (1EWX): `1 + β - β²/2 ≤ χ(o) ≤ (1 - β)⁻¹`;
 * `triangle_bounds` (1EWX): `1 ≤ Δ ≤ 1 + 3 m² + m³` with `m = β / (1 - β)`.
 
-Neither bound uses transitivity: they hold at every root under the row hypothesis
-alone. `chi_bounds_of_transitive` and `triangle_bounds_of_transitive` restate them with
-the transitivity hypothesis of the package, which is then unused. The local Lipschitz
-statement `χ' ≤ (1 - β)⁻²` of 1EWX needs MXGM (package Q-99) and is not proved here.
+Neither bound uses transitivity: they hold at every root under the row hypothesis alone.
+`chi_bounds_of_transitive` and `triangle_bounds_of_transitive` restate them with a transitivity
+hypothesis, which is then unused. The local Lipschitz statement `χ' ≤ (1 - β)⁻²` needs the
+integrated mean-field inequality for the susceptibility and is not proved here.
 
 The deterministic core is `tsum_triangle_le`: for a nonnegative matrix that is one on the
 diagonal and whose off-diagonal rows sum to at most `m`, the closed triangle at a vertex

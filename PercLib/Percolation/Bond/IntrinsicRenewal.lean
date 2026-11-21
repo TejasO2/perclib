@@ -2,8 +2,7 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for issue 445 (Q-111, part 2), written on 2026-11-16 by PROVER-F. No upstream
-proof is copied and no definition is added.
+New proofs, written on 2026-11-16. No upstream proof is copied and no definition is added.
 -/
 module
 
@@ -25,7 +24,7 @@ balls. Then for every `r`:
 (The upper bound `b_r ≤ ∑_{j ≤ r} D^j` is `lintegral_encard_ball_le_of_transitive`.)
 
 Route (wiki, R5XZ): under transitivity every radius-`k` ball has mean `b_k`
-(`lintegral_encard_ball_eq_of_transitive`), so the renewal inequality of Q-220 reads
+(`lintegral_encard_ball_eq_of_transitive`), so the renewal inequality of `BallExploration.lean` reads
 `b_{m+n} ≤ b_m + a_m b_n`. If `a_m < 1` for some `m ≥ 1`, iteration bounds every `b_r` by
 `b_m / (1 - a_m) < ⊤`, and `χ_o = sup_r b_r` would be finite. Hence `a_m ≥ 1`; and
 `b_{r+1} = b_r + a_{r+1}`.

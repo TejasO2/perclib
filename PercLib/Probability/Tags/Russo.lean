@@ -1,8 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-58: correspondence wrappers for the complete grouped Russo assertions.
-Uses the existing finite-profile definitions and division-free pairing proof
-from Russo.lean; no new configuration or pivotal convention is introduced.
+Correspondence wrappers for the complete grouped Russo assertions. Uses the existing finite-profile
+definitions and division-free pairing proof from Russo.lean; no new configuration or pivotal
+convention is introduced.
 -/
 module
 

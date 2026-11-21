@@ -2,12 +2,7 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-Endpoint theorems of issues 432 (Q-98, 5LNL) and 433 (Q-99, MXGM), restored on 2026-11-16 by
-PROVER-F. The proofs were written by PROVER-G (`chi_intensity_sSup_eq_top`, removed from PR
-500 in commit bf0b5ba) and PROVER-E (`exists_chi_gt_of_chi_eq_top`,
-`one_div_le_chi_of_chi_eq_top`, removed from PR 494 in commit 77f2eef) in this repository and
-are restored unchanged; they were cut only for want of a D-5 witness, now supplied by
-`PercLib/Models/FreeGroupTree.lean`. No upstream proof is copied.
+Endpoint theorems for the susceptibility, restored on 2026-11-16. The proofs were written earlier in this repository (`chi_intensity_sSup_eq_top`, removed in commit bf0b5ba; `exists_chi_gt_of_chi_eq_top` and `one_div_le_chi_of_chi_eq_top`, removed in commit 77f2eef) and are restored unchanged; they were cut only for want of a non-vacuity witness, now supplied by `PercLib/Models/FreeGroupTree.lean`. No upstream proof is copied.
 -/
 module
 
@@ -17,13 +12,13 @@ public import PercLib.Percolation.Bond.SusceptibilityDerivative
 /-!
 # Endpoints of finite susceptibility
 
-* `chi_intensity_sSup_eq_top` (5LNL, issue 432): for a transitive intensity with finite row
+* `chi_intensity_sSup_eq_top`: for a transitive intensity with finite row
   sum `L`, if `b_χ = sSup {β | χ_β < ⊤}` is finite then `χ_{b_χ} = ⊤`.
-* `one_div_le_chi_of_chi_eq_top` (MXGM blow-up, issue 433): for a transitive kernel with
+* `one_div_le_chi_of_chi_eq_top` (blow-up): for a transitive kernel with
   off-diagonal row sum `0 < R < ∞`, if `χ` is finite on `(a,b)`, `0 ≤ a`, and `χ(b) = ∞`,
   then `χ(β) ≥ 1/(R (b - β))` for `a < β < b`.
 
-The D-5 witnesses are in `PercLib/Models/FreeGroupTree.lean`. This file adds no definition.
+The non-vacuity witnesses are in `PercLib/Models/FreeGroupTree.lean`. This file adds no definition.
 -/
 
 @[expose] public section

@@ -1,8 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written for package Q-113 (issue 447), on the D-2 interface, from the positive
-semidefiniteness of the connection kernel (`ConnectionKernel.lean`). The statements follow
-the wiki tag 96A2 (connection kernels). No source text or code is copied.
+New proofs, on the bond interface, from the positive semidefiniteness of the connection
+kernel (`ConnectionKernel.lean`). The statements follow the wiki tag 96A2 (connection kernels). No
+source text or code is copied.
 -/
 module
 

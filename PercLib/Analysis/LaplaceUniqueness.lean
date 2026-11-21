@@ -1,19 +1,14 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
 
-Adapted for Q-188 (issue 616) from contributor yujinhkim, repository
-`yujinhkim/lrp`, branch `critical-lrp-1`, commit
-`d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, file
-`PercLib/CriticalLRP/Analysis/LaplaceUnique.lean` (blob `19a96549c5`).
-Licence: Apache-2.0 as declared in that revision's header and
-`third_party/critical-lrp/NOTICE.md`. Upstream origin:
-`yujinhkim/Critical-Long-range-percolation`, revision
-`3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf` (not independently verified).
-Changes: inline the trapezoid weights, omit the unused Tauberian dependency,
-use focused mathlib imports, enabled linters and explicit witnesses.
-Salvaged from branch `work/Q-188-laplace-uniqueness` at tip commit `f26e49c`
-and rebased onto the current tree; the helper `integrableOn_mul_of_norm_bound`
-is replaced by mathlib's `MeasureTheory.Integrable.bdd_mul`.
+Adapted from contributor yujinhkim, repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
+`d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, file `PercLib/CriticalLRP/Analysis/LaplaceUnique.lean`
+(blob `19a96549c5`). Licence: Apache-2.0 as declared in that revision's header and
+`third_party/critical-lrp/NOTICE.md`. Upstream origin: `yujinhkim/Critical-Long-range-percolation`,
+revision `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf` (not independently verified). Changes: inline
+the trapezoid weights, omit the unused Tauberian dependency, use focused mathlib imports, enabled
+linters and explicit witnesses. The helper `integrableOn_mul_of_norm_bound` is replaced by mathlib's
+`MeasureTheory.Integrable.bdd_mul`.
 
 Uniqueness of the Laplace transform on L¹(0,∞), supporting the Tauberian
 converse of Hutchcroft, Critical long-range percolation I, Theorem I.2.11.

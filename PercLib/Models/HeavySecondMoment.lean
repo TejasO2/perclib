@@ -1,7 +1,6 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written for package Q-108 (issue 442, wiki HRS7), on the D-2 interface.
-No source text or code is copied.
+New proofs, on the bond interface. No source text or code is copied.
 -/
 module
 

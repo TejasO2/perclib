@@ -1,9 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs for issue 461 (Q-127), written on 2026-11-16 by PROVER-E: a logarithmic fourth-moment
-bound from a weighted exponential moment (wiki exponential-moments, tag IXEZ), and box exits
-force large clusters for finite-range bonds on `ℤ^d` (tag YVJT, deterministic and conditional
-parts). No upstream proof is copied, no definition is added and no Input is introduced.
+New proofs, written on 2026-11-16: a logarithmic fourth-moment bound from a weighted exponential
+moment (wiki exponential-moments, tag IXEZ), and box exits force large clusters for finite-range
+bonds on `ℤ^d` (tag YVJT, deterministic and conditional parts). No upstream proof is copied, no
+definition is added and no Input is introduced.
 -/
 module
 

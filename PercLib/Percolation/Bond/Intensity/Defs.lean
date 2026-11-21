@@ -1,6 +1,5 @@
 /-
-PercLib intensity interface, following DECISIONS D-2 and the P-6 target reviewed
-on issue #40. New definitions using mathlib's real exponential and complete-lattice
+PercLib intensity interface on the bond interface of `PercLib.Percolation.Bond.Basic`. New definitions using mathlib's real exponential and complete-lattice
 infimum; no upstream probability foundation is copied.
 -/
 module

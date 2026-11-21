@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-56 correspondence wrappers for the subcritical-bound article. All mathematical
-inputs are proved in the imported modules; no literature assumptions are added.
+Correspondence wrappers for the subcritical-bound article. All mathematical inputs are proved in the
+imported modules; no literature assumptions are added.
 -/
 module
 

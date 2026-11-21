@@ -1,16 +1,14 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
 
-Adapted from pull request 488: source repository `yujinhkim/lrp`, branch
-`critical-lrp-1`, commit d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc, file
-`PercLib/CriticalLRP/RussoInf/DominatedFlux.lean`, contributed by `yujinhkim`.
-Licence: Apache-2.0, as declared in that file's header and in
+Adapted from the source repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
+d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc, file `PercLib/CriticalLRP/RussoInf/DominatedFlux.lean`,
+contributed by `yujinhkim`. Licence: Apache-2.0, as declared in that file's header and in
 `third_party/critical-lrp/NOTICE.md` of that commit (upstream origin
-`yujinhkim/Critical-Long-range-percolation` at
-3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf, not independently verified).
-Changes: namespace `RussoDominated` becomes `PercLib.Analysis`; the helper
-`ioc_subset_uIcc` is replaced by mathlib's `Set.Icc_subset_uIcc`; focused imports;
-`autoImplicit` off.
+`yujinhkim/Critical-Long-range-percolation` at 3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf, not
+independently verified). Changes: namespace `RussoDominated` becomes `PercLib.Analysis`; the helper
+`ioc_subset_uIcc` is replaced by mathlib's `Set.Icc_subset_uIcc`; focused imports; `autoImplicit`
+off.
 -/
 module
 

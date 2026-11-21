@@ -1,9 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written for package Q-110 (issue 444), on the D-2 interface and the
-hierarchical geometry of `PercLib.Models.HierarchicalGeometry`. The statements follow the
-wiki tags V4QQ and YWTU (hierarchical two-point function), in conditional form. No source
-text or code is copied.
+New proofs, on the bond interface and the hierarchical geometry of
+`PercLib.Models.HierarchicalGeometry`. The statements follow the wiki tags V4QQ and YWTU
+(hierarchical two-point function), in conditional form. No source text or code is copied.
 -/
 module
 

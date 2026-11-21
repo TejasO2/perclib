@@ -1,8 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-86: intrinsic balls. New for this project; no upstream proof is copied, and no new
-definition is introduced: the intrinsic distance is mathlib's `(openGraph ω).edist`, and
-balls and spheres are written out as sets.
+Intrinsic balls. New for this project; no upstream proof is copied, and no new definition is
+introduced: the intrinsic distance is mathlib's `(openGraph ω).edist`, and balls and spheres are
+written out as sets.
 -/
 module
 

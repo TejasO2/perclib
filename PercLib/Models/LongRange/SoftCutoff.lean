@@ -1,8 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written for package Q-130 (issue 464), on the D-2 conventions for row sums, from
-the sup-norm ball counts of `PowerLaw.lean`. The statements follow the wiki tag C4E9
-(size-biased laws). No source text or code is copied.
+New proofs, on the bond-interface conventions for row sums, from the sup-norm ball counts of
+`PowerLaw.lean`. The statements follow the wiki tag C4E9 (size-biased laws). No source text or code
+is copied.
 -/
 module
 
@@ -23,7 +23,7 @@ On `ℤ^d` write `‖z‖₂ = √(∑ᵢ zᵢ²)` (the norm of `z` in `Euclidea
 * `tsum_added_layer_le` (C4E9): the independent added layer at intensity `β ≥ 0` has
   probability rows `∑'_{v ≠ u} (1 - e^{-β (J - J_r)(u,v)}) ≤ β ·` the same bound.
 
-Row sums are in `ℝ≥0∞`, with the diagonal excluded as in D-2.
+Row sums are in `ℝ≥0∞`, with the diagonal excluded.
 -/
 
 @[expose] public section

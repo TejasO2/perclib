@@ -1,8 +1,7 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written for package Q-67 (issue 374, roadmap T-6), on the D-2 interface.
-Source motivation: T. Hutchcroft, arXiv:2008.11197v2, §2.1, the moment bounds that follow
-Theorem 2.2. No source text or code is copied.
+New proofs, on the bond interface. Source motivation: T. Hutchcroft, arXiv:2008.11197v2,
+§2.1, the moment bounds that follow Theorem 2.2. No source text or code is copied.
 -/
 module
 
@@ -23,7 +22,7 @@ With `Z = maxClusterIntersection Λ`, `M = tightnessScale q Λ`, `Λ` finite non
   `k`, `E Z^k ≤ C_k M^k` with the explicit constant `C_k = 20 · 18^k · k!`.
 
 The second bound is proved for every `k : ℕ`, which includes the requested `k ≥ 1`.
-Expectations are lower Lebesgue integrals in `ℝ≥0∞` (D-2).
+Expectations are lower Lebesgue integrals in `ℝ≥0∞`.
 -/
 
 @[expose] public section
