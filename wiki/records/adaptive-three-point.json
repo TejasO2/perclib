@@ -740,6 +740,12 @@
       "tag": "XCYH",
       "proof_uses": [],
       "reason": "Algebra and gamma identities proved from explicit density hypotheses. Surviving-boundary index correction provisional; source SLE proof remains cited."
+    },
+    {
+      "order": 41,
+      "tag": "Q3MP",
+      "proof_uses": [],
+      "reason": "The proof is a direct bijection argument (tree completion and coordinate swaps preserving product weights) and invokes no other wiki assertion."
     }
   ]
 }

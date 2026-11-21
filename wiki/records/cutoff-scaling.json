@@ -74,6 +74,38 @@
         "IK5Y"
       ],
       "reason": "Replaces truncation by a monotone cap, derives moment lower bounds under size bias, constructs a single rapid-decay tail envelope, and keeps the intermediate parameter in the uniform interval. Includes the zero tail-exponent endpoint and the critical logarithm."
+    },
+    {
+      "order": 1,
+      "tag": "QT3F",
+      "proof_uses": [],
+      "reason": "The tail-sum identity for E T^k and dyadic block summation give both bounds; no other wiki assertion is invoked."
+    },
+    {
+      "order": 2,
+      "tag": "ADN0",
+      "proof_uses": [
+        "QT3F"
+      ],
+      "reason": "The cutoff scale is substituted into the moment estimate of QT3F; the beta statement is the separate matching assumption."
+    },
+    {
+      "order": 3,
+      "tag": "CAV9",
+      "proof_uses": [],
+      "reason": "Shell counting and dyadic block summation of the two-point bounds; no other wiki assertion is invoked."
+    },
+    {
+      "order": 4,
+      "tag": "T5JS",
+      "proof_uses": [],
+      "reason": "Induction on p with an integrating factor and monotone convergence; no other wiki assertion is invoked."
+    },
+    {
+      "order": 5,
+      "tag": "IK5Y",
+      "proof_uses": [],
+      "reason": "The uniform coupling and the finite dominating cluster make the cluster locally constant in beta, and dominated convergence gives continuity; no other wiki assertion is invoked."
     }
   ]
 }

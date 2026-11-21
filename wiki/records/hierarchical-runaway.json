@@ -1103,6 +1103,87 @@
         "F7Q2"
       ],
       "reason": "Interpolate intermediate predictable jump rates between orders two and 2m. The compensated polynomial identity, Doob inequality and weighted Young absorption bound the martingale maximum by the mth bracket moment and integrated 2mth jump rate. Add the controlled drift, sum interval errors for interpolation, and use higher supremum moments for uniform integrability of polynomially bounded continuous path observables. Fixed-tree estimates follow by a finite sum without independence."
+    },
+    {
+      "order": 54,
+      "tag": "2XJX",
+      "proof_uses": [
+        "Y84V",
+        "SNB3",
+        "7AER"
+      ],
+      "reason": "Tree-graph moments (Y84V) give the exponential tail (SNB3) and a linear quantile bound, which contradicts the propagation of a failed bound by block amplification (7AER); the endpoint case uses finite-block continuity."
+    },
+    {
+      "order": 55,
+      "tag": "FF30",
+      "proof_uses": [
+        "JZ47",
+        "L0TE",
+        "2XJX",
+        "R84Z"
+      ],
+      "reason": "The row-sum bound (JZ47) gives beta_c>=1/B; finite-set sharpness (L0TE) gives subcritical finite susceptibility so the runaway bound 2XJX applies; the finite-size characterisation with continuity (R84Z) gives the boundary flux."
+    },
+    {
+      "order": 56,
+      "tag": "655W",
+      "proof_uses": [
+        "2XJX"
+      ],
+      "reason": "Rooted damping (a hypothesis) gives the truncated-mean estimate, and the sibling-block recursion is closed using the quantile bound R_n^2 <= (A/b)L^{(d+alpha)n} of 2XJX."
+    },
+    {
+      "order": 57,
+      "tag": "7YNX",
+      "proof_uses": [
+        "655W",
+        "BNY8"
+      ],
+      "reason": "The flux hypothesis and the block-mean bounds of 655W give two-sided block means; the lower bound uses a direct edge between truncated sibling clusters and the upper bound finite-coordinate BK (BNY8) over level crossings."
+    },
+    {
+      "order": 58,
+      "tag": "MS6M",
+      "proof_uses": [],
+      "reason": "Shell counting and the ultrametric inequality bound the triangle increments; no other wiki assertion is invoked."
+    },
+    {
+      "order": 59,
+      "tag": "7GDE",
+      "proof_uses": [
+        "FF30",
+        "12NL",
+        "7YNX",
+        "UVQ6"
+      ],
+      "reason": "FF30 gives the critical intensity and flux, 12NL rooted damping, 7YNX the block-mean lower bound, and finite-window hyperscaling (UVQ6) the contradicting upper bound."
+    },
+    {
+      "order": 60,
+      "tag": "GPDF",
+      "proof_uses": [],
+      "reason": "A definition; the existence remark uses only continuity and monotonicity of r_n and chi_n."
+    },
+    {
+      "order": 61,
+      "tag": "6F2J",
+      "proof_uses": [
+        "BNY8"
+      ],
+      "reason": "A first-exit decomposition with finite-coordinate BK (BNY8) gives chi_N <= chi_n + phi chi_N; shell summation and the boundary coefficient give the two-sided bounds."
+    },
+    {
+      "order": 62,
+      "tag": "VI3Y",
+      "proof_uses": [],
+      "reason": "Independent exponential clocks per block and pair give the stated weights by a geometric series; no other wiki assertion is invoked."
+    },
+    {
+      "order": 63,
+      "tag": "W8PB",
+      "proof_uses": [],
+      "reason": "A Vandermonde inversion and Lagrange-type indicator polynomials; no other wiki assertion is invoked."
     }
   ]
 }

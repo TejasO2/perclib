@@ -74,6 +74,28 @@
         "XLWI"
       ],
       "reason": "A sparse independent layer yields exponential integrability at a larger parameter; the finite-cluster majorant and Cauchy estimates give the quantitative extension."
+    },
+    {
+      "order": 1,
+      "tag": "XLWI",
+      "proof_uses": [
+        "Y84V"
+      ],
+      "reason": "The uniform-susceptibility tree-graph moment bound (Y84V) is summed into the exponential series, followed by integration and Markov's inequality."
+    },
+    {
+      "order": 2,
+      "tag": "YVJT",
+      "proof_uses": [
+        "XLWI"
+      ],
+      "reason": "An exit path forces |K_o| > r/R, and the uniform-susceptibility volume bound (XLWI) gives the spatial decay."
+    },
+    {
+      "order": 3,
+      "tag": "IW3P",
+      "proof_uses": [],
+      "reason": "The finite-cluster expansion is bounded termwise by complex-exponential estimates and summed under the assumed exponential moment via monotone coupling; no other wiki assertion is invoked."
     }
   ]
 }

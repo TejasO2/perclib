@@ -63,5 +63,43 @@
     }
   ],
   "occursIn": [],
-  "proofUses": []
+  "proofUses": [
+    {
+      "order": 0,
+      "tag": "T7VI",
+      "proof_uses": [
+        "L82Q",
+        "AFH6",
+        "IZAO"
+      ],
+      "reason": "The first bound applies the three-point tree-graph inequality (L82Q), the second the four-point tree shapes of the multipoint tree bound (AFH6), with mass transport and the diagram comparison IZAO for finiteness."
+    },
+    {
+      "order": 1,
+      "tag": "4KBG",
+      "proof_uses": [
+        "6JBS",
+        "BNY8",
+        "67GX",
+        "T7VI",
+        "IZAO",
+        "MXGM"
+      ],
+      "reason": "The derivative comes from the finite-domain Russo identity (6JBS) bounded by BK (BNY8); the boundary estimate (67GX), the weighted moment bounds (T7VI) and B<=A<=Delta^2 (IZAO) give the lower bound, and MXGM gives the lower susceptibility bound."
+    },
+    {
+      "order": 2,
+      "tag": "MTYL",
+      "proof_uses": [],
+      "reason": "The proof is an explicit computation of the two-point function, susceptibility and triangle on Z and invokes no other wiki assertion."
+    },
+    {
+      "order": 3,
+      "tag": "1EWX",
+      "proof_uses": [
+        "MXGM"
+      ],
+      "reason": "The susceptibility and triangle bounds are proved directly by path and walk sums; the derivative bound applies the local regularity and upper derivative estimate MXGM."
+    }
+  ]
 }

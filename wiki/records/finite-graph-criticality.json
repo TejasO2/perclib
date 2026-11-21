@@ -90,6 +90,12 @@
         "F7N7"
       ],
       "reason": "One-sided comparison of critical parameters under the displayed finite-volume and susceptibility hypotheses."
+    },
+    {
+      "order": 5,
+      "tag": "6JZB",
+      "proof_uses": [],
+      "reason": "Expansion over configurations gives the polynomial and the common-uniform coupling gives strict monotonicity; no other wiki assertion is invoked."
     }
   ]
 }

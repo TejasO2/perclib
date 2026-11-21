@@ -132,6 +132,12 @@
         "I328"
       ],
       "reason": "The stated source bound follows, with an independently derived square-root intensity prefactor before conversion. Finite witnesses give the critical limit; I328 supplies additional subcritical consequences. No exponent equality, pointwise estimate or triangle condition is inferred."
+    },
+    {
+      "order": 6,
+      "tag": "EKDO",
+      "proof_uses": [],
+      "reason": "A definition; the remarks on nesting, translation closure and the union law are direct checks invoking no other wiki assertion."
     }
   ],
   "occursIn": []

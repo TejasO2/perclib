@@ -55,6 +55,12 @@
         "7QJG"
       ],
       "reason": "Closing coordinates shrinks clusters. On countable vertices, nonconnection is a measurable complement and finite-cluster events are countable unions of closed-boundary events."
+    },
+    {
+      "order": 4,
+      "tag": "GA03",
+      "proof_uses": [],
+      "reason": "A definition; it invokes no other wiki assertion."
     }
   ]
 }

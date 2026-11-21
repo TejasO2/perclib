@@ -153,6 +153,38 @@
         "AUUG"
       ],
       "reason": "Independent joining layer, subtraction of already-connected mass, factorial second moment on disjoint cutoff clusters and a direct-bond treatment of small chosen radii. All model inputs remain explicit."
+    },
+    {
+      "order": 8,
+      "tag": "J7SM",
+      "proof_uses": [],
+      "reason": "A definition; it invokes no other wiki assertion."
+    },
+    {
+      "order": 9,
+      "tag": "32GP",
+      "proof_uses": [],
+      "reason": "A Markov-type comparison of the spatial moment with the mass outside the ball; no other wiki assertion is invoked."
+    },
+    {
+      "order": 10,
+      "tag": "AWWU",
+      "proof_uses": [],
+      "reason": "A definition; it invokes no other wiki assertion."
+    },
+    {
+      "order": 11,
+      "tag": "39MV",
+      "proof_uses": [
+        "32GP"
+      ],
+      "reason": "Factorisation and Cauchy-Schwarz bound the moment loss by m_{2q-1} and E Z, and the spatial localisation estimate (32GP) bounds E Z."
+    },
+    {
+      "order": 12,
+      "tag": "IBK7",
+      "proof_uses": [],
+      "reason": "An explicit tree-metric construction with direct moment computations; no other wiki assertion is invoked."
     }
   ]
 }

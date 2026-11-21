@@ -96,6 +96,12 @@
         "Y8RX"
       ],
       "reason": "The first-exit inequality gives a convolution with a contracting bounded-support kernel. Finite iteration and support bounds yield spatial exponential decay; directional limits give the length comparison."
+    },
+    {
+      "order": 7,
+      "tag": "NZMZ",
+      "proof_uses": [],
+      "reason": "A definition; it invokes no other wiki assertion."
     }
   ]
 }

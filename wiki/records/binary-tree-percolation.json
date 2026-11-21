@@ -120,6 +120,16 @@
         "LNKT"
       ],
       "reason": "Subtree pullback and independent coordinate blocks give the depth recursion; diagonal erasure extends the canonical profile calculation."
+    },
+    {
+      "order": 2,
+      "tag": "CQYY",
+      "proof_uses": [
+        "BFM4",
+        "8TFY",
+        "UKY4"
+      ],
+      "reason": "The root cluster is a Bin(2,p) Galton-Watson process; the proof applies the extinction criterion (BFM4), the least-fixed-point characterisation (8TFY) and the expected total progeny (UKY4)."
     }
   ]
 }
