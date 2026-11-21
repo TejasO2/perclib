@@ -10,6 +10,15 @@ None.
 
 ## Merged
 
+### New definitions, round 14 batch (additive; no existing name changed)
+
+- `p-a-GPDF` (audited APPROVE, `audit-p-a-GPDF`): `ballExitRate`, `boundaryThreshold`, `maxBoundaryThreshold`,
+  `boundaryScaleIndex`, `boundaryLength` in new `PercLib/Models/HierarchicalBoundaryScales/Defs.lean`.
+- `p-b-CUE4` (audited APPROVE, `audit-p-b-CUE4`): `mobiusCoeff`, `HasNonnegMobiusCoeffs` in new
+  `PercLib/Combinatorics/BooleanCoefficients/Defs.lean`; `HasMassTransport` in new
+  `PercLib/Probability/MassTransport/Defs.lean`; `poissonTail` in new `PercLib/Probability/PoissonTail/Defs.lean`.
+- Announced 21 November 2026 (round 14), merged in the batch on top of `e0ae3ec`.
+
 ### Size-biased law (`sizeBiased`)
 
 - **What:** a new definition `PercLib.Probability.sizeBiased` in the new file
