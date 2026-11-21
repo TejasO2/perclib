@@ -8,6 +8,8 @@ labels: []
 
 # Mass-transport identity of Lemma I.4.1 and the cut-off corner (port)
 
+Being done by the project's own agents; do not start it.
+
 ## Goal
 Port the mass-transport identity behind Lemma I.4.1 of arXiv:2508.18807v1 (the Russo-type
 derivative of cluster-volume moments for long-range percolation with a cut-off kernel) and the

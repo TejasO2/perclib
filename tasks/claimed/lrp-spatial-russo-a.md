@@ -8,6 +8,8 @@ labels: []
 
 # Infinite-volume Russo formula for truncated spatial moments (port, part A)
 
+Being done by the project's own agents; do not start it.
+
 ## Goal
 Port the part of the infinite-volume spatial Russo formula of arXiv:2508.18807v1 that needs no
 uniformity premise: truncated spatial moments, their finite-window flux bounds and their
