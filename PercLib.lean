@@ -15,6 +15,7 @@ public import PercLib.Analysis.GyrationReduction
 public import PercLib.Analysis.HadamardPowers
 public import PercLib.Analysis.HardyMajorant
 public import PercLib.Analysis.HomogeneousBallIntegrals
+public import PercLib.Analysis.InverseSquareBlock
 public import PercLib.Analysis.LaplaceUniqueness
 public import PercLib.Analysis.LinearODEAsymptotics
 public import PercLib.Analysis.LogExponent
@@ -41,6 +42,7 @@ public import PercLib.Analysis.RiccatiComparison
 public import PercLib.Analysis.SignedDrivenODE
 public import PercLib.Analysis.Tags.CriticalExponents
 public import PercLib.Analysis.Tags.IntegratedSusceptibility
+public import PercLib.Analysis.Tags.InverseSquareBlock
 public import PercLib.Analysis.Tags.MarginalODE
 public import PercLib.Analysis.Tags.MarginalODETail
 public import PercLib.Analysis.Tags.MesoscopicTailTransfer
