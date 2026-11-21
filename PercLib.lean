@@ -23,6 +23,7 @@ public import PercLib.Analysis.LogarithmicCorrections
 public import PercLib.Analysis.MesoscopicNegligibility
 public import PercLib.Analysis.ModelNorm.Defs
 public import PercLib.Analysis.MomentHierarchy
+public import PercLib.Analysis.PowerLawConvolution
 public import PercLib.Analysis.QuadraticRecursion
 public import PercLib.Analysis.ReciprocalCutoff
 public import PercLib.Analysis.ReciprocalODE
@@ -117,6 +118,7 @@ public import PercLib.Models.LongRange.Defs
 public import PercLib.Models.LongRange.FiniteSusceptibility
 public import PercLib.Models.LongRange.FourierSymbol
 public import PercLib.Models.LongRange.InfiniteVolumeRusso
+public import PercLib.Models.LongRange.LatticeConvolution
 public import PercLib.Models.LongRange.OmittedLayer
 public import PercLib.Models.LongRange.OneDimensional
 public import PercLib.Models.LongRange.PowerLaw
@@ -129,6 +131,7 @@ public import PercLib.Models.LongRange.Tags.DisplacementKernels
 public import PercLib.Models.LongRange.Tags.IntegratedSusceptibility
 public import PercLib.Models.LongRange.Tags.Sharpness
 public import PercLib.Models.LongRange.Tags.SizeBiasedLaws
+public import PercLib.Models.LongRange.Tags.SpatialConvolution
 public import PercLib.Models.LongRange.Tags.Susceptibility
 public import PercLib.Models.NonSummable
 public import PercLib.Models.NormalizedSmallIntensity
