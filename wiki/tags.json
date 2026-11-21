@@ -5764,6 +5764,10 @@
     {
       "tag": "NC7F",
       "state": "allocated"
+    },
+    {
+      "tag": "B5SL",
+      "state": "allocated"
     }
   ]
 }
