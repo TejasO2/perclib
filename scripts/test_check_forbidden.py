@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 """Unit tests of the forbidden-construct scan (`check_forbidden.py`). Standard library only."""
+import pathlib
+import sys
 import unittest
-from check_forbidden import check_file
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))  # `python3 -I` omits it
+from check_forbidden import check_file  # noqa: E402
 
 REL = 'PercLib/Area/F.lean'
 
@@ -71,6 +75,47 @@ class ForbiddenScanTests(unittest.TestCase):
                      '@[aesop safe (rule_sets := [Foo]), norm_num _] def f : Nat := 0']:
             with self.subTest(text=text):
                 self.assertTrue(flagged(text))
+
+    def test_elaboration_time_meta_code(self):
+        # Finding R1: `run_meta` and a `meta def` registered as a tactic run IO when elaborated.
+        for text in ['run_meta IO.FS.writeFile "pwned" "x"',
+                     'theorem a : True := trivial run_meta IO.FS.writeFile "pwned" "x"',
+                     '@[tactic Lean.Parser.Tactic.done] public meta def evalPwn : Tactic := '
+                     'fun _ => throwUnsupportedSyntax',
+                     'public meta def f : Nat := 0',
+                     'public meta import Lean.Elab.Command']:
+            with self.subTest(text=text):
+                self.assertTrue(flagged(text))
+        for cmd in ['cbv_simproc', 'cbv_simproc_decl', 'cbv_simproc_pattern', 'simproc_pattern',
+                    'grind_propagator', 'builtin_simproc', 'builtin_dsimproc',
+                    'builtin_grind_propagator']:
+            with self.subTest(cmd=cmd):
+                self.assertTrue(flagged(f'{cmd} reduceFoo (Foo _) := fun e => return .continue'))
+        # The tag attribute file may use `meta`, and only that file.
+        self.assertFalse(flagged('public meta import Lean.Elab.Command\npublic meta section',
+                                 'PercLib/Meta/Tag.lean'))
+
+    def test_elaborator_registering_attributes(self):
+        # Finding R1 / GS2: attributes that register elaborator, delaborator or initializer code.
+        for text in ['@[tactic X] def evalX : Tactic := fun _ => pure ()',
+                     '@[app_delab Nat.succ] def delabSucc : Delab := failure',
+                     '@[init act] opaque hook : Unit',
+                     'attribute [tactic Lean.Parser.Tactic.done] evalPwn',
+                     '@[builtin_init act] opaque hook : Unit',
+                     '@[builtin_tactic X] def f : Tactic := fun _ => pure ()',
+                     '@[builtin_delab app.Foo] def f : Delab := failure',
+                     '@[builtin_term_elab foo] def f : TermElab := fun _ _ => failure',
+                     '@[builtin_command_elab foo] def f : CommandElab := fun _ => pure ()',
+                     '@[builtin_macro foo] def f : Macro := fun _ => Macro.throwUnsupported']:
+            with self.subTest(text=text):
+                self.assertTrue(flagged(text))
+        # The tactics `trivial` and `done`, and the word `tactic` outside attributes, pass.
+        for text in ['theorem t : True := by trivial; done',
+                     'theorem t : True := by\n  trivial\n  done',
+                     '-- this tactic proof uses @[tactic] nowhere\ntheorem t : True := by trivial',
+                     '/- the tactic `init` and @[init act] -/\ntheorem t : True := trivial']:
+            with self.subTest(text=text):
+                self.assertFalse(flagged(text))
 
     def test_tactics_with_attribute_names_pass(self):
         ok = '''module
