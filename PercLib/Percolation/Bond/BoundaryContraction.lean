@@ -68,8 +68,7 @@ theorem induce_walk_last_exit (G : SimpleGraph V) (A K : Set V) {a b : A}
 theorem induce_cluster_eq_of_agree (S K : Set V) (u : V) {ω ω' : Config V}
     (hagree : ∀ a ∈ K, ∀ b ∈ S, (s(a, b) ∈ ω ↔ s(a, b) ∈ ω'))
     (h : ∀ v, (ω ∈ localConn S u v) ↔ v ∈ K) :
-    ∀ v, (∃ hu : u ∈ S, ∃ hv : v ∈ S,
-      ((openGraph ω').induce S).Reachable ⟨u, hu⟩ ⟨v, hv⟩) ↔ v ∈ K := by
+    ∀ v, (ω' ∈ localConn S u v) ↔ v ∈ K := by
   -- Walks of `ω'` inside `S` starting in `K` stay in `K`.
   have hstay : ∀ (a b : S) (p : ((openGraph ω').induce S).Walk a b), (a : V) ∈ K →
       (b : V) ∈ K := by

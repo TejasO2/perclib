@@ -240,8 +240,7 @@ theorem continuous_boundaryFlux_intensity (J : Sym2 V → ℝ≥0)
 /-- Internal connections in the image of a domain pull back along a vertex bijection. -/
 theorem localConn_of_image (σ : V ≃ V) (ω : Config V) {S T : Set V}
     (hST : ∀ v, v ∈ T → σ.symm v ∈ S) {a b : V}
-    (h : ∃ ha : σ a ∈ T, ∃ hb : σ b ∈ T,
-      ((openGraph (Sym2.map σ '' ω)).induce T).Reachable ⟨σ a, ha⟩ ⟨σ b, hb⟩) :
+    (h : Sym2.map σ '' ω ∈ localConn T (σ a) (σ b)) :
     ω ∈ localConn S a b := by
   obtain ⟨ha, hb, r⟩ := h
   let ψ : (openGraph (Sym2.map σ '' ω)).induce T →g (openGraph ω).induce S :=
