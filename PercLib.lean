@@ -34,6 +34,7 @@ public import PercLib.Analysis.RegularVariation.PotterODE
 public import PercLib.Analysis.RegularVariation.UniformConvergence
 public import PercLib.Analysis.RiccatiBootstrap
 public import PercLib.Analysis.RiccatiComparison
+public import PercLib.Analysis.SignedDrivenODE
 public import PercLib.Analysis.Tags.CriticalExponents
 public import PercLib.Analysis.Tags.IntegratedSusceptibility
 public import PercLib.Analysis.Tags.MarginalODE
