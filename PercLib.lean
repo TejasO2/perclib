@@ -264,6 +264,7 @@ public import PercLib.Probability.Concentration
 public import PercLib.Probability.Coordinate
 public import PercLib.Probability.CountableBK
 public import PercLib.Probability.Coupling.Monotone
+public import PercLib.Probability.CouplingRatio
 public import PercLib.Probability.CovarianceRusso
 public import PercLib.Probability.Cylinder
 public import PercLib.Probability.CylinderDisjointOccurrence
@@ -313,6 +314,7 @@ public import PercLib.Probability.SizeBiasLimits
 public import PercLib.Probability.SplitCoordinate
 public import PercLib.Probability.Superposition
 public import PercLib.Probability.Tags.Correlation
+public import PercLib.Probability.Tags.CouplingRatio
 public import PercLib.Probability.Tags.DisjointOccurrence
 public import PercLib.Probability.Tags.Ergodicity
 public import PercLib.Probability.Tags.ExponentialMoments
