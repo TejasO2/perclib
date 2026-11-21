@@ -21,8 +21,8 @@ public import Mathlib.MeasureTheory.Integral.Lebesgue.Countable
 /-!
 # Truncated first moments and size-biased laws
 
-Truncated means of a nonnegative random variable from its first two moments, the size-biased law as
-a `withDensity` measure, and its instance for the cluster volume.
+Truncated means of a nonnegative random variable from its first two moments, the size-biased law
+`sizeBiased` (a `withDensity` measure), and its instance for the cluster volume.
 
 ## Main results
 
