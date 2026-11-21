@@ -40,6 +40,7 @@ public import PercLib.Analysis.Tags.MesoscopicTailTransfer
 public import PercLib.Analysis.Tags.SpatialCutoffMoments
 public import PercLib.Analysis.Tauberian.Laplace
 public import PercLib.Analysis.Tauberian.Converse
+public import PercLib.Analysis.Tauberian.Endpoints
 public import PercLib.Analysis.VolumeTail.ChiSquareConstants
 public import PercLib.Analysis.VolumeTail.SizeBiasMGF
 public import PercLib.Analysis.VolumeTail.UpToConstants
