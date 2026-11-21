@@ -11,6 +11,7 @@ module
 public import Mathlib.Analysis.SpecialFunctions.Exp
 public import Mathlib.Topology.Algebra.InfiniteSum.Order
 public import Mathlib.Topology.Instances.ENNReal.Lemmas
+public import PercLib.Percolation.Bond.Embedding
 public import PercLib.Percolation.Bond.Intensity
 public import PercLib.Percolation.Bond.Susceptibility
 public import PercLib.Probability.Coupling.Monotone
@@ -25,7 +26,8 @@ For `q_β = intensityProfile J β`:
   intensities of `c • J` are those of `J` divided by `c` when `c > 0`, and are `⊤` when
   `c = 0`;
 * **comparison**: `J ≤ J'` gives `q_β ≤ q'_β`, hence larger `τ`, `χ`, `θ` and smaller
-  critical intensities;
+  critical intensities; domination off the diagonal suffices (`…_of_le_offDiagonal`), since
+  loops do not change the open graph;
 * **large intensity**: each coordinate increases continuously to `1` when `J e > 0`
   (strictly) and is `0` when `J e = 0`; if `x` and `y` are joined in the support graph of
   `J`, then `τ(x, y) → 1` as `β → ∞`.
@@ -170,6 +172,85 @@ theorem globalCriticalIntensity_anti [Countable V] {J J' : Sym2 V → ℝ≥0} (
   rintro _ ⟨β, rfl, hβ⟩
   exact ⟨β, rfl, lt_of_lt_of_le hβ (law_exists_cluster_infinite_le_of_le h β)⟩
 
+/-! ### Comparison off the diagonal
+
+Loops never change the open graph, so domination is needed only on non-diagonal pairs; the
+value of either profile or kernel on the diagonal is irrelevant. -/
+
+/-- **Some infinite cluster, off-diagonal domination.** If `q e ≤ q' e` for every
+non-diagonal pair `e`, some cluster is infinite with larger probability under `q'`. -/
+theorem law_exists_cluster_infinite_le_of_offDiagonal [Countable V]
+    {q q' : Sym2 V → unitInterval} (h : ∀ e : Sym2 V, ¬ e.IsDiag → q e ≤ q' e) :
+    law q {ω | ∃ x, (cluster ω x).Infinite} ≤ law q' {ω | ∃ x, (cluster ω x).Infinite} := by
+  classical
+  have hmeas : MeasurableSet {ω : Config V | ∃ x, (cluster ω x).Infinite} := by
+    rw [ofPred_exists]
+    exact MeasurableSet.iUnion fun x => measurableSet_cluster_infinite x
+  rw [law_event_eq_of_offDiagonal q (fun e => if e.IsDiag then 0 else q e)
+    (fun e hd => by simp [hd]) hmeas fun ω ω' hωω' => by
+      simp only [mem_ofPred_eq, cluster, ← openGraph_sdiff_diagSet ω, hωω',
+        openGraph_sdiff_diagSet]]
+  refine prodBernoulli_mono_event _ _ (fun e => ?_) hmeas ?_
+  · by_cases hd : e.IsDiag
+    · simp only [hd, ite_true]
+      exact bot_le
+    · simp only [hd, ite_false]
+      exact h e hd
+  · rintro ω ω' hωω' ⟨x, hx⟩
+    exact ⟨x, isUpperSet_cluster_infinite x hωω' hx⟩
+
+/-- A larger kernel value on one pair gives a larger open probability on that pair. -/
+theorem intensityProfile_apply_le_of_le {J J' : Sym2 V → ℝ≥0} {e : Sym2 V} (h : J e ≤ J' e)
+    (β : ℝ≥0) : intensityProfile J β e ≤ intensityProfile J' β e :=
+  intensityProfile_le_of_le (J := fun _ => J e) (J' := fun _ => J' e) (fun _ => h) β e
+
+/-- A kernel larger off the diagonal connects with larger probability. -/
+theorem tau_le_of_le_offDiagonal [Countable V] {J J' : Sym2 V → ℝ≥0}
+    (h : ∀ e : Sym2 V, ¬ e.IsDiag → J e ≤ J' e) (β : ℝ≥0) (x y : V) :
+    tau (intensityProfile J β) x y ≤ tau (intensityProfile J' β) x y :=
+  tau_le_of_embedding (Function.Embedding.refl V)
+    (fun e he => by simpa using intensityProfile_apply_le_of_le (h e he) β) x y
+
+/-- A kernel larger off the diagonal percolates from `x` with larger probability. -/
+theorem law_cluster_infinite_le_of_le_offDiagonal [Countable V] {J J' : Sym2 V → ℝ≥0}
+    (h : ∀ e : Sym2 V, ¬ e.IsDiag → J e ≤ J' e) (β : ℝ≥0) (x : V) :
+    law (intensityProfile J β) {ω | (cluster ω x).Infinite} ≤
+      law (intensityProfile J' β) {ω | (cluster ω x).Infinite} :=
+  law_cluster_infinite_le_of_embedding (Function.Embedding.refl V)
+    (fun e he => by simpa using intensityProfile_apply_le_of_le (h e he) β) x
+
+/-- A kernel larger off the diagonal has a larger probability that some cluster is
+infinite. -/
+theorem law_exists_cluster_infinite_le_of_le_offDiagonal [Countable V]
+    {J J' : Sym2 V → ℝ≥0} (h : ∀ e : Sym2 V, ¬ e.IsDiag → J e ≤ J' e) (β : ℝ≥0) :
+    law (intensityProfile J β) {ω | ∃ x, (cluster ω x).Infinite} ≤
+      law (intensityProfile J' β) {ω | ∃ x, (cluster ω x).Infinite} :=
+  law_exists_cluster_infinite_le_of_offDiagonal fun e he =>
+    intensityProfile_apply_le_of_le (h e he) β
+
+/-- A kernel larger off the diagonal has a larger susceptibility, finite or not. -/
+theorem chi_le_of_le_offDiagonal [Countable V] {J J' : Sym2 V → ℝ≥0}
+    (h : ∀ e : Sym2 V, ¬ e.IsDiag → J e ≤ J' e) (β : ℝ≥0) (x : V) :
+    chi (intensityProfile J β) x ≤ chi (intensityProfile J' β) x :=
+  chi_le_of_embedding (Function.Embedding.refl V)
+    (fun e he => by simpa using intensityProfile_apply_le_of_le (h e he) β) x
+
+/-- **A kernel larger off the diagonal has a smaller root critical intensity.** -/
+theorem rootCriticalIntensity_le_of_le_offDiagonal [Countable V] {J J' : Sym2 V → ℝ≥0}
+    (h : ∀ e : Sym2 V, ¬ e.IsDiag → J e ≤ J' e) (x : V) :
+    rootCriticalIntensity J' x ≤ rootCriticalIntensity J x := by
+  refine sInf_le_sInf ?_
+  rintro _ ⟨β, rfl, hβ⟩
+  exact ⟨β, rfl, lt_of_lt_of_le hβ (law_cluster_infinite_le_of_le_offDiagonal h β x)⟩
+
+/-- **A kernel larger off the diagonal has a smaller global critical intensity.** -/
+theorem globalCriticalIntensity_le_of_le_offDiagonal [Countable V] {J J' : Sym2 V → ℝ≥0}
+    (h : ∀ e : Sym2 V, ¬ e.IsDiag → J e ≤ J' e) :
+    globalCriticalIntensity J' ≤ globalCriticalIntensity J := by
+  refine sInf_le_sInf ?_
+  rintro _ ⟨β, rfl, hβ⟩
+  exact ⟨β, rfl, lt_of_lt_of_le hβ (law_exists_cluster_infinite_le_of_le_offDiagonal h β)⟩
+
 /-! ### One coordinate as a function of the intensity -/
 
 /-- The open probability of a pair is continuous in the intensity. -/
@@ -270,5 +351,12 @@ example : rootCriticalIntensity ((2 : ℝ≥0) • fun _ : Sym2 ℕ => (1 : ℝ�
     globalCriticalIntensity ((0 : ℝ≥0) • fun _ : Sym2 ℕ => (1 : ℝ≥0)) = ⊤ :=
   ⟨by simpa using rootCriticalIntensity_smul (fun _ : Sym2 ℕ => (1 : ℝ≥0)) (c := 2) (by norm_num) 0,
     globalCriticalIntensity_zero_smul _⟩
+
+/-- Off-diagonal comparison ignores the diagonal: a kernel carried by loops alone is
+compared with the zero kernel. -/
+example (β : ℝ≥0) (x : ℕ) :
+    chi (intensityProfile (fun e : Sym2 ℕ => if e.IsDiag then 1 else 0) β) x ≤
+      chi (intensityProfile (fun _ : Sym2 ℕ => 0) β) x :=
+  chi_le_of_le_offDiagonal (fun e he => by simp [he]) β x
 
 end PercLib.Percolation.Bond
