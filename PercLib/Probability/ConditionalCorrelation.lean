@@ -14,6 +14,7 @@ module
 public import PercLib.Probability.HigherCorrelation
 public import Mathlib.Probability.Moments.Covariance
 public import Mathlib.MeasureTheory.Function.ConditionalExpectation.Real
+public import Mathlib.Probability.Distributions.Uniform
 
 /-!
 # Conditioning a three-function correlation
@@ -26,6 +27,13 @@ version of the expression defining `E_3`. Then
 ## Main results
 
 * `PercLib.higherCorrelation_fin_three_eq_condExp`: the conditioning identity.
+* `PercLib.condExp_comap_snd_fairBits`: conditional expectations given the second of two
+  independent fair bits.
+* `PercLib.covariance_sum_fairBits_eq`: on two independent fair bits the covariance sum
+  of the identity is `-1/16` for the nonnegative increasing functions `X ∨ Z, X ∨ Z, Z`,
+  conditioning on `Z`.
+* `PercLib.exists_covariance_sum_neg_fairBits`: hence the covariance sum can be negative for
+  nonnegative increasing functions of independent fair bits.
 -/
 
 @[expose] public section
@@ -164,5 +172,106 @@ theorem higherCorrelation_fin_three_eq_condExp [IsProbabilityMeasure μ] (hm : m
     integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ by simp only; ring)
   rw [e1, e2]
   ring
+
+/-! ### Two independent fair bits -/
+
+private theorem isProbabilityMeasure_uniformOfFinset_univ :
+    IsProbabilityMeasure (Measure.uniformOfFinset (univ : Finset (Bool × Bool))) :=
+  ⟨by simp [Measure.uniformOfFinset_apply, ENNReal.div_self]⟩
+
+/-- Under the uniform law on `Bool × Bool` (two independent fair bits), the integral is the
+average of the four values. -/
+theorem integral_uniformOfFintype_bool_prod (F : Bool × Bool → ℝ) :
+    ∫ ω, F ω ∂Measure.uniformOfFinset (univ : Finset (Bool × Bool)) =
+      (F (false, false) + F (false, true) + F (true, false) + F (true, true)) / 4 := by
+  have : IsProbabilityMeasure (Measure.uniformOfFinset (univ : Finset (Bool × Bool))) :=
+    isProbabilityMeasure_uniformOfFinset_univ
+  rw [integral_fintype Integrable.of_finite]
+  simp [measureReal_def, Fintype.sum_prod_type]
+  ring
+
+/-- Under two independent fair bits, the conditional expectation given the second bit averages
+over the first. -/
+theorem condExp_comap_snd_fairBits (F : Bool × Bool → ℝ) :
+    condExp (MeasurableSpace.comap Prod.snd ⊤)
+        (Measure.uniformOfFinset (univ : Finset (Bool × Bool))) F =
+      fun ω ↦ (F (false, ω.2) + F (true, ω.2)) / 2 := by
+  set μ := Measure.uniformOfFinset (univ : Finset (Bool × Bool))
+  have : IsProbabilityMeasure μ := isProbabilityMeasure_uniformOfFinset_univ
+  have hm : MeasurableSpace.comap Prod.snd ⊤ ≤ (inferInstance : MeasurableSpace (Bool × Bool)) :=
+    measurable_snd.comap_le.trans (by rfl)
+  set G : Bool × Bool → ℝ := fun ω ↦ (F (false, ω.2) + F (true, ω.2)) / 2
+  have hae : G =ᵐ[μ] μ[F | MeasurableSpace.comap Prod.snd ⊤] := by
+    refine ae_eq_condExp_of_forall_setIntegral_eq hm Integrable.of_finite
+      (fun _ _ _ ↦ Integrable.of_finite.integrableOn) ?_ ?_
+    · rintro s ⟨B, -, rfl⟩ -
+      rw [← integral_indicator (measurable_snd ((Set.to_countable B).measurableSet)),
+        ← integral_indicator (measurable_snd ((Set.to_countable B).measurableSet)),
+        integral_uniformOfFintype_bool_prod, integral_uniformOfFintype_bool_prod]
+      by_cases h1 : true ∈ B <;> by_cases h0 : false ∈ B
+      all_goals simp [h1, h0, G]
+      all_goals ring
+    · refine Measurable.aestronglyMeasurable ?_
+      exact (measurable_of_countable (fun b : Bool ↦ (F (false, b) + F (true, b)) / 2)).comp
+        (Measurable.of_comap_le le_rfl)
+  funext ω
+  by_contra hω
+  have h0 : μ {ω' | G ω' ≠ μ[F | MeasurableSpace.comap Prod.snd ⊤] ω'} = 0 := ae_iff.1 hae
+  have hpos : μ {ω} ≠ 0 := by
+    simp [μ]
+  exact hpos (measure_mono_null (Set.singleton_subset_iff.2 (Ne.symm hω)) h0)
+
+/-- **The covariance sum can be negative.** For two independent fair bits `X, Z` (the uniform
+law on `Bool × Bool`), conditioning on `Z`, the nonnegative increasing functions
+`f 0 = f 1 = X ∨ Z` and `f 2 = Z` give covariance sum `-1/16`. -/
+theorem covariance_sum_fairBits_eq :
+    let μ := Measure.uniformOfFinset (univ : Finset (Bool × Bool))
+    let m := MeasurableSpace.comap (Prod.snd : Bool × Bool → Bool) ⊤
+    let f : Fin 3 → Bool × Bool → ℝ :=
+      ![fun ω ↦ if ω.1 || ω.2 then 1 else 0, fun ω ↦ if ω.1 || ω.2 then 1 else 0,
+        fun ω ↦ if ω.2 then 1 else 0]
+    cov[μ[f 0 * f 1 | m] - μ[f 0 | m] * μ[f 1 | m], μ[f 2 | m]; μ] +
+      cov[μ[f 0 * f 2 | m] - μ[f 0 | m] * μ[f 2 | m], μ[f 1 | m]; μ] +
+      cov[μ[f 1 * f 2 | m] - μ[f 1 | m] * μ[f 2 | m], μ[f 0 | m]; μ] = -1 / 16 := by
+  intro μ m f
+  simp only [μ, m, condExp_comap_snd_fairBits, covariance, integral_uniformOfFintype_bool_prod]
+  simp [f]
+  norm_num
+
+/-- **The covariance sum can be negative for nonnegative increasing functions of independent
+fair bits.** Under the uniform law on `Bool × Bool` and conditioning on the second bit, there
+are nonnegative coordinatewise increasing `f 0, f 1, f 2` whose covariance sum in
+`higherCorrelation_fin_three_eq_condExp` is negative. -/
+theorem exists_covariance_sum_neg_fairBits :
+    ∃ f : Fin 3 → Bool × Bool → ℝ, (∀ i, 0 ≤ f i) ∧ (∀ i, Monotone (f i)) ∧
+      cov[condExp (MeasurableSpace.comap Prod.snd ⊤) (Measure.uniformOfFinset univ) (f 0 * f 1) -
+            condExp (MeasurableSpace.comap Prod.snd ⊤) (Measure.uniformOfFinset univ) (f 0) *
+              condExp (MeasurableSpace.comap Prod.snd ⊤) (Measure.uniformOfFinset univ) (f 1),
+          condExp (MeasurableSpace.comap Prod.snd ⊤) (Measure.uniformOfFinset univ) (f 2);
+          Measure.uniformOfFinset univ] +
+        cov[condExp (MeasurableSpace.comap Prod.snd ⊤) (Measure.uniformOfFinset univ) (f 0 * f 2) -
+            condExp (MeasurableSpace.comap Prod.snd ⊤) (Measure.uniformOfFinset univ) (f 0) *
+              condExp (MeasurableSpace.comap Prod.snd ⊤) (Measure.uniformOfFinset univ) (f 2),
+          condExp (MeasurableSpace.comap Prod.snd ⊤) (Measure.uniformOfFinset univ) (f 1);
+          Measure.uniformOfFinset univ] +
+        cov[condExp (MeasurableSpace.comap Prod.snd ⊤) (Measure.uniformOfFinset univ) (f 1 * f 2) -
+            condExp (MeasurableSpace.comap Prod.snd ⊤) (Measure.uniformOfFinset univ) (f 1) *
+              condExp (MeasurableSpace.comap Prod.snd ⊤) (Measure.uniformOfFinset univ) (f 2),
+          condExp (MeasurableSpace.comap Prod.snd ⊤) (Measure.uniformOfFinset univ) (f 0);
+          Measure.uniformOfFinset univ] < 0 := by
+  refine ⟨![fun ω ↦ if ω.1 || ω.2 then 1 else 0, fun ω ↦ if ω.1 || ω.2 then 1 else 0,
+    fun ω ↦ if ω.2 then 1 else 0], ?_, ?_, ?_⟩
+  · intro i ω
+    obtain ⟨a, b⟩ := ω
+    fin_cases i <;> cases a <;> cases b <;> simp
+  · intro i
+    rintro ⟨a1, a2⟩ ⟨b1, b2⟩ ⟨h1, h2⟩
+    fin_cases i <;> cases a1 <;> cases a2 <;> cases b1 <;> cases b2
+    all_goals first
+      | exact absurd h1 (by decide)
+      | exact absurd h2 (by decide)
+      | simp
+  · rw [covariance_sum_fairBits_eq]
+    norm_num
 
 end PercLib
