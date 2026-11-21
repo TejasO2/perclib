@@ -22,10 +22,10 @@ root is joined to some word of length `n`.
 
 ## Main results
 
-* `kTree_depth_events_union_bound_and_limit`: on a tree configuration a word is joined to the
-  root exactly when its edges to the root are open, and the root cluster is infinite exactly
-  when it reaches every depth; the depth events are measurable; `r 0 = 1`, `r n ≤ (k p)ⁿ`,
-  `r n → P(|K(o)| = ∞)`, and `k p < 1` gives an almost surely finite root cluster.
+* `kTree_depth_events_union_bound_and_limit`: when the open graph lies in the tree, a word is
+  joined to the root exactly when its edges to the root are open, and the root cluster is
+  infinite exactly when it reaches every depth; the depth events are measurable; `r 0 = 1`,
+  `r n ≤ (k p)ⁿ`, `r n → P(|K(o)| = ∞)`, and `k p < 1` gives an almost surely finite root cluster.
 * `kTree_depth_recursion_and_percolation_criterion`: `r (n + 1) = 1 - (1 - p r n)^k` for every
   `k`; for `k ≥ 1`, `P(|K(o)| = ∞) > 0` iff `k p > 1` or `p = 1`; for `k ≥ 2` and `k p = 1` the
   root cluster is almost surely finite; at `p = 1` every tree edge is almost surely open; for
@@ -41,19 +41,19 @@ open scoped ENNReal
 
 namespace PercLib.Models
 
-/-- On the rooted `k`-ary tree: for a configuration inside the tree, a word is joined to the
-root iff all its edges to the root are open, and the root cluster is infinite iff it reaches
-every depth; the depth events are measurable; and with open probability `p` on tree edges, `0`
-on other pairs and any diagonal, `r 0 = 1`, `r n ≤ (k p)ⁿ`, `r n → P(|K(o)| = ∞)`, and
-`k p < 1` implies `P(|K(o)| = ∞) = 0`. -/
+/-- On the rooted `k`-ary tree: for a configuration whose open graph lies in the tree, a word
+is joined to the root iff all its edges to the root are open, and the root cluster is infinite
+iff it reaches every depth; the depth events are measurable; and with open probability `p` on
+tree edges, `0` on other pairs and any diagonal, `r 0 = 1`, `r n ≤ (k p)ⁿ`,
+`r n → P(|K(o)| = ∞)`, and `k p < 1` implies `P(|K(o)| = ∞) = 0`. -/
 @[tag "GGH2"]
 theorem kTree_depth_events_union_bound_and_limit (k : ℕ) :
     (∀ ω : Config (List (Fin k)),
-      ω ⊆ (SimpleGraph.fromRel fun u w : List (Fin k) => ∃ b, w = b :: u).edgeSet →
+      openGraph ω ≤ (SimpleGraph.fromRel fun u w : List (Fin k) => ∃ b, w = b :: u) →
       ∀ w : List (Fin k),
         (openGraph ω).Reachable [] w ↔ ∀ m < w.length, s(w.drop (m + 1), w.drop m) ∈ ω) ∧
     (∀ ω : Config (List (Fin k)),
-      ω ⊆ (SimpleGraph.fromRel fun u w : List (Fin k) => ∃ b, w = b :: u).edgeSet →
+      openGraph ω ≤ (SimpleGraph.fromRel fun u w : List (Fin k) => ∃ b, w = b :: u) →
       ((cluster ω []).Infinite ↔
         ∀ n, ∃ w : List (Fin k), w.length = n ∧ (openGraph ω).Reachable [] w)) ∧
     (∀ n : ℕ, MeasurableSet {ω : Config (List (Fin k)) |
@@ -71,8 +71,8 @@ theorem kTree_depth_events_union_bound_and_limit (k : ℕ) :
         atTop (𝓝 (law q {ω | (cluster ω []).Infinite})) ∧
       ((k : ℝ≥0∞) * (unitInterval.toNNReal p : ℝ≥0∞) < 1 →
         law q {ω | (cluster ω []).Infinite} = 0) :=
-  ⟨fun _ hω => reachable_nil_iff_of_subset hω,
-    fun _ hω => cluster_nil_infinite_iff_forall_reach_depth hω,
+  ⟨fun _ hω => reachable_nil_iff_of_openGraph_le hω,
+    fun _ hω => cluster_nil_infinite_iff_forall_reach_depth_of_openGraph_le hω,
     measurableSet_reach_depth,
     fun p q hq => ⟨law_reach_depth_zero q, law_reach_depth_le p q hq,
       tendsto_law_reach_depth p q hq, law_cluster_nil_infinite_eq_zero p q hq⟩⟩

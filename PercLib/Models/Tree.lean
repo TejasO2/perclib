@@ -36,6 +36,9 @@ root is `s(w.drop (m + 1), w.drop m)`.
   depth `0` almost surely (`law_reach_depth_zero`).
 * For `k = 0` the root cluster is `{[]}` (`cluster_nil_eq_singleton_of_eq_zero`); at `p = 1`
   every tree edge is almost surely open (`ae_kTree_edgeSet_subset_of_eq_one`).
+* The two deterministic statements also hold when only the open graph lies in the tree,
+  so open diagonal pairs are allowed (`reachable_nil_iff_of_openGraph_le`,
+  `cluster_nil_infinite_iff_forall_reach_depth_of_openGraph_le`).
 
 This file adds no definition.
 -/
@@ -322,6 +325,40 @@ theorem ae_kTree_edgeSet_subset_of_eq_one (p : unitInterval)
   ae_edgeSet_subset_of_forall_eq_one _ q fun e he => by
     rw [hq e (SimpleGraph.not_isDiag_of_mem_edgeSet _ he)]
     simp [he, hp]
+
+/-! ### Configurations whose open graph lies in the tree -/
+
+/-- **Reaching a word when the open graph lies in the tree.** Open diagonal pairs are
+allowed: a word is joined to the root iff every edge on its way to the root is open. -/
+theorem reachable_nil_iff_of_openGraph_le {ω : Config (List (Fin k))}
+    (hω : openGraph ω ≤ SimpleGraph.fromRel fun u w : List (Fin k) => ∃ b, w = b :: u)
+    (w : List (Fin k)) :
+    (openGraph ω).Reachable [] w ↔ ∀ m < w.length, s(w.drop (m + 1), w.drop m) ∈ ω := by
+  have hs : ω \ Sym2.diagSet ⊆
+      (SimpleGraph.fromRel fun u w : List (Fin k) => ∃ b, w = b :: u).edgeSet :=
+    by simpa [openGraph] using hω
+  rw [← openGraph_sdiff_diagSet ω, reachable_nil_iff_of_subset hs]
+  refine forall₂_congr fun m hm => ?_
+  have hnd : ¬ (s(w.drop (m + 1), w.drop m)).IsDiag := by
+    intro hd
+    have := congrArg List.length (Sym2.mk_isDiag_iff.mp hd)
+    simp at this
+    omega
+  simp [Sym2.mem_diagSet, hnd]
+
+/-- **The root cluster is infinite exactly when it reaches every depth**, for a configuration
+whose open graph lies in the tree (open diagonal pairs allowed). -/
+theorem cluster_nil_infinite_iff_forall_reach_depth_of_openGraph_le
+    {ω : Config (List (Fin k))}
+    (hω : openGraph ω ≤ SimpleGraph.fromRel fun u w : List (Fin k) => ∃ b, w = b :: u) :
+    (cluster ω []).Infinite ↔
+      ∀ n, ∃ w : List (Fin k), w.length = n ∧ (openGraph ω).Reachable [] w := by
+  have hs : ω \ Sym2.diagSet ⊆
+      (SimpleGraph.fromRel fun u w : List (Fin k) => ∃ b, w = b :: u).edgeSet :=
+    by simpa [openGraph] using hω
+  have hc : cluster ω [] = cluster (ω \ Sym2.diagSet) [] := by
+    simp only [cluster, openGraph_sdiff_diagSet]
+  rw [hc, cluster_nil_infinite_iff_forall_reach_depth hs, openGraph_sdiff_diagSet]
 
 /-! ### Non-vacuity -/
 
