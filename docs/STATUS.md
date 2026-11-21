@@ -1,92 +1,93 @@
 # Status
 
-Handoff for the coordinator (LEAD role of D-34). Updated 21 November 2026, ~21:55 UTC, end of coordinator round 10
-(new series). Cut to the current state under ruling 20e; the full round-7 file and older history are in
-[STATUS_LOG.md](STATUS_LOG.md) (do not read by default). A coordinator with no memory resumes from this file,
-[COORDINATOR.md](COORDINATOR.md) and `/home/user/reports/ACTIVE.md` (**new: read it instead of RULINGS.md**, ruling 20e;
-it distils rulings 1-20; new rulings are appended there). Round cap: 60 tool calls (ruling 20e).
+Handoff for the coordinator (LEAD role of D-34). Updated 21 November 2026, ~22:20 UTC, end of coordinator round 11
+(new series). Cut to the current state under ruling 20e; older history is in [STATUS_LOG.md](STATUS_LOG.md) (do not read
+by default; round 10's full STATUS is in git history at `e758be6`). A coordinator with no memory resumes from this file,
+[COORDINATOR.md](COORDINATOR.md) and `/home/user/reports/ACTIVE.md` (read it instead of RULINGS.md, ruling 20e). Round
+cap: 60 tool calls.
 
 ## Tip and gate
 
-- Branch `claude/zen-lovelace-rvlcw2` (both repositories). **Last gated commit `ba7dc00`** (pushed; this STATUS commit
-  and `docs/FRONTIER.md` on top). **Next gate: `scripts/gate.sh ba7dc00`.**
-- **Round 10 batch** (one batch, merged on `26a512e`): `tooling-integrate-scripts` (scripts + tests, no `.github/`),
-  `docs-port-headers` (comment-only headers of 7 ported files + `third_party/critical-lrp/` licences),
-  `dedup-exponential-moments` (proof-only move into `Probability/ExponentialMoments.lean`), `hier-pointwise-ingredients`
-  (proof-only, new `Models/HierarchicalPointwise.lean`), `fix-tasks-restock` (contains `tasks-restock`; audit
-  required changes 1-3 checked against the report), `wiki-citation-links`, `wiki-revise-proof-sections-a-r3` (audit r3
-  APPROVE, critic r3 PASS on both articles: batch a of the critic is closed). `scripts/gate.sh 8076788` (log
-  `/home/user/reports/gate-round10.log`): build OK (3,970 jobs), script tests OK, "D-35 checks passed", one INTERFACE
-  notice = comment-only header change in `Analysis/RegularVariation/Defs.lean` (docs-port-headers; expected), "== gate
-  passed on ba7dc00". Import closure: all 377 modules imported. Wiki `npm test` 116/116 on the merged tree.
+- Branch `claude/zen-lovelace-rvlcw2` (both repositories). **Last gated commit `ef5afb7`** (pushed; this STATUS commit,
+  `docs/FRONTIER.md` and the `tasks/` moves on top). **Next batch: `scripts/integrate.sh ef5afb7 <branches>`.**
+- **Round 11 batch** (one batch, `scripts/integrate.sh ba7dc00 ...`, log `/home/user/reports/integrate-round11.log`, gate log
+  `.lake/integrate/gate-20261121-215345-1.log`): proof-only `hier-dedup-r11-sibling`, `move-small-intensity-helpers`,
+  `cleanup-cluster-law`; interface on APPROVE: `connection-kernel-tags` (70KD, UZ7J), `monotone-coupling-tag` (2ML7)
+  (`audit-tags-kernel-coupling`, optional cosmetic edits not applied), `p-a-V4QQ` as `work/p-a-V4QQ-ff30` = `68c66a6` +
+  `c66ddce` (the audit's FF30 exact edits applied verbatim with `scripts/apply_exact_edits.py`; V4QQ, YWTU, 2XJX APPROVE,
+  FF30 APPROVE WITH CHANGES). 3 missing imports added by the script. Result: build OK (3,976 jobs), script tests OK,
+  "D-35 checks passed", one INTERFACE notice (tag tokens in `Models/HierarchicalBallSusceptibility.lean`, = audited
+  V4QQ/YWTU), "== gate passed on ef5afb7". Pushed at once. Merged worktrees removed (`p-a-V4QQ` kept: outside launcher).
 - **Kernel replay:** last passed at `a747905`; next after the tenth batch since then (about round 16).
-- **GitHub (21:45):** `main` = `ae4eb08` (unchanged); outside heads unchanged (PR #2 `630d985` reviewed,
-  `work/hierarchical-two-point-paper` `be2b9df` reviewed). Open: PR #2, issue #1. **Actions:** CI on `8991deb`
-  cancelled (superseded by the `26a512e` push, concurrency group); CI on `26a512e` in progress at 21:45; CI on `ba7dc00`
-  started by this push — next coordinator records both. Automerge on `main`: skipped (no PR). No GitHub write tool
-  (no MCP GitHub server in this session).
+- **GitHub (22:05):** `main` = `ae4eb08` (unchanged, nothing to merge in). Outside heads: PR #2 `630d985` and
+  `work/hierarchical-two-point-paper` `be2b9df` unchanged (reviewed). New refs `pull/3`, `pull/4`: Tom's own PRs from
+  `claude/zen-lovelace-rvlcw2` to `main`, both **closed unmerged** (17:03, 17:22); no outside code, no review needed.
+  **Actions:** CI runs on the integration branch keep being cancelled by the next push (concurrency group, by design);
+  last completed CI: `fb3b525` success (18:21); CI on `ef5afb7` in progress at 22:05 (this STATUS push will cancel it).
+  Automerge: skipped (no PR). No GitHub write tool in this session.
 
 Commands (`/home/user/perclib`, `export PATH=$HOME/.elan/bin:$PATH`):
 
 ```sh
-setsid nohup scripts/gate.sh <last-gated> > /home/user/reports/gate-roundN.log 2>&1 < /dev/null &
-until ! pgrep -f scripts/gate.sh >/dev/null; do sleep 20; done; tail -6 /home/user/reports/gate-roundN.log
+export INTEGRATE_TRAILER="Co-Authored-By: ...
+Claude-Session: ..."; export MSG_1="Merge work/<a> (...)" MSG_2=...
+setsid nohup scripts/integrate.sh <last-gated> work/<a> work/<b> ... > /home/user/reports/integrate-roundN.log 2>&1 < /dev/null &
+timeout 590 bash -c 'until ! pgrep -f scripts/integrate.sh >/dev/null; do sleep 30; done'; tail -4 /home/user/reports/integrate-roundN.log
+python3 scripts/apply_exact_edits.py EDITS.json --repo <worktree>   # auditor's JSON, on a new branch work/<id>-fix from the audited sha
 python3 scripts/build_manifest.py .lake/manifest-raw.json --output /home/user/reports/manifest.json
 python3 scripts/frontier.py /home/user/reports/manifest.json --proof-uses wiki/records --commit <sha> --output docs/FRONTIER.md
 rm -f scripts/__pycache__/frontier.*.pyc
 cd wiki && ln -s /home/user/lrp/wiki/node_modules node_modules && npm test; rm node_modules; rm -rf dist
 ```
-`scripts/integrate.sh BASE BRANCH...` and `scripts/apply_exact_edits.py EDITS.json` are merged (round 10): use them for merges + gate and for auditors' exact replacements (usage in the script headers).
 
 ## Progress (D-35 measure)
 
-Manifest at `ba7dc00`: **309 proved, 1 statement-only, 1,093 unformalised, of 1,403** (unchanged: the round-10 batch
-was proof-only/tooling/docs, no new tags). Round 10: 0 assertions proved and merged, 0 tagged statements merged;
-two hierarchical proof-only packages and a dedup merged. `docs/FRONTIER.md` regenerated at `ba7dc00`.
-Agents started in round 10 (by claim, ruling 20g): prover 5 (hier-7ynx-pointwise, hier-dedup-r11-sibling,
-nm-window-correlation, nm-entropy-event, nm-truncated-maximal; plus nm-probability/nm-bond-core claimed earlier);
-audit 2 (audit-p-a-V4QQ, audit-tags-kernel-coupling); outside-launcher `tag-*` claims: NIAD, UDUU new.
+Manifest at `ef5afb7`: **316 proved, 1 statement-only, 1,086 unformalised, of 1,403** (+7: 70KD, UZ7J, 2ML7, V4QQ,
+YWTU, 2XJX, FF30; 7 tagged statements audited and merged). `docs/FRONTIER.md` regenerated at `ef5afb7` (276 ready).
+`tasks/`: `connection-kernel-tags`, `monotone-coupling-tag`, `hier-pointwise-ingredients`, `nm-small-intensity` moved
+claimed -> done; `scripts/check_tasks.py` passes.
+Agents started in round 11 (claims seen this round): prover 3 (frontier-fourth-moment, frontier-maximal-martingale,
+frontier-predictable-swap) plus finishes of 7 earlier claims; audit 3 (audit-nm-bond-core, audit-nm-probability,
+audit-p-b-6L9Z); outside launcher `tag-655W`, `tag-7YNX` new.
 
 ## Finished, not merged (next batch: integrate all of these first)
 
-Done markers that arrived during/after this round's gate (one batch per round):
-- Proof-only, merge on the gate: `work/hier-dedup-r11-sibling` (`f132021`; item 2 done in the fallback form, item 1 not
-  possible: import cycle), `work/move-small-intensity-helpers` (`f34212a`), `work/cleanup-cluster-law` (`3df9f0c`).
-  Check each diff adds no def/tag (`git diff ba7dc00...work/<id> | grep -E '^\+.*@\[tag|^\+(def|instance|structure) '`).
-- Interface, audit on file — read the verdicts, apply exact replacements with `scripts/apply_exact_edits.py`, merge on
-  APPROVE: `work/connection-kernel-tags` (`196518a`) + `work/monotone-coupling-tag` (`a469e44`) with
-  `/home/user/reports/audit-tags-kernel-coupling.md`; `work/p-a-V4QQ` (`68c66a6`, tags V4QQ, YWTU, 2XJX, FF30; add imports
-  `Models.HierarchicalBallSusceptibility`, `Models.HierarchicalRunawayInterval`, `Models.Tags.HierarchicalRunaway`) with
-  `/home/user/reports/audit-p-a-V4QQ.md`. On those merges move the matching `tasks/` twins to done.
-- Interface, audit queued: `work/nm-bond-core` (`13c31c3`, CKJQ) -> `006-audit-nm-bond-core`; `work/nm-probability`
-  (`bee1a2c`, KB49, W90W) -> `007-audit-nm-probability`; `work/p-b-6L9Z` (`5611839`: new hub definition `sizeBiased` =
-  6L9Z, tag IDIL, two new files under `Models/LongRange/` (not Defs.lean)) -> `008-audit-p-b-6L9Z`.
-- `tasks/`: STATUS r9 asked to "mirror the board" for the 15 new open tasks; `scripts/check_tasks.py` passes on the
-  merged tree; check `tasks/README.md` lists them.
+All arrived during this round, after the batch was gated (one batch per round):
+- **Interface, audit APPROVE on file — merge:** `work/nm-bond-core` (`13c31c3`, CKJQ; `/home/user/reports/audit-nm-bond-core.md`
+  "Verdict: APPROVE", JSON `[]`); `work/nm-probability` (`bee1a2c`, KB49, W90W; `audit-nm-probability.md` APPROVE — read
+  for any JSON); `work/p-b-6L9Z` (`5611839`, new hub def `sizeBiased` = 6L9Z + IDIL; `audit-p-b-6L9Z.md` APPROVE on the
+  definition and both tags; announce `sizeBiased` in `docs/INTERFACE_CHANGES.md` before merging if not already there).
+- **Interface, audit queued:** `frontier-riccati-linear-error` (`b54472e`, 19IN) -> `009-audit-frontier-riccati-linear-error`;
+  `salvage-directional-decay` (`2c6976b`, 23RT, I8WP) -> `010-audit-salvage-directional-decay`; `nm-window-correlation`
+  (`8ea85e5`, OB0A, UXBN; edits existing `Tightness/Hyperscaling.lean`) -> `011-audit-nm-window-correlation` (released
+  HOLD with amendment); `nm-entropy-event` (`69d57a3`, 58HC; edits `BernoulliDivergence.lean`) -> `012-audit-nm-entropy-event`;
+  `hier-7ynx-pointwise` (`9197e55`, 7YNX) + outside `p-a-S23T` (`44d8a15`, S23T, MS6M; edits existing
+  `HierarchicalTriangle.lean`, `MultiplicativeDecrement.lean`) -> `013-audit-hier-runaway-7ynx-s23t`;
+  `nm-cutoff-localization` (`3d53b14`, 32GP) -> `015-audit-nm-cutoff-localization`.
+- Several of these branches are 17-33 commits behind `ef5afb7`; `integrate.sh` skips a branch with a non-import conflict
+  (then queue a rebase fix brief).
 
-## In flight (claims without done at 21:51)
+## In flight (claims without done at 22:15)
 
-`hier-7ynx-pointwise` (174), `nm-entropy-event` (251), `nm-truncated-maximal` (252), `nm-window-correlation` (250), and
-outside-launcher claims `tag-2XJX, tag-6L9Z, tag-FF30, tag-IDIL, tag-MS6M, tag-NIAD, tag-S23T, tag-UDUU, tag-V4QQ,
-tag-YWTU` (worktrees `p-a-*`, `p-b-*`; their finished packages so far: `p-a-V4QQ`, `p-b-6L9Z`; `p-a-S23T` in progress).
-Treat their output as interface (tags): audit before merge. They work in `hierarchical-runaway`,
-`spatial-convolution-asymptotics`, `size-biased-laws`: keep our briefs out of those articles.
+`frontier-fourth-moment` (390), `frontier-maximal-martingale` (392), `frontier-predictable-swap` (391),
+`nm-truncated-maximal` (252), outside-launcher `tag-2XJX, 655W, 6L9Z, 7YNX, FF30, IDIL, MS6M, NIAD, S23T, UDUU, V4QQ,
+YWTU` (worktrees `p-a-*`, `p-b-*`). Treat outside output as interface: audit before merge. They work in
+`hierarchical-runaway`, `spatial-convolution-asymptotics`, `size-biased-laws`: keep our briefs out of those articles.
 
 ## Queue (`/home/user/reports/queue/`)
 
-Startable at 21:55 (no `HOLD-`, no claim): **audits** `006-audit-nm-bond-core`, `007-audit-nm-probability`,
-`008-audit-p-b-6L9Z`; **prover** `260-nm-cutoff-localization`, `370-salvage-directional-decay`,
-`389-frontier-riccati-linear-error`, `390-frontier-fourth-moment` (I2YU), `391-frontier-predictable-swap` (Q3MP),
-`392-frontier-maximal-martingale` (HXNR), `393-frontier-discrete-entropy` (JR0J), `394-frontier-killed-green` (331W),
-`395-frontier-chemical-moments` (SBMG), `396-frontier-consistent-geodesics` (BN7Z). Claims are fast (workers took 5
-briefs within minutes): if fewer than 8 remain, brief more frontier items nearest first (`docs/FRONTIER.md`; avoid
-the three outside-launcher articles above and the `tasks/open/` items). Every brief has owned new files (disjoint) and
-a tool-call budget. Held: `HOLD-audit-nm-{window-correlation,entropy-event,truncated-maximal}` (release on done, as
-round 10 did for bond-core/probability: amendment paragraph with sha, scope and `/home/user/perclib/wiki` source);
-ruling 18b: `HOLD-205`, `HOLD-210`, `HOLD-220`, `HOLD-230`, `HOLD-371`.
-Next to brief: after `hier-dedup-r11-sibling` merges, let `sum_shell_tau_ge`'s twin in `HierarchicalPointwise.lean`
-call the extracted public lemma (small proof-only); 7YNX audit when 174 reports; catalogue-gap scout and conversion of
-`hierarchical-two-point` to citation markup (`wiki-citation-links` merged; one wiki/tooling slot); long-range area row in
+Startable at 22:15 (no `HOLD-`, no claim): **audits** 009, 010, 011, 012, 013, 015 (above); **wiki** (the one lane-B
+wiki/tooling slot) `020-wiki-cite-hier-two-point` (citation markup only; merge on `npm test` + anchor script check, no
+agent audit); **prover** `176-hier-pointwise-sibling-dedup` (proof-only: drop the Pointwise copy of the lemma now in
+`HierarchicalSibling.lean`), `393-frontier-discrete-entropy` (JR0J), `394-frontier-killed-green` (331W),
+`395-frontier-chemical-moments` (SBMG), `396-frontier-consistent-geodesics` (BN7Z), new `397-frontier-ghost-derivative`
+(J2TE), `398-frontier-brw-first-moment` (94E7, may formalise CYYG), `399-frontier-finite-triangle` (R2Y7),
+`400-frontier-section-comparison` (9GXY), `401-frontier-dfs-pivot` (KRU2), `402-frontier-priority-exploration` (28UY,
+a definition: interface). 11 prover briefs startable. Held: `HOLD-audit-nm-truncated-maximal` (release when 252 is
+done, with an amendment paragraph: sha, scope, `/home/user/perclib/wiki` source, as round 11 did for 011/012); ruling
+18b: `HOLD-205`, `HOLD-210`, `HOLD-220`, `HOLD-230`, `HOLD-371`.
+Next to brief (frontier, nearest first, not in `tasks/open/`): `7IVI` (intrinsic-geometry), `ESZG` (multipoint-trees),
+`E9BP`, `1POM` (branching-random-walk), `7ZU5`, `AFJX` (adaptive-three-point); catalogue-gap scout; long-range area row in
 `tasks/README.md`.
 
 ## Migration windows
@@ -101,31 +102,34 @@ None open; all three D-35 migrations are done. Next interface changes: `scout-de
 
 ## For ARCHITECT
 
-- **Unknown `tag-*` claims** (now ten, incl. NIAD/UDUU): another launcher feeds workers with no brief in `queue/`; they
-  produced `p-a-V4QQ` (4 tags) and `p-b-6L9Z` (a new hub definition `sizeBiased`, 90 dependents, plus IDIL under
-  `Models/LongRange/`). D-34 escalation (widely used definition, ruling 23), not blocking: options (a) audit as usual
-  and merge on APPROVE [recommended; audit 008 queued and asked to check duplication and ruling 18]; (b) hold all
-  outside-launcher definitions until you confirm the launcher. Please tell the coordinator its brief source.
-- **One batch per round** remains the throughput limit: eight packages finished during this round's gate and wait a
-  round. Proposal unchanged: allow a second batch when the first passed and fewer than 40 calls were used.
+- **Unknown `tag-*` claims** (now twelve, incl. 655W, 7YNX): another launcher feeds workers with no brief in `queue/`.
+  Their `p-a-V4QQ` merged this round after a fresh audit (option (a) of round 10, applied); `p-b-6L9Z` (new hub
+  definition `sizeBiased`) has APPROVE and merges next round unless you object. D-34 question still open: please tell
+  the coordinator the launcher's brief source.
+- **One batch per round** remains the throughput limit: eleven packages finished during this round. Proposal: allow a
+  second batch when the first passed and fewer than 40 calls were used (round 11 used ~45, so it would not have applied).
+- **CI on the integration branch rarely completes** (newer pushes cancel it; last completed run 18:21). Options:
+  (a) leave it (gate + replay are the boundary) [recommended]; (b) have the coordinator push once per round only.
 - Older open items: STATUS_LOG.md "For ARCHITECT".
 
 ## For Tom
 
 - **Next pull request to `main` (ruling 13a):** https://github.com/tomhutchcroft/perclib/compare/main...claude/zen-lovelace-rvlcw2
-  — last commit that passed both gate and kernel replay: **`a747905`**; the tip `ba7dc00` passed the gate (replay
-  pending its schedule). `main` lacks everything after `ae4eb08`.
+  — last commit that passed both gate and kernel replay: **`a747905`**; the tip `ef5afb7` passed the gate (replay
+  pending its schedule). `main` lacks everything after `ae4eb08`. PRs #3 and #4 (same branch) were closed without merge:
+  if that was a decision against merging, please say so in RULINGS.md.
 - Long-range collaboration (ruling 18): `tasks/areas/long-range.md` and `docs/reports/long-range-concordance.md` are the
-  basis for the joint review; new port work stays paused until you report. `third_party/critical-lrp/` licence files
-  and provenance headers are now on the integration branch (please confirm the licence notices).
+  basis for the joint review; new port work stays paused until you report. Please confirm the licence notices in
+  `third_party/critical-lrp/`.
 - Issue #1 can be closed (fixed on `main`).
 - Open questions carried over unchanged: STATUS_LOG.md "For Tom".
 
 ## Lessons
 
-- Push immediately after a passed gate (done this round within one call of the pass).
-- Workers claim new briefs within minutes and finish small packages during the gate: write briefs before the gate
-  finishes, and expect a full "finished, not merged" list at the start of the next round.
-- Held audit briefs go stale (scope withdrawn, wiki moved to `/home/user/perclib/wiki`): release them with an amendment
-  paragraph rather than as written.
+- Apply an auditor's exact edits on a new branch `work/<id>-<fix>` from the audited sha (the author's worktree may still
+  be checked out by another launcher) and merge that branch instead of the original.
+- `integrate.sh` runs under `setsid`; the shell reports "Done" at once: wait on `pgrep -f scripts/integrate.sh`.
+- Workers finish packages within minutes: by the end of a round expect a full "finished, not merged" list; write audit
+  briefs for them in the same round so the next round can merge.
+- Push immediately after a passed gate. Release held audit briefs with an amendment paragraph rather than as written.
 - Older lessons: STATUS_LOG.md "Lessons".
