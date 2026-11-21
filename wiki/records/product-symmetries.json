@@ -187,6 +187,12 @@
         "RDX7"
       ],
       "reason": "A countable union excludes all cross bonds almost surely; closed-part identities and independence of the two restrictions give the component laws."
+    },
+    {
+      "order": 7,
+      "tag": "H48I",
+      "proof_uses": [],
+      "reason": "The proof uses coordinate marginals and countable unions of null events; it invokes no other wiki assertion."
     }
   ]
 }

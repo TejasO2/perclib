@@ -148,6 +148,12 @@
       "tag": "ZZ9Q",
       "proof_uses": [],
       "reason": "New consequence of the explicit formula: positive hypergeometric coefficients and their tilted mean prove strict increase and the endpoint equivalents."
+    },
+    {
+      "order": 7,
+      "tag": "83WA",
+      "proof_uses": [],
+      "reason": "A definition; it invokes no other wiki assertion."
     }
   ]
 }

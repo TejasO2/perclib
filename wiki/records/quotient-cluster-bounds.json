@@ -49,6 +49,20 @@
         "WRHL"
       ],
       "reason": "Critical torus upper scale from lattice tails and finite-vertex counting."
+    },
+    {
+      "order": 3,
+      "tag": "VUI1",
+      "proof_uses": [
+        "GSLG"
+      ],
+      "reason": "The proof explores the quotient cluster by lifting each queried edge to a fresh edge of G and uses deferred decisions under adaptive exploration (GSLG) to identify the product law on H."
+    },
+    {
+      "order": 4,
+      "tag": "JZ89",
+      "proof_uses": [],
+      "reason": "The proof uses Markov's inequality on the count of vertices in large components and a layer-cake integral; it invokes no other wiki assertion."
     }
   ]
 }
