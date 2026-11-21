@@ -120,8 +120,8 @@ Frontier (`docs/FRONTIER.md` regenerated at `caa28bc` by this STATUS commit): 30
 - **`work/tooling-d35-header-blocks`** (`c01bf41`): `audit-tooling-d35-header-blocks` APPROVE WITH CHANGE
   (changes 1-3 in `header_text`; change 1 closes a fail-open on valid Lean). Fix
   **`109-fix-tooling-d35-header-blocks`** queued, then `HOLD-audit-tooling-d35-header-blocks-r2`.
-- **Workflows and scanner:** `101-fix-scanner-r4` and `102-fix-workflows-r4` claimed 12:47; then release
-  `HOLD-audit-fix-workflows-r4` (both branches). Merge order on APPROVE: `work/fix-scanner-r4`, then
+- **Workflows and scanner:** `work/fix-scanner-r4` (`0707396` on merge `3c65334`) and `work/fix-workflows-r4`
+  (`0471b5e` on merge `1ab3c5c`) done 12:50/12:53; re-audit **`112-audit-fix-workflows-r4`** released 12:55. Merge order on APPROVE: `work/fix-scanner-r4`, then
   `work/fix-workflows-r4`, gate; the workflows must not reach `main` before AM4. Then `work/contrib-docs` and
   `work/task-board` (check against the tip), mirror the queue into `tasks/` (ruling 9b), open the
   pages-deploy brief (ruling 12).
@@ -136,8 +136,8 @@ Frontier (`docs/FRONTIER.md` regenerated at `caa28bc` by this STATUS commit): 30
 
 ## In flight (claims without a done marker at 12:50)
 
-`mig-localconn-fold` (claimed 12:39; the migration, ~30 files, phases P0-P3), `fix-scanner-r4`,
-`fix-workflows-r4` (12:47), `wiki-revise-proof-sections-a` (12:48). Worktrees kept (unmerged):
+`mig-localconn-fold` (claimed 12:39; the migration, ~30 files, phases P0-P3), `wiki-revise-proof-sections-a`
+(12:48). Worktrees kept (unmerged):
 automerge-workflow, ci-workflow, contrib-docs, task-board, fix-gate-scanner, fix-workflows(-r2,-r3,-r4),
 fix-scanner-r2/-r3/-r4, nm-longrange, port-wiki-hier-thm11, fix-port-wiki-hier-thm11, wiki-model-hier-two-point,
 fix-wiki-model-hier-two-point(-r3), wiki-runaway-split-1, fix-wiki-runaway-split-1, wiki-revise-regular-variation,
@@ -175,7 +175,7 @@ its scout edit; 383 after its edit (area lemmas, never H0OC).
 ## Queue (`/home/user/reports/queue/`)
 
 A brief is startable when it has no `HOLD-` prefix and no `claims/<id>`; claimed briefs stay in the
-directory. **Startable at 12:50 (8, all non-Lean, mutually file-disjoint and disjoint from the claims):**
+directory. **Startable at 12:55 (9, all non-Lean; plus 112 audit-fix-workflows-r4, read-only, mutually file-disjoint and disjoint from the claims):**
 104 audit-wiki-proof-2ZI0-tail, 105 fix-wiki-runaway-split-1-r2 (owns `multiplicative-coalescent.md`), 106
 audit-lrp-I55-premises, 107 audit-wiki-proof-WD31, 108 wiki-67W9-followup (owns `integrated-susceptibility.md`
 + record, `wiki/errata/dgt-long-range-2023.json`), 109 fix-tooling-d35-header-blocks (owns `scripts/check_d35.py`,
@@ -183,7 +183,7 @@ audit-lrp-I55-premises, 107 audit-wiki-proof-WD31, 108 wiki-67W9-followup (owns 
 Lean prover briefs are held for the window (see above); this is the window, so fewer than 8 Lean briefs are
 startable by design.
 **Held:** `HOLD-audit-mig-localconn-fold`, `HOLD-audit-wiki-runaway-split-1-r3`,
-`HOLD-audit-tooling-d35-header-blocks-r2`, `HOLD-audit-wiki-revise-proof-sections-a`, `HOLD-audit-fix-workflows-r4`,
+`HOLD-audit-tooling-d35-header-blocks-r2`, `HOLD-audit-wiki-revise-proof-sections-a`,
 `HOLD-mig-law-generality`, `HOLD-mig-model-norm`, `HOLD-wiki-original-marking`, `HOLD-audit-nm-bond-core`,
 `HOLD-audit-nm-probability`, the six window-held prover briefs `HOLD-092/093/095/096/098/099`, and the 21
 prover briefs listed in the migration section.
