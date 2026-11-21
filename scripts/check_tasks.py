@@ -11,21 +11,26 @@ Prints one line per finding and exits 1 if there is an error, 0 otherwise. Check
    Goal, Target, Owned files, Allowed inputs, Stop condition and Hand-off;
 2. no id is in two of the three directories;
 3. every repository path in backticks under "Owned files" or "Allowed inputs" of an open
-   task exists, or its line says the file is new ("New"/"new");
+   task exists, or its line says the file is new ("New"/"new"); a token with more than
+   MAX_ALTERNATIVES brace alternatives (or more than MAX_BRACE_GROUPS groups, or longer than
+   MAX_TOKEN characters) is reported instead of expanded;
 4. every wiki tag written `**XXXX**` in an open task is anchored as `tag-XXXX` under
    `wiki/articles/`; a tag already attached in Lean (`@[tag "XXXX"]` under `PercLib/`) is
-   reported as a "possibly done" warning (which does not change the exit status) unless the
-   task says that it re-states or extends it;
+   reported as a "possibly done" warning (which does not change the exit status) unless a
+   sentence of the task names that tag and says it is re-stated or extended (the Owned-files
+   wording "tagged restatement(s)" does not count);
 5. no open task targets (in its Goal or Target) an article of an area taken in
-   `tasks/areas/*.md` (the articles linked from the map's tables), unless the task names that
-   area as a shared prerequisite.
+   `tasks/areas/*.md` (the articles linked from the map's tables), unless one sentence of the
+   task says "shared prerequisite" and names that area (by its name in the `tasks/README.md`
+   table, by `areas/<map>.md`, or by the map's stem followed by "area"; the bare stem does not
+   count when it is also one of the area's articles).
 
-Standard library only.
+Every regular expression runs in time linear in its input, and brace expansion is bounded,
+so odd input cannot make a run slow. Standard library only.
 """
 
 import argparse
 import glob
-import itertools
 import re
 import sys
 from pathlib import Path
@@ -39,11 +44,23 @@ TARGET_SECTIONS = ('Goal', 'Target')
 
 TAG_RE = re.compile(r'\*\*([0-9A-Z]{4})\*\*')
 ANCHOR_RE = re.compile(r'''id\s*=\s*["']tag-([0-9A-Z]{4})["']''')
-LEAN_TAG_RE = re.compile(r'@\[[^\]]*?\btag\s+"([0-9A-Z]{4})"')
+LEAN_TAG_NAME_RE = re.compile(r'\btag\s+"([0-9A-Z]{4})"')
+LEAN_ATTR_LOOKBACK = 2000  # an attribute `@[...]` longer than this is not looked through
+HEADING_RE = re.compile(r'^#{2,6}\s+(.*)$')
 RESTATE_RE = re.compile(r'\bre-?stat|\bextend', re.IGNORECASE)
+# Wording that contains RESTATE_RE without saying that a tag is re-stated or extended.
+NOT_RESTATE_RE = re.compile(r'\btagged\s+restatements?\b|\bextended[\s-]+(?:nonnegative|real|'
+                            r'valued|natural)', re.IGNORECASE)
 BACKTICK_RE = re.compile(r'`([^`\n]+)`')
 ARTICLE_LINK_RE = re.compile(r'articles/([A-Za-z0-9_-]+)\.md')
-ARTICLE_NAME_RE = re.compile(r'\barticles?\s+`([A-Za-z0-9_-]+)`')
+ARTICLE_WORD_RE = re.compile(r'\barticles?\b')
+# One more backticked name in a list after "article(s)": `a`, `b`, and `c` / `a` or `b`.
+ARTICLE_NEXT_RE = re.compile(r'\s*(?:,\s*(?:(?:and|or)\b\s*)?|(?:and|or)\b\s*)?'
+                             r'`([A-Za-z0-9_-]+)`')
+SENTENCE_END_RE = re.compile(r'(?<=[.;!?])\s+')
+MAX_ALTERNATIVES = 256
+MAX_BRACE_GROUPS = 64
+MAX_TOKEN = 4096
 NEW_RE = re.compile(r'\b[Nn]ew\b')
 FILE_SUFFIXES = ('.lean', '.md', '.py', '.sh', '.json', '.toml', '.txt', '.yml', '.yaml')
 
@@ -91,11 +108,11 @@ def sections(body):
     """Map heading text (any level >= 2) to the text below it, up to the next heading."""
     out, current, buf = {}, None, []
     for line in body.splitlines():
-        m = re.match(r'^#{2,6}\s+(.*?)\s*#*\s*$', line)
+        m = HEADING_RE.match(line)
         if m:
             if current is not None:
                 out.setdefault(current, '\n'.join(buf))
-            current, buf = m.group(1), []
+            current, buf = m.group(1).rstrip().rstrip('#').rstrip(), []
         elif current is not None:
             buf.append(line)
     if current is not None:
@@ -122,12 +139,46 @@ def logical_lines(text):
     return out
 
 
+def sentences(text):
+    """Split text into sentences: paragraphs (blank lines, headings and list items start a
+    new one) joined into one line each, then cut after `.`, `;`, `!` or `?`."""
+    paragraphs, buf = [], []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith('#') \
+                or re.match(r'^([-*+]|\d+\.)\s', stripped):
+            if buf:
+                paragraphs.append(' '.join(buf))
+            buf = [stripped] if stripped else []
+            if stripped.startswith('#'):
+                paragraphs.append(stripped)
+                buf = []
+        else:
+            buf.append(stripped)
+    if buf:
+        paragraphs.append(' '.join(buf))
+    return [s for p in paragraphs for s in SENTENCE_END_RE.split(p) if s]
+
+
 def expand_braces(s):
-    m = re.search(r'\{([^{}]*)\}', s)
-    if not m:
-        return [s]
-    return list(itertools.chain.from_iterable(
-        expand_braces(s[:m.start()] + alt + s[m.end():]) for alt in m.group(1).split(',')))
+    """All brace alternatives of `s` (`a{b,c}` -> `ab`, `ac`; innermost groups first), or
+    None if there are more than MAX_ALTERNATIVES of them, more than MAX_BRACE_GROUPS groups,
+    or `s` is longer than MAX_TOKEN characters. Iterative; the number of strings held never
+    exceeds MAX_ALTERNATIVES, since expanding a group never lowers it."""
+    if len(s) > MAX_TOKEN or s.count('{') > MAX_BRACE_GROUPS:
+        return None
+    done, todo = [], [s]
+    while todo:
+        cur = todo.pop()
+        m = re.search(r'\{([^{}]*)\}', cur)
+        if not m:
+            done.append(cur)
+            continue
+        alts = m.group(1).split(',')
+        if len(done) + len(todo) + len(alts) > MAX_ALTERNATIVES:
+            return None
+        todo.extend(cur[:m.start()] + alt + cur[m.end():] for alt in reversed(alts))
+    return list(dict.fromkeys(done))
 
 
 def looks_like_path(token, top_level):
@@ -147,9 +198,9 @@ def path_exists(root, rel):
     return (root / rel).exists()
 
 
-def resolve(root, token, bases):
-    """True if every brace alternative of `token` exists from the root or a base dir."""
-    for alt in expand_braces(token):
+def resolve(root, alternatives, bases):
+    """True if every alternative exists from the root or a base dir."""
+    for alt in alternatives:
         if path_exists(root, alt):
             continue
         if not any(path_exists(root, str(Path(b) / alt)) for b in bases):
@@ -168,9 +219,17 @@ def check_paths(root, rel, secs, top_level):
             for token in BACKTICK_RE.findall(line):
                 if not looks_like_path(token, top_level):
                     continue
-                ok = resolve(root, token, bases)
+                alternatives = expand_braces(token)
+                if alternatives is None:
+                    shown = token if len(token) <= 80 else token[:77] + '...'
+                    problems.append(f'{rel}: rule 3: path `{shown}` under "{name}" has too '
+                                    f'many brace alternatives to check (limits: '
+                                    f'{MAX_ALTERNATIVES} alternatives, {MAX_BRACE_GROUPS} '
+                                    f'groups, {MAX_TOKEN} characters)')
+                    continue
+                ok = resolve(root, alternatives, bases)
                 if '/' in token and token.split('/', 1)[0] in top_level:
-                    parent = str(Path(expand_braces(token)[0].rstrip('/*')).parent)
+                    parent = str(Path(alternatives[0].rstrip('/*')).parent)
                     ancestors = [parent] + [str(p) for p in Path(parent).parents
                                             if str(p) != '.']
                     bases = ancestors + [b for b in bases if b not in ancestors]
@@ -190,11 +249,23 @@ def wiki_anchors(root):
     return anchors
 
 
+def attached_tags(text):
+    """Tags `XXXX` written `tag "XXXX"` inside an attribute `@[...]` of a Lean text: the
+    nearest `@[` before the occurrence (within LEAN_ATTR_LOOKBACK characters) is not
+    closed by a `]` before it. Linear in the length of the text."""
+    tags = set()
+    for m in LEAN_TAG_NAME_RE.finditer(text):
+        start = text.rfind('@[', max(0, m.start() - LEAN_ATTR_LOOKBACK), m.start())
+        if start != -1 and text.find(']', start, m.start()) == -1:
+            tags.add(m.group(1))
+    return tags
+
+
 def lean_tags(root):
     tags = set()
     base = root / 'PercLib'
     for p in sorted(base.rglob('*.lean')) if base.is_dir() else []:
-        tags.update(LEAN_TAG_RE.findall(p.read_text(encoding='utf-8', errors='replace')))
+        tags |= attached_tags(p.read_text(encoding='utf-8', errors='replace'))
     return tags
 
 
@@ -210,7 +281,11 @@ def area_maps(root):
         for line in text.splitlines():
             if line.lstrip().startswith('|'):
                 articles.update(ARTICLE_LINK_RE.findall(line))
-        names = {p.stem.lower(), f'areas/{p.name}'.lower(), p.stem.replace('-', ' ').lower()}
+        # The bare stem names the area only when it is not also one of its articles.
+        names = {f'areas/{p.name}'.lower(), f'{p.stem} area'.lower(),
+                 p.stem.lower(), p.stem.replace('-', ' ').lower()}
+        if p.stem in articles:
+            names.discard(p.stem.lower())
         for line in readme_text.splitlines():
             if line.lstrip().startswith('|') and f'areas/{p.name}' in line:
                 cells = [c.strip() for c in line.strip().strip('|').split('|')]
@@ -220,11 +295,46 @@ def area_maps(root):
     return out
 
 
+def article_names(text):
+    """Every backticked name in a list after "article"/"articles":
+    (articles `a`, `b` and `c`) gives a, b, c."""
+    names = []
+    for m in ARTICLE_WORD_RE.finditer(text):
+        pos = m.end()
+        while True:
+            n = ARTICLE_NEXT_RE.match(text, pos)
+            if not n:
+                break
+            names.append(n.group(1))
+            pos = n.end()
+    return names
+
+
 def targeted_articles(secs, anchors):
     text = '\n'.join(find_section(secs, n) or '' for n in TARGET_SECTIONS)
-    arts = set(ARTICLE_LINK_RE.findall(text)) | set(ARTICLE_NAME_RE.findall(text))
+    arts = set(ARTICLE_LINK_RE.findall(text)) | set(article_names(text))
     arts |= {anchors[t] for t in TAG_RE.findall(text) if t in anchors}
     return arts
+
+
+def names_word(sentence, name):
+    """True if `name` occurs in `sentence` not as part of a longer word or hyphenated name."""
+    return re.search(r'(?<![\w-])' + re.escape(name) + r'(?![\w-])', sentence) is not None
+
+
+def restated_tags(text):
+    """Tags named in a sentence that says it re-states or extends something."""
+    tags = set()
+    for s in sentences(text):
+        if RESTATE_RE.search(NOT_RESTATE_RE.sub(' ', s)):
+            tags.update(re.findall(r'(?<![0-9A-Za-z])([0-9A-Z]{4})(?![0-9A-Za-z])', s))
+    return tags
+
+
+def names_area_as_shared(sents, names):
+    """True if one sentence says "shared prerequisite" and names the area."""
+    return any('shared prerequisite' in s and any(names_word(s, n) for n in names)
+               for s in sents)
 
 
 def check(root):
@@ -272,22 +382,23 @@ def check(root):
     areas = area_maps(root)
     for rel, text, secs in open_tasks:
         errors.extend(check_paths(root, rel, secs, top_level))
-        restates = bool(RESTATE_RE.search(text))
+        restated = restated_tags(text)
         for tag in dict.fromkeys(TAG_RE.findall(text)):
             if tag not in anchors:
                 errors.append(f'{rel}: rule 4: tag {tag} has no anchor tag-{tag} under '
                               f'wiki/articles/')
-            elif tag in attached and not restates:
+            elif tag in attached and tag not in restated:
                 warnings.append(f'{rel}: rule 4: tag {tag} is already attached in Lean: '
                                 f'possibly done')
         targets = targeted_articles(secs, anchors)
-        lower = text.lower()
+        sents = None
         for stem, names, articles in areas:
             hit = sorted(targets & articles)
             if not hit:
                 continue
-            shared = 'shared prerequisite' in lower and any(n in lower for n in names)
-            if not shared:
+            if sents is None:
+                sents = [s.lower() for s in sentences(text)]
+            if not names_area_as_shared(sents, names):
                 errors.append(f'{rel}: rule 5: targets article(s) {", ".join(hit)} of the '
                               f'taken area {stem} (tasks/areas/{stem}.md)')
     return errors, warnings

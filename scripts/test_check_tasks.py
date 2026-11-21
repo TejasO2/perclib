@@ -4,9 +4,10 @@ import contextlib
 import io
 from pathlib import Path
 import tempfile
+import time
 import unittest
 
-from check_tasks import check, main
+from check_tasks import MAX_ALTERNATIVES, attached_tags, check, expand_braces, main
 
 REPO = Path(__file__).resolve().parent.parent
 
@@ -138,8 +139,71 @@ class BoardTest(unittest.TestCase):
         with contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(main(['--root', str(self.root)]), 0)
         self.write('tasks/open/t.md', task('t', body=body.replace(
-            'The statement.', 'Re-state it with an extra clause.')))
+            'The statement.', 'This task re-states **BBBB** with an extra clause.')))
         self.assertClean()
+
+    def test_rule4_restatement_exemption_is_per_tag(self):
+        warning = ([], ['tasks/open/t.md: rule 4: tag BBBB is already attached in Lean: '
+                        'possibly done'])
+        body = SECTIONS_OK.replace('**AAAA**', '**BBBB**')
+        cases = [
+            # Owned-files wording of an interface task (M9).
+            body.replace('(the tagged statement only)', '(the tagged restatement only)'),
+            body.replace('(the tagged statement only)', '(tagged restatements only)'),
+            # "extended" in unrelated prose (M10), also in the tag's own sentence.
+            body.replace('The statement.', 'The statement (extended nonnegative values).'),
+            body.replace('The statement.', 'The statement of BBBB, with extended-valued '
+                         'forms. Its proof is extended from a lemma.'),
+            # A re-statement that does not name the tag, or names another tag.
+            body.replace('The statement.', 'Re-state it with an extra clause.'),
+            body.replace('The statement.', 'This task re-states **AAAA** with a clause.'),
+        ]
+        for b in cases:
+            with self.subTest(body=b):
+                self.write('tasks/open/t.md', task('t', body=b))
+                self.assertEqual(check(self.root), warning)
+        # The tag and the re-statement in one sentence, across a line break.
+        self.write('tasks/open/t.md', task('t', body=body.replace(
+            'The statement.', 'The task extends\nBBBB to all laws.')))
+        self.assertClean()
+
+    def test_rule3_brace_expansion_is_bounded(self):
+        self.assertEqual(expand_braces('a{b,c}d{e,f}'), ['abde', 'abdf', 'acde', 'acdf'])
+        self.assertEqual(expand_braces('x{a,{b,c}}'), ['xa', 'xb', 'xc'])
+        self.assertEqual(len(expand_braces('{a,b}' * 8)), MAX_ALTERNATIVES)
+        self.assertIsNone(expand_braces('{a,b}' * 9))
+        self.assertEqual(expand_braces('{' * 60 + 'a' + '}' * 60), ['a'])
+        wide = 'PercLib/' + '{a,b}' * 30 + '.lean'
+        deep = 'PercLib/' + '{' * 2000 + 'a' + '}' * 2000 + '.lean'
+        flat = 'PercLib/' + '{a}' * 1500 + '.lean'
+        body = SECTIONS_OK.replace('`main`', f'`{wide}`, `{deep}`, `{flat}`')
+        self.write('tasks/open/b.md', task('b', body=body))
+        start = time.monotonic()
+        errors, _ = check(self.root)
+        self.assertLess(time.monotonic() - start, 5)
+        self.assertEqual(len(errors), 3, errors)
+        for e in errors:
+            self.assertIn('tasks/open/b.md: rule 3: path `PercLib/', e)
+            self.assertIn('under "Allowed inputs" has too many brace alternatives to check', e)
+
+    def test_regexes_are_linear(self):
+        body = SECTIONS_OK.replace('## Target', '## a' + ' ' * 20000 + 'b\n\n## Target')
+        self.write('tasks/open/h.md', task('h', body=body))
+        self.write('PercLib/Junk.lean', '@[' * 100000)
+        self.write('PercLib/Junk2.lean', 'tag "BBBB" ' * 20000)
+        start = time.monotonic()
+        self.assertClean()
+        self.assertLess(time.monotonic() - start, 5)
+        # Trailing `#`s and spaces of a heading are not part of its name.
+        self.write('tasks/open/h.md', task('h', body=SECTIONS_OK.replace(
+            '## Goal', '## Goal ##  ')))
+        self.assertClean()
+
+    def test_lean_attached_tags(self):
+        self.assertEqual(attached_tags('@[simp, tag "AAAA"] theorem x\n'
+                                       '@[simp,\n  tag "BBBB"] theorem y\n'
+                                       '@[simp] theorem z -- tag "CCCC"\n'
+                                       'tag "DDDD"\n'), {'AAAA', 'BBBB'})
 
     def test_rule5_areas_taken(self):
         body = SECTIONS_OK.replace('**AAAA** (article `art-one`)', '**CCCC**')
@@ -158,6 +222,41 @@ class BoardTest(unittest.TestCase):
         self.write('tasks/open/b.md', task('b', body=SECTIONS_OK.replace(
             'mathlib.', 'mathlib, `wiki/articles/taken.md`.')))
         self.assertClean()
+
+    def test_rule5_every_listed_article(self):
+        error = ['tasks/open/a.md: rule 5: targets article(s) taken of the taken area big '
+                 '(tasks/areas/big.md)']
+        for goal in ('(articles `art-one` and `taken`)', '(articles `art-one`, `x`, and `taken`)',
+                     '(articles `art-one`, `taken`)', '(articles `art-one` or\n`taken`)'):
+            with self.subTest(goal=goal):
+                self.write('tasks/open/a.md', task('a', body=SECTIONS_OK.replace(
+                    '(article `art-one`)', goal)))
+                self.assertEqual(check(self.root), (error, []))
+
+    def test_rule5_shared_prerequisite_names_the_area(self):
+        def err(stem):
+            return (f'tasks/open/a.md: rule 5: targets article(s) taken of the taken area '
+                    f'{stem} (tasks/areas/{stem}.md)')
+        body = SECTIONS_OK.replace('(article `art-one`)', '(article `taken`)')
+        # "shared prerequisite" and the area's name in different sentences (R5e).
+        self.write('tasks/open/a.md', task('a', body=body.replace(
+            'The statement.', 'It belongs to the Big area. See what the area needs from shared '
+            'prerequisites.')))
+        self.assertEqual(check(self.root), ([err('big')], []))
+        self.write('tasks/open/a.md', task('a', body=body.replace(
+            'The statement.', 'It is a shared prerequisite of the Big\narea.')))
+        self.assertClean()
+        # A map whose stem is also one of its articles: the bare stem is not the area's name.
+        self.write('tasks/areas/taken.md', '| Article |\n|---|\n'
+                   '| [taken](../../wiki/articles/taken.md) |\n')
+        self.write('tasks/open/a.md', task('a', body=body.replace(
+            'The statement.', 'A shared prerequisite of the Big area, used by `taken`.')))
+        self.assertEqual(check(self.root), ([err('taken')], []))
+        for named in ('the taken area', '`areas/taken.md`'):
+            with self.subTest(named=named):
+                self.write('tasks/open/a.md', task('a', body=body.replace(
+                    'The statement.', f'A shared prerequisite of the Big area and of {named}.')))
+                self.assertClean()
 
 
 class RealBoardTest(unittest.TestCase):
