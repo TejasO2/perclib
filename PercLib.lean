@@ -118,6 +118,7 @@ public import PercLib.Models.Tags.BinaryTree
 public import PercLib.Models.Tags.Boundary
 public import PercLib.Models.Tags.FiniteRangeDecay
 public import PercLib.Models.Tags.Hierarchical
+public import PercLib.Models.Tags.KernelsAndSitePaths
 public import PercLib.Models.Tags.Lattice
 public import PercLib.Models.Tags.Line
 public import PercLib.Models.Tags.Site

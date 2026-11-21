@@ -25,6 +25,8 @@ site percolation on a graph of maximum degree `Δ` has no infinite cluster when 
 * `ae_all_siteClusters_finite_of_degree_le`
 * `thetaSite_eq_zero_of_lt_inv`
 * `inv_le_criticalProbSite`
+* `siteBernoulli_exists_path_length_le_tsum_prod`, `tsum_prod_support_le`: the path bounds
+  that keep the open-root factor
 -/
 
 @[expose] public section
@@ -240,5 +242,103 @@ example : criticalProbSite 1 = 1 := by
 example : thetaSite 2 ⟨1/4, by constructor <;> norm_num⟩ = 0 := by
   apply thetaSite_eq_zero_of_lt_inv (by norm_num)
   norm_num
+
+end PercLib.Models.Site
+
+/-! ### Site path bounds that keep the open-root factor
+
+For `n ≥ 1`, the probability that some simple path of `n` edges from `x` has all its vertices
+open is at most `∑_γ ∏_{v ∈ γ} w_v ≤ w_x Δ (Δ - 1)^(n - 1) p^n ≤ Δ (Δ - 1)^(n - 1) p^(n + 1)`.
+-/
+
+namespace PercLib.Models.Site
+
+variable {V : Type*}
+
+open Classical in
+/-- **Union bound over simple paths.** For `n ≥ 1`, the probability that some simple path of
+`n` edges from `x` has all its vertices open is at most the sum over these paths of the
+products of their vertex probabilities. -/
+theorem siteBernoulli_exists_path_length_le_tsum_prod (G : SimpleGraph V) [G.LocallyFinite]
+    {Δ : ℕ} (hΔ : ∀ v, G.degree v ≤ Δ) (w : V → unitInterval) (x : V) {n : ℕ} (hn : 1 ≤ n) :
+    siteBernoulli w {ω | ∃ y, ∃ r : G.Path x y, r.1.length = n ∧ ∀ z ∈ r.1.support, z ∈ ω} ≤
+      ∑' r : {r : Σ y, G.Path x y // r.2.1.length = n},
+        ∏ z ∈ r.1.2.1.support.toFinset, (unitInterval.toNNReal (w z) : ℝ≥0∞) := by
+  classical
+  obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
+  let P := {r : Σ y, G.Path x y // r.2.1.length = m + 1}
+  have : Finite P := (finite_card_paths_length G hΔ x m).1
+  have heq : {ω | ∃ y, ∃ r : G.Path x y, r.1.length = m + 1 ∧ ∀ z ∈ r.1.support, z ∈ ω} =
+      ⋃ r : P, {ω : Set V | (r.1.2.1.support.toFinset : Set V) ⊆ ω} := by
+    ext ω
+    simp only [Set.mem_ofPred_eq, Set.mem_iUnion]
+    constructor
+    · rintro ⟨y, r, hn, hr⟩
+      exact ⟨⟨⟨y, r⟩, hn⟩, fun z hz => hr z (List.mem_toFinset.mp hz)⟩
+    · rintro ⟨r, hr⟩
+      exact ⟨r.1.1, r.1.2, r.2, fun z hz => hr (List.mem_toFinset.mpr hz)⟩
+  rw [heq]
+  refine (measure_iUnion_le _).trans_eq (tsum_congr fun r => ?_)
+  simp only [siteBernoulli, prodBernoulli_subset]
+
+open Classical in
+/-- The vertex probabilities along a simple path of `n` edges from `x` multiply to at most
+`w_x p^n`. -/
+theorem prod_support_le_mul_pow {G : SimpleGraph V} (w : V → unitInterval) (p : unitInterval)
+    (hw : ∀ v, w v ≤ p) {x y : V} (r : G.Path x y) :
+    ∏ z ∈ r.1.support.toFinset, (unitInterval.toNNReal (w z) : ℝ≥0∞) ≤
+      (unitInterval.toNNReal (w x) : ℝ≥0∞) * (unitInterval.toNNReal p : ℝ≥0∞) ^ r.1.length := by
+  classical
+  have hnd := r.2.support_nodup
+  rw [← r.1.cons_tail_support] at hnd ⊢
+  have hx : x ∉ r.1.support.tail := (List.nodup_cons.mp hnd).1
+  rw [List.toFinset_cons, Finset.prod_insert (by simpa using hx)]
+  gcongr
+  calc
+    _ ≤ ∏ _z ∈ r.1.support.tail.toFinset, (unitInterval.toNNReal p : ℝ≥0∞) :=
+      Finset.prod_le_prod fun z _ => ENNReal.coe_le_coe.mpr (hw z)
+    _ = _ := by
+      rw [Finset.prod_const, List.toFinset_card_of_nodup (List.nodup_cons.mp hnd).2,
+        List.length_tail, SimpleGraph.Walk.length_support, Nat.add_sub_cancel]
+
+open Classical in
+/-- **Path sum with the open-root factor.** For `n ≥ 1`, the sum over simple paths of `n`
+edges from `x` of the products of their vertex probabilities is at most
+`w_x Δ (Δ - 1)^(n - 1) p^n`. -/
+theorem tsum_prod_support_le (G : SimpleGraph V) [G.LocallyFinite] {Δ : ℕ}
+    (hΔ : ∀ v, G.degree v ≤ Δ) (w : V → unitInterval) (p : unitInterval) (hw : ∀ v, w v ≤ p)
+    (x : V) {n : ℕ} (hn : 1 ≤ n) :
+    ∑' r : {r : Σ y, G.Path x y // r.2.1.length = n},
+        ∏ z ∈ r.1.2.1.support.toFinset, (unitInterval.toNNReal (w z) : ℝ≥0∞) ≤
+      (unitInterval.toNNReal (w x) : ℝ≥0∞) * (Δ * (Δ - 1) ^ (n - 1) : ℕ) *
+        (unitInterval.toNNReal p : ℝ≥0∞) ^ n := by
+  obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
+  let P := {r : Σ y, G.Path x y // r.2.1.length = m + 1}
+  have hcard := finite_card_paths_length G hΔ x m
+  have : Finite P := hcard.1
+  have : Fintype P := Fintype.ofFinite P
+  calc
+    _ ≤ ∑' _r : P, (unitInterval.toNNReal (w x) : ℝ≥0∞) *
+          (unitInterval.toNNReal p : ℝ≥0∞) ^ (m + 1) :=
+      ENNReal.tsum_le_tsum fun r => (prod_support_le_mul_pow w p hw r.1.2).trans_eq (by rw [r.2])
+    _ = (Nat.card P : ℝ≥0∞) * ((unitInterval.toNNReal (w x) : ℝ≥0∞) *
+          (unitInterval.toNNReal p : ℝ≥0∞) ^ (m + 1)) := by
+      simp [tsum_fintype, Nat.card_eq_fintype_card]
+    _ ≤ (Δ * (Δ - 1) ^ m : ℕ) * ((unitInterval.toNNReal (w x) : ℝ≥0∞) *
+          (unitInterval.toNNReal p : ℝ≥0∞) ^ (m + 1)) := by
+      gcongr
+      exact_mod_cast hcard.2
+    _ = _ := by rw [Nat.add_sub_cancel]; ring
+
+/-- Replacing the root probability `w_x ≤ p` by `p` raises the power of `p` by one. -/
+theorem coe_toNNReal_mul_mul_pow_le (w : V → unitInterval) (p : unitInterval)
+    (hw : ∀ v, w v ≤ p) (x : V) (c : ℝ≥0∞) (n : ℕ) :
+    (unitInterval.toNNReal (w x) : ℝ≥0∞) * c * (unitInterval.toNNReal p : ℝ≥0∞) ^ n ≤
+      c * (unitInterval.toNNReal p : ℝ≥0∞) ^ (n + 1) :=
+  calc
+    _ ≤ (unitInterval.toNNReal p : ℝ≥0∞) * c * (unitInterval.toNNReal p : ℝ≥0∞) ^ n := by
+      gcongr
+      exact hw x
+    _ = _ := by ring
 
 end PercLib.Models.Site
