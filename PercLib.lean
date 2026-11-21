@@ -21,6 +21,7 @@ public import PercLib.Analysis.LinearODEAsymptotics
 public import PercLib.Analysis.LogExponent
 public import PercLib.Analysis.LogarithmicCorrections
 public import PercLib.Analysis.MesoscopicNegligibility
+public import PercLib.Analysis.ModelNorm.Defs
 public import PercLib.Analysis.MomentHierarchy
 public import PercLib.Analysis.QuadraticRecursion
 public import PercLib.Analysis.ReciprocalCutoff
