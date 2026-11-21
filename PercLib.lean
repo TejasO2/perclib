@@ -329,6 +329,7 @@ public import PercLib.Probability.Transport.Pullback
 public import PercLib.Probability.Transport.Reindexing
 public import PercLib.Probability.TruncatedMaximal
 public import PercLib.Probability.VarianceTensorization
+public import PercLib.Probability.WeakKernels
 public import PercLib.Probability.ZeroOne
 
 /-
