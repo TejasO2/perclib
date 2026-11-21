@@ -33,7 +33,10 @@ def _is_id_rest(c):
             or 0x2080 <= n <= 0x209c or 0x1d62 <= n <= 0x1d6a or n == 0x2c7c)
 
 
-CHAR_LITERAL = re.compile(r"'(?:\\(?:x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4}|.)|[^\\])'", re.S)
+# The escapes Lean accepts after `\` in string and character literals (checked on v4.35.0);
+# on any other escape Lean abandons the literal and lexes the rest as code.
+ESCAPE = re.compile(r"""\\(?:[\\"'ntr]|x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4})""")
+CHAR_LITERAL = re.compile("'(?:" + ESCAPE.pattern + r"|[^\\])'", re.S)
 
 
 def code_without_literals(text):
@@ -44,7 +47,8 @@ def code_without_literals(text):
     through to the next `»`) `--`, `/-` and `"` open nothing; `'` starts a character
     literal unless it continues an identifier (`h'`). A string literal containing `{` is
     refused, since only its context (`s!`, `m!`, `throwError`, …) tells whether it is
-    interpolated, i.e. contains code."""
+    interpolated, i.e. contains code. An escape outside `ESCAPE` (in a string, also
+    `\\` + newline) is refused, since Lean then abandons the literal and lexes on as code."""
     result, i, depth = [], 0, 0
     while i < len(text):
         if depth:
@@ -80,7 +84,16 @@ def code_without_literals(text):
             while i < len(text) and text[i] != '"':
                 if text[i] == '{':
                     raise ValueError('String literal containing `{` (possibly interpolated)')
-                i += 2 if text[i] == '\\' else 1
+                if text[i] == '\\':
+                    if text.startswith('\n', i + 1):
+                        i += 2
+                        continue
+                    esc = ESCAPE.match(text, i)
+                    if not esc:
+                        raise ValueError('invalid escape in string literal')
+                    i = esc.end()
+                    continue
+                i += 1
             if i >= len(text):
                 raise ValueError('Unterminated string')
             i += 1
@@ -119,6 +132,8 @@ def code_without_literals(text):
                 i = m.end()
                 result.append(' ')
                 continue
+            if text.startswith('\\', i + 1):
+                raise ValueError('invalid escape in character literal')
         result.append(text[i])
         i += 1
     if depth:

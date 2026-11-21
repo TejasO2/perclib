@@ -95,6 +95,15 @@ class ForbiddenScanTests(unittest.TestCase):
         self.assertFalse(flagged('public meta import Lean.Elab.Command\npublic meta section',
                                  'PercLib/Meta/Tag.lean'))
 
+    def test_invalid_escape_probe(self):
+        # Finding S1 / GS3: Lean ends the string at the invalid escape `\q` and runs `run_meta`.
+        line = ('theorem a : True := (fun _ => trivial) "\\q run_meta IO.FS.writeFile '
+                "(toString 'q' ++ toString '1') (toString 'x') -- \"")
+        for text in [line, 'def t : String := "\\q"', "def c : Char := '\\q'"]:
+            with self.subTest(text=text):
+                self.assertTrue(flagged(text))
+        self.assertFalse(flagged('theorem t : "\\x41\\u0042\\n" = "AB\\n" := rfl'))
+
     def test_elaborator_registering_attributes(self):
         # Finding R1 / GS2: attributes that register elaborator, delaborator or initializer code.
         for text in ['@[tactic X] def evalX : Tactic := fun _ => pure ()',
