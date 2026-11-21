@@ -95,6 +95,7 @@ public import PercLib.Models.HierarchicalBallSums
 public import PercLib.Models.HierarchicalCutoff
 public import PercLib.Models.HierarchicalEndpoint
 public import PercLib.Models.HierarchicalGeometry
+public import PercLib.Models.HierarchicalPointwise
 public import PercLib.Models.HierarchicalPowerKernel
 public import PercLib.Models.HierarchicalRestrictedSusc
 public import PercLib.Models.HierarchicalRunaway
