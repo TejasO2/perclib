@@ -52,6 +52,7 @@ kernels `H_σ` and `R_σ = J - H_σ`; the restricted configuration `η_B`
 same restricted configuration. The block quantities `E Z_B`, `M_B`, `S_B` at intensity `β` are
 `σ.expectedBlockMax`, `σ.blockScale`, `σ.blockPairSum`, and good and ancestrally good blocks
 are `σ.IsGoodBlock` and `σ.IsAncestrallyGood`. -/
+open Classical in
 @[tag "EKDO"]
 theorem nested_and_law_eq_map_union_layerKernel {α : ℝ} (hα : 0 < α) (c : ℝ≥0)
     (J : Sym2 (Fin d → ℤ) → ℝ≥0)
@@ -66,6 +67,11 @@ theorem nested_and_law_eq_map_union_layerKernel {α : ℝ} (hα : 0 < α) (c : �
           σ.blockIndex n u = σ.blockIndex n v) ∧
       (∀ n (x y : Fin d → ℤ), σ.blockIndex n x = σ.blockIndex n y → ‖x - y‖ < (L : ℝ) ^ n) ∧
       σ.layerKernel c ((d : ℝ) + α) ≤ J ∧
+      (∀ x y : Fin d → ℤ, σ.layerKernel c ((d : ℝ) + α) s(x, y) =
+        if x = y then 0 else layerWeight L c ((d : ℝ) + α) (σ.commonLevel x y)) ∧
+      (∀ n (z x y : Fin d → ℤ), σ.restrictedKernel J c ((d : ℝ) + α) n z s(x, y) =
+        J s(x, y) - if σ.InStrictAncestor n z x y then σ.layerKernel c ((d : ℝ) + α) s(x, y)
+          else 0) ∧
       (∀ m (z x y : Fin d → ℤ), σ.blockLayerKernel c ((d : ℝ) + α) (m + 1) z s(x, y) =
         if x ∈ σ.block (m + 1) z ∧ y ∈ σ.block (m + 1) z ∧
             σ.blockIndex m x ≠ σ.blockIndex m y
@@ -86,7 +92,8 @@ theorem nested_and_law_eq_map_union_layerKernel {α : ℝ} (hα : 0 < α) (c : �
     σ.layerKernel_le (by positivity) hJ
   exact ⟨fun _ _ _ h => σ.blockIndex_succ_eq_of_eq h, fun _ _ _ => σ.mem_block,
     σ.card_image_blockIndex_block_succ, σ.exists_blockIndex_add_iff,
-    fun _ _ _ h => σ.norm_sub_lt_of_blockIndex_eq h, hHJ,
+    fun _ _ _ h => σ.norm_sub_lt_of_blockIndex_eq h, hHJ, σ.layerKernel_apply c _,
+    fun n z x y => by rw [σ.restrictedKernel_apply, σ.ancestorKernel_apply],
     σ.blockLayerKernel_succ_apply c _, σ.law_intensityProfile_eq_map_union_layerKernel hHJ,
     σ.law_restrictedKernel_succ hHJ,
     fun _ _ _ h => σ.restrictedKernel_eq_of_blockIndex_succ_eq J c _ h⟩
