@@ -82,6 +82,7 @@ public import PercLib.Models.BinaryTreeMoments
 public import PercLib.Models.BoundaryCounterexample
 public import PercLib.Models.ConnectiveConstant
 public import PercLib.Models.DecoratedRay
+public import PercLib.Models.DirectionalDecay
 public import PercLib.Models.FiniteGraph
 public import PercLib.Models.FiniteRangeDecay
 public import PercLib.Models.FreeGroupTree
@@ -141,6 +142,7 @@ public import PercLib.Models.Site.Harris
 public import PercLib.Models.Site.SelfAvoiding
 public import PercLib.Models.Tags.BinaryTree
 public import PercLib.Models.Tags.Boundary
+public import PercLib.Models.Tags.DirectionalDecay
 public import PercLib.Models.Tags.FiniteRangeDecay
 public import PercLib.Models.Tags.FiniteRangeExit
 public import PercLib.Models.Tags.Hierarchical
