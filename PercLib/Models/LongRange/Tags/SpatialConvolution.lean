@@ -10,6 +10,7 @@ proved in the imported modules.
 module
 
 public import PercLib.Meta.Tag
+public import PercLib.Models.LongRange.ConvolutionLeadingTerm
 public import PercLib.Models.LongRange.ConvolutionShift
 public import PercLib.Models.LongRange.LatticeConvolution
 
@@ -18,12 +19,13 @@ public import PercLib.Models.LongRange.LatticeConvolution
 
 Wiki correspondence for the power-law convolution bounds away from the logarithmic endpoints,
 with `⟨x⟩ = max 1 √(∑ᵢ xᵢ²)` and `(f ⋆ g)(x) = ∑ y, f y g (x - y)`, and for the translation
-obstructions, with `(F ⋆ g)(x) = ∑ y, F (x - y) g y`.
+obstructions and the transfer of a leading term, with `(F ⋆ g)(x) = ∑ y, F (x - y) g y`.
 
 ## Main results
 
 * `abs_tsum_mul_sub_le_powerLaw`
 * `isBigO_and_not_isBigO_tsum_mul_single_sub`
+* `summable_abs_mul_and_isLittleO_tsum_mul_sub_powerLaw`
 -/
 
 @[expose] public section
@@ -98,5 +100,22 @@ theorem isBigO_and_not_isBigO_tsum_mul_single_sub (d : ℕ) (hd : 2 < d)
     fun ρ hρ => not_isBigO_tsum_mul_single_sub hs.ne' hF _ hρ,
     fun ρ hρ => not_isBigO_tsum_mul_smul_single_add_single_sub
       (mul_pos hs (by linarith)).ne' hF _ hρ⟩
+
+/-- **A signed summable kernel transfers a spatial power-law leading term.** Let `0 < a < d`,
+`|x| = √(∑ᵢ xᵢ²)` and `⟨x⟩ = max 1 |x|`. If `f(x) = A |x|^(-a) + o(|x|^(-a))` as `|x| → ∞`,
+`∑ |g| < ∞` and `|g(y)| ≤ K ⟨y⟩^(-d)`, then the convolution converges absolutely and
+`(f ⋆ g)(x) = A (∑ g) |x|^(-a) + o(|x|^(-a))`. -/
+@[tag "NIAD"]
+theorem summable_abs_mul_and_isLittleO_tsum_mul_sub_powerLaw {d : ℕ} {a A K : ℝ} (ha : 0 < a)
+    (had : a < d) {f g : (Fin d → ℤ) → ℝ}
+    (hf : (fun x => f x - A * (√(∑ i, ((x i : ℝ)) ^ 2)) ^ (-a)) =o[Filter.comap
+      (fun x => √(∑ i, ((x i : ℝ)) ^ 2)) Filter.atTop] fun x => (√(∑ i, ((x i : ℝ)) ^ 2)) ^ (-a))
+    (hg : Summable fun y => |g y|)
+    (hgK : ∀ y, |g y| ≤ K * (max 1 √(∑ i, ((y i : ℝ)) ^ 2)) ^ (-(d : ℝ))) :
+    (∀ x, Summable fun y => |f (x - y) * g y|) ∧
+      (fun x => ∑' y, f (x - y) * g y - A * (∑' y, g y) * (√(∑ i, ((x i : ℝ)) ^ 2)) ^ (-a))
+        =o[Filter.comap (fun x => √(∑ i, ((x i : ℝ)) ^ 2)) Filter.atTop]
+          fun x => (√(∑ i, ((x i : ℝ)) ^ 2)) ^ (-a) :=
+  summable_abs_mul_and_isLittleO_tsum_mul_sub ha had hf hg hgK
 
 end PercLib.Models.LongRange
