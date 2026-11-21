@@ -711,6 +711,6 @@ K_3=\frac{\sqrt\pi}{\Gamma(1/3)\Gamma(7/6)},\quad K_5=\frac{K_4(\pi/2)^{5/48}}{H
 <li>G. Delfino and J. Viti, On three-point connectivity in two-dimensional percolation, <em>J. Phys. A</em> 44 (2011), 032001; <a href="https://arxiv.org/abs/1009.1314">arXiv:1009.1314</a>.</li>
 <li>N. Gladkov, Percolation inequalities and decision trees, <a href="https://arxiv.org/abs/2408.08457">arXiv:2408.08457</a>.</li>
 <li>G. F. Lawler, O. Schramm and W. Werner, One-arm exponent for critical 2D percolation, <em>Electron. J. Probab.</em> 7 (2002), no. 2; <a href="https://arxiv.org/abs/math/0108211">arXiv:math/0108211</a>.</li>
-<li>J. J. H. Simmons, P. Kleban and R. M. Ziff, Exact factorization of correlation functions in two-dimensional critical percolation, <em>Phys. Rev. E</em> 76 (2007), 041106.</li>
+<li>J. J. H. Simmons, P. Kleban and R. M. Ziff, Exact factorization of correlation functions in two-dimensional critical percolation, <em>Phys. Rev. E</em> 76 (2007), 041106; <a href="https://arxiv.org/abs/0706.4105">arXiv:0706.4105</a>.</li>
 <li>S. Smirnov, Critical percolation in the plane: conformal invariance, Cardy's formula, scaling limits, <em>C. R. Acad. Sci. Paris Sér. I Math.</em> 333 (2001), 239–244.</li>
 </ul>
