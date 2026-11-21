@@ -305,7 +305,7 @@ theorem law_maxClusterIntersection_lt_mul_tightnessScale_le_of_bk [Countable V]
     ← ENNReal.ofReal_sub _ hp0]
   exact ENNReal.ofReal_le_ofReal hfinal
 
-/-! ### Non-vacuity (D-5): one vertex -/
+/-! ### Non-vacuity: one vertex -/
 
 private theorem clusterIntersection_unit_le (Λ : Finset Unit) (ω : Config Unit) (u : Unit) :
     clusterIntersection Λ ω u ≤ 1 := by

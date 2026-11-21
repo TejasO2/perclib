@@ -225,9 +225,9 @@ theorem lintegral_pow_eq_tsum_meas_ge {μ : Measure Ω} {X : Ω → ℝ≥0∞}
 
 end Main
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
-/-- **D-5 witness.** For `X ≡ 3` under a point mass both sides of the first identity are `3`
+/-- **Non-vacuity witness.** For `X ≡ 3` under a point mass both sides of the first identity are `3`
 and, at `k = 2`, both sides of the second are `9`. -/
 theorem discreteLayerCake_three :
     (∫⁻ _ω, (3 : ℝ≥0∞) ∂(Measure.dirac ())) =

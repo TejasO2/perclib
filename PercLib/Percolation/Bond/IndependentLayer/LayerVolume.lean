@@ -411,9 +411,9 @@ theorem lintegral_encard_union_mul_le [Countable V] (q₀ s : Sym2 V → I) (o :
         exact tsum_law_cluster_eq_finset_mul_le_set q₀ o (fun T => (T.encard : ℝ≥0∞) * f T)
     _ = _ := by ring
 
-/-! ### Non-vacuity witness (D-5) -/
+/-! ### Non-vacuity witness -/
 
-/-- **D-5 witness.** On `Bool` with no first layer (`q₀ = 0`) and a fully open second layer,
+/-- **Non-vacuity witness.** On `Bool` with no first layer (`q₀ = 0`) and a fully open second layer,
 the hypotheses of `lintegral_encard_union_mul_le` hold with `ε = 1` (one pair per row) and
 `χ₊ = 2` (two vertices), for every `f`. -/
 example (f : Set Bool → ℝ≥0∞) :

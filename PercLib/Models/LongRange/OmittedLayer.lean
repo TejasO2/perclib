@@ -90,7 +90,7 @@ end Additivity
     (x : Fin d → ℤ) : (radialKernel N K - cutoffKernel N K r) s(x, x) = 0 := by
   simp [cutoffKernel_def]
 
-/-- **Item 1 of issue 624.** For a profile nonnegative on `(0, ∞)` and `r > 0`, the full law
+/-- **Item 1.** For a profile nonnegative on `(0, ∞)` and `r > 0`, the full law
 is the law of the union of the cut-off configuration and an independent omitted layer. -/
 theorem law_intensityProfile_eq_map_union_omitted (hN0 : ∀ v, N v = 0 → v = 0)
     (hK : ∀ t, 0 < t → 0 ≤ K t) (hr : 0 < r) (β : ℝ≥0) :
@@ -103,7 +103,7 @@ theorem law_intensityProfile_eq_map_union_omitted (hN0 : ∀ v, N v = 0 → v = 
   funext e
   exact (add_tsub_cancel_of_le (cutoffKernel_le_radialKernel hN0 hK hr e)).symm
 
-/-- **Item 2 of issue 624.** For a profile nonnegative and decreasing on `(0, ∞)` and
+/-- **Item 2.** For a profile nonnegative and decreasing on `(0, ∞)` and
 `r > 0`, off the diagonal the omitted kernel is `K r` inside the cut-off and the full kernel
 outside it. -/
 theorem coe_omittedKernel_of_ne (hN0 : ∀ v, N v = 0 → v = 0) (hK : ∀ t, 0 < t → 0 ≤ K t)
@@ -159,7 +159,7 @@ theorem omitted_const_nonneg {c κ α : ℝ} (hc : 0 ≤ c) (hκ : 0 < κ) (hα 
       κ ^ (-(d : ℝ)) * (((2 * d * 3 ^ (d - 1) : ℕ) : ℝ) * (1 + 1 / α))) := by
   positivity
 
-/-- **Item 3 of issue 624, the omitted kernel.** For the power law `c s^{-(d+α)}` with
+/-- **Item 3, the omitted kernel.** For the power law `c s^{-(d+α)}` with
 `c ≥ 0`, `α > 0`, `d ≥ 1`, and a norm with `κ ‖z‖ ≤ N (Int.cast ∘ z)`, every off-diagonal row of
 `J - J_r` is at most `C r^{-α}` for `r ≥ 1`, with
 `C = c ((1 + 2/κ)^d + κ^{-d} · 2d 3^{d-1} (1 + 1/α))`. -/
@@ -274,7 +274,7 @@ theorem one_sub_exp_neg_mul_le (β X : ℝ) : 1 - Real.exp (-β * X) ≤ β * X 
   have := Real.add_one_le_exp (-β * X)
   linarith
 
-/-- **Item 3 of issue 624, the omitted layer.** Under the hypotheses of
+/-- **Item 3, the omitted layer.** Under the hypotheses of
 `tsum_omittedKernel_le`, at every intensity `β ≥ 0`, every off-diagonal probability row of
 the omitted layer `1 - e^{-β (J - J_r)}` is at most `β C r^{-α}` for `r ≥ 1`. -/
 theorem tsum_omittedLayer_le (hd : 1 ≤ d) {α c κ : ℝ} (hα : 0 < α) (hc : 0 ≤ c)
@@ -295,7 +295,7 @@ theorem tsum_omittedLayer_le (hd : 1 ≤ d) {α c κ : ℝ} (hα : 0 < α) (hc :
   · rw [← ENNReal.ofReal_coe_nnreal, ← ENNReal.ofReal_mul β.coe_nonneg]
     exact ENNReal.ofReal_le_ofReal (one_sub_exp_neg_mul_le _ _)
 
-/-- **Item 3 of issue 624, existential form.** -/
+/-- **Item 3, existential form.** -/
 theorem exists_tsum_omittedLayer_le (hd : 1 ≤ d) {α c : ℝ} (hα : 0 < α) (hc : 0 ≤ c)
     (hN0 : ∀ v, N v = 0 → v = 0) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ r : ℝ, 1 ≤ r → ∀ (β : ℝ≥0) (x : Fin d → ℤ),
@@ -311,7 +311,7 @@ theorem exists_tsum_omittedLayer_le (hd : 1 ≤ d) {α c : ℝ} (hα : 0 < α) (
     ⟨tsum_omittedKernel_le hd hα hc hN0 hκ hN hr x,
       tsum_omittedLayer_le hd hα hc hN0 hκ hN hr β x⟩⟩
 
-/-! ### The fork's spelling of `hD` (item 4 of issue 624) -/
+/-! ### The fork's spelling of `hD` (item 4) -/
 
 /-- The fork's shift probability `(q_∞ - q_r)/(1 - q_r)`, clamped to `[0, 1]`, of the
 intensity profiles of `J` and of `J' ≤ J` is the omitted-layer probability
@@ -333,7 +333,7 @@ theorem shiftProb_intensityProfile_eq {V : Type*} {J J' : Sym2 V → ℝ≥0} (h
   rw [max_eq_right h0.1, min_eq_right h0.2]
   rfl
 
-/-- **Item 4 of issue 624: `hD` in the fork's spelling.** Under the hypotheses of
+/-- **Item 4: `hD` in the fork's spelling.** Under the hypotheses of
 `tsum_omittedKernel_le`, for every `r ≥ 1` and `x`, the full row (diagonal included) of the
 shift probability `min 1 (max 0 ((q_∞ - q_r)/(1 - q_r)))` from the cut-off law `q_r` to the
 full law `q_∞` at intensity `β` is at most `β C r^{-α}`. -/
@@ -360,7 +360,7 @@ theorem tsum_shiftProb_le (hd : 1 ≤ d) {α c κ : ℝ} (hα : 0 < α) (hc : 0 
     simp [intensityProfile]
   · rfl
 
-/-! ### Witnesses (D-5) -/
+/-! ### Witnesses -/
 
 /-- At `d = 1`, the sup norm (`κ = 1`), `α = 1`, `c = 1` and `r = 1`, the omitted kernel is
 the whole kernel off distance `1` and has value `1` at distance `1`. -/

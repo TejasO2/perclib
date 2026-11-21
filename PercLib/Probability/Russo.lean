@@ -7,7 +7,7 @@ repository-wide licence inferred from its vendored dependencies.
 Modified for PercLib on 2026-11-14: individual real coordinate profiles and derivatives;
 division-free pairing of forced-open/forced-closed differences; p and beta specializations.
 This is finite polynomial calculus, not a new probability law. The probability integral
-bridge is the separate ProductExpectation package. Endpoint derivatives are derivatives
+bridge is the separate ProductExpectation module. Endpoint derivatives are derivatives
 of the real polynomial extension, not a globally interval-valued family.
 -/
 module

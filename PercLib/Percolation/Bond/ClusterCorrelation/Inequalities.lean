@@ -83,7 +83,7 @@ theorem clusterCovarianceUpper [Countable V] : ClusterCovarianceUpper V := by
   rw [hsplit, add_comm]
   exact add_le_add (disjointClusterBK q x y F G hF hG hFm hGm) le_rfl
 
-/-! ### Witnesses (D-5) -/
+/-! ### Witnesses -/
 
 /-- `F = G = |·|` (the cluster volume) on `Bool`: the three inequalities hold. -/
 example (q : Sym2 Bool → unitInterval) :

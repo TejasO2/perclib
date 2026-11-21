@@ -279,9 +279,9 @@ theorem lintegral_mul_ge_of_meas_lt {μ : Measure Ω} [SFinite μ] {f g : Ω →
     _ ≤ ∫⁻ p : ℝ × ℝ, μ ({ω | p.1 < f ω} ∩ {ω | p.2 < g ω}) ∂(κ.prod κ) :=
         lintegral_mono_ae hle
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
-/-- **D-5 witness.** `C = univ` and `f = g = 1` under the point mass on `Unit`: the hypotheses
+/-- **Non-vacuity witness.** `C = univ` and `f = g = 1` under the point mass on `Unit`: the hypotheses
 of `lintegral_mul_indicator_eq_double` and of `lintegral_mul_indicator_le_of_meas_lt` hold, and
 both sides of the inequality equal `1`. -/
 theorem lintegral_mul_indicator_le_of_meas_lt_one :

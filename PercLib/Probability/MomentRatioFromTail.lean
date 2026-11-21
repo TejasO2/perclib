@@ -30,7 +30,7 @@ analytic step). For measurable `f ≥ 0`, `M ≥ 1`, and the tail
   `∫⁻ f^r ≤ (1 + e r 9^r Γ(r)) M^r`.
 
 The tail hypothesis is the third conjunct of `PercLib.Percolation.Bond.UniversalTightness`
-at `t = aM`; that instantiation is a separate package.
+at `t = aM`; that instantiation is made in `PercLib/Percolation/Bond/Tightness/MomentRatio.lean`.
 -/
 
 @[expose] public section
@@ -470,7 +470,7 @@ theorem moment_le_rpow_of_tail {μ : Measure Ω} [IsProbabilityMeasure μ] {f : 
           ← ENNReal.ofReal_add zero_le_one hcpos]
 
 
-/-! ### D-5 witness: `μ = δ_()`, `f = 1`, `M = 1` -/
+/-! ### Non-vacuity witness: `μ = δ_()`, `f = 1`, `M = 1` -/
 
 /-- The tail hypothesis holds for `μ = δ_()`, `f = 1`, `M = 1`: at `t = 1` the right side
 is `e^{8/9} ≥ 1`, and for `t > 1` the left side is `0`. -/

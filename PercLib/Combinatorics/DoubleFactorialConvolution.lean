@@ -139,7 +139,7 @@ theorem lemma_I_4_23 (n : ℕ) (hn : 1 ≤ n) :
   have hk' : k < n := mem_range.1 hk
   rw [show 2 * n - 2 * k - 3 = 2 * (n - 1 - k) - 1 by omega]
 
-/-- **D-5 / sanity check** at `n = 3`: `1·1·3 + 3·1·1 + 3·3·1 = 15 = 5‼`. -/
+/-- **Sanity check** at `n = 3`: `1·1·3 + 3·1·1 + 3·3·1 = 15 = 5‼`. -/
 theorem lemma_I_4_23_three :
     ∑ k ∈ range 3, (3 : ℕ).choose k * (2 * k - 1)‼ * (2 * 3 - 2 * k - 3)‼ = (2 * 3 - 1)‼ :=
   lemma_I_4_23 3 (by norm_num)

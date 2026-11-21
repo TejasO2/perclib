@@ -642,7 +642,7 @@ theorem bool_cluster_false_subset_iff (ω : Config Bool) :
     subst hv
     simp
 
-/-- **The formula evaluated (issue 371, acceptance).** In the smallest case the right-hand
+/-- **The formula evaluated.** In the smallest case the right-hand
 side of `hasDerivAt_law_escape` is `P(S = {false}) · τ(false,false) · J(false,true) =
 e^{-β} · 1 · 1`. -/
 example {β : ℝ} (hβ : 0 < β) :

@@ -732,7 +732,7 @@ theorem potterBounds_of_regularlyVarying {f : ℝ → ℝ} {α : ℝ} (hmeas : M
 
 
 
-/-! ## Part 2 (Q-164, issue 531)
+/-! ## Part 2
 
 Ported from the same source file (its remaining statements; `slowlyVarying_div_rpow` is not
 ported, being the forward direction of `regularlyVarying_iff_slowlyVarying_div_rpow` of
@@ -1066,7 +1066,7 @@ theorem isLogErrorFunction_of_regularlyVarying {f : ℝ → ℝ} {α : ℝ} (hα
     exact hbound x hx
 
 
-/-! ### Witness (D-5) -/
+/-! ### Witness -/
 
 example {a : ℝ} :
     ∀ ε : ℝ, 0 < ε → ∃ X : ℝ, 1 ≤ X ∧ ∀ x y : ℝ, X ≤ y → y ≤ x →

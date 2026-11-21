@@ -602,7 +602,7 @@ theorem binaryTree_law_cluster_card_toReal (p : unitInterval)
   rw [binaryTree_law_cluster_card_eq_catalan p q hq hn]
   simp [ENNReal.toReal_mul, ENNReal.toReal_pow, unitInterval.coe_symm_eq]
 
-/-! ### Non-vacuity (D-5): `n = 1` and `n = 2` -/
+/-! ### Non-vacuity: `n = 1` and `n = 2` -/
 
 /-- `n = 1`: probability `(1-p)^2`. -/
 example (p : unitInterval) :

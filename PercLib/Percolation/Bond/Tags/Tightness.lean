@@ -375,7 +375,7 @@ theorem exponent_relations_sampled_root [Countable V] (q : ℝ → Sym2 V → un
   field_simp
   ring
 
-/-! ### Non-vacuity of 7VCS (D-5)
+/-! ### Non-vacuity of 7VCS
 
 The zero profile on `ℕ` with windows `{0, …, ⌈R⌉₊ - 1}`: every cluster is a single
 vertex almost surely, so `C = 1`, `δ = 2` give the cluster tail, `M = 2`, the averaged

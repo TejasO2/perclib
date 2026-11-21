@@ -348,7 +348,7 @@ theorem triangle_weighted_lt_top [Countable V] (q : Sym2 V → unitInterval) (o 
   have h := triangle_weighted_le q o
   exact (h.1.trans h.2).trans_lt (ENNReal.pow_lt_top hD)
 
-/-! ### Non-vacuity witness (D-5) -/
+/-! ### Non-vacuity witness -/
 
 private theorem tau_bool_half :
     tau (fun _ : Sym2 Bool => (⟨1 / 2, by norm_num, by norm_num⟩ : unitInterval)) false true =

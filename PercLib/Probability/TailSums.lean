@@ -251,7 +251,7 @@ theorem tsum_pow_mul_exp_neg_succ_le (j : ℕ) {c : ℝ} (hc0 : 0 < c) (hc1 : c 
     _ = ENNReal.ofReal ((2 : ℝ) ^ j * (j.factorial : ℝ) * c⁻¹ ^ j * (4 / c)) := by
         rw [← ENNReal.ofReal_mul (by positivity)]
 
-/-! ### D-5 witness: `c = 1` satisfies `0 < c ≤ 1` -/
+/-! ### Non-vacuity witness: `c = 1` satisfies `0 < c ≤ 1` -/
 
 example : (∑' n : ℕ, ENNReal.ofReal (Real.exp (-(((n : ℝ) + 1) * 1)))) ≤ ENNReal.ofReal (2 / 1)
     ∧ (∑' n : ℕ, (((n : ℝ≥0∞) + 1) ^ 2 * ENNReal.ofReal (Real.exp (-(((n : ℝ) + 1) * 1)))))

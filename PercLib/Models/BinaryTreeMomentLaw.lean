@@ -164,7 +164,7 @@ theorem lintegral_cluster_rpow_eq_moment (p : unitInterval)
   field_simp
   ring
 
-/-- D-5: the hypotheses hold at `p = 1/4` with `q` the tree profile, for every `s`. -/
+/-- Non-vacuity: the hypotheses hold at `p = 1/4` with `q` the tree profile, for every `s`. -/
 example (s : ℝ) := lintegral_cluster_rpow_eq_moment
   (⟨1 / 4, by norm_num, by norm_num⟩ : unitInterval)
   (fun e => if e ∈ (SimpleGraph.fromRel fun u w : List (Fin 2) => ∃ b, w = b :: u).edgeSet

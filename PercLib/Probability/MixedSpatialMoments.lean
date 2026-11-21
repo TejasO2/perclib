@@ -452,7 +452,7 @@ theorem singleton_hypotheses (x : E) :
   refine ⟨fun _ => singleton_nonempty x, fun g _ => measurable_const, ?_⟩
   simp
 
-/-- **D-5 witness for VMEJ.** For a deterministic single point the theorem reads
+/-- **Non-vacuity witness for VMEJ.** For a deterministic single point the theorem reads
 `∏_i |P_i(x)| ≤ max_{ij} (|⟨x, u_{ij}⟩|^{2p})^{1/2}`. -/
 theorem prod_le_of_singleton (x : E) {n p : ℕ} (deg : Fin n → ℕ)
     (u : (i : Fin n) → Fin (deg i) → E) (hp : ∑ i, deg i = p) (hp1 : 1 ≤ p) :

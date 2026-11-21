@@ -294,9 +294,9 @@ theorem localConn_ball_bounds (hL : 2 ≤ L) (hd : 1 ≤ d) {α : ℝ}
     · exact hPτ x y
     · exact le_rfl)
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
-/-- D-5: `f x y = L^{-h(y-x)(d-α)}` satisfies both bounds with `a = A = 1` and `f x x = 1`
+/-- Non-vacuity: `f x y = L^{-h(y-x)(d-α)}` satisfies both bounds with `a = A = 1` and `f x x = 1`
 (here `L = 2`, `d = 1`, `α = 1/2`), so item 1 applies. -/
 example (x : ℕ →₀ (Fin 1 → ZMod 2)) (n : ℕ) (hn : 1 ≤ n) :
     ENNReal.ofReal (1 / 2 * (2 : ℝ) ^ ((1 / 2 : ℝ) * n)) ≤

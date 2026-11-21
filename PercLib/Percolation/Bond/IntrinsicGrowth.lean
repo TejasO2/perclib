@@ -140,7 +140,7 @@ theorem rowSum_eq_of_transitive_profile (q : Sym2 V → unitInterval)
   congr 3
   rw [← hσ s(o, w), Sym2.map_mk]
 
-/-- **R5XZ, upper bound (issue 445 form).** For a transitive profile with
+/-- **Upper bound, transitive form.** For a transitive profile with
 `D = ∑'_{v ≠ o} q s(o,v)`, `E|B_ω(o,r)| ≤ ∑_{j ≤ r} D^j`. -/
 theorem lintegral_encard_ball_le_of_transitive [Countable V] (q : Sym2 V → unitInterval)
     (hq : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, q (Sym2.map σ e) = q e) (o : V) (r : ℕ) :
@@ -150,7 +150,7 @@ theorem lintegral_encard_ball_le_of_transitive [Countable V] (q : Sym2 V → uni
   lintegral_encard_ball_le_of_rowSum q _
     (fun v => (rowSum_eq_of_transitive_profile q hq o v).le) o r
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
 /-- The nearest-neighbour profile on `ℤ` (open probability `1` on `s(a, a+1)`) is
 transitive, so the bound applies with `D = 2`. -/

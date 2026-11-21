@@ -423,7 +423,7 @@ theorem lemma_I_2_12_rv' {f f' : ℝ → ℝ} {a r₀ : ℝ}
     ring
   exact lemma_I_2_12_rv ha hr₀ hderiv hpos hode hmeas h0
 
-/-! ### Witness (D-5): `f r = r^a`, `h = 0` -/
+/-! ### Witness: `f r = r^a`, `h = 0` -/
 
 example {a : ℝ} (ha : 0 < a) : RegularlyVarying a (fun r : ℝ => r ^ a) :=
   lemma_I_2_12_rv (f' := fun r => a * r ^ (a - 1)) (h := fun _ => 0) (r₀ := 1) ha one_pos

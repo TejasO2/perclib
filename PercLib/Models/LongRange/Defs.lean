@@ -90,7 +90,7 @@ def cutoffKernel (N : Seminorm ℝ (Fin d → ℝ)) (K : ℝ → ℝ) (r : ℝ) 
 
 /-- The **power-law profile** `s ↦ c s^(-a)` of Definition I.1.3 (with `δ ≡ 0`), with
 exponent `a = d + α` and normalising constant `c`. The wiki articles use `c = 1/a`;
-pull request 488's `lrKernel` uses `c = 1` and the sup norm. -/
+the source formalisation's `lrKernel` uses `c = 1` and the sup norm. -/
 def powerLawProfile (c a s : ℝ) : ℝ :=
   c * s ^ (-a)
 
@@ -307,7 +307,7 @@ theorem antitoneOn_powerLawProfile {c a : ℝ} (hc : 0 ≤ c) (ha : 0 ≤ a) :
     AntitoneOn (powerLawProfile c a) (Ioi 0) := fun _ hs _ _ hst =>
   mul_le_mul_of_nonneg_left (Real.rpow_le_rpow_of_nonpos hs hst (by linarith)) hc
 
-/-! ### Witnesses (D-5): the sup norm and the Euclidean norm -/
+/-! ### Witnesses: the sup norm and the Euclidean norm -/
 
 /-- The sup norm on `ℝ^d` is a norm. -/
 theorem normSeminorm_eq_zero (v : Fin d → ℝ) (h : normSeminorm ℝ (Fin d → ℝ) v = 0) : v = 0 :=
@@ -329,14 +329,14 @@ theorem one_le_norm_of_ne_zero {z : Fin d → ℤ} (hz : z ≠ 0) : 1 ≤ ‖z�
   rw [← natCast_floor_norm]
   exact_mod_cast Nat.one_le_iff_ne_zero.2 fun h => hz ((floor_norm_eq_zero_iff z).1 h)
 
-/-- Issue 508: at `d = 1`, `α = 1` (sup norm, `c = 1`), the kernel is positive off the
+/-- Non-vacuity: at `d = 1`, `α = 1` (sup norm, `c = 1`), the kernel is positive off the
 diagonal. -/
 theorem radialKernel_pos_example {x y : Fin 1 → ℤ} (h : x ≠ y) :
     0 < radialKernel (normSeminorm ℝ (Fin 1 → ℝ)) (powerLawProfile 1 2) s(x, y) := by
   rw [radialKernel_of_ne h, Real.toNNReal_pos]
   exact powerLawProfile_pos one_pos (norm_sub_pos normSeminorm_eq_zero h)
 
-/-- Issue 508: at `d = 1`, `α = 1` (sup norm, `c = 1`), the kernel is summable along rows. -/
+/-- Non-vacuity: at `d = 1`, `α = 1` (sup norm, `c = 1`), the kernel is summable along rows. -/
 theorem summable_radialKernel_example (x : Fin 1 → ℤ) :
     Summable fun y => (radialKernel (normSeminorm ℝ (Fin 1 → ℝ)) (powerLawProfile 1 2)
       s(x, y) : ℝ) := by
@@ -352,7 +352,7 @@ theorem summable_radialKernel_example (x : Fin 1 → ℤ) :
       normSeminorm_intCast]
     norm_num
 
-/-- Issue 508, Euclidean norm: at `d = 1`, `α = 1` (`c = 1`), the kernel is positive off the
+/-- Non-vacuity, Euclidean norm: at `d = 1`, `α = 1` (`c = 1`), the kernel is positive off the
 diagonal. -/
 theorem radialKernel_pos_euclidean_example {x y : Fin 1 → ℤ} (h : x ≠ y) :
     0 < radialKernel ((normSeminorm ℝ (EuclideanSpace ℝ (Fin 1))).comp
@@ -360,7 +360,7 @@ theorem radialKernel_pos_euclidean_example {x y : Fin 1 → ℤ} (h : x ≠ y) :
   rw [radialKernel_of_ne h, Real.toNNReal_pos]
   exact powerLawProfile_pos one_pos (norm_sub_pos euclidean_seminorm_eq_zero h)
 
-/-- Issue 508: the cut-off of `s ↦ s^(-2)` at `r = 1` vanishes for `s > 1` and is positive
+/-- Non-vacuity: the cut-off of `s ↦ s^(-2)` at `r = 1` vanishes for `s > 1` and is positive
 for `0 < s < 1`. -/
 theorem cutoffProfile_example :
     (∀ s, 1 < s → cutoffProfile (powerLawProfile 1 2) 1 s = 0) ∧
@@ -370,7 +370,7 @@ theorem cutoffProfile_example :
   simp only [powerLawProfile, one_mul, Real.one_rpow]
   exact Real.one_lt_rpow_of_pos_of_lt_one_of_neg hs hs1 (by norm_num)
 
-/-- Issue 471: with the sup norm, `J_r = 0` for `r < 1`, since no pair is at distance below
+/-- Non-vacuity: with the sup norm, `J_r = 0` for `r < 1`, since no pair is at distance below
 one. -/
 theorem cutoffKernel_eq_zero_of_lt_one {K : ℝ → ℝ} (hr : r < 1) (e : Sym2 (Fin d → ℤ)) :
     cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) K r e = 0 := by
@@ -382,7 +382,7 @@ theorem cutoffKernel_eq_zero_of_lt_one {K : ℝ → ℝ} (hr : r < 1) (e : Sym2 
       rw [normSeminorm_intCast]
       exact hr.trans_le (one_le_norm_of_ne_zero (sub_ne_zero.2 h))
 
-/-- Issue 471: `J_r ≤ J` at the explicit pair `{0, 1}` of `ℤ`, with `a = 2`, `c = 1/2`,
+/-- Non-vacuity: `J_r ≤ J` at the explicit pair `{0, 1}` of `ℤ`, with `a = 2`, `c = 1/2`,
 `r = 2`. -/
 example : cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (powerLawProfile (1 / 2) 2) 2
       s(0, fun _ => 1) ≤

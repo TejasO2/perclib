@@ -204,7 +204,7 @@ theorem integral_pow_four_le {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω}
   calc ∫ ω, X ω ^ 4 ∂P ≤ 2 * T ^ 2 * ∫ ω, X ω ^ 2 ∂P := by linarith
     _ = 1152 * χ ^ 4 * L ^ 2 * ∫ ω, X ω ^ 2 ∂P := by rw [hT]; ring
 
-/-- **D-5 witness for IXEZ:** `X ≡ 1` under any probability measure (`χ = 1`). -/
+/-- **Non-vacuity witness for IXEZ:** `X ≡ 1` under any probability measure (`χ = 1`). -/
 theorem integral_pow_four_le_const_one {Ω : Type*} [MeasurableSpace Ω] (P : Measure Ω)
     [IsProbabilityMeasure P] :
     ∫ _ω, (1 : ℝ) ^ 4 ∂P ≤
@@ -430,7 +430,7 @@ theorem law_exit_le (q : Sym2 (LatticeSite d) → unitInterval) {R r χ M : ℝ}
 
 /-! ### Non-vacuity for YVJT -/
 
-/-- **D-5 witness for the geometric step:** `d = 1`, `R = 1`, open probability `p` on
+/-- **Non-vacuity witness for the geometric step:** `d = 1`, `R = 1`, open probability `p` on
 nearest-neighbour pairs of `ℤ` and `0` otherwise. -/
 theorem ae_encard_cluster_ge_of_exit_nn (p : unitInterval) (r : ℝ) :
     ∀ᵐ ω ∂law (Sym2.lift ⟨fun x y : LatticeSite 1 => if ‖x - y‖ ≤ 1 then p else 0,
@@ -439,7 +439,7 @@ theorem ae_encard_cluster_ge_of_exit_nn (p : unitInterval) (r : ℝ) :
         ((⌊r / 1⌋₊ + 1 : ℕ) : ℕ∞) ≤ (cluster ω 0).encard :=
   ae_encard_cluster_ge_of_exit _ one_pos (fun x y h => by simp [not_le.2 h]) 0
 
-/-- **D-5 witness for the conditional bound:** with the zero profile the cluster of `o` is
+/-- **Non-vacuity witness for the conditional bound:** with the zero profile the cluster of `o` is
 `{o}` almost surely, so the volume tail hypothesis holds with `χ = 2` and `M = 1`. -/
 theorem law_exit_le_zero (o : LatticeSite d) (r : ℝ) :
     law (fun _ : Sym2 (LatticeSite d) => (0 : unitInterval))

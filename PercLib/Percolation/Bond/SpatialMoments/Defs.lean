@@ -69,7 +69,7 @@ theorem spatialMoment_eq_tsum [Countable V] (q : Sym2 V → unitInterval) (o : V
   · simp_rw [hind x]
     exact (measurable_const.indicator (measurableSet_conn o x)).aemeasurable
 
-/-! ### Witness (D-5) -/
+/-! ### Witness -/
 
 /-- With every pair closed (`q = 0`) the cluster is `{o}`, and the spatial moment is `w 0`. -/
 theorem spatialMoment_zero [Countable V] (o : V) (w : V → ℝ≥0∞) :

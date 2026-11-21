@@ -635,7 +635,7 @@ theorem min_le_of_ghost_ode {m : ℝ → ℝ} {A r q : ℝ} (hA : 0 < A) (hr : 0
     _ = m h := by
         rw [← Real.rpow_mul hmh0, mul_one_div_cancel (by linarith), Real.rpow_one]
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
 section Witness
 

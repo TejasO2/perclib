@@ -281,7 +281,7 @@ theorem sq_sub_le_two_mul_max_mul_bernoulliDivergence {a b : ℝ} (ha : 0 < a) (
   have hm : 0 ≤ b * max (a / b) 1 := by positivity
   nlinarith [mul_nonneg (mul_nonneg zero_le_two hm) h2]
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
 /-- `β₁ = β₂`: both sides of KHB7 vanish. -/
 example (J β : ℝ) :

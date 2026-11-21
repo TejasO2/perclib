@@ -522,7 +522,7 @@ theorem lemma_I_2_10 {f : ℝ → ℝ} {α : ℝ} (hα : -1 < α)
     rw [Real.dist_eq]
     exact hN n hn⟩
 
-/-! ### Witness (D-5): the constant function `1` (index `0`) -/
+/-! ### Witness: the constant function `1` (index `0`) -/
 
 example : Tendsto (fun r => (∫ s in (1 : ℝ)..r, (fun _ : ℝ => (1 : ℝ)) s) / (r * 1)) atTop
     (𝓝 (1 / (0 + 1))) :=

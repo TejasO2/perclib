@@ -176,7 +176,7 @@ theorem intensity_coefficient_bounds {J β : ℝ} (hJ : 0 < J) (hβ : 0 < β) :
     have hle : Real.exp (-β * J) ≤ 1 := Real.exp_le_one_iff.mpr (by nlinarith)
     exact mul_le_of_le_one_left (div_pos hJ hd).le hle
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
 /-- One coordinate and `f = Xₑ`: VVDC reads `Var = q(1-q)`. -/
 example (q : ℝ) :

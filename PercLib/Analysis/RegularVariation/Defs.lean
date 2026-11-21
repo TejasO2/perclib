@@ -184,7 +184,7 @@ theorem SlowlyVarying.rpow_mul (h : SlowlyVarying L) (ρ : ℝ) :
   dsimp only
   rw [Real.mul_rpow hc.le hx.le, mul_assoc, mul_div_assoc, mul_div_mul_left _ _ hxρ]
 
-/-! ### Witnesses (D-5) -/
+/-! ### Witnesses -/
 
 /-- A positive constant is slowly varying. -/
 theorem slowlyVarying_const {a : ℝ} (ha : 0 < a) : SlowlyVarying (fun _ => a) :=
@@ -215,10 +215,9 @@ example : SlowlyVarying Real.log := slowlyVarying_log
 example : RegularlyVarying 2 (fun x => x ^ (2 : ℝ) * Real.log x) :=
   regularlyVarying_rpow_mul_log 2
 
-/-! ### Logarithmic integrability, log-error functions and the generalized inverse (Q-140)
+/-! ### Logarithmic integrability, log-error functions and the generalized inverse
 
-The next three definitions are adapted from pull request 488:
-repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
+The next three definitions are adapted from the repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
 `d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, files
 `PercLib/CriticalLRP/Analysis/RegularVariation.lean` (`LogarithmicallyIntegrable`,
 `IsLogErrorFunction`) and `PercLib/CriticalLRP/Analysis/GeneralInverse.lean` (`genInv`,
@@ -310,7 +309,7 @@ theorem genInv_eq_zero_of_forall_lt (hlt : ∀ x, x₀ ≤ x → f x < y) : genI
   rw [genInv_def, show {x | x₀ ≤ x ∧ y ≤ f x} = ∅ from
     eq_empty_of_forall_notMem fun x hx => (hlt x hx.1).not_ge hx.2, Real.sInf_empty]
 
-/-! #### Witnesses (D-5) -/
+/-! #### Witnesses -/
 
 theorem isLogErrorFunction_zero : IsLogErrorFunction (fun _ => 0) :=
   ⟨⟨⟨0, measurable_const⟩, 1, one_pos, by simp⟩, tendsto_const_nhds⟩

@@ -343,9 +343,9 @@ theorem tendsto_iSup_triangle [Countable V] (q : Sym2 V → unitInterval) (d : V
   have h3 := le_abs_self (d o (σ v))
   linarith
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
-/-- D-5, item 1 on a finite vertex type: `D < ⊤` holds since every `Δₓ ≤ |V|²`. -/
+/-- Non-vacuity, item 1 on a finite vertex type: `D < ⊤` holds since every `Δₓ ≤ |V|²`. -/
 example (q : Sym2 Bool → unitInterval) (o : Bool) {ε : ℝ≥0∞} (hε : 0 < ε) :
     ∃ E : Finset Bool, ∀ x ∉ E, ∑' u, ∑' v, tau q o u * tau q u v * tau q v x < ε := by
   refine exists_finset_triangle_lt q (lt_of_le_of_lt (iSup_le fun x => ?_)
@@ -357,7 +357,7 @@ example (q : Sym2 Bool → unitInterval) (o : Bool) {ε : ℝ≥0∞} (hε : 0 <
             _ = 1 := by ring
     _ = 4 := by simp [tsum_fintype]; norm_num
 
-/-- D-5, item 2 on `ℤ` with `q = p < 1` on nearest-neighbour pairs (and `0` elsewhere),
+/-- Non-vacuity, item 2 on `ℤ` with `q = p < 1` on nearest-neighbour pairs (and `0` elsewhere),
 `d(a,b) = |b - a|`, transitive by translations; `Δ₀ ≤ χ² < ⊤`. -/
 example (p : unitInterval) (hp : p < 1) :
     ∃ q : Sym2 ℤ → unitInterval, (∀ a b, a ≠ b → q s(a, b) = if |b - a| = 1 then p else 0) ∧

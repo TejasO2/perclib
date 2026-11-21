@@ -340,7 +340,7 @@ theorem measure_le_le_exp [IsProbabilityMeasure P] (hX : Measurable X) (hX0 : �
     _ = exp (-(n / (4 * χ ^ 2))) := by
         rw [← exp_add]; congr 1; field_simp; ring
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
 /-- The point mass `X = χ` with `χ ≥ 1` satisfies the moment hypothesis for every `m ≥ 1`. -/
 theorem dirac_moment_hyp {χ : ℝ} (hχ : 1 ≤ χ) (m : ℕ) (hm : 1 ≤ m) :

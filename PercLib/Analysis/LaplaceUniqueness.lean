@@ -463,11 +463,11 @@ theorem eq_zero_ae_of_forall_laplace_eq_zero {D : ℝ → ℝ}
   rw [← h1]
   exact hu
 
-/-- D-5: the zero function meets every positive-rate hypothesis. -/
+/-- Non-vacuity: the zero function meets every positive-rate hypothesis. -/
 example : (fun _ : ℝ => (0 : ℝ)) =ᵐ[volume.restrict (Ioi (0 : ℝ))] 0 :=
   eq_zero_ae_of_forall_laplace_eq_zero (by simp) (by simp)
 
-/-- D-5: a nonzero compactly supported function has an explicitly nonzero
+/-- Non-vacuity: a nonzero compactly supported function has an explicitly nonzero
 Laplace transform. -/
 example :
     IntegrableOn ((Ioo (0 : ℝ) 1).indicator (fun _ => (1 : ℝ))) (Ioi 0) ∧

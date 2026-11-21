@@ -183,7 +183,7 @@ example (p : E → unitInterval) {A B : Set (Set E)} (hA : IsUpperSet A) (hB : I
   measure_inter_ge_of_latticeCondition _ (fun ω η => (prodBernoulli_latticeCondition p ω η).le)
     hA hB
 
-/-- The monotone comparison of S-2 on a finite index set, re-derived from Holley. -/
+/-- The monotone comparison of `PercLib.Probability.Coupling.Monotone` on a finite index set, re-derived from Holley. -/
 example (p q : E → unitInterval) (hpq : p ≤ q) {A : Set (Set E)} (hA : IsUpperSet A) :
     prodBernoulli p A ≤ prodBernoulli q A :=
   measure_le_of_holley _ _ (prodBernoulli_holley p q hpq) hA

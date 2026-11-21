@@ -446,7 +446,7 @@ theorem split_second_term_eq_zero_iff (p : unitInterval) (y : ℝ) :
 
 /-! ### Non-vacuity -/
 
-/-- **D-5 witness for XWH4, `I = {e}`, `A = B = {e open}`.** Here `P(H) = 0`, `C₁₁` is
+/-- **Non-vacuity witness for XWH4, `I = {e}`, `A = B = {e open}`.** Here `P(H) = 0`, `C₁₁` is
 everything and `U = V = ∅`, so the theorem gives `P(H̃) = p²`. -/
 theorem prodBernoulli_real_split_unit (q : Unit → unitInterval) :
     (prodBernoulli (Sum.elim q fun _ : Unit => q ())).real
@@ -470,7 +470,7 @@ theorem prodBernoulli_real_split_unit (q : Unit → unitInterval) :
   simpa only [measureReal_empty, sub_zero, union_empty, sdiff_empty, inter_empty,
     empty_sdiff, mul_zero, add_zero, probReal_univ, mul_one] using h
 
-/-- **D-5 witness for XWH4, `A = B = univ`.** The hypotheses hold for every finite `I`, and
+/-- **Non-vacuity witness for XWH4, `A = B = univ`.** The hypotheses hold for every finite `I`, and
 then both sides vanish. -/
 theorem prodBernoulli_real_split_sub_univ (q : I → unitInterval) (e : I) :
     (prodBernoulli (Sum.elim q fun _ : Unit => q e)).real

@@ -461,7 +461,7 @@ theorem eventually_lintegral_ball_le [Countable V] (J : Sym2 V → ℝ≥0) (o :
         simp only [div_eq_mul_inv]
         ring
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
 /-- PI11 on the two-vertex model at `r = 0` and `r = 1`. -/
 example (α β : ℝ≥0) (hα : 0 < α) (hαβ : α ≤ β) :

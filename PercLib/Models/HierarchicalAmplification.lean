@@ -258,7 +258,7 @@ theorem exp_neg_two_mul_sq_le {N : ℝ} (hN : 0 < N) :
   rw [this]
   nlinarith [sq_nonneg N]
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
 /-- The issue's example `L = 2`, `d = 3`, `α = 1`: a scale `ℓ` exists. -/
 example : ∃ ℓ : ℕ, 1 ≤ ℓ ∧ Real.exp (-(((2 : ℕ) : ℝ) ^ (3 * ℓ) / (8 * Real.exp 1))) ≤ 1 / 4 ∧

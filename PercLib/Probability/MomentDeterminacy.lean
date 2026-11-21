@@ -443,7 +443,7 @@ theorem Measure.eq_of_forall_moment_eq_of_summable {μ ν : Measure ℝ} [IsFini
 
 
 
-/-! ### D-5 witnesses -/
+/-! ### Non-vacuity witnesses -/
 
 /-- The hypotheses of `Measure.eq_of_mgf_eq` hold for `μ = ν = δ₀`: the mgf is finite
 everywhere. -/

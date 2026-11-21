@@ -469,7 +469,7 @@ theorem exponent_relations {Λ v EN ES EX : ℝ → ℝ} {F : ℕ → ℝ} {d df
     rw [h', hδ'] at this
     linarith
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
 /-- The window tail with `A = 1`, `θ = 0` holds for every window and root. -/
 theorem window_tail_one [Countable V] (q : Sym2 V → unitInterval) (Λ : Finset V) (u : V)

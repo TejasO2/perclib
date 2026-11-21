@@ -23,7 +23,7 @@ open Lean
 namespace Lean.Parser.Attr
 
 /-- Permanent wiki assertion identity. The compiled manifest validates cross-module uniqueness
-and the one permitted duplicate: a statement definition and its proof (D-16). -/
+and the one permitted duplicate: a statement definition and its proof. -/
 syntax (name := tag) "tag " str : attr
 end Lean.Parser.Attr
 namespace PercLib.Meta

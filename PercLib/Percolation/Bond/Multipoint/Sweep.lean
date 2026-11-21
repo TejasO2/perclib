@@ -287,7 +287,7 @@ theorem threePartDistance_triple {x y z : X} (hxy : x ≠ y) (hyz : y ≠ z) (hx
     | ring1
     | (rw [dist_comm a b, dist_comm b c, dist_comm c a]; ring1)
 
-/-! ### Witnesses (D-5) -/
+/-! ### Witnesses -/
 
 /-- `A = {0, 1, 3} ⊆ ℝ`: `Sweep(A) > 0`, `Sweep(2 • A) = 2³ Sweep(A)`, and
 `S(A) = 1 · 2 · 3 = 6`. -/

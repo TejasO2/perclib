@@ -152,7 +152,7 @@ theorem ae_all_siteClusters_finite_of_degree_le [Countable V]
     siteBernoulli_siteInfinite_eq_zero_of_degree_le G hΔ w p hw hp x
 
 /-- A finite cover of each lattice neighbour set by signed coordinate steps.
-This local degree bound avoids a dependency on the pending Q-32 lattice package. -/
+This local degree bound keeps the file independent of `PercLib.Models.Lattice`. -/
 private theorem lattice_neighbors_subset (d : ℕ) (x : LatticeSite d) :
     (zdGraph d).neighborSet x ⊆ Set.range
       (fun t : Fin d × Bool => Function.update x t.1 (x t.1 + if t.2 then 1 else -1)) := by

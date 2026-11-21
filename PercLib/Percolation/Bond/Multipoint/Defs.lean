@@ -95,7 +95,7 @@ theorem subsingleton_treeShape_of_eq {k : ℕ}
   obtain rfl : G = H := Subtype.ext (h _ _ G.2 H.2)
   exact ⟨Iso.refl, fun _ => rfl⟩
 
-/-! ### Witnesses (D-5): `|𝒯_2| = |𝒯_3| = 1` -/
+/-! ### Witnesses: `|𝒯_2| = |𝒯_3| = 1` -/
 
 /-- The neighbours of the centre of a star are all other vertices. -/
 private theorem neighborSet_starGraph_center {W : Type*} (r : W) :
@@ -202,7 +202,7 @@ theorem card_treeShape_three : Nat.card (TreeShape 3) = 1 := by
 
 /-! ### Multipoint geometry: the recursive three-part distance and the sweep product
 
-Part 2 of Q-138 (issue 472): wiki tags Y4H4 and CS13 (article `multipoint-trees`). A finite
+Wiki tags Y4H4 and CS13 (article `multipoint-trees`). A finite
 metric space `(A, d)` is a `Finset` in a metric space; for `A ⊆ ℝ^d` with the Euclidean
 distance (`EuclideanSpace ℝ (Fin d)`), `threePartDistance` is the `S(A)` of Y4H4, and in
 general it is the `S_d(A)` of CS13. -/

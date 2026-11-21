@@ -351,7 +351,7 @@ theorem tendsto_laplace_of_sizeBias_tendsto {ι : Type*} {l : Filter ι} {Ω : T
     exact squeeze_zero (fun r => abs_nonneg _) hclose hdiff
   simpa using hsq.add hweak
 
-/-- **D-5 witness for 7W00.** If `X_r ≡ a_r` then `Q_r = δ₁` for every `r`, and the limit
+/-- **Non-vacuity witness for 7W00.** If `X_r ≡ a_r` then `Q_r = δ₁` for every `r`, and the limit
 `Q = δ₁` is supported on `[0, ∞)`; the Laplace limit is `1 - e^{-λ}`. -/
 theorem sizeBias_law_const {Ω : Type*} [MeasurableSpace Ω] (P : Measure Ω)
     [IsProbabilityMeasure P] {a : ℝ} (ha : 0 < a) :
@@ -365,7 +365,7 @@ theorem sizeBias_law_const {Ω : Type*} [MeasurableSpace Ω] (P : Measure Ω)
       measure_univ, one_smul]
   · simp
 
-/-- **D-5 witness for 7W00, instantiated.** With `X_r ≡ a_r = 1` on a point, `h_r = λ`, the
+/-- **Non-vacuity witness for 7W00, instantiated.** With `X_r ≡ a_r = 1` on a point, `h_r = λ`, the
 hypotheses hold with `Q_r = Q = δ₁`, and the theorem gives the constant sequence
 `1 - e^{-λ}`. -/
 theorem tendsto_laplace_const {ι : Type*} (l : Filter ι) {lam : ℝ} (hlam : 0 < lam) :
@@ -634,7 +634,7 @@ theorem tendsto_tail_of_sizeBias_tendsto {ι : Type*} {l : Filter ι} {Ω : Type
   simp_rw [hseq]
   exact tendsto_integral_indicator_inv Q Q₀ hconv ht hQt
 
-/-- **D-5 witness for the tail part.** With `X_r ≡ a_r = 1` on a point, `Q_r = Q = δ₁` and
+/-- **Non-vacuity witness for the tail part.** With `X_r ≡ a_r = 1` on a point, `Q_r = Q = δ₁` and
 `t = 1/2` (not an atom of `δ₁`), the theorem applies. -/
 theorem tendsto_tail_const {ι : Type*} (l : Filter ι) :
     Tendsto (fun _ : ι => (1 : ℝ) / (∫ _ω, (1 : ℝ) ∂(Measure.dirac ())) *

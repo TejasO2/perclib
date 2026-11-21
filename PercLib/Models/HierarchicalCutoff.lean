@@ -521,7 +521,7 @@ theorem inv_le_rootCriticalIntensity_hierarchical_of_ne (J : Sym2 (ℕ →₀ (F
 
 end PercLib.Models
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 section Witnesses
 
 open PercLib.Models

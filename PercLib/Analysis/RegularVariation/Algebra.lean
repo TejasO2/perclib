@@ -210,7 +210,7 @@ theorem reverse_doubling_of_regularlyVarying {f : ℝ → ℝ} {ρ : ℝ} (hρ :
   rw [lt_div_iff₀ hxpos] at hx
   linarith
 
-/-! ### Witnesses (D-5) -/
+/-! ### Witnesses -/
 
 example : RegularlyVarying (2 + -1) (fun x : ℝ => x ^ (2 : ℝ) * (x ^ (1 : ℝ))⁻¹) :=
   (regularlyVarying_rpow 2).mul (regularlyVarying_rpow 1).inv

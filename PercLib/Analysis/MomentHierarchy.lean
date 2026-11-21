@@ -772,7 +772,7 @@ theorem isEquivalent_moment_hierarchy_slowlyVarying {P : ℕ} {r₀ α B C R_L :
   field_simp
   exact (div_self hr).symm
 
-/-! ### D-5 witness: the exact solution -/
+/-! ### Non-vacuity witness: the exact solution -/
 
 /-- The power-law moments `m_p(r) = (2p−3)‼ r^{(2p−1)α}` solve the hierarchy exactly with
 `B = C = 1`, `ε_p ≡ 0` and `a(r) = α r^{−α−1}`; here is the derivative identity. -/
@@ -820,7 +820,7 @@ theorem hasDerivAt_moment_hierarchy_witness {α r : ℝ} (hr : 0 < r) {p : ℕ} 
     Real.rpow_add hr]
   ring
 
-/-- D-5 witness for `isEquivalent_moment_hierarchy`: every hypothesis holds for the exact
+/-- Non-vacuity witness for `isEquivalent_moment_hierarchy`: every hypothesis holds for the exact
 solution `m_p(r) = (2p−3)‼ r^{(2p−1)α}`, `B = C = 1`, `ε_p ≡ 0`, `a(r) = α r^{−α−1}`,
 `r₀ = 1`, for every `P` and every `α > 0`. -/
 example (P : ℕ) {α : ℝ} (hα : 0 < α) : ∀ p, 1 ≤ p → p ≤ P →
@@ -857,7 +857,7 @@ example (P : ℕ) {α : ℝ} (hα : 0 < α) : ∀ p, 1 ≤ p → p ≤ P →
     refine Eventually.of_forall fun r hr => ?_
     exact hasDerivAt_moment_hierarchy_witness (one_pos.trans_le hr) (by omega)
 
-/-- D-5 witness for `isEquivalent_moment_hierarchy_slowlyVarying`: the exact solution with
+/-- Non-vacuity witness for `isEquivalent_moment_hierarchy_slowlyVarying`: the exact solution with
 `L ≡ 1` (`R_L = 0`), `B = C = 1`, `ε_p ≡ 0`, `a(r) = α r^{−α−1}`, `r₀ = 1`, for every `P` and
 every `α > 0`. -/
 example (P : ℕ) {α : ℝ} (hα : 0 < α) : ∀ p, 1 ≤ p → p ≤ P →

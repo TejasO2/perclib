@@ -294,7 +294,7 @@ theorem prod_restore_window_finset_subset [Countable V] (q : Sym2 V → unitInte
   exact ⟨fun ⟨_, _, h⟩ => h, fun h =>
     ⟨(finite_cluster_inter_finset ω E o).toFinset, by simp, h⟩⟩
 
-/-- **Item 2 of issue 628: the restoration map preserves the law.** For every profile on a
+/-- **Item 2: the restoration map preserves the law.** For every profile on a
 countable vertex type, `(μ ⊗ μ).map (restoreMap o) = μ` with `μ = law q`. -/
 theorem map_restoreMap [Countable V] (q : Sym2 V → unitInterval) (o : V) :
     ((law q).prod (law q)).map (restoreMap o) = law q := by
@@ -366,7 +366,7 @@ theorem map_restoreMap [Countable V] (q : Sym2 V → unitInterval) (o : V) :
   simp_rw [hc]
   exact tendsto_const_nhds
 
-/-! ### Witnesses (D-5) -/
+/-! ### Witnesses -/
 
 /-- On `Bool` with one pair of probability `1/2` (and the loops), restoration preserves the
 law; `restoreMap_self` shows the map is the identity on the diagonal. -/

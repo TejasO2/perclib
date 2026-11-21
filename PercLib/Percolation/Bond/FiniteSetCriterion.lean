@@ -432,7 +432,7 @@ theorem one_le_boundaryFlux_at_rootCriticalIntensity [Countable V] (J : Sym2 V �
             exact ENNReal.coe_le_coe.2 (intensityProfile_toNNReal_le J βc _)
         _ = _ := by ring
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
 /-- The constant kernel on `ZMod 2` is transitive, by the translations `σ = (· + c)`. -/
 theorem transitive_const_zmod_two :

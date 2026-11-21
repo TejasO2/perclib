@@ -459,7 +459,7 @@ theorem bootstrap_general
     linarith
   exact hmin r hr1 hadm
 
-/-- D-5: the exact profile F(r) = r at α = β = 1, with zero error,
+/-- Non-vacuity: the exact profile F(r) = r at α = β = 1, with zero error,
 meets both bootstrap contracts. The general smallness condition is attained
 at q = 1 and ε = 1/8. The high-dimensional example uses d = 4 and C = 1/64,
 so the retained max 1 is exercised. -/

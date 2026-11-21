@@ -311,9 +311,9 @@ theorem hasDerivAt_truncated_moment (lam : ℝ → Sym2 V → ℝ≥0) (w : Sym2
           exact mul_le_mul_of_nonneg_left (hy y) (hw _)
       _ = _ := by rw [← Finset.sum_mul]; ring
 
-/-! ### Non-vacuity witness (D-5) -/
+/-! ### Non-vacuity witness -/
 
-/-- **D-5 witness.** On `ZMod 2` with `λ_u = u⁺` (`= u` near `t = 1`), `w = 1` and `m = 1/2`
+/-- **Non-vacuity witness.** On `ZMod 2` with `λ_u = u⁺` (`= u` near `t = 1`), `w = 1` and `m = 1/2`
 (below one, as the issue requires), the hypotheses of MIJ7 hold. -/
 example : ∃ D : ℝ, HasDerivAt (fun u : ℝ => ∫ ω, min ((cluster ω (0 : ZMod 2)).ncard : ℝ) (1 / 2)
       ∂law (intensityProfile (fun _ : Sym2 (ZMod 2) => u.toNNReal) 1)) D 1 ∧ 0 ≤ D ∧

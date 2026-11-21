@@ -152,9 +152,9 @@ theorem tsum_iterate_col (M : Γ → Γ → ℝ≥0∞) (hM : ∀ g x y, M (g * 
     rw [ENNReal.tsum_comm]
     simp_rw [ENNReal.tsum_mul_right, ih, ENNReal.tsum_mul_left, tsum_col_eq M hM, hχ, pow_succ]
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
-/-- D-5 on `ℤ` (additive): `M x y = 2^{-|x-y|}` is invariant with square-summable rows and
+/-- Non-vacuity on `ℤ` (additive): `M x y = 2^{-|x-y|}` is invariant with square-summable rows and
 columns, so the trace identity applies, with absolute convergence. -/
 example : Summable (fun v : ℤ => |(1 / 2 : ℝ) ^ (v - 0).natAbs * (1 / 2 : ℝ) ^ (0 - v).natAbs|) ∧
     ∑' v : ℤ, (1 / 2 : ℝ) ^ (v - 0).natAbs * (1 / 2 : ℝ) ^ (0 - v).natAbs =
@@ -182,7 +182,7 @@ example : Summable (fun v : ℤ => |(1 / 2 : ℝ) ^ (v - 0).natAbs * (1 / 2 : �
     (fun g x y => by simp) (fun g x y => by simp) hsq hsq' hsq hsq'
   exact ⟨h.1, h.2.2⟩
 
-/-- D-5 on `ZMod 3` (written `Fin 3`, the same type) with circulant kernels
+/-- Non-vacuity on `ZMod 3` (written `Fin 3`, the same type) with circulant kernels
 `M x y = c(y - x)`, `N x y = d(y - x)`: both traces are `7`, computed as finite sums. -/
 example :
     ∑' v : Fin 3, ![(2 : ℝ), 1, 0] (v - 0) * ![(1 : ℝ), 3, 5] (0 - v) = 7 ∧
@@ -203,7 +203,7 @@ example :
     rw [h0, h1, h2, h3, h4]
     norm_num
 
-/-- D-5 for kernel powers: on `ZMod 3` the all-ones kernel has row sum `3`, and every row
+/-- Non-vacuity witness for kernel powers: on `ZMod 3` the all-ones kernel has row sum `3`, and every row
 and column of its `n`-th power sums to `3^n`. -/
 example (n : ℕ) (x : ZMod 3) :
     ∑' y, (fun K : ZMod 3 → ZMod 3 → ℝ≥0∞ => fun a b => ∑' z, K a z * (fun _ _ => 1) z b)^[n]

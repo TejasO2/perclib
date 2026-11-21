@@ -76,7 +76,7 @@ theorem card_edgeFinset_trivalentTree {k : ℕ} {G : SimpleGraph (Fin k ⊕ Fin 
   rw [card_vertices_trivalentTree hk] at h
   omega
 
-/-! ### Witnesses (D-5) -/
+/-! ### Witnesses -/
 
 /-- With two leaves the single edge `{0, 1}` (the star at leaf `0`) has `2·2 - 3 = 1` edge. -/
 example : (starGraph (Sum.inl 0 : Fin 2 ⊕ Fin (2 - 2))).edgeFinset.card = 1 := by

@@ -254,9 +254,9 @@ theorem law_not_subset_ball_le [Countable V] (q : Sym2 V → unitInterval) (o : 
         · rw [indicator_of_notMem h]
           exact zero_le
 
-/-! ### Non-vacuity witness (D-5) -/
+/-! ### Non-vacuity witness -/
 
-/-- **D-5 witness for 32GP.** On `ℤ` with every pair closed (`q = 0`), `N = |·|`, `p = 1`,
+/-- **Non-vacuity witness for 32GP.** On `ℤ` with every pair closed (`q = 0`), `N = |·|`, `p = 1`,
 `C_p = r = 1`: the spatial moment is `N(0) = 0`, so the hypothesis holds and the volume
 outside `B(0, C)` has expectation at most `C⁻¹ χ`. -/
 example (C : ℝ) (hC : 0 < C) :
@@ -361,7 +361,7 @@ theorem exists_moment_ratio_bounds {A b L : ℝ} (hA : 0 < A) (hb : 0 < b) (hL :
       _ ≤ L * ((K 2 + K 3 + K 4) * Q ^ 2 * ∫ ω, X ω ^ 2 ∂μ) := by gcongr; linarith
       _ = L * (K 2 + K 3 + K 4) * Q ^ 2 * ∫ ω, X ω ^ 2 ∂μ := by ring
 
-/-- **D-5 witness for 0WAE.** `X = Y = 1` under a point mass, `Q = 1`, `A = e`, `b = 1`,
+/-- **Non-vacuity witness for 0WAE.** `X = Y = 1` under a point mass, `Q = 1`, `A = e`, `b = 1`,
 `L = 1`: the tail hypothesis holds (`P(Y ≥ t) = 0` for `t > 1`) and so does localization. -/
 example : ∃ D : ℝ, ∫ ω, (fun _ : Unit => (1 : ℝ)) ω ^ 2 ∂(Measure.dirac ()) ≤
     D * 1 * ∫ ω, (fun _ : Unit => (1 : ℝ)) ω ∂(Measure.dirac ()) := by

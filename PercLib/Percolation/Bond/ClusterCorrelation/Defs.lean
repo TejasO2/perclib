@@ -122,7 +122,7 @@ theorem restoreMap_self (o : V) (ω : Config V) : restoreMap o (ω, ω) = ω := 
   · exact mem_restoreMap_of_touch h
   · exact mem_restoreMap_of_not_touch h
 
-/-! ### Witnesses (D-5)
+/-! ### Witnesses
 
 The targets have no hypotheses beyond the monotonicity and measurability of `F` and `G`;
 the witnesses check the constant functionals and, for Lemma I.4.12, the case `y = o`. -/

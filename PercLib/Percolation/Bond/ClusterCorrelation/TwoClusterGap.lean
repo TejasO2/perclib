@@ -122,7 +122,7 @@ theorem twoClusterGap [Countable V] : TwoClusterGap V := by
         refine tsum_congr fun a => tsum_congr fun b => ?_
         ring
 
-/-! ### Witnesses (D-5) -/
+/-! ### Witnesses -/
 
 /-- The zero profile on `ℕ` with `o, x, y, z` distinct: both sides vanish, and the theorem
 applies. -/

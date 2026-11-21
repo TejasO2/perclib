@@ -588,7 +588,7 @@ theorem avg_tau_le_of_cluster_tail [Countable V] (q : Sym2 V → unitInterval)
   rw [e1, e2, e3]
   field_simp
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
 /-- On `Unit` every cluster is the single vertex. -/
 theorem encard_cluster_unit (ω : Config Unit) (x : Unit) : (cluster ω x).encard = 1 := by

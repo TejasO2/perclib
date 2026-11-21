@@ -301,7 +301,7 @@ theorem threePartDistance_image_smul {E : Type*} [NormedAddCommGroup E] [NormedS
         rw [← mul_assoc, mul_inv_cancel₀ hpos.ne', one_mul]
     _ ≤ c ^ A.card * threePartDistance A := mul_le_mul_of_nonneg_left h hpos.le
 
-/-! ### Witnesses (D-5) -/
+/-! ### Witnesses -/
 
 /-- `A = {0, 1, 3} ⊆ ℝ`: `S(A) > 0`, and `S(2 • A) = 8 S(A)`. -/
 example : 0 < threePartDistance ({0, 1, 3} : Finset ℝ) :=

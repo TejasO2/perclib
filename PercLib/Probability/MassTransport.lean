@@ -111,7 +111,7 @@ theorem law_mass_transport {Γ : Type*} [Group Γ] [Countable Γ]
   lintegral_mass_transport (fun g ω => Sym2.map (g * ·) '' ω)
     (measurePreserving_image_sym2Map_mul_left q hq) t ht hinv
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
 /-- On `ℤ`, the transport `F x y = 1` if `y = x + 1` (else `0`) sends mass `1` out of `0`
 and `0` receives mass `1`. -/

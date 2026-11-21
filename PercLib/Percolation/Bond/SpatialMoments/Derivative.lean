@@ -190,9 +190,9 @@ theorem hasDerivAt_integral_prod_sum_cluster {ι : Type*} [Fintype ι] [Decidabl
     exact prod_add_sub_prod _ _
   · rfl
 
-/-! ### Non-vacuity witness (D-5) -/
+/-! ### Non-vacuity witness -/
 
-/-- **D-5 witness.** Two points (`Bool`), `λ_u = u⁺` on the pair (`= u` near `t = 1`), and
+/-- **Non-vacuity witness.** Two points (`Bool`), `λ_u = u⁺` on the pair (`= u` near `t = 1`), and
 the weight `g = 1{·= true}`: the hypotheses of `hasDerivAt_integral_sum_cluster` hold. -/
 example :
     HasDerivAt (fun u : ℝ => ∫ ω, ∑ z, (cluster ω false).indicator

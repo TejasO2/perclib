@@ -296,7 +296,7 @@ theorem treeGraphInequality (V : Type*) [Countable V] : TreeGraphInequality V :=
   exact mul_le_mul' le_rfl (countable_profile_bk q (isUpperSet_conn w y)
     (isUpperSet_conn w z))
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
 example : TreeGraphInequality Bool := treeGraphInequality Bool
 

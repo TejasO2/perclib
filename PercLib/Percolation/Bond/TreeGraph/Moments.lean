@@ -387,7 +387,7 @@ theorem lintegral_encard_pow_le_iSup [Countable V] (q : Sym2 V → unitInterval)
       (((2 * m - 3)‼ : ℕ) : ℝ≥0∞) * chi q o * (⨆ x, chi q x) ^ (2 * m - 2) :=
   lintegral_encard_pow_le q (fun x => le_iSup (fun x => chi q x) x) m hm o
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
 /-- At `m = 1` the bound is the identity `E|K_o| = χ(o)`. -/
 example [Countable V] (q : Sym2 V → unitInterval) (o : V) :

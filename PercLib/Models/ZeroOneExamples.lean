@@ -157,7 +157,7 @@ theorem rootCriticalIntensity_eq_top_of_finite {V : Type*} [Finite V] (J : Sym2 
   rw [h, measure_empty] at hpos
   exact (lt_irrefl _ hpos).elim
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
 /-- KB1L on `Fin 3` with the complete unit kernel. -/
 example : globalCriticalIntensity (fun _ : Sym2 (Fin 3) => (1 : ℝ≥0)) = ⊤ ∧

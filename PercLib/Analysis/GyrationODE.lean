@@ -277,9 +277,9 @@ theorem tendsto_div_rpow_log {F : ℝ → ℝ} {c Q : ℝ}
   rw [hsplit, hmain]
   field_simp
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
-/-- D-5, `α = 1`, `c = Q = 1`: the explicit solution
+/-- Non-vacuity, `α = 1`, `c = Q = 1`: the explicit solution
 `F r = r^{2α} (1 + cQ (r^{2-α} - 1)/(2-α)) = r³` solves the ODE, so `F r / r³ → 1`. -/
 example : Tendsto (fun r : ℝ => r ^ 3 / r ^ (2 + 1 : ℝ)) atTop (𝓝 (1 * 1 / (2 - 1))) := by
   refine tendsto_div_rpow_of_lt (F := fun r : ℝ => r ^ 3) (by norm_num) fun r hr => ?_
@@ -289,7 +289,7 @@ example : Tendsto (fun r : ℝ => r ^ 3 / r ^ (2 + 1 : ℝ)) atTop (𝓝 (1 * 1 
   field_simp
   ring
 
-/-- D-5, `α = 2`, `c = Q = 1`: `F r = r⁴ (1 + log r)` solves the ODE, so
+/-- Non-vacuity, `α = 2`, `c = Q = 1`: `F r = r⁴ (1 + log r)` solves the ODE, so
 `F r / (r⁴ log r) → 1`. -/
 example : Tendsto (fun r : ℝ => r ^ 4 * (1 + Real.log r) / (r ^ (4 : ℝ) * Real.log r)) atTop
     (𝓝 (1 * 1)) := by

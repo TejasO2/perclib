@@ -587,7 +587,7 @@ theorem ae_deriv_twoPoint (hα : 0 < α) (hακ : α ≤ κ)
         0 := mul_nonpos_of_nonneg_of_nonpos (by positivity) (by nlinarith)
     exact hlhs.trans (mul_nonneg (by linarith) (inv_nonneg.2 hr0.le))
 
-/-- **D-5 witness for KKGL.** For every `0 < α ≤ κ < 2α`, the two-point family satisfies all
+/-- **Non-vacuity witness for KKGL.** For every `0 < α ≤ κ < 2α`, the two-point family satisfies all
 hypotheses of `tendsto_limsup_truncatedMean_div_mean` with `r₀ = 1`, `a(r) = α r^{-α-1}`,
 `a₀ = α`, `b = B = c₁ = 1` and `C = 1`. Its conclusion also holds directly, since the ratio is
 `min 1 δ` (`truncatedMean_div_mean_twoPoint`). -/

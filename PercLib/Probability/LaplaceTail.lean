@@ -338,7 +338,7 @@ theorem tendsto_one_sub_exp_neg_div :
     rw [div_le_one ht]
     linarith [Real.add_one_le_exp (-t)]
 
-/-- **D-5 witness.** On `ℕ` put mass `c_n = (2n-1)!!/((n+1)! 2^{n+1})` at `n` and let
+/-- **Non-vacuity witness.** On `ℕ` put mass `c_n = (2n-1)!!/((n+1)! 2^{n+1})` at `n` and let
 `T(n) = n + 1`, so that `E[s^T] = 1 - √(1 - s)`. Then `G(t) = √(1 - e^{-t})`,
 `G(t)/√t → 1`, and the tail bounds hold. -/
 example : ∃ C > 0, ∃ c > 0, ∃ N : ℕ, (∀ n : ℕ, 1 ≤ n →

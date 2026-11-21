@@ -245,7 +245,7 @@ private theorem law_foldl_replicate_le [Countable V] (q : Sym2 V → unitInterva
   rwa [List.map_replicate, List.prod_replicate] at h
 
 /-- **The BK step for the largest intersection** (Hutchcroft, arXiv:2008.11197v2,
-Theorem 2.3, first bound, reading `k ≥ 1` of issue 52):
+Theorem 2.3, first bound, reading `k ≥ 1`):
 `P(max ≥ 3^k λ) ≤ P(max ≥ λ)^(3^(k-1) + 1)` for `λ ≥ 1` and `k ≥ 1`. -/
 theorem law_three_pow_mul_le_maxClusterIntersection_le [Countable V]
     (q : Sym2 V → unitInterval) {Λ : Finset V} (hΛ : Λ.Nonempty) {l : ℝ} (hl : 1 ≤ l)
@@ -266,7 +266,7 @@ theorem law_three_pow_mul_le_maxClusterIntersection_le [Countable V]
     (by exact_mod_cast clusterIntersection_le_max Λ η hvΛ)
 
 /-- **The BK step for one cluster** (Hutchcroft, arXiv:2008.11197v2, Theorem 2.3, second
-bound, reading `k ≥ 1` of issue 52):
+bound, reading `k ≥ 1`):
 `P(|K_u ∩ Λ| ≥ 3^k λ) ≤ P(max ≥ λ)^(3^(k-1)) · P(|K_u ∩ Λ| ≥ λ)` for `λ ≥ 1`, `k ≥ 1`. -/
 theorem law_three_pow_mul_le_clusterIntersection_le [Countable V]
     (q : Sym2 V → unitInterval) (Λ : Finset V) (u : V) {l : ℝ} (hl : 1 ≤ l)
@@ -279,8 +279,7 @@ theorem law_three_pow_mul_le_clusterIntersection_le [Countable V]
   rw [mul_comm]
   exact law_foldl_replicate_le q Λ l _ (isUpperSet_real_le_clusterIntersection Λ u l)
 
-/-- **The BK step** (Hutchcroft, arXiv:2008.11197v2, Theorem 2.3, reading `k ≥ 1` of
-issue 52) for every countable vertex type and every profile. -/
+/-- **The BK step** (Hutchcroft, arXiv:2008.11197v2, Theorem 2.3, reading `k ≥ 1`) for every countable vertex type and every profile. -/
 @[tag "JGZB"]
 theorem tightnessBK (V : Type*) [Countable V] : TightnessBK V := fun q Λ hΛ _l hl _k hk =>
   ⟨law_three_pow_mul_le_maxClusterIntersection_le q hΛ hl hk,
@@ -328,7 +327,7 @@ theorem universalTightness (V : Type*) [Countable V] : UniversalTightness V := f
     fun _ε hε hε1 => law_maxClusterIntersection_lt_mul_tightnessScale_le q hΛ hε hε1,
     fun u _a ha => law_mul_tightnessScale_le_clusterIntersection_le q hΛ u ha⟩
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
 example : TightnessBK Unit := tightnessBK Unit
 

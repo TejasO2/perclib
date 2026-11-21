@@ -299,7 +299,7 @@ theorem iSup_chi_eq_top : ⨆ v, chi q v = ⊤ := by
 
 end Model
 
-/-! ### The profile exists (D-5) -/
+/-! ### The profile exists -/
 
 /-- A profile with the required values exists. -/
 theorem exists_profile : ∃ q : Sym2 (Option (Σ k : ℕ, Fin (2 ^ (k + 1)))) → unitInterval,

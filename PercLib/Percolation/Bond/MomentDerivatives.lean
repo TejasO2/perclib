@@ -410,9 +410,9 @@ theorem moment_derivative_nonneg (w : Sym2 V → ℝ) (hw : ∀ e, 0 ≤ w e)
   · exact le_rfl
   · exact Finset.sum_nonneg fun j _ => by positivity
 
-/-! ### Non-vacuity witness (D-5) -/
+/-! ### Non-vacuity witness -/
 
-/-- **D-5 witness.** On `ZMod 2` with `λ_u = u⁺` on every pair (so `λ_u = u` near `t = 1`),
+/-- **Non-vacuity witness.** On `ZMod 2` with `λ_u = u⁺` on every pair (so `λ_u = u` near `t = 1`),
 the hypotheses of `hasDerivAt_moment_of_transitive` hold, with `w = 1` and the translations
 of `ZMod 2` as the transitive group. -/
 example (k : ℕ) :

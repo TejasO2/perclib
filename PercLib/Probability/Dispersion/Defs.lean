@@ -184,7 +184,7 @@ theorem stableLevyDensity_pos_of_ne {N : Seminorm ℝ E} (hN : ∀ x, N x = 0 �
   ENNReal.ofReal_pos.2 (mul_pos (by positivity)
     (Real.rpow_pos_of_pos ((apply_nonneg N x).lt_of_ne fun h => hx (hN x h.symm)) _))
 
-/-! ### Witnesses (D-5) -/
+/-! ### Witnesses -/
 
 /-- The point mass at `0` is the stopped law of the zero exponent. -/
 theorem isExpTimeStoppedLaw_dirac_zero [MeasurableSpace E] [BorelSpace E] : IsExpTimeStoppedLaw (fun _ : E => 0) (Measure.dirac 0) :=

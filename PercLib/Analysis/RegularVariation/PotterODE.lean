@@ -431,7 +431,7 @@ theorem tendsto_uniformly_ratio_of_ode {f f' h : ℝ → ℝ} {a : ℝ} (ha : 0 
         have hcomm : v ^ a * (2 * (a * δ * M)) = 2 * (a * δ * M) * v ^ a := by ring
         rw [hcomm]; exact hδ2
 
-/-! ### Witness (D-5): `f r = r^a`, `h = 0` -/
+/-! ### Witness: `f r = r^a`, `h = 0` -/
 
 example {a : ℝ} (ha : 0 < a) :
     Tendsto (fun r => (∫ s in (1 : ℝ)..r, s ^ a) / (r * r ^ a)) atTop (𝓝 (1 / (a + 1))) :=

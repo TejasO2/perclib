@@ -248,9 +248,9 @@ theorem tsum_added_layer_le (hα : 0 < α) (hA : 0 ≤ A) (hjA : ∀ t, 1 ≤ t 
     rw [← ENNReal.ofReal_mul hβ]
     exact ENNReal.ofReal_le_ofReal (hX _)
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
-/-- D-5: `j t = t^{-d-α}` with `A = 1`, at `d = 1`, `α = 1`, `r = 1`, satisfies every
+/-- Non-vacuity: `j t = t^{-d-α}` with `A = 1`, at `d = 1`, `α = 1`, `r = 1`, satisfies every
 hypothesis, so both bounds apply. -/
 example (u : Fin 1 → ℤ) :
     (∑' v, if v = u then 0 else ENNReal.ofReal (
@@ -262,7 +262,7 @@ example (u : Fin 1 → ℤ) :
   exact tsum_cutoff_sub_le (d := 1) (j := fun t => t ^ (-((1 : ℕ) : ℝ) - 1)) (α := 1) (A := 1)
     one_pos zero_le_one (fun t _ => by simp) le_rfl u
 
-/-- D-5 for `cutoff_bounds`: `j t = t^{-2}` is nonnegative and nonincreasing on `[1, ∞)`. -/
+/-- Non-vacuity witness for `cutoff_bounds`: `j t = t^{-2}` is nonnegative and nonincreasing on `[1, ∞)`. -/
 example {u v : Fin 1 → ℤ} (huv : u ≠ v) :
     0 ≤ (if √(∑ i, (((v - u) i : ℤ) : ℝ) ^ 2) ≤ 1 then
           √(∑ i, (((v - u) i : ℤ) : ℝ) ^ 2) ^ (-(2 : ℝ)) - (1 : ℝ) ^ (-(2 : ℝ)) else 0) :=

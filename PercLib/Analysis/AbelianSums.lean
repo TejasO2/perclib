@@ -320,7 +320,7 @@ theorem tsum_exp_isEquivalent_log_of_isEquivalent {c : ℝ} (hc : 0 < c) {b : �
   exact (tsum_exp_isEquivalent_of_isEquivalent hd hbd (fun t ht => (hD t ht).summable)
     hdiv).trans hequiv
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
 /-- Item (i) for `bₙ = n^{a-1}` exactly (`c = 1`). -/
 example {a : ℝ} (ha : 0 < a) :

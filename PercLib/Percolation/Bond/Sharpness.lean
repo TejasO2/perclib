@@ -197,7 +197,7 @@ theorem rootCriticalIntensity_eq_sSup_boundaryFlux_lt_one [Countable V] (J : Sym
   le_antisymm (rootCriticalIntensity_le_sSup_boundaryFlux_lt_one J hJ o)
     (sSup_boundaryFlux_lt_one_le_rootCriticalIntensity J hT hJ o)
 
-/-- **T-5, sharpness (item 1).** Under transitivity and summable rows, the susceptibility is
+/-- **Sharpness (item 1).** Under transitivity and summable rows, the susceptibility is
 finite at every intensity below the threshold. -/
 theorem chi_lt_top_of_lt_rootCriticalIntensity [Countable V] (J : Sym2 V → ℝ≥0)
     (hT : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e)
@@ -211,7 +211,7 @@ theorem chi_lt_top_of_lt_rootCriticalIntensity [Countable V] (J : Sym2 V → ℝ
   have hle : β ≤ β' + ε := (ENNReal.coe_lt_coe.1 hlt).le.trans le_self_add
   exact (chi_mono (fun e => intensityProfile_mono J hle e) o).trans_lt (hchi o)
 
-/-- **T-5, sharpness at every vertex.** -/
+/-- **Sharpness at every vertex.** -/
 theorem chi_lt_top_of_lt_rootCriticalIntensity' [Countable V] (J : Sym2 V → ℝ≥0)
     (hT : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e)
     (hJ : ∀ u, Summable fun v => (J s(u, v) : ℝ)) {o : V} {β : ℝ≥0}
@@ -304,7 +304,7 @@ theorem one_sub_div_le_law_cluster_infinite [Countable V] (J : Sym2 V → ℝ≥
   rwa [ENNReal.ofReal_sub _ (div_nonneg ENNReal.toReal_nonneg hβ0.le), ENNReal.ofReal_one,
     ENNReal.ofReal_div_of_pos hβ0, ENNReal.ofReal_toReal hc, ENNReal.ofReal_coe_nnreal] at h
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
 /-- The zero kernel on `ℤ`: transitive with summable rows, `β_c = ⊤`, so item 1 holds at every
 `β`; item 3 is vacuous there. -/

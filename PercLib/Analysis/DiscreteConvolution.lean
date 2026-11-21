@@ -236,7 +236,7 @@ theorem convPow_le_convPow_one (hμ : ∀ y, μ y⁻¹ = μ y) (n : ℕ) (x : Γ
 
 end Powers
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
 /-- On `ℤ` (written multiplicatively), the indicator of `{0, 1}` convolved with itself takes
 the value `2` at `1`. -/

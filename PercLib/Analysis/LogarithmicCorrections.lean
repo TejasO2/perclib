@@ -701,7 +701,7 @@ theorem op8f_asymptotics {α a₀ c ν K r₀ : ℝ} (ha₀ : 0 < a₀) (hc : 0 
     have : 0 < Real.sqrt (Real.log r) := Real.sqrt_pos.2 hlr
     field_simp
 
-/-- **D-5 witness for OP8F.** Take `α = a₀ = c = ν = K = 1` and `r₀ = 2`, with `m(r) = r`,
+/-- **Non-vacuity witness for OP8F.** Take `α = a₀ = c = ν = K = 1` and `r₀ = 2`, with `m(r) = r`,
 `a(r) = r^{-2}`, `b(r) = r³`, `e₁ = 0`, `ε = 0`, `f(r) = r³/√(6 log r)` and
 `e₂(r) = 1/(6 log r)`. Every hypothesis holds, and the theorem gives
 `f/m³ ~ (6 log r)^{-1/2}`, which is exact. -/

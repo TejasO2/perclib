@@ -366,9 +366,9 @@ theorem lintegral_ball_hom_rpow (μ : Measure E) [μ.IsAddHaarMeasure] [Nontrivi
     ← ENNReal.ofReal_mul hs.le, ← add_mul,
     ← ENNReal.ofReal_add (by positivity) hb, hreal]
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
-/-- D-5: `E = ℝ`, `P = 1` (`k = 0`), `s = 1/2`: the hypotheses hold, and
+/-- Non-vacuity: `E = ℝ`, `P = 1` (`k = 0`), `s = 1/2`: the hypotheses hold, and
 `∫⁻_{(-R, R)} |x|^{-1/2} = 2 R^{1/2} · vol(ball 0 1)`. -/
 example {R : ℝ} (hR : 0 < R) :
     ∫⁻ x in ball (0 : ℝ) R, ENNReal.ofReal ((fun _ : ℝ => (1 : ℝ)) x * ‖x‖ ^ (-(1 / 2 : ℝ)))

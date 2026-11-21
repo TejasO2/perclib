@@ -248,7 +248,7 @@ theorem succ_le_lintegral_encard_ball [Countable V] (q : Sym2 V → unitInterval
     push_cast at h1 ih ⊢
     exact add_le_add ih h1
 
-/-! ### Non-vacuity witness (D-5) -/
+/-! ### Non-vacuity witness -/
 
 /-- The all-open nearest-neighbour line: transitive, `D = 2`, `χ = ⊤`; so every sphere has
 mean at least `1` and every ball of radius `r` mean at least `r + 1`. -/

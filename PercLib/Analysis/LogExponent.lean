@@ -236,7 +236,7 @@ theorem not_isEquivalent_two_add_sin_mul_rpow (α : ℝ) {c : ℝ} (hc : 0 < c) 
   field_simp
   ring
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
 /-- `2 x^3` is asymptotically equivalent to `2 x^3`, hence `Θ(x^3)` with logarithmic
 exponent `3`. -/

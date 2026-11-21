@@ -290,7 +290,7 @@ theorem ae_all_clusters_finite_of_degree_le [Countable V]
     law_cluster_infinite_eq_zero_of_degree_le G hΔ q p hoff hle hp x
 
 /-- Nearest-neighbour lattice corollary. The degree estimate is an explicit input,
-as permitted by Q-23; this does not assert a separate degree-counting theorem. -/
+and this does not assert a separate degree-counting theorem. -/
 theorem law_lattice_cluster_infinite_eq_zero_of_degree_bound (d : ℕ) (hd : 1 ≤ d)
     [(PercLib.Models.Site.zdGraph d).LocallyFinite]
     (hdegree : ∀ v, (PercLib.Models.Site.zdGraph d).degree v ≤ 2*d)

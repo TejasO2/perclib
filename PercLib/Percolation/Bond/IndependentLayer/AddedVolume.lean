@@ -419,9 +419,9 @@ theorem law_added_volume_ge_mul_le [Countable V] (q₀ s : Sym2 V → I) (o : V)
   · rw [indicator_of_notMem hx]
     exact zero_le
 
-/-! ### Non-vacuity witness (D-5) -/
+/-! ### Non-vacuity witness -/
 
-/-- **D-5 witness.** On `Bool` with no first layer (`q₀ = 0`) and a second layer of
+/-- **Non-vacuity witness.** On `Bool` with no first layer (`q₀ = 0`) and a second layer of
 probability `1` on every pair, the hypotheses of `lintegral_ghost_added_mul_le` hold with
 `a = 1` (each off-diagonal row has one pair), for every `h > 0` and every `f`. -/
 example (f : Set Bool → ℝ≥0∞) :

@@ -462,7 +462,7 @@ theorem prodBernoulli_odds_solved_le {A : Set (Set E)} (hA : IsUpperSet A) (hne 
   rw [div_le_iff₀ (by linarith)]
   nlinarith
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
 /-- At deterministic profiles (every `q e ∈ {0,1}`) both sides of Efron–Stein vanish. -/
 example (q : E → ℝ) (hq : ∀ e, q e = 0 ∨ q e = 1) (f : (E → Bool) → ℝ) :

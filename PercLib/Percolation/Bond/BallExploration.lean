@@ -360,7 +360,7 @@ theorem renewal_ball (q : Sym2 V → unitInterval) (o : V) (r k : ℕ)
 
 end Markov
 
-/-! ### Non-vacuity witness (D-5) -/
+/-! ### Non-vacuity witness -/
 
 open Classical in
 /-- Balls of a profile with finite row sums are finite almost surely. -/

@@ -136,7 +136,7 @@ theorem lintegral_ghost_cutoff_le_of_transitive [Countable V] (q : Sym2 V → I)
     exact ciSup_const
   rwa [hsup] at h2
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
 /-- FJWB on `ℤ` with the zero profile and `E₀ = ∅`: the cut-off cluster is `{o}`, the
 omitted rows vanish, and the profile is transitive under translations. -/

@@ -344,7 +344,7 @@ example : ∃ b : ℝ, 0 < b ∧
 
 /-! ### Witnesses for the endpoint theorems of `SusceptibilityEndpoint.lean` -/
 
-/-- **5LNL endpoint** (issue 432): every hypothesis of `chi_intensity_sSup_eq_top` holds on the
+/-- **Endpoint of finite susceptibility.** Every hypothesis of `chi_intensity_sSup_eq_top` holds on the
 free-group tree, so `χ_{b_χ}(1) = ⊤` there. -/
 example : chi (intensityProfile
       (fun e : Sym2 (FreeGroup (Fin 2)) =>
@@ -360,7 +360,7 @@ example : chi (intensityProfile
   rw [← hb]
   exact ENNReal.coe_lt_top
 
-/-- **MXGM blow-up** (issue 433): every hypothesis of `one_div_le_chi_of_chi_eq_top` holds on
+/-- **Blow-up of the susceptibility.** Every hypothesis of `one_div_le_chi_of_chi_eq_top` holds on
 `(0, b)` for the free-group tree, with `R > 0`. -/
 example : ∃ b : ℝ, 0 < b ∧ ∃ R : ℝ, 0 < R ∧ ∀ β ∈ Ioo (0 : ℝ) b,
     1 / (R * (b - β)) ≤ (chi (intensityProfile

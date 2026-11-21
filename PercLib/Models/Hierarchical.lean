@@ -151,7 +151,7 @@ theorem exists_hierarchical_kernel (C r : ℝ≥0) :
     fun z => by
     simp only [Finsupp.support_neg]
 
-/-- **P-6 on the hierarchical lattice: susceptibility.** -/
+/-- **Intensity bound on the hierarchical lattice: susceptibility.** -/
 theorem chi_intensity_le_hierarchical (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0)
     (C r : ℝ≥0) (hJ : ∀ x y, J s(x,y) = C * r ^ ((y - x).support.sup Nat.succ))
     (hr : (L : ℝ≥0) ^ d * r * 2 ≤ 1) (β : ℝ≥0)
@@ -160,7 +160,7 @@ theorem chi_intensity_le_hierarchical (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) 
   chi_intensity_le_of_translationInvariant J (fun z => C * r ^ (z.support.sup Nat.succ)) hJ
     (2 * C) (tsum_geometricRadial_le C r hr) β hβ x
 
-/-- **P-6 on the hierarchical lattice: global threshold.** -/
+/-- **Intensity bound on the hierarchical lattice: global threshold.** -/
 theorem inv_le_globalCriticalIntensity_hierarchical
     (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) (C r : ℝ≥0)
     (hJ : ∀ x y, J s(x,y) = C * r ^ ((y - x).support.sup Nat.succ))
@@ -169,7 +169,7 @@ theorem inv_le_globalCriticalIntensity_hierarchical
   inv_le_globalCriticalIntensity_of_translationInvariant J
     (fun z => C * r ^ (z.support.sup Nat.succ)) hJ (2 * C) (tsum_geometricRadial_le C r hr)
 
-/-- **P-6 on the hierarchical lattice: root threshold.** -/
+/-- **Intensity bound on the hierarchical lattice: root threshold.** -/
 theorem inv_le_rootCriticalIntensity_hierarchical
     (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) (C r : ℝ≥0)
     (hJ : ∀ x y, J s(x,y) = C * r ^ ((y - x).support.sup Nat.succ))

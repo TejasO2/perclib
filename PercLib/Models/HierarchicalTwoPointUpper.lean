@@ -391,7 +391,7 @@ theorem tsum_tau_ball_le_powerLaw (hL : 1 ≤ L) {α : ℝ} (hα : 0 < α) (C₀
     ring
   rw [mul_comm, mul_assoc, mul_comm _ (((L ^ d) ^ N : ℕ) : ℝ≥0∞), e]
 
-/-! ### Non-vacuity (D-5): `d = 1`, `L = 2`, `f j = 4^(-j)`, `α = 1`, `β = 1/8` -/
+/-! ### Non-vacuity: `d = 1`, `L = 2`, `f j = 4^(-j)`, `α = 1`, `β = 1/8` -/
 
 /-- The block means are bounded by the susceptibility. -/
 theorem tsum_localConn_le_chi {W : Type*} [Countable W] (q : Sym2 W → unitInterval) (D : Set W)

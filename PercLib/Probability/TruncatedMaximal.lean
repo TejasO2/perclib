@@ -213,7 +213,7 @@ theorem martingale_sq_sub_predictableVariation [IsFiniteMeasure μ] (hX : Martin
     rw [e1, e2, e3, e4, e5]
     ring
 
-/-! ### D-5 witnesses -/
+/-! ### Non-vacuity witnesses -/
 
 /-- The hypotheses of `lintegral_sup_abs_sq_le` hold for the zero martingale on any finite
 measure space. -/

@@ -315,7 +315,7 @@ theorem rpow_div_le_lintegral_encard_cluster_intensity {J : Sym2 (Fin d → ℤ)
       ∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ p ∂(law (intensityProfile J β)) :=
   rpow_div_le_lintegral_encard_cluster _ (intensityProfile_translation_invariant hJ β) n hp
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
 /-- The zero kernel is translation invariant, so Lemma I.2.6 applies to it (and to the zero
 profile) at every `n`, `β` and `p > 0`. -/

@@ -25,7 +25,7 @@ open scoped NNReal
 
 namespace PercLib.Models
 
-/-- **D-5 witness.** The exact kernel `J s(u,v) = c L^{-(d+α) h(v-u)}` is translation
+/-- **Non-vacuity witness.** The exact kernel `J s(u,v) = c L^{-(d+α) h(v-u)}` is translation
 invariant, radial, and satisfies `c L^{-(d+α) h(v-u)} ≤ J s(u,v) ≤ C L^{-(d+α) h(v-u)}` (here
 for all `u, v`, in particular for `u ≠ v`) whenever `0 < c ≤ C`. -/
 theorem hierarchicalTwoPoint_kernel_witness (d L : ℕ) (α c C : ℝ) (hc : 0 < c) (hcC : c ≤ C) :
@@ -55,7 +55,7 @@ theorem hierarchicalTwoPoint_kernel_witness (d L : ℕ) (α c C : ℝ) (hc : 0 <
   · rw [hJ, Real.coe_toNNReal _ (hpos u v)]
     exact mul_le_mul_of_nonneg_right hcC (Real.rpow_nonneg (Nat.cast_nonneg L) _)
 
-/-- **D-5, existence form.** For every admissible `(d, L, α, c, C)` some kernel satisfies all
+/-- **Non-vacuity, existence form.** For every admissible `(d, L, α, c, C)` some kernel satisfies all
 kernel hypotheses of `HierarchicalTwoPointAveraged` and `HierarchicalTwoPointRadial`. -/
 theorem exists_hierarchicalTwoPoint_kernel (d L : ℕ) (α c C : ℝ) (hc : 0 < c) (hcC : c ≤ C) :
     ∃ J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0,

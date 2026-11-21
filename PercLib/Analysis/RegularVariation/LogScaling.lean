@@ -280,7 +280,7 @@ theorem regularlyVarying_exp_integral_of_tendsto_zero
     _ = Real.exp (∫ s in r₀..l * x, (1 - δ s) * a / s) /
           Real.exp (∫ s in r₀..x, (1 - δ s) * a / s) := hratio.symm
 
-/-! ### Witness (D-5) -/
+/-! ### Witness -/
 
 example : LogarithmicallyIntegrable (fun r : ℝ => (fun _ : ℝ => (0 : ℝ)) (2 * r ^ (3 : ℝ))) :=
   logarithmicallyIntegrable_comp_rpow_const_mul _ isLogErrorFunction_zero.1 (c := 3) (C := 2)

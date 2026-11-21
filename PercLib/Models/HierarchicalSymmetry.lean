@@ -344,7 +344,7 @@ theorem tau_eq_inv_card_mul_tsum_shell {d L : ℕ} [NeZero L]
 
 end PercLib.Models
 
-/-! ### Non-vacuity (D-5): `d = 1`, `L = 2`, `f n = 4^(-n)` -/
+/-! ### Non-vacuity: `d = 1`, `L = 2`, `f n = 4^(-n)` -/
 section Witnesses
 
 open PercLib.Models

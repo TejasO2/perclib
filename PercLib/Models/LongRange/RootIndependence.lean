@@ -68,8 +68,7 @@ theorem lintegral_encard_cluster_eq_of_transitive (q : Sym2 V → unitInterval)
   exact (lintegral_encard_cluster_eq_of_map_law_eq φ
     (prodBernoulli_map_image_sym2_invariant q φ hφ) F x).symm
 
-/-- **Root independence under transitivity of the kernel**, at every intensity (item 4 of
-issue 625, in the transitivity spelling of `chi_eq_of_transitive`). -/
+/-- **Root independence under transitivity of the kernel**, at every intensity (item 4, in the transitivity spelling of `chi_eq_of_transitive`). -/
 theorem lintegral_encard_cluster_intensity_eq_of_transitive (J : Sym2 V → ℝ≥0)
     (hT : ∀ x y : V, ∃ φ : V ≃ V, φ x = y ∧ ∀ e, J (Sym2.map φ e) = J e) (β : ℝ≥0)
     (F : ℕ∞ → ℝ≥0∞) (x y : V) :
@@ -95,14 +94,14 @@ theorem transitive_of_map_add_invariant {β : Type*} (q : Sym2 G → β)
     ∀ x y : G, ∃ φ : G ≃ G, φ x = y ∧ ∀ e, q (Sym2.map φ e) = q e :=
   fun x y => ⟨Equiv.addRight (-x + y), by simp, fun e => hq _ e⟩
 
-/-- **Item 1 of issue 625.** For a translation-invariant profile on an additive group,
+/-- **Item 1.** For a translation-invariant profile on an additive group,
 `∫⁻ F (|K_x|) d(law q)` does not depend on `x`, for every `F : ℕ∞ → ℝ≥0∞`. -/
 theorem lintegral_encard_cluster_eq_of_translationInvariant (q : Sym2 G → unitInterval)
     (hq : ∀ (a : G) e, q (Sym2.map (· + a) e) = q e) (F : ℕ∞ → ℝ≥0∞) (x y : G) :
     ∫⁻ ω, F (cluster ω x).encard ∂(law q) = ∫⁻ ω, F (cluster ω y).encard ∂(law q) :=
   lintegral_encard_cluster_eq_of_transitive q (transitive_of_map_add_invariant q hq) F x y
 
-/-- **Item 2 of issue 625, Laplace form.** The ghost transform `∫⁻ (1 - e^{-h |K_y|})`
+/-- **Item 2, Laplace form.** The ghost transform `∫⁻ (1 - e^{-h |K_y|})`
 of a translation-invariant profile does not depend on the root. -/
 theorem lintegral_one_sub_exp_cluster_eq_of_translationInvariant (q : Sym2 G → unitInterval)
     (hq : ∀ (a : G) e, q (Sym2.map (· + a) e) = q e) (h : ℝ) (x y : G) :
@@ -113,7 +112,7 @@ theorem lintegral_one_sub_exp_cluster_eq_of_translationInvariant (q : Sym2 G →
   lintegral_encard_cluster_eq_of_translationInvariant q hq
     (fun n => 1 - EReal.exp (-((h : EReal) * ((n : ℝ≥0∞) : EReal)))) x y
 
-/-- **Item 2 of issue 625, marked-vertex form, with equality.** For a translation-invariant
+/-- **Item 2, marked-vertex form, with equality.** For a translation-invariant
 profile, the probability that the cluster of `y` contains a mark of an independent field of
 intensity `1 - e^{-h}` is the same at every `y`. -/
 theorem ghost_hits_eq_of_translationInvariant [Countable G] (q : Sym2 G → unitInterval)
@@ -125,7 +124,7 @@ theorem ghost_hits_eq_of_translationInvariant [Countable G] (q : Sym2 G → unit
     ← lintegral_cluster_one_sub_exp_eq_prod q y hh hp]
   exact lintegral_one_sub_exp_cluster_eq_of_translationInvariant q hq h x y
 
-/-- **Item 2 of issue 625, in the fork's form `hG`:** every root's ghost-hit probability is
+/-- **Item 2, in the fork's form `hG`:** every root's ghost-hit probability is
 at most the one at `o`. -/
 theorem ghost_hits_le_root_of_translationInvariant [Countable G] (q : Sym2 G → unitInterval)
     (hq : ∀ (a : G) e, q (Sym2.map (· + a) e) = q e) {h : ℝ} {p : I} (hh : 0 < h)
@@ -142,7 +141,7 @@ theorem intensityProfile_map_add {J : Sym2 G → ℝ≥0}
 
 end Group
 
-/-! ### The radial and cut-off kernels on `ℤ^d` (item 3 of issue 625) -/
+/-! ### The radial and cut-off kernels on `ℤ^d` (item 3) -/
 
 section Lattice
 
@@ -200,7 +199,7 @@ theorem lintegral_encard_cluster_radialKernel_eq (N : Seminorm ℝ (Fin d → �
 
 end Lattice
 
-/-! ### Witnesses (D-5) -/
+/-! ### Witnesses -/
 
 /-- Item 3 at `d = 1`, `α = 1` (power law `s ↦ s^(-2)`), sup norm, `β = 1`, `r = 2`:
 the cut-off law is translation invariant. -/

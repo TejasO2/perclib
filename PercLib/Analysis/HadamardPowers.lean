@@ -122,7 +122,7 @@ theorem posSemidef_hadamard_pow_sub {S : Matrix n n ℝ} (hS : S.PosSemidef) :
     have hl := hS.eigenvalues_nonneg l
     positivity
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
 /-- `S = 1`: both sides are the identity, and the difference is zero. -/
 example : ((1 : Matrix (Fin 2) (Fin 2) ℝ) ⊙ (1 ^ 3) - (1 ^ 2) ⊙ (1 ^ 2)) = 0 ∧

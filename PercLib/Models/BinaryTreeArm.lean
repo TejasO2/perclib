@@ -329,7 +329,7 @@ theorem binaryTree_law_reach_depth_isEquivalent (q : Sym2 (List (Fin 2)) → uni
   simp only [Pi.div_apply]
   rw [div_div_eq_mul_div, mul_comm]
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
 /-- `r_1 = 3/4`. -/
 example :

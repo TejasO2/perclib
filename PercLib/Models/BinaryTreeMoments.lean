@@ -365,7 +365,7 @@ theorem binaryTree_moment_ratio_isEquivalent (q : ℝ → Sym2 (List (Fin 2)) �
 
 end Law
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
 /-- `s = 1`: `M_1(p) ~ Γ(1/2) λ(p)^{-1/2}/√π`. -/
 example := moment_isEquivalent_of_gt (s := 1) (by norm_num)

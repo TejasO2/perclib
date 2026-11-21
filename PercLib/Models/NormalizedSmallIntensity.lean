@@ -241,7 +241,7 @@ theorem triangle_bounds (J : Sym2 V → ℝ≥0)
         ENNReal.le_tsum (f := fun v => tau q o o * tau q o v * tau q v o) o
     _ ≤ _ := ENNReal.le_tsum (f := fun u => ∑' v, tau q o u * tau q u v * tau q v o) o
 
-/-- 1EWX bounds on `χ`, with the transitivity hypothesis of the package (unused). -/
+/-- The bounds on `χ`, with an (unused) transitivity hypothesis. -/
 theorem chi_bounds_of_transitive (J : Sym2 V → ℝ≥0)
     (hrow : ∀ v, rowSum (fun e => (J e : ℝ≥0∞)) v = 1)
     (_htrans : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e)
@@ -250,7 +250,7 @@ theorem chi_bounds_of_transitive (J : Sym2 V → ℝ≥0)
       chi (intensityProfile J β) o ≤ (1 - (β : ℝ≥0∞))⁻¹ :=
   chi_bounds J hrow β hβ o
 
-/-- 1EWX bounds on `Δ`, with the transitivity hypothesis of the package (unused). -/
+/-- The bounds on `Δ`, with an (unused) transitivity hypothesis. -/
 theorem triangle_bounds_of_transitive (J : Sym2 V → ℝ≥0)
     (hrow : ∀ v, rowSum (fun e => (J e : ℝ≥0∞)) v = 1)
     (_htrans : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e)
@@ -262,7 +262,7 @@ theorem triangle_bounds_of_transitive (J : Sym2 V → ℝ≥0)
         1 + 3 * ((β : ℝ≥0∞) / (1 - β)) ^ 2 + ((β : ℝ≥0∞) / (1 - β)) ^ 3 :=
   triangle_bounds J (fun v => (hrow v).le) β hβ o
 
-/-! ### Non-vacuity (D-5): the nearest-neighbour kernel `1/2` on `ℤ` -/
+/-! ### Non-vacuity: the nearest-neighbour kernel `1/2` on `ℤ` -/
 
 /-- The nearest-neighbour kernel of weight `1/2` on `ℤ` exists. -/
 theorem exists_line_kernel :
@@ -288,7 +288,7 @@ theorem line_rowSum (J : Sym2 ℤ → ℝ≥0) (hJ : ∀ a b, J s(a, b) = if |b 
         rcases abs_eq (zero_le_one' ℤ) |>.1 h1 with h2 | h2 <;> omega
       simp [this]
 
-/-- The nearest-neighbour kernel is transitive in the spelling of the package. -/
+/-- The nearest-neighbour kernel is transitive in the spelling of `chi_bounds_of_transitive`. -/
 theorem line_transitive (J : Sym2 ℤ → ℝ≥0)
     (hJ : ∀ a b, J s(a, b) = if |b - a| = 1 then 1 / 2 else 0) :
     ∀ x y : ℤ, ∃ σ : ℤ ≃ ℤ, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e := by
@@ -300,7 +300,7 @@ theorem line_transitive (J : Sym2 ℤ → ℝ≥0)
     congr 3
     ring
 
-/-- D-5: the hypotheses of `chi_bounds_of_transitive` and `triangle_bounds_of_transitive`
+/-- Non-vacuity: the hypotheses of `chi_bounds_of_transitive` and `triangle_bounds_of_transitive`
 hold on `ℤ` with the kernel `1/2` on nearest-neighbour pairs, for every `0 < β < 1`. -/
 example (β : ℝ≥0) (hβ0 : 0 < β) (hβ : β < 1) :
     ∃ J : Sym2 ℤ → ℝ≥0,

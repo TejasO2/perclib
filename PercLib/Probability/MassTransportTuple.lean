@@ -101,7 +101,7 @@ theorem mul_pow_sub_pow_eq_sum_choose (a b : ℝ) (p : ℕ) :
   rw [← sum_choose_mul_pow_eq_pow_sub a b p, Finset.mul_sum]
   exact sum_congr rfl fun ℓ _ => by ring
 
-/-- D-5 witness for `tsum_mass_transport_tuple`: `G = ℤ`, `k = 2`, `F v = 1` if
+/-- Non-vacuity witness for `tsum_mass_transport_tuple`: `G = ℤ`, `k = 2`, `F v = 1` if
 `v 1 − v 0 = 1` and `0` otherwise; both sides equal `1`. -/
 example :
     (∑' v : {v : Fin 2 → ℤ // v 0 = 0}, (if v.1 1 - v.1 0 = 1 then (1 : ℝ≥0∞) else 0))

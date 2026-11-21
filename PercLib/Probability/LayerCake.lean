@@ -206,7 +206,7 @@ theorem lintegral_indicator_lt_eq {X : Ω → ℝ} (hX : Measurable X) (hX0 : �
     · rfl
     · exact ⟨fun h' => absurd h' (by linarith [ht]), fun h' => absurd (hs.trans h') h⟩
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
 /-- `T ≡ k`: the tail sum is `k`. -/
 example (k : ℕ) : ∑' n : ℕ, (Measure.dirac ()) {_ω : Unit | ((n + 1 : ℕ) : ℕ∞) ≤ (k : ℕ∞)} =

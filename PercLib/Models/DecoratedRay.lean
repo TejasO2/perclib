@@ -597,7 +597,7 @@ theorem chi_zero (J : Sym2 (ℕ × ℕ) → ℝ≥0)
 
 /-! ### The intensity exists -/
 
-/-- The intensity of the decorated ray exists (non-vacuity of `hJ`, D-5). -/
+/-- The intensity of the decorated ray exists (non-vacuity of `hJ`). -/
 theorem exists_J : ∃ J : Sym2 (ℕ × ℕ) → ℝ≥0, ∀ u v : ℕ × ℕ, J s(u, v) =
       (if u.2 = 0 ∧ v.2 = 0 ∧ v.1 = u.1 + 1 then 1 else 0) +
       (if v.1 = u.1 ∧ 1 ≤ u.1 ∧ v.2 = u.2 + 1 ∧ v.2 ≤ 2 ^ u.1 then (u.1 : ℝ≥0) ^ 2 else 0) +
@@ -612,7 +612,7 @@ theorem exists_J : ∃ J : Sym2 (ℕ × ℕ) → ℝ≥0, ∀ u v : ℕ × ℕ, 
   simp only [Sym2.lift_mk, hf]
   ring
 
-/-- At `β = 0` the model has `χ(o) = 1` (D-5). -/
+/-- At `β = 0` the model has `χ(o) = 1`. -/
 example : ∃ J : Sym2 (ℕ × ℕ) → ℝ≥0, chi (intensityProfile J 0) (0, 0) = 1 ∧
     ∀ β : ℝ≥0, chi (intensityProfile J β) (0, 0) < ⊤ ↔ (β : ℝ) < Real.log 2 := by
   obtain ⟨J, hJ⟩ := exists_J

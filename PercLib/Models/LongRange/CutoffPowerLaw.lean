@@ -182,7 +182,7 @@ theorem cutoffPowerLawDerivative : CutoffPowerLawDerivative := by
     (fun h0 => hasDerivAt_powerLawProfile_inv ha h0) hxy hr
   exact ⟨hJ, hasDerivAt_intensityProfile_of_hasDerivAt _ β _ hJ⟩
 
-/-! ### Witnesses (D-5) -/
+/-! ### Witnesses -/
 
 /-- PVA8 at `d = 1`, `α = 1`, the sup norm, `r = 2` and `N(x - y) = 1`: the value is
 `(1 - 2^{-2})/2`. -/

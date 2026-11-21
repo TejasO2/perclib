@@ -179,7 +179,7 @@ theorem lintegral_sizeBiased_cluster (q : Sym2 V → unitInterval) (o : V) :
       (∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ^ 2 ∂law q) / chi q o :=
   lintegral_self_withDensity_div (law q) ((measurable_of_countable (fun n : ℕ∞ => (n : ℝ≥0∞))).comp (measurable_encard_cluster o))
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
 /-- The singleton cluster: on `Unit`, `T = 1`, so `χ = 1 < ∞` and `Ê T = E T² / χ = 1`. -/
 example (q : Sym2 Unit → unitInterval) :

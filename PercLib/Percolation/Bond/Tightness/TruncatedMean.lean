@@ -260,7 +260,7 @@ theorem le_card_mul_lintegral_clusterIntersection_of_transitive [Countable V]
   rw [← nsmul_eq_mul, ← Finset.sum_const, ← Finset.sum_congr rfl hv]
   exact le_sum_lintegral_clusterIntersection q hΛ
 
-/-! ### Non-vacuity (D-5): `Λ = {v}`, `M = 2`, `X_v = 1` -/
+/-! ### Non-vacuity: `Λ = {v}`, `M = 2`, `X_v = 1` -/
 
 /-- With `Λ = {v}`, the cluster intersection is one, the scale is two, and item 2 reads
 `1/2 ≤ 1`. -/

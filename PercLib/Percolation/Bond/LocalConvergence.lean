@@ -350,7 +350,7 @@ theorem rootCriticalIntensity_le_liminf [Countable V] {W : ℕ → Type*} [∀ n
     (offDiag_rowSum_lt_top_of_summable _ (summable_indicator_edgeSet (hGsf n))) S' hoS' β
     hΦ).le
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
 section Witness
 

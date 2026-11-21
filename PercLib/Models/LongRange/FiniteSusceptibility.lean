@@ -70,7 +70,7 @@ theorem rootCriticalIntensity_eq_globalCriticalIntensity_of_translationInvariant
   rootCriticalIntensity_eq_globalCriticalIntensity_of_transitive J
     (transitive_of_translationInvariant J k hJ) x
 
-/-- **Item 2, T-5 on countable groups.** For a summable translation-invariant pair intensity,
+/-- **Item 2, finite susceptibility on countable groups.** For a summable translation-invariant pair intensity,
 the susceptibility is finite at every vertex at every intensity below the threshold. -/
 theorem chi_lt_top_of_lt_globalCriticalIntensity_of_translationInvariant [Countable G]
     (J : Sym2 G → ℝ≥0) (k : G → ℝ≥0) (hJ : ∀ x y, J s(x,y) = k (y - x))
@@ -82,7 +82,7 @@ theorem chi_lt_top_of_lt_globalCriticalIntensity_of_translationInvariant [Counta
 
 end Group
 
-/-- **T-5 (roadmap form, item 3).** On `ℤ^d`, for a summable translation-invariant pair
+/-- **Finite susceptibility on `ℤ^d` (item 3).** On `ℤ^d`, for a summable translation-invariant pair
 intensity `J s(x,y) = k (y - x)`, the susceptibility is finite at every vertex at every
 intensity below the threshold, and the root and global thresholds agree. -/
 theorem chi_lt_top_of_lt_globalCriticalIntensity_int {d : ℕ}
@@ -126,7 +126,7 @@ theorem chi_lt_top_of_lt_globalCriticalIntensity_hierarchical {d L : ℕ} [NeZer
 
 end PercLib.Models
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 section Witnesses
 
 open PercLib.Models

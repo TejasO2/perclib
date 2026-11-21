@@ -320,7 +320,7 @@ theorem line_eventually_deriv_chi_lt :
   exact line_deriv_chi_lt J hJ hβ hβ'
 
 omit hJ in
-/-- D-5: the nearest-neighbour kernel `1/2` exists, so every statement above applies; for
+/-- Non-vacuity: the nearest-neighbour kernel `1/2` exists, so every statement above applies; for
 instance at `β = 1/100`. -/
 example : ∃ J : Sym2 ℤ → ℝ≥0, (∀ a b, J s(a, b) = if |b - a| = 1 then 1 / 2 else 0) ∧
     chi (intensityProfile J (1 / 100)) 0 = ENNReal.ofReal (2 * Real.exp (((1 / 100 : ℝ≥0) : ℝ) / 2) - 1) ∧

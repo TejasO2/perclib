@@ -82,8 +82,7 @@ def UniversalTightness (V : Type*) [Countable V] : Prop :=
           law q {ω | tightnessScale q Λ ≤ clusterIntersection Λ ω u} *
           ENNReal.ofReal (Real.exp (-a / 9)))
 
-/-- **The BK step** (Hutchcroft, arXiv:2008.11197v2, Theorem 2.3), **on the reading
-`k ≥ 1` of issue 52**; the printed `k ≥ 0` is false at `k = 0`. For every `λ ≥ 1` and
+/-- **The BK step** (Hutchcroft, arXiv:2008.11197v2, Theorem 2.3), **on the reading `k ≥ 1`**; the printed `k ≥ 0` is false at `k = 0`. For every `λ ≥ 1` and
 `k ≥ 1`:
 `P(max ≥ 3^k λ) ≤ P(max ≥ λ)^(3^(k-1) + 1)` and
 `P(|K_u ∩ Λ| ≥ 3^k λ) ≤ P(max ≥ λ)^(3^(k-1)) · P(|K_u ∩ Λ| ≥ λ)`. -/

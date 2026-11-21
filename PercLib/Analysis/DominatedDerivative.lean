@@ -131,7 +131,7 @@ theorem hasDerivAt_of_tendsto_hasDerivAt
   exact hInt.congr_of_eventuallyEq hident
 
 
-/-! ### D-5 witnesses: the constant sequence `f n = sin`, `bound = 1` -/
+/-! ### Non-vacuity witnesses: the constant sequence `f n = sin`, `bound = 1` -/
 
 example (a b : ℝ) : ∫ x in a..b, Real.cos x = Real.sin b - Real.sin a :=
   integral_eq_sub_of_tendsto_hasDerivAt (I := univ) (f := fun _ => Real.sin)

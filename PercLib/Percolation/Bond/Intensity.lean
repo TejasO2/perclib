@@ -65,7 +65,7 @@ theorem intensityProfile_toNNReal_le (J : Sym2 V → ℝ≥0) (β : ℝ≥0) (e 
   linarith
 
 /-- A row bound `M` on the intensity gives the row bound `β M` on the profile, in the
-off-diagonal form used by P-5. -/
+off-diagonal form used by `PercLib.Percolation.Bond.RowSum`. -/
 theorem intensity_rowSum_le (J : Sym2 V → ℝ≥0) (M : ℝ≥0)
     (hJ : ∀ v, rowSum (fun e => (J e : ℝ≥0∞)) v ≤ M) (β : ℝ≥0) (v : V) :
     rowSum (fun e => unitInterval.toENNReal (intensityProfile J β e)) v ≤

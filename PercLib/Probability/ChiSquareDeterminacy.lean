@@ -272,7 +272,7 @@ end PercLib.Probability
 
 namespace PercLib.Probability
 
-/-- D-5: the gamma law itself satisfies the determinacy hypotheses;
+/-- Non-vacuity: the gamma law itself satisfies the determinacy hypotheses;
 its zeroth, first and second moments are 1, 1 and 3. -/
 example :
     (∫ x : ℝ, x ^ 0 ∂gammaMeasure (1 / 2) (1 / 2)) = 1 ∧

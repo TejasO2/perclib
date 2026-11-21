@@ -119,7 +119,7 @@ theorem sum_lintegral_clusterIntersection_eq [Countable V] (q : Sym2 V → unitI
   refine lintegral_congr fun ω => ?_
   rw [← sum_clusterIntersection_eq_sum_sq, Nat.cast_sum]
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
 /-- A singleton window: the sum is one. -/
 example (ω : Config Unit) :

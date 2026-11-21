@@ -130,8 +130,7 @@ theorem hasSum_mean_one (hm : ∑' k : ℕ, (k : ℝ≥0∞) * p k = 1) :
 
 /-! ### 1. The second-order expansion at one -/
 
-/-- **Expansion.** `ψ(u) = 1 - φ(1-u)` satisfies `ψ(u) = u - (σ²/2) u² + o(u²)`, in the form of
-Q-117. -/
+/-- **Expansion.** `ψ(u) = 1 - φ(1-u)` satisfies `ψ(u) = u - (σ²/2) u² + o(u²)`, in the form used by `PercLib/Analysis/QuadraticRecursion.lean`. -/
 theorem tendsto_one_sub_genFun_expansion (hm : ∑' k : ℕ, (k : ℝ≥0∞) * p k = 1) {σ2 : ℝ}
     (hσ : HasSum (fun k : ℕ => (k : ℝ) * ((k : ℝ) - 1) * (p k).toReal) σ2) :
     Tendsto (fun u => ((1 - ∑' k, (p k).toReal * (1 - u) ^ k) - u + σ2 / 2 * u ^ 2) / u ^ 2)

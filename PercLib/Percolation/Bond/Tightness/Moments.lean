@@ -213,7 +213,7 @@ theorem lintegral_maxClusterIntersection_pow_le [Countable V]
                 (M : ℝ≥0∞) ^ k * (k ! * 18 ^ k : ℝ≥0∞) * 19 := by gcongr
           _ = (20 * 18 ^ k * k ! : ℝ≥0∞) * (M : ℝ≥0∞) ^ k := by ring
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
 /-- Item 1 at a singleton: `M = 2` and `Z = 1`. -/
 example (q : Sym2 Unit → unitInterval) :

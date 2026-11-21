@@ -456,7 +456,7 @@ theorem measurable_clusterIntersection_ennreal [Countable V] (Λ : Finset V) (u 
     Measurable fun ω : Config V => (clusterIntersection Λ ω u : ℝ≥0∞) :=
   measurable_from_nat.comp (measurable_clusterIntersection Λ u)
 
-/-- **Corollary I.2.5 on D-2, `p > 0`.** For real `p > 0` and `s ≥ 0`,
+/-- **Corollary I.2.5 on the bond interface, `p > 0`.** For real `p > 0` and `s ≥ 0`,
 `E X_u^{p+s} ≤ C(p,s) M^s E X_u^p` with `C(p,s) = (p+s)/p + e (p+s) 9^{p+s} Γ(p+s)`. -/
 theorem lintegral_rpow_clusterIntersection_add_le [Countable V] (q : Sym2 V → unitInterval)
     {Λ : Finset V} (hΛ : Λ.Nonempty) (u : V) {p s : ℝ} (hp : 0 < p) (hs : 0 ≤ s) :
@@ -470,7 +470,7 @@ theorem lintegral_rpow_clusterIntersection_add_le [Countable V] (q : Sym2 V → 
       have := two_le_tightnessScale q hΛ; omega))
     (law_clusterIntersection_tail_le q hΛ u) hp hs
 
-/-- **Corollary I.2.5 on D-2, full range `p, s ≥ 0`,** with
+/-- **Corollary I.2.5 on the bond interface, full range `p, s ≥ 0`,** with
 `C(p,s) = (p+s)/p + 1 + e (p+s) 9^{p+s} Γ(p+s)`. -/
 theorem lintegral_rpow_clusterIntersection_add_le_of_nonneg [Countable V]
     (q : Sym2 V → unitInterval) {Λ : Finset V} (hΛ : Λ.Nonempty) (u : V) {p s : ℝ}
@@ -511,7 +511,7 @@ theorem sub_one_rpow_div_exp_le_lintegral_maxClusterIntersection [Countable V]
   rw [div_eq_mul_inv, ← Real.exp_neg, ENNReal.ofReal_mul (Real.rpow_nonneg hMreal _)]
   exact (mul_le_mul' le_rfl hmin.le).trans hmarkov
 
-/-! ### Non-vacuity (D-5): `Λ = {v}`, `X = 1`, `M = 2` -/
+/-! ### Non-vacuity: `Λ = {v}`, `X = 1`, `M = 2` -/
 
 /-- With `Λ = {0}` in `ℕ`, `X_0 = 1` and `M = 2`: Corollary I.2.5 reads
 `1 ≤ C(p,s) 2^s` and the lower bound reads `1/e ≤ 1`; every hypothesis holds. -/

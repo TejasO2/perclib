@@ -302,7 +302,7 @@ theorem law_le_encard_le_of_endpoint [Countable V] {d α C₀ θ D B : ℝ} {r�
   obtain ⟨β, h1, h2⟩ := (hev.and hmem).exists
   exact absurd (hbelow β h2 n hn) (not_le.2 h1)
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
 /-- With `d = 2`, `α = 1`, `C₀ = 1`, `r₀ = 1` (so `θ = 1/5`), the hypothesis of
 `amplitude_contraction` holds for every `p` with `0 ≤ p 1 ≤ 1` and `p n = 0` for `n ≥ 2`. -/

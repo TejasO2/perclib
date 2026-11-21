@@ -364,7 +364,7 @@ theorem binaryTree_law_card_isEquivalent (p : unitInterval)
   rw [binaryTree_law_card_eq_half p q hq hp hn, ENNReal.toReal_ofReal (by positivity)]
 
 /-- The volume tail at `p = 1/2`, exactly: `P(|K([])| ≥ n) = 2 C(2n,n)/4^n` for `n ≥ 1`
-(the infinite cluster has probability `0`, Q-71). -/
+(the infinite cluster has probability `0`). -/
 theorem binaryTree_law_le_encard_eq (p : unitInterval) (q : Sym2 (List (Fin 2)) → unitInterval)
     (hq : ∀ e, ¬ e.IsDiag → q e =
       if e ∈ (SimpleGraph.fromRel fun u w : List (Fin 2) => ∃ b, w = b :: u).edgeSet then p
@@ -525,9 +525,9 @@ theorem binaryTree_law_card_nearCritical_isEquivalent (pn : ℕ → unitInterval
 
 end Tree
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
-/-- D-5: `a_0 = 1`, `a_1 = 1/4`, `a_2 = 1/8` at `p = 1/2`
+/-- Non-vacuity: `a_0 = 1`, `a_1 = 1/4`, `a_2 = 1/8` at `p = 1/2`
 (`a_n(1/2) = Cat(n)/4^n`; `a_0` is the formal value at `n = 0`, not a cluster size). -/
 example : (catalan 0 : ℝ) / 4 ^ 0 * ((1 - 1 / 2) / (1 / 2)) * (4 * (1 / 2) * (1 - 1 / 2)) ^ 0 = 1 ∧
     (catalan 1 : ℝ) / 4 ^ 1 * ((1 - 1 / 2) / (1 / 2)) * (4 * (1 / 2) * (1 - 1 / 2)) ^ 1 = 1 / 4 ∧
@@ -536,7 +536,7 @@ example : (catalan 0 : ℝ) / 4 ^ 0 * ((1 - 1 / 2) / (1 / 2)) * (4 * (1 / 2) * (
   simp [catalan_zero, catalan_one, catalan_two]
   norm_num
 
-/-- D-5: `ε_n = n^{-1/3}` satisfies `ε_n → 0` and `n ε_n⁴ → 0`. -/
+/-- Non-vacuity: `ε_n = n^{-1/3}` satisfies `ε_n → 0` and `n ε_n⁴ → 0`. -/
 example : Tendsto (fun n : ℕ => (n : ℝ) ^ (-(1 / 3 : ℝ))) atTop (𝓝 0) ∧
     Tendsto (fun n : ℕ => (n : ℝ) * ((n : ℝ) ^ (-(1 / 3 : ℝ))) ^ 4) atTop (𝓝 0) := by
   constructor
