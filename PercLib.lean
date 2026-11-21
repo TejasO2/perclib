@@ -236,6 +236,7 @@ public import PercLib.Percolation.Bond.SusceptibilityEndpoint
 public import PercLib.Percolation.Bond.Tags.BoundaryForest
 public import PercLib.Percolation.Bond.Tags.ClusterCorrelation
 public import PercLib.Percolation.Bond.Tags.CoreBoundaryLaws
+public import PercLib.Percolation.Bond.Tags.CoreClosedProducts
 public import PercLib.Percolation.Bond.Tags.CoreConnectivity
 public import PercLib.Percolation.Bond.Tags.CoreCorrelationLength
 public import PercLib.Percolation.Bond.Tags.CoreFiniteVolume
@@ -289,6 +290,7 @@ public import PercLib.Probability.Characterization
 public import PercLib.Probability.ChiSquareDeterminacy
 public import PercLib.Probability.ChiSquareLimit
 public import PercLib.Probability.ChiSquareMoments
+public import PercLib.Probability.ClosedProduct
 public import PercLib.Probability.Concentration
 public import PercLib.Probability.Coordinate
 public import PercLib.Probability.CountableBK
