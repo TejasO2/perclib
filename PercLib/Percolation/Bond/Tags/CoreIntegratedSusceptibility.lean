@@ -26,10 +26,8 @@ variable {V : Type*}
 most `∑_{c ∈ S} τ(y,c) τ(c,w)`. -/
 @[tag "7902"]
 theorem tau_deleted_loss [Countable V] (q : Sym2 V → unitInterval) (S : Set V) (y w : V) :
-    law q {ω | ∃ hy : y ∈ Sᶜ, ∃ hw : w ∈ Sᶜ,
-        ((openGraph ω).induce Sᶜ).Reachable ⟨y, hy⟩ ⟨w, hw⟩} ≤ tau q y w ∧
-    tau q y w ≤ law q {ω | ∃ hy : y ∈ Sᶜ, ∃ hw : w ∈ Sᶜ,
-        ((openGraph ω).induce Sᶜ).Reachable ⟨y, hy⟩ ⟨w, hw⟩} +
+    law q (localConn Sᶜ y w) ≤ tau q y w ∧
+    tau q y w ≤ law q (localConn Sᶜ y w) +
       ∑' c : S, tau q y c * tau q c w :=
   ⟨law_deleted_le_tau q S y w, tau_le_deleted_add q S y w⟩
 
@@ -45,10 +43,7 @@ theorem boundary_susceptibility_bound_positive_part [Countable V] (J : Sym2 V �
     (∑ u ∈ S, ∑' w, if w ∈ S then 0 else (tau (intensityProfile J β) u w).toReal) ^ 2 /
         ((β : ℝ) ^ 2 * (⨆ u, chi (intensityProfile J β) u).toReal *
           ∑ u ∈ S, (∑ v ∈ S, (tau (intensityProfile J β) u v).toReal) ^ 2) ≤
-      ∑ v ∈ S, ∑' z, (if z ∈ S then 0 else (J s(v, z) : ℝ)) *
-        ∑' w, (law (intensityProfile J β)).real {ω | ∃ hz : z ∈ (S : Set V)ᶜ,
-          ∃ hw : w ∈ (S : Set V)ᶜ,
-          ((openGraph ω).induce (S : Set V)ᶜ).Reachable ⟨z, hz⟩ ⟨w, hw⟩} ∧
+      boundarySusceptibility J β S ∧
     (max ((⨅ u, chi (intensityProfile J β) u).toReal * S.card -
           ∑ u ∈ S, ∑ v ∈ S, (tau (intensityProfile J β) u v).toReal) 0) ^ 2 /
         ((β : ℝ) ^ 2 * (⨆ u, chi (intensityProfile J β) u).toReal *

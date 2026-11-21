@@ -47,7 +47,7 @@ theorem localConn_dependsOn_sym2 (S : Finset V) (x y : (S : Set V)) (ω : Config
   exact ⟨fun h => ⟨h, this⟩, fun h => h.1⟩
 
 /-- Internal connection events are increasing. -/
-theorem isUpperSet_localConn (S : Set V) (x y : S) :
+theorem isUpperSet_setOf_reachable_induce (S : Set V) (x y : S) :
     IsUpperSet {ω : Config V | ((openGraph ω).induce S).Reachable x y} :=
   fun _ _ h hxy => localConn_mono_config S x y h hxy
 
@@ -102,7 +102,7 @@ theorem law_localConn_hasDerivWithinAt (J : Sym2 V → ℝ≥0) (S : Finset V) (
     (fun b => intensityProfile J b.toNNReal) (Ici 0)
     (fun e _ => intensityProfile_toNNReal_coe J hβ e)
     (fun _ hb e _ => intensityProfile_toNNReal_coe J (mem_Ici.1 hb) e)
-    (isUpperSet_localConn _ x y) (localConn_dependsOn_sym2 S x y)
+    (isUpperSet_setOf_reachable_induce _ x y) (localConn_dependsOn_sym2 S x y)
 
 /-- Internal connection events are unchanged by loops. -/
 theorem localConn_congr_openGraph (S : Set V) (x y : S) (ω ω' : Config V)

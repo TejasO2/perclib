@@ -52,7 +52,7 @@ theorem law_disjoint_domains_independent (q : Sym2 V → unitInterval) :
         law q {ω | ((openGraph ω).induce S).Reachable x y} *
           law q {ω | ((openGraph ω).induce T).Reachable u v}) :=
   ⟨fun _ _ _ hS hAm hA => law_iInter_fin_of_determined_internalPairs q hS hAm hA,
-    fun S _ x y => ⟨measurableSet_localConn S x y, localConn_determined S x y⟩,
+    fun S _ x y => ⟨measurableSet_setOf_reachable_induce S x y, localConn_determined S x y⟩,
     fun _ _ _ _ hST x y u v => law_localConn_inter_eq_mul q hST x y u v⟩
 
 end PercLib.Percolation.Bond

@@ -11,20 +11,11 @@
     {
       "source": "hutchcroft-book",
       "order": 33,
-      "label": "Regular variation and Laplace tails",
+      "label": "Regular variation and Karamata's Tauberian theorem",
       "locator": "Cited without locator; the book is unpublished.",
       "relationship": "Credited source",
       "status": "attribution only",
       "note": "Results, arguments or exposition in this article taken from the book are credited to T. Hutchcroft, book in preparation."
-    },
-    {
-      "source": "perclib-shared-elementary",
-      "order": 0,
-      "label": "Shared elementary analytic estimates",
-      "locator": "Explicit public declaration start lines: 38, 47, 68, 86",
-      "relationship": "Source-inspected exposition with scope boundaries",
-      "status": "pending",
-      "note": "Four existing estimates are collected in one module, retaining their positivity and integrability hypotheses. Source pin: f51f639c15d742034cc6e2058008c79f48392873."
     },
     {
       "source": "perclib-train10-analysis-regularvariation-defs",

@@ -148,7 +148,7 @@
         },
         "consequences": {
           "title": "A conditional mean-field theorem",
-          "sha256": "c297228c2c224ac3fd2760b4b1ab6000a879d8704f5a98206feaf84b4f8a05e8"
+          "sha256": "5b4b020ea03097db050eb4b78bddbbb4b00ca2eb683fb619bf14d5ae0ab1a5f9"
         },
         "proof-architecture": {
           "title": "Why the diagram enters",
@@ -206,24 +206,47 @@
     },
     "hierarchical-two-point": {
       "prototypeId": "PC-000110",
-      "metadataSha256": "16b8afe8631d5acce549b6334b9f10304778c0ed9622e2735d0c00fa232fe99b",
+      "metadataSha256": "7ac718c7454cfc5e3d3f465216c235039a5823924c8da260f850857de0e9919b",
       "sections": {
         "model": {
-          "title": "The hierarchical geometry",
-          "sha256": "0bb2ed244d8404d338bbee743c8e21de1ef8334a53957f0683d4840d58f0689c"
+          "title": "Definitions and setting",
+          "sha256": "3021ea13d3dbe52098c0b48ecba37e780099629f209d84538a7ff4b4df89115b"
         },
         "statement": {
-          "title": "The critical estimate",
-          "sha256": "4698760ff67d2e312d71a1a99d1de45d79ccddcf93be2f35081d640a4c30aaa4"
+          "title": "Statement",
+          "sha256": "fd3728538c2dce60c6fa5c6e9caf3c181c9974dd406d91903f829a8241bc1603"
+        },
+        "examples": {
+          "title": "Examples and non-examples",
+          "sha256": "fc1aededffc12607f0a4d20bf8824e13ec96691ea970219b130b0c739f6d314f"
+        },
+        "idea": {
+          "title": "Idea of the proof",
+          "sha256": "4a0f3042dfd0e487b89deb598e813c53cfacd16f1e5246ce6b2722088e7fc14c"
+        },
+        "proof": {
+          "title": "Proof",
+          "sha256": "ac07915a32beaadca8ac1a522466c2ee24083e0cfb4c47e7c1f9256c94271757"
         },
         "consequence": {
-          "title": "A ball susceptibility calculation",
-          "sha256": "da4c91fb7d211848a5f17581ef344b9935136f6de80cbaa10f4bec4775b25cd1"
+          "title": "Consequences and applications",
+          "sha256": "bd23a843e833d6542f651b9bfb6164fa8a73165e8649f1ee51ce664a6394e1b4"
         },
         "position": {
-          "title": "Symmetry and further estimates",
-          "sha256": "a9490254dfe2820bb931028825f4e5b794b78787cc60969ab82d6ecdabf35df6"
+          "title": "Variants and generalisations",
+          "sha256": "34ad173e028ffa6c927037dc0a145f215b7c2afa99b8afb2bb91de1a73afa06d"
+        },
+        "history": {
+          "title": "History and attribution",
+          "sha256": "1eceb796d07eebf779f0dbe10bb22dbe7612927b5bc32ca88138a0110f9b9f42"
+        },
+        "references": {
+          "title": "References",
+          "sha256": "e3db4b4fbd21f9f0d904809b21cd56f7ea54a022e04a27f7b0e70e113fe6b83b"
         }
+      },
+      "lead": {
+        "sha256": "e6ee841d3f501a1b427efe1d907c755296af4ade69de4216f8991076fb22aac8"
       }
     },
     "finite-random-graphs": {
