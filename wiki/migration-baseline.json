@@ -206,24 +206,47 @@
     },
     "hierarchical-two-point": {
       "prototypeId": "PC-000110",
-      "metadataSha256": "411751ac32db95f83d84484f82da301fbbea2b7f94fbd00021e541a76f5bf3f3",
+      "metadataSha256": "7ac718c7454cfc5e3d3f465216c235039a5823924c8da260f850857de0e9919b",
       "sections": {
         "model": {
-          "title": "The hierarchical geometry",
-          "sha256": "0bb2ed244d8404d338bbee743c8e21de1ef8334a53957f0683d4840d58f0689c"
+          "title": "Definitions and setting",
+          "sha256": "38cdb2de9d31a500f869918ac0cb6507f0e89ee1ee627c730a1a44063d84cc0b"
         },
         "statement": {
-          "title": "The critical estimate",
-          "sha256": "5e9a5d910f857dea67cd4367529f8e6801573b3cc984bf3bae72ea5ec40cfb3a"
+          "title": "Statement",
+          "sha256": "f00de495a08e16835496a7114996abdf880353d9313371a31332ec67317fe5a1"
+        },
+        "examples": {
+          "title": "Examples and non-examples",
+          "sha256": "18053f5d96c5c58c9d2dfbaa511c97d743521c382a4de0d7e2f6adffcf6b1135"
+        },
+        "idea": {
+          "title": "Idea of the proof",
+          "sha256": "752c695bfdc0f6b48a7606623e1855858f2ada4c1e3b914aaac3fba2d3e1b655"
+        },
+        "proof": {
+          "title": "Proof",
+          "sha256": "2d2d50aceb106b3ab77e376649ecc1a08c6038240aec20a803ce48d6265ec293"
         },
         "consequence": {
-          "title": "A ball susceptibility calculation",
-          "sha256": "1d48de71f7951052b062dace659bd89610cc499371bf2ccccccc9204476cb5e5"
+          "title": "Consequences and applications",
+          "sha256": "447edb15d32a4701f5a6c62b9c2177bf6995dbc0348942306c322026ec8c3c62"
         },
         "position": {
-          "title": "Symmetry and further estimates",
-          "sha256": "a9490254dfe2820bb931028825f4e5b794b78787cc60969ab82d6ecdabf35df6"
+          "title": "Variants and generalisations",
+          "sha256": "3a174dc04966bdfdda335a1d7f8d65ed1f0775c20e5c25ab3987e3cdb8f5bc54"
+        },
+        "history": {
+          "title": "History and attribution",
+          "sha256": "465d61481538641bd3e99b6b9d824073b534d3be9f1312b3010107d043c5718d"
+        },
+        "references": {
+          "title": "References",
+          "sha256": "e3db4b4fbd21f9f0d904809b21cd56f7ea54a022e04a27f7b0e70e113fe6b83b"
         }
+      },
+      "lead": {
+        "sha256": "8d1c895781b292e3c0ac062cbb35fd0807ca08c6a30522cd48395f541ec0f901"
       }
     },
     "finite-random-graphs": {
