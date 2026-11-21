@@ -67,8 +67,7 @@ theorem induce_walk_last_exit (G : SimpleGraph V) (A K : Set V) {a b : A}
 /-- The event `{K_S(u) = K}` depends only on pairs meeting `K` with both ends in `S`. -/
 theorem induce_cluster_eq_of_agree (S K : Set V) (u : V) {ω ω' : Config V}
     (hagree : ∀ a ∈ K, ∀ b ∈ S, (s(a, b) ∈ ω ↔ s(a, b) ∈ ω'))
-    (h : ∀ v, (∃ hu : u ∈ S, ∃ hv : v ∈ S,
-      ((openGraph ω).induce S).Reachable ⟨u, hu⟩ ⟨v, hv⟩) ↔ v ∈ K) :
+    (h : ∀ v, (ω ∈ localConn S u v) ↔ v ∈ K) :
     ∀ v, (∃ hu : u ∈ S, ∃ hv : v ∈ S,
       ((openGraph ω').induce S).Reachable ⟨u, hu⟩ ⟨v, hv⟩) ↔ v ∈ K := by
   -- Walks of `ω'` inside `S` starting in `K` stay in `K`.
@@ -124,8 +123,7 @@ theorem measurableSet_exists_localConn [Countable V] (D T : Set V) (y : V) :
 
 /-- The event that the internal cluster of `u` in `S` equals `K` is measurable. -/
 theorem measurableSet_induce_cluster_eq [Countable V] (S K : Set V) (u : V) :
-    MeasurableSet {ω : Config V | ∀ v, (∃ hu : u ∈ S, ∃ hv : v ∈ S,
-      ((openGraph ω).induce S).Reachable ⟨u, hu⟩ ⟨v, hv⟩) ↔ v ∈ K} := by
+    MeasurableSet {ω : Config V | ∀ v, (ω ∈ localConn S u v) ↔ v ∈ K} := by
   rw [ofPred_forall]
   refine MeasurableSet.iInter fun v => ?_
   by_cases hv : v ∈ K
@@ -143,40 +141,28 @@ open Classical in
 not joined to `u` inside `S` pass through a pair `x y` with `x ∈ S`, `y ∉ S`. -/
 theorem law_reach_not_localConn_le_firstExit [Countable V] (q : Sym2 V → unitInterval)
     (S : Finset V) (A T : Set V) {u : V} (hu : u ∈ S) :
-    law q {ω | ∃ b ∈ T, (∃ hu : u ∈ A, ∃ hb : b ∈ A,
-        ((openGraph ω).induce A).Reachable ⟨u, hu⟩ ⟨b, hb⟩) ∧
-        ¬ ∃ hu : u ∈ (S : Set V), ∃ hb : b ∈ (S : Set V),
-          ((openGraph ω).induce (S : Set V)).Reachable ⟨u, hu⟩ ⟨b, hb⟩} ≤
+    law q {ω | ∃ b ∈ T, (ω ∈ localConn A u b) ∧
+        ¬ ω ∈ localConn (S : Set V) u b} ≤
       ∑ x ∈ S, ∑' y, if y ∈ S then 0 else
-        law q {ω | ∃ hu : u ∈ (S : Set V), ∃ hx : x ∈ (S : Set V),
-          ((openGraph ω).induce (S : Set V)).Reachable ⟨u, hu⟩ ⟨x, hx⟩} *
+        law q (localConn (S : Set V) u x) *
         (unitInterval.toNNReal (q s(x, y)) : ℝ≥0∞) *
-        law q {ω | ∃ b ∈ T, ∃ hy : y ∈ A, ∃ hb : b ∈ A,
-          ((openGraph ω).induce A).Reachable ⟨y, hy⟩ ⟨b, hb⟩} := by
+        law q {ω | ∃ b ∈ T, ω ∈ localConn A y b} := by
   -- The internal cluster events, the exit events and the joint events.
-  set E : Finset V → Set (Config V) := fun K => {ω | ∀ v, (∃ hu : u ∈ (S : Set V),
-    ∃ hv : v ∈ (S : Set V), ((openGraph ω).induce (S : Set V)).Reachable ⟨u, hu⟩ ⟨v, hv⟩) ↔
+  set E : Finset V → Set (Config V) := fun K => {ω | ∀ v, (ω ∈ localConn (S : Set V) u v) ↔
       v ∈ K} with hE
   set F : Finset V → V → Set (Config V) := fun K y => {ω | ∃ b ∈ T,
-    ∃ hy : y ∈ A \ (K : Set V), ∃ hb : b ∈ A \ (K : Set V),
-      ((openGraph ω).induce (A \ (K : Set V))).Reachable ⟨y, hy⟩ ⟨b, hb⟩} with hF
+    ω ∈ localConn (A \ (K : Set V)) y b} with hF
   set H : Finset V → V → V → Set (Config V) := fun K x y =>
     {ω | x ∈ K ∧ y ∉ S ∧ ω ∈ E K ∧ s(x, y) ∈ ω ∧ ω ∈ F K y} with hH
-  set τ : V → ℝ≥0∞ := fun x => law q {ω | ∃ hu : u ∈ (S : Set V), ∃ hx : x ∈ (S : Set V),
-    ((openGraph ω).induce (S : Set V)).Reachable ⟨u, hu⟩ ⟨x, hx⟩} with hτ
-  set P : V → ℝ≥0∞ := fun y => law q {ω | ∃ b ∈ T, ∃ hy : y ∈ A, ∃ hb : b ∈ A,
-    ((openGraph ω).induce A).Reachable ⟨y, hy⟩ ⟨b, hb⟩} with hP
+  set τ : V → ℝ≥0∞ := fun x => law q (localConn (S : Set V) u x) with hτ
+  set P : V → ℝ≥0∞ := fun y => law q {ω | ∃ b ∈ T, ω ∈ localConn A y b} with hP
   -- Covering by the joint events.
-  have hcover : {ω | ∃ b ∈ T, (∃ hu : u ∈ A, ∃ hb : b ∈ A,
-        ((openGraph ω).induce A).Reachable ⟨u, hu⟩ ⟨b, hb⟩) ∧
-        ¬ ∃ hu : u ∈ (S : Set V), ∃ hb : b ∈ (S : Set V),
-          ((openGraph ω).induce (S : Set V)).Reachable ⟨u, hu⟩ ⟨b, hb⟩} ⊆
+  have hcover : {ω | ∃ b ∈ T, (ω ∈ localConn A u b) ∧
+        ¬ ω ∈ localConn (S : Set V) u b} ⊆
       ⋃ x ∈ S, ⋃ y, ⋃ K ∈ S.powerset, H K x y := by
     rintro ω ⟨b, hbT, ⟨huA, hbA, ⟨p⟩⟩, hnot⟩
-    set K : Finset V := S.filter fun v => ∃ hu : u ∈ (S : Set V), ∃ hv : v ∈ (S : Set V),
-      ((openGraph ω).induce (S : Set V)).Reachable ⟨u, hu⟩ ⟨v, hv⟩ with hK
-    have hmemK : ∀ v, v ∈ K ↔ ∃ hu : u ∈ (S : Set V), ∃ hv : v ∈ (S : Set V),
-        ((openGraph ω).induce (S : Set V)).Reachable ⟨u, hu⟩ ⟨v, hv⟩ := by
+    set K : Finset V := S.filter fun v => ω ∈ localConn (S : Set V) u v with hK
+    have hmemK : ∀ v, v ∈ K ↔ ω ∈ localConn (S : Set V) u v := by
       intro v
       rw [hK, Finset.mem_filter]
       exact ⟨fun h => h.2, fun h => ⟨h.2.1, h⟩⟩
@@ -355,20 +341,15 @@ Terms with `x ∉ S` or `y ∉ A` vanish because the events require membership. 
 @[tag "USAC"]
 theorem law_reach_le_firstExit [Countable V] (q : Sym2 V → unitInterval) {S A B : Set V}
     {u : V} (hu : u ∈ S) (hB : B ⊆ A \ S) :
-    law q {ω | ∃ b ∈ B, ∃ hu : u ∈ A, ∃ hb : b ∈ A,
-        ((openGraph ω).induce A).Reachable ⟨u, hu⟩ ⟨b, hb⟩} ≤
+    law q {ω | ∃ b ∈ B, ω ∈ localConn A u b} ≤
       ∑' x, ∑' y, if y ∈ S then 0 else
-        law q {ω | ∃ hu : u ∈ S, ∃ hx : x ∈ S,
-          ((openGraph ω).induce S).Reachable ⟨u, hu⟩ ⟨x, hx⟩} *
+        law q (localConn S u x) *
         (unitInterval.toNNReal (q s(x, y)) : ℝ≥0∞) *
-        law q {ω | ∃ b ∈ B, ∃ hy : y ∈ A, ∃ hb : b ∈ A,
-          ((openGraph ω).induce A).Reachable ⟨y, hy⟩ ⟨b, hb⟩} := by
+        law q {ω | ∃ b ∈ B, ω ∈ localConn A y b} := by
   set R : Finset V → Set (Config V) := fun F => {ω | ∃ b ∈ B,
-    ∃ hu : u ∈ A ∩ (F : Set V), ∃ hb : b ∈ A ∩ (F : Set V),
-      ((openGraph ω).induce (A ∩ (F : Set V))).Reachable ⟨u, hu⟩ ⟨b, hb⟩} with hR
+    ω ∈ localConn (A ∩ (F : Set V)) u b} with hR
   -- Every connection inside `A` is a connection inside `A ∩ F` for a finite `F`.
-  have hcover : {ω | ∃ b ∈ B, ∃ hu : u ∈ A, ∃ hb : b ∈ A,
-      ((openGraph ω).induce A).Reachable ⟨u, hu⟩ ⟨b, hb⟩} ⊆ ⋃ F, R F := by
+  have hcover : {ω | ∃ b ∈ B, ω ∈ localConn A u b} ⊆ ⋃ F, R F := by
     rintro ω ⟨b, hbB, huA, hbA, ⟨p⟩⟩
     let p' := p.map (SimpleGraph.Embedding.induce A).toHom
     let F : Finset V := p'.support.toFinset
@@ -401,10 +382,8 @@ theorem law_reach_le_firstExit [Countable V] (q : Sym2 V → unitInterval) {S A 
   set S' : Finset V := F.filter (· ∈ S) with hS'
   have huS' : u ∈ S' := Finset.mem_filter.mpr ⟨huF, hu⟩
   have hS'S : (S' : Set V) ⊆ S := fun v hv => (Finset.mem_filter.mp hv).2
-  have hRsub : R F ⊆ {ω | ∃ b ∈ B, (∃ hu : u ∈ A ∩ (F : Set V), ∃ hb : b ∈ A ∩ (F : Set V),
-        ((openGraph ω).induce (A ∩ (F : Set V))).Reachable ⟨u, hu⟩ ⟨b, hb⟩) ∧
-        ¬ ∃ hu : u ∈ (S' : Set V), ∃ hb : b ∈ (S' : Set V),
-          ((openGraph ω).induce (S' : Set V)).Reachable ⟨u, hu⟩ ⟨b, hb⟩} := by
+  have hRsub : R F ⊆ {ω | ∃ b ∈ B, (ω ∈ localConn (A ∩ (F : Set V)) u b) ∧
+        ¬ ω ∈ localConn (S' : Set V) u b} := by
     rintro ω ⟨b, hbB, h⟩
     exact ⟨b, hbB, h, fun ⟨_, hb, _⟩ => (hB hbB).2 (hS'S hb)⟩
   refine (measure_mono hRsub).trans ((law_reach_not_localConn_le_firstExit q S'
@@ -415,11 +394,8 @@ theorem law_reach_le_firstExit [Countable V] (q : Sym2 V → unitInterval) {S A 
   · by_cases hyF : y ∈ F
     · have : y ∈ S' := Finset.mem_filter.mpr ⟨hyF, hyS⟩
       simp [this]
-    · have hP0 : law q {ω | ∃ b ∈ B, ∃ hy : y ∈ A ∩ (F : Set V), ∃ hb : b ∈ A ∩ (F : Set V),
-          ((openGraph ω).induce (A ∩ (F : Set V))).Reachable ⟨y, hy⟩ ⟨b, hb⟩} = 0 := by
-        have : {ω : Config V | ∃ b ∈ B, ∃ hy : y ∈ A ∩ (F : Set V),
-            ∃ hb : b ∈ A ∩ (F : Set V),
-            ((openGraph ω).induce (A ∩ (F : Set V))).Reachable ⟨y, hy⟩ ⟨b, hb⟩} = ∅ :=
+    · have hP0 : law q {ω | ∃ b ∈ B, ω ∈ localConn (A ∩ (F : Set V)) y b} = 0 := by
+        have : {ω : Config V | ∃ b ∈ B, ω ∈ localConn (A ∩ (F : Set V)) y b} = ∅ :=
           Set.eq_empty_iff_forall_notMem.mpr fun ω ⟨_, _, hy', _⟩ => hyF hy'.2
         rw [this, measure_empty]
       rw [hP0, mul_zero, ite_self]
@@ -434,17 +410,14 @@ theorem law_reach_le_firstExit [Countable V] (q : Sym2 V → unitInterval) {S A 
 /-- The expected size of an internal cluster is the sum of internal connection
 probabilities. -/
 theorem lintegral_encard_induce [Countable V] (q : Sym2 V → unitInterval) (D : Set V) (x : V) :
-    ∫⁻ ω, (({y | ∃ hx : x ∈ D, ∃ hy : y ∈ D,
-      ((openGraph ω).induce D).Reachable ⟨x, hx⟩ ⟨y, hy⟩} : Set V).encard : ℝ≥0∞) ∂law q =
-      ∑' v, law q {ω | ∃ hx : x ∈ D, ∃ hv : v ∈ D,
-        ((openGraph ω).induce D).Reachable ⟨x, hx⟩ ⟨v, hv⟩} := by
-  have hpt : ∀ ω : Config V, ((({y | ∃ hx : x ∈ D, ∃ hy : y ∈ D,
-      ((openGraph ω).induce D).Reachable ⟨x, hx⟩ ⟨y, hy⟩} : Set V).encard : ℝ≥0∞)) =
+    ∫⁻ ω, ((localCluster ω D x : Set V).encard : ℝ≥0∞) ∂law q =
+      ∑' v, law q (localConn D x v) := by
+  have hpt : ∀ ω : Config V, (((localCluster ω D x : Set V).encard : ℝ≥0∞)) =
       ∑' v, (localConn D x v).indicator 1 ω := by
     intro ω
     rw [encard_eq_tsum_indicator]
     refine tsum_congr fun v => ?_
-    simp only [indicator, mem_ofPred_eq, Pi.one_apply]
+    simp only [indicator, Pi.one_apply]
     rfl
   simp_rw [hpt]
   rw [lintegral_tsum fun v => (measurable_one.indicator
@@ -454,10 +427,8 @@ theorem lintegral_encard_induce [Countable V] (q : Sym2 V → unitInterval) (D :
 /-- Off the domain the internal connection probabilities vanish. -/
 theorem law_induce_conn_eq_zero_of_notMem {q : Sym2 V → unitInterval} {D : Set V} {x v : V}
     (h : x ∉ D ∨ v ∉ D) :
-    law q {ω | ∃ hx : x ∈ D, ∃ hv : v ∈ D,
-      ((openGraph ω).induce D).Reachable ⟨x, hx⟩ ⟨v, hv⟩} = 0 := by
-  have : {ω : Config V | ∃ hx : x ∈ D, ∃ hv : v ∈ D,
-      ((openGraph ω).induce D).Reachable ⟨x, hx⟩ ⟨v, hv⟩} = ∅ := by
+    law q (localConn D x v) = 0 := by
+  have : localConn D x v = ∅ := by
     refine Set.eq_empty_iff_forall_notMem.mpr fun ω ⟨hx, hv, _⟩ => ?_
     rcases h with h | h
     · exact h hx
@@ -466,8 +437,7 @@ theorem law_induce_conn_eq_zero_of_notMem {q : Sym2 V → unitInterval} {D : Set
 
 /-- In a finite domain the expected internal cluster size is at most its cardinality. -/
 theorem tsum_law_induce_conn_le_card {q : Sym2 V → unitInterval} (Λ : Finset V) (x : V) :
-    ∑' v, law q {ω | ∃ hx : x ∈ (Λ : Set V), ∃ hv : v ∈ (Λ : Set V),
-      ((openGraph ω).induce (Λ : Set V)).Reachable ⟨x, hx⟩ ⟨v, hv⟩} ≤ Λ.card := by
+    ∑' v, law q (localConn (Λ : Set V) x v) ≤ Λ.card := by
   rw [tsum_eq_sum (s := Λ) fun v hv => law_induce_conn_eq_zero_of_notMem (Or.inr hv)]
   calc _ ≤ ∑ _v ∈ Λ, (1 : ℝ≥0∞) := Finset.sum_le_sum fun _ _ => prob_le_one
     _ = Λ.card := by simp
@@ -477,17 +447,11 @@ open Classical in
 theorem tsum_law_induce_conn_le_of_boundary_contraction [Countable V]
     (q : Sym2 V → unitInterval) (Sx : V → Finset V) (hSx : ∀ x, x ∈ Sx x) {B a : ℝ≥0∞}
     (ha : a < 1)
-    (hB : ∀ x, ∑ u ∈ Sx x, law q {ω | ∃ hx : x ∈ (Sx x : Set V), ∃ hu : u ∈ (Sx x : Set V),
-      ((openGraph ω).induce (Sx x : Set V)).Reachable ⟨x, hx⟩ ⟨u, hu⟩} ≤ B)
-    (hΦ : ∀ x, ∑ u ∈ Sx x, ∑' v, (if v ∈ Sx x then 0 else
-      law q {ω | ∃ hx : x ∈ (Sx x : Set V), ∃ hu : u ∈ (Sx x : Set V),
-        ((openGraph ω).induce (Sx x : Set V)).Reachable ⟨x, hx⟩ ⟨u, hu⟩} *
-      (unitInterval.toNNReal (q s(u, v)) : ℝ≥0∞)) ≤ a)
+    (hB : ∀ x, ∑ u ∈ Sx x, law q (localConn (Sx x : Set V) x u) ≤ B)
+    (hΦ : ∀ x, boundaryFlux q (Sx x) x ≤ a)
     (Λ : Finset V) (x : V) :
-    ∑' v, law q {ω | ∃ hx : x ∈ (Λ : Set V), ∃ hv : v ∈ (Λ : Set V),
-      ((openGraph ω).induce (Λ : Set V)).Reachable ⟨x, hx⟩ ⟨v, hv⟩} ≤ B / (1 - a) := by
-  set W : V → ℝ≥0∞ := fun y => ∑' v, law q {ω | ∃ hy : y ∈ (Λ : Set V),
-    ∃ hv : v ∈ (Λ : Set V), ((openGraph ω).induce (Λ : Set V)).Reachable ⟨y, hy⟩ ⟨v, hv⟩}
+    ∑' v, law q (localConn (Λ : Set V) x v) ≤ B / (1 - a) := by
+  set W : V → ℝ≥0∞ := fun y => ∑' v, law q (localConn (Λ : Set V) y v)
     with hW
   set M : ℝ≥0∞ := ⨆ y, W y with hM
   have hWM : ∀ y, W y ≤ M := fun y => le_iSup W y
@@ -508,50 +472,39 @@ theorem tsum_law_induce_conn_le_of_boundary_contraction [Countable V]
     have hS'Sx : (S' : Set V) ⊆ Sx y := fun v hv => (Finset.mem_filter.mp hv).1
     have hS'Λ : (S' : Set V) ⊆ Λ := fun v hv => (Finset.mem_filter.mp hv).2
     -- Split each connection according to whether it is internal to `S'`.
-    have hsplit : ∀ v, law q {ω | ∃ hy : y ∈ (Λ : Set V), ∃ hv : v ∈ (Λ : Set V),
-        ((openGraph ω).induce (Λ : Set V)).Reachable ⟨y, hy⟩ ⟨v, hv⟩} ≤
-        law q {ω | ∃ hy : y ∈ (S' : Set V), ∃ hv : v ∈ (S' : Set V),
-          ((openGraph ω).induce (S' : Set V)).Reachable ⟨y, hy⟩ ⟨v, hv⟩} +
+    have hsplit : ∀ v, law q (localConn (Λ : Set V) y v) ≤
+        law q (localConn (S' : Set V) y v) +
         ∑ z ∈ S', ∑' w, if w ∈ S' then 0 else
-          law q {ω | ∃ hy : y ∈ (S' : Set V), ∃ hz : z ∈ (S' : Set V),
-            ((openGraph ω).induce (S' : Set V)).Reachable ⟨y, hy⟩ ⟨z, hz⟩} *
+          law q (localConn (S' : Set V) y z) *
           (unitInterval.toNNReal (q s(z, w)) : ℝ≥0∞) *
-          law q {ω | ∃ hw : w ∈ (Λ : Set V), ∃ hv : v ∈ (Λ : Set V),
-            ((openGraph ω).induce (Λ : Set V)).Reachable ⟨w, hw⟩ ⟨v, hv⟩} := by
+          law q (localConn (Λ : Set V) w v) := by
       intro v
       have hfe := law_reach_not_localConn_le_firstExit q S' (Λ : Set V) {v} hyS'
       simp only [mem_singleton_iff, exists_eq_left] at hfe
       refine (measure_mono ?_).trans ((measure_union_le _ _).trans (add_le_add le_rfl hfe))
       intro ω hω
-      by_cases hin : ∃ hy : y ∈ (S' : Set V), ∃ hv : v ∈ (S' : Set V),
-          ((openGraph ω).induce (S' : Set V)).Reachable ⟨y, hy⟩ ⟨v, hv⟩
+      by_cases hin : ω ∈ localConn (S' : Set V) y v
       · exact Or.inl hin
       · exact Or.inr ⟨hω, hin⟩
     -- The internal part.
-    have hint : ∑' v, law q {ω | ∃ hy : y ∈ (S' : Set V), ∃ hv : v ∈ (S' : Set V),
-        ((openGraph ω).induce (S' : Set V)).Reachable ⟨y, hy⟩ ⟨v, hv⟩} ≤ B := by
+    have hint : ∑' v, law q (localConn (S' : Set V) y v) ≤ B := by
       rw [tsum_eq_sum (s := Sx y) fun v hv =>
         law_induce_conn_eq_zero_of_notMem (Or.inr fun h => hv (hS'Sx h))]
       refine le_trans (Finset.sum_le_sum fun v _ => measure_mono fun ω h =>
         localConn_mono_set hS'Sx _ _ h) (hB y)
     -- The boundary part.
     have hbd : ∑' v, ∑ z ∈ S', ∑' w, (if w ∈ S' then 0 else
-          law q {ω | ∃ hy : y ∈ (S' : Set V), ∃ hz : z ∈ (S' : Set V),
-            ((openGraph ω).induce (S' : Set V)).Reachable ⟨y, hy⟩ ⟨z, hz⟩} *
+          law q (localConn (S' : Set V) y z) *
           (unitInterval.toNNReal (q s(z, w)) : ℝ≥0∞) *
-          law q {ω | ∃ hw : w ∈ (Λ : Set V), ∃ hv : v ∈ (Λ : Set V),
-            ((openGraph ω).induce (Λ : Set V)).Reachable ⟨w, hw⟩ ⟨v, hv⟩}) ≤ a * M := by
+          law q (localConn (Λ : Set V) w v)) ≤ a * M := by
       rw [Summable.tsum_finsetSum fun _ _ => ENNReal.summable]
       rw [Finset.sum_congr rfl fun z _ => ENNReal.tsum_comm]
       have hinner : ∀ z ∈ S', ∀ w, ∑' v, (if w ∈ S' then 0 else
-          law q {ω | ∃ hy : y ∈ (S' : Set V), ∃ hz : z ∈ (S' : Set V),
-            ((openGraph ω).induce (S' : Set V)).Reachable ⟨y, hy⟩ ⟨z, hz⟩} *
+          law q (localConn (S' : Set V) y z) *
           (unitInterval.toNNReal (q s(z, w)) : ℝ≥0∞) *
-          law q {ω | ∃ hw : w ∈ (Λ : Set V), ∃ hv : v ∈ (Λ : Set V),
-            ((openGraph ω).induce (Λ : Set V)).Reachable ⟨w, hw⟩ ⟨v, hv⟩}) ≤
+          law q (localConn (Λ : Set V) w v)) ≤
           (if w ∈ Sx y then 0 else
-            law q {ω | ∃ hy : y ∈ (Sx y : Set V), ∃ hz : z ∈ (Sx y : Set V),
-              ((openGraph ω).induce (Sx y : Set V)).Reachable ⟨y, hy⟩ ⟨z, hz⟩} *
+            law q (localConn (Sx y : Set V) y z) *
             (unitInterval.toNNReal (q s(z, w)) : ℝ≥0∞)) * M := by
         intro z _ w
         by_cases hwS' : w ∈ S'
@@ -563,35 +516,26 @@ theorem tsum_law_induce_conn_le_of_boundary_contraction [Countable V]
           simp only [hwSx, ↓reduceIte]
           exact mul_le_mul' (mul_le_mul' (measure_mono fun ω h => localConn_mono_set hS'Sx _ _ h)
             le_rfl) (hWM w)
-        · rw [show (∑' v, law q {ω | ∃ hw : w ∈ (Λ : Set V), ∃ hv : v ∈ (Λ : Set V),
-              ((openGraph ω).induce (Λ : Set V)).Reachable ⟨w, hw⟩ ⟨v, hv⟩}) = 0 from
+        · rw [show (∑' v, law q (localConn (Λ : Set V) w v)) = 0 from
             hW0 w hwΛ, mul_zero]
           exact zero_le
       calc _ ≤ ∑ z ∈ S', ∑' w, (if w ∈ Sx y then 0 else
-            law q {ω | ∃ hy : y ∈ (Sx y : Set V), ∃ hz : z ∈ (Sx y : Set V),
-              ((openGraph ω).induce (Sx y : Set V)).Reachable ⟨y, hy⟩ ⟨z, hz⟩} *
+            law q (localConn (Sx y : Set V) y z) *
             (unitInterval.toNNReal (q s(z, w)) : ℝ≥0∞)) * M :=
             Finset.sum_le_sum fun z hz => ENNReal.tsum_le_tsum fun w => hinner z hz w
         _ ≤ ∑ z ∈ Sx y, ∑' w, (if w ∈ Sx y then 0 else
-            law q {ω | ∃ hy : y ∈ (Sx y : Set V), ∃ hz : z ∈ (Sx y : Set V),
-              ((openGraph ω).induce (Sx y : Set V)).Reachable ⟨y, hy⟩ ⟨z, hz⟩} *
+            law q (localConn (Sx y : Set V) y z) *
             (unitInterval.toNNReal (q s(z, w)) : ℝ≥0∞)) * M :=
             Finset.sum_le_sum_of_subset (Finset.filter_subset _ _)
-        _ = (∑ z ∈ Sx y, ∑' w, (if w ∈ Sx y then 0 else
-            law q {ω | ∃ hy : y ∈ (Sx y : Set V), ∃ hz : z ∈ (Sx y : Set V),
-              ((openGraph ω).induce (Sx y : Set V)).Reachable ⟨y, hy⟩ ⟨z, hz⟩} *
-            (unitInterval.toNNReal (q s(z, w)) : ℝ≥0∞))) * M := by
-            rw [Finset.sum_mul]
+        _ = (boundaryFlux q (Sx y) y) * M := by
+            rw [boundaryFlux_def, Finset.sum_mul]
             simp_rw [ENNReal.tsum_mul_right]
         _ ≤ a * M := mul_le_mul' (hΦ y) le_rfl
-    calc W y ≤ ∑' v, (law q {ω | ∃ hy : y ∈ (S' : Set V), ∃ hv : v ∈ (S' : Set V),
-          ((openGraph ω).induce (S' : Set V)).Reachable ⟨y, hy⟩ ⟨v, hv⟩} +
+    calc W y ≤ ∑' v, (law q (localConn (S' : Set V) y v) +
         ∑ z ∈ S', ∑' w, if w ∈ S' then 0 else
-          law q {ω | ∃ hy : y ∈ (S' : Set V), ∃ hz : z ∈ (S' : Set V),
-            ((openGraph ω).induce (S' : Set V)).Reachable ⟨y, hy⟩ ⟨z, hz⟩} *
+          law q (localConn (S' : Set V) y z) *
           (unitInterval.toNNReal (q s(z, w)) : ℝ≥0∞) *
-          law q {ω | ∃ hw : w ∈ (Λ : Set V), ∃ hv : v ∈ (Λ : Set V),
-            ((openGraph ω).induce (Λ : Set V)).Reachable ⟨w, hw⟩ ⟨v, hv⟩}) :=
+          law q (localConn (Λ : Set V) w v)) :=
           ENNReal.tsum_le_tsum hsplit
       _ ≤ B + a * M := by
           rw [ENNReal.tsum_add]
@@ -614,12 +558,8 @@ open Classical in
 `∑_{u ∈ S_x} τ_{S_x}(x,u) ≤ B` and `Φ_q(x,S_x) ≤ a < 1`, then `χ(x) ≤ B (1 - a)⁻¹`. -/
 theorem chi_le_of_boundary_contraction [Countable V] (q : Sym2 V → unitInterval)
     (Sx : V → Finset V) (hSx : ∀ x, x ∈ Sx x) {B a : ℝ≥0∞} (ha : a < 1)
-    (hB : ∀ x, ∑ u ∈ Sx x, law q {ω | ∃ hx : x ∈ (Sx x : Set V), ∃ hu : u ∈ (Sx x : Set V),
-      ((openGraph ω).induce (Sx x : Set V)).Reachable ⟨x, hx⟩ ⟨u, hu⟩} ≤ B)
-    (hΦ : ∀ x, ∑ u ∈ Sx x, ∑' v, (if v ∈ Sx x then 0 else
-      law q {ω | ∃ hx : x ∈ (Sx x : Set V), ∃ hu : u ∈ (Sx x : Set V),
-        ((openGraph ω).induce (Sx x : Set V)).Reachable ⟨x, hx⟩ ⟨u, hu⟩} *
-      (unitInterval.toNNReal (q s(u, v)) : ℝ≥0∞)) ≤ a)
+    (hB : ∀ x, ∑ u ∈ Sx x, law q (localConn (Sx x : Set V) x u) ≤ B)
+    (hΦ : ∀ x, boundaryFlux q (Sx x) x ≤ a)
     (x : V) : chi q x ≤ B * (1 - a)⁻¹ := by
   obtain ⟨Λ, hΛ, hcov⟩ := exists_finset_exhaustion (V := V)
   have hmono : Monotone fun n => (Λ n : Set V) := fun m n h => Finset.coe_subset.mpr (hΛ h)
@@ -633,12 +573,8 @@ open Classical in
 `chi_le_of_boundary_contraction` with `B < ∞`, almost surely every cluster is finite. -/
 theorem ae_cluster_finite_of_boundary_contraction [Countable V] (q : Sym2 V → unitInterval)
     (Sx : V → Finset V) (hSx : ∀ x, x ∈ Sx x) {B a : ℝ≥0∞} (hBtop : B < ∞) (ha : a < 1)
-    (hB : ∀ x, ∑ u ∈ Sx x, law q {ω | ∃ hx : x ∈ (Sx x : Set V), ∃ hu : u ∈ (Sx x : Set V),
-      ((openGraph ω).induce (Sx x : Set V)).Reachable ⟨x, hx⟩ ⟨u, hu⟩} ≤ B)
-    (hΦ : ∀ x, ∑ u ∈ Sx x, ∑' v, (if v ∈ Sx x then 0 else
-      law q {ω | ∃ hx : x ∈ (Sx x : Set V), ∃ hu : u ∈ (Sx x : Set V),
-        ((openGraph ω).induce (Sx x : Set V)).Reachable ⟨x, hx⟩ ⟨u, hu⟩} *
-      (unitInterval.toNNReal (q s(u, v)) : ℝ≥0∞)) ≤ a) :
+    (hB : ∀ x, ∑ u ∈ Sx x, law q (localConn (Sx x : Set V) x u) ≤ B)
+    (hΦ : ∀ x, boundaryFlux q (Sx x) x ≤ a) :
     ∀ᵐ ω ∂law q, ∀ x, (cluster ω x).Finite := by
   rw [ae_all_iff]
   intro x
@@ -655,10 +591,7 @@ the bound holds with `B = N`. -/
 theorem chi_le_of_boundary_contraction_card [Countable V] (q : Sym2 V → unitInterval)
     (Sx : V → Finset V) (hSx : ∀ x, x ∈ Sx x) {N : ℕ} (hN : ∀ x, (Sx x).card ≤ N)
     {a : ℝ≥0∞} (ha : a < 1)
-    (hΦ : ∀ x, ∑ u ∈ Sx x, ∑' v, (if v ∈ Sx x then 0 else
-      law q {ω | ∃ hx : x ∈ (Sx x : Set V), ∃ hu : u ∈ (Sx x : Set V),
-        ((openGraph ω).induce (Sx x : Set V)).Reachable ⟨x, hx⟩ ⟨u, hu⟩} *
-      (unitInterval.toNNReal (q s(u, v)) : ℝ≥0∞)) ≤ a)
+    (hΦ : ∀ x, boundaryFlux q (Sx x) x ≤ a)
     (x : V) : chi q x ≤ N * (1 - a)⁻¹ := by
   refine chi_le_of_boundary_contraction q Sx hSx ha (fun y => ?_) hΦ x
   calc _ ≤ ∑ _u ∈ Sx y, (1 : ℝ≥0∞) := Finset.sum_le_sum fun _ _ => prob_le_one
@@ -674,7 +607,7 @@ theorem chi_le_of_rowSum_le [Countable V] (q : Sym2 V → unitInterval) {a : ℝ
   have h := chi_le_of_boundary_contraction_card q (fun x => {x}) (fun x => by simp)
     (N := 1) (fun x => by simp) ha (fun y => ?_) x
   · simpa using h
-  rw [Finset.sum_singleton]
+  rw [boundaryFlux_def, Finset.sum_singleton]
   refine le_trans (ENNReal.tsum_le_tsum fun v => ?_) (hrow y)
   by_cases hv : v = y
   · simp [hv]

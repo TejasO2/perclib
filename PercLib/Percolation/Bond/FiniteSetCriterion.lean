@@ -112,10 +112,7 @@ open Classical in
 /-- **Regularity of `Φ`, monotonicity.** For a fixed finite `S`, the boundary functional
 `β ↦ Φ_{q_β}(o,S)` is monotone. -/
 theorem monotone_boundaryFlux_intensity [Countable V] (J : Sym2 V → ℝ≥0) (S : Finset V) (o : V) :
-    Monotone fun β : ℝ≥0 => ∑ u ∈ S, ∑' v, (if v ∈ S then 0 else
-      law (intensityProfile J β) {ω | ∃ ho : o ∈ (S : Set V), ∃ hu : u ∈ (S : Set V),
-        ((openGraph ω).induce (S : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
-      (unitInterval.toNNReal (intensityProfile J β s(u, v)) : ℝ≥0∞)) := by
+    Monotone fun β : ℝ≥0 => boundaryFlux (intensityProfile J β) S o := by
   intro β₁ β₂ h
   refine Finset.sum_le_sum fun u _ => ENNReal.tsum_le_tsum fun v => ?_
   split_ifs
@@ -132,8 +129,7 @@ theorem continuous_intensityProfile_pi (J : Sym2 V → ℝ≥0) :
 /-- An internal connection probability is continuous in the intensity. -/
 theorem continuous_law_localConn_intensity (J : Sym2 V → ℝ≥0) (S : Finset V) (x u : V) :
     Continuous fun β : ℝ≥0 => law (intensityProfile J β)
-      {ω : Config V | ∃ hx : x ∈ (S : Set V), ∃ hu : u ∈ (S : Set V),
-        ((openGraph ω).induce (S : Set V)).Reachable ⟨x, hx⟩ ⟨u, hu⟩} :=
+      (localConn (S : Set V) x u) :=
   (continuous_law_localConn S x u).comp (continuous_intensityProfile_pi J)
 
 open Classical in
@@ -209,18 +205,12 @@ for a fixed finite `S` the boundary functional `β ↦ Φ_{q_β}(o,S)` is contin
 theorem continuous_boundaryFlux_intensity (J : Sym2 V → ℝ≥0)
     (hrow : ∀ u, rowSum (fun e => (J e : ℝ≥0∞)) u < ∞) (S : Finset V)
     (o : V) :
-    Continuous fun β : ℝ≥0 => ∑ u ∈ S, ∑' v, (if v ∈ S then 0 else
-      law (intensityProfile J β) {ω | ∃ ho : o ∈ (S : Set V), ∃ hu : u ∈ (S : Set V),
-        ((openGraph ω).induce (S : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
-      (unitInterval.toNNReal (intensityProfile J β s(u, v)) : ℝ≥0∞)) := by
+    Continuous fun β : ℝ≥0 => boundaryFlux (intensityProfile J β) S o := by
   refine continuous_finsetSum _ fun u hu => ?_
   have hfac : (fun β : ℝ≥0 => ∑' v, (if v ∈ S then 0 else
-      law (intensityProfile J β) {ω | ∃ ho : o ∈ (S : Set V), ∃ hu : u ∈ (S : Set V),
-        ((openGraph ω).induce (S : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
+      law (intensityProfile J β) (localConn (S : Set V) o u) *
       (unitInterval.toNNReal (intensityProfile J β s(u, v)) : ℝ≥0∞))) =
-      fun β => law (intensityProfile J β) {ω | ∃ ho : o ∈ (S : Set V),
-          ∃ hu : u ∈ (S : Set V),
-          ((openGraph ω).induce (S : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
+      fun β => law (intensityProfile J β) (localConn (S : Set V) o u) *
         ∑' v, (if v ∈ S then 0 else
           (unitInterval.toNNReal (intensityProfile J β s(u, v)) : ℝ≥0∞)) := by
     funext β
@@ -252,7 +242,7 @@ theorem localConn_of_image (σ : V ≃ V) (ω : Config V) {S T : Set V}
     (hST : ∀ v, v ∈ T → σ.symm v ∈ S) {a b : V}
     (h : ∃ ha : σ a ∈ T, ∃ hb : σ b ∈ T,
       ((openGraph (Sym2.map σ '' ω)).induce T).Reachable ⟨σ a, ha⟩ ⟨σ b, hb⟩) :
-    ∃ ha : a ∈ S, ∃ hb : b ∈ S, ((openGraph ω).induce S).Reachable ⟨a, ha⟩ ⟨b, hb⟩ := by
+    ω ∈ localConn S a b := by
   obtain ⟨ha, hb, r⟩ := h
   let ψ : (openGraph (Sym2.map σ '' ω)).induce T →g (openGraph ω).induce S :=
     { toFun := fun v => ⟨σ.symm v, hST v v.2⟩
@@ -272,10 +262,8 @@ domain is at most that of the domain. -/
 theorem law_localConn_image_le [Countable V] (J : Sym2 V → ℝ≥0) (σ : V ≃ V)
     (hσ : ∀ e, J (Sym2.map σ e) = J e) (β : ℝ≥0) {S T : Set V}
     (hST : ∀ v, v ∈ T → σ.symm v ∈ S) (a b : V) :
-    law (intensityProfile J β) {ω | ∃ ha : σ a ∈ T, ∃ hb : σ b ∈ T,
-        ((openGraph ω).induce T).Reachable ⟨σ a, ha⟩ ⟨σ b, hb⟩} ≤
-      law (intensityProfile J β) {ω | ∃ ha : a ∈ S, ∃ hb : b ∈ S,
-        ((openGraph ω).induce S).Reachable ⟨a, ha⟩ ⟨b, hb⟩} := by
+    law (intensityProfile J β) (localConn T (σ a) (σ b)) ≤
+      law (intensityProfile J β) (localConn S a b) := by
   conv_lhs => rw [← law_intensityProfile_map_eq J σ hσ β, map_image_sym2Map_apply]
   exact measure_mono fun ω hω => localConn_of_image σ ω hST hω
 
@@ -284,17 +272,9 @@ open Classical in
 most the boundary functional at `(o, S)`. -/
 theorem boundaryFlux_map_le [Countable V] (J : Sym2 V → ℝ≥0) (σ : V ≃ V)
     (hσ : ∀ e, J (Sym2.map σ e) = J e) (β : ℝ≥0) (S : Finset V) (o : V) :
-    ∑ u ∈ S.map σ.toEmbedding, ∑' v, (if v ∈ S.map σ.toEmbedding then 0 else
-      law (intensityProfile J β) {ω | ∃ ho : σ o ∈ ((S.map σ.toEmbedding : Finset V) : Set V),
-        ∃ hu : u ∈ ((S.map σ.toEmbedding : Finset V) : Set V),
-        ((openGraph ω).induce ((S.map σ.toEmbedding : Finset V) : Set V)).Reachable
-          ⟨σ o, ho⟩ ⟨u, hu⟩} *
-      (unitInterval.toNNReal (intensityProfile J β s(u, v)) : ℝ≥0∞)) ≤
-    ∑ u ∈ S, ∑' v, (if v ∈ S then 0 else
-      law (intensityProfile J β) {ω | ∃ ho : o ∈ (S : Set V), ∃ hu : u ∈ (S : Set V),
-        ((openGraph ω).induce (S : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
-      (unitInterval.toNNReal (intensityProfile J β s(u, v)) : ℝ≥0∞)) := by
-  rw [Finset.sum_map]
+    boundaryFlux (intensityProfile J β) (S.map σ.toEmbedding) (σ o) ≤
+    boundaryFlux (intensityProfile J β) S o := by
+  rw [boundaryFlux_def, boundaryFlux_def, Finset.sum_map]
   refine Finset.sum_le_sum fun u _ => ?_
   rw [← σ.tsum_eq]
   refine ENNReal.tsum_le_tsum fun v => ?_
@@ -321,15 +301,9 @@ theorem exists_chi_lt_top_of_boundaryFlux_lt_one [Countable V] (J : Sym2 V → �
     (hT : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e)
     (hrow : ∀ u, rowSum (fun e => (J e : ℝ≥0∞)) u < ∞)
     (S : Finset V) {o : V} (hoS : o ∈ S) (β₀ : ℝ≥0)
-    (hΦ : ∑ u ∈ S, ∑' v, (if v ∈ S then 0 else
-      law (intensityProfile J β₀) {ω | ∃ ho : o ∈ (S : Set V), ∃ hu : u ∈ (S : Set V),
-        ((openGraph ω).induce (S : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
-      (unitInterval.toNNReal (intensityProfile J β₀ s(u, v)) : ℝ≥0∞)) < 1) :
+    (hΦ : boundaryFlux (intensityProfile J β₀) S o < 1) :
     ∃ ε : ℝ≥0, 0 < ε ∧ ∀ x, chi (intensityProfile J (β₀ + ε)) x < ⊤ := by
-  set Φ : ℝ≥0 → ℝ≥0∞ := fun β => ∑ u ∈ S, ∑' v, (if v ∈ S then 0 else
-      law (intensityProfile J β) {ω | ∃ ho : o ∈ (S : Set V), ∃ hu : u ∈ (S : Set V),
-        ((openGraph ω).induce (S : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
-      (unitInterval.toNNReal (intensityProfile J β s(u, v)) : ℝ≥0∞))
+  set Φ : ℝ≥0 → ℝ≥0∞ := fun β => boundaryFlux (intensityProfile J β) S o
   have hc : Continuous Φ := continuous_boundaryFlux_intensity J hrow S o
   -- Some `ε > 0` keeps `Φ` below one.
   have ht : Tendsto (fun ε : ℝ≥0 => Φ (β₀ + ε)) (𝓝[>] 0) (𝓝 (Φ β₀)) := by
@@ -350,11 +324,7 @@ theorem exists_chi_lt_top_of_boundaryFlux_lt_one [Countable V] (J : Sym2 V → �
     rw [h]
     exact hoS
   have hcard : ∀ x, (Sx x).card ≤ S.card := fun x => by simp [Sx]
-  have hΦx : ∀ x, ∑ u ∈ Sx x, ∑' v, (if v ∈ Sx x then 0 else
-      law (intensityProfile J (β₀ + ε)) {ω | ∃ hx : x ∈ (Sx x : Set V),
-        ∃ hu : u ∈ (Sx x : Set V),
-        ((openGraph ω).induce (Sx x : Set V)).Reachable ⟨x, hx⟩ ⟨u, hu⟩} *
-      (unitInterval.toNNReal (intensityProfile J (β₀ + ε) s(u, v)) : ℝ≥0∞)) ≤
+  have hΦx : ∀ x, boundaryFlux (intensityProfile J (β₀ + ε)) (Sx x) x ≤
       Φ (β₀ + ε) := fun x => by
     have h := boundaryFlux_map_le J (σ x) (hσJ x) (β₀ + ε) S o
     simp only [hσx x] at h
@@ -371,10 +341,7 @@ theorem lt_rootCriticalIntensity_of_boundaryFlux_lt_one [Countable V] (J : Sym2 
     (hT : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e)
     (hrow : ∀ u, rowSum (fun e => (J e : ℝ≥0∞)) u < ∞)
     (S : Finset V) {o : V} (hoS : o ∈ S) (β₀ : ℝ≥0)
-    (hΦ : ∑ u ∈ S, ∑' v, (if v ∈ S then 0 else
-      law (intensityProfile J β₀) {ω | ∃ ho : o ∈ (S : Set V), ∃ hu : u ∈ (S : Set V),
-        ((openGraph ω).induce (S : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
-      (unitInterval.toNNReal (intensityProfile J β₀ s(u, v)) : ℝ≥0∞)) < 1) :
+    (hΦ : boundaryFlux (intensityProfile J β₀) S o < 1) :
     (β₀ : ℝ≥0∞) < rootCriticalIntensity J o := by
   obtain ⟨ε, hε0, hchi⟩ := exists_chi_lt_top_of_boundaryFlux_lt_one J hT hrow S hoS β₀ hΦ
   have h0 := law_cluster_infinite_eq_zero_of_chi_ne_top _ o (hchi o).ne
@@ -400,22 +367,11 @@ theorem one_le_boundaryFlux_at_rootCriticalIntensity [Countable V] (J : Sym2 V �
     (hT : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e)
     (hrow : ∀ u, rowSum (fun e => (J e : ℝ≥0∞)) u < ∞) {o : V}
     (hc : rootCriticalIntensity J o < ⊤) (S : Finset V) (hoS : o ∈ S) :
-    1 ≤ ∑ u ∈ S, ∑' v, (if v ∈ S then 0 else
-      law (intensityProfile J (rootCriticalIntensity J o).toNNReal)
-        {ω | ∃ ho : o ∈ (S : Set V), ∃ hu : u ∈ (S : Set V),
-          ((openGraph ω).induce (S : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
-      (unitInterval.toNNReal (intensityProfile J (rootCriticalIntensity J o).toNNReal
-        s(u, v)) : ℝ≥0∞)) ∧
-    ∑ u ∈ S, ∑' v, (if v ∈ S then 0 else
-      law (intensityProfile J (rootCriticalIntensity J o).toNNReal)
-        {ω | ∃ ho : o ∈ (S : Set V), ∃ hu : u ∈ (S : Set V),
-          ((openGraph ω).induce (S : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
-      (unitInterval.toNNReal (intensityProfile J (rootCriticalIntensity J o).toNNReal
-        s(u, v)) : ℝ≥0∞)) ≤
+    1 ≤ boundaryFlux (intensityProfile J (rootCriticalIntensity J o).toNNReal) S o ∧
+    boundaryFlux (intensityProfile J (rootCriticalIntensity J o).toNNReal) S o ≤
     rootCriticalIntensity J o * ∑ u ∈ S,
       law (intensityProfile J (rootCriticalIntensity J o).toNNReal)
-        {ω | ∃ ho : o ∈ (S : Set V), ∃ hu : u ∈ (S : Set V),
-          ((openGraph ω).induce (S : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
+        (localConn (S : Set V) o u) *
       ∑' v, (if v ∈ S then 0 else (J s(u, v) : ℝ≥0∞)) := by
   set βc := (rootCriticalIntensity J o).toNNReal with hβc
   have hβc' : (βc : ℝ≥0∞) = rootCriticalIntensity J o := ENNReal.coe_toNNReal hc.ne
@@ -433,8 +389,7 @@ theorem one_le_boundaryFlux_at_rootCriticalIntensity [Countable V] (J : Sym2 V �
     · simp [hv]
     · rw [ite_eq_right hv, ite_eq_right hv]
       calc _ ≤ law (intensityProfile J βc)
-              {ω | ∃ ho : o ∈ (S : Set V), ∃ hu : u ∈ (S : Set V),
-                ((openGraph ω).induce (S : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
+              (localConn (S : Set V) o u) *
               ((βc : ℝ≥0∞) * (J s(u, v) : ℝ≥0∞)) := by
             refine mul_le_mul' le_rfl ?_
             rw [← ENNReal.coe_mul]
@@ -466,16 +421,16 @@ example (β : ℝ≥0) :
       Continuous fun β : ℝ≥0 => ∑ u ∈ ({0} : Finset (ZMod 2)), ∑' v, (if v ∈ ({0} : Finset _)
         then 0 else
         law (intensityProfile (fun _ : Sym2 (ZMod 2) => (1 : ℝ≥0)) β)
-          {ω | ∃ ho : (0 : ZMod 2) ∈ (({0} : Finset (ZMod 2)) : Set (ZMod 2)),
-            ∃ hu : u ∈ (({0} : Finset (ZMod 2)) : Set (ZMod 2)),
-            ((openGraph ω).induce (({0} : Finset (ZMod 2)) : Set (ZMod 2))).Reachable
-              ⟨0, ho⟩ ⟨u, hu⟩} *
+          (localConn (({0} : Finset (ZMod 2)) : Set (ZMod 2)) 0 u) *
         (unitInterval.toNNReal (intensityProfile (fun _ => (1 : ℝ≥0)) β s(u, v)) : ℝ≥0∞)) :=
   ⟨chi_eq_of_transitive _ transitive_const_zmod_two β 0 1,
     rootCriticalIntensity_eq_globalCriticalIntensity_of_transitive _ transitive_const_zmod_two 0,
-    by convert continuous_boundaryFlux_intensity (V := ZMod 2) (fun _ => 1) (fun u => by
-      rw [rowSum_def, tsum_fintype]
-      exact ENNReal.sum_lt_top.2 fun _ _ => by split_ifs <;> simp) {0} 0⟩
+    by
+      have h := continuous_boundaryFlux_intensity (V := ZMod 2) (fun _ => 1) (fun u => by
+        rw [rowSum_def, tsum_fintype]
+        exact ENNReal.sum_lt_top.2 fun _ _ => by split_ifs <;> simp) {0} 0
+      simp only [boundaryFlux_def] at h
+      convert h⟩
 
 open Classical in
 /-- The zero kernel with `S = {o}`: `Φ = 0 < 1`, so the susceptibility is finite just above `β₀ = 1`
@@ -490,18 +445,15 @@ example (o : ZMod 2) :
     fun u => by simp
   have hΦ : ∑ u ∈ ({o} : Finset (ZMod 2)), ∑' v, (if v ∈ ({o} : Finset (ZMod 2)) then 0 else
       law (intensityProfile (fun _ : Sym2 (ZMod 2) => (0 : ℝ≥0)) 1)
-        {ω | ∃ ho : o ∈ (({o} : Finset (ZMod 2)) : Set (ZMod 2)),
-          ∃ hu : u ∈ (({o} : Finset (ZMod 2)) : Set (ZMod 2)),
-          ((openGraph ω).induce (({o} : Finset (ZMod 2)) : Set (ZMod 2))).Reachable
-            ⟨o, ho⟩ ⟨u, hu⟩} *
+        (localConn (({o} : Finset (ZMod 2)) : Set (ZMod 2)) o u) *
       (unitInterval.toNNReal (intensityProfile (fun _ => (0 : ℝ≥0)) 1 s(u, v)) : ℝ≥0∞)) < 1 := by
     have hz : ∀ e : Sym2 (ZMod 2),
         intensityProfile (fun _ : Sym2 (ZMod 2) => (0 : ℝ≥0)) 1 e = 0 :=
       fun e => intensityProfile_eq_zero_of_eq_zero _ rfl 1
     simp [hz]
   exact ⟨exists_chi_lt_top_of_boundaryFlux_lt_one _ transitive_zero (by convert hrow) {o}
-      (Finset.mem_singleton_self o) 1 (by convert hΦ),
+      (Finset.mem_singleton_self o) 1 (by rw [boundaryFlux_def]; convert hΦ),
     lt_rootCriticalIntensity_of_boundaryFlux_lt_one _ transitive_zero (by convert hrow) {o}
-      (Finset.mem_singleton_self o) 1 (by convert hΦ)⟩
+      (Finset.mem_singleton_self o) 1 (by rw [boundaryFlux_def]; convert hΦ)⟩
 
 end PercLib.Percolation.Bond
