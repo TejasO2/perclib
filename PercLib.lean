@@ -402,6 +402,7 @@ public import PercLib.Probability.Tags.GhostFieldDerivative
 public import PercLib.Probability.Tags.GhostTransform
 public import PercLib.Probability.Tags.Harris
 public import PercLib.Probability.Tags.IntegratedLowerTail
+public import PercLib.Probability.Tags.MassTransport
 public import PercLib.Probability.Tags.MonotoneCoupling
 public import PercLib.Probability.Tags.NearMisses
 public import PercLib.Probability.Tags.PredictableSwap
