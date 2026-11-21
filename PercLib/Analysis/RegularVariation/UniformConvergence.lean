@@ -12,8 +12,10 @@ arXiv:2508.18807v1.
 Ported from the work of contributor `yujinhkim`: repository `yujinhkim/lrp`, branch
 `critical-lrp-1`, commit `d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, file
 `PercLib/CriticalLRP/Analysis/UniformConvergence.lean` (its first part, through
-`hasPotterBounds_of_regularlyVarying`); licence Apache-2.0 as declared in that commit's file headers
-and `third_party/critical-lrp/NOTICE.md`; upstream `yujinhkim/Critical-Long-range-percolation` at
+`hasPotterBounds_of_regularlyVarying`, and, in the section "Part 2", its remaining statements
+except `slowlyVarying_div_rpow`) and file `PercLib/CriticalLRP/Analysis/PotterBounded.lean` (in
+"Part 2"); licence Apache-2.0 as declared in that commit's file headers and
+`third_party/critical-lrp/NOTICE.md`; upstream `yujinhkim/Critical-Long-range-percolation` at
 `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf`. Modified: `RegularlyVaryingAtTop f α` becomes
 `RegularlyVarying α f` of `PercLib/Analysis/RegularVariation/Defs.lean` (each proof first recovers
 the source's two components from it); `HasPotterBounds f α` is written out, so

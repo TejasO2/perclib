@@ -67,7 +67,7 @@ A failure means the batch does not move: find the culprit branch, `git reset --h
 <tip>` locally (never on the remote), re-merge without it, re-gate. An "INTERFACE"
 notice is not a failure; it must correspond to audited interface changes. Kernel replay (ruling 13b): after every tenth merged batch, in a separate
 detached worktree at the last gated commit (`.lake/packages` symlinked, `.lake/build` copied),
-`nice -n 15 scripts/kernel_replay.sh 6` in the background; it does not need the main checkout
+`nice -n 15 scripts/kernel_replay.sh 2` in the background (batch 6 was OOM-killed repeatedly); it does not need the main checkout
 idle; record commit and result in STATUS.
 
 Push: `git push -u origin claude/zen-lovelace-rvlcw2` (retry with backoff on network
@@ -89,6 +89,9 @@ a review (proof-only: gate on the merge with the integration branch; interface: 
 `docs/reviews/pr-<n>.md` (or `branch-<name>.md`) on the integration branch, written for the contributor; never merge an
 outside pull request into the integration branch ourselves. `git fetch origin main`: if `main` moved, merge
 `origin/main` into the integration branch and gate. No Lean work of ours inside the lace-expansion area (ruling 14a).
+GitHub Actions (ruling 17; every round): `curl -s 'https://api.github.com/repos/tomhutchcroft/perclib/actions/runs?per_page=15'`
+(and `/actions/runs/<id>/jobs`); record the conclusions in STATUS and fix a failing workflow at top priority (fix brief +
+scoped audit).
 Announce our interface changes in `docs/INTERFACE_CHANGES.md` before they merge (ruling 14e).
 
 Memory: one gate machine-wide. Before starting a gate, `pgrep -af scripts/gate.sh` (check each cwd); a worker's gate

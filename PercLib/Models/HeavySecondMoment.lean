@@ -26,6 +26,7 @@ enters through the hypotheses `hpath`, `hroot` and `hsupp` (no new definition);
 * `lintegral_encard_sq_eq_top`: `E|K_root|² = ⊤`.
 * `lintegral_exp_eq_top`: `E exp(t |K_root|) = ⊤` for every `t > 0`.
 * `iSup_chi_eq_top`: `sup_v χ(v) = ⊤`.
+* `connected_fromEdgeSet_pos`: the support graph `{e | 0 < q e}` is connected.
 
 So the uniform hypothesis `sup_v χ(v) < ⊤` of Y84V cannot be weakened to `χ(o) < ⊤`.
 Almost surely every path edge is open and only pairs of positive probability are open; on
@@ -303,6 +304,44 @@ theorem iSup_chi_eq_top : ⨆ v, chi q v = ⊤ := by
   exact hr.trans ((hk n).trans (le_iSup (fun v => chi q v) _))
 
 end Model
+
+/-! ### Connected host
+
+The support graph `{e | 0 < q e}` is connected: each path `C_k` is joined internally by edges
+of probability one and to the root by an edge of probability `4^(-(k+1))`. -/
+
+/-- **The support graph of the heavy-second-moment model is connected.** If `q` is one on
+consecutive vertices of each path `C_k` and positive on the pair joining the root to the
+endpoint `0` of `C_k`, then `fromEdgeSet {e | 0 < q e}` is connected. -/
+theorem connected_fromEdgeSet_pos {q : Sym2 (Option (Σ k : ℕ, Fin (2 ^ (k + 1)))) → unitInterval}
+    (hpath : ∀ (k : ℕ) (i j : Fin (2 ^ (k + 1))), i.val + 1 = j.val →
+      q s(some ⟨k, i⟩, some ⟨k, j⟩) = 1)
+    (hroot : ∀ k : ℕ, (q s(none, some ⟨k, ⟨0, Nat.two_pow_pos _⟩⟩) : ℝ) = (1 / 4) ^ (k + 1)) :
+    (SimpleGraph.fromEdgeSet {e | 0 < q e}).Connected := by
+  set G := SimpleGraph.fromEdgeSet {e | 0 < q e}
+  have hroot' : ∀ k : ℕ, G.Reachable none (some ⟨k, ⟨0, Nat.two_pow_pos _⟩⟩) := by
+    intro k
+    refine SimpleGraph.Adj.reachable ((SimpleGraph.fromEdgeSet_adj _).2 ⟨?_, by simp⟩)
+    change (0 : ℝ) < (q s(none, some ⟨k, ⟨0, Nat.two_pow_pos _⟩⟩) : ℝ)
+    rw [hroot k]
+    positivity
+  have hstep : ∀ (k n : ℕ) (h : n < 2 ^ (k + 1)),
+      G.Reachable (some ⟨k, ⟨0, Nat.two_pow_pos _⟩⟩) (some ⟨k, ⟨n, h⟩⟩) := by
+    intro k n
+    induction n with
+    | zero => intro h; exact SimpleGraph.Reachable.refl _
+    | succ n ih =>
+      intro h
+      refine (ih (Nat.lt_of_succ_lt h)).trans (SimpleGraph.Adj.reachable
+        ((SimpleGraph.fromEdgeSet_adj _).2 ⟨?_, ?_⟩))
+      · change 0 < q s(some ⟨k, ⟨n, Nat.lt_of_succ_lt h⟩⟩, some ⟨k, ⟨n + 1, h⟩⟩)
+        rw [hpath k _ _ rfl]
+        exact zero_lt_one
+      · simp
+  refine (SimpleGraph.connected_iff_exists_forall_reachable G).2 ⟨none, fun w => ?_⟩
+  rcases w with _ | ⟨k, ⟨n, h⟩⟩
+  · exact SimpleGraph.Reachable.refl _
+  · exact (hroot' k).trans (hstep k n h)
 
 /-! ### The profile exists -/
 

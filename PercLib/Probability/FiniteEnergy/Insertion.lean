@@ -5,9 +5,13 @@ Authors: PercLib contributors
 -/
 /-
 The independence argument adapts the method of bondPercolation_inter_of_disjoint and
-bondPercolation_finiteEnergy in Tom Hutchcroft's near-critical-diffusivity,
-Percolation/Literature/FiniteEnergy.lean at c820fea91a7482c1755de0ec94ecb9f59ccfcacc, under Tom
-Hutchcroft's reuse permission recorded in `docs/DECISIONS.md`. Here the assignment is fixed, the
+bondPercolation_finiteEnergy in Percolation/Literature/FiniteEnergy.lean at
+tomhutchcroft/near-critical-diffusivity, revision c820fea91a7482c1755de0ec94ecb9f59ccfcacc, under
+Tom Hutchcroft's reuse permission recorded in `docs/DECISIONS.md`. Licence status: that file lies in
+the source's `Percolation/Literature/` tree, which holds code vendored from the `percolation/`
+project of `anthropics/formal-math` (Apache-2.0; see the source's `third_party/formal-math/`). For
+any vendored part, the Apache-2.0 licence and its notices are those retained in
+`third_party/percolation/`; no other upstream licence is asserted. Here the assignment is fixed, the
 profile is inhomogeneous, and the law is PercLib's existing prodBernoulli. The overwrite proof uses
 mathlib directly.
 -/

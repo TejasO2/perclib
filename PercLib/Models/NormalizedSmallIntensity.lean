@@ -5,13 +5,15 @@ Authors: PercLib contributors
 -/
 /-
 New proofs, on the bond interface and the intensity family `intensityProfile`. The
-statements follow the wiki tags 1EWX (bounds only) and MTYL. No source text or code is copied.
+statements follow the wiki tags 1EWX, MTYL and HRS7 (host connectivity). No source text or
+code is copied.
 -/
 module
 
 public import PercLib.Percolation.Bond.Intensity
 public import PercLib.Percolation.Bond.VolumeTails
 public import PercLib.Percolation.Bond.Susceptibility
+public import PercLib.Percolation.Bond.SusceptibilityDerivative
 public import Mathlib.Analysis.Complex.Exponential
 
 /-!
@@ -26,8 +28,15 @@ Let `J` be an intensity whose off-diagonal rows sum to exactly one, and let
 
 Neither bound uses transitivity: they hold at every root under the row hypothesis alone.
 `chi_bounds_of_transitive` and `triangle_bounds_of_transitive` restate them with a transitivity
-hypothesis, which is then unused. The local Lipschitz statement `χ' ≤ (1 - β)⁻²` needs the
-integrated mean-field inequality for the susceptibility and is not proved here.
+hypothesis, which is then unused.
+
+With transitivity, the integrated mean-field inequality for the susceptibility gives:
+
+* `locallyLipschitzOn_chi_Ioo_zero_one` (1EWX): `β ↦ χ_β(o)` is locally Lipschitz on `(0, 1)`;
+* `ae_hasDerivAt_chi_le_inv_one_sub_sq` (1EWX): `χ'(β) ≤ (1 - β)⁻²` for almost every
+  `β ∈ (0, 1)`;
+* `ae_hasDerivAt_chi_lt_triangle_formula` (1EWX): for almost every `β ∈ (0, 1/100)`,
+  `χ'(β) < χ (χ - Δ) / (3 β² Δ²)`, so the stronger triangle formula fails there.
 
 The deterministic core is `tsum_triangle_le`: for a nonnegative matrix that is one on the
 diagonal and whose off-diagonal rows sum to at most `m`, the closed triangle at a vertex
@@ -325,5 +334,156 @@ example (β : ℝ≥0) (hβ0 : 0 < β) (hβ : β < 1) :
       (line_transitive J hJ) β hβ0 hβ 0,
     triangle_bounds_of_transitive J (fun v => by convert line_rowSum J hJ v)
       (line_transitive J hJ) β hβ0 hβ 0⟩
+
+
+/-! ### Regularity of `χ` and failure of the stronger triangle formula -/
+
+/-- Real form of `chi_bounds` at a real intensity `0 ≤ β < 1`: `χ` is finite and
+`1 + β - β²/2 ≤ χ ≤ (1 - β)⁻¹`. -/
+theorem toReal_chi_bounds (J : Sym2 V → ℝ≥0)
+    (hrow : ∀ v, rowSum (fun e => (J e : ℝ≥0∞)) v = 1) {β : ℝ} (hβ0 : 0 ≤ β) (hβ : β < 1)
+    (o : V) :
+    chi (intensityProfile J β.toNNReal) o ≠ ⊤ ∧
+      1 + β - β ^ 2 / 2 ≤ (chi (intensityProfile J β.toNNReal) o).toReal ∧
+      (chi (intensityProfile J β.toNNReal) o).toReal ≤ (1 - β)⁻¹ := by
+  have hb : β.toNNReal < 1 := by
+    rw [Real.toNNReal_lt_one]; exact hβ
+  have hbβ : ((β.toNNReal : ℝ≥0) : ℝ) = β := Real.coe_toNNReal β hβ0
+  obtain ⟨hlo, hhi⟩ := chi_bounds J hrow β.toNNReal hb o
+  rw [hbβ] at hlo
+  have hsub : (1 - ((β.toNNReal : ℝ≥0) : ℝ≥0∞)) ≠ 0 :=
+    (tsub_pos_of_lt (by exact_mod_cast hb)).ne'
+  have htop : (1 - ((β.toNNReal : ℝ≥0) : ℝ≥0∞))⁻¹ ≠ ⊤ := ENNReal.inv_ne_top.2 hsub
+  have hne : chi (intensityProfile J β.toNNReal) o ≠ ⊤ := ne_top_of_le_ne_top htop hhi
+  refine ⟨hne, (ENNReal.ofReal_le_iff_le_toReal hne).1 hlo, ?_⟩
+  refine (ENNReal.toReal_mono htop hhi).trans_eq ?_
+  rw [ENNReal.toReal_inv, ENNReal.toReal_sub_of_le (by exact_mod_cast hb.le) ENNReal.one_ne_top,
+    ENNReal.toReal_one, ENNReal.coe_toReal, hbβ]
+
+/-- Real form of `triangle_bounds` at a real intensity `0 ≤ β < 1`: with
+`Δ = ∑' u v, τ(o,u) τ(u,v) τ(v,o)`, `1 ≤ Δ.toReal ≤ 1 + 3 m² + m³` for `m = β / (1 - β)`. -/
+theorem toReal_triangle_bounds (J : Sym2 V → ℝ≥0)
+    (hrow : ∀ v, rowSum (fun e => (J e : ℝ≥0∞)) v ≤ 1) {β : ℝ} (hβ0 : 0 ≤ β) (hβ : β < 1)
+    (o : V) :
+    1 ≤ (∑' u, ∑' v, tau (intensityProfile J β.toNNReal) o u *
+        tau (intensityProfile J β.toNNReal) u v * tau (intensityProfile J β.toNNReal) v o).toReal ∧
+      (∑' u, ∑' v, tau (intensityProfile J β.toNNReal) o u *
+        tau (intensityProfile J β.toNNReal) u v *
+          tau (intensityProfile J β.toNNReal) v o).toReal ≤
+        1 + 3 * (β / (1 - β)) ^ 2 + (β / (1 - β)) ^ 3 := by
+  have hb : β.toNNReal < 1 := by
+    rw [Real.toNNReal_lt_one]; exact hβ
+  obtain ⟨hlo, hhi⟩ := triangle_bounds J hrow β.toNNReal hb o
+  have hm : ((β.toNNReal : ℝ≥0) : ℝ≥0∞) / (1 - (β.toNNReal : ℝ≥0∞)) =
+      ENNReal.ofReal (β / (1 - β)) := by
+    rw [ENNReal.ofReal_div_of_pos (by linarith), ENNReal.ofReal_sub _ hβ0, ENNReal.ofReal_one]
+    rfl
+  have hm0 : 0 ≤ β / (1 - β) := div_nonneg hβ0 (by linarith)
+  have hrhs : (1 : ℝ≥0∞) + 3 * (((β.toNNReal : ℝ≥0) : ℝ≥0∞) / (1 - (β.toNNReal : ℝ≥0∞))) ^ 2 +
+      (((β.toNNReal : ℝ≥0) : ℝ≥0∞) / (1 - (β.toNNReal : ℝ≥0∞))) ^ 3 =
+      ENNReal.ofReal (1 + 3 * (β / (1 - β)) ^ 2 + (β / (1 - β)) ^ 3) := by
+    rw [hm, ENNReal.ofReal_add (by positivity) (by positivity),
+      ENNReal.ofReal_add zero_le_one (by positivity), ENNReal.ofReal_one,
+      ENNReal.ofReal_mul (by norm_num), ENNReal.ofReal_pow hm0, ENNReal.ofReal_pow hm0]
+    norm_num
+  rw [hrhs] at hhi
+  have hne := ne_top_of_le_ne_top ENNReal.ofReal_ne_top hhi
+  refine ⟨?_, ENNReal.toReal_le_of_le_ofReal (by positivity) hhi⟩
+  simpa using ENNReal.toReal_mono hne hlo
+
+/-- **Arithmetic core of the failure of the stronger triangle formula.** If `0 < β ≤ 1/100`,
+`1 + β - β²/2 ≤ x`, `1 ≤ d ≤ 1 + 3 m² + m³` with `m = β / (1 - β)`, and
+`D ≤ (1 - β)⁻²`, then `D < x (x - d) / (3 β² d²)`. -/
+theorem lt_mul_sub_div_of_small {β x d D : ℝ} (hβ0 : 0 < β) (hβ : β ≤ 1 / 100)
+    (hx : 1 + β - β ^ 2 / 2 ≤ x) (hd1 : 1 ≤ d)
+    (hd : d ≤ 1 + 3 * (β / (1 - β)) ^ 2 + (β / (1 - β)) ^ 3) (hD : D ≤ ((1 - β) ^ 2)⁻¹) :
+    D < x * (x - d) / (3 * β ^ 2 * d ^ 2) := by
+  set m := β / (1 - β) with hm_def
+  have h1β : 0 < 1 - β := by linarith
+  have hm0 : 0 ≤ m := div_nonneg hβ0.le h1β.le
+  have hm : m ≤ 2 * β := by
+    rw [hm_def, div_le_iff₀ h1β]; nlinarith
+  have hm2 : m ^ 2 ≤ 4 * β ^ 2 := by nlinarith
+  have hm3 : m ^ 3 ≤ 8 * β ^ 3 := by
+    have := pow_le_pow_left₀ hm0 hm 3
+    nlinarith
+  have hd' : d ≤ 1 + 13 * β ^ 2 := by nlinarith
+  have hd2 : d ≤ 2 := by nlinarith
+  have hx1 : 1 ≤ x := by nlinarith
+  have hxd : β / 2 ≤ x - d := by nlinarith
+  have hD2 : D ≤ 2 := by
+    refine hD.trans ?_
+    rw [inv_le_comm₀ (by positivity) two_pos]
+    nlinarith
+  have hden : 0 < 3 * β ^ 2 * d ^ 2 := by positivity
+  rw [lt_div_iff₀ hden]
+  have hprod : β / 2 ≤ x * (x - d) := by nlinarith
+  have hbound : D * (3 * β ^ 2 * d ^ 2) ≤ 24 * β ^ 2 := by
+    calc D * (3 * β ^ 2 * d ^ 2) ≤ 2 * (3 * β ^ 2 * d ^ 2) :=
+          mul_le_mul_of_nonneg_right hD2 hden.le
+      _ ≤ 2 * (3 * β ^ 2 * 2 ^ 2) := by gcongr
+      _ = 24 * β ^ 2 := by ring
+  nlinarith
+
+variable (J : Sym2 V → ℝ≥0)
+  (hJ : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e)
+  (hrow : ∀ v, rowSum (fun e => (J e : ℝ≥0∞)) v = 1)
+
+include hrow in
+/-- Below `β = 1` the susceptibility of a normalized model is finite. -/
+theorem chi_ne_top_of_mem_Ioo (o : V) :
+    ∀ β ∈ Set.Ioo (0 : ℝ) 1, chi (intensityProfile J β.toNNReal) o ≠ ⊤ :=
+  fun _ hβ => (toReal_chi_bounds J hrow hβ.1.le hβ.2 o).1
+
+include hJ hrow in
+/-- **Local Lipschitz continuity on `(0, 1)`.** In a transitive model whose off-diagonal
+rows sum to one, `β ↦ χ_β(o)` is locally Lipschitz on `(0, 1)`. -/
+theorem locallyLipschitzOn_chi_Ioo_zero_one (o : V) :
+    LocallyLipschitzOn (Set.Ioo 0 1)
+      (fun u : ℝ => (chi (intensityProfile J u.toNNReal) o).toReal) :=
+  locallyLipschitzOn_chi J hJ o (by rw [hrow]; exact ENNReal.one_ne_top) le_rfl
+    (chi_ne_top_of_mem_Ioo J hrow o)
+
+include hJ hrow in
+/-- **Derivative bound on `(0, 1)`.** In a transitive model whose off-diagonal rows sum to
+one, almost every `β ∈ (0, 1)` has a derivative `χ'(β) ≤ (1 - β)⁻²`. -/
+theorem ae_hasDerivAt_chi_le_inv_one_sub_sq (o : V) :
+    ∀ᵐ β, β ∈ Set.Ioo (0 : ℝ) 1 → ∃ D,
+      HasDerivAt (fun u : ℝ => (chi (intensityProfile J u.toNNReal) o).toReal) D β ∧
+      D ≤ ((1 - β) ^ 2)⁻¹ := by
+  have hR : rowSum (fun e => (J e : ℝ≥0∞)) o ≠ ⊤ := by rw [hrow]; exact ENNReal.one_ne_top
+  filter_upwards [ae_differentiableAt_chi J hJ o hR le_rfl (chi_ne_top_of_mem_Ioo J hrow o)]
+    with β hβ hmem
+  have hd := (hβ hmem).hasDerivAt
+  refine ⟨_, hd, ?_⟩
+  have hD := (hasDerivAt_chi_mem_Icc J hJ o hR le_rfl (chi_ne_top_of_mem_Ioo J hrow o) hmem
+    hd).2
+  obtain ⟨-, hx0, hx1⟩ := toReal_chi_bounds J hrow hmem.1.le hmem.2 o
+  rw [hrow, ENNReal.toReal_one, one_mul] at hD
+  refine hD.trans ?_
+  rw [← inv_pow]
+  exact pow_le_pow_left₀ ENNReal.toReal_nonneg hx1 2
+
+include hJ hrow in
+/-- **The stronger triangle formula fails at small intensity.** In a transitive model whose
+off-diagonal rows sum to one, almost every `β ∈ (0, 1/100)` has a derivative
+`χ'(β) < χ (χ - Δ) / (3 β² Δ²)`, where `Δ = ∑' u v, τ(o,u) τ(u,v) τ(v,o)`. -/
+theorem ae_hasDerivAt_chi_lt_triangle_formula (o : V) :
+    ∀ᵐ β, β ∈ Set.Ioo (0 : ℝ) (1 / 100) → ∃ D,
+      HasDerivAt (fun u : ℝ => (chi (intensityProfile J u.toNNReal) o).toReal) D β ∧
+      D < (chi (intensityProfile J β.toNNReal) o).toReal *
+          ((chi (intensityProfile J β.toNNReal) o).toReal -
+            (∑' u, ∑' v, tau (intensityProfile J β.toNNReal) o u *
+              tau (intensityProfile J β.toNNReal) u v *
+              tau (intensityProfile J β.toNNReal) v o).toReal) /
+          (3 * β ^ 2 * (∑' u, ∑' v, tau (intensityProfile J β.toNNReal) o u *
+              tau (intensityProfile J β.toNNReal) u v *
+              tau (intensityProfile J β.toNNReal) v o).toReal ^ 2) := by
+  filter_upwards [ae_hasDerivAt_chi_le_inv_one_sub_sq J hJ hrow o] with β hβ hmem
+  have hmem' : β ∈ Set.Ioo (0 : ℝ) 1 := ⟨hmem.1, hmem.2.trans (by norm_num)⟩
+  obtain ⟨D, hd, hD⟩ := hβ hmem'
+  obtain ⟨-, hx, -⟩ := toReal_chi_bounds J hrow hmem'.1.le hmem'.2 o
+  obtain ⟨hd1, hd2⟩ := toReal_triangle_bounds J (fun v => (hrow v).le) hmem'.1.le hmem'.2 o
+  exact ⟨D, hd, lt_mul_sub_div_of_small hmem.1 hmem.2.le hx hd1 hd2 hD⟩
 
 end PercLib.Models.NormalizedSmallIntensity

@@ -6,6 +6,28 @@ deprecated alias for one release where that is possible.
 
 ## Announced, not yet merged
 
+- `p-b-CUE4` (audited APPROVE, `audit-p-b-CUE4`; held: gate D-35 check (i) fails on `HasMassTransport.tsum_eq`, fix queued): `mobiusCoeff`, `HasNonnegMobiusCoeffs` in new
+  `PercLib/Combinatorics/BooleanCoefficients/Defs.lean`; `HasMassTransport` in new
+  `PercLib/Probability/MassTransport/Defs.lean`; `poissonTail` in new `PercLib/Probability/PoissonTail/Defs.lean`.
+
+
+## Merged
+
+### New definitions, round 14 batch (`p-a-GPDF`) (additive; no existing name changed)
+
+- `p-a-GPDF` (audited APPROVE, `audit-p-a-GPDF`): `ballExitRate`, `boundaryThreshold`, `maxBoundaryThreshold`,
+  `boundaryScaleIndex`, `boundaryLength` in new `PercLib/Models/HierarchicalBoundaryScales/Defs.lean`.
+- Announced 21 November 2026 (round 14), merged in the batch on top of `e0ae3ec`.
+
+### Size-biased law (`sizeBiased`)
+
+- **What:** a new definition `PercLib.Probability.sizeBiased` in the new file
+  `PercLib/Probability/SizeBias/Defs.lean`: the size-biased law of a nonnegative random
+  variable as a `withDensity` measure, with its API; `PercLib/Probability/SizeBias.lean` now
+  uses it. Tags 6L9Z, IDIL (`work/p-b-6L9Z`, audit `audit-p-b-6L9Z` APPROVE).
+- **Breaks:** nothing; existing statements keep their names (additive change).
+- **Merged:** 21 November 2026, round-12 batch gated at `4312804` (merge of `work/p-b-6L9Z-doc`).
+
 ### Long-range norm structure (`ModelNorm`)
 
 - **What:** a new structure `ModelNorm E` extending `Seminorm ℝ E` with definiteness
@@ -19,8 +41,15 @@ deprecated alias for one release where that is possible.
 - **Recipe:** replace a seminorm `N` together with its definiteness proof by a `ModelNorm`
   (`ModelNorm.ofNorm E` for the norm of a normed space); drop the definiteness argument at
   call sites.
+- **Renames** (merged with `work/mig-model-norm` at `d1295a4`; no deprecated aliases were
+  kept, since no outside branch used the old names):
 
-## Merged
+  | Old name | New name |
+  |---|---|
+  | `seminorm_intCast_pos` | `ModelNorm.intCast_comp_pos` |
+  | `norm_sub_pos` | `ModelNorm.intCast_comp_sub_pos` |
+  | `LongRange.exists_pos_mul_norm_le` | `ModelNorm.exists_pos_mul_norm_le` (deleted, use this) |
+  | `normSeminorm_eq_zero`, `euclidean_seminorm_eq_zero` | `ModelNorm.ofNorm`, Euclidean `ModelNorm.comp` |
 
 ### Connection probability under a general measure (`connProb`)
 

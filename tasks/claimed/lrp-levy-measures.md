@@ -8,6 +8,8 @@ labels: []
 
 # Lévy measures of the cut-off stable law and quadratic ball integrals (port)
 
+Being done by the project's own agents; do not start it.
+
 ## Goal
 Port the measure-theoretic lemmas about the stable and cut-off Lévy measures of (I.5.16) in
 arXiv:2508.18807v1 §I.5.2, and the quadratic integrals over balls, onto PercLib's existing Lévy

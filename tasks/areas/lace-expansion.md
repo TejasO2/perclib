@@ -234,8 +234,8 @@ statement exactly has not been audited.
 
 | Tag | Article | Statement | Related, untagged Lean |
 |---|---|---|---|
-| `70KD` | connection-kernels | Positive semidefiniteness of the connection kernel | `sum_mul_tau_eq_integral`, `sum_mul_tau_nonneg`, `posSemidef_tau` (`PercLib/Percolation/Bond/ConnectionKernel.lean`); likely needs only a `Tags/` restatement |
-| `UZ7J` | connection-kernels | Cubic connection bounds from finite diagonal triangles | `triangle_sq_le`, `triangle_le_rpow`, `triangle_le_sqrt`, `tsum_tau_sq_le_triangle` (same file); likely needs only a `Tags/` restatement |
+| `70KD` | connection-kernels | Positive semidefiniteness of the connection kernel | `sum_mul_connProb_eq_integral`, `sum_mul_connProb_nonneg`, `posSemidef_connProb` (`PercLib/Percolation/Bond/ConnectionKernel.lean`); likely needs only a `Tags/` restatement |
+| `UZ7J` | connection-kernels | Cubic connection bounds from finite diagonal triangles | `triangle_sq_le`, `triangle_le_rpow`, `triangle_le_sqrt`, `tsum_connProb_sq_le_triangle` (same file); likely needs only a `Tags/` restatement |
 | `F77A` | connection-kernels | Fourier identities and triangle comparison on Euclidean and hierarchical groups | trace identity `tsum_mul_eq_tsum_mul_of_invariant` (`PercLib/Probability/InvariantTrace.lean`); no Fourier transform in the library |
 | `2ML7` | product-model | Monotone product coupling | `exists_bond_monotone_coupling`, `exists_prodBernoulli_monotone_coupling`, `prodBernoulli_mono_event`, `lintegral_prodBernoulli_mono` (`PercLib/Probability/Coupling/Monotone.lean`) |
 | `8ZGG` | triangle-susceptibility | The reciprocal susceptibility is globally Lipschitz in the bond probability | finite-volume derivative bound `hasDerivAt_finiteChi_le` and the pivotal split `exists_disjointOccurrence_of_pivotal_conn` (`PercLib/Percolation/Bond/SusceptibilityDerivative.lean`), stated in the intensity parameter β, not in p |

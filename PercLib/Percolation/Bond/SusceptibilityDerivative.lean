@@ -43,7 +43,8 @@ For a transitive kernel (`∀ x y, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2
 countable `V` with finite off-diagonal row sum `R`, `M_F ≤ χ(β)` and `R_F ≤ R`, so the
 finite-volume derivative is at most `R χ(β)²`. Integrating and exhausting `V` by finite sets
 gives `χ(t) - χ(s) ≤ R ∫_s^t χ(u)² du` wherever `χ` is finite (`chi_sub_le_integral`,
-tag MXGM), and hence `χ` is Lipschitz on compact subintervals (`lipschitzOnWith_chi`),
+tag MXGM), and hence `χ` is Lipschitz on compact subintervals (`lipschitzOnWith_chi`) and
+locally Lipschitz on open intervals (`locallyLipschitzOn_chi`),
 differentiable almost everywhere (`ae_differentiableAt_chi`) with derivative in `[0, R χ²]`
 (`hasDerivAt_chi_mem_Icc`). Finally `1/χ(s) - 1/χ(t) ≤ R (t - s)` (`inv_chi_sub_le`).
 The endpoint blow-up `χ(β) ≥ 1/(R (b - β))` when `χ(b) = ∞` is left to a later file, which
@@ -927,3 +928,32 @@ example {s t b : ℝ} (hs : 0 < s) (hst : s ≤ t) (ht : t < b) :
     (fun β _ => hchi _ _ _) hs hst ht using 4
 
 end PercLib.Percolation.Bond
+
+/-! ### Local Lipschitz continuity -/
+
+namespace PercLib.Models.NormalizedSmallIntensity
+
+open PercLib.Percolation.Bond
+
+variable {V : Type*} [Countable V]
+
+open Set in
+/-- **Local Lipschitz continuity of `χ`.** In a transitive intensity model with finite
+off-diagonal row sum at `o` and susceptibility finite on `(a, b)`, `0 ≤ a`, the real
+susceptibility `β ↦ χ_β(o)` is locally Lipschitz on `(a, b)`. -/
+theorem locallyLipschitzOn_chi (J : Sym2 V → ℝ≥0)
+    (hJ : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e) (o : V)
+    (hR : rowSum (fun e => (J e : ℝ≥0∞)) o ≠ ⊤) {a b : ℝ} (ha : 0 ≤ a)
+    (hfin : ∀ β ∈ Ioo a b, chi (intensityProfile J β.toNNReal) o ≠ ⊤) :
+    LocallyLipschitzOn (Ioo a b)
+      (fun u : ℝ => (chi (intensityProfile J u.toNNReal) o).toReal) := by
+  intro β hβ
+  have hs : a < (a + β) / 2 := by linarith [hβ.1]
+  have hs' : (a + β) / 2 < β := by linarith [hβ.1]
+  have ht : (β + b) / 2 < b := by linarith [hβ.2]
+  have ht' : β < (β + b) / 2 := by linarith [hβ.2]
+  exact ⟨_, Icc ((a + β) / 2) ((β + b) / 2),
+    mem_nhdsWithin_of_mem_nhds (Icc_mem_nhds hs' ht'),
+    lipschitzOnWith_chi J hJ o hR ha hfin hs ht⟩
+
+end PercLib.Models.NormalizedSmallIntensity

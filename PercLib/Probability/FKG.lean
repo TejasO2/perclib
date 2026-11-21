@@ -134,6 +134,39 @@ theorem measure_le_of_holley (μ ν : Measure (Set E)) [IsProbabilityMeasure μ]
   rw [← ofReal_measureReal (measure_ne_top μ A), ← ofReal_measureReal (measure_ne_top ν A)]
   exact ENNReal.ofReal_le_ofReal hh
 
+/-- **Holley, observable form.** Under Holley's condition, `E_μ f ≤ E_ν f` for every increasing
+real function `f`. No full support is assumed. -/
+theorem integral_le_of_holley (μ ν : Measure (Set E)) [IsProbabilityMeasure μ]
+    [IsProbabilityMeasure ν]
+    (h : ∀ ω η : Set E, μ {ω} * ν {η} ≤ μ {ω ∩ η} * ν {ω ∪ η})
+    {f : Set E → ℝ} (hf : Monotone f) : ∫ ω, f ω ∂μ ≤ ∫ ω, f ω ∂ν := by
+  classical
+  have hr : ∀ ω η : Set E, μ.real {ω} * ν.real {η} ≤ μ.real {ω ⊓ η} * ν.real {ω ⊔ η} := by
+    intro ω η
+    simp only [measureReal_def, ← ENNReal.toReal_mul]
+    exact ENNReal.toReal_mono (ENNReal.mul_ne_top (measure_ne_top _ _) (measure_ne_top _ _))
+      (h ω η)
+  have hμ1 : ∑ ω : Set E, μ.real {ω} = 1 := by
+    rw [sum_measureReal_singleton, Finset.coe_univ]
+    simp
+  have hν1 : ∑ ω : Set E, ν.real {ω} = 1 := by
+    rw [sum_measureReal_singleton, Finset.coe_univ]
+    simp
+  -- shift `f` by its minimum `f ∅` to make it nonnegative
+  have hh := holley (μ := fun ω : Set E => f ω - f ∅)
+    (f := fun ω => μ.real {ω}) (g := fun ω => ν.real {ω})
+    (fun ω => sub_nonneg.2 (hf (empty_subset ω))) (fun _ => measureReal_nonneg)
+    (fun _ => measureReal_nonneg) (fun ω η hle => sub_le_sub_right (hf hle) _)
+    (hμ1.trans hν1.symm) hr
+  have key : ∀ ρ : Measure (Set E), IsProbabilityMeasure ρ → ∑ ω : Set E, ρ.real {ω} = 1 →
+      ∫ ω, f ω ∂ρ = ∑ ω : Set E, (f ω - f ∅) * ρ.real {ω} + f ∅ := by
+    intro ρ _ hρ
+    rw [integral_fintype (Integrable.of_finite)]
+    simp only [smul_eq_mul, sub_mul, Finset.sum_sub_distrib, ← Finset.mul_sum, hρ, mul_one]
+    simp only [mul_comm, sub_add_cancel]
+  rw [key μ inferInstance hμ1, key ν inferInstance hν1]
+  linarith
+
 /-! ### Product measures -/
 
 theorem toNNReal_add_toNNReal_symm (t : unitInterval) :

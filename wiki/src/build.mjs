@@ -27,6 +27,19 @@ import {
   previewData,
   previewScript,
 } from "./wiki-features.mjs";
+import {
+  catalogue,
+  expandCitations,
+  newCitationState,
+  withReferences,
+  bibliographyPage,
+  plainCitations,
+  plainCitationsText,
+  assertNoPlainCitations,
+  failOnPlainCitations,
+  referencesSectionId,
+  referencesTitle,
+} from "./citations.mjs";
 import { loadErrata, errataPage, articleErrata, errataIndex, errataResolutionText, errataVersionText } from "./errata.mjs";
 import {
   esc,
@@ -46,14 +59,18 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 // an article body (pages, search, link graph) sees the same HTML. The lead,
 // when present, is the first body entry, with id `lead` and an empty title, so
 // backlinks, the link checks and the link report treat it as body text.
-export function prepareBodies(articles, pages) {
+// Citations [@key] (src/citations.mjs) are expanded against the source
+// catalogue `sources`; an article citing any work gets a References list.
+// `citedBy` maps each cited catalogue key to the articles citing it.
+export function prepareBodies(articles, pages, sources = []) {
   const bodies = new Map(),
     wanted = [],
-    resolvedWanted = [];
-  for (const p of articles)
-    bodies.set(
-      p.id,
-      [
+    resolvedWanted = [],
+    citedBy = new Map(),
+    byKey = catalogue(sources);
+  for (const p of articles) {
+    const citations = newCitationState();
+    const entries = [
         ...(p.lead === undefined
           ? []
           : [{ id: leadId, title: "", html: leadHtml(p.lead), lead: true }]),
@@ -64,18 +81,23 @@ export function prepareBodies(articles, pages) {
         const at = (w) => ({ ...w, article: p.id, section: s.id });
         wanted.push(...r.wanted.map(at));
         resolvedWanted.push(...r.resolved.map(at));
+        const html = expandCitations(r.html, byKey, where, citations).html;
         return s.lead
-          ? { id: s.id, title: s.title, html: r.html, lead: true }
-          : { id: s.id, title: s.title, html: r.html };
-      }),
-    );
-  return { bodies, wanted, resolvedWanted };
+          ? { id: s.id, title: s.title, html, lead: true }
+          : { id: s.id, title: s.title, html };
+      });
+    bodies.set(p.id, withReferences(entries, citations, byKey));
+    for (const key of citations.order)
+      citedBy.set(key, [...(citedBy.get(key) ?? []), { article: p.id, title: p.title }]);
+  }
+  return { bodies, wanted, resolvedWanted, citedBy };
 }
 // Title of a body entry in backlink lists.
 export const bodyTitle = (page, section) =>
   section === leadId
     ? "Introduction"
-    : page.sections.find((s) => s.id === section).title;
+    : (page.sections.find((s) => s.id === section)?.title ??
+      (section === referencesSectionId ? referencesTitle : undefined));
 // The opening of an article page after its header: lead, running context,
 // contents box (sections only) and the collapse tools.
 export function articleOpening(p, sections, extra) {
@@ -254,6 +276,11 @@ export function aboutPage(info, evidence, counts) {
       '<p>The <a href="/errata/">source errata</a> record problems found in the published literature while this wiki was written, with proposed corrections. Every entry is provisional until Tom Hutchcroft confirms it; confirmed entries say so.</p>',
     ) +
     section(
+      "bibliography",
+      "Bibliography",
+      '<p>Articles cite published works by a link to a References list at the foot of the page. The <a href="/bibliography/">bibliography</a> lists every work in the source catalogue with the articles that cite it.</p>',
+    ) +
+    section(
       "authorship",
       "How the text was written",
       "<p>Much of the text was drafted with AI assistance and is being reviewed.</p>",
@@ -354,10 +381,17 @@ export async function build(
     : "";
   const history = collectHistory(root, evidenceOptions.historyRef);
   const pages = new Map(articles.map((p) => [p.id, p]));
-  const { bodies, wanted, resolvedWanted } = prepareBodies(articles, pages);
+  const { bodies, wanted, resolvedWanted, citedBy } = prepareBodies(
+    articles,
+    pages,
+    records.sources,
+  );
   const graph = linkGraph(articles, bodies, assertions, baseline);
   assertNoDeadLinks(graph);
   const report = linkReport(articles, bodies, graph, wanted);
+  const strictCitations = evidenceOptions.strictCitations ?? failOnPlainCitations;
+  const unlinkedCitations = plainCitations(articles, bodies);
+  assertNoPlainCitations(unlinkedCitations, strictCitations);
   const sectionTitle = (id, section) => bodyTitle(pages.get(id), section);
   const read = async (file) =>
     JSON.parse(await fs.readFile(path.join(root, "src/content", file), "utf8"));
@@ -456,7 +490,8 @@ export async function build(
     const rail =
       railBlock(
         "On this page",
-        p.sections
+        sections
+          .filter((s) => !s.lead)
           .map((s) => `<a href="#section-${s.id}">${esc(s.title)}</a>`)
           .join("") +
           '<a href="#connections">Connections</a><a href="#sources">Sources</a>',
@@ -648,6 +683,14 @@ export async function build(
         : "<p>No compiled manifest is supplied.</p>"),
   );
   add(
+    "bibliography",
+    "Bibliography",
+    heading(
+      "Bibliography",
+      "Every work in the source catalogue and the articles that cite it.",
+    ) + bibliographyPage(sources, citedBy),
+  );
+  add(
     "about",
     "About",
     aboutPage(buildInfo(evidenceOptions), evidence, counts),
@@ -698,8 +741,15 @@ export async function build(
     text: [entry.title, entry.status, entry.locator, errataVersionText(data), ...(entry.status === "withdrawn" ? [entry.withdrawalReason] : [errataResolutionText(entry), entry.claim, entry.problem, entry.correction, entry.leanImpact]), ...entry.tags].join(" "),
   }))));
   files.set("search-index.json", JSON.stringify(index) + "\n");
-  files.set("link-report.json", JSON.stringify({ ...report, resolvedWanted }, null, 2) + "\n");
-  files.set("link-report.txt", linkReportText(report, resolvedWanted));
+  files.set(
+    "link-report.json",
+    JSON.stringify({ ...report, resolvedWanted, unlinkedCitations }, null, 2) + "\n",
+  );
+  files.set(
+    "link-report.txt",
+    linkReportText(report, resolvedWanted) +
+      plainCitationsText(unlinkedCitations, strictCitations),
+  );
   for (const entry of registry.tags) {
     const a = assertions.find((a) => a.tag === entry.tag),
       target = a ? `${articleUrl(a.article)}#${a.anchor}` : null;
@@ -760,7 +810,7 @@ export async function build(
     `Built ${articles.length} static articles, ${assertions.length} assertion redirects, ${registry.tags.filter((t) => t.state === "withdrawn").length} tombstones; all local links and mathematics validated.`,
   );
   console.log(
-    `Link report (advisory): ${report.noInlineLinks.length} articles without inline links, ${report.unlinkedMentions.length} unlinked concept mentions, ${report.wantedPages.length} wanted pages; see dist/link-report.txt.`,
+    `Link report (advisory): ${report.noInlineLinks.length} articles without inline links, ${report.unlinkedMentions.length} unlinked concept mentions, ${report.wantedPages.length} wanted pages, ${unlinkedCitations.length} plain-text citations; see dist/link-report.txt.`,
   );
   if (mathLayout.pages) console.log(`Shared ${mathLayout.styles} math layout styles across ${mathLayout.pages} pages; saved ${mathLayout.bytesSaved} bytes.`);
   if (basePath !== "/") console.log(`All site URLs are under the base path ${basePath}.`);
