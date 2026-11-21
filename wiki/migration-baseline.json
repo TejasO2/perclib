@@ -118,7 +118,7 @@
     },
     "sharpness": {
       "prototypeId": "PC-000106",
-      "metadataSha256": "36a4fdfdf57f2c64fa5313d6ce55666b8304caae107599377a3f0b490709fdfd",
+      "metadataSha256": "959bbb653c34acda250ef9fb3bd35234e128213f884643de8f68d7015f0cd547",
       "sections": {
         "statement": {
           "title": "A precise lattice statement",
