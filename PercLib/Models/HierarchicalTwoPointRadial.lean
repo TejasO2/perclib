@@ -58,6 +58,7 @@ only on `d, L, α, c, C`, such that every radial kernel with
 `c L^{-(d+α) h(v-u)} ≤ J(u,v) ≤ C L^{-(d+α) h(v-u)}` off the diagonal has `0 < β_c < ∞` and,
 for all `x, y`,
 `a L^{-h(y-x)(d-α)} ≤ P_{β_c}(x ↔ y inside Λ(x,y)) ≤ τ_{β_c}(x,y) ≤ A L^{-h(y-x)(d-α)}`. -/
+@[tag "W498"]
 theorem hierarchicalTwoPointRadial (d L : ℕ) (α c C : ℝ) :
     HierarchicalTwoPointRadial d L α c C := by
   intro hd hL hα hαd hc hcC
