@@ -32,6 +32,8 @@ For nested events `A_1 ⊆ ⋯ ⊆ A_n` of probabilities `a_1 ≤ ⋯ ≤ a_n`, 
 * `PercLib.sum_finpartition_insert_moments`: the combinatorial recursion for an arbitrary
   moment function.
 * `PercLib.higherCorrelation_insert`: the insertion recursion.
+* `PercLib.higherCorrelation_pair`, `PercLib.higherCorrelation_fin_three`: the explicit forms
+  for two and three functions.
 * `PercLib.higherCorrelation_insert_of_eq_one`: inserting the constant function one multiplies
   the correlation by `|s| - 1` under a probability measure.
 * `PercLib.higherCorrelation_indicator_of_monotoneOn`: the product formula for a nested family of
@@ -148,6 +150,40 @@ theorem higherCorrelation_insert (μ : Measure Ω) {a : ι} {s : Finset ι} (ha 
   congr 2
   have hne : #t ≠ 0 := (card_pos.2 (P.nonempty_of_mem_parts ht)).ne'
   exact_mod_cast Nat.mul_factorial_pred hne
+
+/-- For two functions the higher correlation is the covariance `∫ f i f j - ∫ f i ∫ f j`. -/
+theorem higherCorrelation_pair (μ : Measure Ω) {i j : ι} (hij : i ≠ j) (f : ι → Ω → ℝ) :
+    higherCorrelation μ {i, j} f =
+      ∫ ω, f i ω * f j ω ∂μ - (∫ ω, f i ω ∂μ) * ∫ ω, f j ω ∂μ := by
+  rw [higherCorrelation_insert μ (by simpa using hij) (singleton_nonempty j)]
+  simp only [sum_singleton, higherCorrelation_singleton, Function.update_self, Pi.mul_apply]
+  congr 1
+  exact integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ mul_comm _ _)
+
+/-- For three functions, `E_3(f_0, f_1, f_2) = 2 ∫ f_0 f_1 f_2 - ∫ f_0 f_1 ∫ f_2 - ∫ f_0 f_2 ∫ f_1
+- ∫ f_1 f_2 ∫ f_0 + ∫ f_0 ∫ f_1 ∫ f_2`. -/
+theorem higherCorrelation_fin_three (μ : Measure Ω) (f : Fin 3 → Ω → ℝ) :
+    higherCorrelation μ univ f =
+      2 * ∫ ω, f 0 ω * f 1 ω * f 2 ω ∂μ - (∫ ω, f 0 ω * f 1 ω ∂μ) * ∫ ω, f 2 ω ∂μ -
+        (∫ ω, f 0 ω * f 2 ω ∂μ) * ∫ ω, f 1 ω ∂μ - (∫ ω, f 1 ω * f 2 ω ∂μ) * ∫ ω, f 0 ω ∂μ +
+        (∫ ω, f 0 ω ∂μ) * (∫ ω, f 1 ω ∂μ) * ∫ ω, f 2 ω ∂μ := by
+  have hu : (univ : Finset (Fin 3)) = insert 0 {1, 2} := by decide
+  rw [hu, higherCorrelation_insert μ (by decide) (insert_nonempty 1 {2}),
+    sum_insert (by decide), sum_singleton, higherCorrelation_pair μ (by decide),
+    higherCorrelation_pair μ (by decide), higherCorrelation_pair μ (by decide)]
+  simp only [Function.update_apply]
+  simp only [show (1 : Fin 3) ≠ 2 by decide, show (2 : Fin 3) ≠ 1 by decide,
+    ↓reduceIte, Pi.mul_apply]
+  have h1 : ∫ ω, f 1 ω * f 0 ω * f 2 ω ∂μ = ∫ ω, f 0 ω * f 1 ω * f 2 ω ∂μ :=
+    integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ by simp only; ring)
+  have h2 : ∫ ω, f 1 ω * (f 2 ω * f 0 ω) ∂μ = ∫ ω, f 0 ω * f 1 ω * f 2 ω ∂μ :=
+    integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ by simp only; ring)
+  have h3 : ∫ ω, f 1 ω * f 0 ω ∂μ = ∫ ω, f 0 ω * f 1 ω ∂μ :=
+    integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ by simp only; ring)
+  have h4 : ∫ ω, f 2 ω * f 0 ω ∂μ = ∫ ω, f 0 ω * f 2 ω ∂μ :=
+    integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ by simp only; ring)
+  rw [h1, h2, h3, h4]
+  ring
 
 /-- **Inserting the constant function one.** Under a probability measure, for `a ∉ s` with `s`
 nonempty and `f a = 1`, `E_{s ∪ {a}}(f) = (|s| - 1) E_s(f)`. -/
