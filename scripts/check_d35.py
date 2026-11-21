@@ -94,14 +94,13 @@ def header_text(text: str) -> str:
     Lean does: strings are not special inside a comment, so a `"-/"` there closes it in
     Lean and here alike) before the first token that is not a comment: normally the `module`
     keyword, after a copyright block and a provenance block. Blank space and `--` line
-    comments between them are skipped; line comments are not part of the result. The
-    first module docstring anywhere in the file is added as well (if it is not already
+    comments between them are skipped; line comments are part of the result. The
+    first `/-!` comment after the header is added as well (if it is not already
     one of the header comments).
     """
     def comment_end(start: int) -> int:
-        # Index just past the block comment opening at `start`; an unterminated comment
-        # runs to the end of the text.
-        depth, i = 1, start + 2
+        # Lean starts the body after the third character of every opener (`/-x`, `/--`, `/-!`)
+        depth, i = 1, start + 3
         while i < n:
             if text.startswith('-/', i):
                 depth -= 1
@@ -126,10 +125,12 @@ def header_text(text: str) -> str:
             i = j
         elif text.startswith('--', i):
             j = text.find('\n', i)
-            i = n if j < 0 else j + 1
+            j = n if j < 0 else j
+            parts.append(text[i:j])
+            i = j
         else:
             break
-    k = text.find('/-!')
+    k = text.find('/-!', i)
     if k >= 0:
         doc = text[k:comment_end(k)]
         if doc not in parts:

@@ -63,6 +63,27 @@ class HeaderTextTests(unittest.TestCase):
         text = COPYRIGHT + 'import Mathlib\n/- D-35 -/\n' + DOC
         self.assertEqual(labels(text), [])
 
+    # A `/-! … -/` inside a header comment must not hide the real module docstring.
+    REAL_DOC = ('module\n\npublic import Mathlib\n\n'
+                '/-!\n# T\n\nPorted in issue #41 by the LEAD.\n-/\n')
+
+    def test_docstring_nested_in_header_block_does_not_hide_real_one(self):  # P13b
+        text = COPYRIGHT + '/- Provenance; see /-! x -/ for the format. -/\n' + self.REAL_DOC
+        self.assertEqual(sorted(set(labels(text))), ['LEAD', 'issue #41'])
+
+    def test_docstring_in_header_line_comment_does_not_hide_real_one(self):  # P13c
+        text = COPYRIGHT + '-- format: /-! x -/\n' + self.REAL_DOC
+        self.assertEqual(sorted(set(labels(text))), ['LEAD', 'issue #41'])
+
+    def test_label_in_line_comment_before_module_flagged(self):
+        text = COPYRIGHT + '-- written by an agent, D-12\nmodule\n' + DOC
+        self.assertTrue(labels(text))
+
+    def test_opener_body_starts_after_third_character(self):  # P11
+        text = (COPYRIGHT + '/-/- x -/\nmodule\n' + DOC
+                + 'theorem t : True := trivial -- the LEAD\n/- D-99 -/\n')
+        self.assertEqual(labels(text), [])
+
 
 if __name__ == '__main__':
     unittest.main()
