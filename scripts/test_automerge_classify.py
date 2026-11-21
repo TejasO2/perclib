@@ -4,6 +4,7 @@ import copy
 import difflib
 import io
 import json
+import re
 import shutil
 import sys
 import tempfile
@@ -58,6 +59,9 @@ theorem foo_lt (h : n ≤ 3) : n < 6 := by
   omega
 
 noncomputable def bar''')
+
+LINE_A = 'theorem a : True := trivial'
+WITH_A = BASE_FILE.replace('end PercLib', LINE_A + '\n\nend PercLib')
 
 
 def patch(old, new):
@@ -310,6 +314,113 @@ class ClassifyTests(unittest.TestCase):
         self.assertEqual(lines, ['a   b', '"-- not a comment" ', 'c \'"\' d'])
 
 
+    # Cases a-f of finding F1 of the audit of the automerge classifier: each edits only
+    # untagged theorems and was accepted before the fix; Lean 4.35 parses each as a new
+    # command (a, b, c and the interpolation cases were checked with `lean`).
+
+    def test_guillemet_comment_desync_rejected(self):
+        # Cases a and b (A1): `--` inside `«x--»` is not a comment.
+        for name, new in {
+            'a: def after «x--»': WITH_A.replace(
+                LINE_A, 'theorem a : True := let «x--» := 0; trivial def evil : Nat := 1'),
+            'b: instance after «y--»': WITH_A.replace(
+                LINE_A, 'theorem a : True := let «y--» := 0; trivial '
+                        'instance : Inhabited Nat := ⟨5⟩'),
+        }.items():
+            with self.subTest(case=name):
+                self.reject(Fixture().lean(PATH, WITH_A, new), contains='changed line uses')
+
+    def test_guillemet_identifier_rejected(self):
+        # A1: no `«` on a changed line, even with nothing else wrong.
+        new = WITH_A.replace(LINE_A, 'theorem a : True := let «y» := 0; trivial')
+        self.reject(Fixture().lean(PATH, WITH_A, new), contains='«')
+
+    def test_guillemet_scanning(self):
+        # A1: `«…»` is copied verbatim and may not be left open.
+        self.assertEqual(am.strip_comments('let «x--» := 0; def -- c\n'),
+                         'let «x--» := 0; def \n')
+        self.assertEqual(am.strip_comments('«a/-b» def'), '«a/-b» def')
+        with self.assertRaises(am.Reject):
+            am.strip_comments('theorem t : True := «x-- trivial\n')
+        new = WITH_A.replace(LINE_A, 'theorem a : True := let «x-- := 0; trivial')
+        self.reject(Fixture().lean(PATH, WITH_A, new), contains='unterminated «')
+
+    def test_interpolated_string_desync_rejected(self):
+        # A string inside `{…}` of an interpolated string can hide a comment opener from
+        # the scanner: `s!"{"--"}"` and `s!"{"/-"}"` (verified with Lean 4.35).
+        for name, new in {
+            'line comment': WITH_A.replace(
+                LINE_A, 'theorem a : True := let _ := s!"{"--"}"; trivial '
+                        'def evil : Nat := 1'),
+            'block comment': WITH_A.replace(
+                LINE_A, 'theorem a : True := let _ := s!"{"/-"}"; trivial\n'
+                        'def evil : Nat := 1\n-- -/'),
+        }.items():
+            with self.subTest(case=name):
+                self.reject(Fixture().lean(PATH, WITH_A, new), contains='{')
+
+    def test_hash_command_mid_line_rejected(self):
+        # Case c (A2): `#eval!` in the middle of a line. (The token `eval` is forbidden
+        # too, by A3, so the `#` rule is checked on its own below.)
+        new = WITH_A.replace(
+            LINE_A, 'theorem a : True := trivial #eval! IO.FS.writeFile "pwned.txt" "hi"')
+        self.reject(Fixture().lean(PATH, WITH_A, new))
+        self.assertTrue(any(line.startswith('theorem a') and '#' in line for line in
+                            am.split_lines(am.strip_comments(new, blank_literals=True))))
+        for line in ['theorem a : True := trivial #exit',
+                     'theorem a : True := (trivial) #guard true',
+                     'theorem a : True := trivial #check_failure (1 : Nat)']:
+            with self.subTest(line=line):
+                self.reject(Fixture().lean(PATH, WITH_A, WITH_A.replace(LINE_A, line)),
+                            contains='`#`')
+
+    def test_hash_in_literal_accepted(self):
+        # A2: `#` inside string and character literals is not code.
+        new = WITH_A.replace(LINE_A, "theorem a : \"#a\".length = 2 ∧ '#' = '#' := "
+                                     "⟨rfl, rfl⟩")
+        self.accept(Fixture().lean(PATH, WITH_A, new))
+
+    def test_indented_command_keywords_rejected(self):
+        # Cases d, e, f (A3): a command keyword on an indented line after a proof, or in
+        # the middle of a line, starts a new command.
+        after_helper = '  omega\n\n@[tag "AB12"]'
+        for name, insert, word in [
+            ('d: open ... in before a tagged theorem',
+             '  omega\n  open Classical in\n\n@[tag "AB12"]', 'open'),
+            ('e: irreducible_def', '  omega\n  irreducible_def evil : Nat := 1\n\n'
+                                  '@[tag "AB12"]', 'irreducible_def'),
+            ('f: simproc', '  omega\n  simproc evil (Nat.succ _) := fun _ => pure .continue'
+                           '\n\n@[tag "AB12"]', 'simproc'),
+            ('alias mid-line', '  omega alias evil := helper\n\n@[tag "AB12"]', 'alias'),
+            ('add_decl_doc', '  omega\n  add_decl_doc helper\n\n@[tag "AB12"]',
+             'add_decl_doc'),
+        ]:
+            with self.subTest(case=name):
+                new = BASE_FILE.replace(after_helper, insert)
+                self.assertNotEqual(new, BASE_FILE)
+                self.reject(Fixture().lean(PATH, BASE_FILE, new), contains=word)
+
+    def test_command_keyword_lists(self):
+        # A3: the minimum list of the audit, and the generated list, are forbidden; the
+        # proof commands and their modifiers are not.
+        minimum = set('''open eval simproc dsimproc simproc_decl dsimproc_decl
+            irreducible_def add_decl_doc seal unseal register_simp_attr register_label_attr
+            suppress_compilation compile_inductive initialize_simps_projections
+            recall'''.split())
+        self.assertLessEqual(minimum, am.FORBIDDEN_TOKENS)
+        self.assertLessEqual(am.COMMAND_KEYWORDS - am.PROOF_COMMANDS - am.MODIFIERS,
+                             am.FORBIDDEN_TOKENS)
+        self.assertTrue({'lemma', 'theorem', 'example', 'def', 'instance', 'alias',
+                         'add_decl_doc', 'notation3'} <= am.COMMAND_KEYWORDS)
+        self.assertFalse((am.PROOF_COMMANDS | am.MODIFIERS) & am.FORBIDDEN_TOKENS)
+        self.assertTrue(all(re.fullmatch(r'[A-Za-z][A-Za-z0-9_]*', w)
+                            for w in am.COMMAND_KEYWORDS))
+
+    def test_attribute_on_theorem_accepted(self):
+        # Note N7: attribute changes on untagged theorems are accepted.
+        new = BASE_FILE.replace('theorem helper', '@[simp] theorem helper')
+        self.accept(Fixture().lean(PATH, BASE_FILE, new))
+
 EVIDENCE_HEAD = 'a' * 40
 EVIDENCE_BASE = 'b' * 40
 
@@ -324,7 +435,8 @@ def evidence():
                pull_requests=[dict(number=7, head=dict(sha=EVIDENCE_HEAD),
                                    base=dict(sha=EVIDENCE_BASE))])
     jobs = dict(jobs=[dict(name='gate', conclusion='success', head_sha=EVIDENCE_HEAD),
-                      dict(name='kernel-replay', conclusion='skipped')])
+                      dict(name='kernel-replay', conclusion='success',
+                           head_sha=EVIDENCE_HEAD)])
     branch = dict(name='main', protected=True, commit=dict(sha=EVIDENCE_BASE))
     compare = dict(behind_by=0, ahead_by=2, merge_base_commit=dict(sha=EVIDENCE_BASE))
     workflow = dict(id=5, path='.github/workflows/ci.yml')
@@ -370,6 +482,16 @@ class EvidenceTests(unittest.TestCase):
             'gate missing': lambda ev: ev['jobs'].update(jobs=[]),
             'two gates': lambda ev: ev['jobs']['jobs'].append(
                 dict(name='gate', conclusion='success')),
+            'kernel replay missing': lambda ev: ev['jobs'].update(
+                jobs=[j for j in ev['jobs']['jobs'] if j['name'] != 'kernel-replay']),
+            'kernel replay skipped': lambda ev: ev['jobs']['jobs'][1].update(
+                conclusion='skipped'),
+            'kernel replay failed': lambda ev: ev['jobs']['jobs'][1].update(
+                conclusion='failure'),
+            'kernel replay of another head': lambda ev: ev['jobs']['jobs'][1].update(
+                head_sha='c' * 40),
+            'two kernel replays': lambda ev: ev['jobs']['jobs'].append(
+                dict(name='kernel-replay', conclusion='success')),
             'base moved': set_(('branch', 'commit', 'sha'), 'c' * 40),
             'unprotected': set_(('branch', 'protected'), False),
             'head behind base': set_(('compare', 'behind_by'), 1),
