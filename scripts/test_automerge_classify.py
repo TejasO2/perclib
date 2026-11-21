@@ -470,6 +470,57 @@ class ClassifyTests(unittest.TestCase):
             with self.subTest(line=line):
                 self.accept(Fixture().lean(PATH, WITH_A, WITH_A.replace(LINE_A, line)))
 
+    # Finding S1 of the third audit of the CI workflows: on an invalid escape such as `\q`
+    # Lean abandons the string at the escape and lexes the rest as code, where `run_meta`
+    # starts a new command. The lexer must refuse the literal itself, so the reason names
+    # the escape and not a token that the line check happens to see.
+    S1_LINE = ('theorem a : True := (fun _ => trivial) "\\q run_meta IO.FS.writeFile '
+               "(toString 'q' ++ toString '1') (toString 'x') -- \"")
+
+    def test_invalid_escape_rejected(self):
+        cases = [
+            ('S1 probe', self.S1_LINE, '`\\q` in a string literal'),
+            ('char literal', "theorem a : True := (fun _ => trivial) '\\q' run_meta pure ()",
+             '`\\q` in a character literal'),
+            ('string, no command after', 'theorem a : "\\q".length = 1 := rfl',
+             '`\\q` in a string literal'),
+            ('char, no command after', "theorem a : '\\q' = 'q' := rfl",
+             '`\\q` in a character literal'),
+            ('\\x with one hex digit', 'theorem a : "\\x4g".length = 2 := rfl',
+             '`\\x` in a string literal'),
+            ('\\u with three hex digits', 'theorem a : "\\u03B".length = 1 := rfl',
+             '`\\u` in a string literal'),
+            ('\\0', 'theorem a : "\\0".length = 1 := rfl', '`\\0` in a string literal'),
+            ('\\a', "theorem a : '\\a' = 'a' := rfl", '`\\a` in a character literal'),
+            ('backslash-newline in a char', "theorem a : '\\\n' = 'a' := rfl",
+             '`\\` before a newline in a character literal'),
+        ]
+        for name, line, reason in cases:
+            with self.subTest(case=name):
+                with self.assertRaises(am.Reject) as cm:
+                    Fixture().lean(PATH, WITH_A, WITH_A.replace(LINE_A, line)).classify()
+                message = str(cm.exception)
+                self.assertIn('invalid escape ' + reason, message)
+                self.assertNotIn('run_meta', message)
+                self.assertNotIn('changed line', message)
+
+    def test_valid_escapes_accepted(self):
+        # Every escape Lean accepts still passes, in strings and in character literals.
+        # (A forbidden token such as `def` cannot be put inside the string here: the token
+        # check reads the line with literals present, by design. That an escaped quote does
+        # not end the literal is checked on strip_comments directly, below.)
+        escapes = ['\\\\', '\\"', "\\'", '\\n', '\\t', '\\r', '\\x41', '\\xfF', '\\u03B1',
+                   '\\uabcd']
+        for esc in escapes:
+            for line in [f'theorem a : "a{esc}b c".length > 0 := by decide',
+                         f"theorem a : '{esc}' = '{esc}' := rfl"]:
+                with self.subTest(line=line):
+                    self.accept(Fixture().lean(PATH, WITH_A, WITH_A.replace(LINE_A, line)))
+        gap = 'theorem a : "ab\\\n    cd".length = 4 := by decide'
+        self.accept(Fixture().lean(PATH, WITH_A, WITH_A.replace(LINE_A, gap)))
+        self.assertEqual(am.strip_comments('x "\\" def" y \'\\\'\' z', blank_literals=True),
+                         'x ' + ' ' * 8 + ' y ' + ' ' * 4 + ' z')
+
 EVIDENCE_HEAD = 'a' * 40
 EVIDENCE_BASE = 'b' * 40
 

@@ -40,7 +40,9 @@ rejection.
   scripts/command_keywords.lean). A changed line may also contain no `#` outside string
   and character literals (no `#eval!` and no other `#` command, wherever it starts) and
   no `«…»` identifier. A file containing a string literal with `{` (possibly an
-  interpolated string) is rejected, and so is an unterminated comment, string or `«`.
+  interpolated string) is rejected, and so is an unterminated comment, string or `«`,
+  and a string or character literal with an escape Lean does not accept (see
+  STRING_ESCAPE: Lean abandons such a string at the escape and reads the rest as code).
 - Auxiliary definitions count as definitions: a `where` clause or a `let rec` inside a
   theorem adds a definition (`z.foo`, `a.f`) to the library, so a changed line matching
   `\bwhere\b` or `\blet\s+rec\b` (after comments are removed) is rejected. Since Lean
@@ -270,6 +272,14 @@ AUX_DEFINITION = re.compile(r'\bwhere\b|\blet\s+rec\b')
 # Lean also reads `let` and `rec` on different lines as `let rec`.
 LET_REC = re.compile(r'\blet\s+rec\b')
 TAG_VALUE = re.compile(r'\btag\s+"([0-9A-Z]{4})"')
+# The escapes Lean accepts after `\` in a string literal: `\\`, `\"`, `\'`, `\n`, `\t`, `\r`,
+# `\x` with two hex digits, `\u` with four, and (in strings only) `\` before a newline. On
+# any other escape Lean reports an error, abandons the string token and lexes the rest of
+# the would-be string as code, where a command keyword starts a new command.
+STRING_ESCAPE = re.compile(r'\\(?:[\\"\'ntr\n]|x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4})')
+# A character literal: one character other than `\` and `'`, or one escape of
+# STRING_ESCAPE other than `\` before a newline.
+CHAR_LITERAL = re.compile(r"'(?:\\(?:[\\\"'ntr]|x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4})|[^\\'])'")
 
 
 class Reject(Exception):
@@ -367,13 +377,22 @@ def is_ident_char(c: str) -> bool:
     return c.isalnum() or c in "_'!?"
 
 
+def shown_escape(text: str, i: int) -> str:
+    """The escape starting with the `\\` at `text[i]`, quoted for a rejection reason."""
+    if text.startswith('\\\n', i):
+        return '`\\` before a newline'
+    return f'`{text[i:i + 2]}`'
+
+
 def strip_comments(text: str, blank_literals: bool = False) -> str:
     """Remove line and (nested) block comments, keeping strings and every newline.
 
     A `«…»` identifier is copied verbatim (Lean reads `«x--»` as one identifier, not as
     the start of a comment). A string literal containing `{` is rejected: it may be an
     interpolated string (`s!"…"`, `m!"…"`, `throwError "…"`), whose `{…}` holds code with
-    strings of its own, which this scanner does not follow. With `blank_literals`, every
+    strings of its own, which this scanner does not follow. A string or character literal
+    with an escape outside STRING_ESCAPE is rejected (Lean would end the literal there and
+    read the rest as code). With `blank_literals`, every
     character of a string or character literal other than a newline becomes a space.
     """
     out, i, n = [], 0, len(text)
@@ -414,7 +433,14 @@ def strip_comments(text: str, blank_literals: bool = False) -> str:
         if text[i] == '"':
             j = i + 1
             while j < n and text[j] != '"':
-                j += 2 if text[j] == '\\' else 1
+                if text[j] != '\\':
+                    j += 1
+                    continue
+                escape = STRING_ESCAPE.match(text, j)
+                if escape is None:
+                    raise Reject(f'invalid escape {shown_escape(text, j)} in a string '
+                                 'literal')
+                j = escape.end()
             if j >= n:
                 raise Reject('unterminated string')
             if '{' in text[i:j + 1]:
@@ -423,11 +449,18 @@ def strip_comments(text: str, blank_literals: bool = False) -> str:
             i = j + 1
             continue
         if text[i] == "'" and (i == 0 or not is_ident_char(text[i - 1])):
-            char = re.match(r"'(?:\\.[^']*|[^\\'])'", text[i:])
+            char = CHAR_LITERAL.match(text, i)
             if char:
                 out.append(literal(char[0]))
-                i += len(char[0])
+                i = char.end()
                 continue
+            if text.startswith("'\\", i):
+                # Lean reads `'\` as the start of a character literal, whatever follows.
+                escape = STRING_ESCAPE.match(text, i + 1)
+                if escape is None or escape[0] == '\\\n':
+                    raise Reject(f'invalid escape {shown_escape(text, i + 1)} in a '
+                                 'character literal')
+                raise Reject('unterminated character literal')
         if text[i] == '«':
             end = text.find('»', i + 1)
             if end < 0:
