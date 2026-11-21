@@ -8,6 +8,8 @@ labels: [good-first-task]
 
 # Infinite root cluster on a rooted tree as the limit of depth probabilities
 
+Being done by the project's own agents (finished, under review); do not start it.
+
 ## Goal
 Prove wiki assertion **GGH2** (article `binary-tree-percolation`) in full and tag it. All parts
 are in `PercLib/Models/Tree.lean` except the public statement that the probability of an
