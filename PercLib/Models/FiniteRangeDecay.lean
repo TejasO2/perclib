@@ -526,6 +526,21 @@ theorem law_exit_le_of_iSup_chi_ne_top (q : Sym2 (LatticeSite d) → unitInterva
   rw [hset]
   exact law_encard_cluster_ge_le_sqrt_two_mul q o hM (by exact_mod_cast hn)
 
+/-! ### Non-vacuity -/
+
+/-- The zero profile on `ℤ^d` has range `R = 1` and `χ ≡ 1`, so it meets every hypothesis of
+`law_exit_le_of_iSup_chi_ne_top`. -/
+example (o : LatticeSite d) (r : ℝ) :
+    law (fun _ : Sym2 (LatticeSite d) => (0 : unitInterval))
+        {ω | ∃ y, (openGraph ω).Reachable o y ∧ r < ‖y - o‖} ≤
+      ENNReal.ofReal (√2 * (chi (fun _ : Sym2 (LatticeSite d) => (0 : unitInterval)) o).toReal *
+        exp (-(r / (4 * 1 *
+          (⨆ x, chi (fun _ : Sym2 (LatticeSite d) => (0 : unitInterval)) x).toReal ^ 2)))) := by
+  have h1 : ∀ x, chi (fun _ : Sym2 (LatticeSite d) => (0 : unitInterval)) x = 1 :=
+    chi_eq_one_of_offDiagonal_zero _ fun _ _ _ => rfl
+  exact law_exit_le_of_iSup_chi_ne_top _ one_pos (fun _ _ _ => rfl)
+    (by simp [h1]) o r
+
 end UniformSusceptibility
 
 end PercLib.Models
