@@ -1,4 +1,9 @@
 /-
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Exact nearest-neighbour bond percolation on the integer line. New specialization of
 PercLib's forest path formula and pinned mathlib 56a005855ea17e0b0958f73ec801ae140b0a1679.
 The canonical law on unordered pairs is retained, with arbitrary diagonal marginals.
@@ -31,7 +36,7 @@ infinite clusters below `p = 1`, and infinite critical intensities.
 noncomputable section
 
 open MeasureTheory PercLib.Probability PercLib.Percolation.Bond
-open scoped ENNReal NNReal Classical
+open scoped ENNReal NNReal
 
 namespace PercLib.Models.Line
 

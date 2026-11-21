@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs, on the bond-interface conventions for row sums, from the sup-norm ball counts of
 `PowerLaw.lean`. The statements follow the wiki tag C4E9 (size-biased laws). No source text or code
 is copied.
@@ -40,7 +44,8 @@ variable {d : ℕ}
 
 /-- The expression `√(∑ᵢ zᵢ²)` is the norm in `EuclideanSpace ℝ (Fin d)`. -/
 theorem euclid_eq_norm (z : Fin d → ℤ) :
-    √(∑ i, ((z i : ℝ)) ^ 2) = ‖(WithLp.toLp 2 (fun i => (z i : ℝ)) : EuclideanSpace ℝ (Fin d))‖ := by
+    √(∑ i, ((z i : ℝ)) ^ 2) = ‖(WithLp.toLp 2 (fun i => (z i : ℝ)) : EuclideanSpace ℝ
+        (Fin d))‖ := by
   rw [EuclideanSpace.norm_eq]
   simp
 
@@ -141,7 +146,8 @@ theorem shell_term_eq {r : ℝ} (hr : 0 < r) (A : ℝ) (k : ℕ) :
 
 /-- **The row of `J - J_r`.** For `r ≥ 1`,
 `∑'_{v ≠ u} (J - J_r)(u,v) ≤ A 3^d (1 + 2^d/(1 - 2^{-α})) r^{-α}`. -/
-theorem tsum_cutoff_sub_le (hα : 0 < α) (hA : 0 ≤ A) (hjA : ∀ t, 1 ≤ t → j t ≤ A * t ^ (-(d : ℝ) - α))
+theorem tsum_cutoff_sub_le (hα : 0 < α) (hA : 0 ≤ A)
+    (hjA : ∀ t, 1 ≤ t → j t ≤ A * t ^ (-(d : ℝ) - α))
     {r : ℝ} (hr : 1 ≤ r) (u : Fin d → ℤ) :
     (∑' v, if v = u then 0 else ENNReal.ofReal (j √(∑ i, (((v - u) i : ℤ) : ℝ) ^ 2) -
         (if √(∑ i, (((v - u) i : ℤ) : ℝ) ^ 2) ≤ r then
@@ -228,7 +234,8 @@ theorem tsum_cutoff_sub_le (hα : 0 < α) (hA : 0 ≤ A) (hjA : ∀ t, 1 ≤ t �
 
 /-- **The added layer.** At intensity `β ≥ 0` the independent added layer
 `1 - e^{-β (J - J_r)}` has probability rows at most `β A 3^d (1 + 2^d/(1 - 2^{-α})) r^{-α}`. -/
-theorem tsum_added_layer_le (hα : 0 < α) (hA : 0 ≤ A) (hjA : ∀ t, 1 ≤ t → j t ≤ A * t ^ (-(d : ℝ) - α))
+theorem tsum_added_layer_le (hα : 0 < α) (hA : 0 ≤ A)
+    (hjA : ∀ t, 1 ≤ t → j t ≤ A * t ^ (-(d : ℝ) - α))
     {r : ℝ} (hr : 1 ≤ r) {β : ℝ} (hβ : 0 ≤ β) (u : Fin d → ℤ) :
     (∑' v, if v = u then 0 else ENNReal.ofReal (1 - Real.exp (-β *
         (j √(∑ i, (((v - u) i : ℤ) : ℝ) ^ 2) -

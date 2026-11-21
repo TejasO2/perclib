@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-16: volume bias bounds absolute mixed spatial moments of a random
 finite set (wiki spatial-cutoff-moments, tag VMEJ). No upstream proof is copied, no definition is
 added and no Input is introduced.
@@ -109,7 +113,8 @@ theorem sum_piFinset_prod_le (K : Finset E) {n p : ℕ} (deg : Fin n → ℕ)
         rw [Fintype.sum_piFinset_apply (fun y => ‖⟪y, u f.1 f.2⟫‖ₑ ^ p) K f.1,
           Fintype.card_fin, nsmul_eq_mul, Nat.cast_pow]
 
-/-- **Cauchy–Schwarz over `K`.** `|K|^k ∑_{y∈K} g(y) ≤ (|K| |K|^{2k})^{1/2} (∑_{y∈K} g(y)²)^{1/2}`. -/
+/-- **Cauchy–Schwarz over `K`.** `|K|^k ∑_{y∈K} g(y) ≤ (|K| |K|^{2k})^{1/2} (∑_{y∈K} g(y)²)^{1/2}`.
+-/
 theorem pow_mul_sum_le {α : Type*} (K : Finset α) (g : α → ℝ≥0∞) (k : ℕ) :
     (#K : ℝ≥0∞) ^ k * ∑ y ∈ K, g y ≤
       ((#K : ℝ≥0∞) * (#K : ℝ≥0∞) ^ (2 * k)) ^ (1 / 2 : ℝ) *

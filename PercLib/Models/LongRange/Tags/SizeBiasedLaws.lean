@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Correspondence wrapper for the soft power-law cutoff comparison of the size-biased-laws
 article. All mathematical inputs are proved in the imported modules; the ghost comparison
 is the two-layer comparison `lintegral_ghost_le_layer` (BEJT).
@@ -41,7 +45,7 @@ finite, the ghost transforms satisfy `M_r(h) ≤ M(h) ≤ M_r(h) + β C r^{-α} 
 theorem softCutoff_rows_and_ghost_comparison {d : ℕ} {j : ℝ → ℝ} {α A : ℝ}
     (_hd : 1 ≤ d) (hα : 0 < α) (hA : 0 < A)
     (hj0 : ∀ t, 1 ≤ t → 0 ≤ j t) (hjm : AntitoneOn j (Set.Ici 1))
-    (hjA : ∀ t, 1 ≤ t → j t ≤ A * t ^ (-(d:ℝ) - α)) {r : ℝ} (hr : 1 ≤ r)
+    (hjA : ∀ t, 1 ≤ t → j t ≤ A * t ^ (-(d : ℝ) - α)) {r : ℝ} (hr : 1 ≤ r)
     (Kfull Kr : Sym2 (Fin d → ℤ) → ℝ≥0)
     (hKfull : ∀ u v, Kfull s(u, v) =
       if u = v then 0 else (j √(∑ i, (((v - u) i : ℤ) : ℝ) ^ 2)).toNNReal)
@@ -55,7 +59,8 @@ theorem softCutoff_rows_and_ghost_comparison {d : ℕ} {j : ℝ → ℝ} {α A :
       (if √(∑ i, (((v - u) i : ℤ) : ℝ) ^ 2) ≤ r then
           j √(∑ i, (((v - u) i : ℤ) : ℝ) ^ 2) - j r else 0) ≤
         j √(∑ i, (((v - u) i : ℤ) : ℝ) ^ 2)) ∧
-    (∀ u : Fin d → ℤ, (∑' v, if v = u then 0 else ENNReal.ofReal (j √(∑ i, (((v - u) i : ℤ) : ℝ) ^ 2) -
+    (∀ u : Fin d → ℤ, (∑' v, if v = u then 0 else ENNReal.ofReal
+        (j √(∑ i, (((v - u) i : ℤ) : ℝ) ^ 2) -
         (if √(∑ i, (((v - u) i : ℤ) : ℝ) ^ 2) ≤ r then
           j √(∑ i, (((v - u) i : ℤ) : ℝ) ^ 2) - j r else 0))) ≤
       ENNReal.ofReal (A * 3 ^ d * (1 + 2 ^ d / (1 - 2 ^ (-α))) * r ^ (-α))) ∧

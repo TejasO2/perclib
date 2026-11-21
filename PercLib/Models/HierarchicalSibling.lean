@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs (the sibling-block recursion), written on 2026-11-20. No upstream proof is copied and no
 definition is added.
 -/
@@ -121,7 +123,7 @@ theorem law_restrict_level_ball_map_addLeft (J : Sym2 (ℕ →₀ (Fin d → ZMo
     simp only [Sym2.map_mk, Equiv.coe_addLeft, Set.mk_mem_sym2_iff, mem_ofPred_eq, hiff]
     split_ifs
     · apply Subtype.ext
-      show 1 - Real.exp (-(β : ℝ) * (J s(x + a, x + b) : ℝ)) =
+      change 1 - Real.exp (-(β : ℝ) * (J s(x + a, x + b) : ℝ)) =
         1 - Real.exp (-(β : ℝ) * (J s(a, b) : ℝ))
       rw [add_comm x a, add_comm x b, hJt]
     · rfl
@@ -255,7 +257,7 @@ theorem sum_shell_tau_ge [NeZero L] (hL : 2 ≤ L) (hd : 1 ≤ d) {α c A : ℝ}
       have huv : u ≠ v := fun h => Finset.disjoint_left.1 hdisj hu (h ▸ hv)
       have hq1uv : q1 s(u, v) = q s(u, v) := by simp only [hq1, hmem1, ↓reduceIte]
       rw [hq1uv]
-      show 1 - Real.exp (-r) ≤ 1 - Real.exp (-(β : ℝ) * (J s(u, v) : ℝ))
+      change 1 - Real.exp (-r) ≤ 1 - Real.exp (-(β : ℝ) * (J s(u, v) : ℝ))
       have hlev : (((v - u).support.sup Nat.succ : ℕ) : ℝ) ≤ (n : ℝ) + 1 := by
         exact_mod_cast level_sub_le_of_mem_level_ball (hSsub u hu) (hTsub v hv)
       have hpow : (L : ℝ) ^ (-(((d : ℝ) + α) * ((n : ℝ) + 1))) ≤

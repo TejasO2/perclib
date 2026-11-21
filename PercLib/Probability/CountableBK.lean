@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 Corresponds to `truncation`, `disjointOccurrence_eq_iUnion_truncation`,
 `measurableSet_disjointOccurrence` and `percolation_bk` in NearCritical/CountableBK.lean, to
 `profileEventProbability_cylinder`, `percolationProfile_cylinder_bk_of_uniform_lt_one` and
@@ -35,7 +37,6 @@ uses the outer measure. Only `A □ B` is shown measurable.
 @[expose] public section
 noncomputable section
 open Set MeasureTheory
-open scoped Classical
 namespace PercLib.Probability
 variable {ι : Type*}
 
@@ -127,6 +128,7 @@ theorem disjointOccurrence_eq_iUnion_truncation {A B : Set (Set ι)}
     exact (mem_disjointOccurrence_iff_open hA hB ω).mpr
       ⟨F, H, hF, hH, hd, hFω, hHω, hFA, hHB⟩
 
+open Classical in
 /-- The truncated disjoint occurrences increase with the coordinate set. -/
 theorem directed_preimage_restrict_disjointOccurrence_truncation {A B : Set (Set ι)}
     (hA : IsUpperSet A) (hB : IsUpperSet B) :

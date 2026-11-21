@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Lemma I.4.13 of T. Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1
 (logarithmic error transforms): for `a > 0` the transforms
 `r ↦ r^a ∫_r^∞ s^{-a-1} h(s) ds` and `r ↦ r^{-a} ∫_{r₀}^r s^{a-1} h(s) ds` of a
@@ -814,7 +818,7 @@ theorem isLogErrorFunction_add {f g : ℝ → ℝ} (hf : IsLogErrorFunction f)
   refine h3.mono' ?_ ?_
   · refine ((((hF.add hG).abs).div measurable_id).aestronglyMeasurable).congr
       (ae_restrict_of_forall_mem measurableSet_Ioi fun r hr => ?_)
-    show |F r + G r| / r = |f r + g r| / r
+    change |F r + G r| / r = |f r + g r| / r
     rw [hsum r (le_of_lt hr)]
   · filter_upwards [ae_restrict_mem measurableSet_Ioi] with r hr
     rw [mem_Ioi] at hr
@@ -851,7 +855,7 @@ from `1` well defined. -/
 theorem lemma_I_4_13_second_from_one {h : ℝ → ℝ} {a r₀ : ℝ} (ha : 0 < a) (hr₀ : 1 ≤ r₀)
     (hmeas : Measurable h) (hint : IntegrableOn (fun s => |h s| / s) (Ioi r₀) volume)
     (h0 : Tendsto h atTop (𝓝 0))
-    (hint1 : IntegrableOn (fun s => |h s| / s) (Set.Ioc (1:ℝ) r₀) volume) :
+    (hint1 : IntegrableOn (fun s => |h s| / s) (Set.Ioc (1 : ℝ) r₀) volume) :
     IsLogErrorFunction (fun r : ℝ => r ^ (-a) * ∫ s in Set.Ioc 1 r, s ^ (a - 1) * h s) := by
   have hsplit : IntegrableOn (fun s => |h s| / s) (Ioi (1:ℝ)) volume := by
     rw [← Set.Ioc_union_Ioi_eq_Ioi hr₀]

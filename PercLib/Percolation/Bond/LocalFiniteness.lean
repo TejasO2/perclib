@@ -1,4 +1,9 @@
 /-
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New applications of mathlib's first Borel–Cantelli lemma and graph-walk API at
 56a005855ea17e0b0958f73ec801ae140b0a1679. No upstream percolation theorem is assumed.
 -/
@@ -19,7 +24,7 @@ There is no subcriticality assumption or assertion that the clusters are finite.
 @[expose] public section
 
 open MeasureTheory Set
-open scoped ENNReal Classical
+open scoped ENNReal
 
 namespace SimpleGraph
 
@@ -68,6 +73,7 @@ open PercLib.Probability
 
 variable {V : Type*} [Countable V]
 
+open Classical in
 /-- A finite off-diagonal row sum gives a finite neighbor set almost surely at one vertex. -/
 theorem ae_finite_neighbors_of_rowSum_lt_top (q : Sym2 V → unitInterval) (v : V)
     (hrow : rowSum (fun e => unitInterval.toENNReal (q e)) v < ∞) :

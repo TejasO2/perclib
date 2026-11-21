@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 The logarithmic ODE identities and Lemma I.2.12 of T. Hutchcroft, *Critical long-range percolation
 I*, arXiv:2508.18807v1, §I.2.2, pp. 25-26.
 
@@ -177,7 +181,7 @@ theorem abs_intervalIntegral_div_le {h : ℝ → ℝ} {δ x y : ℝ}
         intro s hs
         rw [uIcc_of_le hxy] at hs
         have hs0 : 0 < s := lt_of_lt_of_le hx hs.1
-        show |h s / s| = |h s| / s
+        change |h s / s| = |h s| / s
         rw [abs_div, abs_of_pos hs0]
     _ ≤ ∫ s in x..y, δ * (1 / s) := by
         apply intervalIntegral.integral_mono_on hxy hInt2 hInt3

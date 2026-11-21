@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs, on the bond interface. Source motivation: T. Hutchcroft, arXiv:2008.11197v2,
 §2.1, deduction of Theorem 2.2 from Theorem 2.3. No source text or code is copied.
 -/
@@ -130,7 +134,7 @@ theorem law_mul_tightnessScale_le_maxClusterIntersection_le_of_bk [Countable V]
     have hsub : {ω : Config V | a * (M : ℝ) ≤ (maxClusterIntersection Λ ω : ℝ)} ⊆
         {ω | (M : ℝ) ≤ (maxClusterIntersection Λ ω : ℝ)} := by
       intro ω (hω : a * (M : ℝ) ≤ _)
-      show (M : ℝ) ≤ _
+      change (M : ℝ) ≤ _
       nlinarith
     have hexp : Real.exp (-1) ≤ Real.exp (-a / 9) := Real.exp_le_exp.2 (by linarith)
     exact (measure_mono hsub).trans (hMtail.trans (ENNReal.ofReal_le_ofReal hexp))
@@ -190,7 +194,7 @@ theorem law_mul_tightnessScale_le_clusterIntersection_le_of_bk [Countable V]
   · have hsub : {ω : Config V | a * (M : ℝ) ≤ (clusterIntersection Λ ω u : ℝ)} ⊆
         {ω | M ≤ clusterIntersection Λ ω u} := by
       intro ω (hω : a * (M : ℝ) ≤ _)
-      show M ≤ clusterIntersection Λ ω u
+      change M ≤ clusterIntersection Λ ω u
       exact_mod_cast (show (M : ℝ) ≤ (clusterIntersection Λ ω u : ℝ) by nlinarith)
     refine (measure_mono hsub).trans ?_
     calc L = 1 * L := (one_mul L).symm
@@ -226,7 +230,8 @@ theorem law_maxClusterIntersection_lt_mul_tightnessScale_le_of_bk [Countable V]
     (q : Sym2 V → unitInterval) {Λ : Finset V} (hΛ : Λ.Nonempty)
     (hBK : ∀ l : ℝ, 1 ≤ l → ∀ k : ℕ, 1 ≤ k →
       law q {ω | (3 : ℝ) ^ k * l ≤ (maxClusterIntersection Λ ω : ℝ)} ≤
-        law q {ω | l ≤ (maxClusterIntersection Λ ω : ℝ)} ^ (3 ^ (k - 1) + 1)) {ε : ℝ} (hε : 0 < ε) (_hε1 : ε ≤ 1) :
+        law q {ω | l ≤ (maxClusterIntersection Λ ω : ℝ)} ^ (3 ^ (k - 1) + 1)) {ε : ℝ} (hε : 0 < ε)
+            (_hε1 : ε ≤ 1) :
     law q {ω | (maxClusterIntersection Λ ω : ℝ) < ε * (tightnessScale q Λ : ℝ)} ≤
       ENNReal.ofReal (27 * ε) := by
   set M := tightnessScale q Λ with hM
@@ -271,7 +276,7 @@ theorem law_maxClusterIntersection_lt_mul_tightnessScale_le_of_bk [Countable V]
   have hsub : {ω : Config V | M - 1 ≤ maxClusterIntersection Λ ω} ⊆
       {ω | (3 : ℝ) ^ k * l ≤ (maxClusterIntersection Λ ω : ℝ)} := by
     intro ω (hω : M - 1 ≤ maxClusterIntersection Λ ω)
-    show (3 : ℝ) ^ k * l ≤ _
+    change (3 : ℝ) ^ k * l ≤ _
     have hcast : ((M - 1 : ℕ) : ℝ) = (M : ℝ) - 1 := by
       rw [Nat.cast_sub (by omega)]; simp
     have h' : (M : ℝ) - 1 ≤ maxClusterIntersection Λ ω := by

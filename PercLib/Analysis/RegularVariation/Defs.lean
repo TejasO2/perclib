@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Slow and regular variation at infinity (wiki tag 3491), following Bingham–Goldie–Teugels, *Regular
 Variation*, §1.1–1.4, and the wiki article `regular-variation`. Mathlib at the pinned revision has
 no such notion. New definitions and proofs; nothing is copied for them. The definitions
@@ -275,7 +279,7 @@ theorem LogarithmicallyIntegrable.mono (hh : LogarithmicallyIntegrable h)
       (volume.restrict (Ioi (max (max r₀ R) a))) :=
     (((continuous_abs.measurable.comp hF).div measurable_id).aestronglyMeasurable).congr
       (ae_restrict_of_forall_mem measurableSet_Ioi fun r hr => by
-        show |F r| / r = |h' r| / r
+        change |F r| / r = |h' r| / r
         rw [hFeq r ((le_max_right _ _).trans hr.le)])
   refine (hint.mono_set (Ioi_subset_Ioi ((le_max_left _ _).trans (le_max_left _ _)))).mono'
     hmeas (ae_restrict_of_forall_mem measurableSet_Ioi fun r hr => ?_)

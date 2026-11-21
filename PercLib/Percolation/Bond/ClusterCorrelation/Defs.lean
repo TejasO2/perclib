@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 The restoration map and the targets of Lemmas I.2.1 and I.4.12 of T. Hutchcroft, *Critical
 long-range percolation I*, arXiv:2508.18807v1, on the bond interface.
 

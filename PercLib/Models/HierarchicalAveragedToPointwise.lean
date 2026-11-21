@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs on the bond-percolation interface of this library, from its hierarchical
 symmetry, geometry and ball-sum theorems and pinned mathlib's ENNReal arithmetic.
 Mathematical reference: arXiv 2103.17013v1, the deduction of Corollary 1.2 from Theorem 1.1.
@@ -37,7 +41,7 @@ intensity is radial, `J s(x,y) = f (h (y - x))`, and `q = intensityProfile J β`
 noncomputable section
 
 open MeasureTheory Set
-open scoped ENNReal NNReal Classical
+open scoped ENNReal NNReal
 open PercLib.Percolation.Bond
 
 namespace PercLib.Models
@@ -57,7 +61,7 @@ theorem tsum_subtype_eq_tsum_ite {W M : Type*} [AddCommMonoid M] [TopologicalSpa
 
 variable {d L : ℕ} [NeZero L]
 variable (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) (f : ℕ → ℝ≥0)
-  (hJ : ∀ x y, J s(x,y) = f ((y - x).support.sup Nat.succ))
+  (hJ : ∀ x y, J s(x, y) = f ((y - x).support.sup Nat.succ))
 
 /-! ### The restricted shell average -/
 

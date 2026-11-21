@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Non-vacuity witness written on 2026-11-20, for the statements of `PercLib.Models.Hierarchical.Defs`.
 New proofs; no upstream code is copied and no definition is added.
 -/

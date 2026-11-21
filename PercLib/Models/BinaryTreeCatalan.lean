@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs, on the bond interface and the rooted-tree conventions of
 `PercLib.Models.Tree`, using mathlib's `BinaryTree.treesOfNumNodesEq` and `catalan`. No source text
 or code is copied.

@@ -1,4 +1,9 @@
 /-
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Logarithmic exponents of eventually positive real functions: asymptotic equivalence to
 `c x^α` implies `Θ(x^α)`, which implies logarithmic exponent `α`, and neither converse
 holds. New proofs against pinned mathlib 56a005855ea17e0b0958f73ec801ae140b0a1679.

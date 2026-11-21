@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 The size-biased band estimate and the lower tail up to constants in Proposition I.3.1(1) of
 T. Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1, pp. 28–29.
 

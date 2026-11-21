@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs using mathlib's product and Bernoulli measures, at the pinned revision
 56a005855ea17e0b0958f73ec801ae140b0a1679. No upstream coupling theorem is copied.
 The coordinate construction uses three states: both open, only the upper open,

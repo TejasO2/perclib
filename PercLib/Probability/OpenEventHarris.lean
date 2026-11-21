@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-14. They cover the role of `percolation_harris_of_finite_witnesses`,
 `escapeEvent_eq_iUnion_truncation` and `percolation_escape_harris` in
 NearCritical/OpenEventHarris.lean of tomhutchcroft/near-critical-diffusivity at revision
@@ -46,7 +48,8 @@ namespace PercLib.Probability
 variable {ι : Type*}
 
 /-- Harris for finitely many increasing measurable events. -/
-@[tag "22S9"] theorem prodBernoulli_prod_le_biInter (q : ι → unitInterval) {α : Type*} (s : Finset α)
+@[tag "22S9"] theorem prodBernoulli_prod_le_biInter (q : ι → unitInterval) {α : Type*}
+    (s : Finset α)
     (A : α → Set (Set ι)) (hA : ∀ a ∈ s, IsUpperSet (A a))
     (hAm : ∀ a ∈ s, MeasurableSet (A a)) :
     ∏ a ∈ s, prodBernoulli q (A a) ≤ prodBernoulli q (⋂ a ∈ s, A a) := by
@@ -99,7 +102,8 @@ theorem eq_iUnion_finite_witness {A : Set (Set ι)} (hA : IsUpperSet A)
 
 /-- An increasing event with finite witnesses is measurable when there are countably many
 indices. -/
-@[tag "5CN6"] theorem measurableSet_of_finite_witness [Countable ι] {A : Set (Set ι)} (hA : IsUpperSet A)
+@[tag "5CN6"] theorem measurableSet_of_finite_witness [Countable ι] {A : Set (Set ι)}
+    (hA : IsUpperSet A)
     (hfin : ∀ ω ∈ A, ∃ F : Finset ι, (F : Set ι) ⊆ ω ∧ (F : Set ι) ∈ A) :
     MeasurableSet A := by
   rw [eq_iUnion_finite_witness hA hfin]
@@ -205,7 +209,7 @@ theorem law_harris_conn [Countable V] (q : Sym2 V → unitInterval) (x y u v : V
 /-- The two-point function is supermultiplicative along a middle vertex. -/
 theorem tau_mul_tau_le [Countable V] (q : Sym2 V → unitInterval) (x y z : V) :
     tau q x y * tau q y z ≤ tau q x z := by
-  show law q (conn x y) * law q (conn y z) ≤ law q (conn x z)
+  change law q (conn x y) * law q (conn y z) ≤ law q (conn x z)
   exact (law_harris_conn q x y y z).trans (measure_mono fun _ h => conn_trans h.1 h.2)
 
 /-- Harris for two escape events. -/

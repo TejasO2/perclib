@@ -1,4 +1,9 @@
 /-
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New indicator expansions on the canonical bond interface, using pinned mathlib's
 ENNReal sums and Tonelli theorem (56a005855ea17e0b0958f73ec801ae140b0a1679).
 No upstream moment bound or percolation theorem is assumed.
@@ -18,7 +23,7 @@ No tree-graph or BK inequality is asserted.
 @[expose] public section
 
 open MeasureTheory Set
-open scoped ENNReal Classical
+open scoped ENNReal
 
 namespace PercLib.Percolation.Bond
 
@@ -104,6 +109,7 @@ theorem lintegral_cluster_sq [Countable V] (q : Sym2 V → unitInterval) (v : V)
       ∑' x, ∑' y, law q (conn v x ∩ conn v y) := by
   simpa only [pow_two] using lintegral_cluster_mul q v v
 
+open Classical in
 /-- Exhaustion by any cofinal family of finite domains recovers the full second
 moment. No finite second-moment assumption or monotonicity of the indexing is needed. -/
 theorem lintegral_cluster_sq_eq_iSup [Countable V] {ι : Type*}

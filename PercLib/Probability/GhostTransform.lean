@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-16. No upstream proof is copied and no definition is added.
 -/
 module
@@ -617,7 +619,8 @@ theorem min_le_of_ghost_ode {m : ℝ → ℝ} {A r q : ℝ} (hA : 0 < A) (hr : 0
   have hKh : K * h ≤ m h ^ (r + 1) := by
     refine le_of_forall_pos_le_add fun δ hδ => ?_
     by_cases hK0' : K = 0
-    · rw [hK0', zero_mul]; exact (Real.rpow_nonneg (hm01 h hh).1 _).trans (le_add_of_nonneg_right hδ.le)
+    · rw [hK0', zero_mul]; exact (Real.rpow_nonneg (hm01 h hh).1 _).trans
+        (le_add_of_nonneg_right hδ.le)
     have hKpos : 0 < K := lt_of_le_of_ne hK0 (Ne.symm hK0')
     set ε := min (h / 2) (δ / K) with hε
     have hε0 : 0 < ε := lt_min (by linarith) (by positivity)

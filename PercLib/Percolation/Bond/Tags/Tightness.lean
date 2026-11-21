@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Correspondence wrappers for the universal tightness, quantile moment and finite-set hyperscaling
 assertions. All mathematical inputs are proved in the imported modules.
 -/
@@ -33,7 +37,7 @@ Wiki correspondence for universal tightness, quantile moments and finite-set hyp
 @[expose] public section
 noncomputable section
 open MeasureTheory Set Filter Topology
-open scoped ENNReal NNReal Nat Classical
+open scoped ENNReal NNReal Nat
 
 namespace PercLib.Percolation.Bond
 variable {V : Type*}
@@ -324,6 +328,7 @@ theorem hyperscaling_exponent_inequalities [Countable V] (q : Sym2 V → unitInt
   norm_num at h2
   linarith
 
+open Classical in
 /-- Exponent relations for the sampled-root variable and the window intersections of a
 family of profiles and windows; the counting identity is proved, not assumed. When
 `κ = 0`, `d_f = dδ/(δ+1)` and `α = d(δ-1)/(δ+1)`. -/

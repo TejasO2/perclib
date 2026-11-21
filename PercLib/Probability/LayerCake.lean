@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-16. No upstream proof is copied and no definition is added.
 -/
 module
@@ -241,8 +243,11 @@ example {p : ℝ} (hp : 0 < p) :
   exact this.symm
 
 /-- Item 4 for `X ≡ 2` and `t = 1`: both sides are `2`. -/
-example : ∫⁻ _ω, {_ω : Unit | (1 : ℝ) < 2}.indicator (fun _ => ENNReal.ofReal 2) () ∂(Measure.dirac ()) =
+example : ∫⁻ _ω, {_ω : Unit | (1 : ℝ) < 2}.indicator (fun _ => ENNReal.ofReal 2)
+    () ∂(Measure.dirac ()) =
     ENNReal.ofReal 1 * (Measure.dirac ()) {_ω : Unit | (1 : ℝ) < 2} +
       ∫⁻ s in Ioi (1 : ℝ), (Measure.dirac ()) {_ω : Unit | s < 2} :=
   lintegral_indicator_lt_eq (X := fun _ => (2 : ℝ)) measurable_const (fun _ => by norm_num)
     zero_le_one
+
+end PercLib.Probability

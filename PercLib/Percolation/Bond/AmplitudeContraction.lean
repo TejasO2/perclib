@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs, on the bond interface. Source motivation: T. Hutchcroft, "Power-law bounds for
 critical long-range percolation below the upper-critical dimension", arXiv:2008.11197v2, §4, and the
 wiki statement C9N6. No source text or code is copied.

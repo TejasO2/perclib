@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-16. No upstream proof is copied.
 -/
 module
@@ -39,7 +41,6 @@ noncomputable section
 
 open MeasureTheory Set PercLib.Probability
 open scoped ENNReal NNReal unitInterval
-open Classical
 
 namespace PercLib.Percolation.Bond
 
@@ -68,6 +69,7 @@ theorem chi_intensity_le_root [Countable V] {J : Sym2 V → ℝ≥0} {o : V}
     (fun e _ => (intensityProfile_map_eq (map_symm_preserves hφ) β e).ge) (φ o)
   simpa using h
 
+open Classical in
 /-- Under transitivity every off-diagonal row sum of `J` equals the one at `o`. -/
 theorem rowSum_eq_root {J : Sym2 V → ℝ≥0} {o : V}
     (hJ : ∀ x, ∃ φ : V ≃ V, φ o = x ∧ ∀ e, J (Sym2.map φ e) = J e) (u : V) :
@@ -150,6 +152,7 @@ theorem inv_le_chiCriticalIntensity [Countable V] {J : Sym2 V → ℝ≥0} {o : 
 
 /-! ### Non-vacuity -/
 
+open Classical in
 /-- The constant intensity on `Sym2 ℤ` restricted to nearest neighbours is transitive about
 `0`: translations preserve it. -/
 example : ∀ x : ℤ, ∃ φ : ℤ ≃ ℤ, φ 0 = x ∧ ∀ e,

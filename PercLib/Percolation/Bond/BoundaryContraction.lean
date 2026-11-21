@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs of the restricted-domain first-exit inequality and of the uniform boundary
 contraction bound on the susceptibility (wiki boundary-laws, tags USAC and YLZV).
 No upstream proof is copied, no definition is added and no Input is introduced.
@@ -34,7 +38,7 @@ finite volume, where the supremum over roots is finite, and then passes to the l
 @[expose] public section
 noncomputable section
 open MeasureTheory Set PercLib.Probability
-open scoped ENNReal NNReal Classical
+open scoped ENNReal NNReal
 
 namespace PercLib.Percolation.Bond
 variable {V : Type*}
@@ -145,6 +149,7 @@ theorem measurableSet_induce_cluster_eq [Countable V] (S K : Set V) (u : V) :
 
 /-! ## The first-exit inequality for a finite domain -/
 
+open Classical in
 /-- **First exit from a finite domain.** Connections inside `A` from `u ∈ S` to targets
 not joined to `u` inside `S` pass through a pair `x y` with `x ∈ S`, `y ∉ S`. -/
 theorem law_reach_not_localConn_le_firstExit [Countable V] (q : Sym2 V → unitInterval)
@@ -354,6 +359,7 @@ theorem law_reach_not_localConn_le_firstExit [Countable V] (q : Sym2 V → unitI
 
 /-! ## The restricted-domain first-exit inequality (USAC) -/
 
+open Classical in
 /-- **Restricted-domain first exit (USAC).** For `u ∈ S` and `B ⊆ A \ S`, with no
 finiteness assumed,
 `P(u ↔_A B) ≤ ∑_{x ∈ S} ∑'_{y ∈ A \ S} τ_S(u,x) q(x,y) P(y ↔_A B)`.
@@ -478,6 +484,7 @@ theorem tsum_law_induce_conn_le_card {q : Sym2 V → unitInterval} (Λ : Finset 
   calc _ ≤ ∑ _v ∈ Λ, (1 : ℝ≥0∞) := Finset.sum_le_sum fun _ _ => prob_le_one
     _ = Λ.card := by simp
 
+open Classical in
 /-- **Boundary contraction in finite volume.** -/
 theorem tsum_law_induce_conn_le_of_boundary_contraction [Countable V]
     (q : Sym2 V → unitInterval) (Sx : V → Finset V) (hSx : ∀ x, x ∈ Sx x) {B a : ℝ≥0∞}
@@ -608,11 +615,13 @@ theorem tsum_law_induce_conn_le_of_boundary_contraction [Countable V]
     rw [mul_comm, ENNReal.sub_mul fun _ _ => hMtop, one_mul]
     exact tsub_le_iff_left.mpr (by rw [add_comm]; exact hMle)
   have hMB : M ≤ B / (1 - a) :=
-    (ENNReal.le_div_iff_mul_le (Or.inl h1a) (Or.inl (ENNReal.sub_ne_top ENNReal.one_ne_top))).mpr hfin
+    (ENNReal.le_div_iff_mul_le (Or.inl h1a) (Or.inl
+        (ENNReal.sub_ne_top ENNReal.one_ne_top))).mpr hfin
   exact (hWM x).trans hMB
 
 /-! ## Uniform boundary contraction (YLZV) -/
 
+open Classical in
 /-- **Uniform boundary contraction.** If every `x` has a finite `S_x ∋ x` with
 `∑_{u ∈ S_x} τ_{S_x}(x,u) ≤ B` and `Φ_q(x,S_x) ≤ a < 1`, then `χ(x) ≤ B (1 - a)⁻¹`. -/
 theorem chi_le_of_boundary_contraction [Countable V] (q : Sym2 V → unitInterval)
@@ -631,6 +640,7 @@ theorem chi_le_of_boundary_contraction [Countable V] (q : Sym2 V → unitInterva
   rw [lintegral_encard_induce]
   exact tsum_law_induce_conn_le_of_boundary_contraction q Sx hSx ha hB hΦ (Λ n) x
 
+open Classical in
 /-- **Uniform boundary contraction, almost-sure finiteness.** Under the hypotheses of
 `chi_le_of_boundary_contraction` with `B < ∞`, almost surely every cluster is finite. -/
 theorem ae_cluster_finite_of_boundary_contraction [Countable V] (q : Sym2 V → unitInterval)
@@ -651,6 +661,7 @@ theorem ae_cluster_finite_of_boundary_contraction [Countable V] (q : Sym2 V → 
   rw [ae_iff]
   simpa only [Set.not_infinite.symm, not_not] using h0
 
+open Classical in
 /-- **Uniform boundary contraction with bounded domains.** If `|S_x| ≤ N` for all `x`,
 the bound holds with `B = N`. -/
 theorem chi_le_of_boundary_contraction_card [Countable V] (q : Sym2 V → unitInterval)
@@ -666,6 +677,7 @@ theorem chi_le_of_boundary_contraction_card [Countable V] (q : Sym2 V → unitIn
     _ = (Sx y).card := by simp
     _ ≤ N := by exact_mod_cast hN y
 
+open Classical in
 /-- Singleton domains: an off-diagonal row-sum bound `a < 1` gives `χ ≤ (1 - a)⁻¹`. -/
 theorem chi_le_of_rowSum_le [Countable V] (q : Sym2 V → unitInterval) {a : ℝ≥0∞}
     (ha : a < 1)

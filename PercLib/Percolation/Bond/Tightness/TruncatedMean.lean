@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-16: truncated means of the cluster intersection from universal
 tightness. From the tightness theorems of this library and pinned mathlib's Markov inequality and
 exponential bounds. No upstream code is copied, no definition is added and no Input is introduced.

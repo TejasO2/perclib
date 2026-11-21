@@ -1,6 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Ported from the source repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
 `d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, files `PercLib/CriticalLRP/LevyAnalysis/Radial.lean`
 (blob `bde47c1551`), `PercLib/CriticalLRP/LevyAnalysis/Rpow.lean` (blob `bc4e3f889a`) and
@@ -191,7 +194,8 @@ theorem lintegral_ball_hom_rpow (μ : Measure E) [μ.IsAddHaarMeasure] [Nontrivi
   have hsing : μ ({(0 : E)} : Set E) = 0 := by
     have h := Measure.addHaar_smul μ (r := (0 : ℝ)) (s := (Set.univ : Set E))
     rw [zero_smul_set (Set.univ_nonempty (α := E)),
-      zero_pow (Nat.pos_iff_ne_zero.mp (Module.finrank_pos (R := ℝ) (M := E))), abs_zero, ENNReal.ofReal_zero, zero_mul] at h
+      zero_pow (Nat.pos_iff_ne_zero.mp (Module.finrank_pos (R := ℝ) (M := E))), abs_zero,
+          ENNReal.ofReal_zero, zero_mul] at h
     exact h
   have haeμ : ∀ᵐ x ∂μ, x ≠ (0 : E) := by
     rw [MeasureTheory.ae_iff]
@@ -328,7 +332,8 @@ theorem lintegral_ball_hom_rpow (μ : Measure E) [μ.IsAddHaarMeasure] [Nontrivi
   have hm2 : Measurable (fun a : ℝ =>
       ENNReal.ofReal (s * a ^ (k + (finrank ℝ E : ℝ) - s - 1))) := by
     simpa only [Pi.mul_apply] using
-      (measurable_const.mul (measurable_id'.pow_const (k + (finrank ℝ E : ℝ) - s - 1))).ennreal_ofReal
+      (measurable_const.mul (measurable_id'.pow_const
+          (k + (finrank ℝ E : ℝ) - s - 1))).ennreal_ofReal
   have hm3 : Measurable (fun a : ℝ =>
       ENNReal.ofReal (a ^ (k + (finrank ℝ E : ℝ) - s - 1))) :=
     (measurable_id'.pow_const _).ennreal_ofReal

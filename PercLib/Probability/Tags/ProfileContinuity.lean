@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Correspondence wrappers assembled from the existing finite-product, ordered-coupling and Harris
 APIs. No upstream proof is copied.
 -/
@@ -31,7 +35,7 @@ association.
 @[expose] public section
 noncomputable section
 open MeasureTheory Measure Set
-open scoped ENNReal Classical
+open scoped ENNReal
 
 namespace PercLib.Probability
 variable {I : Type*}
@@ -42,6 +46,7 @@ private theorem measurable_restrict_block (F : Finset I) :
   intro i
   exact (measurableSet_mem i.val).mem
 
+open Classical in
 /-- Finite restrictions, configuration weights, integrals and mixed cylinders
 under arbitrary profiles and arbitrary ambient coordinate sets. -/
 @[tag "ZNMQ"]
@@ -129,6 +134,7 @@ section Product
 variable {X : I → Type*} [∀ i, MeasurableSpace (X i)]
   (μ : (i : I) → Measure (X i)) [∀ i, IsProbabilityMeasure (μ i)]
 
+open Classical in
 /-- Finite-coordinate averaging preserves the law and means, contracts bounds
 and L1 differences, fixes finite-coordinate functions, and preserves order.
 The integrable version includes product and almost-everywhere section integrability. -/
@@ -173,6 +179,7 @@ theorem finite_coordinate_averaging (F : Finset I) {f : (Π i, X i) → ℝ}
       exact h.comp_measurable (measurable_finsetPiecewise F)
     exact ⟨hi, hi.prod_right_ae, integral_integral_piecewise μ hgi⟩
 
+open Classical in
 /-- Indicator averages approximate in L1 uniformly over all finite supersets of
 a sufficiently large block, with no countability assumption on the index set. -/
 @[tag "NPRG"]
@@ -184,6 +191,7 @@ theorem finite_coordinate_indicator_approximation {A : Set (Π i, X i)}
   obtain ⟨F₀, h⟩ := exists_integral_norm_integral_piecewise_indicator_sub_le μ hA (half_pos hε)
   exact ⟨F₀, fun F hF => (h F hF).trans_lt (half_lt_self hε)⟩
 
+open Classical in
 /-- Product association bundles finite-coordinate real observables and arbitrary
 increasing measurable events on products of linearly ordered spaces. -/
 @[tag "9U6I"]
@@ -207,11 +215,13 @@ end PercLib.Probability
 
 namespace PercLib.Probability
 
+open Classical in
 /-- An empty observation is constant even on an uncountable coordinate space. -/
 example (q : ℝ → unitInterval) (f : Set (∅ : Finset ℝ) → ℝ) :
     (∫ ω, f (Subtype.val ⁻¹' ω) ∂prodBernoulli q) = f ∅ := by
   rw [(finite_restrictions_and_weighted_expectations q ∅).2.2.2.1 f |>.2]
-  simp
+  simp only [Finset.univ_unique, Finset.univ_eq_empty, Finset.prod_empty, mul_one,
+      Finset.sum_singleton]
   exact congrArg f (Subsingleton.elim _ _)
 
 /-- Finite real expectations are continuous at the two extreme profiles. -/
@@ -269,6 +279,7 @@ end PercLib.Probability
 namespace PercLib.Probability
 open Filter Topology PercLib.Percolation.Bond
 
+open Classical in
 private theorem continuous_finite_witness_union {I : Type*}
     (W : Set (Finset I)) (H : Finset W) :
     Continuous (fun q : I → unitInterval =>
@@ -328,7 +339,8 @@ theorem finite_open_witness_probability_regular {I : Type*} [Countable I] (W : S
       funext q
       rw [heq, hm.measure_iUnion]
     rw [hprob]
-    exact lowerSemicontinuous_iSup fun n => (continuous_finite_witness_union W (H n)).lowerSemicontinuous
+    exact lowerSemicontinuous_iSup fun n => (continuous_finite_witness_union W
+        (H n)).lowerSemicontinuous
   refine ⟨measurableSet_iUnion_witness W, hlsc, ?_, fun _ _ => lowerSemicontinuous_tau⟩
   intro q p hp
   exact (hlsc.le_liminf p).trans ((tendsto_pi_nhds.mpr hp).liminf_le_liminf_comp)

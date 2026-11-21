@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Correspondence wrappers for boundary, forest and walk-kernel assertions. All mathematical inputs are
 proved in the imported modules.
 -/
@@ -32,7 +36,7 @@ bounded-degree path counts and intensity bounds.
 @[expose] public section
 noncomputable section
 open MeasureTheory ProbabilityTheory Set PercLib.Probability
-open scoped ENNReal NNReal Classical
+open scoped ENNReal NNReal
 
 namespace PercLib.Percolation.Bond
 variable {V : Type*}
@@ -54,6 +58,7 @@ theorem boundary_mark_exponential [Countable V] (q : Sym2 V → unitInterval)
   simpa only [he] using law_boundary_closed_exponential q S x (fun e => max (J e) 0)
     β hβ (fun e => le_max_right _ _) hs' (fun y => by simpa only [he] using hq y)
 
+open Classical in
 /-- The first-exit chain, its singleton form, and the zero-boundary case. -/
 @[tag "ROY9"]
 theorem boundary_escape_and_percolation [Countable V] (q : Sym2 V → unitInterval)
@@ -91,8 +96,8 @@ theorem boundary_escape_and_percolation [Countable V] (q : Sym2 V → unitInterv
 /-- Both sides of the first-exit estimate are exact on every initial ray segment. -/
 @[tag "6J9C"]
 theorem ray_escape_and_boundary_sum (q : Sym2 ℕ → unitInterval) (t : unitInterval)
-    (hedge : ∀ n, q s(n,n+1) = t)
-    (hz : ∀ m n, m ≠ n → ¬ (m + 1 = n ∨ n + 1 = m) → q s(m,n) = 0)
+    (hedge : ∀ n, q s(n, n + 1) = t)
+    (hz : ∀ m n, m ≠ n → ¬ (m + 1 = n ∨ n + 1 = m) → q s(m, n) = 0)
     (n : ℕ) :
     law q (⋃ w ∈ (Finset.range (n+1) : Set ℕ)ᶜ, conn 0 w) =
       (unitInterval.toNNReal t : ℝ≥0∞) ^ (n+1) ∧
@@ -112,6 +117,7 @@ theorem positive_support_contains_configuration [Countable V] (q : Sym2 V → un
     (∀ᵐ ω ∂law q, openGraph ω ≤ SimpleGraph.fromEdgeSet {e | 0 < q e}) :=
   ⟨ae_config_subset_positive q, ae_openGraph_le_support q⟩
 
+open Classical in
 /-- A forest host gives the unique-path product, zero between different components,
 and the exact susceptibility sum, with the root contributing its empty path. -/
 @[tag "8KVE"]
@@ -146,8 +152,8 @@ theorem forest_path_and_susceptibility [Countable V] (q : Sym2 V → unitInterva
 including the critical endpoint and the equivalence characterising finiteness. -/
 @[tag "TGL4"]
 theorem ray_two_point_and_susceptibility (q : Sym2 ℕ → unitInterval) (t : unitInterval)
-    (hedge : ∀ n, q s(n,n+1) = t)
-    (hz : ∀ m n, m ≠ n → ¬ (m + 1 = n ∨ n + 1 = m) → q s(m,n) = 0) :
+    (hedge : ∀ n, q s(n, n + 1) = t)
+    (hz : ∀ m n, m ≠ n → ¬ (m + 1 = n ∨ n + 1 = m) → q s(m, n) = 0) :
     (∀ m n, tau q m n = (unitInterval.toNNReal t : ℝ≥0∞) ^ Nat.dist m n) ∧
     chi q 0 = ∑' n : ℕ, (unitInterval.toNNReal t : ℝ≥0∞) ^ n ∧
     chi q 0 = (1 - (unitInterval.toNNReal t : ℝ≥0∞))⁻¹ ∧
@@ -182,6 +188,7 @@ theorem walk_kernel_row_bounds (a : V → V → ℝ≥0∞) :
     exact ⟨walkSum_masked_le_pow a m hrow, fun hm =>
       ⟨walkSum_masked_total_le a m hrow hm, ENNReal.inv_lt_top.mpr (tsub_pos_of_lt hm)⟩⟩
 
+open Classical in
 /-- The finite count and probability bound for positive-length simple host paths.
 The vertex type is arbitrary and no off-host probability assumption is made. -/
 @[tag "8WML"]
@@ -233,7 +240,7 @@ theorem bounded_degree_susceptibility_and_finiteness [Countable V]
     (q : Sym2 V → unitInterval) (p : unitInterval)
     (hoff : ∀ e, ¬ e.IsDiag → e ∉ G.edgeSet → q e = 0)
     (hle : ∀ e ∈ G.edgeSet, q e ≤ p)
-    (hp : ((Δ-1 : ℕ) : ℝ≥0∞) * (unitInterval.toNNReal p : ℝ≥0∞) < 1) :
+    (hp : ((Δ - 1 : ℕ) : ℝ≥0∞) * (unitInterval.toNNReal p : ℝ≥0∞) < 1) :
     (∀ x, chi q x ≤ 1 + (Δ : ℝ≥0∞) * (unitInterval.toNNReal p : ℝ≥0∞) /
       (1 - ((Δ-1 : ℕ) : ℝ≥0∞) * (unitInterval.toNNReal p : ℝ≥0∞))) ∧
     (∀ᵐ ω ∂law q, ∀ x, (cluster ω x).Finite) ∧
@@ -401,6 +408,7 @@ example : ∀ x : Bool, chi (fun _ : Sym2 Bool => (1 : unitInterval)) x ≤ 2 :=
     (by intro e he; exact le_rfl) (by simp)
   simpa only [unitInterval.toNNReal_one, ENNReal.coe_one, one_add_one_eq_two] using h.2.2.2 rfl
 
+open Classical in
 /-- The defining sequence product, its full sum, empty sequences and diagonal
 removal. All objects are the existing definitions; no paths or countability
 restrictions are imposed on the sequence index. -/
@@ -415,13 +423,14 @@ theorem sequence_weights_sums_and_diagonal (a : V → V → ℝ≥0∞) :
   ⟨fun _ _ _ => rfl, walkSum_eq_tsum_walkWeight a, walkWeight_zero a,
     walkSum_zero a, offDiagonal_apply a⟩
 
+open Classical in
 /-- A boundary mark is precisely the edge to the collapsed exterior. Internal
 connections use the induced graph, equivalently the restricted pair configuration;
 their probability is its canonical two-point function. -/
 @[tag "XN06"]
 theorem boundary_marks_and_internal_connections [Countable V]
     (q : Sym2 V → unitInterval) (S : Set V) (π : V → Option S)
-    (hπ : ∀ v, π v = if h : v ∈ S then some ⟨v,h⟩ else none) :
+    (hπ : ∀ v, π v = if h : v ∈ S then some ⟨v, h⟩ else none) :
     (∀ (ω : Config V) (x : S),
       (openGraph {z : Sym2 (Option S) | ∃ e ∈ ω, Sym2.map π e = z ∧ ¬ z.IsDiag}).Adj
         (some x) none ↔ ∃ y : (Sᶜ : Set V), s((x : V), (y : V)) ∈ ω) ∧
@@ -450,6 +459,7 @@ theorem boundary_marks_and_internal_connections [Countable V]
 
 -- Two disjoint edges can become connected through the ghost. The boundary
 -- marks therefore encode boundary bonds, and do not claim an original connection.
+open Classical in
 example : ∃ (S : Set (Bool × Bool)) (ω : Config (Bool × Bool)) (a b : S)
     (π : (Bool × Bool) → Option S),
     (∀ v, π v = if h : v ∈ S then some ⟨v,h⟩ else none) ∧
