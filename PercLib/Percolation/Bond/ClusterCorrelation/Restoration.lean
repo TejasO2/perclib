@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 The restoration map preserves the product law (the coupling in the proof of Lemma I.4.12 of T.
 Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1). The statements are ported from
 the repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit

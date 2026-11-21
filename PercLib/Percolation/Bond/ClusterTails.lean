@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New cluster-tail glue using the existing finite-open-path witness API in
 PercLib.Probability.OpenEventHarris and mathlib's finite subsets and measure
 continuity. No upstream proof is copied and no tightness bound is asserted.
@@ -29,7 +33,7 @@ limit along finite-edge restrictions.
 @[expose] public section
 
 open MeasureTheory Set
-open scoped ENNReal Classical
+open scoped ENNReal
 
 namespace PercLib.Percolation.Bond
 

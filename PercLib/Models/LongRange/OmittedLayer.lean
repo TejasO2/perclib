@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Discharge of the premise `hD` that the formalisation of contributor yujinhkim cited below adds to
 Propositions I.3.1 and I.3.2 of T. Hutchcroft, *Critical long-range percolation I*,
 arXiv:2508.18807v1. The premise is read from the repository `yujinhkim/lrp`, branch
@@ -30,8 +34,8 @@ is `J - J_r` (pointwise truncated subtraction in `ℝ≥0`, which is exact since
 * `coe_omittedKernel_of_ne` (item 2): `(J - J_r)(x,y) = K r` if `N(x-y) ≤ r` and
   `K (N(x-y))` otherwise;
 * `tsum_omittedKernel_le` and `tsum_omittedLayer_le` (item 3): for the power law
-  `K = powerLawProfile c (d + α)` and any norm with `κ ‖z‖ ≤ N (Int.cast ∘ z)`, the omitted rows are at
-  most `C r^{-α}` and the omitted-layer probability rows at most `β C r^{-α}` for `r ≥ 1`,
+  `K = powerLawProfile c (d + α)` and any norm with `κ ‖z‖ ≤ N (Int.cast ∘ z)`, the omitted rows are
+  at most `C r^{-α}` and the omitted-layer probability rows at most `β C r^{-α}` for `r ≥ 1`,
   with `C = c ((1 + 2/κ)^d + κ^{-d} · 2d 3^{d-1} (1 + 1/α))`;
 * `tsum_shiftProb_le` (item 4): the same row bound in the fork's spelling of `hD`, with
   `shiftProb(q_∞, q_r) = min 1 (max 0 ((q_∞ - q_r)/(1 - q_r)))` written out and shown
@@ -121,8 +125,8 @@ theorem coe_omittedKernel_of_ne (hN0 : ∀ v, N v = 0 → v = 0) (hK : ∀ t, 0 
 
 /-! ### Counting lattice points in a norm ball -/
 
-/-- If `κ ‖z‖ ≤ N (Int.cast ∘ z)`, a ball of radius `r ≥ 1` has at most `(1 + 2/κ)^d r^d` points of the
-sup-norm ball `κ ‖z‖ ≤ r`. -/
+/-- If `κ ‖z‖ ≤ N (Int.cast ∘ z)`, a ball of radius `r ≥ 1` has at most `(1 + 2/κ)^d r^d` points of
+the sup-norm ball `κ ‖z‖ ≤ r`. -/
 theorem encard_mul_norm_le {κ : ℝ} (hκ : 0 < κ) (hr : 1 ≤ r) :
     (({z : Fin d → ℤ | κ * ‖z‖ ≤ r}.encard : ℕ∞) : ℝ≥0∞) ≤
       ENNReal.ofReal ((1 + 2 / κ) ^ d * r ^ d) := by
@@ -376,7 +380,8 @@ example {x y : Fin 1 → ℤ} (hxy : x ≠ y) :
 `C = 7`, and every omitted row is at most `7`. -/
 example (x : Fin 1 → ℤ) :
     rowSum (fun e => (((radialKernel (normSeminorm ℝ (Fin 1 → ℝ))
-      (powerLawProfile 1 ((1 : ℕ) + 1)) - cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (powerLawProfile 1 ((1 : ℕ) + 1)) 1) e : ℝ≥0) :
+      (powerLawProfile 1 ((1 : ℕ) + 1)) - cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ))
+          (powerLawProfile 1 ((1 : ℕ) + 1)) 1) e : ℝ≥0) :
         ℝ≥0∞)) x ≤ ENNReal.ofReal 7 := by
   refine (tsum_omittedKernel_le le_rfl one_pos zero_le_one normSeminorm_eq_zero one_pos
     (fun z => by rw [one_mul, normSeminorm_intCast]) le_rfl x).trans_eq ?_

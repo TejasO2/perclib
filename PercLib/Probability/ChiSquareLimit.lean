@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Weak convergence from convergence of moments to a moment-determinate law on `[0,∞)`, and the
 squared-normal (chi-square) limit of size-biased laws, for T. Hutchcroft, *Critical long-range
 percolation I*, arXiv:2508.18807v1, Remark I.1.7 and the proof of (I.1.7), p. 32.
@@ -69,7 +73,8 @@ theorem ae_nonneg_of_tendsto {ι : Type*} {l : Filter ι} [l.NeBot]
     ∀ᵐ x ∂(ν : Measure ℝ), 0 ≤ x := by
   have h1 : ∀ i, (Q i : Measure ℝ) (Ici 0) = 1 := fun i =>
     (prob_compl_eq_zero_iff measurableSet_Ici).1 (mem_ae_iff.1 (hQ0 i))
-  have hle := ProbabilityMeasure.limsup_measure_closed_le_of_tendsto hconv (isClosed_Ici (a := (0 : ℝ)))
+  have hle := ProbabilityMeasure.limsup_measure_closed_le_of_tendsto hconv
+      (isClosed_Ici (a := (0 : ℝ)))
   simp only [h1, limsup_const] at hle
   exact mem_ae_iff.2 ((prob_compl_eq_zero_iff measurableSet_Ici).2
     (le_antisymm prob_le_one hle))
@@ -286,7 +291,7 @@ theorem tendsto_of_tendsto_integral_pow {ι : Type*} {l : Filter ι} [l.IsCounta
       ((hmom p).comp (hns.comp hφ.tendsto_atTop))
   have hνabs : ∀ p : ℕ, Integrable (fun x => |x| ^ p) (ν : Measure ℝ) := fun p =>
     (hνint p).congr (hν0.mono fun x hx => by
-      show x ^ p = |x| ^ p
+      change x ^ p = |x| ^ p
       rw [abs_of_nonneg hx])
   have heq : (ν : Measure ℝ) = μ :=
     Measure.eq_of_forall_moment_eq_of_summable hν0 hμ0 hνabs hμint

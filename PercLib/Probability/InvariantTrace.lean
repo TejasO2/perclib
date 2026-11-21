@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs, from pinned mathlib's series lemmas. The statements are the trace step of the wiki tags
 IZAO and 87W3 (connection kernels). No source text or code is copied.
 -/
@@ -35,7 +39,6 @@ Each has an additive version.
 noncomputable section
 
 open scoped ENNReal
-open Classical
 
 namespace PercLib.Probability
 
@@ -73,7 +76,8 @@ theorem summable_abs_mul_of_sq (M N : Γ → Γ → ℝ) (hM : Summable fun v =>
 
 /-- **Trace step, with convergence.** For invariant real kernels with
 square-summable rows and columns, both trace series converge absolutely and are equal. -/
-@[to_additive trace_comm_of_invariant_add /-- Additive version of the trace identity with convergence. -/]
+@[to_additive trace_comm_of_invariant_add
+    /-- Additive version of the trace identity with convergence. -/]
 theorem trace_comm_of_invariant (M N : Γ → Γ → ℝ)
     (hM : ∀ g x y, M (g * x) (g * y) = M x y) (hN : ∀ g x y, N (g * x) (g * y) = N x y)
     (hMr : ∀ x, Summable fun y => M x y ^ 2) (hMc : ∀ y, Summable fun x => M x y ^ 2)
@@ -108,7 +112,8 @@ theorem tsum_row_eq (M : Γ → Γ → ℝ≥0∞) (hM : ∀ g x y, M (g * x) (g
   simpa using hM x 1 y
 
 /-- Every column of an invariant `M ≥ 0` sums to its row sum at `1`. -/
-@[to_additive tsum_col_eq_add /-- Every column of an invariant `M ≥ 0` sums to its row sum at `0`. -/]
+@[to_additive tsum_col_eq_add
+    /-- Every column of an invariant `M ≥ 0` sums to its row sum at `0`. -/]
 theorem tsum_col_eq (M : Γ → Γ → ℝ≥0∞) (hM : ∀ g x y, M (g * x) (g * y) = M x y) (y : Γ) :
     ∑' x, M x y = ∑' x, M 1 x := by
   rw [← (Equiv.mulLeft y).tsum_eq, ← (Equiv.inv Γ).tsum_eq]
@@ -118,6 +123,7 @@ theorem tsum_col_eq (M : Γ → Γ → ℝ≥0∞) (hM : ∀ g x y, M (g * x) (g
   rw [inv_mul_cancel, show (y * x⁻¹)⁻¹ * y = x by simp [mul_assoc]] at h
   exact h.symm
 
+open Classical in
 /-- **Rows of kernel powers.** For an invariant `M ≥ 0` whose row at `1` sums to `χ`, every
 row of the `n`-th power of `M` sums to `χ^n`. -/
 @[to_additive tsum_iterate_row_add /-- Rows of kernel powers, additive version. -/]
@@ -135,6 +141,7 @@ theorem tsum_iterate_row (M : Γ → Γ → ℝ≥0∞) (hM : ∀ g x y, M (g * 
     rw [ENNReal.tsum_comm]
     simp_rw [ENNReal.tsum_mul_left, tsum_row_eq M hM, hχ, ENNReal.tsum_mul_right, ih, pow_succ]
 
+open Classical in
 /-- **Columns of kernel powers.** For an invariant `M ≥ 0` whose row at `1` sums to `χ`,
 every column of the `n`-th power of `M` sums to `χ^n`. -/
 @[to_additive tsum_iterate_col_add /-- Columns of kernel powers, additive version. -/]

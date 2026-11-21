@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Driven linear differential equations with a regularly varying forcing term: Lemmas I.4.21,
 I.4.22 and the case `b < a` of Lemma I.5.5 of T. Hutchcroft, *Critical long-range percolation I:
 High effective dimension*, arXiv:2508.18807v1, §I.4.3 and §I.5.1.
@@ -147,7 +151,8 @@ theorem measurable_rpow_mul_exp_neg_integral {δ : ℝ → ℝ} {r₀ C : ℝ} (
     (hδm : Measurable δ) (hδ1 : ∀ x, r₀ ≤ x → |δ x| ≤ C) :
     Measurable (fun r : ℝ => r ^ a * Real.exp (-(a * ∫ s in r₀..r, (Ioi r₀).indicator δ s / s))) :=
   (measurable_id.pow_const a).mul (Real.measurable_exp.comp
-    ((measurable_const.mul (continuous_intervalIntegral_indicator_Ioi_div hr₀ hδm hδ1).measurable).neg))
+    ((measurable_const.mul (continuous_intervalIntegral_indicator_Ioi_div hr₀ hδm
+        hδ1).measurable).neg))
 
 /-- The integrating weight is positive on the positive axis. -/
 theorem rpow_mul_exp_neg_integral_pos {δ : ℝ → ℝ} {r₀ a r : ℝ} (hr : 0 < r) :
@@ -275,7 +280,8 @@ theorem normalized_increment_of_driving_ode {f f' h δ : ℝ → ℝ} {a x₀ r�
   have hwpos : ∀ x, 0 < x → 0 < w x := fun x hx => rpow_mul_exp_neg_integral_pos hx
   have hHac : AbsolutelyContinuousOnInterval
       (fun r => ∫ s in r₀..r, (Ioi r₀).indicator δ s / s) r₀ R :=
-    (intervalIntegrable_indicator_Ioi_div hr₀ hδm hδ1 r₀ R).absolutelyContinuousOnInterval_intervalIntegral
+    (intervalIntegrable_indicator_Ioi_div hr₀ hδm hδ1 r₀
+        R).absolutelyContinuousOnInterval_intervalIntegral
       left_mem_uIcc
   have h0 : ∀ x ∈ uIcc r₀ R, x ≠ 0 := by
     intro x hx

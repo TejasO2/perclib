@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Two examples around the zero-one law. New for this project; no upstream proof is copied, and no new
 definition is introduced.
 -/
@@ -168,7 +172,8 @@ example : globalCriticalIntensity (fun _ : Sym2 (Fin 3) => (1 : ℝ≥0)) = ⊤ 
 infinite cluster exists almost surely. -/
 example : ∃ (V : Type) (_ : Countable V) (q : Sym2 V → unitInterval) (o : V),
     law q {ω | ∃ v, (cluster ω v).Infinite} = 1 ∧
-      law q {ω | (cluster ω o).Infinite} = (unitInterval.toNNReal ⟨1 / 2, by norm_num, by norm_num⟩ : ℝ≥0∞) :=
+      law q {ω | (cluster ω o).Infinite} = (unitInterval.toNNReal
+          ⟨1 / 2, by norm_num, by norm_num⟩ : ℝ≥0∞) :=
   exists_root_percolation_eq _
 
 end PercLib.Models.ZeroOneExamples

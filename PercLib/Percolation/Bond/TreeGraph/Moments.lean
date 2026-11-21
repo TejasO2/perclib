@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs, on the bond interface. Source motivation: M. Aizenman and C. M. Newman, J.
 Stat. Phys. 36 (1984), the moment bounds from the tree-graph inequalities, and the wiki statement
 Y84V. No source text or code is copied.
@@ -28,7 +32,8 @@ With `M ≥ χ(x)` for every `x` and `m ≥ 1`,
 
 **Strengthening, stated explicitly.** The usual statement assumes `M = ⨆ x, χ(x) < ⊤`. The bound is
 proved for every `M` with `χ(x) ≤ M` for all `x`, finite or not (in `ℝ≥0∞` it is trivial
-when `M = ⊤` and `m ≥ 2`), and `lintegral_encard_pow_le_iSup` is the form with `M = ⨆ x, χ(x)` and the finiteness hypothesis omitted.
+when `M = ⊤` and `m ≥ 2`), and `lintegral_encard_pow_le_iSup` is the form with `M = ⨆ x, χ(x)` and
+the finiteness hypothesis omitted.
 -/
 
 @[expose] public section

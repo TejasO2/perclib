@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-16. No upstream proof is copied and no definition is added.
 -/
 module
@@ -265,6 +267,7 @@ theorem update_neg_involutive (j : Fin d) :
 
 /-! ### The lower bound -/
 
+open Classical in
 /-- **Master lower bound.** If `p(x) ≥ c |x|^{-d-α}` for `x ≠ 0`, then for every coordinate
 `j` and every `N` with `N |k_j| ≤ 1`,
 `1 - φ(k) ≥ c (√d)^{-d-α} / 4 · k_j² · ∑_{n=1}^{N} n^{1-α}`. -/
@@ -384,7 +387,8 @@ theorem le_one_sub_fourierSymbol {p : (Fin d → ℤ) → ℝ} (hp0 : ∀ x, 0 �
       have hwx : √(d : ℝ) ^ e * ((n : ℝ) + 1) ^ e ≤ w x := by
         simp only [hw, hx0, ↓reduceIte]
         rw [← mul_rpow (sqrt_nonneg _) hm.le]
-        exact rpow_le_rpow_of_nonpos hpos hle (by rw [he]; linarith [hα, (Nat.cast_nonneg d : (0 : ℝ) ≤ d)])
+        exact rpow_le_rpow_of_nonpos hpos hle
+          (by rw [he]; linarith [hα, (Nat.cast_nonneg d : (0 : ℝ) ≤ d)])
       have hcos : (k j * ((n : ℝ) + 1)) ^ 2 / 4 ≤ 1 - |cos (k j * (x j : ℝ))| := by
         have hxj' : (x j : ℝ) = (n : ℝ) + 1 := by rw [hxj]; push_cast; ring
         rw [hxj']
@@ -530,7 +534,8 @@ theorem ofReal_one_sub_fourierSymbol_le (hd : 1 ≤ d) {p : (Fin d → ℤ) → 
 /-- **The one-dimensional sum, split at `n = 1/s`.** For `0 < s ≤ 1` and `N = ⌊1/s⌋`:
 `∑_{n ≥ 1} n^{-1-α} min(s²n², 1) ≤ s² ∑_{n=1}^{N} n^{1-α} + (1 + 1/α) s^α`. -/
 theorem tsum_rpow_mul_min_le {α s : ℝ} (hα : 0 < α) (hs0 : 0 < s) (hs1 : s ≤ 1) :
-    ∑' n : ℕ, ENNReal.ofReal (if n = 0 then 0 else (n : ℝ) ^ (-(1 + α)) * min (s ^ 2 * (n : ℝ) ^ 2) 1)
+    ∑' n : ℕ, ENNReal.ofReal (if n = 0 then 0 else (n : ℝ) ^ (-(1 + α)) *
+        min (s ^ 2 * (n : ℝ) ^ 2) 1)
       ≤ ENNReal.ofReal (s ^ 2 * ∑ n ∈ range ⌊1 / s⌋₊, ((n : ℝ) + 1) ^ (1 - α)) +
         ENNReal.ofReal ((1 + 1 / α) * s ^ α) := by
   classical

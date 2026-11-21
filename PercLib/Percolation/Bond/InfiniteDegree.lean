@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-14. No upstream proof is copied: the probabilistic input is mathlib's
 second Borel–Cantelli lemma `ProbabilityTheory.measure_limsup_eq_one`.
 -/
@@ -29,13 +31,13 @@ file adds no definition.
 @[expose] public section
 
 open MeasureTheory ProbabilityTheory Set Filter PercLib.Probability
-open Classical
 open scoped ENNReal NNReal
 
 namespace PercLib.Percolation.Bond
 
 variable {V : Type*}
 
+open Classical in
 /-- A row sum with the diagonal excluded is a sum over the other vertices. -/
 theorem tsum_ite_eq_tsum_ne (v : V) (f : V → ℝ≥0∞) :
     (∑' w, if w = v then 0 else f w) = ∑' w : {w : V | w ≠ v}, f w := by
@@ -68,6 +70,7 @@ theorem tsum_min_one_eq_top {α : Type*} {f : α → ℝ≥0∞} (hf : ∀ a, f 
   rw [h, top_le_iff] at this
   exact (ENNReal.add_ne_top.2 ⟨hne, hfin⟩) this
 
+open Classical in
 /-- **Second Borel–Cantelli for the neighbours of a vertex.** If the row sum of `q` at `v`
 is infinite, then almost surely `v` has infinitely many open neighbours. -/
 theorem ae_infinite_neighbors_of_rowSum_eq_top [Countable V] (q : Sym2 V → unitInterval)
@@ -136,6 +139,7 @@ theorem one_sub_exp_neg_one_mul_min_le (t : ℝ) (ht : 0 ≤ t) :
     have := Real.exp_le_exp.2 (neg_le_neg h)
     linarith
 
+open Classical in
 /-- **An infinite row sum of `J` gives an infinite row sum of the profile at every
 positive intensity.** -/
 theorem rowSum_intensityProfile_eq_top (J : Sym2 V → ℝ≥0) (v : V) {β : ℝ≥0} (hβ : 0 < β)
@@ -214,6 +218,7 @@ theorem globalCriticalIntensity_eq_zero_of_rowSum_eq_top [Countable V] (J : Sym2
 
 /-! ### Non-vacuity -/
 
+open Classical in
 /-- A constant nonzero row on an infinite vertex type has infinite sum. -/
 theorem tsum_ite_const_eq_top [Infinite V] (v : V) {c : ℝ≥0∞} (hc : c ≠ 0) :
     (∑' w, if w = v then 0 else c) = ∞ := by
@@ -221,6 +226,7 @@ theorem tsum_ite_const_eq_top [Infinite V] (v : V) {c : ℝ≥0∞} (hc : c ≠ 
   have : Infinite {w : V | w ≠ v} := (finite_singleton v).infinite_compl.to_subtype
   exact ENNReal.tsum_const_eq_top_of_ne_zero hc
 
+open Classical in
 /-- `V = ℕ`, `q ≡ 1/2`: the cluster of `0` is infinite almost surely. -/
 example : law (fun _ : Sym2 ℕ => (⟨1 / 2, by norm_num, by norm_num⟩ : unitInterval))
     {ω | (cluster ω 0).Infinite} = 1 :=

@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-16. Statements from the wiki article `cutoff-localization` (tags
 32GP, 0WAE) and `spatial-cutoff-moments`; source T. Hutchcroft, *Critical long-range percolation I*,
 arXiv:2508.18807v1, §I.4.1. No upstream proof is copied and no definition is added.
@@ -19,7 +21,8 @@ public import PercLib.Analysis.GoodScales
 # Spatial moments localise the volume (32GP, 0WAE)
 
 For a countable vertex group `V`, a profile `q`, a root `o` and a weight `N : V → ℝ` (a norm,
-for instance the sup norm on `ℤ^d`; no sign condition is needed), write `B(o, R) = {x | N(x - o) ≤ R}`.
+for instance the sup norm on `ℤ^d`; no sign condition is needed), write
+`B(o, R) = {x | N(x - o) ≤ R}`.
 
 * **Algebra of spatial moments**: `spatialMoment_add`, `spatialMoment_const_mul`,
   `spatialMoment_one` (`= χ`), `spatialMoment_add_right_of_invariant` (translation

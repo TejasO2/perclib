@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs, on the bond interface and the intensity family `intensityProfile`. The
 statements follow the wiki tag MTYL. No source text or code is copied.
 -/
@@ -32,7 +36,6 @@ noncomputable section
 
 open MeasureTheory PercLib.Probability PercLib.Percolation.Bond Filter Topology
 open scoped ENNReal NNReal
-open Classical
 
 namespace PercLib.Models.NormalizedSmallIntensity
 
@@ -110,7 +113,8 @@ theorem tsum_triangle_pow_natAbs (P : ℝ≥0∞) :
     congr 1
   simp_rw [hpos, hneg]
   rw [tsum_eq_zero_add' ENNReal.summable]
-  have hS : ∑' n : ℕ, (n : ℝ≥0∞) * (P ^ 2) ^ n = ∑' n : ℕ, ((n + 1 : ℕ) : ℝ≥0∞) * (P ^ 2) ^ (n + 1) := by
+  have hS : ∑' n : ℕ, (n : ℝ≥0∞) * (P ^ 2) ^ n = ∑' n : ℕ,
+      ((n + 1 : ℕ) : ℝ≥0∞) * (P ^ 2) ^ (n + 1) := by
     rw [tsum_eq_zero_add' ENNReal.summable]
     simp
   have hsplit : ∑' n : ℕ, (P ^ 2) ^ (n + 1) * (((n + 1 : ℕ) : ℝ≥0∞) + c) =
@@ -162,7 +166,8 @@ theorem exp_half_lt_of_small {β : ℝ} (hβ : 0 < β) (hβ' : β < 1 / 48) :
       (2 * Real.exp (β / 2) - 1) * ((2 * Real.exp (β / 2) - 1) -
           (1 + 6 * (1 - Real.exp (-(β / 2))) ^ 2 / (1 - (1 - Real.exp (-(β / 2))) ^ 2) ^ 2)) /
         (3 * β ^ 2 *
-          (1 + 6 * (1 - Real.exp (-(β / 2))) ^ 2 / (1 - (1 - Real.exp (-(β / 2))) ^ 2) ^ 2) ^ 2) := by
+          (1 + 6 * (1 - Real.exp (-(β / 2))) ^ 2 / (1 - (1 - Real.exp (-(β / 2))) ^ 2) ^ 2) ^
+              2) := by
   set x := 1 - Real.exp (-(β / 2)) with hx
   set D := 1 + 6 * x ^ 2 / (1 - x ^ 2) ^ 2 with hD
   set E := Real.exp (β / 2)
@@ -323,7 +328,8 @@ omit hJ in
 /-- Non-vacuity: the nearest-neighbour kernel `1/2` exists, so every statement above applies; for
 instance at `β = 1/100`. -/
 example : ∃ J : Sym2 ℤ → ℝ≥0, (∀ a b, J s(a, b) = if |b - a| = 1 then 1 / 2 else 0) ∧
-    chi (intensityProfile J (1 / 100)) 0 = ENNReal.ofReal (2 * Real.exp (((1 / 100 : ℝ≥0) : ℝ) / 2) - 1) ∧
+    chi (intensityProfile J (1 / 100)) 0 = ENNReal.ofReal
+        (2 * Real.exp (((1 / 100 : ℝ≥0) : ℝ) / 2) - 1) ∧
     deriv (fun b : ℝ => (chi (intensityProfile J b.toNNReal) 0).toReal) (1 / 100) <
       (chi (intensityProfile J (1 / 100 : ℝ).toNNReal) 0).toReal *
         ((chi (intensityProfile J (1 / 100 : ℝ).toNNReal) 0).toReal -

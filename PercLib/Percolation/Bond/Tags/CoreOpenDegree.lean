@@ -1,5 +1,7 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
 -/
 module
 
@@ -15,11 +17,12 @@ All mathematical inputs are proved in the imported modules. -/
 @[expose] public section
 noncomputable section
 open MeasureTheory Set Filter
-open scoped ENNReal NNReal Topology Classical
+open scoped ENNReal NNReal Topology
 
 namespace PercLib.Percolation.Bond
 variable {V : Type*}
 
+open Classical in
 /-- The expected number of open pairs in a finite set of pairs is the sum of their
 probabilities, and the expected number of open ordered pairs leaving a finite vertex set
 is the sum of the exterior probabilities. -/
@@ -32,6 +35,7 @@ theorem lintegral_open_pairs_and_boundary [Countable V] (q : Sym2 V → unitInte
       ∑ x ∈ Λ, ∑' y, if y ∈ Λ then 0 else (unitInterval.toNNReal (q s(x, y)) : ℝ≥0∞) :=
   ⟨lintegral_ncard_inter_finset_pairs q F, lintegral_encard_boundary_pairs q Λ⟩
 
+open Classical in
 /-- The generating function of the number of open pairs from `v` into a finite set, and
 the probability that there is none. -/
 @[tag "TEYJ"]
@@ -77,6 +81,7 @@ theorem open_degree_law [Countable V] (q : Sym2 V → unitInterval) (v : V) :
   filter_upwards [ae_finite_neighbors_of_rowSum_lt_top q v hrow] with ω hω
   exact Set.encard_lt_top_iff.2 hω
 
+open Classical in
 /-- For `s ≤ 1` and an increasing sequence of finite sets, the generating function of the
 limiting number of open pairs from `v` is the decreasing limit, equivalently the infimum,
 of the finite products. -/

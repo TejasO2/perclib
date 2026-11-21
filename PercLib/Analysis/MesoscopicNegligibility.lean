@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-16: truncated moment inequalities force mesoscopic negligibility
 (wiki mesoscopic-tail-transfer, tag KKGL, with the conclusion QMN5 written out). No upstream proof
 is copied, no definition is added and no Input is introduced.
@@ -600,7 +604,8 @@ theorem tendsto_twoPoint (hα : 0 < α) (hακ : α ≤ κ) (hκ : κ < 2 * α)
     (c₁ := 1) (a := fun r => α * r ^ (-α - 1)) hα hακ hκ one_pos
     (fun r hr => isProbabilityMeasure_twoPoint hακ hμ hr) (fun r hr => ?_) one_pos
     (fun r hr => by rw [mean_twoPoint hακ hμ hr, one_mul]) one_pos le_rfl
-    (fun r hr => by rw [secondMoment_twoPoint hακ hμ hr]; simp only [one_mul]; exact ⟨le_rfl, le_rfl⟩)
+    (fun r hr => by
+      rw [secondMoment_twoPoint hακ hμ hr]; simp only [one_mul]; exact ⟨le_rfl, le_rfl⟩)
     (fun R hR => (absolutelyContinuousOnInterval_rpow_one (α + κ) hR).congr fun r hr => by
       rw [uIcc_of_le hR] at hr
       exact (secondMoment_twoPoint hακ hμ hr.1).symm)

@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-15. No upstream proof is copied.
 -/
 module
@@ -155,7 +157,8 @@ theorem law_cluster_eq_inter [Countable V] (q : Sym2 V → unitInterval) (x : V)
     (hx : x ∈ C) {B : Set (Config V)} (hB : MeasurableSet B)
     (hdet : ∀ ω ω', (∀ a ∉ C, ∀ b ∉ C, (s(a, b) ∈ ω ↔ s(a, b) ∈ ω')) → (ω ∈ B ↔ ω' ∈ B)) :
     law q ({ω | cluster ω x = C} ∩ B) = law q {ω | cluster ω x = C} * law q B := by
-  refine PercLib.Probability.prodBernoulli_inter_of_determined_inter q {e | ∃ v ∈ e, v ∈ C} {e | ∀ v ∈ e, v ∉ C} ?_
+  refine PercLib.Probability.prodBernoulli_inter_of_determined_inter q {e | ∃ v ∈ e, v ∈ C}
+      {e | ∀ v ∈ e, v ∉ C} ?_
     (measurableSet_cluster_eq_finset x C hx) hB (cluster_eq_finset_determined x C hx) ?_
   · exact Set.disjoint_left.2 fun e ⟨v, hv, hvC⟩ he => he v hv hvC
   · intro ω

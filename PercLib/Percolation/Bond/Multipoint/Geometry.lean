@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Positivity, monotonicity and scaling of the recursive three-part distance `S(A)` (wiki tag Y4H4,
 article `multipoint-trees`; T. Hutchcroft, *Critical long-range percolation I*, arXiv:2508.18807v1,
 §I.2). New proofs; no upstream code is copied.
@@ -165,7 +169,8 @@ variable {Y : Type*} [MetricSpace Y] [DecidableEq Y]
 /-- For `|A| ≤ 2`, `c^|A| diam(A)² ≤ diam(f A)²` when `c d ≤ d ∘ f` on `A`. -/
 theorem pow_card_mul_diam_sq_le_image {f : X → Y} {c : ℝ} (hc : 0 ≤ c) {A : Finset X}
     (hA : A.card ≤ 2) (hf : ∀ x ∈ A, ∀ y ∈ A, c * dist x y ≤ dist (f x) (f y)) :
-    c ^ A.card * Metric.diam (A : Set X) ^ 2 ≤ Metric.diam ((A.image f : Finset Y) : Set Y) ^ 2 := by
+    c ^ A.card * Metric.diam (A : Set X) ^ 2 ≤ Metric.diam
+        ((A.image f : Finset Y) : Set Y) ^ 2 := by
   rcases Nat.lt_or_ge A.card 2 with h | h
   · have hs : (A : Set X).Subsingleton := fun x hx y hy =>
       Finset.card_le_one.1 (by omega) x hx y hy

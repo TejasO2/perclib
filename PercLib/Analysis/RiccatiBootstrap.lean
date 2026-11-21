@@ -1,6 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Adapted from contributor yujinhkim, repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
 `d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, file `PercLib/CriticalLRP/VolumeMoments/Bootstrap.lean`
 (blob `a2ff52d99c`). Licence: Apache-2.0 as declared in that revision's header and
@@ -326,7 +329,7 @@ theorem bootstrap_general
     {r₀ : ℝ} (hr₀ : 1 ≤ r₀) (hbdd : ∀ r, r₀ ≤ r → F r ≤ 2 * α / β * r ^ α)
     (hmin : ∀ b, 1 ≤ b → (∀ r, b ≤ r → F r ≤ 2 * α / β * r ^ α) → r₀ ≤ b)
     {r : ℝ} (hr1 : 1 ≤ r)
-    (hsmall : (2:ℝ) ^ q * ε r * ((max r r₀ / r) ^ (α * q)) ≤ 1 / 4) :
+    (hsmall : (2 : ℝ) ^ q * ε r * ((max r r₀ / r) ^ (α * q)) ≤ 1 / 4) :
     r₀ ≤ r := by
   -- step 1: the error is controlled by `2^q ε(s) (max s r₀ / s)^{αq}`
   have hbound : ∀ s, 1 ≤ s → |e s| ≤ (2:ℝ) ^ q * ε s * (((max s r₀) / s) ^ (α * q)) := by

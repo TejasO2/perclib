@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Correspondence wrappers for the mesoscopic-tail-transfer assertions OP4X, J5R6 and KKGL,
 proved from `ReciprocalODE.lean` and `MesoscopicNegligibility.lean`. No new definitions.
 -/
@@ -111,7 +115,8 @@ theorem twoPoint_truncated_ratio_example {α κ : ℝ} (_hα : 0 < α) (hακ : 
         fun r => r ^ (α + κ) := by
       have h0 : Tendsto (fun r : ℝ => (1 - r ^ (α - κ)) * r ^ (α - κ)) atTop (𝓝 0) := by
         simpa using ((tendsto_const_nhds (x := (1 : ℝ))).sub hp).mul hp
-      have h := (isBigO_refl (fun r : ℝ => r ^ (α + κ)) atTop).mul_isLittleO ((isLittleO_one_iff (F := ℝ)).2 h0)
+      have h := (isBigO_refl (fun r : ℝ => r ^ (α + κ)) atTop).mul_isLittleO
+          ((isLittleO_one_iff (F := ℝ)).2 h0)
       simp only [mul_one] at h
       refine h.congr' ?_ EventuallyEq.rfl
       filter_upwards [eventually_gt_atTop 0] with r hr

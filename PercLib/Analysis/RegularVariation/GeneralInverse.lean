@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 The generalized inverse of a measurable regularly varying
 function of positive index (Bingham–Goldie–Teugels, Theorem 1.5.12), the inverse/scale layer
 of Proposition I.3.2, and Karamata integration on a positive tail, for T. Hutchcroft,
@@ -284,7 +288,7 @@ theorem RegularlyVarying.eventually_comp_le (hρ : 0 < ρ) (hmeas : Measurable f
     rw [hval] at hcomp
     refine hcomp.congr' ?_
     filter_upwards with y
-    show f ((1 - δ)⁻¹ * ((1 - δ) * genInv f x₀ y)) / f ((1 - δ) * genInv f x₀ y)
+    change f ((1 - δ)⁻¹ * ((1 - δ) * genInv f x₀ y)) / f ((1 - δ) * genInv f x₀ y)
       = f (genInv f x₀ y) / f ((1 - δ) * genInv f x₀ y)
     rw [show (1 - δ)⁻¹ * ((1 - δ) * genInv f x₀ y) = genInv f x₀ y by
       field_simp [show (1 - δ) ≠ 0 by linarith]]
@@ -514,7 +518,7 @@ theorem RegularlyVarying.tendsto_genInv_rpow_ratio (hρ : 0 < ρ) (hmeas : Measu
     rwa [hval] at h
   refine (hcont.comp hbase).congr' ?_
   filter_upwards with y
-  show (genInv f x₀ (lam * y) / genInv f x₀ y) ^ α
+  change (genInv f x₀ (lam * y) / genInv f x₀ y) ^ α
     = (genInv f x₀ (lam * y)) ^ α / (genInv f x₀ y) ^ α
   rw [Real.div_rpow (hf.genInv_pos hρ hmeas hx₀ _).le (hf.genInv_pos hρ hmeas hx₀ _).le]
 
@@ -558,7 +562,7 @@ theorem RegularlyVarying.tendsto_div_of_bounded_ratio (hρ : 0 < ρ) (hmeas : Me
   refine (hcont.comp hpow).congr' ?_
   filter_upwards [hmem] with h hhmem
   have hlpos : 0 < u h / v h := lt_of_lt_of_le ha hhmem.1
-  show ((u h / v h) ^ ρ) ^ (1 / ρ) = u h / v h
+  change ((u h / v h) ^ ρ) ^ (1 / ρ) = u h / v h
   rw [← Real.rpow_mul (le_of_lt hlpos), mul_one_div_cancel hρ.ne', Real.rpow_one]
 
 /-! ## The level laws in the intensity variable `h ↓ 0⁺` -/
@@ -573,7 +577,7 @@ theorem RegularlyVarying.tendsto_genInv_levelRatio (hρ : 0 < ρ) (hmeas : Measu
   refine ((hf.tendsto_genInv_ratio hρ hmeas hx₀ hpos hbdd hlam).comp
     tendsto_inv_nhdsGT_zero).congr' ?_
   filter_upwards with h
-  show genInv f x₀ (lam * h⁻¹) / genInv f x₀ h⁻¹ = genInv f x₀ (lam / h) / genInv f x₀ (1 / h)
+  change genInv f x₀ (lam * h⁻¹) / genInv f x₀ h⁻¹ = genInv f x₀ (lam / h) / genInv f x₀ (1 / h)
   rw [← div_eq_mul_inv, one_div]
 
 /-- The level argument `λ / (A₂ h)` tends to `∞` as `h ↓ 0⁺`. -/
@@ -628,14 +632,14 @@ theorem RegularlyVarying.tendsto_level_filled_of_tendsto_div (hρ : 0 < ρ) (hme
         (𝓝[>] 0) (𝓝 (A₂ / A₂)) := (hψ.comp harg).div_const A₂
     rw [div_self hA₂.ne'] at h2
     refine h2.congr' (Eventually.of_forall fun h => ?_)
-    show ψ (genInv f x₀ (lam / (A₂ * h))) / f (genInv f x₀ (lam / (A₂ * h))) / A₂
+    change ψ (genInv f x₀ (lam / (A₂ * h))) / f (genInv f x₀ (lam / (A₂ * h))) / A₂
       = ψ (genInv f x₀ (lam / (A₂ * h))) / (A₂ * f (genInv f x₀ (lam / (A₂ * h))))
     rw [div_div, mul_comm (f _)]
   have hprod := hfilled.mul hratio
   rw [mul_one] at hprod
   refine hprod.congr' (Eventually.of_forall fun h => ?_)
   have hzero : A₂ * f (genInv f x₀ (lam / (A₂ * h))) ≠ 0 := mul_ne_zero hA₂.ne' (hfne h)
-  show (h * (A₂ * f (genInv f x₀ (lam / (A₂ * h))))) *
+  change (h * (A₂ * f (genInv f x₀ (lam / (A₂ * h))))) *
         (ψ (genInv f x₀ (lam / (A₂ * h))) / (A₂ * f (genInv f x₀ (lam / (A₂ * h)))))
       = h * ψ (genInv f x₀ (lam / (A₂ * h)))
   rw [mul_assoc, mul_div_cancel₀ _ hzero]
@@ -663,7 +667,7 @@ theorem RegularlyVarying.tendsto_level_normalization (hρ : 0 < ρ) (hmeas : Mea
     field_simp
   rw [← Real.rpow_mul hA.le, hexp] at hcont
   refine (hcont.comp hbase).congr' (Eventually.of_forall fun h => ?_)
-  show (genInv f x₀ (lam / (A₂ * h)) / genInv f x₀ (1 / h)) ^ α
+  change (genInv f x₀ (lam / (A₂ * h)) / genInv f x₀ (1 / h)) ^ α
     = (genInv f x₀ (lam / (A₂ * h))) ^ α / (genInv f x₀ (1 / h)) ^ α
   rw [Real.div_rpow (hf.genInv_pos hρ hmeas hx₀ _).le (hf.genInv_pos hρ hmeas hx₀ _).le]
 

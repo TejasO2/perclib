@@ -1,5 +1,7 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
 -/
 module
 
@@ -17,11 +19,12 @@ All mathematical inputs are proved in the imported modules. -/
 @[expose] public section
 noncomputable section
 open MeasureTheory Set ProbabilityTheory
-open scoped ENNReal NNReal Classical
+open scoped ENNReal NNReal
 
 namespace PercLib.Percolation.Bond
 variable {V : Type*}
 
+open Classical in
 /-- Boundary contraction: finite sets `S_x ∋ x` with internal mass at most `B` and boundary
 flux at most `a < 1` give `χ(x) ≤ B/(1-a)`, almost surely finite clusters when `B < ∞`, and
 the choice `B = N` when `|S_x| ≤ N`. -/
@@ -74,6 +77,7 @@ theorem exterior_law_given_cluster [Countable V] (q : Sym2 V → unitInterval) (
   · rw [cond_apply hmeas, law_cluster_eq_inter_localConn_compl q x C hx y z]
     exact hcancel hpos
 
+open Classical in
 /-- For a transitive kernel with finite rows and finite global critical intensity `β_c`,
 every finite `S ∋ o` has boundary flux at least one at `β_c`, bounded by
 `β_c ∑_{u ∈ S} τ_S(o,u) ∑_{v ∉ S} J(u,v)`. -/

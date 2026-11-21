@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-16. No upstream proof is copied.
 -/
 module
@@ -29,12 +31,12 @@ noncomputable section
 
 open MeasureTheory Set PercLib.Probability
 open scoped ENNReal
-open Classical
 
 namespace PercLib.Percolation.Bond
 
 variable {V : Type*}
 
+open Classical in
 /-- A vertex at intrinsic distance at most `r` is the end of an open simple path of length at
 most `r`. -/
 theorem edist_le_subset_iUnion_path (o y : V) (r : ℕ) :
@@ -57,6 +59,7 @@ theorem edist_le_subset_iUnion_path (o y : V) (r : ℕ) :
   exact (show e ∈ ω \ Sym2.diagSet by
     simpa [openGraph, SimpleGraph.edgeSet_fromEdgeSet] using he').1
 
+open Classical in
 /-- The ball probability is at most the weight of the simple paths of length at most `r`. -/
 theorem law_edist_le_le_tsum_paths [Countable V] (q : Sym2 V → unitInterval) (o y : V)
     (r : ℕ) :
@@ -74,6 +77,7 @@ theorem law_edist_le_le_tsum_paths [Countable V] (q : Sym2 V → unitInterval) (
         measure_iUnion_le _
     _ = _ := by simp only [law, prodBernoulli_subset]
 
+open Classical in
 /-- **Upper bound.** If every off-diagonal row sum of `q` is at most `D`, then
 `E|B_ω(o,r)| ≤ ∑_{j ≤ r} D^j`. -/
 theorem lintegral_encard_ball_le_of_rowSum [Countable V] (q : Sym2 V → unitInterval)
@@ -128,6 +132,7 @@ theorem lintegral_encard_ball_le_of_rowSum [Countable V] (q : Sym2 V → unitInt
     _ ≤ ∑ j ∈ Finset.range (r + 1), D ^ j :=
         Finset.sum_le_sum fun n _ => walkSum_masked_le_pow _ D hrow n o
 
+open Classical in
 /-- Under transitivity of `q` every off-diagonal row sum equals the one at `o`. -/
 theorem rowSum_eq_of_transitive_profile (q : Sym2 V → unitInterval)
     (hq : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, q (Sym2.map σ e) = q e) (o v : V) :
@@ -152,6 +157,7 @@ theorem lintegral_encard_ball_le_of_transitive [Countable V] (q : Sym2 V → uni
 
 /-! ### Non-vacuity -/
 
+open Classical in
 /-- The nearest-neighbour profile on `ℤ` (open probability `1` on `s(a, a+1)`) is
 transitive, so the bound applies with `D = 2`. -/
 example (r : ℕ) := lintegral_encard_ball_le_of_transitive
