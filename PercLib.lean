@@ -237,6 +237,7 @@ public import PercLib.Percolation.Bond.Tags.CoreOpenDegree
 public import PercLib.Percolation.Bond.Tags.CorePaths
 public import PercLib.Percolation.Bond.Tags.CoreRussoContinuity
 public import PercLib.Percolation.Bond.Tags.CoreSymmetries
+public import PercLib.Percolation.Bond.Tags.CoreThresholdsAndSymmetries
 public import PercLib.Percolation.Bond.Tags.CoreZeroOne
 public import PercLib.Percolation.Bond.Tags.DomainIndependence
 public import PercLib.Percolation.Bond.Tags.FiniteVolume
