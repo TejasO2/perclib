@@ -108,7 +108,7 @@
       "edition": "arXiv:2508.18807v1",
       "locator": "Lemma I.4.21 (f' ~ r^{-1}(af+h) with h non-negligible).",
       "relationship": "source-statement",
-      "note": "Same hypotheses (a>0; h positive, measurable, regularly varying of index b>0; f differentiable with f'(r) ~ (af(r)+h(r))/r; b>a) and both conclusions (f ~ h/(b-a); f regularly varying of index b). Domains (0,infinity) as in the source."
+      "note": "Same hypotheses (a>0; h positive, measurable, regularly varying of index b>0; f differentiable with f'(r) ~ (af(r)+h(r))/r; b>a) and both conclusions (f ~ h/(b-a); f eventually positive and regularly varying of index b on a half-line). Domains (0,infinity) as in the source."
     }
   ],
   "proofUses": [
