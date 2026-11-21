@@ -360,6 +360,7 @@ public import PercLib.Probability.Superposition
 public import PercLib.Probability.Tags.Correlation
 public import PercLib.Probability.Tags.CouplingRatio
 public import PercLib.Probability.Tags.DisjointOccurrence
+public import PercLib.Probability.Tags.EntropyComparison
 public import PercLib.Probability.Tags.Ergodicity
 public import PercLib.Probability.Tags.ExponentialMoments
 public import PercLib.Probability.Tags.FiniteCoordinates
