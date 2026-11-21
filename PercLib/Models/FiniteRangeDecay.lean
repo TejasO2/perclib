@@ -17,6 +17,7 @@ public import Mathlib.Analysis.Complex.ExponentialBounds
 public import Mathlib.MeasureTheory.Integral.Bochner.Basic
 public import PercLib.Probability.ExponentialMoments
 public import PercLib.Percolation.Bond.TreeGraph.Moments
+public import PercLib.Percolation.Bond.UniformVolumeTail
 
 /-! # Exponential comparisons for cluster volumes
 
@@ -32,6 +33,9 @@ public import PercLib.Percolation.Bond.TreeGraph.Moments
 * `law_exit_le` (YVJT, conditional): under the volume tail bound
   `P(|K_o| ≥ n) ≤ (√2 χ_o / n) e^{-n/(4M²)}` (an ordinary hypothesis here), the exit
   probability is at most `√2 χ_o e^{-r/(4RM²)}`.
+* `law_exit_le_of_iSup_chi_ne_top` (YVJT): the same exit bound with `χ_o = χ(o)` and
+  `M = ⨆ x, χ(x) < ∞`, the volume tail now supplied by
+  `PercLib.Percolation.Bond.law_encard_cluster_ge_le_sqrt_two_mul`.
 -/
 
 @[expose] public section
@@ -494,5 +498,49 @@ theorem law_exit_le_zero (o : LatticeSite d) (r : ℝ) :
     exact zero_le
 
 end YVJT
+
+/-! ### YVJT with the volume tail discharged -/
+
+section UniformSusceptibility
+
+open PercLib.Percolation.Bond PercLib.Models.Site
+open scoped ENNReal
+
+variable {d : ℕ}
+
+/-- **Spatial exponential decay for finite-range bonds.** Let `q` vanish on pairs at sup
+distance `> R`, with `R > 0`, and let `M = ⨆ x, χ(x) < ∞`. Then for every real `r`,
+`P(o ↔ a vertex outside o + [-r,r]^d) ≤ √2 χ(o) e^{-r/(4RM²)}`. -/
+theorem law_exit_le_of_iSup_chi_ne_top (q : Sym2 (LatticeSite d) → unitInterval) {R : ℝ}
+    (hR : 0 < R) (hq : ∀ x y : LatticeSite d, R < ‖x - y‖ → q s(x, y) = 0)
+    (hM : (⨆ x, chi q x) ≠ ⊤) (o : LatticeSite d) (r : ℝ) :
+    law q {ω | ∃ y, (openGraph ω).Reachable o y ∧ r < ‖y - o‖} ≤
+      ENNReal.ofReal (√2 * (chi q o).toReal *
+        exp (-(r / (4 * R * (⨆ x, chi q x).toReal ^ 2)))) := by
+  refine law_exit_le q hR hq o ENNReal.toReal_nonneg fun n hn => ?_
+  have hset : {ω : Config (LatticeSite d) | (n : ℕ∞) ≤ (cluster ω o).encard} =
+      {ω | ENNReal.ofReal (n : ℝ) ≤ ((cluster ω o).encard : ℝ≥0∞)} := by
+    ext ω
+    simp only [mem_ofPred_eq, ENNReal.ofReal_natCast]
+    rw [← ENat.toENNReal_le, ENat.toENNReal_coe]
+  rw [hset]
+  exact law_encard_cluster_ge_le_sqrt_two_mul q o hM (by exact_mod_cast hn)
+
+/-! ### Non-vacuity -/
+
+/-- The zero profile on `ℤ^d` has range `R = 1` and `χ ≡ 1`, so it meets every hypothesis of
+`law_exit_le_of_iSup_chi_ne_top`. -/
+example (o : LatticeSite d) (r : ℝ) :
+    law (fun _ : Sym2 (LatticeSite d) => (0 : unitInterval))
+        {ω | ∃ y, (openGraph ω).Reachable o y ∧ r < ‖y - o‖} ≤
+      ENNReal.ofReal (√2 * (chi (fun _ : Sym2 (LatticeSite d) => (0 : unitInterval)) o).toReal *
+        exp (-(r / (4 * 1 *
+          (⨆ x, chi (fun _ : Sym2 (LatticeSite d) => (0 : unitInterval)) x).toReal ^ 2)))) := by
+  have h1 : ∀ x, chi (fun _ : Sym2 (LatticeSite d) => (0 : unitInterval)) x = 1 :=
+    chi_eq_one_of_offDiagonal_zero _ fun _ _ _ => rfl
+  exact law_exit_le_of_iSup_chi_ne_top _ one_pos (fun _ _ _ => rfl)
+    (by simp [h1]) o r
+
+end UniformSusceptibility
 
 end PercLib.Models

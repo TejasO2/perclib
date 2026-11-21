@@ -170,6 +170,30 @@ export function validateEvidence(receipt, manifest, bytes) {
   };
 }
 
+// A manifest compiled earlier in the same workflow run that builds the site (the
+// GitHub Pages workflow). There is no completed run to hold a receipt for yet; the
+// manifest must name this run and be compiled from exactly the commit being built.
+// The site is published only if this run then succeeds.
+export function validateSameRun(manifest, runUrl, buildCommit) {
+  const m = /^https:\/\/github\.com\/(tomhutchcroft\/(?:lrp|perclib))\/actions\/runs\/\d+$/.exec(
+    runUrl ?? "",
+  );
+  if (!m) fail("unexpected workflow run URL");
+  if (manifest.ci_run !== runUrl)
+    fail("manifest was not compiled in this workflow run");
+  if (!sha.test(buildCommit ?? "") || manifest.commit !== buildCommit)
+    fail("manifest commit differs from the commit being built");
+  return {
+    repository: m[1],
+    runUrl,
+    commit: manifest.commit,
+    artifactId: null,
+    // Shown in place of "Successful CI run": the run is still in progress when the
+    // site is built.
+    runLabel: "Workflow run that built this site",
+  };
+}
+
 export function statusFor(entry, reviews) {
   const history = reviews.filter((r) => r.tag === entry.tag);
   const matching = entry.fingerprint
@@ -198,6 +222,9 @@ export async function loadEvidence(
     reviewsPath,
     docgenBase = process.env.WIKI_DOCGEN_BASE,
     docgenCommit = process.env.WIKI_DOCGEN_COMMIT,
+    sameRunUrl = process.env.WIKI_MANIFEST_RUN,
+    buildCommit = process.env.WIKI_BUILD_COMMIT,
+    requireManifest = process.env.WIKI_REQUIRE_MANIFEST === "1",
   } = {},
 ) {
   const reviews = validateReviews(
@@ -205,18 +232,26 @@ export async function loadEvidence(
     assertions,
   );
   if (!manifestPath) {
-    if (receiptPath) fail("receipt supplied without manifest");
+    // A published site never goes out without formal status (GitHub Pages workflow).
+    if (requireManifest) fail("a compiled manifest is required for this build");
+    if (receiptPath || sameRunUrl)
+      fail("receipt or workflow run supplied without manifest");
     return { entries: null, reviews, provenance: null, docgenBase: null };
   }
-  if (!receiptPath) fail("manifest requires a successful artifact receipt");
+  if (receiptPath && sameRunUrl)
+    fail("supply either an artifact receipt or a workflow run, not both");
+  if (!receiptPath && !sameRunUrl)
+    fail("manifest requires a successful artifact receipt");
   const bytes = await fs.readFile(manifestPath);
   const manifest = JSON.parse(bytes);
   const entries = validateManifest(manifest, assertions);
-  const provenance = validateEvidence(
-    JSON.parse(await fs.readFile(receiptPath, "utf8")),
-    manifest,
-    bytes,
-  );
+  const provenance = receiptPath
+    ? validateEvidence(
+        JSON.parse(await fs.readFile(receiptPath, "utf8")),
+        manifest,
+        bytes,
+      )
+    : validateSameRun(manifest, sameRunUrl, buildCommit);
   if (docgenBase) {
     const url = new URL(docgenBase);
     if (
@@ -236,14 +271,14 @@ export async function loadEvidence(
 export function evidencePanel(assertions, evidence) {
   if (!evidence.entries)
     return '<section class="article-section" id="formal-evidence"><h2>Formal evidence</h2><p>No compiled manifest is supplied with this edition. Formal status is unavailable.</p></section>';
-  const { repository, commit, runUrl } = evidence.provenance;
+  const { repository, commit, runUrl, runLabel } = evidence.provenance;
   const links = (tags) =>
     tags.length
       ? "<ul>" +
         tags.map((t) => `<li><a href="/tag/${t}/">${t}</a></li>`).join("") +
         "</ul>"
       : "<p>No tagged dependencies recorded on this axis.</p>";
-  return `<section class="article-section" id="formal-evidence"><h2>Formal evidence</h2><p>Compiled snapshot <a href="https://github.com/${repository}/commit/${commit}"><code>${commit}</code></a> · <a href="${runUrl}">Successful CI run</a>. A proof status describes the Lean statement; correspondence to the prose is reviewed separately.</p>${assertions
+  return `<section class="article-section" id="formal-evidence"><h2>Formal evidence</h2><p>Compiled snapshot <a href="https://github.com/${repository}/commit/${commit}"><code>${commit}</code></a> · <a href="${runUrl}">${esc(runLabel ?? "Successful CI run")}</a>. A proof status describes the Lean statement; correspondence to the prose is reviewed separately.</p>${assertions
     .map((a) => {
       const e = evidence.entries.get(a.tag),
         result = statusFor(e, evidence.reviews);

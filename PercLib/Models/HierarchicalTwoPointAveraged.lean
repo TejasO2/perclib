@@ -78,16 +78,25 @@ theorem tsum_law_localConn_level_ball_eq_lintegral [NeZero L]
 
 open Classical in
 /-- **Theorem 1.1 of arXiv:2103.17013v1 (averaged critical two-point bounds).** For `d ≥ 1`,
-`L ≥ 2`, `0 < α < d` and `0 < c ≤ C` there are `a, A > 0`, depending only on `d, L, α, c, C`,
+`L ≥ 2`, `0 < α < d` and `0 < c` there are `a, A > 0`, depending only on `d, L, α, c, C`,
 such that every translation-invariant kernel with
 `c L^{-(d+α) h(v-u)} ≤ J(u,v) ≤ C L^{-(d+α) h(v-u)}` off the diagonal has `β_c < ∞` and, for
 every `n ≥ 1`,
 `a L^{-(d-α)n} ≤ L^{-dn} ∑_{h x = n} P_{β_c}(0 ↔ x inside Λ_n)
-  ≤ L^{-dn} ∑_{h x ≤ n} τ_{β_c}(0,x) ≤ A L^{-(d-α)n}`. -/
+  ≤ L^{-dn} ∑_{h x ≤ n} τ_{β_c}(0,x) ≤ A L^{-(d-α)n}`.
+If `C < c` no kernel satisfies both bounds, since the lattice has a pair `u ≠ v`. -/
+@[tag "J98J"]
 theorem hierarchicalTwoPointAveraged (d L : ℕ) (α c C : ℝ) :
     HierarchicalTwoPointAveraged d L α c C := by
-  intro hd hL hα hαd hc hcC
+  intro hd hL hα hαd hc
   have : NeZero L := ⟨by omega⟩
+  have : Fact (1 < L) := ⟨by omega⟩
+  have : Nonempty (Fin d) := ⟨⟨0, by omega⟩⟩
+  obtain hCc | hcC := lt_or_ge C c
+  · refine ⟨1, 1, one_pos, one_pos, fun J _ hJl hJu => absurd ?_ hCc.not_ge⟩
+    obtain ⟨v, hv⟩ := exists_ne (0 : ℕ →₀ (Fin d → ZMod L))
+    exact le_of_mul_le_mul_right ((hJl 0 v hv.symm).trans (hJu 0 v hv.symm))
+      (Real.rpow_pos_of_pos (by exact_mod_cast (show 0 < L by omega)) _)
   have hC : 0 < C := hc.trans_le hcC
   have hL0 : (0 : ℝ) < L := by exact_mod_cast (show 0 < L by omega)
   have hL1 : (1 : ℝ) < L := by exact_mod_cast (show 1 < L by omega)
