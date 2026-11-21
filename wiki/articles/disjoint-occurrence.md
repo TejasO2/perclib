@@ -8,7 +8,7 @@
   "summary": "Disjoint finite certificates distinguish separate witnesses from simultaneous occurrence, and commute with restriction to a set of coordinates.",
   "context": ["An arbitrary coordinate set $I$ and configurations $\\omega\\subseteq I$.", "Events are subsets of $\\Omega=\\{0,1\\}^I$. Certificates are always finite.", "No probability law is needed until the final section."],
   "related": ["product-model", "connectivity", "harris-inequality", "russo-formula"],
-  "sourceIds": ["perclib-disjoint-certificates", "perclib-disjoint-algebra", "perclib-cylinder-disjoint", "perclib-bk-endpoints"],
+  "sourceIds": ["hutchcroft-book", "perclib-disjoint-certificates", "perclib-disjoint-algebra", "perclib-cylinder-disjoint", "perclib-bk-endpoints"],
   "aliases": ["BK", "finite certificate", "forcing", "open witness", "disjoint occurrence"],
   "prototypeUses": []
 }

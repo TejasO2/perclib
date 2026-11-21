@@ -17,7 +17,7 @@
     "disjoint-occurrence",
     "triangle-condition"
   ],
-  "sourceIds": ["hutchcroft-triangle-2021", "perclib-boundary-susceptibility", "perclib-boundary-counterexample", "perclib-normalized-small-intensity", "perclib-normalized-small-intensity-line"],
+  "sourceIds": ["hutchcroft-book", "hutchcroft-triangle-2021", "perclib-boundary-susceptibility", "perclib-boundary-counterexample", "perclib-normalized-small-intensity", "perclib-normalized-small-intensity-line"],
   "aliases": [
     "boundary susceptibility",
     "positive-part correction",

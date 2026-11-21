@@ -9,6 +9,15 @@
   ],
   "sourceOccurrences": [
     {
+      "source": "hutchcroft-book",
+      "order": 32,
+      "label": "Ghost fields and magnetization",
+      "locator": "Cited without locator; the book is unpublished.",
+      "relationship": "Credited source",
+      "status": "attribution only",
+      "note": "Results, arguments or exposition in this article taken from the book are credited to T. Hutchcroft, book in preparation."
+    },
+    {
       "source": "perclib-train10-probability-ghosttransform",
       "order": 0,
       "label": "Ghost transforms and zero-field endpoints",

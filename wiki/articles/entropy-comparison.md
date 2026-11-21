@@ -8,7 +8,7 @@
   "summary": "The entropy of an exploration transcript is the expected sum of its one-coordinate costs. This gives probability comparisons controlled by weighted revealments, including for countable non-halting decision trees.",
   "context": ["Independent Bernoulli coordinates and the same deterministic query rule under both laws.", "No coordinate is queried twice along a run; halting is determined by the answers already seen.", "Weighted profiles have finite nonnegative weights and positive finite intensities."],
   "related": ["finite-transcripts", "product-model", "exploration", "russo-formula"],
-  "sourceIds": ["perclib-bernoulli-divergence"],
+  "sourceIds": ["hutchcroft-book", "perclib-bernoulli-divergence"],
   "aliases": ["relative entropy", "Kullback-Leibler divergence", "decision tree", "revealment", "Dewan-Muirhead", "Pinsker"],
   "prototypeUses": []
 }

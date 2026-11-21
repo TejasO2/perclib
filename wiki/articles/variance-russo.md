@@ -8,7 +8,7 @@
   "summary": "An elementary variance inequality controls a finite increasing event by its pivotal coordinates and yields an odds comparison across parameters.",
   "context": ["A finite set $E$ of independent Bernoulli coordinates.", "A real observable $f$; increasingness is imposed only for the event derivative bound.", "Homogeneous parameters lie in $(0,1)$ when division or logarithms are used."],
   "related": ["russo-formula", "harris-inequality", "product-model"],
-  "sourceIds": ["perclib-elementary-square", "perclib-train5-variance"],
+  "sourceIds": ["hutchcroft-book", "perclib-elementary-square", "perclib-train5-variance"],
   "aliases": ["variance tensorization", "Bernoulli Poincare inequality", "elementary threshold bound", "odds comparison"],
   "prototypeUses": ["russo-formula"]
 }

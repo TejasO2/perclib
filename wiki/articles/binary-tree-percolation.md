@@ -18,7 +18,7 @@
     "susceptibility",
     "exploration"
   ],
-  "sourceIds": ["perclib-regular-tree", "perclib-tree-recursion", "perclib-train5-binary-tree", "perclib-train5-binary-arm", "perclib-train5-binary-catalan", "perclib-binary-tree-asymptotics", "perclib-abelian-sums", "perclib-binary-tree-moments", "perclib-binary-tree-moment-law"],
+  "sourceIds": ["hutchcroft-book", "perclib-regular-tree", "perclib-tree-recursion", "perclib-train5-binary-tree", "perclib-train5-binary-arm", "perclib-train5-binary-catalan", "perclib-binary-tree-asymptotics", "perclib-abelian-sums", "perclib-binary-tree-moments", "perclib-binary-tree-moment-law"],
   "aliases": [
     "binary tree",
     "Catalan",

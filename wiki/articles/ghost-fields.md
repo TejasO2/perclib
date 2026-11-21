@@ -8,7 +8,7 @@
   "summary": "Independent vertex marks turn cluster volumes into a smooth positive-field observable. The zero-field value, its right-hand limit and susceptibility have different meanings.",
   "context": ["A countable vertex set and the measurable cluster $K$ of a fixed root, with $T=|K|\\in\\{1,2,\\ldots,\\infty\\}$.", "The percolation law is fixed while the field parameter $h$ varies.", "Vertex marks are independent of each other and of the percolation configuration."],
   "related": ["susceptibility", "binary-tree-percolation", "branching-processes", "russo-formula", "exploration"],
-  "sourceIds": ["perclib-train10-probability-ghosttransform"],
+  "sourceIds": ["hutchcroft-book", "perclib-train10-probability-ghosttransform"],
   "aliases": ["ghost", "green vertices", "magnetization", "Laplace transform", "external field"],
   "prototypeUses": []
 }

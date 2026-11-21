@@ -8,7 +8,7 @@
   "summary": "Diagonal invariance equates total outgoing and incoming mass on a group. For invariant random clusters this gives averaging identities on finite clusters and rules out equivariant choices of a single vertex in an infinite cluster.",
   "context": ["A countable group $\\Gamma$, with identity $o$, acts on its vertices by left multiplication.", "All transported quantities are nonnegative, so sums and expectations may be infinite.", "Random transports are measurable and equivariant, and their underlying probability law is invariant."],
   "related": ["product-symmetries", "connectivity", "susceptibility", "triangle-condition"],
-  "sourceIds": ["perclib-train5-mass-transport"],
+  "sourceIds": ["hutchcroft-book", "perclib-train5-mass-transport"],
   "aliases": ["mass transport", "Cayley graph", "diagonal invariance", "unimodularity", "cluster averaging", "invariant representative"],
   "prototypeUses": []
 }

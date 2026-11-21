@@ -20,6 +20,7 @@
     "universal-tightness"
   ],
   "sourceIds": [
+    "hutchcroft-book",
     "hutchcroft-hierarchical-2021",
     "hutchcroft-hierarchical-volumes-2022"
   ],

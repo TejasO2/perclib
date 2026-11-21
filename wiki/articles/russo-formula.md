@@ -17,7 +17,7 @@
     "cutoff-families",
     "sharpness"
   ],
-  "sourceIds": ["mathlib", "perclib-finite-polynomial", "perclib-cylinder-russo", "perclib-finite-russo", "perclib-one-coordinate", "perclib-pivotal-algebra", "perclib-integrated-russo", "perclib-finite-volume-russo", "perclib-finite-support-russo", "perclib-russo-associations", "perclib-train10-models-longrange-infinitevolumerusso"],
+  "sourceIds": ["hutchcroft-book", "mathlib", "perclib-finite-polynomial", "perclib-cylinder-russo", "perclib-finite-russo", "perclib-one-coordinate", "perclib-pivotal-algebra", "perclib-integrated-russo", "perclib-finite-volume-russo", "perclib-finite-support-russo", "perclib-russo-associations", "perclib-train10-models-longrange-infinitevolumerusso"],
   "aliases": [
     "Russo",
     "pivotal edge",

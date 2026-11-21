@@ -272,7 +272,7 @@ export async function build(
       sources
         .map(
           (s) =>
-            `<section class="article-section"><h2><a href="/sources/${s.id}/">${esc(s.title)}</a></h2><p>${esc(s.author)} · ${esc(s.year)}</p><p>${esc(s.description)}</p></section>`,
+            `<section class="article-section"><h2><a href="/sources/${s.id}/">${esc(s.title)}</a></h2><p>${[s.author, s.year].filter((v) => v != null).map(esc).join(" · ")}</p><p>${esc(s.description)}</p></section>`,
         )
         .join(""),
   );
@@ -301,7 +301,7 @@ export async function build(
       heading(s.title, s.description) +
         (errata.some((e) => e.source === s.id) ? `<p><a href="/errata/${s.id}/">Source errata and provisional corrections</a></p>` : "") +
         concordance(occurrences.filter((o) => o.source === s.id)) +
-        `<p>${esc(s.author)} · ${esc(s.year)} · ${esc(s.edition)}</p><p><a href="${esc(s.url)}">Source</a></p><p>${esc(s.coverageNote)}</p>` +
+        `<p>${[s.author, s.year, s.edition].filter((v) => v != null).map(esc).join(" · ")}</p>${s.url ? `<p><a href="${esc(s.url)}">Source</a></p>` : ""}<p>${esc(s.coverageNote)}</p>` +
         s.occurrences.map(occurrence).join(""),
     );
   add("errata", "Source errata", errataIndex(errata, sources), "", "",

@@ -8,7 +8,7 @@
   "summary": "Counting simple paths improves the uniform-degree small-parameter criterion from Delta p below one to (Delta minus one) p below one. The same count bounds susceptibility and includes degrees zero and one.",
   "context": ["A countable simple host graph $G$, with at most $\\Delta$ neighbours at each vertex, where $\\Delta\\in\\mathbb N$.", "Independent bond probabilities $q_e\\leq p\\in[0,1]$ on host edges, and zero on other non-loop pairs.", "Diagonal coordinates are unrestricted; paths and clusters belong to the simple open graph."],
   "related": ["subcritical-bound", "connectivity", "forest-connections", "susceptibility", "binary-tree-percolation"],
-  "sourceIds": ["perclib-bounded-degree", "perclib-self-avoiding-chi", "perclib-self-avoiding-decay", "perclib-tree-counting", "perclib-boundary-forest-associations"],
+  "sourceIds": ["perclib-bounded-degree", "hutchcroft-book", "perclib-self-avoiding-chi", "perclib-self-avoiding-decay", "perclib-tree-counting", "perclib-boundary-forest-associations"],
   "aliases": ["self-avoiding path", "maximum degree", "nonbacktracking", "path criterion"],
   "prototypeUses": []
 }

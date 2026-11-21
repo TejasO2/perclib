@@ -9,6 +9,15 @@
   ],
   "sourceOccurrences": [
     {
+      "source": "hutchcroft-book",
+      "order": 41,
+      "label": "Critical exponent conventions",
+      "locator": "Cited without locator; the book is unpublished.",
+      "relationship": "Credited source",
+      "status": "attribution only",
+      "note": "Results, arguments or exposition in this article taken from the book are credited to T. Hutchcroft, book in preparation."
+    },
+    {
       "source": "perclib-log-exponent",
       "order": 0,
       "label": "Logarithmic exponents and their converses",

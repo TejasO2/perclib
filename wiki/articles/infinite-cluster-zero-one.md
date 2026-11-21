@@ -19,7 +19,7 @@
     "infinite-cluster-uniqueness",
     "profile-continuity"
   ],
-  "sourceIds": ["perclib-intensity-definitions", "perclib-product-zero-one", "perclib-product-mixing", "perclib-bond-ergodicity", "perclib-zero-one-examples", "perclib-decorated-ray", "perclib-path-comparison", "perclib-bond-zero-one", "perclib-unattained-threshold"],
+  "sourceIds": ["hutchcroft-book", "perclib-intensity-definitions", "perclib-product-zero-one", "perclib-product-mixing", "perclib-bond-ergodicity", "perclib-zero-one-examples", "perclib-decorated-ray", "perclib-path-comparison", "perclib-bond-zero-one", "perclib-unattained-threshold"],
   "aliases": [
     "Kolmogorov zero-one law",
     "tail event",

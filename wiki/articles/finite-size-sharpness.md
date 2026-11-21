@@ -8,7 +8,7 @@
   "summary": "Summable long-range boundary intensities can be wired into a finite graph. Its closed-pivotal identity gives the supercritical inequality, which identifies the finite-size threshold and proves subcritical finite susceptibility.",
   "context": ["A countable vertex set $V$, with a fixed root $o$.", "Finite nonnegative symmetric off-diagonal weights $J_{uv}$ with $\\sum_{v\\ne u}J_{uv}<\\infty$ for each $u$.", "Independent bond probabilities $q_\\beta(u,v)=1-e^{-\\beta J_{uv}}$, for finite $\\beta\\geq0$; diagonal coordinates do not affect the graph.", "Transitivity is assumed only in the threshold theorem."],
   "related": ["sharpness", "boundary-laws", "russo-formula", "finite-volume", "bk-inequality"],
-  "sourceIds": ["perclib-susceptibility-continuity", "perclib-finite-set-criterion", "perclib-supercritical-integration", "perclib-unexplored-region", "perclib-wired-derivative-formula", "perclib-train10-sharpness"],
+  "sourceIds": ["hutchcroft-book", "perclib-susceptibility-continuity", "perclib-finite-set-criterion", "perclib-supercritical-integration", "perclib-unexplored-region", "perclib-wired-derivative-formula", "perclib-train10-sharpness"],
   "aliases": ["finite-size threshold", "Duminil-Copin Tassion", "closed pivotal", "supercritical lower bound", "sharpness"],
   "prototypeUses": []
 }

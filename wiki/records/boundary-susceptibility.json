@@ -9,6 +9,15 @@
   ],
   "sourceOccurrences": [
     {
+      "source": "hutchcroft-book",
+      "order": 1,
+      "label": "Susceptibility beyond a finite boundary",
+      "locator": "Cited without locator; the book is unpublished.",
+      "relationship": "Credited source",
+      "status": "attribution only",
+      "note": "Results, arguments or exposition in this article taken from the book are credited to T. Hutchcroft, book in preparation."
+    },
+    {
       "source": "hutchcroft-triangle-2021",
       "order": 1,
       "label": "Boundary formula and proof arithmetic",

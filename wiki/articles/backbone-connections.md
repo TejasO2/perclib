@@ -8,7 +8,7 @@
   "summary": "The disjoint-connection backbone observable has an exact invariant counting identity, a BK upper bound, and a two-ghost small-field representation. Cluster exploration gives a reverse bound with a triangle error and a high-dimensional multiple-arm consequence; the bubble-only bound remains open.",
   "context": ["Independent bonds on a countable group with a left-invariant law for the counting identity.", "Disjointness means edge-disjoint open witnesses; empty paths are allowed.", "The two ghost fields use independent marks, including at the same vertex."],
   "related": ["disjoint-occurrence", "ghost-fields", "connection-kernels", "intrinsic-geometry", "susceptibility"],
-  "sourceIds": ["hutchcroft-lrp-3", "perclib-split-coordinate"],
+  "sourceIds": ["hutchcroft-book", "hutchcroft-lrp-3", "perclib-split-coordinate"],
   "aliases": ["backbone", "two ghosts", "reverse BK", "disjoint connections", "bubble condition"],
   "prototypeUses": []
 }

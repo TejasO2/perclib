@@ -8,7 +8,7 @@
   "summary": "Coordinate covariances express finite-product derivatives; a supplied revealment inequality then yields a quantitative derivative lower bound.",
   "context": ["A finite coordinate set $E$ with independent Bernoulli bits $X_e$.", "Finite nonnegative weights $J_e$ and finite intensity $\\beta$.", "Increasingness is required for nonnegative covariance bounds, not for the identities."],
   "related": ["russo-formula", "harris-inequality", "finite-transcripts"],
-  "sourceIds": ["perclib-train5-covariance-russo"],
+  "sourceIds": ["hutchcroft-book", "perclib-train5-covariance-russo"],
   "aliases": ["coordinate covariance", "Russo covariance formula", "revealment derivative bound"],
   "prototypeUses": ["russo-formula"]
 }

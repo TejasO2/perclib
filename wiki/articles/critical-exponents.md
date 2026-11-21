@@ -8,7 +8,7 @@
   "summary": "A logarithmic exponent records a leading power and can coexist with unbounded logarithmic corrections. The order parameter, susceptibility, volume tail, Euclidean arm and two-point function use different limits and conventions.",
   "context": ["The parameter is the homogeneous opening probability $p$, so the symbol $\\beta$ below denotes an exponent, not an intensity.", "For the two one-sided parameter limits, assume $0<p_c<1$ and the stated observables are finite and positive where their logarithms are used.", "No existence or numerical value of a critical exponent is asserted for a model merely by introducing the notation."],
   "related": ["criticality", "susceptibility", "triangle-condition", "branching-processes", "cutoff-families"],
-  "sourceIds": ["perclib-log-exponent", "perclib-tail-comparison", "perclib-window-hyperscaling", "perclib-damped-window-tails"],
+  "sourceIds": ["hutchcroft-book", "perclib-log-exponent", "perclib-tail-comparison", "perclib-window-hyperscaling", "perclib-damped-window-tails"],
   "aliases": ["critical exponent", "logarithmic exponent", "one-arm exponent", "anomalous dimension", "power law", "logarithmic correction"],
   "prototypeUses": []
 }

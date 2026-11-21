@@ -20,7 +20,7 @@
     "regular-variation",
     "spatial-cutoff-moments"
   ],
-  "sourceIds": ["hutchcroft-lrp-1", "perclib-size-bias-truncation", "perclib-independent-layer-ghost", "perclib-independent-layer-exploration", "perclib-independent-layer", "perclib-size-bias-limits", "perclib-soft-cutoff", "perclib-moment-determinacy", "perclib-train10-conditional", "perclib-train10-models-longrange-omittedlayer"],
+  "sourceIds": ["hutchcroft-book", "hutchcroft-lrp-1", "perclib-size-bias-truncation", "perclib-independent-layer-ghost", "perclib-independent-layer-exploration", "perclib-independent-layer", "perclib-size-bias-limits", "perclib-soft-cutoff", "perclib-moment-determinacy", "perclib-train10-conditional", "perclib-train10-models-longrange-omittedlayer"],
   "aliases": [
     "size bias",
     "size biased",

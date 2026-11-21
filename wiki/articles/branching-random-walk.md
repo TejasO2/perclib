@@ -8,7 +8,7 @@
   "summary": "Critical branching random walk has random-walk Green function as its expected occupation density. Fourier inversion gives diagram thresholds for nearest-neighbour and power-law steps, including the logarithmic boundary at tail exponent two.",
   "context": ["Independent offspring variables have finite mean $m$; children move independently according to a Markov kernel.", "Occupation counts retain multiplicity: different particles and different generations can visit the same site.", "The first Fourier calculation is for lazy nearest-neighbour walk on $\\mathbb Z^d$, $d\\geq1$."],
   "related": ["branching-processes", "exploration", "triangle-condition", "susceptibility"],
-  "sourceIds": ["perclib-train10-models-longrange-fouriersymbol"],
+  "sourceIds": ["hutchcroft-book", "perclib-train10-models-longrange-fouriersymbol"],
   "aliases": ["branching random walk", "Green function", "bubble diagram", "triangle diagram", "upper critical dimension", "occupation density"],
   "prototypeUses": []
 }

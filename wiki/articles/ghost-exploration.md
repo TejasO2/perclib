@@ -8,7 +8,7 @@
   "summary": "Exploring from all green vertices computes ghost connection and bounds edge revealment by endpoint magnetizations. Covariance with an edge-only event reduces to a cluster-size observable.",
   "context": ["A finite nonempty vertex set $V$ and finitely many non-loop bonds $E$.", "Independent bond states, with arbitrary probabilities in $[0,1]$.", "Independent vertex marks $G_v$ of probability $1-e^{-h}$, for finite $h\\geq0$, independent of all bonds."],
   "related": ["exploration", "finite-transcripts", "susceptibility", "russo-formula"],
-  "sourceIds": [],
+  "sourceIds": ["hutchcroft-book"],
   "aliases": ["ghost exploration", "green cluster revealment", "ghost covariance", "magnetization algorithm"],
   "prototypeUses": []
 }

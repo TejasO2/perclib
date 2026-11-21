@@ -21,6 +21,7 @@
     "finite-set-hyperscaling"
   ],
   "sourceIds": [
+    "hutchcroft-book",
     "hutchcroft-powerlaw-2021",
     "perclib-martingale-maximal",
     "hutchcroft-lrp-3"

@@ -9,6 +9,15 @@
   ],
   "sourceOccurrences": [
     {
+      "source": "hutchcroft-book",
+      "order": 28,
+      "label": "The Harris inequality",
+      "locator": "Cited without locator; the book is unpublished.",
+      "relationship": "Credited source",
+      "status": "attribution only",
+      "note": "Results, arguments or exposition in this article taken from the book are credited to T. Hutchcroft, book in preparation."
+    },
+    {
       "source": "grimmett",
       "order": 4,
       "label": "Positive association",
@@ -108,7 +117,17 @@
       "note": "Proof by conditioning on the finite root cluster. The almost-sure finiteness restriction is explicit and does not certify the unrestricted source interface."
     }
   ],
-  "occursIn": [],
+  "occursIn": [
+    {
+      "order": 5,
+      "source": "hutchcroft-book",
+      "tag": "X5SS",
+      "relationship": "generalization",
+      "edition": "In preparation",
+      "locator": "Cited without locator; the book is unpublished.",
+      "note": "Credited to T. Hutchcroft, book in preparation."
+    }
+  ],
   "proofUses": [
     {
       "order": 0,

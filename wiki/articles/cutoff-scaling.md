@@ -8,7 +8,7 @@
   "summary": "Explicit cutoff hypotheses yield moment scales and familiar exponent identities. The estimates explain the scaling argument without assuming that its hypotheses hold in a given percolation model.",
   "context": ["The notation $f\\asymp g$ means two-sided bounds by positive constants independent of the parameter tending to its limit.", "The cutoff estimates below are hypotheses, not asserted properties of every percolation model.", "Cluster-volume variables are positive integer-valued; expectations may initially be extended nonnegative quantities."],
   "related": ["criticality", "susceptibility", "binary-tree-percolation", "triangle-condition", "cutoff-families"],
-  "sourceIds": [],
+  "sourceIds": ["hutchcroft-book"],
   "aliases": ["scaling relations", "gap exponent", "gap scale", "moment cutoff", "correlation length", "Fisher relation"],
   "prototypeUses": []
 }

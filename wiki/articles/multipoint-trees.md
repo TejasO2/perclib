@@ -21,6 +21,7 @@
     "size-biased-laws"
   ],
   "sourceIds": [
+    "hutchcroft-book",
     "hutchcroft-lrp-2",
     "perclib-branch-point",
     "perclib-tree-moments",

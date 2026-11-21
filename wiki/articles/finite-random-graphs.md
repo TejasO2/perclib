@@ -17,7 +17,8 @@
     "universal-tightness"
   ],
   "sourceIds": [
-    "heydenreich-hofstad"
+    "heydenreich-hofstad",
+    "hutchcroft-book"
   ],
   "aliases": [
     "Erdős–Rényi",

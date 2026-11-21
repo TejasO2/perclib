@@ -4,7 +4,7 @@
   "articles": {
     "product-model": {
       "prototypeId": "PC-000101",
-      "metadataSha256": "322f84cc130779382d250ce0eac3025537d6358e3c68d208031b2c951e1475ce",
+      "metadataSha256": "197e2e808af3e667851094251afe3692d1f301239345cb36ad99a835b2a8f78a",
       "sections": {
         "law": {
           "title": "The configuration law",
@@ -22,7 +22,7 @@
     },
     "connectivity": {
       "prototypeId": "PC-000102",
-      "metadataSha256": "cc7527f5e1cd9b589623a5021277662fa02e08a696f52a18cfee27616824d5d9",
+      "metadataSha256": "4d2715a361d08f43dbc58c090db5e1376842eb08f4eabe892d68b00e551fd9e4",
       "sections": {
         "paths": {
           "title": "Connection events",
@@ -44,7 +44,7 @@
     },
     "susceptibility": {
       "prototypeId": "PC-000103",
-      "metadataSha256": "a49a3a9c54e06d066b0c54bf154d92118a462d73a7efcbc81a3df7390cba0324",
+      "metadataSha256": "d34a76ea26c5823c73625bd018755c0fb3f8561347b9a0a025af523dcb4454cb",
       "sections": {
         "definition": {
           "title": "Definition and the sum identity",
@@ -66,7 +66,7 @@
     },
     "subcritical-bound": {
       "prototypeId": "PC-000104",
-      "metadataSha256": "0da3dd64637acb438912fafc747c68260353090fb2dcd5d4038a19b21edd8655",
+      "metadataSha256": "2d2402ef3f78399950943c47aeaf742ded34a135e9f5ae0d335d81ef86f1050b",
       "sections": {
         "statement": {
           "title": "The theorem",
@@ -100,7 +100,7 @@
     },
     "criticality": {
       "prototypeId": "PC-000105",
-      "metadataSha256": "0a9c51cec531d683292092925db7fd943bfc57b0c41c578f17257873f32b8081",
+      "metadataSha256": "2c83178805bab58d0df6d25664529c187030699fa230688e08e2a21d271a0adc",
       "sections": {
         "infinite": {
           "title": "Infinite-volume thresholds",
@@ -118,7 +118,7 @@
     },
     "sharpness": {
       "prototypeId": "PC-000106",
-      "metadataSha256": "71ce78edad4a1c9ba9bce1ec4d40d02b95ce92d77a1b05eec4dda1caefeee573",
+      "metadataSha256": "36a4fdfdf57f2c64fa5313d6ce55666b8304caae107599377a3f0b490709fdfd",
       "sections": {
         "statement": {
           "title": "A precise lattice statement",
@@ -140,7 +140,7 @@
     },
     "triangle-condition": {
       "prototypeId": "PC-000107",
-      "metadataSha256": "2f2b3dc08680d8ac5de059a996d7c6a8970cfb4635060d21034b04be62db0732",
+      "metadataSha256": "3d47f4f27aa366ce88ad6a14145cee780e952faf8ce97a3777a05cf120cb5482",
       "sections": {
         "diagram": {
           "title": "The diagram",
@@ -162,7 +162,7 @@
     },
     "universal-tightness": {
       "prototypeId": "PC-000108",
-      "metadataSha256": "c0b05f65b02ffd0af904bf0408d773d4697ad08f0a190d310563f9366fc86a04",
+      "metadataSha256": "1c9537428ac803e60149cb8b99af9d20c8bbbd4711c32998e772c6d6b15c0566",
       "sections": {
         "scale": {
           "title": "Choose the observable before the scale",
@@ -184,7 +184,7 @@
     },
     "cutoff-families": {
       "prototypeId": "PC-000109",
-      "metadataSha256": "d2a07de8a0bdda09547e9e561a00e1e21209b73fe3d43741a21225ae57b98d7d",
+      "metadataSha256": "d4650fc0483a18922d0f05cf5885e99d60938a150f206d82b385682948b2a17f",
       "sections": {
         "definition": {
           "title": "An integrated cutoff",
@@ -206,7 +206,7 @@
     },
     "hierarchical-two-point": {
       "prototypeId": "PC-000110",
-      "metadataSha256": "98d09e382c3c4ae5da574a7c7028d2160b14037e918303cbd5d455b75abe55b3",
+      "metadataSha256": "16b8afe8631d5acce549b6334b9f10304778c0ed9622e2735d0c00fa232fe99b",
       "sections": {
         "model": {
           "title": "The hierarchical geometry",
@@ -228,7 +228,7 @@
     },
     "finite-random-graphs": {
       "prototypeId": "PC-000111",
-      "metadataSha256": "382785b989b23d45fe53d9e1586d532c53ea3b5d6e5a5dcf289367ecdba19b78",
+      "metadataSha256": "a566d577e99b9da8290a334a9f2608c4ee96df005bcc18585d6a7b028cf4eec2",
       "sections": {
         "identity": {
           "title": "Susceptibility from the component partition",
@@ -250,7 +250,7 @@
     },
     "exploration": {
       "prototypeId": "PC-000112",
-      "metadataSha256": "407031cc9b63a188d21b9853c32566e2ff2797f9aec5eca61aebe406d5482007",
+      "metadataSha256": "7448432010007305ae515fb640861d8055fad4f50ba6efa6722ab000e3f32c87",
       "sections": {
         "principle": {
           "title": "The deferred-decision principle",

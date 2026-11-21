@@ -17,6 +17,7 @@
     "triangle-condition"
   ],
   "sourceIds": [
+    "hutchcroft-book",
     "perclib-connection-kernel",
     "perclib-train10-analysis-discreteconvolution",
     "hutchcroft-lrp-3"

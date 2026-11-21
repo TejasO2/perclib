@@ -8,7 +8,7 @@
   "summary": "Karamata's Laplace–tail theorem fixes the Gamma normalization in the passage from cluster-size tails to magnetization. Tail equivalents do not imply all-integer point-mass equivalents.",
   "context": ["A nonnegative random variable $X$ that is finite almost surely.", "The transform is $M_X(h)=\\mathbb E[1-e^{-hX}]$ for $h>0$.", "The fractional tail index satisfies $0<\\alpha<1$."],
   "related": ["ghost-fields", "branching-processes", "binary-tree-percolation", "susceptibility"],
-  "sourceIds": ["perclib-shared-elementary", "perclib-train10-analysis-regularvariation-defs"],
+  "sourceIds": ["hutchcroft-book", "perclib-shared-elementary", "perclib-train10-analysis-regularvariation-defs"],
   "aliases": ["Karamata", "Tauberian", "slowly varying", "regular variation", "Laplace", "Gamma constant"],
   "prototypeUses": []
 }

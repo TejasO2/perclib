@@ -18,6 +18,7 @@
     "cutoff-hydrodynamics"
   ],
   "sourceIds": [
+    "hutchcroft-book",
     "borgs-chayes-randall-1998",
     "arratia-garibaldi-hales-2015",
     "hutchcroft-lin-pims-2025"

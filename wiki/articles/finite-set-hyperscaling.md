@@ -20,6 +20,7 @@
     "integrated-susceptibility"
   ],
   "sourceIds": [
+    "hutchcroft-book",
     "perclib-marked-edge-splitting",
     "hutchcroft-powerlaw-2021",
     "perclib-amplitude-contraction",

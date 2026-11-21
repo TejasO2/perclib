@@ -19,6 +19,7 @@
   ],
   "sourceIds": [
     "mathlib",
+    "hutchcroft-book",
     "perclib-configuration-conditioning",
     "perclib-block-independence",
     "perclib-boundary-wiring",

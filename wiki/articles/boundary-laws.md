@@ -17,7 +17,7 @@
     "finite-transcripts",
     "sharpness"
   ],
-  "sourceIds": ["perclib-boundary-wiring", "perclib-first-exit", "dct-sharpness", "perclib-cluster-law", "perclib-boundary-contraction", "perclib-wiring-collapse", "perclib-boundary-forest-associations"],
+  "sourceIds": ["hutchcroft-book", "perclib-boundary-wiring", "perclib-first-exit", "dct-sharpness", "perclib-cluster-law", "perclib-boundary-contraction", "perclib-wiring-collapse", "perclib-boundary-forest-associations"],
   "aliases": [
     "boundary wiring",
     "ghost boundary",

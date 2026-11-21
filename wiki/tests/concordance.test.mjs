@@ -43,6 +43,20 @@ test("source occurrence records reject invented status, stale editions and unkno
     2,
   );
 });
+test("a source without a URL is cited without a link, and its rows may not carry one", () => {
+  const unpublished = [...sources, { id: "unpublished-src", shortName: "Unpublished", edition: "In preparation" }];
+  const row = { ...occurrence, source: "unpublished-src", edition: "In preparation" };
+  delete row.source_url;
+  const check = (rows) =>
+    validateOccurrences({ schema: "perclib-occurs-in-v1", occurrences: rows }, unpublished, assertions);
+  assert.equal(check([row]).length, 1);
+  assert.throws(() => check([{ ...row, source_url: sources[0].url }]));
+  assert.throws(() => check([{ ...row, locator: "" }]));
+  assert.throws(() => check([{ ...occurrence, source_url: undefined }]));
+  const html = concordancePanel(check([row]), unpublished, assertions, { entries: null });
+  assert.match(html, /Unpublished<\/a> · In preparation<\/p>/);
+  assert.ok(!html.includes('href="undefined"'));
+});
 test("rendering distinguishes source records from formal evidence and escapes source text", () => {
   const html = concordancePanel(validate([occurrence]), sources, assertions, {
     entries: null,

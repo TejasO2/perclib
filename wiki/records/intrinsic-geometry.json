@@ -9,6 +9,15 @@
   ],
   "sourceOccurrences": [
     {
+      "source": "hutchcroft-book",
+      "order": 12,
+      "label": "Intrinsic balls and cluster-volume tails",
+      "locator": "Cited without locator; the book is unpublished.",
+      "relationship": "Credited source",
+      "status": "attribution only",
+      "note": "Results, arguments or exposition in this article taken from the book are credited to T. Hutchcroft, book in preparation."
+    },
+    {
       "source": "perclib-intrinsic-balls",
       "order": 0,
       "label": "Intrinsic balls and thinning comparison",

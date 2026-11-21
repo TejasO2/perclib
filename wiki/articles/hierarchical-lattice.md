@@ -19,7 +19,7 @@
     "cutoff-families",
     "walk-kernels"
   ],
-  "sourceIds": ["perclib-hierarchical-model", "perclib-hierarchical-geometry", "perclib-hierarchical-small-two-point", "perclib-hierarchical-cutoff", "perclib-hierarchical-ball-sums", "perclib-train10-models-hierarchicalsymmetry"],
+  "sourceIds": ["hutchcroft-book", "perclib-hierarchical-model", "perclib-hierarchical-geometry", "perclib-hierarchical-small-two-point", "perclib-hierarchical-cutoff", "perclib-hierarchical-ball-sums", "perclib-train10-models-hierarchicalsymmetry"],
   "aliases": [
     "hierarchical lattice",
     "ultrametric",

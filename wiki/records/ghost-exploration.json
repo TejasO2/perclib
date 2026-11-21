@@ -7,7 +7,17 @@
       "order": 17
     }
   ],
-  "sourceOccurrences": [],
+  "sourceOccurrences": [
+    {
+      "source": "hutchcroft-book",
+      "order": 19,
+      "label": "Exploring the green clusters",
+      "locator": "Cited without locator; the book is unpublished.",
+      "relationship": "Credited source",
+      "status": "attribution only",
+      "note": "Results, arguments or exposition in this article taken from the book are credited to T. Hutchcroft, book in preparation."
+    }
+  ],
   "occursIn": [],
   "proofUses": []
 }

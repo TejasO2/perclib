@@ -19,7 +19,8 @@
   "sourceIds": [
     "grimmett",
     "heydenreich-hofstad",
-    "mathlib"
+    "mathlib",
+    "hutchcroft-book"
   ],
   "aliases": [
     "Bernoulli",

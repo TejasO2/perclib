@@ -18,6 +18,7 @@
     "cutoff-families"
   ],
   "sourceIds": [
+    "hutchcroft-book",
     "perclib-size-bias-truncation",
     "perclib-discrete-layer-cake",
     "perclib-tail-comparison",

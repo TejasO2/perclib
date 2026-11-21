@@ -19,6 +19,7 @@
     "pointwise-long-range"
   ],
   "sourceIds": [
+    "hutchcroft-book",
     "hutchcroft-lrp-2",
     "hutchcroft-pointwise-2024"
   ],

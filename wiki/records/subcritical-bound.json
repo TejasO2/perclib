@@ -9,6 +9,15 @@
   ],
   "sourceOccurrences": [
     {
+      "source": "hutchcroft-book",
+      "order": 22,
+      "label": "A small-parameter susceptibility bound",
+      "locator": "Cited without locator; the book is unpublished.",
+      "relationship": "Credited source",
+      "status": "attribution only",
+      "note": "Results, arguments or exposition in this article taken from the book are credited to T. Hutchcroft, book in preparation."
+    },
+    {
       "source": "hutchcroft-powerlaw-2021",
       "order": 0,
       "label": "Positive lower bound on the critical intensity",
@@ -28,6 +37,15 @@
       "locator": "Section 1, Introduction; unnumbered paragraph immediately after the displayed definition of beta_c and before the discussion of the one-dimensional non-trivial phase transition.",
       "relationship": "generalization",
       "note": "For symmetric summable J on Z^d, the source derives absence of infinite clusters when beta times the total kernel mass is below one, then the reciprocal-mass lower bound. JZ47 permits non-transitive uniform row bounds and explicitly handles zero mass. Source total mass includes J(0); the graph's off-diagonal mass is at most this total."
+    },
+    {
+      "order": 4,
+      "source": "hutchcroft-book",
+      "tag": "JZ47",
+      "relationship": "generalization",
+      "edition": "In preparation",
+      "locator": "Cited without locator; the book is unpublished.",
+      "note": "Credited to T. Hutchcroft, book in preparation."
     }
   ],
   "proofUses": [

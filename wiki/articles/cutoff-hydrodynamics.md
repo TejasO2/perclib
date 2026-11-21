@@ -19,6 +19,7 @@
     "universal-tightness"
   ],
   "sourceIds": [
+    "hutchcroft-book",
     "hutchcroft-lrp-2",
     "perclib-good-scales",
     "perclib-window-hyperscaling",

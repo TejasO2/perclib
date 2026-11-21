@@ -19,7 +19,8 @@
     "cutoff-localization"
   ],
   "sourceIds": [
-    "baumler-berger-isoperimetric-2022"
+    "baumler-berger-isoperimetric-2022",
+    "hutchcroft-book"
   ],
   "aliases": [
     "Bäumler Berger",

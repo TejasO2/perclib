@@ -18,6 +18,7 @@
     "finite-random-graphs"
   ],
   "sourceIds": [
+    "hutchcroft-book",
     "hutchcroft-powerlaw-2021"
   ],
   "aliases": [

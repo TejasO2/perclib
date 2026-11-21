@@ -9,6 +9,15 @@
   ],
   "sourceOccurrences": [
     {
+      "source": "hutchcroft-book",
+      "order": 18,
+      "label": "The van den Berg–Kesten inequality",
+      "locator": "Cited without locator; the book is unpublished.",
+      "relationship": "Credited source",
+      "status": "attribution only",
+      "note": "Results, arguments or exposition in this article taken from the book are credited to T. Hutchcroft, book in preparation."
+    },
+    {
       "source": "perclib-low-density-bk",
       "order": 0,
       "label": "Homogeneous low-density BK induction",
@@ -36,6 +45,16 @@
       "note": "The source supplies JRCI and the repeated product bound AUUG, with increasing events allowed to be nonmeasurable when their probabilities are read as outer measures. Only the finite-witness disjoint occurrence is exhausted."
     }
   ],
-  "occursIn": [],
+  "occursIn": [
+    {
+      "order": 6,
+      "source": "hutchcroft-book",
+      "tag": "BNY8",
+      "relationship": "source-statement",
+      "edition": "In preparation",
+      "locator": "Cited without locator; the book is unpublished.",
+      "note": "Credited to T. Hutchcroft, book in preparation."
+    }
+  ],
   "proofUses": []
 }

@@ -8,7 +8,7 @@
   "summary": "Finite-coordinate BK follows from a coordinate induction and independent bit blocks. Finite open witnesses extend it to countably many coordinates and repeated disjoint occurrence.",
   "context": ["Configurations are subsets of a coordinate set $I$, with independent open probabilities $q_i\\in[0,1]$.", "The events are increasing. Disjoint occurrence always uses finite certificates, as in the disjoint-occurrence article.", "The coordinate set is finite in the first theorem and countable in the extension."],
   "related": ["disjoint-occurrence", "product-model", "harris-inequality", "connectivity"],
-  "sourceIds": ["perclib-low-density-bk", "perclib-finite-profile-bk", "perclib-countable-profile-bk"],
+  "sourceIds": ["hutchcroft-book", "perclib-low-density-bk", "perclib-finite-profile-bk", "perclib-countable-profile-bk"],
   "aliases": ["BK inequality", "van den Berg Kesten", "disjoint witnesses", "countable BK"],
   "prototypeUses": []
 }

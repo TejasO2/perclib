@@ -17,7 +17,7 @@
     "connectivity",
     "harris-inequality"
   ],
-  "sourceIds": ["perclib-finite-cylinders", "perclib-finite-expectations", "perclib-finite-continuity", "perclib-monotone-coupling", "perclib-product-law", "perclib-profile-total-variation", "perclib-susceptibility-continuity", "perclib-profile-regularity", "perclib-theta-semicontinuity"],
+  "sourceIds": ["perclib-finite-cylinders", "perclib-finite-expectations", "perclib-finite-continuity", "perclib-monotone-coupling", "perclib-product-law", "perclib-profile-total-variation", "perclib-susceptibility-continuity", "perclib-profile-regularity", "perclib-theta-semicontinuity", "hutchcroft-book"],
   "aliases": [
     "profile continuity",
     "cylinder continuity",

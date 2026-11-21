@@ -21,7 +21,7 @@
     "integrated-susceptibility",
     "open-degree-laws"
   ],
-  "sourceIds": ["perclib-translation-models", "perclib-long-range-cuts", "perclib-power-law", "perclib-nonsummable-kernels", "perclib-line-first-moment", "perclib-long-range-interface", "perclib-train10-models-longrange-rootindependence", "perclib-train10-models-longrange-cutoffpowerlaw"],
+  "sourceIds": ["hutchcroft-book", "perclib-translation-models", "perclib-long-range-cuts", "perclib-power-law", "perclib-nonsummable-kernels", "perclib-line-first-moment", "perclib-long-range-interface", "perclib-train10-models-longrange-rootindependence", "perclib-train10-models-longrange-cutoffpowerlaw"],
   "aliases": [
     "displacement kernel",
     "translation invariant",

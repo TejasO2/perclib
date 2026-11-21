@@ -9,6 +9,15 @@
   ],
   "sourceOccurrences": [
     {
+      "source": "hutchcroft-book",
+      "order": 29,
+      "label": "Russo's formula",
+      "locator": "Cited without locator; the book is unpublished.",
+      "relationship": "Credited source",
+      "status": "attribution only",
+      "note": "Results, arguments or exposition in this article taken from the book are credited to T. Hutchcroft, book in preparation."
+    },
+    {
       "source": "perclib-finite-polynomial",
       "order": 0,
       "label": "Homogeneous finite expectation polynomial",
@@ -99,7 +108,17 @@
       "note": "Complete file read at dfbc5b4f4e964374431189c682520bff85e008e6; no compiled or independently reviewed status inferred."
     }
   ],
-  "occursIn": [],
+  "occursIn": [
+    {
+      "order": 3,
+      "source": "hutchcroft-book",
+      "tag": "IENL",
+      "relationship": "generalization",
+      "edition": "In preparation",
+      "locator": "Cited without locator; the book is unpublished.",
+      "note": "Credited to T. Hutchcroft, book in preparation."
+    }
+  ],
   "proofUses": [
     {
       "order": 0,

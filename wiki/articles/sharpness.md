@@ -18,7 +18,8 @@
   ],
   "sourceIds": [
     "dct-sharpness",
-    "grimmett"
+    "grimmett",
+    "hutchcroft-book"
   ],
   "aliases": [
     "sharp phase transition",

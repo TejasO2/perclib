@@ -27,18 +27,22 @@ export function validateOccurrences(data, sources, assertions) {
   for (const row of data.occurrences) {
     if (
       !row ||
-      Object.keys(row).some((k) => !fields.includes(k)) ||
-      fields.some((k) => typeof row[k] !== "string" || !row[k].trim())
+      Object.keys(row).some((k) => !fields.includes(k))
     )
       throw Error("Concordance: invalid occurrence fields");
     const source = catalog.get(row.source);
     if (!source || !tags.has(row.tag) || !relationships.has(row.relationship))
       throw Error("Concordance: unknown source, tag or relationship");
-    const url = new URL(row.source_url);
+    // A source without a URL (an unpublished work) is cited without a link.
+    const required = source.url === undefined ? fields.filter((k) => k !== "source_url") : fields;
     if (
-      url.protocol !== "https:" ||
-      url.username ||
-      url.password ||
+      required.some((k) => typeof row[k] !== "string" || !row[k].trim()) ||
+      (source.url === undefined && "source_url" in row)
+    )
+      throw Error("Concordance: invalid occurrence fields");
+    const url = source.url === undefined ? null : new URL(row.source_url);
+    if (
+      (url && (url.protocol !== "https:" || url.username || url.password)) ||
       row.source_url !== source.url ||
       row.edition !== source.edition
     )
@@ -66,7 +70,7 @@ export function concordancePanel(rows, sources, assertions, evidence) {
       .map((row) => {
         const entry = evidence.entries?.get(row.tag),
           result = entry ? statusFor(entry, evidence.reviews) : null;
-        return `<div class="article-section"><h3><a href="/tag/${row.tag}/">${row.tag} · ${esc(tags.get(row.tag).title)}</a></h3><p><a href="/sources/${esc(row.source)}/">${esc(catalog.get(row.source).shortName)}</a> · <a href="${esc(row.source_url)}">${esc(row.edition)}</a></p><p>${esc(row.locator)}</p><p>${relationships.get(row.relationship)}. ${esc(row.note)}</p><p>Formal status: ${esc(result ? (result.status ?? "Compiled statement; correspondence pending") : "unavailable")}. ${result ? "Wiki/Lean correspondence review: " + esc(result.reviewState) + "." : ""}</p>${entry?.proof_status === "proved-modulo" ? "<p>Named inputs still to discharge:</p><ul>" + entry.inputs.map((input) => "<li><code>" + esc(input) + "</code></li>").join("") + "</ul>" : ""}</div>`;
+        return `<div class="article-section"><h3><a href="/tag/${row.tag}/">${row.tag} · ${esc(tags.get(row.tag).title)}</a></h3><p><a href="/sources/${esc(row.source)}/">${esc(catalog.get(row.source).shortName)}</a> · ${row.source_url ? `<a href="${esc(row.source_url)}">${esc(row.edition)}</a>` : esc(row.edition)}</p><p>${esc(row.locator)}</p><p>${relationships.get(row.relationship)}. ${esc(row.note)}</p><p>Formal status: ${esc(result ? (result.status ?? "Compiled statement; correspondence pending") : "unavailable")}. ${result ? "Wiki/Lean correspondence review: " + esc(result.reviewState) + "." : ""}</p>${entry?.proof_status === "proved-modulo" ? "<p>Named inputs still to discharge:</p><ul>" + entry.inputs.map((input) => "<li><code>" + esc(input) + "</code></li>").join("") + "</ul>" : ""}</div>`;
       })
       .join("") +
     "</section>"

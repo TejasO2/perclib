@@ -19,7 +19,8 @@
   ],
   "sourceIds": [
     "hutchcroft-triangle-2021",
-    "heydenreich-hofstad"
+    "heydenreich-hofstad",
+    "hutchcroft-book"
   ],
   "aliases": [
     "triangle diagram",

@@ -19,6 +19,7 @@
     "size-biased-laws"
   ],
   "sourceIds": [
+    "hutchcroft-book",
     "hutchcroft-lrp-1",
     "perclib-linear-ode-asymptotics",
     "perclib-gyration-ode",

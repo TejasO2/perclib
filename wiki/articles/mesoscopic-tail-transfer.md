@@ -8,7 +8,7 @@
   "summary": "Uniform negligibility of small cutoff clusters makes the cutoff-to-full comparison contractive. First and second moment bounds then yield two-sided power bounds for the full cluster tail, without assuming convergence to a limiting cluster law.",
   "context": ["Cutoff sizes $X_r$ are nonnegative with finite first and second moments.", "The cutoff mass scale is $r^\\kappa$, with $0<\\alpha<\\kappa$ and mean of order $r^\\alpha$.", "Negligibility and the cutoff-to-full comparison are explicit inputs, not consequences of moment orders alone."],
   "related": ["cutoff-hydrodynamics", "cutoff-localization", "size-biased-laws", "ghost-fields", "regular-variation"],
-  "sourceIds": ["hutchcroft-lrp-3", "hutchcroft-lrp-2", "perclib-reciprocal-ode", "perclib-mesoscopic-negligibility", "perclib-mass-transport-tuple"],
+  "sourceIds": ["hutchcroft-lrp-3", "hutchcroft-book", "hutchcroft-lrp-2", "perclib-reciprocal-ode", "perclib-mesoscopic-negligibility", "perclib-mass-transport-tuple"],
   "aliases": ["mesoscopic negligibility", "truncated first moment", "tail extraction", "low-dimensional volume tail"],
   "prototypeUses": []
 }

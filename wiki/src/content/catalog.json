@@ -1,6 +1,15 @@
 {
   "sources": [
     {
+      "id": "hutchcroft-book",
+      "shortName": "T. Hutchcroft, book in preparation",
+      "title": "Book in preparation",
+      "author": "T. Hutchcroft",
+      "edition": "In preparation",
+      "description": "A book in preparation by T. Hutchcroft. Articles that take results, arguments or exposition from it credit it as a source.",
+      "coverageNote": "Attribution only. The book is unpublished; the wiki credits it without locators and does not reproduce its text."
+    },
+    {
       "id": "grimmett",
       "shortName": "Grimmett",
       "title": "Percolation",

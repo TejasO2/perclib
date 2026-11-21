@@ -17,6 +17,7 @@
     "susceptibility"
   ],
   "sourceIds": [
+    "hutchcroft-book",
     "grimmett",
     "mathlib",
     "perclib-open-event-harris",

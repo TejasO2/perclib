@@ -8,7 +8,7 @@
   "summary": "Generating functions determine extinction and expected total progeny. Critical nondegeneracy and lattice support must be kept separate when interpreting the mean-field picture.",
   "context": ["Start from one individual: $Z_0=1$.", "Each individual has an independent copy of a nonnegative integer-valued offspring variable $\\xi$, with finite mean $m$.", "The offspring law is the same in every generation."],
   "related": ["exploration", "susceptibility", "subcritical-bound", "regular-variation"],
-  "sourceIds": ["perclib-offspring-generating-function", "perclib-laplace-tail", "perclib-offspring-transform", "perclib-quadratic-recursion"],
+  "sourceIds": ["hutchcroft-book", "perclib-offspring-generating-function", "perclib-laplace-tail", "perclib-offspring-transform", "perclib-quadratic-recursion"],
   "aliases": ["Galton–Watson", "offspring", "extinction", "total progeny", "mean field", "generating function"],
   "prototypeUses": []
 }

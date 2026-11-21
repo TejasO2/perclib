@@ -9,6 +9,15 @@
   ],
   "sourceOccurrences": [
     {
+      "source": "hutchcroft-book",
+      "order": 20,
+      "label": "Product percolation",
+      "locator": "Cited without locator; the book is unpublished.",
+      "relationship": "Credited source",
+      "status": "attribution only",
+      "note": "Results, arguments or exposition in this article taken from the book are credited to T. Hutchcroft, book in preparation."
+    },
+    {
       "source": "grimmett",
       "order": 0,
       "label": "The basic percolation model",
@@ -36,7 +45,26 @@
       "note": "The compiled Lrp.Probability.ProdBernoulli adapter reuses this foundation. A full correspondence with the bond-percolation article remains pending."
     }
   ],
-  "occursIn": [],
+  "occursIn": [
+    {
+      "order": 1,
+      "source": "hutchcroft-book",
+      "tag": "2ML7",
+      "relationship": "generalization",
+      "edition": "In preparation",
+      "locator": "Cited without locator; the book is unpublished.",
+      "note": "Credited to T. Hutchcroft, book in preparation."
+    },
+    {
+      "order": 2,
+      "source": "hutchcroft-book",
+      "tag": "8NWX",
+      "relationship": "generalization",
+      "edition": "In preparation",
+      "locator": "Cited without locator; the book is unpublished.",
+      "note": "Credited to T. Hutchcroft, book in preparation."
+    }
+  ],
   "proofUses": [
     {
       "order": 0,

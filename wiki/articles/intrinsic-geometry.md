@@ -8,7 +8,7 @@
   "summary": "A chosen shortest open path compares intrinsic-ball volume with susceptibility at a smaller intensity. An intrinsic-volume bound and a separate one-arm bound together control cluster-volume tails.",
   "context": ["A countable simple graph, with graph distance measured using open edges.", "The thinning comparison uses independent bonds with probabilities $1-e^{-\\beta J_e}$ and finite nonnegative weights.", "The intrinsic one-arm event is not increasing in the edge configuration."],
   "related": ["connectivity", "stopped-exploration", "integrated-lower-tails", "susceptibility"],
-  "sourceIds": ["perclib-intrinsic-balls", "perclib-intrinsic-growth", "hutchcroft-lrp-3"],
+  "sourceIds": ["hutchcroft-book", "perclib-intrinsic-balls", "perclib-intrinsic-growth", "hutchcroft-lrp-3"],
   "aliases": ["intrinsic distance", "intrinsic ball", "chemical distance", "intrinsic one-arm", "short-path thinning"],
   "prototypeUses": []
 }

@@ -17,6 +17,7 @@
     "sharpness"
   ],
   "sourceIds": [
+    "hutchcroft-book",
     "perclib-boundary-susceptibility",
     "perclib-susceptibility-derivative",
     "perclib-susceptibility-regularity",

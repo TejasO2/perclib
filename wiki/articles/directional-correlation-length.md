@@ -8,7 +8,7 @@
   "summary": "Harris makes minus the logarithm of the two-point function subadditive. Translation invariance then gives a directional decay rate, which can vanish even when susceptibility is finite.",
   "context": ["Independent bond percolation on a countable vertex set, with two-point function $\\tau(x,y)=\\mathbb P(x\\leftrightarrow y)$.", "For directional limits the vertices form a countable Abelian group and the two-point function is invariant under simultaneous translation.", "Logarithmic limits are taken only along directions whose connection probabilities are positive."],
   "related": ["harris-inequality", "lattice-path-growth", "displacement-kernels", "susceptibility", "critical-exponents", "cutoff-localization"],
-  "sourceIds": ["perclib-correlation-length"],
+  "sourceIds": ["perclib-correlation-length", "hutchcroft-book"],
   "aliases": ["inverse correlation length", "directional decay rate", "subadditivity", "Fekete", "exponential decay", "connection pseudometric"],
   "prototypeUses": ["harris-inequality", "lattice-path-growth"]
 }

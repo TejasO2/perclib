@@ -8,7 +8,7 @@
   "summary": "Double-factorial moment bounds control both weighted and ordinary exponential moments. Explicit Markov bounds retain their prefactors and yield a pure exponential estimate only in a stated large-threshold range.",
   "context": ["A nonnegative random variable $X$ with finite positive mean $\\chi$.", "The full moment hypothesis is $\\mathbb E X^m\\leq(2m-3)!!\\,\\chi^{2m-1}$ for every integer $m\\geq1$, with $(-1)!!=1$.", "For percolation, deriving these moment inequalities is a separate tree-graph argument."],
   "related": ["susceptibility", "sharpness", "disjoint-occurrence", "universal-tightness"],
-  "sourceIds": ["perclib-exponential-moment-series", "perclib-finite-range-decay", "perclib-tail-sums", "perclib-real-moment-ratios", "perclib-train10-percolation-bond-tightness-momentratio"],
+  "sourceIds": ["hutchcroft-book", "perclib-exponential-moment-series", "perclib-finite-range-decay", "perclib-tail-sums", "perclib-real-moment-ratios", "perclib-train10-percolation-bond-tightness-momentratio"],
   "aliases": ["exponential moment", "moment generating function", "tree-graph moments", "double factorial", "subcritical volume tail"],
   "prototypeUses": []
 }

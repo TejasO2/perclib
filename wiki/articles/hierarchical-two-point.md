@@ -18,7 +18,8 @@
     "cutoff-families"
   ],
   "sourceIds": [
-    "hutchcroft-hierarchical-2021"
+    "hutchcroft-hierarchical-2021",
+    "hutchcroft-book"
   ],
   "aliases": [
     "hierarchical lattice",

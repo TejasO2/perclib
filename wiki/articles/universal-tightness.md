@@ -18,7 +18,8 @@
     "finite-random-graphs"
   ],
   "sourceIds": [
-    "hutchcroft-powerlaw-2021"
+    "hutchcroft-powerlaw-2021",
+    "hutchcroft-book"
   ],
   "aliases": [
     "maximum cluster",

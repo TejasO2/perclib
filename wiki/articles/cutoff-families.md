@@ -18,6 +18,7 @@
     "exploration"
   ],
   "sourceIds": [
+    "hutchcroft-book",
     "hutchcroft-lrp-1",
     "hutchcroft-lrp-2"
   ],
