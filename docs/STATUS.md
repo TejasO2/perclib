@@ -1,7 +1,8 @@
 # Status
 
 Handoff file for the coordinator (the LEAD role of D-34). Last updated 21 November 2026,
-05:12 UTC, at the end of coordinator round 6 (eighth coordinator; one gated batch, wiki records only). A coordinator with no
+05:14 UTC, at the end of coordinator round 7 (ninth coordinator; nothing mergeable, so no gate and no
+merge this round: two done markers became audit briefs). A coordinator with no
 memory resumes from this file, [COORDINATOR.md](COORDINATOR.md) (the procedure for one
 round), [COORDINATION.md](COORDINATION.md) (worker rules), [DECISIONS.md](DECISIONS.md)
 (D-34, D-35, D-36, D-37) and `/home/user/reports/RULINGS.md` (container-local rulings 1-10;
@@ -10,6 +11,10 @@ durability, ruling 9i) in the private repository under `lrp/docs/reports/` at th
 lrp commit; `/home/user/reports/` stays the live copy.
 ## Integration tip and gate
 
+- **Round 7:** no merge, no gate (the two packages finished this round both need a fresh audit first).
+  The tip is the round-7 STATUS commit on top of `f9ecd72`; last gated commit still `41b1762`, last
+  gated commit with Lean changes still `2957b5a`. The next gate on a Lean merge is
+  `scripts/gate.sh 2957b5a` (or `41b1762`; both extracts are saved).
 - Branch `claude/zen-lovelace-rvlcw2` in both repositories. Pushed:
   `origin/claude/zen-lovelace-rvlcw2` = the commit of this STATUS file. Last gated commit
   **`41b1762`** (merge of `work/wiki-proof-uses-frozen`); after it `98ea558` (FRONTIER regenerated)
@@ -75,6 +80,9 @@ and untracks them); delete `scripts/__pycache__/frontier.*.pyc` after `frontier.
 
 ## Progress (D-35 measure)
 
+Round 7: nothing merged, so **0 new assertions proved and 0 tagged statements audited** (FCU7's
+first audit approved but is not counted: not fresh, see below). Manifest unchanged: 263 proved.
+
 Round 6: no Lean merged, so **0 new assertions proved and 0 tagged statements audited**; manifest at
 `41b1762`: 263 proved, 5 statement-only, 1,133 unformalised, of 1,401 (unchanged). Frontier 287 → 303
 ready (the frozen records' `proofUses`).
@@ -100,6 +108,8 @@ fresh statement audit. Also on file: `audit-driven-ode-I421` (Lemma I.4.21 prove
 `Analysis/DrivenODE.lean`; counts once a wiki assertion exists and is tagged: `013-wiki-I421`).
 
 ## Merged
+
+Round 7 (ninth coordinator): nothing.
 
 Round 6 (eighth coordinator), one gated batch, pushed:
 - `wiki-proof-uses-frozen` (`ec9bfab`, merge `41b1762`): 20 `proofUses` rows (9 of them `[]`, all
@@ -201,6 +211,16 @@ hierarchical H0-H4 and H6, salvage, D-33 ports, link tags, `nm-analysis`, `d35-b
   §5 questions (tagged statements gaining a "Let d ≥ 1 …" clause; nested collapsibles for long steps;
   book credit: the private record credits no result on this page to the draft; stale record rows
   S7, `proofUses[1].reason` for W498) go to Tom with the critic's view.
+- **Round 7, `work/wiki-fcu7`:** `audit-wiki-fcu7` (done 05:11) gives **APPROVE** for statement, prose
+  and records (binder table all SOURCE/TYPING; DT15 arXiv:1502.03051v1 Thm 1.1; `npm test` 100/100 and
+  `check-articles.mjs` on an export of `533cd38`), optional follow-up `dt-sharpness-zd` in `sourceIds`.
+  But the auditor **disclosed that its first command printed the author's report**. Under the
+  precedent for judgement (non-compiled) audits (`audit-wiki-hier-thm11`, `audit-wiki-I421`) the
+  approval is not fresh, so `037-audit-wiki-fcu7-r2` (second fresh auditor, told not to read either
+  report and not to glob-print `/home/user/reports/`) was queued. **On its APPROVE: merge
+  `work/wiki-fcu7`** (wiki only; `git diff --quiet 533cd38 HEAD -- wiki/articles/sharpness.md` etc.
+  after the merge), gate, push. If ARCHITECT accepts disclosed-but-grounded approvals, merge on the
+  first audit instead.
 - `work/wiki-fcu7` (`533cd38`, done 04:45): FCU7 is now the precise statement p̃_c = p_c
   (Duminil-Copin–Tassion arXiv:1502.03051 Thm 1.1), new catalogue entry `dt-sharpness-zd`, one
   occurrence row, one baseline digest. Tagged statement changed: `026-audit-wiki-fcu7` queued (diff and
@@ -254,6 +274,14 @@ hierarchical H0-H4 and H6, salvage, D-33 ports, link tags, `nm-analysis`, `d35-b
   the audit decides.
 - `work/nm-longrange` (e4e9b59; ZH13, R01V): `HOLD-fix-nm-longrange` after the window (it must
   now also respell row sums with `rowSum`).
+- **Round 7, `work/fix-workflows-r2`** (`0166c52`, done 05:10): CW1 (no `.lake/build` cache restore or
+  save on pull-request runs), CW2 option (a) (`ci_script_tests.sh` skips `test_manifest.py`, which runs
+  in the gate job after the gate), AM1 (`where` / `let rec` rejected per line, plus a command-level
+  `let rec` rule for `let`⏎`rec`, beyond the audit's wording, fails closed); author reports 40
+  classifier tests and the CI helper tests passing (not re-run by the coordinator). Branch merges the tip
+  `98ea558` (9bdc8e3). The third audit was released as **`036-audit-fix-workflows-r2`**. On APPROVE:
+  merge `work/fix-scanner-r2` then `work/fix-workflows-r2`, gate, then contrib-docs and task-board as
+  below.
 - `work/fix-scanner-r2` (`cf87858` on `5e3643c`, done 05:08): GS1/GS2 of `audit-fix-workflows`
   applied (elaboration-time commands and elaborator-registering attributes now forbidden; 2 new tests,
   11 pass; tree scan clean). Waits, with `work/fix-workflows-r2` (in flight), for
@@ -292,8 +320,12 @@ hierarchical H0-H4 and H6, salvage, D-33 ports, link tags, `nm-analysis`, `d35-b
 
 ## In flight
 
-Claims without a done marker at 05:12 (judged live by claim time): **`mig-linters`** (claimed 04:58,
-the only Lean work; worktree `/home/user/wt/mig-linters` at `cfb7144`),
+Claims without a done marker at 05:14 (round 7): **`mig-linters`** (claimed 04:58, the only Lean work;
+worktree `/home/user/wt/mig-linters` at `cfb7144`, uncommitted edits to many `PercLib/` files modified
+within the last 15 min: live), `wiki-errata-bookkeeping` (five errata files, claimed 05:07),
+`audit-wiki-proofs-brw`, `audit-wiki-proofs-susc` (read-only, claimed round 7). Done in round 7 and
+consumed: `fix-workflows-r2`, `audit-wiki-fcu7`.
+Round 6's list: `mig-linters`,
 `fix-workflows-r2` (tooling: workflows and scripts), `wiki-errata-bookkeeping` (five errata
 files), `audit-wiki-fcu7` (read-only); all claimed during round 6. Done during round 6 and consumed:
 `scout-errata-triage-b`, `audit-wiki-I421`, `scout-frontier-next`, `fix-scanner-r2`.
@@ -333,6 +365,14 @@ All prover briefs carry `HOLD-`. Non-Lean and read-only briefs stay startable. S
 
 Claimed briefs stay in the queue directory (never delete a claimed brief); a brief is
 startable when it has no `HOLD-` prefix and no `claims/<id>`.
+**Startable at 05:14, round 7 (9, all non-Lean, mutually file-disjoint and disjoint from the claims):**
+`029-audit-wiki-proofs-misc`, `030-wiki-runaway-split-1`, `031-audit-wiki-model-hier-two-point`,
+`032-critic-reread-hierarchical-two-point`, `033-fix-wiki-I421`, `034-wiki-errata-bookkeeping-b`,
+`035-tooling-manifest-setdefs`, **`036-audit-fix-workflows-r2`** (released from HOLD this round: both
+targets done), **`037-audit-wiki-fcu7-r2`** (new). Claimed in round 7: `027`, `028`. Held unchanged:
+`HOLD-audit-wiki-I421-r2` (after 033), `HOLD-031-critic-regular-variation` (after 032), all Lean
+prover briefs (window), `HOLD-fix-nm-longrange`, `HOLD-audit-nm-*`.
+Round 6's list, for reference:
 **Startable at 05:12 (9, all non-Lean, mutually file-disjoint and disjoint from the claims):**
 new in round 6: `027-audit-wiki-proofs-brw`,
 `028-audit-wiki-proofs-susc`, `029-audit-wiki-proofs-misc` (read-only audits, diff and sources, not
@@ -418,6 +458,16 @@ the frozen `sharpness` and `hierarchical-two-point` records after `014`/`015` me
 `task-board` merges. Wiki revisions of frozen articles must update `migration-baseline.json`.
 
 ## For ARCHITECT
+
+- Round 7 (ninth coordinator): the launch instructions again said "never main, no PRs/issues"; no pull
+  request opened, open pull requests/issues not read. Window reading unchanged (non-Lean briefs stay
+  startable).
+- Round 7: **audit freshness.** Three of the last six judgement audits disclosed that the author's
+  report was printed by their first command (`audit-wiki-hier-thm11`, `audit-wiki-I421`,
+  `audit-wiki-fcu7`). The coordinator keeps the precedent (approval not counted, second fresh audit
+  queued: `037-audit-wiki-fcu7-r2`) and now tells auditors not to glob-print `/home/user/reports/`.
+  A structural fix would be to keep author reports outside the directory auditors read (e.g.
+  `/home/user/reports/authors/`); that changes QUEUE.md's hand-off path, so it is your call.
 
 - Round 6 (eighth coordinator): the launch instructions again said "never main, no PRs/issues"; no pull
   request opened, open pull requests/issues not read (item "Pull requests to `main`" below unchanged).
@@ -566,6 +616,10 @@ the frozen `sharpness` and `hierarchical-two-point` records after `014`/`015` me
   add `/PercLib/**/Tags/` (and area `Defs`) to CODEOWNERS or accept this knowingly. Also check
   once that each action SHA pinned in the workflows is the tag it names (N4).
 ## Lessons
+
+- **Round 7:** nothing new was done at the start; within one minute of waiting two markers arrived
+  (`fix-workflows-r2`, `audit-wiki-fcu7`), both leading to audit briefs, no merge. Claims are fast
+  again (two audits claimed within a minute of the round's start).
 
 - **Round 6:** six done markers were waiting at the start (four wiki branches with mathematical or
   tagged content needing audits, one records-only branch, one critique), and a seventh arrived during
