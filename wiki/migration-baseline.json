@@ -206,7 +206,7 @@
     },
     "hierarchical-two-point": {
       "prototypeId": "PC-000110",
-      "metadataSha256": "16b8afe8631d5acce549b6334b9f10304778c0ed9622e2735d0c00fa232fe99b",
+      "metadataSha256": "411751ac32db95f83d84484f82da301fbbea2b7f94fbd00021e541a76f5bf3f3",
       "sections": {
         "model": {
           "title": "The hierarchical geometry",
@@ -214,7 +214,7 @@
         },
         "statement": {
           "title": "The critical estimate",
-          "sha256": "4698760ff67d2e312d71a1a99d1de45d79ccddcf93be2f35081d640a4c30aaa4"
+          "sha256": "dce10bd8235aae0f64ec67dd83fec5651fb99aacf54e2f1913f40e67c67bf379"
         },
         "consequence": {
           "title": "A ball susceptibility calculation",

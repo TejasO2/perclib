@@ -50,5 +50,26 @@
     }
   ],
   "occursIn": [],
-  "proofUses": []
+  "proofUses": [
+    {
+      "order": 0,
+      "tag": "J98J",
+      "proof_uses": [
+        "7AER",
+        "FF30",
+        "12NL",
+        "655W",
+        "7YNX"
+      ],
+      "reason": "The upper envelope gives a finite row sum, so FF30 supplies a finite positive critical intensity with bounds depending only on d, L, alpha, c, C, subcritical finiteness and boundary flux; 12NL supplies rooted damping. Then 655W and 7YNX give pointwise shell bounds at the critical intensity with uniform constants, and summing over shells gives the averaged bounds."
+    },
+    {
+      "order": 1,
+      "tag": "W498",
+      "proof_uses": [
+        "J98J"
+      ],
+      "reason": "Source route: for a radial kernel the level isometries make both connection probabilities constant on each shell, so the averaged bounds of J98J become pointwise bounds; translation reduces a general pair to the origin."
+    }
+  ]
 }
