@@ -301,6 +301,7 @@ public import PercLib.Probability.GeneratingFunction
 public import PercLib.Probability.GhostTransform
 public import PercLib.Probability.Harris
 public import PercLib.Probability.HarrisDecreasing
+public import PercLib.Probability.IntegratedLowerTail
 public import PercLib.Probability.InvariantTrace
 public import PercLib.Probability.LaplaceTail
 public import PercLib.Probability.LayerCake
@@ -337,6 +338,7 @@ public import PercLib.Probability.Tags.ExponentialMoments
 public import PercLib.Probability.Tags.FiniteCoordinates
 public import PercLib.Probability.Tags.GhostTransform
 public import PercLib.Probability.Tags.Harris
+public import PercLib.Probability.Tags.IntegratedLowerTail
 public import PercLib.Probability.Tags.ProductModel
 public import PercLib.Probability.Tags.ProfileContinuity
 public import PercLib.Probability.Tags.RevealmentDerivative
