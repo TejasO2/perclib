@@ -21,17 +21,18 @@ Configurations `Config V = Set (Sym2 V)` are ordered by inclusion (mathlib's ord
    is a monotone observable.)
 2. Every connection event `conn x y` is increasing (`isUpperSet_conn`,
    `PercLib/Probability/OpenEventHarris.lean`; `conn_mono`, `PercLib/Percolation/Bond/Basic.lean`).
-3. Measurability is a separate fact: for countable `V`, `conn x y` is measurable
-   (`measurableSet_conn`, `PercLib/Percolation/Bond/Basic.lean`).
+
+Measurability is not part of the assertion (H4OA only remarks that it must be proved
+separately); the docstring may mention it with a pointer to `measurableSet_conn`
+(`PercLib/Percolation/Bond/Basic.lean`).
 
 Sketch:
 ```lean
-theorem increasing_conn_and_measurable (x y : V) :
+theorem isUpperSet_conn_and_monotone_indicator (x y : V) :
     IsUpperSet (conn x y : Set (Config V)) ∧
-    Monotone ((conn x y : Set (Config V)).indicator (1 : Config V → ℝ)) ∧
-    ([Countable V] → MeasurableSet (conn x y : Set (Config V)))
+    Monotone ((conn x y : Set (Config V)).indicator (1 : Config V → ℝ))
 ```
-(The binder for `Countable` may go outside; keep the statement faithful.) Search mathlib for the
+Search mathlib for the
 indicator lemma (`Set.indicator_le_indicator_of_subset`, `IsUpperSet`) before writing one.
 
 ## Owned files

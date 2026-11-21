@@ -17,7 +17,9 @@ equivariant rule picks a single vertex out of an infinite cluster. They share on
 one set of helper lemmas, so they form one task.
 
 ## Target
-Setting: a countable group `Γ`, a measure space `(Ω, μ)`, measure-preserving maps
+Setting: a countable group `Γ`, a probability space `(Ω, μ)` (`μ` a probability measure, matching
+the wiki's "under an invariant random-graph-and-mark law"; 4SZ9 may be stated for any measure
+`μ`, O0TO needs `IsProbabilityMeasure μ`), measure-preserving maps
 `act g : Ω → Ω` (as in `lintegral_mass_transport`), and a measurable random configuration
 `G : Ω → Config Γ` that is equivariant: `G (act g ω) = Sym2.map (g * ·) '' G ω`. (Auxiliary marks
 live in `Ω`.) Write `K_x(ω) = cluster (G ω) x`.

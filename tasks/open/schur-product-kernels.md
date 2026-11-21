@@ -12,8 +12,8 @@ labels: []
 Prove wiki assertion **TAB8** (article `connection-kernels`) and tag it: the entrywise (Schur)
 product of two positive semidefinite kernels on a countable set is positive semidefinite, and
 for bounded kernels `‖S ∘ T‖ ≤ ‖S‖ ‖T‖`. The connection-kernel positivity results build on these
-two facts. (The connection-kernel assertions `70KD` and `UZ7J` themselves belong to the
-lace-expansion area and are not part of this task.)
+two facts. `70KD` and `UZ7J` are covered by the claimed task `connection-kernel-tags` and are
+not part of this task.
 
 ## Target
 Kernels are functions `S T : V → V → ℝ` on a countable type `V`; `S ∘ T` is `(x,y) ↦ S x y * T x y`.
