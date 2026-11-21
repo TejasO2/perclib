@@ -8,6 +8,8 @@ labels: []
 
 # Holley's inequality for increasing observables
 
+Being done by the project's own agents; do not start it.
+
 ## Goal
 Prove wiki assertion **KB49** (article `harris-inequality`) in full and tag it. The library has
 Holley's comparison for increasing **events** (`measure_le_of_holley`,

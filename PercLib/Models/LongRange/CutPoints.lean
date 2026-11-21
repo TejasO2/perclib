@@ -11,9 +11,7 @@ and summability). The model is the canonical set of unordered open pairs.
 module
 
 public import PercLib.Percolation.Bond.Basic
-public import PercLib.Probability.ProdBernoulliIndependence
-public import Mathlib.Analysis.SpecialFunctions.Log.Summable
-public import Mathlib.Topology.Algebra.InfiniteSum.Real
+public import PercLib.Probability.ClosedProduct
 
 /-!
 # Cut points for one-dimensional long-range percolation
@@ -73,31 +71,6 @@ theorem finite_cluster_of_cuts (ω : Config ℤ) {k₁ k₂ : ℤ} (h₁ : k₁ 
     (hc₁ : IsCut ω k₁) (hc₂ : IsCut ω k₂) :
     (cluster ω 0).Finite :=
   (Set.finite_Ioc k₁ k₂).subset (cluster_subset_of_cuts ω h₁ h₂ hc₁ hc₂)
-
-/-- Closed coordinates in a countable, injectively indexed family have the product law. -/
-theorem prodBernoulli_forall_notMem {ι α : Type*} [Countable α]
-    (p : ι → unitInterval) (f : α → ι) (hf : Function.Injective f) :
-    prodBernoulli p {ω | ∀ a, f a ∉ ω} =
-      ∏' a, (unitInterval.toNNReal (unitInterval.symm (p (f a))) : ℝ≥0∞) := by
-  classical
-  rw [prodBernoulli_eq_map, Measure.map_apply (show Measurable (fun q : ι → Prop => {i | q i}) from
-      by fun_prop)
-    (by simpa only [Set.ofPred_forall, Set.compl_ofPred] using
-      MeasurableSet.iInter (fun a => (measurableSet_mem (f a)).compl))]
-  have hset : (fun q : ι → Prop => {i | q i}) ⁻¹' {ω | ∀ a, f a ∉ ω} =
-      Set.pi (Set.range f) (fun _ => {False}) := by
-    ext q
-    simp only [Set.mem_preimage, Set.mem_ofPred_eq, Set.mem_pi, Set.mem_range,
-      Set.mem_singleton_iff, forall_exists_index, forall_apply_eq_imp_iff]
-    simp
-  rw [hset]
-  refine (Measure.infinitePi_pi_of_countable
-    (μ := fun i => bernoulliMeasure True False (p i))
-    (Set.countable_range f) (t := fun _ => {False}) (by measurability)).trans ?_
-  rw [← (Equiv.ofInjective f hf).tprod_eq]
-  apply tprod_congr
-  intro a
-  simp
 
 /-- The parametrization by length and left-endpoint offset never repeats an unordered pair. -/
 theorem cut_pair_injective (k : ℤ) :
@@ -167,28 +140,6 @@ theorem law_cut_eq_tprod (p : ℕ → unitInterval) (q : Sym2 ℤ → unitInterv
     _ = _ := (hn.map_tprod ENNReal.ofNNRealHom ENNReal.continuous_coe).trans
       (tprod_congr (fun n => ENNReal.coe_pow _ _))
 
-private theorem closed_product_pos {α : Type*} (p : α → unitInterval)
-    (hs : Summable (fun a => (p a : ℝ))) (hlt : ∀ a, p a < 1) :
-    0 < ∏' a, (unitInterval.toNNReal (unitInterval.symm (p a)) : ℝ≥0∞) := by
-  classical
-  have hnonneg (a) : 0 ≤ 1 - (p a : ℝ) := sub_nonneg.mpr (p a).property.2
-  have hpos (a) : 0 < 1 - (p a : ℝ) := sub_pos.mpr (by exact_mod_cast hlt a)
-  have hlog : Summable (fun a => Real.log (1 - (p a : ℝ))) := by
-    simpa only [sub_eq_add_neg] using Real.summable_log_one_add_of_summable hs.neg
-  have hp := Real.hasProd_of_hasSum_log hpos hlog.hasSum
-  have hp' : HasProd (fun a => ENNReal.ofReal (1 - (p a : ℝ)))
-      (ENNReal.ofReal (Real.exp (∑' a, Real.log (1 - (p a : ℝ))))) := by
-    unfold HasProd at *
-    convert (ENNReal.continuous_ofReal.tendsto _).comp hp using 1
-    ext F
-    simp [ENNReal.ofReal_prod_of_nonneg (fun a _ => hnonneg a)]
-  have heq (a) : (unitInterval.toNNReal (unitInterval.symm (p a)) : ℝ≥0∞) =
-      ENNReal.ofReal (1 - (p a : ℝ)) := by
-    exact ENNReal.ofReal_coe_nnreal.symm
-  simp_rw [heq]
-  rw [hp'.tprod_eq]
-  exact ENNReal.ofReal_pos.mpr (Real.exp_pos _)
-
 /-- A summable weighted distance profile with no certain positive-length bond has a positive cut
 probability. -/
 theorem law_cut_pos (p : ℕ → unitInterval) (q : Sym2 ℤ → unitInterval)
@@ -200,40 +151,13 @@ theorem law_cut_pos (p : ℕ → unitInterval) (q : Sym2 ℤ → unitInterval)
   have hdist (z : Σ n : ℕ, Fin n) :
       k + (z.1 : ℤ) - (z.2.val : ℤ) - (k - (z.2.val : ℤ)) = z.1 := by omega
   simp_rw [hq, hdist, Int.natAbs_natCast]
-  apply closed_product_pos
+  apply tprod_symm_pos_of_summable
   · rw [summable_sigma_of_nonneg (fun z => (p z.1).property.1)]
     constructor
     · intro n; exact (hasSum_fintype _).summable
     · simpa [tsum_fintype] using hsum
   · intro ⟨n, i⟩
     exact hlt n (by have := i.isLt; omega)
-
-private theorem summable_of_closed_product_pos {α : Type*} (p : α → unitInterval)
-    (hpos : 0 < ∏' a, (unitInterval.toNNReal (unitInterval.symm (p a)) : ℝ≥0∞)) :
-    Summable (fun a => (p a : ℝ)) := by
-  classical
-  let P := ∏' a, (unitInterval.toNNReal (unitInterval.symm (p a)) : ℝ≥0∞)
-  have hle (a) : (unitInterval.toNNReal (unitInterval.symm (p a)) : ℝ≥0∞) ≤ 1 := by
-    exact_mod_cast (unitInterval.symm (p a)).property.2
-  have hP : P ≤ 1 := tprod_le_one hle
-  have hPr : 0 < P.toReal := ENNReal.toReal_pos (ne_of_gt hpos) (ne_top_of_le_ne_top (by simp) hP)
-  apply summable_of_sum_le (fun a => (p a).property.1) (c := -Real.log P.toReal)
-  intro F
-  have hF : P ≤ ∏ a ∈ F, (unitInterval.toNNReal (unitInterval.symm (p a)) : ℝ≥0∞) := by
-    dsimp [P]
-    rw [ENNReal.tprod_eq_iInf_prod hle]
-    exact iInf_le _ F
-  have hFr : P.toReal ≤ ∏ a ∈ F, (1 - (p a : ℝ)) := by
-    have h := ENNReal.toReal_mono (ENNReal.prod_ne_top (fun _ _ => ENNReal.coe_ne_top)) hF
-    simpa only [ENNReal.toReal_prod, ENNReal.coe_toReal, unitInterval.coe_toNNReal,
-      unitInterval.coe_symm_eq] using h
-  have hexp : (∏ a ∈ F, (1 - (p a : ℝ))) ≤ Real.exp (-∑ a ∈ F, (p a : ℝ)) := by
-    rw [← Finset.sum_neg_distrib, Real.exp_sum]
-    exact Finset.prod_le_prod₀ (fun a _ => sub_nonneg.mpr (p a).property.2)
-      (fun a _ => Real.one_sub_le_exp_neg _)
-  have hlog := Real.log_le_log hPr (hFr.trans hexp)
-  rw [Real.log_exp] at hlog
-  linarith
 
 /-- Divergence of the weighted sum forces every gap-cut probability to vanish. -/
 theorem law_cut_eq_zero_of_not_summable (p : ℕ → unitInterval) (q : Sym2 ℤ → unitInterval)
@@ -245,7 +169,7 @@ theorem law_cut_eq_zero_of_not_summable (p : ℕ → unitInterval) (q : Sym2 ℤ
       k + (z.1 : ℤ) - (z.2.val : ℤ) - (k - (z.2.val : ℤ)) = z.1 := by omega
   simp_rw [hq, hdist, Int.natAbs_natCast]
   by_contra h
-  have hs := summable_of_closed_product_pos (fun z : Σ n : ℕ, Fin n => p z.1)
+  have hs := summable_of_tprod_symm_pos (fun z : Σ n : ℕ, Fin n => p z.1)
       (lt_of_le_of_ne bot_le (Ne.symm h))
   rw [summable_sigma_of_nonneg (fun z => (p z.1).property.1)] at hs
   exact hsum (by simpa [tsum_fintype] using hs.2)

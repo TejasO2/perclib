@@ -9,6 +9,7 @@ New proofs, written on 2026-11-15. No upstream proof is copied.
 module
 
 public import PercLib.Percolation.Bond.LocalConnectivity
+public import PercLib.Probability.ClosedProduct
 public import PercLib.Probability.ProdBernoulliIndependence
 public import PercLib.Probability.DeterminedIndependence
 
@@ -22,6 +23,12 @@ boundary pairs, so `P(K_x = C)` factors (`law_cluster_eq_finset`). The event `{K
 depends only on pairs meeting `C`, so it is independent of every event determined by the
 outer pairs (`law_cluster_eq_inter`, the domain Markov property).
 
+In the spelling with `localConn`, the identity `{K_x = C} = I_C ∩ D_C` holds for every set
+`C ∋ x` on any vertex type (`setOf_cluster_eq_eq_inter`). On a countable vertex type the
+factorization holds for every `C ∋ x` (`law_cluster_eq_eq_mul`), and the closed-boundary
+probability is the infinite product of the closed probabilities of the boundary pairs
+(`law_boundary_closed_eq_tprod`).
+
 This file adds no definition. The independence of events determined by disjoint coordinate sets is
 used through a private lemma; `PercLib/Probability/DeterminedIndependence.lean` proves a public
 version.
@@ -30,6 +37,7 @@ version.
 @[expose] public section
 
 open MeasureTheory Set PercLib.Probability
+open scoped ENNReal
 
 namespace PercLib.Percolation.Bond
 
@@ -179,6 +187,143 @@ theorem law_cluster_eq_inter_localConn_compl [Countable V] (q : Sym2 V → unitI
         law q {ω | ((openGraph ω).induce ((C : Set V)ᶜ)).Reachable y z} :=
   law_cluster_eq_inter q x C hx (measurableSet_setOf_reachable_induce _ y z) fun _ _ h =>
     localConn_iff_of_agree _ y z fun a ha b hb => h a ha b hb
+
+/-! ### The finite-cluster law in the `localConn` spelling -/
+
+/-- **The cluster of `x` is a set `C ∋ x`** exactly when every vertex of `C` is connected to
+`x` inside `C` and no pair from `C` to its complement is open. No finiteness or countability
+is needed. -/
+theorem cluster_eq_iff_forall_localConn (ω : Config V) {x : V} {C : Set V} (hx : x ∈ C) :
+    cluster ω x = C ↔
+      (∀ y ∈ C, ω ∈ localConn C x y) ∧ ∀ u ∈ C, ∀ v ∉ C, s(u, v) ∉ ω := by
+  classical
+  constructor
+  · intro h
+    refine ⟨fun y hy => ?_, fun u hu v hv huv => ?_⟩
+    · have hxy : (openGraph ω).Reachable x y := by
+        have : y ∈ cluster ω x := by rw [h]; exact hy
+        exact this
+      obtain ⟨w⟩ := hxy
+      have hw : ∀ z ∈ w.support, z ∈ C := fun z hz => by
+        rw [← h]
+        exact ⟨w.takeUntil z hz⟩
+      exact ⟨hx, hy, ⟨w.induce C hw⟩⟩
+    · have hne : u ≠ v := fun e => hv (e ▸ hu)
+      have hu' : (openGraph ω).Reachable x u := by
+        have : u ∈ cluster ω x := by rw [h]; exact hu
+        exact this
+      have hv' : v ∈ cluster ω x :=
+        hu'.trans (SimpleGraph.Adj.reachable ((openGraph_adj_iff ω u v).2 ⟨huv, hne⟩))
+      rw [h] at hv'
+      exact hv hv'
+  · rintro ⟨hin, hbd⟩
+    ext v
+    constructor
+    · intro hv
+      change (openGraph ω).Reachable x v at hv
+      rw [SimpleGraph.reachable_iff_reflTransGen] at hv
+      induction hv with
+      | refl => exact hx
+      | @tail w z _ hadj ih =>
+        by_contra hz
+        rw [openGraph_adj_iff] at hadj
+        exact hbd w ih z hz hadj.1
+    · intro hv
+      exact (mem_cluster_iff ω x v).2 (localConn_subset_conn C x v (hin v hv))
+
+/-- **`{K_x = C} = I_C ∩ D_C`** for every set `C ∋ x`, as an identity of events. -/
+theorem setOf_cluster_eq_eq_inter {x : V} {C : Set V} (hx : x ∈ C) :
+    {ω : Config V | cluster ω x = C} =
+      {ω : Config V | ∀ y ∈ C, ω ∈ localConn C x y} ∩
+        {ω : Config V | ∀ u ∈ C, ∀ v ∉ C, s(u, v) ∉ ω} := by
+  ext ω
+  exact cluster_eq_iff_forall_localConn ω hx
+
+/-- The internal connection event `I_C` of a countable set is measurable, whatever the
+cardinality of the vertex type. -/
+theorem measurableSet_setOf_forall_localConn (x : V) {C : Set V} (hC : C.Countable) :
+    MeasurableSet {ω : Config V | ∀ y ∈ C, ω ∈ localConn C x y} := by
+  have : Countable C := hC.to_subtype
+  have hset : {ω : Config V | ∀ y ∈ C, ω ∈ localConn C x y} = ⋂ y ∈ C, localConn C x y := by
+    ext ω
+    simp
+  rw [hset]
+  exact MeasurableSet.biInter hC fun y _ => measurableSet_localConn C x y
+
+/-- The closed-boundary event `D_C` is measurable on a countable vertex type. -/
+theorem measurableSet_setOf_boundary_closed [Countable V] (C : Set V) :
+    MeasurableSet {ω : Config V | ∀ u ∈ C, ∀ v ∉ C, s(u, v) ∉ ω} := by
+  simp only [ofPred_forall]
+  exact MeasurableSet.iInter fun u => MeasurableSet.iInter fun _ =>
+    MeasurableSet.iInter fun v => MeasurableSet.iInter fun _ => (measurableSet_mem _).compl
+
+/-- The event `{K_x = C}` is measurable on a countable vertex type, for every set `C`. -/
+theorem measurableSet_setOf_cluster_eq [Countable V] (x : V) (C : Set V) :
+    MeasurableSet {ω : Config V | cluster ω x = C} := by
+  by_cases hx : x ∈ C
+  · rw [setOf_cluster_eq_eq_inter hx]
+    exact (measurableSet_setOf_forall_localConn x C.to_countable).inter
+      (measurableSet_setOf_boundary_closed C)
+  · have : {ω : Config V | cluster ω x = C} = ∅ :=
+      Set.eq_empty_of_forall_notMem fun ω (h : cluster ω x = C) =>
+        hx (h ▸ (SimpleGraph.Reachable.refl x : x ∈ cluster ω x))
+    rw [this]
+    exact MeasurableSet.empty
+
+/-- **The law of a cluster** on a countable vertex type: for every set `C ∋ x`,
+`P(K_x = C) = P(I_C) P(D_C)`, since `I_C` and `D_C` depend on disjoint sets of pairs. -/
+theorem law_cluster_eq_eq_mul [Countable V] (q : Sym2 V → unitInterval) {x : V} {C : Set V}
+    (hx : x ∈ C) :
+    law q {ω : Config V | cluster ω x = C} =
+      law q {ω : Config V | ∀ y ∈ C, ω ∈ localConn C x y} *
+        law q {ω : Config V | ∀ u ∈ C, ∀ v ∉ C, s(u, v) ∉ ω} := by
+  rw [setOf_cluster_eq_eq_inter hx]
+  refine PercLib.Probability.prodBernoulli_inter_of_determined_inter q {e | ∀ v ∈ e, v ∈ C}
+    {e | ∃ u ∈ C, ∃ v ∉ C, e = s(u, v)} ?_ (measurableSet_setOf_forall_localConn x C.to_countable)
+    (measurableSet_setOf_boundary_closed C) ?_ ?_
+  · refine Set.disjoint_left.2 fun e he ⟨u, _, v, hv, huv⟩ => hv (he v ?_)
+    rw [huv]; exact Sym2.mem_mk_right u v
+  · intro ω
+    simp only [mem_ofPred_eq]
+    refine forall_congr' fun y => forall_congr' fun hy => ?_
+    rw [mem_localConn_iff_reachable hx hy, mem_localConn_iff_reachable hx hy]
+    refine localConn_iff_of_agree C ⟨x, hx⟩ ⟨y, hy⟩ fun a ha b hb => ?_
+    have : s(a, b) ∈ {e : Sym2 V | ∀ v ∈ e, v ∈ C} := by
+      intro v hv
+      rcases Sym2.mem_iff.1 hv with rfl | rfl
+      · exact ha
+      · exact hb
+    simp [this]
+  · intro ω
+    simp only [mem_ofPred_eq, mem_inter_iff]
+    refine forall_congr' fun u => forall_congr' fun hu => forall_congr' fun v =>
+      forall_congr' fun hv => ?_
+    simp only [not_and]
+    exact ⟨fun h hm => absurd hm h, fun h hm => h hm ⟨u, hu, v, hv, rfl⟩⟩
+
+/-- Boundary pairs, indexed with their endpoint in `C` first, are distinct unordered pairs. -/
+theorem injective_sym2_mk_boundary (C : Set V) :
+    Function.Injective fun z : {z : V × V // z.1 ∈ C ∧ z.2 ∉ C} => s(z.1.1, z.1.2) := by
+  rintro ⟨⟨a, b⟩, ha, hb⟩ ⟨⟨c, d⟩, hc, hd⟩ h
+  rcases Sym2.eq_iff.1 h with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
+  · rfl
+  · exact absurd ha hd
+
+/-- **The closed-boundary probability** on a countable vertex type is the infinite product of
+the closed probabilities of the boundary pairs, each indexed once with its endpoint in `C`
+first. It may be zero. -/
+theorem law_boundary_closed_eq_tprod [Countable V] (q : Sym2 V → unitInterval) (C : Set V) :
+    law q {ω : Config V | ∀ u ∈ C, ∀ v ∉ C, s(u, v) ∉ ω} =
+      ∏' z : {z : V × V // z.1 ∈ C ∧ z.2 ∉ C},
+        (1 - (unitInterval.toNNReal (q s(z.1.1, z.1.2)) : ℝ≥0∞)) := by
+  have hset : {ω : Config V | ∀ u ∈ C, ∀ v ∉ C, s(u, v) ∉ ω} =
+      {ω | ∀ z : {z : V × V // z.1 ∈ C ∧ z.2 ∉ C}, s(z.1.1, z.1.2) ∉ ω} := by
+    ext ω
+    simp only [mem_ofPred_eq, Subtype.forall, Prod.forall]
+    exact ⟨fun h u v huv => h u huv.1 v huv.2, fun h u hu v hv => h u v ⟨hu, hv⟩⟩
+  rw [hset]
+  exact (prodBernoulli_forall_notMem q _ (injective_sym2_mk_boundary C)).trans
+    (tprod_congr fun z => coe_toNNReal_symm_eq_one_sub _)
 
 /-! ### Non-vacuity -/
 

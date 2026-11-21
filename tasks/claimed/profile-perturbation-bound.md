@@ -8,6 +8,8 @@ labels: [good-first-task]
 
 # Total-variation and observable bounds for summable profile perturbations
 
+Being done by the project's own agents; do not start it.
+
 ## Goal
 Prove wiki assertion **W90W** (article `profile-continuity`) in full and tag it. The library
 bounds `|P_q(A) − P_r(A)|` by `Σ_i |q_i − r_i|`; the assertion adds the cap by one and the
