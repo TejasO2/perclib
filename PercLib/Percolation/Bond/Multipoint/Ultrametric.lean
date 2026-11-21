@@ -30,7 +30,8 @@ identity of the wiki article.
 * `prod_edgeFinset_fromEdgeSet_parent`: a product over its edges is the product over the
   nonroot vertices of the parent edges;
 * `diam_mul_prod_le_sweepProduct`: `diam(A) ∏_{e ∈ T} d(e) ≤ Sweep(A)` for a spanning tree `T`
-  of `A` of minimum edge-length product.
+  of `A` of minimum edge-length product;
+* `exists_isTree_forall_prod_le`: such a spanning tree exists when `A` is nonempty.
 -/
 
 @[expose] public section
@@ -189,5 +190,21 @@ theorem diam_mul_prod_le_sweepProduct {A : Finset X} {T : SimpleGraph A} (hT : T
   congr 1
   convert hprod using 2 with x
   all_goals first | rfl | exact Finset.coe_injective (by rw [coe_edgeFinset, coe_edgeFinset])
+
+open Classical in
+/-- Non-vacuity of the minimality hypothesis: every nonempty finite set carries a spanning tree
+of minimum edge-length product. -/
+theorem exists_isTree_forall_prod_le {A : Finset X} (hA : A.Nonempty) :
+    ∃ T : SimpleGraph A, T.IsTree ∧ ∀ T' : SimpleGraph A, T'.IsTree →
+      ∏ e ∈ T.edgeFinset, Sym2.lift ⟨fun x y : A => dist (x : X) y, fun _ _ => dist_comm _ _⟩ e ≤
+        ∏ e ∈ T'.edgeFinset,
+          Sym2.lift ⟨fun x y : A => dist (x : X) y, fun _ _ => dist_comm _ _⟩ e := by
+  have : Nonempty A := hA.to_subtype
+  obtain ⟨T₀, -, hT₀⟩ := (connected_top (V := A)).exists_isTree_le
+  obtain ⟨T, hT, hmin⟩ := (univ.filter fun T : SimpleGraph A => T.IsTree).exists_min_image
+    (fun T => ∏ e ∈ T.edgeFinset,
+      Sym2.lift ⟨fun x y : A => dist (x : X) y, fun _ _ => dist_comm _ _⟩ e)
+    ⟨T₀, mem_filter.2 ⟨mem_univ _, hT₀⟩⟩
+  exact ⟨T, (mem_filter.1 hT).2, fun T' h' => hmin T' (mem_filter.2 ⟨mem_univ _, h'⟩)⟩
 
 end PercLib.Percolation.Bond
