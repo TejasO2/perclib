@@ -1,6 +1,7 @@
 module
 
 public import PercLib.Analysis.AbelianSums
+public import PercLib.Analysis.CriticalDrivenODE
 public import PercLib.Analysis.DiscreteConvolution
 public import PercLib.Analysis.DominatedDerivative
 public import PercLib.Analysis.DrivenODE
@@ -75,6 +76,7 @@ public import PercLib.Models.HierarchicalCutoff
 public import PercLib.Models.HierarchicalEndpoint
 public import PercLib.Models.HierarchicalGeometry
 public import PercLib.Models.HierarchicalPowerKernel
+public import PercLib.Models.HierarchicalRestrictedSusc
 public import PercLib.Models.HierarchicalRunaway
 public import PercLib.Models.HierarchicalSibling
 public import PercLib.Models.HierarchicalSymmetry
@@ -327,6 +329,7 @@ public import PercLib.Probability.Transport.Pullback
 public import PercLib.Probability.Transport.Reindexing
 public import PercLib.Probability.TruncatedMaximal
 public import PercLib.Probability.VarianceTensorization
+public import PercLib.Probability.WeakKernels
 public import PercLib.Probability.ZeroOne
 
 /-

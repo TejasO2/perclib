@@ -282,6 +282,15 @@
         "PAFY"
       ],
       "reason": "Multiscale good-block renormalization: overlapping good blocks merge, two disjoint bad blocks are a squared error, and a single bad spot is bridged by one long edge whose failure probability is bounded through the inverse-square block integral (PAFY)."
+    },
+    {
+      "order": 17,
+      "tag": "67W9",
+      "proof_uses": [
+        "F4CV",
+        "H0OC"
+      ],
+      "reason": "A renormalization inequality for crossings by short edges, with bridges bounded through the inverse-square tail and Harris for decreasing events, keeps the non-crossing probability bounded below; closed long edges and the zero-one law then exclude percolation when the tail coefficient times the squared density is below one."
     }
   ]
 }
