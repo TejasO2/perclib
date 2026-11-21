@@ -172,9 +172,10 @@ test("a lead has at most three paragraphs and only paragraphs", async () => {
   assert.equal(parseLead("x.md", ""), null);
 });
 
-test("frozen digests: no current article has a lead, so every digest is unchanged", async () => {
+test("frozen digests: no frozen article has a lead, so every digest is unchanged", async () => {
   assert.equal(real.length >= 142, true);
-  for (const p of real) assert.equal("lead" in p, false, p.id);
+  for (const id of Object.keys(baseline.articles))
+    assert.equal("lead" in real.find((p) => p.id === id), false, id);
   // The current tree validates against the unchanged migration baseline.
   await assert.doesNotReject(checkArticles());
   for (const id of Object.keys(baseline.articles)) {

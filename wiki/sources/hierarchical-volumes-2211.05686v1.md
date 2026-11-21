@@ -6,11 +6,11 @@ The paper works with an exact power-law radial kernel, with a fixed geometric-se
 
 | Source passage | Written treatment |
 | --- | --- |
-| Section 1.1, exact radial kernel and block layers | [VI3Y](../articles/hierarchical-runaway.md#section-exact-block-layers) proves the independent-layer construction, the missing ancestor intensity in a finite block, and the increasing finite-witness limit. |
-| Section 2, transition display and (2.1); Remark 2.2 | [Z960](../articles/hierarchical-runaway.md#section-block-coalescent) derives the finite generator and intermediate independent-bond law, including zero intensity without dividing by the terminal time. |
-| Lemma 2.3 and (2.4) | [22H8](../articles/hierarchical-runaway.md#section-coalescent-moments) proves every mixed-moment equation explicitly, retaining the diagonal and merger corrections. |
-| (2.2)–(2.3), (2.5)–(2.7) | [54V4](../articles/hierarchical-runaway.md#section-coalescent-gluing) proves the full multinomial recursion across independent children and the identity with rooted moments. |
-| Component-size determination after (2.4) | [W8PB](../articles/hierarchical-runaway.md#section-coalescent-gluing) gives a finite Vandermonde and polynomial-interpolation proof. It determines the size multiset, not the labelled partition. |
+| Section 1.1, exact radial kernel and block layers | [VI3Y](../articles/hierarchical-block-coalescent.md#section-exact-block-layers) proves the independent-layer construction, the missing ancestor intensity in a finite block, and the increasing finite-witness limit. |
+| Section 2, transition display and (2.1); Remark 2.2 | [Z960](../articles/multiplicative-coalescent.md#section-block-coalescent) derives the finite generator and intermediate independent-bond law, including zero intensity without dividing by the terminal time. |
+| Lemma 2.3 and (2.4) | [22H8](../articles/multiplicative-coalescent.md#section-coalescent-moments) proves every mixed-moment equation explicitly, retaining the diagonal and merger corrections. |
+| (2.2)–(2.3), (2.5)–(2.7) | [54V4](../articles/hierarchical-block-coalescent.md#section-coalescent-gluing) proves the full multinomial recursion across independent children and the identity with rooted moments. |
+| Component-size determination after (2.4) | [W8PB](../articles/multiplicative-coalescent.md#section-size-determination) gives a finite Vandermonde and polynomial-interpolation proof. It determines the size multiset, not the labelled partition. |
 
 The initial holding-probability display double counts the merger rate if its pair sum is read, consistently with the next display, as ordered. The following generator already includes the correct factor. The [provisional erratum](../errata/hutchcroft-hierarchical-volumes-2022.json) gives the complete local repair and the Lean obligation. The moment identities are unaffected.
 
@@ -27,9 +27,9 @@ Reading update, 17 November 2026: all of section 3 and the arguments for Lemmas 
 | --- | --- |
 | Theorem 3.1; Lemma 3.3 | Existing [DMI0/12NL](../articles/finite-set-hyperscaling.md#section-splitting) already give the marked splitter and maximum/rooted estimates. No duplicate proof was added. |
 | Theorem 3.2, Corollary 3.4, Lemma 3.5 | [3109](../articles/finite-set-hyperscaling.md#section-norm-tightness) combines pieces from different clusters, keeps the isolated-mark contribution, and supplies the finite-witness countable passage and real-quantile argument. Constants are uniform in the norm index. |
-| Corollary 3.7 and (3.12) | [25TW](../articles/finite-set-hyperscaling.md#section-norm-moments) proves power-sum moment bounds, mixed comparisons and uniform integrability for fixed indices. [X2A4](../articles/hierarchical-runaway.md#section-coalescent-concentration) gives the intermediate-block and child-quantile consequences. |
+| Corollary 3.7 and (3.12) | [25TW](../articles/finite-set-hyperscaling.md#section-norm-moments) proves power-sum moment bounds, mixed comparisons and uniform integrability for fixed indices. [X2A4](../articles/hierarchical-block-coalescent.md#section-coalescent-concentration) gives the intermediate-block and child-quantile consequences. |
 | Lemmas 4.6–4.7 | [25Z4](../articles/cluster-partitions.md#section-cluster-covariance) proves the conditional-complement comparison and covariance bound, also for finite windows on countable graphs. |
-| Proposition 4.5, Lemma 4.8 and Corollary 4.9 | [X2A4](../articles/hierarchical-runaway.md#section-coalescent-concentration) gives the exact mean-equation error and concentration criterion. The critical mean lower bound and hydrodynamic condition remain explicit separate inputs. |
+| Proposition 4.5, Lemma 4.8 and Corollary 4.9 | [X2A4](../articles/hierarchical-block-coalescent.md#section-coalescent-concentration) gives the exact mean-equation error and concentration criterion. The critical mean lower bound and hydrodynamic condition remain explicit separate inputs. |
 
 Equation (3.12) overstates uniformity in the moment index. Its counterexample occurs inside a fixed critical hierarchical model, at increasingly small positive level-one times. The repaired gamma-factor estimate retains every fixed-index comparison needed here. Positive amplification scales, weak atomic-quantile bounds and the level-zero singleton are also made explicit. These are two new [provisional entries](../errata/hutchcroft-hierarchical-volumes-2022.json), with complete local repairs. They do not diagnose a failure of the matching tail results.
 
@@ -125,7 +125,7 @@ Reading update, 17 November 2026: sections 6.2–6.3 are now fully read in versi
 | Source passage | Treatment |
 | --- | --- |
 | Lemma 6.11; Theorem 6.12 as used here | [I2YU](../articles/hierarchical-runaway.md#section-cluster-fourth-moment) proves the ordered-discovery dependence statement by cluster conditioning, then the finite-valued convex comparison and a sufficient fourth-moment bound with coefficient three. The general unbounded-variable theorem is not added. |
-| Lemma 6.9 | [C1BP](../articles/hierarchical-runaway.md#section-norm-covariance-equations) gives both exact covariance equations and independent-child gluing. |
+| Lemma 6.9 | [C1BP](../articles/multiplicative-coalescent.md#section-norm-covariance-equations) gives both exact covariance equations and independent-child gluing. |
 | Propositions 6.5 and 6.10 | [LWRN](../articles/hierarchical-runaway.md#section-leading-norm-correlations) controls every remainder and proves the two covariance constants by stable ratio equations. |
 | Corollaries 6.6–6.7 | [5B41](../articles/hierarchical-runaway.md#section-first-mean-correction) supplies the geometric domination needed for the future-scale series and corrects the terminal endpoint of the time integral. |
 | Lemma 6.4 | [S23T](../articles/hierarchical-runaway.md#section-polynomial-recursion) proves the general decay law by inverse-power increments. |
@@ -160,7 +160,7 @@ Reading update, 17 November 2026: section 7's constructions have been compared w
 
 | Source passage | Treatment |
 | --- | --- |
-| Section 7.1, quotient kernel and final coalescent time | [YY9S](../articles/hierarchical-runaway.md#section-periodic-block-kernel) uses the quotient by the tail subgroup and computes the constant q/(1-q). This preserves the intended shell calculation. Periodic cluster-size predictions remain conjectural source discussion. |
+| Section 7.1, quotient kernel and final coalescent time | [YY9S](../articles/hierarchical-block-coalescent.md#section-periodic-block-kernel) uses the quotient by the tail subgroup and computes the constant q/(1-q). This preserves the intended shell calculation. Periodic cluster-size predictions remain conjectural source discussion. |
 | Section 7.2, definition and continuity of the map on cluster laws | [7VHT](../articles/hierarchical-runaway.md#section-renormalization-map) proves continuity of ranked combination and uses the cited Feller kernel to obtain continuity on probability laws. It verifies every scaling factor in the orbit identity. |
 | Critical-parameter characterization and Remark 7.2 | [NIXH](../articles/hierarchical-runaway.md#section-critical-orbit-topology) proves the zero-limit criterion using sharpness and a uniform critical probability bound. Above and at the critical dimension, the sup norm vanishes while squared l2 norm tends to L^alpha-1; the laws are therefore not tight in l2. The corresponding norms diverge for p<2 and vanish for p>2. |
 | Conjecture 7.1 | Low-dimensional tightness and positivity of limiting coordinates are already proved. A limit of the entire orbit would be fixed by continuity, but convergence of that orbit is not asserted. |
