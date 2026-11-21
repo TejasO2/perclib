@@ -10,10 +10,12 @@ pull requests to `main`). Container-local reports and briefs are copied for dura
 
 ## Integration tip and gate
 
-- Branch `claude/zen-lovelace-rvlcw2` in both repositories. **Last gated commit `5fb1db4`** (pushed;
-  extract `.lake/gate/5fb1db4….json` saved); the tip is this STATUS commit (with `docs/FRONTIER.md`
-  regenerated at `5fb1db4`) on top of it. **Next gate: `scripts/gate.sh 5fb1db4`.**
-- **Round 7 (13:15-14:00): six gated batches, all passed, all pushed.** Batches 5 and 6:
+- Branch `claude/zen-lovelace-rvlcw2` in both repositories. **Last gated commit `78ee775`** (pushed;
+  extract `.lake/gate/78ee775….json` saved); the tip is this STATUS commit on top of it (`docs/FRONTIER.md` from
+  `5fb1db4` is still current: no tag changed since). **Next gate: `scripts/gate.sh 78ee775`.**
+- **Round 7 (13:15-14:05): seven gated batches, all passed, all pushed.** Batch 7: `scripts/gate.sh 5fb1db4` on
+  **`78ee775`** (merge `hier-thm11`): 3,932 jobs, 6,303 constants, 339 modules, "D-35 checks passed", "PROOF-ONLY
+  change against 5fb1db4: 2 Lean file(s), no compiled interface change", "== gate passed on 78ee775…". Batches 5 and 6:
   5. `scripts/gate.sh e57e4b0` on **`a117338`** (merges `mig-localconn-fold` = migration (c) step 2, and
      `nm-longrange`): build `--wfail` OK (3,930 jobs, full rebuild of the fold's dependants, about 9 min),
      axiom audit 6,232 constants, closure 337 modules, "D-35 checks passed", "INTERFACE change against e57e4b0"
@@ -106,7 +108,9 @@ parent). After each gate `git checkout scripts/__pycache__/`; after `frontier.py
 Round 7: **7 assertions proved in Lean and merged** (R01V, ZH13, CPD6, XSA6, D1CH, DL0X, XRSL), **16 tagged Lean
 statements audited and merged** (those 7 plus the 9 respelled by the fold: USAC, YLZV, R84Z, 5UJQ, 6QN7, 7902, 67GX,
 7BMQ, JTBG), and 3 more audited with small required changes (XLWI, YVJT, EZJ7: fixes queued). Eight further
-tagged statements are finished and wait for their audits (KJWA, 8IGH, 04ZI, PAFY, F75G, 57FJ, QW2L, 0YH8). Merged: one untagged proof-only Lean package (`lrp-I526`: Lemma I.5.26 of
+tagged statements are finished and wait for their audits (KJWA, 8IGH, 04ZI, PAFY, F75G, 57FJ, QW2L, 0YH8).
+**Hierarchical line: Theorem 1.1 of arXiv:2103.17013v1 is proved in Lean** (`hierarchicalTwoPointAveraged`, proof-only,
+merged `78ee775`); it counts as an assertion once the J98J tag package is audited. Merged: one untagged proof-only Lean package (`lrp-I526`: Lemma I.5.26 of
 *Critical long-range percolation I* in the 2KB9 generality, `PercLib/Analysis/SignedDrivenODE.lean`, the
 paper's `|f| = O(h)` hypothesis removed), the model article `hierarchical-two-point` with J98J (ruling 8), the
 regular-variation revision, runaway split step 1 (two new articles `multiplicative-coalescent`,
@@ -168,7 +172,14 @@ Frontier (`docs/FRONTIER.md` regenerated at `caa28bc` by this STATUS commit): 30
 - `fix-wiki-proof-2ZI0-tail` (2ZI0 tail proofs; audit + r2 APPROVE), `fix-wiki-proof-WD31` (WD31 proof; audit + r2
   APPROVE), `wiki-rv-reading-map` (C4 of the regular-variation audit; 13 rows, coordinator's mechanical check that only
   the last cell of those rows changed, links resolve: npm 100/100).
-- Worktrees removed: mig-localconn-fold (its `scratch/` moved as above), nm-longrange, nm-finite-coordinates,
+- **`hier-thm11`** (`78ee775`, proof-only, new file `PercLib/Models/HierarchicalTwoPointAveraged.lean`): **Theorem
+  1.1 of arXiv:2103.17013v1** (averaged critical two-point bounds, H8 of the hierarchical programme) proved exactly
+  as the Prop `HierarchicalTwoPointAveraged` of `Models/Hierarchical/Defs.lean` states, constants chosen before `J`
+  and depending only on `d, L, α, c, C`. Not yet counted as a wiki assertion: the J98J tag is a separate interface
+  package (next item to brief: tag the theorem or a restatement with J98J, fresh binder-table audit against
+  `hierarchical-two-point.md#tag-J98J`, whose statement includes `β_c < ∞` and the symmetric-kernel hypotheses).
+  Released `108-hier-cor12` (H9, Corollary 1.2, W498 Prop, and V4QQ/YWTU unconditionally).
+- Worktrees removed: hier-thm11, mig-localconn-fold (its `scratch/` moved as above), nm-longrange, nm-finite-coordinates,
   wiki-proof-2ZI0-tail, fix-wiki-proof-2ZI0-tail, wiki-proof-WD31, fix-wiki-proof-WD31, wiki-rv-reading-map,
   lrp-I526, wiki-model-hier-two-point, fix-wiki-model-hier-two-point(-r3),
   wiki-revise-regular-variation, fix-wiki-revise-regular-variation, wiki-runaway-split-1,
@@ -254,9 +265,8 @@ Frontier (`docs/FRONTIER.md` regenerated at `caa28bc` by this STATUS commit): 30
   NC7F's interpolated-paths clause needs "deterministic grids N_n → ∞ at every node" (tagged-block wording, fresh
   audit, listed "For Tom"); OQV3's A, Γ and (18)-(22) are defined only inside MFGT's proof (presentational).
 
-## In flight (claims without a done marker at 13:58)
+## In flight (claims without a done marker at 14:05)
 
-`hier-thm11` (13:50; Theorem 1.1 of the hierarchical programme, `HierarchicalTwoPointAveraged.lean`, proof-only),
 `nm-core-wrappers` (13:51), `nm-kernels-sitepaths` (13:51), `audit-mig-iscut-fold` (13:56).
 Worktrees kept (unmerged):
 automerge-workflow, ci-workflow, contrib-docs, task-board, fix-gate-scanner, fix-workflows(-r2,-r3,-r4),
@@ -282,14 +292,14 @@ Next steps, in order:
    other Lean briefs for the window (strict reading) or keep them open if disjoint (round-5 reading); (d) itself
    must run alone among migrations and finish within one round, else reopen and retry.
 3. **(e):** `HOLD-mig-model-norm` after (d); release before 371 and 230.
-4. After (d): `HOLD-200` (items 4+ only) and `HOLD-audit-nm-bond-core`; after (e): 210, 220, 230, 370, 371; 335 after
-   330 (`hier-thm11`) merges; 240 after its scout edit.
+4. After (d): `HOLD-200` (items 4+ only) and `HOLD-audit-nm-bond-core`; after (e): 210, 220, 230, 370, 371; 240 after
+   its scout edit.
 
 ## Queue (`/home/user/reports/queue/`)
 
 A brief is startable when it has no `HOLD-` prefix and no `claims/<id>`; claimed briefs stay in the directory.
-**Startable at 13:58 (22; mutually file-disjoint and disjoint from the claims):**
-- Lean (8): 104 lrp-I56-gyration (D-33 package 7, new `Analysis/CriticalLogODE.lean`, `Analysis/GyrationReduction.lean`),
+**Startable at 14:05 (23; mutually file-disjoint and disjoint from the claims):**
+- Lean (9): 108 hier-cor12 (H9; new `Models/HierarchicalTwoPointRadial.lean`), 104 lrp-I56-gyration (D-33 package 7, new `Analysis/CriticalLogODE.lean`, `Analysis/GyrationReduction.lean`),
   105 lrp-I32-analytic (D-33 package 16, new `Analysis/VolumeTail/{Normalizer,MGFAssembly,Endpoint,A3Limit}.lean`),
   106 nm-tree-split (RZSW; `Combinatorics/TreeSplitting.lean` append, new `Combinatorics/Tags/TreeSplitting.lean`),
   107 nm-multipoint-geometry (9YE6; `Bond/Multipoint/{Geometry,Sweep}.lean` append, new
@@ -304,19 +314,20 @@ A brief is startable when it has no `HOLD-` prefix and no `claims/<id>`; claimed
 `HOLD-audit-nm-uniform-volume-r2`, `HOLD-audit-frontier-four-functions-r2`,
 `HOLD-audit-wiki-revise-proof-sections-a-r2`, `HOLD-audit-wiki-revise-regular-variation-r3`,
 `HOLD-audit-fix-workflows-r5`, `HOLD-audit-nm-bond-core`, `HOLD-audit-nm-probability`, prover briefs 200, 210, 220,
-230, 240, 335, 370, 371 (conditions above).
+230, 240, 370, 371 (conditions above).
 Released this round: 100 audit-mig-localconn-fold, 101 mig-iscut-fold, 102 hier-thm11 (was HOLD-330), 103
 audit-mig-iscut-fold, 124 (2ZI0 r2), 125 wiki-original-marking, 129 (WD31 r2), 130 nm-core-wrappers (HOLD-360), 131
 nm-kernels-sitepaths (HOLD-362), 132 frontier-root-global-percolation (HOLD-383, edited to name the area lemmas,
 never H0OC), 133 nm-tree-depth (HOLD-361), 142 (67W9 r2).
 
-Next packages to brief, in order: merges as the audits report (eight frontier tags first); (d) after iscut; I.5.5 +
+Next packages to brief, in order: the J98J tag on `hierarchicalTwoPointAveraged` (interface, fresh audit; hierarchical
+line, D-34 first priority); merges as the audits report (eight frontier tags first); (d) after iscut; I.5.5 +
 B5SL + 2KB9 tag package after 140's branch merges; the exponential-moment dedup after `nm-uniform-volume` merges; the
 NC7F precision fix after 141's merge; correctness audits of Q7QG, V7MP, 9FO5 (low priority); critic passes (one at a
 time): proof sections of `integrated-susceptibility`, `finite-random-graphs`, `triangle-condition`,
 `adaptive-three-point`, `critical-exponents`, and `branching-random-walk`/`size-biased-laws`/`marginal-ode` after
 140; near-miss B2ZL (after (e): `PowerLaw.lean` may use the long-range norm) and 32GP; D-33 packages 17-18 after 16;
-the J98J Lean tag after `hier-thm11` merges (interface, fresh audit); the `unusedFintypeInType` clean-up; the
+the `unusedFintypeInType` clean-up; the
 `op8f_asymptotics` rename; runaway split step 2 and M1/M3/M4/M5; scout-defs D1, D2, D3a, D6 (add the set-level
 pivotal event); the fold's clean-up list; `DrivenODE.normalized_increment_of_driving_ode` dedup;
 `exists_intervalIntegrable_tail_of_regularlyVarying` via `RegularlyVarying.exists_forall_abs_le`; the tasks board
@@ -392,6 +403,11 @@ mirror once `task-board` merges.
   includes the new J98J statement). The reviser's open questions are in §5 of its report (copy in
   `lrp/docs/reports/`, `wiki-model-hier-two-point.md`); the restructuring of the other articles follows this
   pattern unless you object.
+- **Milestone:** Theorem 1.1 of *Critical percolation on the hierarchical lattice* (arXiv:2103.17013v1), the averaged
+  critical two-point bounds with constants uniform in the kernel, is now proved in Lean on the integration branch
+  (`PercLib/Models/HierarchicalTwoPointAveraged.lean`, merged `78ee775`), using the corrected Prop. 2.12(ii) constant
+  listed below. Corollary 1.2 (pointwise bounds for radial kernels) is the next package. The kernel replay has not
+  been run since the baseline; it is required before a pull request to `main`.
 - **Questions from the wiki revisions (D-19: you judge style).** (1) `regular-variation`: the slowly varying function
   is written `L` (as in Feller, Vol. II, cited first) or `ℓ` (STYLE notation table; Bingham–Goldie–Teugels)? It stays
   `L` with one defining sentence until you decide; `ℓ` would touch the tagged statements 3491 and SLGY (letter
