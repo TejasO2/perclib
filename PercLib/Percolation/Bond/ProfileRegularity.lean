@@ -103,12 +103,11 @@ theorem continuous_prodBernoulli_of_determined {ι : Type*} (F : Finset ι) {E :
 profile. -/
 theorem continuous_law_localConn (S : Finset V) (x y : V) :
     Continuous fun q : Sym2 V → unitInterval =>
-      law q {ω : Config V | ∃ hx : x ∈ (S : Set V), ∃ hy : y ∈ (S : Set V),
-        ((openGraph ω).induce (S : Set V)).Reachable ⟨x, hx⟩ ⟨y, hy⟩} := by
+      law q (localConn (S : Set V) x y) := by
   classical
   set F : Finset (Sym2 V) := (S ×ˢ S).image fun z => s(z.1, z.2) with hF
   refine continuous_prodBernoulli_of_determined F fun ω ω' h => ?_
-  simp only [mem_ofPred_eq]
+  simp only [mem_localConn]
   refine exists_congr fun hx => exists_congr fun hy => localConn_iff_of_agree _ _ _
     fun a ha b hb => ?_
   have hab : s(a, b) ∈ (F : Set (Sym2 V)) := by
@@ -136,8 +135,7 @@ theorem lowerSemicontinuous_tau [Countable V] (x y : V) :
   obtain ⟨S, hS, hcover⟩ := exists_finset_exhaustion (V := V)
   have hS' : Monotone fun n => (S n : Set V) := fun m n hmn => Finset.coe_subset.2 (hS hmn)
   have heq : (fun q : Sym2 V → unitInterval => tau q x y) = fun q =>
-      ⨆ n, law q {ω : Config V | ∃ hx : x ∈ (S n : Set V), ∃ hy : y ∈ (S n : Set V),
-        ((openGraph ω).induce (S n : Set V)).Reachable ⟨x, hx⟩ ⟨y, hy⟩} := by
+      ⨆ n, law q (localConn (S n : Set V) x y) := by
     funext q
     exact tau_eq_iSup_localConn q hS' hcover x y
   rw [heq]

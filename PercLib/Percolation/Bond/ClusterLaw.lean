@@ -81,7 +81,7 @@ theorem measurableSet_internally_connected [Countable V] (x : V) (C : Finset V) 
     MeasurableSet {ω : Config V |
       ∀ y : (C : Set V), ((openGraph ω).induce (C : Set V)).Reachable ⟨x, hx⟩ y} := by
   rw [ofPred_forall]
-  exact MeasurableSet.iInter fun y => measurableSet_localConn (C : Set V) ⟨x, hx⟩ y
+  exact MeasurableSet.iInter fun y => measurableSet_setOf_reachable_induce (C : Set V) ⟨x, hx⟩ y
 
 /-- The event that no pair leaving `C` is open is measurable. -/
 theorem measurableSet_boundary_closed [Countable V] (C : Finset V) :
@@ -177,7 +177,7 @@ theorem law_cluster_eq_inter_localConn_compl [Countable V] (q : Sym2 V → unitI
         {ω | ((openGraph ω).induce ((C : Set V)ᶜ)).Reachable y z}) =
       law q {ω | cluster ω x = C} *
         law q {ω | ((openGraph ω).induce ((C : Set V)ᶜ)).Reachable y z} :=
-  law_cluster_eq_inter q x C hx (measurableSet_localConn _ y z) fun _ _ h =>
+  law_cluster_eq_inter q x C hx (measurableSet_setOf_reachable_induce _ y z) fun _ _ h =>
     localConn_iff_of_agree _ y z fun a ha b hb => h a ha b hb
 
 /-! ### Non-vacuity -/

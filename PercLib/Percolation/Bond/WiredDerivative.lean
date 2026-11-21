@@ -170,7 +170,7 @@ theorem law_unexplored_eq_inter_localConn [Countable V] (q : Sym2 V → unitInte
     exact ⟨unexplored_eq_of_agree hag,
       unexplored_eq_of_agree fun e he => (hag e he).symm⟩
   have h := prodBernoulli_inter_of_determined q hdisj (measurableSet_unexplored_eq _ _)
-    (measurableSet_localConn (T : Set V) ⟨o, ho⟩ ⟨u, hu⟩) hA
+    (measurableSet_setOf_reachable_induce (T : Set V) ⟨o, ho⟩ ⟨u, hu⟩) hA
     (localConn_determined (T : Set V) ⟨o, ho⟩ ⟨u, hu⟩)
   exact h
 

@@ -421,8 +421,7 @@ theorem hasDerivWithinAt_law_escape (J : Sym2 V → ℝ≥0)
         (law (intensityProfile J β.toNNReal)).real
             {ω | {v | v ∈ (Λ : Set V) ∧ cluster ω v ⊆ Λ} = (T : Set V)} *
           ∑ u ∈ T, (law (intensityProfile J β.toNNReal)).real
-              {ω | ∃ ho : o ∈ T, ∃ hu : u ∈ T,
-                ((openGraph ω).induce (T : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
+              (localConn (T : Set V) o u) *
             ∑' v, if v ∈ T then 0 else (J s(u, v) : ℝ))
       (Ici 0) β := by
   set π : V → Option (Λ : Set V) :=
@@ -454,8 +453,7 @@ theorem hasDerivWithinAt_law_escape (J : Sym2 V → ℝ≥0)
   set P := (law (intensityProfile J β.toNNReal)).real
     {ω | {v | v ∈ (Λ : Set V) ∧ cluster ω v ⊆ Λ} = (T : Set V)}
   set τ : V → ℝ := fun u => (law (intensityProfile J β.toNNReal)).real
-    {ω | ∃ ho : o ∈ T, ∃ hu : u ∈ T,
-      ((openGraph ω).induce (T : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩}
+    (localConn (T : Set V) o u)
   set R : V → ℝ := fun u => ∑' v, if v ∈ T then 0 else (J s(u, v) : ℝ)
   have hterm : ∀ u : (Λ : Set V),
       (∑ b : Option (Λ : Set V),
@@ -474,8 +472,7 @@ theorem hasDerivWithinAt_law_escape (J : Sym2 V → ℝ≥0)
         rw [hreal]
         have hpre := collapse_preimage_unexplored_conn Λ π hπ hT.1 hT.2 huT
         rw [hpre]
-        have hτ : {ω : Config V | ∃ ho : o ∈ T, ∃ hu : (u : V) ∈ T,
-            ((openGraph ω).induce (T : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} =
+        have hτ : localConn (T : Set V) o u =
             {ω | ((openGraph ω).induce (T : Set V)).Reachable ⟨o, hT.2⟩ ⟨u, huT⟩} := by
           ext ω
           simp only [mem_ofPred_eq]
@@ -513,8 +510,7 @@ theorem hasDerivAt_law_escape (J : Sym2 V → ℝ≥0)
         (law (intensityProfile J β.toNNReal)).real
             {ω | {v | v ∈ (Λ : Set V) ∧ cluster ω v ⊆ Λ} = (T : Set V)} *
           ∑ u ∈ T, (law (intensityProfile J β.toNNReal)).real
-              {ω | ∃ ho : o ∈ T, ∃ hu : u ∈ T,
-                ((openGraph ω).induce (T : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
+              (localConn (T : Set V) o u) *
             ∑' v, if v ∈ T then 0 else (J s(u, v) : ℝ)) β :=
   (hasDerivWithinAt_law_escape J hJ Λ ho hβ.le).hasDerivAt (Ici_mem_nhds hβ)
 
@@ -562,16 +558,14 @@ theorem law_escape_derivative_ge (J : Sym2 V → ℝ≥0)
     {β : ℝ} (hβ : 0 < β) {m : ℝ}
     (hm : ∀ T ∈ Λ.powerset.filter (fun T => o ∈ T),
       m ≤ ∑ u ∈ T, (law (intensityProfile J β.toNNReal)).real
-          {ω | ∃ ho : o ∈ T, ∃ hu : u ∈ T,
-            ((openGraph ω).induce (T : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
+          (localConn (T : Set V) o u) *
         ∑' v, if v ∈ T then 0 else (intensityProfile J β.toNNReal s(u, v) : ℝ)) :
     (1 - (law (intensityProfile J β.toNNReal)).real {ω | ¬ cluster ω o ⊆ Λ}) / β * m ≤
       ∑ T ∈ Λ.powerset.filter (fun T => o ∈ T),
         (law (intensityProfile J β.toNNReal)).real
             {ω | {v | v ∈ (Λ : Set V) ∧ cluster ω v ⊆ Λ} = (T : Set V)} *
           ∑ u ∈ T, (law (intensityProfile J β.toNNReal)).real
-              {ω | ∃ ho : o ∈ T, ∃ hu : u ∈ T,
-                ((openGraph ω).induce (T : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
+              (localConn (T : Set V) o u) *
             ∑' v, if v ∈ T then 0 else (J s(u, v) : ℝ) := by
   rw [← sum_law_unexplored_eq _ Λ ho, Finset.sum_div, Finset.sum_mul]
   refine Finset.sum_le_sum fun T hT => ?_
@@ -610,8 +604,7 @@ theorem deriv_law_escape_ge (J : Sym2 V → ℝ≥0)
           ⟨{o}, Finset.mem_filter.2 ⟨Finset.mem_powerset.2 (Finset.singleton_subset_iff.2 ho),
             Finset.mem_singleton_self o⟩⟩
           (fun T => ∑ u ∈ T, (law (intensityProfile J β.toNNReal)).real
-            {ω | ∃ ho : o ∈ T, ∃ hu : u ∈ T,
-              ((openGraph ω).induce (T : Set V)).Reachable ⟨o, ho⟩ ⟨u, hu⟩} *
+            (localConn (T : Set V) o u) *
             ∑' v, if v ∈ T then 0 else (intensityProfile J β.toNNReal s(u, v) : ℝ)) ≤
       deriv (fun b : ℝ => (law (intensityProfile J b.toNNReal)).real
         {ω | ¬ cluster ω o ⊆ Λ}) β := by
@@ -689,10 +682,7 @@ example {β : ℝ} (hβ : 0 < β) :
       simp only [Finset.coe_singleton, mem_singleton_iff, mem_ofPred_eq, and_iff_left_iff_imp]
       rintro rfl
       simpa using h
-  have hτ : {ω : Config Bool | ∃ ho : false ∈ ({false} : Finset Bool),
-      ∃ hu : false ∈ ({false} : Finset Bool),
-      ((openGraph ω).induce (({false} : Finset Bool) : Set Bool)).Reachable ⟨false, ho⟩
-        ⟨false, hu⟩} = univ := by
+  have hτ : localConn (({false} : Finset Bool) : Set Bool) false false = univ := by
     ext ω
     simp
   rw [hS, hτ, probReal_univ, one_mul, tsum_fintype, Fintype.sum_bool,

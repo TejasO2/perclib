@@ -134,8 +134,8 @@ theorem mem_disjointOccurrence_localConn_of_restrict {ω : Config V} {x a b y : 
   rw [mem_disjointOccurrence_iff_open (isUpperSet_conn x a) (isUpperSet_conn b y)] at h
   obtain ⟨F, H, hF, hH, hd, hFω, hHω, hFc, hHc⟩ := h
   have hinj := sym2_map_val_injective S
-  rw [mem_disjointOccurrence_iff_open (isUpperSet_localConn _ x a)
-    (isUpperSet_localConn _ b y)]
+  rw [mem_disjointOccurrence_iff_open (isUpperSet_setOf_reachable_induce _ x a)
+    (isUpperSet_setOf_reachable_induce _ b y)]
   refine ⟨Sym2.map Subtype.val '' F, Sym2.map Subtype.val '' H, hF.image _, hH.image _,
     (Set.disjoint_image_iff hinj).2 hd, ?_, ?_, ?_, ?_⟩
   · rintro _ ⟨f, hf, rfl⟩
@@ -208,8 +208,8 @@ theorem measureReal_disjointOccurrence_localConn_le (q : Sym2 V → unitInterval
         (law q).real {ω : Config V | ((openGraph ω).induce (S : Set V)).Reachable b y} := by
   rw [localConn_eq_preimage_restrict S x a, localConn_eq_preimage_restrict S b y]
   refine cylinder_profile_bk q S.sym2 _ _ ?_ ?_
-  · exact fun η η' h hη => isUpperSet_localConn _ x a (image_mono h) hη
-  · exact fun η η' h hη => isUpperSet_localConn _ b y (image_mono h) hη
+  · exact fun η η' h hη => isUpperSet_setOf_reachable_induce _ x a (image_mono h) hη
+  · exact fun η η' h hη => isUpperSet_setOf_reachable_induce _ b y (image_mono h) hη
 
 open Classical in
 /-- The probability that `e` is pivotal for `x ↔_S y` is at most

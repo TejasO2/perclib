@@ -49,10 +49,7 @@ theorem boundary_counterexample_three_path (J : Sym2 (Fin 3) → ℝ≥0)
     ∑ v ∈ ({0, 1} : Finset (Fin 3)), ∑' z,
         (if z ∈ ({0, 1} : Finset (Fin 3)) then 0 else (J s(v, z) : ℝ)) *
           ∑' w, (law (intensityProfile J 1)).real
-            {ω | ∃ hz : z ∈ ((({0, 1} : Finset (Fin 3)) : Set (Fin 3))ᶜ),
-              ∃ hw : w ∈ ((({0, 1} : Finset (Fin 3)) : Set (Fin 3))ᶜ),
-              ((openGraph ω).induce ((({0, 1} : Finset (Fin 3)) : Set (Fin 3))ᶜ)).Reachable
-                ⟨z, hz⟩ ⟨w, hw⟩} = 1 / 100 ∧
+            (localConn ((({0, 1} : Finset (Fin 3)) : Set (Fin 3))ᶜ) z w) = 1 / 100 ∧
     (841 / 10050 : ℝ) <
       ((⨅ u, chi (intensityProfile J 1) u).toReal * (({0, 1} : Finset (Fin 3)).card : ℝ) -
           ∑ u ∈ ({0, 1} : Finset (Fin 3)), ∑ v ∈ ({0, 1} : Finset (Fin 3)),
@@ -69,10 +66,7 @@ theorem boundary_counterexample_three_path (J : Sym2 (Fin 3) → ℝ≥0)
       ∑ v ∈ ({0, 1} : Finset (Fin 3)), ∑' z,
         (if z ∈ ({0, 1} : Finset (Fin 3)) then 0 else (J s(v, z) : ℝ)) *
           ∑' w, (law (intensityProfile J 1)).real
-            {ω | ∃ hz : z ∈ ((({0, 1} : Finset (Fin 3)) : Set (Fin 3))ᶜ),
-              ∃ hw : w ∈ ((({0, 1} : Finset (Fin 3)) : Set (Fin 3))ᶜ),
-              ((openGraph ω).induce ((({0, 1} : Finset (Fin 3)) : Set (Fin 3))ᶜ)).Reachable
-                ⟨z, hz⟩ ⟨w, hw⟩}) :=
+            (localConn ((({0, 1} : Finset (Fin 3)) : Set (Fin 3))ᶜ) z w)) :=
   ⟨iInf_iSup_chi_three_path h01 h12 h02, sum_tau_pair_three_path h01 h12 h02,
     boundary_functional_three_path h12 h02, unsigned_square_three_path_gt h01 h12 h02,
     not_boundary_bound_unsigned h01 h12 h02⟩

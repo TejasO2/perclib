@@ -200,13 +200,10 @@ theorem boundary_functional_three_path (h12 : J s(1, 2) = 1 / 100) (h02 : J s(0,
     ∑ v ∈ ({0, 1} : Finset (Fin 3)), ∑' z,
         (if z ∈ ({0, 1} : Finset (Fin 3)) then 0 else (J s(v, z) : ℝ)) *
           ∑' w, (law (intensityProfile J 1)).real
-            {ω | ∃ hz : z ∈ ((({0, 1} : Finset (Fin 3)) : Set (Fin 3))ᶜ),
-              ∃ hw : w ∈ ((({0, 1} : Finset (Fin 3)) : Set (Fin 3))ᶜ),
-              ((openGraph ω).induce ((({0, 1} : Finset (Fin 3)) : Set (Fin 3))ᶜ)).Reachable
-                ⟨z, hz⟩ ⟨w, hw⟩} = 1 / 100 := by
+            (localConn ((({0, 1} : Finset (Fin 3)) : Set (Fin 3))ᶜ) z w) = 1 / 100 := by
   simp only [tsum_fintype, Fin.sum_univ_three]
   rw [Finset.sum_pair (by decide)]
-  simp [h12, h02]
+  simp [h12, h02, localConn]
 
 /-- The unsigned square `(χ_min |S| - ∑_{u,v ∈ S} τ(u,v))² / (β² χ_max Q(S))` at `β = 1`,
 `S = {0, 1}` exceeds `841/10050`. -/
@@ -259,10 +256,7 @@ theorem not_boundary_bound_unsigned (h01 : J s(0, 1) = 99 / 100)
       ∑ v ∈ ({0, 1} : Finset (Fin 3)), ∑' z,
         (if z ∈ ({0, 1} : Finset (Fin 3)) then 0 else (J s(v, z) : ℝ)) *
           ∑' w, (law (intensityProfile J 1)).real
-            {ω | ∃ hz : z ∈ ((({0, 1} : Finset (Fin 3)) : Set (Fin 3))ᶜ),
-              ∃ hw : w ∈ ((({0, 1} : Finset (Fin 3)) : Set (Fin 3))ᶜ),
-              ((openGraph ω).induce ((({0, 1} : Finset (Fin 3)) : Set (Fin 3))ᶜ)).Reachable
-                ⟨z, hz⟩ ⟨w, hw⟩}) := by
+            (localConn ((({0, 1} : Finset (Fin 3)) : Set (Fin 3))ᶜ) z w)) := by
   rw [boundary_functional_three_path h12 h02, not_le]
   exact lt_trans (by norm_num) (unsigned_square_three_path_gt h01 h12 h02)
 

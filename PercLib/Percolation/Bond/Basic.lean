@@ -156,17 +156,55 @@ theorem cluster_empty (x : V) : cluster (∅ : Config V) x = {x} := by
 theorem one_le_encard_cluster (ω : Config V) (x : V) : 1 ≤ (cluster ω x).encard :=
   Set.one_le_encard_iff_nonempty.2 ⟨x, mem_cluster_self ω x⟩
 
+/-! ### Connection probability under a general measure -/
+
+/-- The connection probability of `x` and `y` under a measure `μ` on bond configurations,
+`μ {x ↔ y}`. No independence is assumed; under the independent law it is `tau q`. -/
+def connProb (μ : Measure (Config V)) (x y : V) : ℝ≥0∞ := μ (conn x y)
+
+theorem connProb_def (μ : Measure (Config V)) (x y : V) : connProb μ x y = μ (conn x y) :=
+  rfl
+
+@[simp] theorem connProb_law (q : Sym2 V → unitInterval) (x y : V) :
+    connProb (law q) x y = tau q x y :=
+  rfl
+
+@[simp] theorem connProb_zero (x y : V) : connProb (0 : Measure (Config V)) x y = 0 :=
+  rfl
+
 /-- A vertex is connected to itself with probability one. -/
-theorem tau_self (q : Sym2 V → unitInterval) (x : V) : tau q x x = 1 := by
-  rw [tau, conn_self, measure_univ]
+@[simp] theorem connProb_self (μ : Measure (Config V)) [IsProbabilityMeasure μ] (x : V) :
+    connProb μ x x = 1 := by
+  rw [connProb, conn_self, measure_univ]
+
+/-- The connection probability is symmetric. -/
+theorem connProb_comm (μ : Measure (Config V)) (x y : V) : connProb μ x y = connProb μ y x := by
+  rw [connProb, connProb, conn_symm]
+
+/-- The connection probability is at most one. -/
+theorem connProb_le_one (μ : Measure (Config V)) [IsZeroOrProbabilityMeasure μ] (x y : V) :
+    connProb μ x y ≤ 1 :=
+  prob_le_one
+
+theorem connProb_ne_top (μ : Measure (Config V)) [IsFiniteMeasure μ] (x y : V) :
+    connProb μ x y ≠ ⊤ :=
+  measure_ne_top μ _
+
+theorem connProb_mono {μ ν : Measure (Config V)} (h : μ ≤ ν) (x y : V) :
+    connProb μ x y ≤ connProb ν x y :=
+  h _
+
+/-- A vertex is connected to itself with probability one. -/
+theorem tau_self (q : Sym2 V → unitInterval) (x : V) : tau q x x = 1 :=
+  connProb_self (law q) x
 
 /-- The two-point function is symmetric. -/
-theorem tau_comm (q : Sym2 V → unitInterval) (x y : V) : tau q x y = tau q y x := by
-  rw [tau, tau, conn_symm]
+theorem tau_comm (q : Sym2 V → unitInterval) (x y : V) : tau q x y = tau q y x :=
+  connProb_comm (law q) x y
 
 /-- The two-point function is at most one. -/
 theorem tau_le_one (q : Sym2 V → unitInterval) (x y : V) : tau q x y ≤ 1 :=
-  prob_le_one
+  connProb_le_one (law q) x y
 
 /-! ### Measurability -/
 
@@ -475,12 +513,12 @@ theorem localConn_mono {S : Set V} {x y : V} {ω ω' : Config V} (h : ω ⊆ ω'
   exact ⟨hx, hy, hr.mono fun _ _ hadj => openGraph_mono h hadj⟩
 
 /-- Connection inside a set is an upper set of configurations. -/
-theorem isUpperSet_localConn' (S : Set V) (x y : V) : IsUpperSet (localConn S x y) :=
+theorem isUpperSet_localConn (S : Set V) (x y : V) : IsUpperSet (localConn S x y) :=
   fun _ _ h hxy => localConn_mono h hxy
 
 /-- Connection inside a countable set is measurable, whatever the cardinality of the
 vertex type. -/
-theorem measurableSet_localConn' (S : Set V) [Countable S] (x y : V) :
+theorem measurableSet_localConn (S : Set V) [Countable S] (x y : V) :
     MeasurableSet (localConn S x y) := by
   by_cases hx : x ∈ S
   · by_cases hy : y ∈ S
@@ -646,6 +684,16 @@ example : ({s(0, 1), s(1, 2)} : Config (Fin 3)) ∈ conn 0 2 ∧
     rcases ha with rfl | rfl <;> rcases hb with rfl | rfl <;> decide
   rw [hbot, SimpleGraph.reachable_bot] at hr
   exact absurd (congrArg Subtype.val hr) (show (0 : Fin 3) ≠ 2 by decide)
+
+/-- The connection probability is computed for a law that is not a product law: under
+the Dirac mass at the configuration with the single open pair `{false, true}` the two
+vertices of `Bool` are connected with probability one, and under the Dirac mass at the
+empty configuration with probability zero. -/
+example : connProb (Measure.dirac ({s(false, true)} : Config Bool)) false true = 1 ∧
+    connProb (Measure.dirac (∅ : Config Bool)) false true = 0 := by
+  refine ⟨Measure.dirac_apply_of_mem (mem_conn_of_mem (by decide) rfl), ?_⟩
+  rw [connProb, Measure.dirac_apply' _ (measurableSet_conn false true),
+    Set.indicator_of_notMem (by rw [empty_mem_conn_iff]; decide)]
 
 /-- With every pair open, `0` is not a cut of the integers. -/
 example : ¬ IsCut (Set.univ : Config ℤ) 0 :=
