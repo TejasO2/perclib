@@ -47,8 +47,24 @@
       "relationship": "Proof route",
       "status": "pending",
       "note": "The finite-range spatial-decay conclusion must not be promoted to a general long-range spatial-decay statement."
+    },
+    {
+      "source": "dt-sharpness-zd",
+      "order": 0,
+      "label": "Subcritical finite-set certificate",
+      "locator": "Theorem 1.1",
+      "relationship": "Source-inspected statement correspondence",
+      "status": "pending",
+      "note": "Nearest-neighbour bond percolation on Z^d, d ≥ 2: the certificate threshold equals p_c. Remark 3 gives the openness of the certificate set and hence φ_p(S) ≥ 1 for p ≥ p_c."
     }
   ],
   "occursIn": [],
-  "proofUses": []
+  "proofUses": [
+    {
+      "order": 0,
+      "tag": "6EIM",
+      "proof_uses": [],
+      "reason": "A definition; it invokes no other wiki assertion."
+    }
+  ]
 }

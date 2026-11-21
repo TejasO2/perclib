@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs, on the bond interface and the intensity family `intensityProfile`. The
 statements follow the wiki tags 1EWX (bounds only) and MTYL. No source text or code is copied.
 -/
@@ -35,7 +39,6 @@ noncomputable section
 
 open MeasureTheory PercLib.Probability PercLib.Percolation.Bond
 open scoped ENNReal NNReal
-open Classical
 
 namespace PercLib.Models.NormalizedSmallIntensity
 
@@ -82,18 +85,21 @@ theorem ofReal_mul_le_intensityProfile (J : Sym2 V → ℝ≥0) (β : ℝ≥0) (
 
 /-! ### The deterministic triangle bound -/
 
+open Classical in
 /-- Picking the diagonal entry from the left. -/
 theorem tsum_ite_eq_mul_left (u : V) (f : V → ℝ≥0∞) :
     ∑' v, (if u = v then (1 : ℝ≥0∞) else 0) * f v = f u := by
   rw [tsum_eq_single u (fun v hv => by simp [Ne.symm hv])]
   simp
 
+open Classical in
 /-- Picking the diagonal entry from the right. -/
 theorem tsum_mul_ite_eq_right (o : V) (f : V → ℝ≥0∞) :
     ∑' v, f v * (if v = o then (1 : ℝ≥0∞) else 0) = f o := by
   rw [tsum_eq_single o (fun v hv => by simp [hv])]
   simp
 
+open Classical in
 /-- **Closed triangle of `δ + t`.** If `t` vanishes on the diagonal and its rows sum to at
 most `m`, the closed triangle of `δ + t` at `o` is at most `1 + 3 m² + m³`. -/
 theorem tsum_triangle_le_of_add (t : V → V → ℝ≥0∞) (m : ℝ≥0∞) (ht0 : ∀ x, t x x = 0)
@@ -149,6 +155,7 @@ theorem tsum_triangle_le_of_add (t : V → V → ℝ≥0∞) (m : ℝ≥0∞) (h
         · exact hrow o
     _ = 1 + 3 * m ^ 2 + m ^ 3 := by ring
 
+open Classical in
 /-- **Closed triangle.** For `a` equal to one on the diagonal, with off-diagonal rows
 summing to at most `m`, `∑' u v, a o u * a u v * a v o ≤ 1 + 3 m² + m³`. -/
 theorem tsum_triangle_le (a : V → V → ℝ≥0∞) (m : ℝ≥0∞) (ha : ∀ x, a x x = 1)
@@ -178,6 +185,7 @@ theorem inv_one_sub_eq_one_add (β : ℝ≥0) (hβ : β < 1) :
     _ = (1 - β) / (1 - β) + β / (1 - β) := (ENNReal.div_add_div_same).symm
     _ = 1 + (β : ℝ≥0∞) / (1 - β) := by rw [ENNReal.div_self h1 h2]
 
+open Classical in
 /-- If off-diagonal rows of `J` sum to at most one and `β < 1`, every off-diagonal row of
 the two-point function sums to at most `β / (1 - β)`. -/
 theorem tsum_tau_offDiag_le (J : Sym2 V → ℝ≥0)
@@ -189,6 +197,7 @@ theorem tsum_tau_offDiag_le (J : Sym2 V → ℝ≥0)
     inv_one_sub_eq_one_add β hβ] at hchi
   exact (ENNReal.add_le_add_iff_left ENNReal.one_ne_top).1 hchi
 
+open Classical in
 /-- **Susceptibility bounds.** If every off-diagonal row of `J` sums to exactly one
 and `0 ≤ β < 1`, then `1 + β - β²/2 ≤ χ(o) ≤ (1 - β)⁻¹` at every root. -/
 theorem chi_bounds (J : Sym2 V → ℝ≥0)

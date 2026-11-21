@@ -1,4 +1,9 @@
 /-
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Left-continuity of the susceptibility in the intensity, and finite susceptibility forces a
 contracting finite set. New proofs from the regularity, local-connectivity and intensity
 theorems of this library and pinned mathlib 56a005855ea17e0b0958f73ec801ae140b0a1679's
@@ -34,7 +39,7 @@ and `Φ_q(o,T) = ∑_{u ∈ T} ∑'_{v ∉ T} τ_T(o,u) q s(u,v)`; both are writ
 noncomputable section
 
 open MeasureTheory Set Filter Topology
-open scoped ENNReal NNReal Classical
+open scoped ENNReal NNReal
 
 namespace PercLib.Percolation.Bond
 
@@ -69,6 +74,7 @@ theorem law_localConn_le_tau (q : Sym2 V → unitInterval) (T : Set V) (o u : V)
   measure_mono fun _ ⟨ho, hu, h⟩ => conn_of_localConn _ T ⟨o, ho⟩ ⟨u, hu⟩ h
 
 omit [Countable V] in
+open Classical in
 /-- The exterior tails of a finite off-diagonal row tend to zero along an exhaustion. -/
 theorem tendsto_exteriorRow_zero (q : Sym2 V → unitInterval) (u : V)
     (hrow : rowSum (fun e => unitInterval.toENNReal (q e)) u ≠ ∞)
@@ -83,6 +89,7 @@ theorem tendsto_exteriorRow_zero (q : Sym2 V → unitInterval) (u : V)
     (unitInterval.toNNReal (q s(u, v)) : ℝ≥0∞))).trans (tsum_congr fun v => ?_)
   by_cases hv : v ∈ T n <;> simp [Set.indicator, hv]
 
+open Classical in
 /-- **`⇒` direction.** If the off-diagonal rows of `q` are bounded by `Q < ⊤` and
 `chi q o < ⊤`, then along any increasing sequence of finite sets `T_n` exhausting `V`,
 `Φ_q(o, T_n) → 0`. (The hypothesis `o ∈ T_n` is not needed: the internal
@@ -154,6 +161,7 @@ theorem tendsto_boundaryFlux_exhaustion (q : Sym2 V → unitInterval) {Q : ℝ�
   exact tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds hlim
     (fun n => zero_le) hle
 
+open Classical in
 /-- **`⇒` direction, existence form.** Under the same hypotheses, some finite `T ∋ o`
 has `Φ_q(o,T) < 1`. -/
 theorem exists_boundaryFlux_lt_one (q : Sym2 V → unitInterval) {Q : ℝ≥0∞} (hQ : Q < ⊤)
@@ -170,6 +178,7 @@ theorem exists_boundaryFlux_lt_one (q : Sym2 V → unitInterval) {Q : ℝ≥0∞
   obtain ⟨n, hn⟩ := (h.eventually (gt_mem_nhds zero_lt_one)).exists
   exact ⟨_, Finset.mem_insert_self o _, hn⟩
 
+open Classical in
 /-- **Corollary for intensity kernels.** If every off-diagonal row of `J` is at most `M` and
 `chi q_β o < ⊤`, then some finite `T ∋ o` has `Φ_{q_β}(o,T) < 1`. -/
 theorem exists_boundaryFlux_lt_one_of_chi_lt_top (J : Sym2 V → ℝ≥0) (M : ℝ≥0)
@@ -204,6 +213,7 @@ example : ∃ J : Sym2 ℤ → ℝ≥0,
     · exact Subtype.ext (by simp only [intensityProfile, hJ, h]; norm_num)
     · exact intensityProfile_eq_zero_of_eq_zero J (by rw [hJ, ite_eq_right h]) 1
 
+open Classical in
 /-- Item 2 with `q = 0` on `ℤ`: `χ = 1 < ⊤` and the rows vanish, so some finite `T ∋ 0` has
 `Φ < 1` (here `Φ = 0`). -/
 example : ∃ T : Finset ℤ, 0 ∈ T ∧ ∑ u ∈ T, ∑' v, (if v ∈ T then 0 else

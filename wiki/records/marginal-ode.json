@@ -88,9 +88,29 @@
       "relationship": "Versioned source comparison",
       "status": "pending",
       "note": "The inverse has a positive quarter-power divided by alpha, while its named coefficient A_n^* has a negative half-power; the final tail coefficient is unchanged."
+    },
+    {
+      "source": "hutchcroft-lrp-1",
+      "order": 50,
+      "label": "An asymptotic linear equation with dominant driving term",
+      "locator": "Lemma I.4.21",
+      "relationship": "Source statement with complete proof",
+      "status": "pending",
+      "note": "B5SL states Lemma I.4.21 with the same hypotheses and both conclusions; its proof reduces the asymptotic equation to the signed linear theorem 2KB9."
     }
   ],
-  "occursIn": [],
+  "occursIn": [
+    {
+      "order": 0,
+      "source": "hutchcroft-lrp-1",
+      "tag": "B5SL",
+      "source_url": "https://arxiv.org/abs/2508.18807v1",
+      "edition": "arXiv:2508.18807v1",
+      "locator": "Lemma I.4.21 (f' ~ r^{-1}(af+h) with h non-negligible).",
+      "relationship": "source-statement",
+      "note": "Same hypotheses (a>0; h positive, measurable, regularly varying of index b>0; f differentiable with f'(r) ~ (af(r)+h(r))/r; b>a) and both conclusions (f ~ h/(b-a); f eventually positive and regularly varying of index b on a half-line). Domain (0,infinity) for h as in the source; the same domain for f, which the source leaves implicit."
+    }
+  ],
   "proofUses": [
     {
       "order": 0,
@@ -123,6 +143,15 @@
       "tag": "63GS",
       "proof_uses": [],
       "reason": "The proof solves the explicit linear equation w'-w/t=a gamma C in closed form; it invokes no other wiki assertion."
+    },
+    {
+      "order": 5,
+      "tag": "B5SL",
+      "proof_uses": [
+        "2KB9",
+        "3491"
+      ],
+      "reason": "The asymptotic relation becomes the exact equation rf'=(1-theta)(af+h) with theta->0; after local boundedness of h (uniform convergence theorem) and local absolute continuity of f, the signed linear theorem 2KB9 with A=1 gives f/h->1/(b-a), and regular variation of f follows from that of h (3491)."
     }
   ]
 }

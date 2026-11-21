@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-16: the exact derivative of the escape probability from a finite
 domain and the finite-size differential inequality (wiki finite-size-sharpness, tag HATE). No
 upstream proof is copied, no definition is added and no Input is introduced.
@@ -36,7 +40,6 @@ noncomputable section
 
 open MeasureTheory Set PercLib.Probability
 open scoped ENNReal NNReal
-open Classical
 
 namespace PercLib.Percolation.Bond
 
@@ -119,6 +122,7 @@ theorem eq_of_boundary_pair_eq {T : Set L} {u u' : L} {b b' : Option L} (hu : u 
   · exact ⟨Option.some_injective _ h1, h2⟩
   · exact absurd hu (hb' u h1.symm)
 
+open Classical in
 /-- **The closed pivotal event on `{S = T}`, pair by pair.** Its probability is the
 probability of `{S = T} ∩ {o ↔ u}` when the pair is `s(some u, b)` with `u ∈ T` and `b`
 outside `T`, and zero otherwise. -/
@@ -190,6 +194,7 @@ section Partition
 
 variable {V : Type*} (Λ : Finset V)
 
+open Classical in
 /-- **Partition by the unexplored set.** Off `{some o ↔ none}` the events
 `{u ∉ S ↔ ...}` indexed by `T ⊆ Λ` with `o ∈ T` partition the configurations of the ghost
 graph. -/
@@ -224,6 +229,7 @@ theorem measureReal_eq_sum_unexplored (μ : Measure (Config (Option (Λ : Set V)
   · intro T _
     exact (Set.toFinite _).measurableSet
 
+open Classical in
 /-- **Russo's formula on the ghost graph, summed by the unexplored set.** The derivative of
 `P(some o ↔ none)` is the sum over `T` and over pairs from `u ∈ T` to a vertex outside `T`
 of the intensity of the pair times `P(S = T, some o ↔ some u)`. -/
@@ -285,12 +291,13 @@ end Partition
 section Translate
 
 variable {V : Type*} (Λ : Finset V) (π : V → Option (Λ : Set V))
-  (hπ : ∀ v, π v = if h : v ∈ (Λ : Set V) then some ⟨v, h⟩ else none)
-include hπ
 
+open Classical in
 /-- The event `{S = T}` is the pull-back of the ghost event "exactly `T` is not joined to
 the ghost". -/
-theorem collapse_preimage_unexplored {T : Finset V} (hT : T ⊆ Λ) :
+theorem collapse_preimage_unexplored
+    (hπ : ∀ v, π v = if h : v ∈ (Λ : Set V) then some ⟨v, h⟩ else none)
+    {T : Finset V} (hT : T ⊆ Λ) :
     (fun ω : Config V => {z : Sym2 (Option (Λ : Set V)) | ∃ e ∈ ω, Sym2.map π e = z ∧
         ¬ z.IsDiag}) ⁻¹'
       {σ | ∀ u : (Λ : Set V), σ ∉ conn (some u) none ↔ (u : V) ∈ T} =
@@ -311,7 +318,7 @@ theorem collapse_preimage_unexplored {T : Finset V} (hT : T ⊆ Λ) :
     simp only [mem_ofPred_eq, Finset.mem_coe] at this
     exact ⟨fun hu => this.1 ⟨u.2, hu⟩, fun hu => (this.2 hu).2⟩
 
-omit hπ in
+open Classical in
 /-- On `{S = T}` a connection between two vertices of `T` is a connection inside `T`. -/
 theorem mem_conn_iff_localConn_of_unexplored_eq {ω : Config V} {T : Finset V}
     (hS : {v | v ∈ (Λ : Set V) ∧ cluster ω v ⊆ Λ} = (T : Set V)) {o u : V} (ho : o ∈ T)
@@ -326,10 +333,12 @@ theorem mem_conn_iff_localConn_of_unexplored_eq {ω : Config V} {T : Finset V}
     exact ⟨w.induce (T : Set V) hw⟩
   · exact conn_of_localConn ω (T : Set V) ⟨o, ho⟩ ⟨u, hu⟩
 
+open Classical in
 /-- The event `{S = T, o ↔_T u}` is the pull-back of the ghost event
 `{S = T, some o ↔ some u}`. -/
-theorem collapse_preimage_unexplored_conn {T : Finset V} (hT : T ⊆ Λ) {o u : V} (ho : o ∈ T)
-    (hu : u ∈ T) :
+theorem collapse_preimage_unexplored_conn
+    (hπ : ∀ v, π v = if h : v ∈ (Λ : Set V) then some ⟨v, h⟩ else none)
+    {T : Finset V} (hT : T ⊆ Λ) {o u : V} (ho : o ∈ T) (hu : u ∈ T) :
     (fun ω : Config V => {z : Sym2 (Option (Λ : Set V)) | ∃ e ∈ ω, Sym2.map π e = z ∧
         ¬ z.IsDiag}) ⁻¹'
       {σ | (∀ u : (Λ : Set V), σ ∉ conn (some u) none ↔ (u : V) ∈ T) ∧
@@ -350,9 +359,12 @@ theorem collapse_preimage_unexplored_conn {T : Finset V} (hT : T ⊆ Λ) {o u : 
     exact (collapse_mem_conn_some_iff π hπ ω _ _ ((hY ⟨o, hT ho⟩).2 ho)).2
       ((mem_conn_iff_localConn_of_unexplored_eq Λ hS ho hu).2 hc)
 
+open Classical in
 /-- **The ghost weight of a vertex of `T`.** Summing the ghost intensities of the pairs from
 `u ∈ T` to the vertices outside `T` gives `∑_{v ∉ T} J(u,v)`. -/
-theorem sum_ghost_intensity_outside (J : Sym2 V → ℝ≥0) {u₀ : (Λ : Set V)}
+theorem sum_ghost_intensity_outside
+    (hπ : ∀ v, π v = if h : v ∈ (Λ : Set V) then some ⟨v, h⟩ else none)
+    (J : Sym2 V → ℝ≥0) {u₀ : (Λ : Set V)}
     (hJ : Summable fun v => (J s((u₀ : V), v) : ℝ)) {T : Finset V} (hT : T ⊆ Λ)
     (hu : (u₀ : V) ∈ T) :
     ∑ b : Option (Λ : Set V), (if ∀ w : (Λ : Set V), b = some w → (w : V) ∉ T then
@@ -395,6 +407,7 @@ section Main
 
 variable {V : Type*} [Countable V]
 
+open Classical in
 /-- **Derivative of the escape probability, within `[0, ∞)`.** For a finite domain `Λ ∋ o` and
 `J` with summable rows, the escape probability `f(β) = P_β(K_o ⊄ Λ)` has derivative
 `∑_{T ⊆ Λ, o ∈ T} P_β(S = T) ∑_{u ∈ T} τ_{T,β}(o,u) ∑_{v ∉ T} J(u,v)` within `[0, ∞)` at
@@ -488,6 +501,7 @@ theorem hasDerivWithinAt_law_escape (J : Sym2 V → ℝ≥0)
     Finset.sum_finset_coe (fun v => if v ∈ T then P * (τ v * R v) else 0) Λ,
     Finset.sum_ite_mem, Finset.inter_eq_right.2 hT.1, Finset.mul_sum]
 
+open Classical in
 /-- **Derivative of the escape probability.** At every `β > 0` the escape probability is
 differentiable with the derivative of `hasDerivWithinAt_law_escape`. -/
 theorem hasDerivAt_law_escape (J : Sym2 V → ℝ≥0)
@@ -504,6 +518,7 @@ theorem hasDerivAt_law_escape (J : Sym2 V → ℝ≥0)
             ∑' v, if v ∈ T then 0 else (J s(u, v) : ℝ)) β :=
   (hasDerivWithinAt_law_escape J hJ Λ ho hβ.le).hasDerivAt (Ici_mem_nhds hβ)
 
+open Classical in
 /-- The events `{S = T}`, `T ⊆ Λ`, `o ∈ T`, partition `{K_o ⊆ Λ}`. -/
 theorem sum_law_unexplored_eq (q : Sym2 V → unitInterval) (Λ : Finset V) {o : V}
     (ho : o ∈ Λ) :
@@ -538,6 +553,7 @@ theorem sum_law_unexplored_eq (q : Sym2 V → unitInterval) (Λ : Finset V) {o :
     exact Finset.coe_injective (h.symm.trans h')
   · exact fun T _ => measurableSet_unexplored_eq _ _
 
+open Classical in
 /-- **Finite-size differential inequality, with an arbitrary lower bound.** If every
 `Φ_β(o,T) = ∑_{u ∈ T} τ_{T,β}(o,u) ∑_{v ∉ T} q_β(u,v)` is at least `m`, then
 `f'(β) ≥ (1 - f(β))/β · m`. -/
@@ -583,6 +599,7 @@ theorem law_escape_derivative_ge (J : Sym2 V → ℝ≥0)
   rw [← tsum_mul_left]
   exact hsq.tsum_le_tsum hle hsJ
 
+open Classical in
 /-- **Finite-size differential inequality.** For `β > 0`,
 `f'(β) ≥ (1 - f(β))/β · min_{T ⊆ Λ, o ∈ T} Φ_β(o,T)`. -/
 theorem deriv_law_escape_ge (J : Sym2 V → ℝ≥0)

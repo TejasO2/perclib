@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-16: the derivative bound for the finite-volume susceptibility (wiki
 integrated-susceptibility, tag TAVM) and the integrated mean-field inequality for the susceptibility
 of a transitive kernel (tag MXGM). No upstream proof is copied, no definition is added and no Input
@@ -49,7 +53,7 @@ will carry its non-vacuity witness.
 @[expose] public section
 noncomputable section
 open MeasureTheory Set PercLib.Probability
-open scoped ENNReal NNReal Classical
+open scoped ENNReal NNReal
 
 namespace PercLib.Percolation.Bond
 variable {V : Type*}
@@ -207,6 +211,7 @@ theorem measureReal_disjointOccurrence_localConn_le (q : Sym2 V → unitInterval
   · exact fun η η' h hη => isUpperSet_localConn _ x a (image_mono h) hη
   · exact fun η η' h hη => isUpperSet_localConn _ b y (image_mono h) hη
 
+open Classical in
 /-- The probability that `e` is pivotal for `x ↔_S y` is at most
 `∑ τ_S(x,a) τ_S(b,y)` over the two orientations `(a,b)` of `e`. -/
 theorem measureReal_pivotal_localConn_le (q : Sym2 V → unitInterval) {e : Sym2 V}
@@ -233,6 +238,7 @@ theorem measureReal_pivotal_localConn_le (q : Sym2 V → unitInterval) {e : Sym2
     ((measureReal_biUnion_finset_le _ _).trans ?_)
   exact Finset.sum_le_sum fun p _ => measureReal_disjointOccurrence_localConn_le S q _ _ _ _
 
+open Classical in
 /-- The Russo derivative of `χ_S(o)` is at most `R_S χ_S(o) M_S`. -/
 theorem russo_finiteChi_le (J : Sym2 V → ℝ≥0) (o : (S : Set V)) {β : ℝ} (hβ : 0 ≤ β) :
     (∑ y : (S : Set V), ∑ e ∈ S.sym2, ((J e : ℝ) * Real.exp (-β * J e)) *
@@ -311,6 +317,7 @@ theorem russo_finiteChi_le (J : Sym2 V → ℝ≥0) (o : (S : Set V)) {β : ℝ}
         rw [← Finset.sum_mul]
         ring
 
+open Classical in
 /-- **Right derivative.** At every `β ≥ 0` the finite-volume susceptibility
 `β ↦ χ_S(o) = ∑_{y ∈ S} τ_S(o,y)` has a derivative `D` within `[0, ∞)` with
 `0 ≤ D ≤ R_S χ_S(o) M_S`, where `R_S = max_{u ∈ S} ∑_{v ∈ S, v ≠ u} J(u,v)` and
@@ -333,6 +340,7 @@ theorem hasDerivWithinAt_finiteChi_le (J : Sym2 V → ℝ≥0) (o : (S : Set V))
       (mul_nonneg (J e).coe_nonneg (Real.exp_pos _).le) measureReal_nonneg,
     russo_finiteChi_le S J o hβ⟩
 
+open Classical in
 /-- **TAVM.** At every `β > 0` the finite-volume susceptibility `β ↦ χ_S(o)` has a
 derivative `D` with `0 ≤ D ≤ R_S χ_S(o) M_S`. -/
 @[tag "TAVM"]
@@ -374,6 +382,7 @@ theorem law_map_image_of_invariant {q : Sym2 V → unitInterval} (σ : V ≃ V)
   rw [Sym2.map_map, σ.self_comp_symm, Sym2.map_id, id] at h
   exact h.symm
 
+open Classical in
 /-- For a transitive kernel, the off-diagonal row sums do not depend on the vertex. -/
 theorem rowSum_eq_of_transitive (J : Sym2 V → ℝ≥0)
     (hJ : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e) (u o : V) :
@@ -401,6 +410,7 @@ theorem finiteChi_le_chi [Countable V] (q : Sym2 V → unitInterval) (S : Finset
     _ ≤ ∑' y, tau q x y := ENNReal.sum_le_tsum S
     _ = chi q x := (chi_eq_tsum_tau q x).symm
 
+open Classical in
 /-- On a countable vertex set the susceptibility is the supremum of finite-volume
 susceptibilities along an exhaustion by finite sets containing the root. -/
 theorem exists_chi_eq_iSup_finiteChi [Countable V] (q : Sym2 V → unitInterval) (o : V) :
@@ -437,6 +447,7 @@ variable [Countable V] (J : Sym2 V → ℝ≥0)
   (hJ : ∀ x y : V, ∃ σ : V ≃ V, σ x = y ∧ ∀ e, J (Sym2.map σ e) = J e)
 
 include hJ in
+open Classical in
 /-- On a transitive kernel the Russo derivative of a finite-volume susceptibility is at most
 `R χ(β)²`, where `R` is the off-diagonal row sum of `J` and `χ(β)` the susceptibility. -/
 theorem russo_finiteChi_le_rowSum_mul_sq (S : Finset V) (o : (S : Set V)) {β : ℝ}

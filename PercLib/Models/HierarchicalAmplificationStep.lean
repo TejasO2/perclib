@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-16. No upstream proof is copied and no definition is added.
 -/
 module
@@ -92,9 +94,9 @@ theorem law_bad_pair_le [DecidableEq V] (q : Sym2 V → unitInterval) {Λi Λj :
   set SS : Set (Sym2 V) := Si ∪ Sj with hSS
   have hSSfin : SS.Finite := by
     refine Set.Finite.union ?_ ?_
-    · show ((Λi : Set V).sym2).Finite
+    · change ((Λi : Set V).sym2).Finite
       rw [← Finset.coe_sym2]; exact Finset.finite_toSet _
-    · show ((Λj : Set V).sym2).Finite
+    · change ((Λj : Set V).sym2).Finite
       rw [← Finset.coe_sym2]; exact Finset.finite_toSet _
   have hi_eq : ∀ ω : Config V, ω ∩ SS ∩ Si = ω ∩ Si := fun ω => by
     rw [inter_assoc, inter_eq_right.2 subset_union_left]
@@ -391,7 +393,7 @@ theorem lt_tightnessScale_of_blocks [Countable V] [DecidableEq V] (q : Sym2 V �
       congr 1
       ext w
       simp [and_comm]
-    show m ≤ _
+    change m ≤ _
     calc m ≤ g.card * (R - 1) := Nat.mul_le_mul_right _ hK
       _ ≤ ∑ i ∈ g, (C i ω).card := hlow
       _ = (g.biUnion fun i => C i ω).card := hcardU.symm
@@ -616,7 +618,7 @@ theorem tightnessScale_hierarchical_amplification [NeZero L] (hL : 2 ≤ L) {α 
   have hqσ : ∀ x e, q (Sym2.map (Equiv.addLeft x) e) = q e := by
     intro x e
     apply Subtype.ext
-    show 1 - Real.exp (-(β : ℝ) * (J (Sym2.map (Equiv.addLeft x) e) : ℝ)) =
+    change 1 - Real.exp (-(β : ℝ) * (J (Sym2.map (Equiv.addLeft x) e) : ℝ)) =
       1 - Real.exp (-(β : ℝ) * (J e : ℝ))
     rw [hJσ]
   set R := tightnessScale (fun e => if e ∈ ((ball n : Finset _) : Set _).sym2 then q e else 0)

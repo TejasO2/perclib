@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Correspondence wrappers for exponential moments and tails from double-factorial moment
 bounds, and for the divergence bound between intensity-parametrised Bernoulli laws. Every
 statement is assembled from lemmas proved in the imported modules; no new definition is

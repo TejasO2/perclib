@@ -1,8 +1,9 @@
 # Status
 
 Handoff file for the coordinator (the LEAD role of D-34). Last updated 21 November 2026,
-05:14 UTC, at the end of coordinator round 7 (ninth coordinator; nothing mergeable, so no gate and no
-merge this round: two done markers became audit briefs). A coordinator with no
+05:27 UTC, at the end of coordinator round 9 (eleventh coordinator; no merge, no gate: the two
+packages finished this round are audits approving with changes, which became fix briefs plus held
+re-audits). A coordinator with no
 memory resumes from this file, [COORDINATOR.md](COORDINATOR.md) (the procedure for one
 round), [COORDINATION.md](COORDINATION.md) (worker rules), [DECISIONS.md](DECISIONS.md)
 (D-34, D-35, D-36, D-37) and `/home/user/reports/RULINGS.md` (container-local rulings 1-10;
@@ -11,6 +12,19 @@ durability, ruling 9i) in the private repository under `lrp/docs/reports/` at th
 lrp commit; `/home/user/reports/` stays the live copy.
 ## Integration tip and gate
 
+- **Round 9:** no merge, no gate. The tip is this round's STATUS commit on top of `b6ec653` (round-8
+  STATUS) and `7b6baf0` (last gated commit, extract saved). Last gated commit with Lean changes still
+  `2957b5a`. Next gate: `scripts/gate.sh 7b6baf0` (for the mig-linters merge also compare the
+  extracts `.lake/gate/2957b5a….json` and the new one: only `line` may differ).
+- **Round 8:** merged `work/wiki-errata-bookkeeping` (`4923cec`, merge **`7b6baf0`**). Gate
+  `scripts/gate.sh 41b1762` on `7b6baf0`: build 3,922 jobs, axiom audit 5,954 constants (only
+  `propext`, `Classical.choice`, `Quot.sound`), closure 329 modules, forbidden scan 329 files, tests,
+  extract, "D-35 checks passed", "PROOF-ONLY change against 41b1762e1ca2: 0 Lean file(s), no compiled
+  interface change", "== gate passed on 7b6baf0…". Wiki on the merged tree: `npm test` 100/100.
+  Manifest and frontier unchanged (errata only; not rebuilt). Pushed `61e159e..7b6baf0`, then this
+  STATUS commit. **Last gated commit `7b6baf0`** (its extract `.lake/gate/7b6baf0….json` is saved);
+  last gated commit with Lean changes still `2957b5a`. Next gate: `scripts/gate.sh 7b6baf0`
+  (or `2957b5a` for the mig-linters merge, to compare extracts).
 - **Round 7:** no merge, no gate (the two packages finished this round both need a fresh audit first).
   The tip is the round-7 STATUS commit on top of `f9ecd72`; last gated commit still `41b1762`, last
   gated commit with Lean changes still `2957b5a`. The next gate on a Lean merge is
@@ -80,6 +94,13 @@ and untracks them); delete `scripts/__pycache__/frontier.*.pyc` after `frontier.
 
 ## Progress (D-35 measure)
 
+Round 9: nothing merged, so **0 new assertions proved and 0 tagged statements audited** (the
+model-article audit approves seven unchanged tagged blocks but they are not counted until the
+article merges). Manifest unchanged (263 proved, 5 statement-only, 1,133 unformalised, of 1,401).
+
+Round 8: no Lean merged, so **0 new assertions proved and 0 tagged statements audited**; manifest
+unchanged (263 proved, 5 statement-only, 1,133 unformalised, of 1,401).
+
 Round 7: nothing merged, so **0 new assertions proved and 0 tagged statements audited** (FCU7's
 first audit approved but is not counted: not fresh, see below). Manifest unchanged: 263 proved.
 
@@ -108,6 +129,18 @@ fresh statement audit. Also on file: `audit-driven-ode-I421` (Lemma I.4.21 prove
 `Analysis/DrivenODE.lean`; counts once a wiki assertion exists and is tagged: `013-wiki-I421`).
 
 ## Merged
+
+Round 9 (eleventh coordinator): nothing.
+
+Round 8 (tenth coordinator), one gated batch, pushed:
+- `wiki-errata-bookkeeping` (`4923cec`, merge `7b6baf0`): four provisional errata entries repaired from
+  the published arXiv versions (all stay provisional, D-30): `compound-zeta-normalization` drops G12U
+  and 6ZYT, `boundary-scaling-scope` drops 8XA9, `reverse-bk-cancellation` correction trimmed to the
+  correction itself (tags unchanged), `walk-time-boundary` locator/problem/correction/impact now cover
+  arXiv:1201.3953v1 (identity fails for every t ≥ 1 without the factor m/(m−1)); the fifth,
+  `critical-integral-and-amplitude`, checked and left (the two printed forms are equivalent). Errata
+  are not tagged statements: merged on the gate. Follow-up: the file-level `versionAudit` of
+  `hofstad-nachmias-hypercube.json` is now stale (queued `040-wiki-errata-hypercube-version`).
 
 Round 7 (ninth coordinator): nothing.
 
@@ -196,6 +229,37 @@ hierarchical H0-H4 and H6, salvage, D-33 ports, link tags, `nm-analysis`, `d35-b
 
 ## Finished, not merged
 
+- **Round 9, model article audit:** `audit-wiki-model-hier-two-point` (fresh; states it did not read the
+  author's report; done 05:24) on `work/wiki-model-hier-two-point` `792ca22`: **APPROVE** for tags and
+  anchors (all seven tagged blocks identical except two equivalent link rewrites `#/criticality` →
+  `/articles/criticality/`, `#/susceptibility` → `/articles/susceptibility/`), setting text, the three
+  new proofs (J98J averaged, W498 non-radial pointwise, V4QQ/YWTU volume: every step and constant
+  checked), attribution, test and baseline change (mutation-tested); **APPROVE WITH CHANGE 4.1**
+  (Examples: "no critical two-point function to estimate" is inaccurate; exact replacement), plus
+  non-blocking O1 (lead paragraph 3 misattributes the lower bound to the recursion) and O2 (Statement
+  section, "both sums" loose). The critic re-read `032` is claimed (05:24, in flight). Queued, held:
+  **`HOLD-fix-wiki-model-hier-two-point`** (one reviser applies 4.1, O1, O2 and the critic's r2 list;
+  mathematical items of the critique are reported, not applied; owns the article and its baseline
+  entry; branch from `work/wiki-model-hier-two-point` merged with the tip) — **release on
+  `done/critic-reread-hierarchical-two-point`** with a free numeric prefix — and
+  **`HOLD-audit-wiki-model-hier-two-point-r2`** (fresh; release on `done/fix-wiki-model-hier-two-point`).
+  On its APPROVE: merge `work/fix-wiki-model-hier-two-point` (contains the model article, J98J and its
+  fix), gate, push, list the page "For Tom". The fix branch will conflict trivially with `030` in
+  `wiki/migration-baseline.json` (different entries): merge one at a time.
+- **Round 9, misc audit:** `audit-wiki-proofs-misc` (fresh; states it did not read the author's report;
+  done 05:22) on `work/wiki-proofs-misc` `cf77c4a`: statements and anchors byte-identical (PASS);
+  every paragraph **APPROVE WITH CHANGE** with exact replacements (JM5A: attribution of the fixed-
+  neighbourhood limits to Smirnov and LSW, link `#S1`→`#S2`, bare-tag link KJWA; R9NU: `G_n` is the
+  Miller–Schoug Green function, not a nesting statistic; WD31: (ii) rewritten to Bollobás–Riordan's
+  route, recommended 6THJ instead of DYUM+Peierls, last sentence; T9KC: one precision fix; new T9KC
+  scope paragraph replaced). **T9KC scope settled: COVERED BY REDUCTION** — T9KC as stated is true:
+  p(u)=1 case elementary (coset argument, written in the audit), Σp=∞ by Grimmett–Keane–Marstrand
+  1984 (a.s. connected; hypothesis form unverified, paper unreachable), remaining case GKN 1992 (page
+  locators unverified). Queued **`041-fix-wiki-proofs-misc`** (new worker, audit attached; owns the
+  three articles) and **`HOLD-audit-wiki-proofs-misc-r2`** (fresh; release on
+  `done/fix-wiki-proofs-misc`; also checks the GKM citation). On APPROVE: merge
+  `work/fix-wiki-proofs-misc` (contains `work/wiki-proofs-misc`), gate, push; critic pass later
+  (ruling 7 (iii)).
 - **The model article (ruling 8), round 6:** `work/wiki-model-hier-two-point` (`792ca22`; contains
   `work/port-wiki-hier-thm11` 025c8f3 and `work/fix-port-wiki-hier-thm11` 4b8ee89 = J98J with full
   proof, `audit-j98j` APPROVE, fixes W1/C1/C2 checked). The reviser restructured
@@ -226,6 +290,20 @@ hierarchical H0-H4 and H6, salvage, D-33 ports, link tags, `nm-analysis`, `d35-b
   occurrence row, one baseline digest. Tagged statement changed: `026-audit-wiki-fcu7` queued (diff and
   sources). Not done by the author: `dt-sharpness-zd` in the front-matter `sourceIds` (changes the
   frozen metadata digest; a later package).
+- **Round 8, brw and susc audits:** `audit-wiki-proofs-brw` (fresh; states it did not read the author's
+  report) **APPROVE WITH CHANGE**: G12U proof every step checked, change 1 is notation only (the display
+  over the set `{m, n−m}` loses a term when n is even); BSI3/48GR/FM8D idea paragraphs APPROVE (A2, A3:
+  Bass–Levin and Kesten 1986 attributions not checkable from this session); F1 (G12U `data-title` drops
+  "cited"), F2 (three stale mentions in `wiki/sources/marginal-long-range-models.md`).
+  `audit-wiki-proofs-susc` (fresh, same statement) **APPROVE WITH CHANGE**: JZG4 Gap 1 (case (iii) of
+  the Claim) with exact replacement, two optional nits, 67W9 attribution to DGT §2.4, and §4 replacement
+  texts for the stale provenance (including the tagged JZG4 statement paragraph's provenance clause,
+  NLDF, XP2Y, record note, DGT errata `leanImpact`, reading map). Queued `038-fix-wiki-proofs-brw`,
+  `039-fix-wiki-proofs-susc` (new workers, audits attached, branches from the authors' branches merged
+  with the tip) and `HOLD-audit-wiki-proofs-brw-r2`, `HOLD-audit-wiki-proofs-susc-r2` (fresh re-audits;
+  release each on its fix's done marker; the susc re-audit includes a binder table for JZG4). **On
+  APPROVE: merge `work/fix-wiki-proofs-brw` / `work/fix-wiki-proofs-susc`** (they contain the authors'
+  branches), gate, push; then a critic pass of the new proof sections (ruling 7 (iii)).
 - `work/wiki-proofs-brw` (`f83829d`, on `7a45d94`): full proof of **G12U** (from V7FQ and an inline
   Bennett inequality), `proofUses` G12U → V7FQ; BSI3, 48GR, FM8D: idea paragraphs, "literature result;
   proof wanted"; sourcing sentence and two mentions reworded. Correctness audit
@@ -320,6 +398,20 @@ hierarchical H0-H4 and H6, salvage, D-33 ports, link tags, `nm-analysis`, `d35-b
 
 ## In flight
 
+Claims without a done marker at 05:27 (round 9): **`mig-linters`** (the only Lean work; live: its
+build loop was at iteration 8 at 05:24 with 63 errors left, down from 218; logs in a scratchpad
+`full<N>.log`), `wiki-runaway-split-1` (claimed 05:15), `critic-reread-hierarchical-two-point`
+(claimed 05:24, read-only), `fix-wiki-I421` (claimed 05:24; then release `HOLD-audit-wiki-I421-r2`). Done in round 9 and consumed: `audit-wiki-proofs-misc`,
+`audit-wiki-model-hier-two-point` (fix briefs, see above). Worktrees unchanged from round 8.
+
+Claims without a done marker at 05:22 (round 8): **`mig-linters`** (the only Lean work; worktree
+`/home/user/wt/mig-linters`, files and `.lake/build` modified in the last 5-10 min: live),
+`wiki-runaway-split-1` (claimed 05:15; worktree `/home/user/wt/wiki-runaway-split-1`),
+`audit-wiki-model-hier-two-point` (05:16), `audit-wiki-proofs-misc` (05:14) (read-only). Done in round 8
+and consumed: `wiki-errata-bookkeeping` (merged), `audit-wiki-proofs-brw`, `audit-wiki-proofs-susc`
+(fix briefs). Worktrees: as round 7's list below, minus wiki-errata-bookkeeping (merged, removed), plus
+wiki-runaway-split-1 (in flight).
+
 Claims without a done marker at 05:14 (round 7): **`mig-linters`** (claimed 04:58, the only Lean work;
 worktree `/home/user/wt/mig-linters` at `cfb7144`, uncommitted edits to many `PercLib/` files modified
 within the last 15 min: live), `wiki-errata-bookkeeping` (five errata files, claimed 05:07),
@@ -365,6 +457,20 @@ All prover briefs carry `HOLD-`. Non-Lean and read-only briefs stay startable. S
 
 Claimed briefs stay in the queue directory (never delete a claimed brief); a brief is
 startable when it has no `HOLD-` prefix and no `claims/<id>`.
+**Startable at 05:27, round 9 (8, all non-Lean, mutually file-disjoint and disjoint from the claims):**
+`034-wiki-errata-bookkeeping-b`, `035-tooling-manifest-setdefs`, `036-audit-fix-workflows-r2`,
+`037-audit-wiki-fcu7-r2`, `038-fix-wiki-proofs-brw`, `039-fix-wiki-proofs-susc`,
+`040-wiki-errata-hypercube-version`, and new **`041-fix-wiki-proofs-misc`** (owns
+`adaptive-three-point.md`, `critical-exponents.md`, `infinite-cluster-uniqueness.md`; `HOLD-381` only
+reads `adaptive-three-point.md`). Claimed in round 9: `032`, `033` (both 05:24). New held: `HOLD-fix-wiki-model-hier-two-point`
+(after 032), `HOLD-audit-wiki-model-hier-two-point-r2` (after that fix), `HOLD-audit-wiki-proofs-misc-r2`
+(after 041). Still held: `HOLD-audit-wiki-proofs-brw-r2` (after 038), `HOLD-audit-wiki-proofs-susc-r2`
+(after 039), `HOLD-audit-wiki-I421-r2` (after 033),
+`HOLD-031-critic-regular-variation` (after 032), all Lean prover briefs (window). Wanted proofs 2ZI0/F9EV
+still wait for `030` to merge (it owns `wiki/migration-baseline.json`).
+Round 8's list, for reference:
+**Startable at 05:22, round 8 (9):** `032`-`040` as above.
+Round 7's list, for reference:
 **Startable at 05:14, round 7 (9, all non-Lean, mutually file-disjoint and disjoint from the claims):**
 `029-audit-wiki-proofs-misc`, `030-wiki-runaway-split-1`, `031-audit-wiki-model-hier-two-point`,
 `032-critic-reread-hierarchical-two-point`, `033-fix-wiki-I421`, `034-wiki-errata-bookkeeping-b`,
@@ -459,6 +565,15 @@ the frozen `sharpness` and `hierarchical-two-point` records after `014`/`015` me
 
 ## For ARCHITECT
 
+- Round 9 (eleventh coordinator): the launch instructions again said "never main, no PRs/issues"; no pull
+  request opened, open pull requests/issues not read. Window reading unchanged (non-Lean briefs stay
+  startable while `mig-linters` runs). Both round-9 audits stated up front that they did not read the
+  author's report.
+
+- Round 8 (tenth coordinator): the launch instructions again said "never main, no PRs/issues"; no pull
+  request opened, open pull requests/issues not read. Window reading unchanged. Both round-8 audits
+  stated up front that they did not read the author's report (the round-7 instruction works).
+
 - Round 7 (ninth coordinator): the launch instructions again said "never main, no PRs/issues"; no pull
   request opened, open pull requests/issues not read. Window reading unchanged (non-Lean briefs stay
   startable).
@@ -550,9 +665,11 @@ the frozen `sharpness` and `hierarchical-two-point` records after `014`/`015` me
   to the source". How should results original to the wiki be marked in History, and must each have a
   fresh correctness audit before it stays public? (The critic read their proofs and found no error; two
   steps are compressed, P10 and P11.)
-- **T9KC scope** (long-range uniqueness of the infinite cluster): as worded it allows p(z) = 1 and
-  Σ p(z) = ∞; whether the cited Gandolfi–Keane–Newman theorem covers that is being settled by
-  `audit-wiki-proofs-misc`. Nothing for you yet unless the audit finds the statement too strong.
+- **T9KC scope** (long-range uniqueness of the infinite cluster): settled by `audit-wiki-proofs-misc`:
+  the statement as worded (allowing p(z) = 1 and Σ p(z) = ∞) is true, by an elementary coset argument
+  when some p(u) = 1 and by Grimmett–Keane–Marstrand (1984) connectivity when Σ p = ∞; the article's
+  scope paragraph is being rewritten accordingly (`041`). Nothing for you unless the GKM hypothesis
+  check fails.
 - The model article `hierarchical-two-point` is restructured (branch `work/wiki-model-hier-two-point`);
   it is being audited and re-read by a critic and will reach the integration branch only after both.
 
@@ -616,6 +733,16 @@ the frozen `sharpness` and `hierarchical-two-point` records after `014`/`015` me
   add `/PercLib/**/Tags/` (and area `Defs`) to CODEOWNERS or accept this knowingly. Also check
   once that each action SHA pinned in the workflows is the tag it names (N4).
 ## Lessons
+
+- **Round 9:** two audit markers arrived within two minutes of the start (one at 05:22, one at 05:24);
+  both approved with changes. When a correctness audit and a critic re-read target the same article,
+  hold one combined revision brief until both are done instead of two fixes on one file. Workers now
+  write build logs into the coordinator's scratchpad path; read them there to judge a long Lean claim.
+
+- **Round 8:** predecessor's handoff and this round's start overlapped by a minute (STATUS time 05:14,
+  clock 05:13 at start); tree was clean, so no wait needed. One done marker arrived within 90 s of
+  waiting; an errata-only merge plus gate took about 4 min. Errata entries are not tagged statements:
+  merged on the gate (as `wiki-math-fixes` was).
 
 - **Round 7:** nothing new was done at the start; within one minute of waiting two markers arrived
   (`fix-workflows-r2`, `audit-wiki-fcu7`), both leading to audit briefs, no merge. Claims are fast

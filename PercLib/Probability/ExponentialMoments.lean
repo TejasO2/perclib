@@ -1,4 +1,9 @@
 /-
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Exponential moments from double-factorial moment bounds, and explicit tails. New proofs
 against pinned mathlib 56a005855ea17e0b0958f73ec801ae140b0a1679; no upstream proof is
 copied. The binomial series of `(1 − z)^{∓1/2}` is mathlib's
@@ -58,7 +63,8 @@ theorem ascPochhammer_eval_half (n : ℕ) :
     ring
 
 theorem ascPochhammer_eval_neg_half (n : ℕ) :
-    (ascPochhammer ℝ (n + 1)).eval (-1 / 2) = -(Nat.doubleFactorial (2 * n - 1) : ℝ) / 2 ^ (n + 1) := by
+    (ascPochhammer ℝ (n + 1)).eval (-1 / 2) = -(Nat.doubleFactorial (2 * n - 1) : ℝ) / 2 ^
+        (n + 1) := by
   rw [ascPochhammer_succ_left, Polynomial.eval_mul, Polynomial.eval_comp, Polynomial.eval_X,
     Polynomial.eval_add, Polynomial.eval_X, Polynomial.eval_one,
     show (-1 / 2 : ℝ) + 1 = 1 / 2 by norm_num, ascPochhammer_eval_half]
@@ -74,7 +80,8 @@ theorem multichoose_eq_eval_div (r : ℝ) (n : ℕ) :
 
 /-- For `0 ≤ z < 1`: `∑ (2n−1)!!/(n! 2^n) z^n = (1 − z)^{−1/2}`. -/
 theorem hasSum_inv_sqrt_one_sub {z : ℝ} (hz0 : 0 ≤ z) (hz1 : z < 1) :
-    HasSum (fun n : ℕ => (Nat.doubleFactorial (2 * n - 1) : ℝ) / (n ! * 2 ^ n) * z ^ n) (1 / sqrt (1 - z)) := by
+    HasSum (fun n : ℕ => (Nat.doubleFactorial (2 * n - 1) : ℝ) / (n ! * 2 ^ n) * z ^ n)
+        (1 / sqrt (1 - z)) := by
   have hb : z ∈ Metric.eball (0 : ℝ) 1 := by
     rw [Metric.mem_eball, edist_zero_right, enorm_eq_nnnorm, ENNReal.coe_lt_one_iff,
       ← NNReal.coe_lt_coe, coe_nnnorm, Real.norm_of_nonneg hz0]
@@ -88,7 +95,8 @@ theorem hasSum_inv_sqrt_one_sub {z : ℝ} (hz0 : 0 ≤ z) (hz1 : z < 1) :
 
 /-- For `0 ≤ z < 1`: `∑_{n ≥ 0} (2n−1)!!/((n+1)! 2^{n+1}) z^{n+1} = 1 − (1 − z)^{1/2}`. -/
 theorem hasSum_one_sub_sqrt_one_sub {z : ℝ} (hz0 : 0 ≤ z) (hz1 : z < 1) :
-    HasSum (fun n : ℕ => (Nat.doubleFactorial (2 * n - 1) : ℝ) / ((n + 1) ! * 2 ^ (n + 1)) * z ^ (n + 1))
+    HasSum (fun n : ℕ => (Nat.doubleFactorial (2 * n - 1) : ℝ) / ((n + 1) ! * 2 ^ (n + 1)) * z ^
+        (n + 1))
       (1 - sqrt (1 - z)) := by
   have hb : z ∈ Metric.eball (0 : ℝ) 1 := by
     rw [Metric.mem_eball, edist_zero_right, enorm_eq_nnnorm, ENNReal.coe_lt_one_iff,
@@ -173,7 +181,8 @@ theorem lintegral_mul_exp_le (hX : Measurable X) (hX0 : ∀ ω, 0 ≤ X ω) (hχ
     (hmom : ∀ m : ℕ, 1 ≤ m → ∫⁻ ω, ENNReal.ofReal (X ω ^ m) ∂P ≤
       ENNReal.ofReal (Nat.doubleFactorial (2 * m - 3) * χ ^ (2 * m - 1)))
     {r : ℝ} (hr : 0 ≤ r) (hr1 : r < (2 * χ ^ 2)⁻¹) :
-    ∫⁻ ω, ENNReal.ofReal (X ω * exp (r * X ω)) ∂P ≤ ENNReal.ofReal (χ / sqrt (1 - 2 * r * χ ^ 2)) := by
+    ∫⁻ ω, ENNReal.ofReal (X ω * exp (r * X ω)) ∂P ≤
+        ENNReal.ofReal (χ / sqrt (1 - 2 * r * χ ^ 2)) := by
   have h2 : 0 < 2 * χ ^ 2 := by positivity
   have hz1 : 2 * r * χ ^ 2 < 1 := by
     calc 2 * r * χ ^ 2 = r * (2 * χ ^ 2) := by ring

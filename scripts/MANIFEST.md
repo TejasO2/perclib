@@ -39,7 +39,14 @@ and the public definition index.
 
 A Prop-valued definition is a statement, not a proof. Lean reduces the type telescope
 and codomain to recognize Prop aliases; it closes the applied body over the telescope,
-including definitions whose values are function aliases rather than literal lambdas. Tagged opaque propositions are
+including definitions whose values are function aliases rather than literal lambdas.
+The builder then keeps as statements only definitions whose declared codomain (after the
+binders written in the declared type, with project aliases unfolded) is `Prop`. A
+definition of a set or predicate whose codomain only reduces to `α → Prop` (`Set α`, or
+an alias of a function type into `Prop`) is a definition like any other, not an
+assertion awaiting a proof; any other reducible codomain fails extraction. A parameter
+written as a binder (`def p (n : ℕ) : ℕ → Prop`) is part of the statement's telescope,
+as for D-16 statements with parameters. Tagged opaque propositions are
 rejected: D-16 uses definitions, and opacity cannot turn a proposition into its proof. Its value, with lambda parameters
 turned into universal quantifiers, is the proposition displayed and fingerprinted.
 The one allowed shared tag is a statement and a theorem of exactly that statement

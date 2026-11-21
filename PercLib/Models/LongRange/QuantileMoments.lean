@@ -1,6 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Adapted from the source repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
 d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc, files
 `PercLib/CriticalLRP/Tightness/LemmaI26Averaging.lean` (blob 817aa6d768) and
@@ -195,7 +198,8 @@ theorem le_card_mul_law_clusterIntersection_ball (q : Sym2 (Fin d → ℤ) → u
       ∑ x ∈ Λ, law q (E x) := by
     calc (m : ℝ≥0∞) * law q {ω | m ≤ maxClusterIntersection Λ ω}
         = ∫⁻ ω, (m : ℝ≥0∞) * {ω | m ≤ maxClusterIntersection Λ ω}.indicator 1 ω ∂(law q) := by
-          rw [lintegral_const_mul _ ((measurable_one).indicator hmaxm), lintegral_indicator_one hmaxm]
+          rw [lintegral_const_mul _ ((measurable_one).indicator hmaxm),
+              lintegral_indicator_one hmaxm]
       _ ≤ ∫⁻ ω, ∑ x ∈ Λ, (E x).indicator 1 ω ∂(law q) := lintegral_mono hpt
       _ = ∑ x ∈ Λ, law q (E x) := by
           rw [lintegral_finsetSum _ fun x _ => (measurable_one).indicator (hEm x)]

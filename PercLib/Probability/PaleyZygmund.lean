@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-16: the Paley–Zygmund inequality and the second-moment method, from
 pinned mathlib's Hölder inequality for lower Lebesgue integrals, and the cluster-volume corollary.
 No upstream code is copied, no definition is added and no Input is introduced.
@@ -118,7 +122,8 @@ theorem paleyZygmund_real [IsProbabilityMeasure μ] {X : Ω → ℝ} (hX : Measu
   have hE : ∫⁻ ω, ENNReal.ofReal (X ω) ∂μ = ENNReal.ofReal (∫ ω, X ω ∂μ) :=
     (ofReal_integral_eq_lintegral_ofReal hint (Filter.Eventually.of_forall hX0)).symm
   have hE2 : ∫⁻ ω, ENNReal.ofReal (X ω) ^ 2 ∂μ = ENNReal.ofReal (∫ ω, X ω ^ 2 ∂μ) := by
-    rw [ofReal_integral_eq_lintegral_ofReal hint2 (Filter.Eventually.of_forall fun ω => sq_nonneg _)]
+    rw [ofReal_integral_eq_lintegral_ofReal hint2 (Filter.Eventually.of_forall fun ω =>
+        sq_nonneg _)]
     refine lintegral_congr fun ω => ?_
     rw [ENNReal.ofReal_pow (hX0 ω)]
   have hEX0 : 0 ≤ ∫ ω, X ω ∂μ := integral_nonneg hX0
@@ -179,15 +184,24 @@ theorem paleyZygmund_cluster_of_chi_le {V : Type*} [Countable V] (q : Sym2 V →
 
 /-! ### Non-vacuity -/
 
-/-- A Bernoulli(1/2) variable (`X = 1` on `true` under `Ber(true, false, 1/2)`): every hypothesis of the
-second-moment method holds (here it is an equality, `1/4 = 1/2 · 1/2`). -/
-example : (∫⁻ ω, (if ω = true then 1 else 0 : ℝ≥0∞) ∂(ProbabilityTheory.bernoulliMeasure true false (⟨1 / 2, by norm_num, by norm_num⟩ : unitInterval))) ^ 2 ≤
-    (ProbabilityTheory.bernoulliMeasure true false (⟨1 / 2, by norm_num, by norm_num⟩ : unitInterval)) {ω | 0 < (if ω = true then 1 else 0 : ℝ≥0∞)} *
-      ∫⁻ ω, (if ω = true then 1 else 0 : ℝ≥0∞) ^ 2 ∂(ProbabilityTheory.bernoulliMeasure true false (⟨1 / 2, by norm_num, by norm_num⟩ : unitInterval)) :=
+/-- A Bernoulli(1/2) variable (`X = 1` on `true` under `Ber(true, false, 1/2)`): every hypothesis of
+the second-moment method holds (here it is an equality, `1/4 = 1/2 · 1/2`). -/
+example : (∫⁻ ω, (if ω = true then 1 else 0 : ℝ≥0∞)
+    ∂(ProbabilityTheory.bernoulliMeasure true false
+    (⟨1 / 2, by norm_num, by norm_num⟩ : unitInterval))) ^ 2 ≤
+    (ProbabilityTheory.bernoulliMeasure true false
+        (⟨1 / 2, by norm_num, by norm_num⟩ : unitInterval))
+        {ω | 0 < (if ω = true then 1 else 0 : ℝ≥0∞)} *
+      ∫⁻ ω, (if ω = true then 1 else 0 : ℝ≥0∞) ^ 2
+          ∂(ProbabilityTheory.bernoulliMeasure true false
+          (⟨1 / 2, by norm_num, by norm_num⟩ : unitInterval)) :=
   sq_lintegral_le_measure_pos_mul (Measurable.of_discrete) (ne_top_of_le_ne_top ENNReal.one_ne_top
     (by
-      calc ∫⁻ ω, (if ω = true then 1 else 0 : ℝ≥0∞) ∂(ProbabilityTheory.bernoulliMeasure true false (⟨1 / 2, by norm_num, by norm_num⟩ : unitInterval))
-          ≤ ∫⁻ _, 1 ∂(ProbabilityTheory.bernoulliMeasure true false (⟨1 / 2, by norm_num, by norm_num⟩ : unitInterval)) :=
+      calc ∫⁻ ω, (if ω = true then 1 else 0 : ℝ≥0∞)
+          ∂(ProbabilityTheory.bernoulliMeasure true false
+          (⟨1 / 2, by norm_num, by norm_num⟩ : unitInterval))
+          ≤ ∫⁻ _, 1 ∂(ProbabilityTheory.bernoulliMeasure true false
+              (⟨1 / 2, by norm_num, by norm_num⟩ : unitInterval)) :=
             lintegral_mono fun ω => by split_ifs <;> simp
         _ = 1 := by simp))
 

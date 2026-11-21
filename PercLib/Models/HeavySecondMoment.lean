@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs, on the bond interface. No source text or code is copied.
 -/
 module
@@ -276,7 +280,8 @@ theorem iSup_chi_eq_top : ⨆ v, chi q v = ⊤ := by
       simp only [Option.some.injEq, Sigma.mk.inj_iff, heq_eq_eq, true_and] at h
       exact h
     refine le_trans ?_ (ENNReal.tsum_comp_le_tsum_of_injective hinj _)
-    have h1 : ∀ i : Fin (2 ^ (k + 1)), tau q (some ⟨k, ⟨0, Nat.two_pow_pos _⟩⟩) (some ⟨k, i⟩) = 1 := by
+    have h1 : ∀ i : Fin (2 ^ (k + 1)), tau q (some ⟨k, ⟨0, Nat.two_pow_pos _⟩⟩)
+        (some ⟨k, i⟩) = 1 := by
       intro i
       have h := (ae_iff_measure_eq (μ := law q) (measurableSet_conn _ _).nullMeasurableSet).1
         (ae_conn_path hpath k i)
@@ -336,20 +341,20 @@ theorem exists_profile : ∃ q : Sym2 (Option (Σ k : ℕ, Fin (2 ^ (k + 1)))) �
   refine ⟨fun e => Sym2.lift ⟨g, hg⟩ e, ?_, ?_, ?_⟩
   · intro k i j h
     have hp : P (some ⟨k, i⟩) (some ⟨k, j⟩) := ⟨k, i, j, rfl, rfl, Or.inl h⟩
-    show g _ _ = 1
+    change g _ _ = 1
     simp only [g, hp, ↓reduceIte]
   · intro k
     have hnP : ¬ P none (some ⟨k, ⟨0, Nat.two_pow_pos _⟩⟩) := by
       rintro ⟨k', i, j, h1, -⟩
       exact absurd h1 (by simp)
     have hr : R none (some ⟨k, ⟨0, Nat.two_pow_pos _⟩⟩) := ⟨k, Or.inl ⟨rfl, rfl⟩⟩
-    show ((g none (some ⟨k, ⟨0, Nat.two_pow_pos _⟩⟩) : unitInterval) : ℝ) = _
+    change ((g none (some ⟨k, ⟨0, Nat.two_pow_pos _⟩⟩) : unitInterval) : ℝ) = _
     simp only [g, hnP, hr, ↓reduceIte, L, Option.elim_none, Option.elim_some, zero_add]
   · intro a b h
     by_contra hc
     rw [not_or] at hc
     apply h
-    show g a b = 0
+    change g a b = 0
     have h1 : ¬ P a b := hc.1
     have h2 : ¬ R a b := hc.2
     simp only [g, h1, h2, ↓reduceIte]

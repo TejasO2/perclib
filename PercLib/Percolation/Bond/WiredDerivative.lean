@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proof of the factorisation of the law of the set of vertices of a finite domain
 that are not joined to its exterior (wiki finite-size-sharpness, tag HATE, item 1).
 No upstream proof is copied, no definition is added and no Input is introduced.

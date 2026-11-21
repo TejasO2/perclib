@@ -1,6 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New statement definitions, written on 2026-11-14, on the bond interface. Source: T.
 Hutchcroft, "Power-law bounds for critical long-range percolation below the upper-critical
 dimension", arXiv:2008.11197v2, §2.1, Theorem 2.2 and Theorem 2.3 (printed p. 14). No code is
@@ -122,7 +125,7 @@ theorem tightnessScale_singleton (q : Sym2 V → unitInterval) (v : V) :
         have h' : 2 ≤ maxClusterIntersection {v} ω := hω
         rw [maxClusterIntersection_singleton] at h'
         omega
-    show law q {ω : Config V | 2 ≤ maxClusterIntersection {v} ω} ≤ _
+    change law q {ω : Config V | 2 ≤ maxClusterIntersection {v} ω} ≤ _
     rw [hempty, measure_empty]
     exact zero_le
   apply le_antisymm (Nat.sInf_le h2)
@@ -131,7 +134,7 @@ theorem tightnessScale_singleton (q : Sym2 V → unitInterval) (v : V) :
   by_contra hlt
   have huniv : {ω : Config V | n ≤ maxClusterIntersection {v} ω} = Set.univ :=
     Set.eq_univ_of_forall fun ω => by
-      show n ≤ maxClusterIntersection {v} ω
+      change n ≤ maxClusterIntersection {v} ω
       rw [maxClusterIntersection_singleton]
       omega
   have hn' : law q {ω : Config V | n ≤ maxClusterIntersection {v} ω} ≤

@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs, on the bond interface and the hierarchical geometry of
 `PercLib.Models.HierarchicalGeometry`. The statements follow the wiki tags V4QQ and YWTU
 (hierarchical two-point function), in conditional form. No source text or code is copied.
@@ -40,7 +44,6 @@ noncomputable section
 
 open MeasureTheory PercLib.Probability PercLib.Percolation.Bond
 open scoped ENNReal NNReal
-open Classical
 
 namespace PercLib.Models
 

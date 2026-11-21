@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs using the existing quantile and pinned mathlib order/topology APIs.
 Source motivation: arXiv:2103.17013v1, section 2.1. The assertion of continuity is
 replaced by left stability.
@@ -34,7 +38,7 @@ endpoint.
 noncomputable section
 
 open MeasureTheory Set Filter
-open scoped ENNReal NNReal Topology Classical
+open scoped ENNReal NNReal Topology
 
 namespace PercLib.Percolation.Bond
 
@@ -118,7 +122,8 @@ theorem maxClusterIntersection_mono (Λ : Finset V) {ω ω' : Config V} (h : ω 
   apply Finset.sup_le
   intro v hv
   exact (Set.ncard_le_ncard (Set.inter_subset_inter_left _ (cluster_mono h v))
-    (Λ.finite_toSet.subset Set.inter_subset_right)).trans (Finset.le_sup (f := fun v => (cluster ω' v ∩ (Λ : Set V)).ncard) hv)
+    (Λ.finite_toSet.subset Set.inter_subset_right)).trans
+        (Finset.le_sup (f := fun v => (cluster ω' v ∩ (Λ : Set V)).ncard) hv)
 
 /-- On finite vertex types the quantile is monotone in every bond probability. -/
 theorem tightnessScale_mono_finite [Finite V] (Λ : Finset V)

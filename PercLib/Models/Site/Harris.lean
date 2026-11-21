@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New site-percolation corollaries of PercLib's canonical Bernoulli Harris inequality and monotone
 coupling. Uses the existing site-percolation definitions; no upstream proof copied.
 -/
@@ -31,7 +35,7 @@ probability in the parameter.
 @[expose] public section
 noncomputable section
 open MeasureTheory Set PercLib.Probability
-open scoped ENNReal NNReal Classical
+open scoped ENNReal NNReal
 
 namespace PercLib.Models.Site
 variable {V : Type*}
@@ -191,6 +195,7 @@ example :
   change ((1 / 2 : ℝ≥0) * (1 / 2)) * ((1 / 2) * (1 / 2)) < 1 / 2
   norm_num
 
+open Classical in
 /-- For distinct vertices, a connection has probability at most `w_x w_y`: both endpoints
 must be open. -/
 theorem siteBernoulli_siteConn_le_mul_of_ne (G : SimpleGraph V) (w : V → unitInterval)

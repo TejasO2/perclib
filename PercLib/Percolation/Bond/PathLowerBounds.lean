@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New for this project. No upstream proof is copied.
 -/
 module
@@ -147,7 +149,9 @@ theorem tau_completeBipartite_bool (k : ℕ) (t : unitInterval) :
     intro e he he'
     simp only [mem_insert_iff, mem_singleton_iff] at he he'
     rcases he with rfl | rfl <;> rcases he' with h | h <;>
-      simp [x, y] at h <;> exact hmm' h
+      simp only [Sym2.eq, Sym2.rel_iff', Prod.mk.injEq, Sum.inr.injEq, true_and, Prod.swap_prod_mk,
+          reduceCtorEq, and_self, or_false, x, Sum.inl.injEq, Bool.false_eq_true, false_and,
+          or_self, y, Bool.true_eq_false, and_false, and_true] at h <;> exact hmm' h
   have hunion := prodBernoulli_biUnion_of_determined q Finset.univ hFdisj
     (A := A) (fun m _ => measurableSet_setOf_finset_subset _) (fun m => subset_determined _)
   have hA : ∀ m, prodBernoulli q (A m) =

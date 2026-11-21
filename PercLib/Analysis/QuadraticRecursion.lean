@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-16, against pinned mathlib. No upstream proof is copied.
 -/
 module
@@ -59,7 +61,7 @@ theorem tendsto_inv_sub_inv
     field_simp
     ring
   have hψ0 : ψ u ≠ 0 := by rw [hψu]; exact mul_ne_zero hu0.ne' hd
-  show (a - ε u) / (1 - a * u + ε u * u) = 1 / ψ u - 1 / u
+  change (a - ε u) / (1 - a * u + ε u * u) = 1 / ψ u - 1 / u
   rw [hψu]
   field_simp
   ring

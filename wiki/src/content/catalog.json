@@ -65,6 +65,17 @@
       "coverageNote": "The percolation statements are a source for the planned shared critical theory. The prototype does not include a Lean implementation of the finite-size criterion or the sharpness proof."
     },
     {
+      "id": "dt-sharpness-zd",
+      "shortName": "Duminil-Copin\u2013Tassion, Z^d note",
+      "title": "A new proof of the sharpness of the phase transition for Bernoulli percolation on Z^d",
+      "author": "Hugo Duminil-Copin and Vincent Tassion",
+      "year": 2015,
+      "edition": "arXiv:1502.03051v1 \u00b7 10 February 2015",
+      "url": "https://arxiv.org/abs/1502.03051v1",
+      "description": "The finite-set criterion and the identification of its threshold with p_c for nearest-neighbour bond percolation on Z^d.",
+      "coverageNote": "Theorem 1.1 is the source of the lattice identification of the certificate threshold with p_c."
+    },
+    {
       "id": "hutchcroft-triangle-2021",
       "shortName": "Quantitative triangle bounds",
       "title": "On the derivation of mean-field percolation critical exponents from the triangle condition",
@@ -2666,7 +2677,7 @@
       "title": "Transition Probabilities for Symmetric Jump Processes",
       "author": "Richard F. Bass and David A. Levin",
       "year": 2002,
-      "edition": "Author-hosted 26-page PDF; Theorem 1.1 on PDF p. 2",
+      "edition": "Author-hosted 26-page PDF; Theorem 1.1 on PDF p. 2; published Transactions of the American Mathematical Society 354(7), 2933\u20132953, AMS article S0002-9947-02-02998-7 (DOI 10.1090/S0002-9947-02-02998-7 read off the AMS identifier, not resolved)",
       "url": "https://pages.uoregon.edu/dlevin/pubs/sym.pdf",
       "description": "Two-sided discrete-time bounds for comparable power-law conductances.",
       "coverageNote": "The setup and Theorem 1.1 were checked. The full proof and journal PDF were not audited."
@@ -2956,6 +2967,28 @@
       "url": "https://doi.org/10.1007/BF01208256",
       "description": "Primary reference for the exponential correlation length and the tilted lace expansion.",
       "coverageNote": "Section 1.1 and Appendix A read in publisher PDF text. The wiki gives a finite-range mass and boundary proof; the uniform tilted diagram bootstrap is still separate. No new erratum or formal association. The Section 5 framework and diagram discussion were also read. A separate coarse high-dimensional argument now closes the tilted bootstrap and proves the exponential length law and pole residue; numerical constants and the spread-out theorem are not imported."
+    },
+    {
+      "id": "hara-slade-1990",
+      "shortName": "Hara\u2013Slade mean-field percolation",
+      "title": "Mean-field critical behaviour for percolation in high dimensions",
+      "author": "Takashi Hara and Gordon Slade",
+      "year": 1990,
+      "edition": "Communications in Mathematical Physics 128(2), 333\u2013391; Project Euclid record cmp/1104180434; DOI not verified",
+      "url": "https://projecteuclid.org/journals/communications-in-mathematical-physics/volume-128/issue-2/Mean-field-critical-behaviour-for-percolation-in-high-dimensions/cmp/1104180434.pdf",
+      "description": "The lace expansion for bond percolation and the triangle condition in high dimensions, for nearest-neighbour and spread-out models.",
+      "coverageNote": "Cited inline for the percolation lace expansion and its diagrammatic bootstrap. Journal, volume, issue and pages are from the Project Euclid record as returned by a web search on 21 November 2026; the publisher page could not be fetched from this session and no DOI was confirmed. The paper has not been read for the wiki; no locator, erratum or formal association is claimed."
+    },
+    {
+      "id": "gkn-1992",
+      "shortName": "Gandolfi\u2013Keane\u2013Newman uniqueness",
+      "title": "Uniqueness of the infinite component in a random graph with applications to percolation and spin glasses",
+      "author": "Alberto Gandolfi, Michael S. Keane and Charles M. Newman",
+      "year": 1992,
+      "edition": "Probability Theory and Related Fields 92, 511\u2013527; DOI 10.1007/BF01274266",
+      "url": "https://doi.org/10.1007/BF01274266",
+      "description": "The Burton\u2013Keane uniqueness argument for the infinite cluster extended to translation-invariant random graphs on Z^d with long-range edges.",
+      "coverageNote": "Cited inline in the uniqueness article for Theorem 0 (p. 513) and Theorem 1 (p. 516); those locators were not rechecked here. Journal, volume, pages and DOI agree across reference lists and bibliographic databases returned by a web search on 21 November 2026; the publisher page could not be fetched from this session and the issue number is not recorded. The paper has not been read for the wiki; no erratum or formal association is claimed."
     },
     {
       "id": "kozma-nachmias-alexander-orbach-2009",

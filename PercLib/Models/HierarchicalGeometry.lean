@@ -1,4 +1,9 @@
 /-
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Exact hierarchical geometry. New proofs using the existing finite-support lattice
 and mathlib 56a005855ea17e0b0958f73ec801ae140b0a1679's finite cardinalities and sums.
 No new notion of level, ball, or percolation law is introduced.
@@ -31,7 +36,7 @@ geometric and power-law kernels are summed exactly.
 
 @[expose] public section
 noncomputable section
-open scoped ENNReal NNReal Classical
+open scoped ENNReal NNReal
 
 namespace PercLib.Models
 
@@ -90,7 +95,8 @@ theorem exists_addSubgroup_level_ball (n : ℕ) :
   refine ⟨{ carrier := {z | z.support.sup Nat.succ ≤ n}
             zero_mem' := by simp
             add_mem' := fun hx hy => (level_add_le_max _ _).trans (max_le hx hy)
-            neg_mem' := fun hx => by simpa only [Set.mem_ofPred_eq, Finsupp.support_neg] using hx }, fun _ => Iff.rfl⟩
+            neg_mem' := fun hx => by simpa only [Set.mem_ofPred_eq, Finsupp.support_neg] using hx },
+                fun _ => Iff.rfl⟩
 
 /-- A translated level ball is a coset of its origin ball. -/
 theorem level_ball_eq_translate (x : ℕ →₀ A) (n : ℕ) :
@@ -149,7 +155,8 @@ theorem level_ball_restrict_bijective (n : ℕ) :
     simp [z, i.isLt]
 
 /-- A level ball has finitely many vectors whenever the coefficient group is finite. -/
-theorem finite_level_ball [Finite A] (n : ℕ) : {z : ℕ →₀ A | z.support.sup Nat.succ ≤ n}.Finite := by
+theorem finite_level_ball [Finite A] (n : ℕ) : {z : ℕ →₀ A | z.support.sup Nat.succ ≤
+    n}.Finite := by
   have : Finite {z : ℕ →₀ A // z.support.sup Nat.succ ≤ n} :=
     Finite.of_injective _ (level_ball_restrict_bijective (A := A) n).1
   exact Set.finite_coe_iff.mp this
@@ -168,7 +175,8 @@ theorem level_ball_succ_eq_iUnion (n : ℕ) :
       rintro rfl
       simpa using (Finsupp.mem_support_iff.mp hi)
     have hzi : z i ≠ 0 := by
-      simpa [Finsupp.sub_apply, Finsupp.single_apply, Ne.symm hne] using Finsupp.mem_support_iff.mp hi
+      simpa [Finsupp.sub_apply, Finsupp.single_apply, Ne.symm hne] using
+          Finsupp.mem_support_iff.mp hi
     have hil := (level_le_iff_support z _).mp hz i (Finsupp.mem_support_iff.mpr hzi)
     omega
   · rintro ⟨a, ha⟩
@@ -263,7 +271,8 @@ theorem tsum_radial_eq [NeZero L] (f : ℕ → ℝ≥0∞) :
     (∑' z : ℕ →₀ (Fin d → ZMod L), f (z.support.sup Nat.succ)) =
       f 0 + ∑' n : ℕ, (((L ^ d) ^ (n + 1) - (L ^ d) ^ n : ℕ) : ℝ≥0∞) * f (n + 1) := by
   have hfib : (∑' z : ℕ →₀ (Fin d → ZMod L), f (z.support.sup Nat.succ)) =
-      ∑' n : ℕ, (Nat.card {z : ℕ →₀ (Fin d → ZMod L) // z.support.sup Nat.succ = n} : ℝ≥0∞) * f n := by
+      ∑' n : ℕ, (Nat.card {z : ℕ →₀ (Fin d → ZMod L) // z.support.sup Nat.succ = n} : ℝ≥0∞) *
+          f n := by
     rw [← ENNReal.tsum_fiberwise (fun z : ℕ →₀ (Fin d → ZMod L) => f (z.support.sup Nat.succ))
       (fun z => z.support.sup Nat.succ)]
     apply tsum_congr
@@ -300,7 +309,8 @@ theorem tsum_geometricRadial_eq [NeZero L] (r : ℝ≥0∞) :
       ring
     _ = _ := by rw [ENNReal.tsum_mul_left, ENNReal.tsum_geometric]
 
-/-- A nondegenerate hierarchical geometric kernel is summable exactly below its geometric ratio threshold. -/
+/-- A nondegenerate hierarchical geometric kernel is summable exactly below its geometric ratio
+threshold. -/
 theorem tsum_geometricRadial_lt_top_iff (hL : 2 ≤ L) (hd : 1 ≤ d) (r : ℝ≥0)
     (hr : 0 < r) :
     (∑' z : ℕ →₀ (Fin d → ZMod L), if z = 0 then 0 else (r : ℝ≥0∞) ^ (z.support.sup Nat.succ)) < ⊤ ↔

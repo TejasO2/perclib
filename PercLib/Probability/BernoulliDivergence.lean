@@ -1,4 +1,9 @@
 /-
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Two-point (Bernoulli) divergence inequalities for the exponential intensity family. New
 proofs against pinned mathlib 56a005855ea17e0b0958f73ec801ae140b0a1679, using mathlib's
 `InformationTheory.klFun`; no upstream proof is copied. The Bernoulli divergence

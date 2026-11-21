@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Correspondence wrappers for the ghost field and the independent-layer ghost comparisons. All
 mathematical inputs are proved in the imported modules.
 -/
@@ -25,7 +29,6 @@ Wiki correspondence for the ghost field and the independent-layer ghost comparis
 noncomputable section
 open MeasureTheory Set PercLib.Probability
 open scoped ENNReal unitInterval
-open Classical
 
 namespace PercLib.Percolation.Bond
 variable {V : Type*}
@@ -56,6 +59,7 @@ theorem ghost_field_magnetization [Countable V] (q : Sym2 V → I) (x : V) :
     exact ⟨mem_univ _, v, hv.2⟩
   · rw [Measure.prod_prod, hmarks, mul_zero]
 
+open Classical in
 /-- The omitted-edge ghost comparison `M₀(h) ≤ M_o(h) ≤ M₀(h) + δ E[X e^{-hX}] M*(h)`;
 under a transitive full profile `M* = M_o` and the error is multiplicative. -/
 @[tag "FJWB"]
