@@ -72,7 +72,9 @@ public import PercLib.Basic
 public import PercLib.Combinatorics.DoubleFactorialConvolution
 public import PercLib.Combinatorics.FiniteEdgeChange
 public import PercLib.Combinatorics.ForestBranching
+public import PercLib.Combinatorics.InvariantWeightTest
 public import PercLib.Combinatorics.Tags.ForestConnections
+public import PercLib.Combinatorics.Tags.InvariantWeightTest
 public import PercLib.Combinatorics.Tags.TreeSplitting
 public import PercLib.Combinatorics.TreeSplitting
 public import PercLib.Meta.Tag
