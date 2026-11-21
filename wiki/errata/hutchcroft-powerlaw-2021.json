@@ -28,9 +28,9 @@
       "id": "recursive-retaining-threshold",
       "title": "The recursive partition threshold",
       "status": "provisional",
-      "locator": "arXiv:2008.11197v2, Section 2.1, proof of Lemma 2.4, recursive construction of the good partitions.",
-      "claim": "The recursive retaining exponent is inconsistent with the final marked-mass interval.",
-      "problem": "To end with marked counts in $[3^{-k}N,3^{1-k}N)$, pieces reaching the upper endpoint must still be split. The recursion must also retain vertex coverage for an unmarked prescribed root.",
+      "locator": "arXiv:2008.11197v2, Section 2.1: Lemma 2.4 statement (printed p.15); proof of Lemma 2.4, recursive construction of the good partitions π_{i+1} (printed p.17); proof of Theorem 2.3, passage before (2.11) (printed p.18). Extracted v2 PDF text checked 21 November 2026.",
+      "claim": "The recursion defines π_{i+1} by retaining the pieces W of π_i with $|V(W)\\cap A|<3^{k-1}|A|$ and splitting each piece with $|V(W)\\cap A|\\ge 3^{-k+1}|A|$. The printed retaining threshold $3^{k-1}|A|$, a sign slip for $3^{-k+1}|A|$, is inconsistent with the final marked-mass interval $3^{-k}\\le|A\\cap V_i|/|A|<3^{-k+1}$ (below, N=|A|).",
+      "problem": "To end with marked counts in $[3^{-k}N,3^{1-k}N)$, pieces reaching the upper endpoint must still be split. A repaired recursion must also keep item 2 of Lemma 2.4 (every vertex is incident to some piece), which the proof of Theorem 2.3 uses before (2.11) to place the root u, not required to lie in Λ, in some V_i. The printed recursion keeps it because every π_i is a partition of all edges of the spanning tree; this point records a constraint on the repair, not a further error.",
       "correction": "Retain a piece precisely when its marked count is below $3^{1-k}N$; split larger pieces into connected nonempty edge sets. DMI0 proves a partition covering every vertex with at least $3^{k-1}+1$ pieces, each in the required interval. The edge sets, rather than their endpoint sets, are disjoint; 12NL applies BK to these witnesses.",
       "tags": [
         "DMI0",

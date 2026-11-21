@@ -2,8 +2,7 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for issue 643 (Q-215), written on 2026-11-16 by PROVER-F. No upstream proof is
-copied and no definition is added.
+New proofs, written on 2026-11-16. No upstream proof is copied and no definition is added.
 -/
 module
 
@@ -1011,9 +1010,9 @@ theorem one_sub_fourierSymbol_asymp_of_two_lt (hd : 1 ≤ d) {p : (Fin d → ℤ
           gcongr
       _ = _ := by rw [hs2]; ring
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
-/-- The witness of the issue: on `ℤ`, `p(0) = 1/2` and `p(x) = c₀ |x|^{-2}` with
+/-- Non-vacuity witness: on `ℤ`, `p(0) = 1/2` and `p(x) = c₀ |x|^{-2}` with
 `c₀ = 3/(2π²)`, so that the masses sum to one (`∑_{x ≠ 0} x^{-2} = π²/3`). -/
 theorem hasSum_lazy_inverse_square :
     HasSum (fun x : Fin 1 → ℤ => if x = 0 then (1 / 2 : ℝ) else

@@ -12,8 +12,6 @@
       "correction": "FIXER recommends restoring the all-lattice denominator sum_y h(y/L), including y=0, as in the cited earlier arXiv:1204.1180v4 Appendix A (A.2). Require this finite denominator to be positive. TIOJ proves normalization of the base law and its compound mixture for alpha>0, and verifies symmetry, nondegeneracy, irreducibility and aperiodicity for the cube. DTYB retains the infinite-mass counterexample and the separately normalized punctured alternative; these are different laws. The earlier Appendix A assumes alpha not equal to two, so it does not itself certify the marginal analytic hypotheses. The clipped power-law example used in G12U\u20136ZYT is separate; the main theorem is not contradicted.",
       "tags": [
         "DTYB",
-        "G12U",
-        "6ZYT",
         "TIOJ"
       ],
       "issues": [],

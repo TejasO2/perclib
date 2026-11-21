@@ -1,17 +1,15 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
 
-Adapted from pull request 488: source repository `yujinhkim/lrp`, branch
-`critical-lrp-1`, commit d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc, files
-`PercLib/CriticalLRP/Analysis/MassTransport.lean` and
-`PercLib/CriticalLRP/MomentExpansion.lean`, contributed by `yujinhkim`.
-Licence: Apache-2.0, as declared in those files' headers and in
-`third_party/critical-lrp/NOTICE.md` of that commit (upstream origin
-`yujinhkim/Critical-Long-range-percolation` at
-3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf, not independently verified).
-Changes: renamed into `PercLib.Probability`; `tsum_mass_transport` renamed
-`tsum_mass_transport_tuple`; the unused `[Countable G]` dropped; the two-point form is
-derived from `tsum_mass_transport_add`; focused imports; `autoImplicit` off.
+Adapted from the source repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
+d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc, files `PercLib/CriticalLRP/Analysis/MassTransport.lean`
+and `PercLib/CriticalLRP/MomentExpansion.lean`, contributed by `yujinhkim`. Licence: Apache-2.0, as
+declared in those files' headers and in `third_party/critical-lrp/NOTICE.md` of that commit
+(upstream origin `yujinhkim/Critical-Long-range-percolation` at
+3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf, not independently verified). Changes: renamed into
+`PercLib.Probability`; `tsum_mass_transport` renamed `tsum_mass_transport_tuple`; the unused
+`[Countable G]` dropped; the two-point form is derived from `tsum_mass_transport_add`; focused
+imports; `autoImplicit` off.
 -/
 module
 
@@ -103,7 +101,7 @@ theorem mul_pow_sub_pow_eq_sum_choose (a b : ℝ) (p : ℕ) :
   rw [← sum_choose_mul_pow_eq_pow_sub a b p, Finset.mul_sum]
   exact sum_congr rfl fun ℓ _ => by ring
 
-/-- D-5 witness for `tsum_mass_transport_tuple`: `G = ℤ`, `k = 2`, `F v = 1` if
+/-- Non-vacuity witness for `tsum_mass_transport_tuple`: `G = ℤ`, `k = 2`, `F v = 1` if
 `v 1 − v 0 = 1` and `0` otherwise; both sides equal `1`. -/
 example :
     (∑' v : {v : Fin 2 → ℤ // v 0 = 0}, (if v.1 1 - v.1 0 = 1 then (1 : ℝ≥0∞) else 0))

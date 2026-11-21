@@ -1,21 +1,19 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
 
-Adapted from pull request 488: source repository `yujinhkim/lrp`, branch
-`critical-lrp-1`, commit d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc, files
-`PercLib/CriticalLRP/Tightness/MomentRatio.lean` (blob 331d362155) and
-`PercLib/CriticalLRP/Tightness/RealExponent.lean` (blob e177d7bd87), contributed by
-`yujinhkim`. Licence: Apache-2.0, as declared in those files' headers and in
+Adapted from the source repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
+d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc, files `PercLib/CriticalLRP/Tightness/MomentRatio.lean`
+(blob 331d362155) and `PercLib/CriticalLRP/Tightness/RealExponent.lean` (blob e177d7bd87),
+contributed by `yujinhkim`. Licence: Apache-2.0, as declared in those files' headers and in
 `third_party/critical-lrp/NOTICE.md` of that commit (upstream origin
-`yujinhkim/Critical-Long-range-percolation` at 3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf,
-not independently verified).
-Changes: the abstract results are in namespace `PercLib.Probability`; the source's
-definitions `momentConst`, `momentConstR`, `momentConstFull` are written out as expressions
+`yujinhkim/Critical-Long-range-percolation` at 3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf, not
+independently verified). Changes: the abstract results are in namespace `PercLib.Probability`; the
+source's definitions `momentConst`, `momentConstR`, `momentConstFull` are written out as expressions
 and its `edianOf`/`edianMaxVol`/`clusterMaxVol`/`clusterVolIn`/`TailI26` are replaced by this
-library's `tightnessScale`, `maxClusterIntersection`, `clusterIntersection` and the rooted
-conjunct of `universalTightness` (D-33); the D-2 statements of Corollary I.2.5 and of the
-lower bound are new; the window-monotonicity and edian-existence parts of
-`RealExponent.lean` are not ported; focused imports; `autoImplicit` off; linters on.
+library's `tightnessScale`, `maxClusterIntersection`, `clusterIntersection` and the rooted conjunct
+of `universalTightness`; the bond-interface statements of Corollary I.2.5 and of the lower bound are
+new; the window-monotonicity and edian-existence parts of `RealExponent.lean` are not ported;
+focused imports; `autoImplicit` off; linters on.
 -/
 module
 
@@ -37,7 +35,7 @@ exponential tail `μ{X ≥ t} ≤ e · e^{-t/(9M)} · μ{X ≥ M}` (`t ≥ M`, `
 * `moment_ratio_le_rpow_ennreal`, `moment_le_rpow_ennreal_of_tail`,
   `moment_ratio_le_rpow_ennreal_of_nonneg`: real exponents, `X` almost surely finite.
 
-On the D-2 interface (namespace `PercLib.Percolation.Bond`), with `X = |K_u ∩ Λ|` and
+On the bond interface (namespace `PercLib.Percolation.Bond`), with `X = |K_u ∩ Λ|` and
 `M = tightnessScale q Λ`:
 * `law_clusterIntersection_tail_le`: the rooted tail, from `universalTightness`;
 * `lintegral_rpow_clusterIntersection_add_le` and `..._of_nonneg` (Corollary I.2.5):
@@ -458,7 +456,7 @@ theorem measurable_clusterIntersection_ennreal [Countable V] (Λ : Finset V) (u 
     Measurable fun ω : Config V => (clusterIntersection Λ ω u : ℝ≥0∞) :=
   measurable_from_nat.comp (measurable_clusterIntersection Λ u)
 
-/-- **Corollary I.2.5 on D-2, `p > 0`.** For real `p > 0` and `s ≥ 0`,
+/-- **Corollary I.2.5 on the bond interface, `p > 0`.** For real `p > 0` and `s ≥ 0`,
 `E X_u^{p+s} ≤ C(p,s) M^s E X_u^p` with `C(p,s) = (p+s)/p + e (p+s) 9^{p+s} Γ(p+s)`. -/
 theorem lintegral_rpow_clusterIntersection_add_le [Countable V] (q : Sym2 V → unitInterval)
     {Λ : Finset V} (hΛ : Λ.Nonempty) (u : V) {p s : ℝ} (hp : 0 < p) (hs : 0 ≤ s) :
@@ -472,7 +470,7 @@ theorem lintegral_rpow_clusterIntersection_add_le [Countable V] (q : Sym2 V → 
       have := two_le_tightnessScale q hΛ; omega))
     (law_clusterIntersection_tail_le q hΛ u) hp hs
 
-/-- **Corollary I.2.5 on D-2, full range `p, s ≥ 0`,** with
+/-- **Corollary I.2.5 on the bond interface, full range `p, s ≥ 0`,** with
 `C(p,s) = (p+s)/p + 1 + e (p+s) 9^{p+s} Γ(p+s)`. -/
 theorem lintegral_rpow_clusterIntersection_add_le_of_nonneg [Countable V]
     (q : Sym2 V → unitInterval) {Λ : Finset V} (hΛ : Λ.Nonempty) (u : V) {p s : ℝ}
@@ -513,7 +511,7 @@ theorem sub_one_rpow_div_exp_le_lintegral_maxClusterIntersection [Countable V]
   rw [div_eq_mul_inv, ← Real.exp_neg, ENNReal.ofReal_mul (Real.rpow_nonneg hMreal _)]
   exact (mul_le_mul' le_rfl hmin.le).trans hmarkov
 
-/-! ### Non-vacuity (D-5): `Λ = {v}`, `X = 1`, `M = 2` -/
+/-! ### Non-vacuity: `Λ = {v}`, `X = 1`, `M = 2` -/
 
 /-- With `Λ = {0}` in `ℕ`, `X_0 = 1` and `M = 2`: Corollary I.2.5 reads
 `1 ≤ C(p,s) 2^s` and the lower bound reads `1/e ≤ 1`; every hypothesis holds. -/

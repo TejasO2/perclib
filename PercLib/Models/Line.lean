@@ -9,6 +9,24 @@ public import PercLib.Percolation.Bond.Forest
 public import PercLib.Percolation.Bond.Intensity
 public import Mathlib.Topology.Algebra.InfiniteSum.NatInt
 
+/-!
+# Nearest-neighbour percolation on the integer line
+
+Exact two-point function and susceptibility of nearest-neighbour bond percolation on `ℤ`, absence of
+infinite clusters below `p = 1`, and infinite critical intensities.
+
+## Main results
+
+* `tau_eq_pow`
+* `chi_eq`
+* `chi_lt_top`
+* `law_exists_infinite_eq_zero`
+* `law_cluster_infinite_eq_one`
+* `rootCriticalIntensity_eq_top`
+* `globalCriticalIntensity_eq_top`
+* `chi_intensity_eq`
+-/
+
 @[expose] public section
 noncomputable section
 

@@ -1,7 +1,7 @@
 /-
-Integrated and open-pivotal forms of Russo's identity. New consequences of PercLib's
-Russo.lean (native NearCritical source c820fea91a7482c1755de0ec94ecb9f59ccfcacc, R-3)
-and mathlib 56a005855ea17e0b0958f73ec801ae140b0a1679's fundamental theorem of calculus.
+Integrated and open-pivotal forms of Russo's identity. New consequences of PercLib's Russo.lean
+(native NearCritical source c820fea91a7482c1755de0ec94ecb9f59ccfcacc, reused with Tom Hutchcroft's
+permission) and mathlib 56a005855ea17e0b0958f73ec801ae140b0a1679's fundamental theorem of calculus.
 No new law or pivotal convention is introduced.
 -/
 module
@@ -9,6 +9,21 @@ module
 public import PercLib.Probability.Cylinder
 public import PercLib.Probability.Russo
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
+
+/-!
+# Integrated Russo formula
+
+The integral form of Russo's identity along a profile curve, and the Margulis–Russo form with open
+pivotal coordinates.
+
+## Main results
+
+* `prodBernoulli_real_open_pivotal`
+* `prodBernoulli_sub_eq_integral_profile`
+* `prodBernoulli_hasDerivWithinAt_open_pivotal`
+* `prodBernoulli_sub_eq_integral_pivotal`
+* `prodBernoulli_sub_eq_integral_segment`
+-/
 
 @[expose] public section
 noncomputable section

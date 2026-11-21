@@ -2,8 +2,7 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for issue 168 (Q-25), written on 2026-11-14 by PROVER-E. No upstream proof is
-copied.
+New proofs, written on 2026-11-14. No upstream proof is copied.
 -/
 module
 

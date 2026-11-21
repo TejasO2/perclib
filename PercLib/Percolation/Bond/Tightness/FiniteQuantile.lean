@@ -2,7 +2,7 @@
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
 New proofs using the existing quantile and pinned mathlib order/topology APIs.
 Source motivation: arXiv:2103.17013v1, section 2.1. The assertion of continuity is
-replaced by left stability, following FIXER's provisional resolution of issue 53.
+replaced by left stability.
 No source code is copied; no two-sided continuity of the integer quantile is claimed.
 -/
 module
@@ -12,6 +12,23 @@ public import PercLib.Percolation.Bond.Intensity
 public import PercLib.Probability.FiniteContinuity
 public import PercLib.Probability.Coupling.Monotone
 public import PercLib.Probability.OpenEventHarris
+
+/-!
+# The quantile scale on finite vertex types
+
+Basic properties of the quantile `tightnessScale`, its monotonicity in the profile on finite vertex
+types, and its left stability along the intensity family, which passes subcritical bounds to the
+endpoint.
+
+## Main results
+
+* `law_max_tail_at_tightnessScale`
+* `tightnessScale_le_iff`
+* `tightnessScale_mono_finite`
+* `finite_quantile_left_stable`
+* `finite_quantile_left_limit`
+* `finite_quantile_sq_bound_at_endpoint`
+-/
 
 @[expose] public section
 noncomputable section

@@ -2,7 +2,7 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 New proofs using pinned mathlib's simple paths, cylinder probabilities and
-ENNReal sums. No upstream proof is copied; reuse findings are on issue #39.
+ENNReal sums. No upstream proof is copied.
 -/
 module
 

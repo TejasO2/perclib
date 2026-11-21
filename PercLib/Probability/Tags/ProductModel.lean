@@ -9,6 +9,21 @@ public import PercLib.Meta.Tag
 public import PercLib.Probability.Exploration.Transcript
 public import PercLib.Probability.Transport.Reindexing
 
+/-!
+# Product model: correspondence
+
+Wiki correspondence for relabelling, restriction, finite transcripts and cylinder probabilities of
+the canonical product law.
+
+## Main results
+
+* `product_relabelling`
+* `product_relabelling_invariant`
+* `transcript_probability_and_factorization`
+* `adaptive_transcript_conditional`
+* `prodBernoulli_open_closed`
+-/
+
 @[expose] public section
 open MeasureTheory ProbabilityTheory Set
 open scoped ENNReal Classical

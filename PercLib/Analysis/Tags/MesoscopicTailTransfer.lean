@@ -9,6 +9,19 @@ public import PercLib.Meta.Tag
 public import PercLib.Analysis.ReciprocalODE
 public import PercLib.Analysis.MesoscopicNegligibility
 
+/-!
+# Mesoscopic tail transfer: correspondence
+
+Wiki correspondence for the reciprocal ODE bounds, the two-point example and mesoscopic
+negligibility.
+
+## Main results
+
+* `reciprocal_ode_lower_bounds`
+* `twoPoint_truncated_ratio_example`
+* `tendsto_limsup_truncatedMean_div_mean_of_isTheta`
+-/
+
 @[expose] public section
 noncomputable section
 
@@ -117,7 +130,7 @@ theorem twoPoint_truncated_ratio_example {α κ : ℝ} (_hα : 0 < α) (hακ : 
     filter_upwards [Ioo_mem_nhdsGT (show (0 : ℝ) < 1 by norm_num)] with δ hδ
     exact ((tendsto_truncated_ratio hακ hδ.1 hδ.2.le).limUnder_eq).symm
 
-/-- **KKGL** (conclusion QMN5, written out). Let `0 < α ≤ κ < 2α` and `r₀ > 0`. For `r ≥ r₀`
+/-- **KKGL** (conclusion written out). Let `0 < α ≤ κ < 2α` and `r₀ > 0`. For `r ≥ r₀`
 let `μ_r` be a probability measure on `[0, ∞)` with integrable `x` and `x²`, and write
 `m₁(r) = ∫ x dμ_r`, `m₂(r) = ∫ x² dμ_r` and `T_m(r) = ∫ min x m dμ_r`. Suppose `m₁ ≍ r^α`,
 `b r^{α+κ} ≤ m₂(r) ≤ B r^{α+κ}` with `0 < b ≤ B`, `m₂` and every `T_m` (`m > 0`) are

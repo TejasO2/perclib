@@ -214,7 +214,7 @@ theorem min_div_le_one_sub_div {βc β : ℝ} (hc : 0 ≤ βc) (hβ : βc < β) 
   · rw [min_eq_right (by linarith), div_le_div_iff₀ (by linarith) hβ0]
     nlinarith
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
 /-- The derivative of `s ↦ 1 − 1/s`. -/
 theorem hasDerivAt_one_sub_one_div {s : ℝ} (hs : s ≠ 0) :

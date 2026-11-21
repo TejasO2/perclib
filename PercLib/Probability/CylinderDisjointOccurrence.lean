@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 
 Adapted from NearCritical/CylinderDisjointOccurrence.lean at
 https://github.com/tomhutchcroft/near-critical-diffusivity/tree/c820fea91a7482c1755de0ec94ecb9f59ccfcacc
-under Tom Hutchcroft's reuse permission (DECISIONS R-3). The native upstream
+under Tom Hutchcroft's reuse permission recorded in `docs/DECISIONS.md`. The native upstream
 file has no licence header; this records permission, not an upstream Apache claim.
 Changed for PercLib: canonical Set configurations, standard preimage/image/set
 difference for restriction/extension, and arbitrary coordinate subsets. Finite

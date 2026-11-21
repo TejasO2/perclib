@@ -2,8 +2,7 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for issue 641 (Q-213, item 2), written on 2026-11-16 by PROVER-F. No upstream
-proof is copied and no definition is added.
+New proofs, written on 2026-11-16. No upstream proof is copied and no definition is added.
 -/
 module
 
@@ -205,11 +204,11 @@ theorem tsum_tsum_ite_mem_not_mem_le (s : Sym2 V → I) (C : Finset V) {a : ℝ�
         exact Finset.sum_congr rfl fun u hu => by simp [hu]
     _ = (C.card : ℝ≥0∞) * a := by rw [Finset.sum_const, nsmul_eq_mul]
 
-/-- **AYPN.** Let `ω ~ law q₀` and `ξ ~ law s` be independent, `C = K_o(ω)` finite almost
-surely, `D = K_o(ω ∪ ξ) \ C`, `a` a bound on the off-diagonal row sums of `s` and
-`M*(h) = ⨆ v, E_r[1 - e^{-h|K_v|}]` for the union law `r`. Then for every measurable
-functional `f ≥ 0` of the original cluster,
-`E[(1 - e^{-h|D|}) f(C)] ≤ E[min(1, a M*(h) |C|) f(C)]`. -/
+/-- **Ghost bound for the added mass.** Let `ω ~ law q₀` and `ξ ~ law s` be independent,
+`C = K_o(ω)` finite almost surely, `D = K_o(ω ∪ ξ) \ C`, `a` a bound on the off-diagonal row sums of
+`s` and `M*(h) = ⨆ v, E_r[1 - e^{-h|K_v|}]` for the union law `r`. Then for every measurable
+functional `f ≥ 0` of the original cluster, `E[(1 - e^{-h|D|}) f(C)] ≤ E[min(1, a M*(h) |C|) f(C)]`.
+-/
 theorem lintegral_ghost_added_mul_le [Countable V] (q₀ s : Sym2 V → I) (o : V) {h : ℝ}
     (hh : 0 < h) (hfin : ∀ᵐ ω ∂(law q₀), (cluster ω o).Finite) {a : ℝ≥0∞}
     (ha : ∀ u, rowSum (fun e => unitInterval.toENNReal (s e)) u ≤ a)
@@ -390,7 +389,7 @@ theorem lintegral_ghost_added_mul_le [Countable V] (q₀ s : Sym2 V → I) (o : 
     _ ≤ _ := tsum_law_cluster_eq_finset_mul_le_set q₀ o
         (fun T => min 1 (a * Mx * T.encard) * f T)
 
-/-- **AYPN, tail form.** Under the hypotheses of `lintegral_ghost_added_mul_le`, for every
+/-- **Tail form.** Under the hypotheses of `lintegral_ghost_added_mul_le`, for every
 `t`, `(1 - e^{-ht}) P(|D| ≥ t) ≤ E[min(1, a M*(h) |C|)]`. -/
 theorem law_added_volume_ge_mul_le [Countable V] (q₀ s : Sym2 V → I) (o : V) {h : ℝ}
     (hh : 0 < h) (hfin : ∀ᵐ ω ∂(law q₀), (cluster ω o).Finite) {a : ℝ≥0∞}
@@ -420,9 +419,9 @@ theorem law_added_volume_ge_mul_le [Countable V] (q₀ s : Sym2 V → I) (o : V)
   · rw [indicator_of_notMem hx]
     exact zero_le
 
-/-! ### Non-vacuity witness (D-5) -/
+/-! ### Non-vacuity witness -/
 
-/-- **D-5 witness.** On `Bool` with no first layer (`q₀ = 0`) and a second layer of
+/-- **Non-vacuity witness.** On `Bool` with no first layer (`q₀ = 0`) and a second layer of
 probability `1` on every pair, the hypotheses of `lintegral_ghost_added_mul_le` hold with
 `a = 1` (each off-diagonal row has one pair), for every `h > 0` and every `f`. -/
 example (f : Set Bool → ℝ≥0∞) :

@@ -1,9 +1,10 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-New proofs for P-7 (issue 41), written on 2026-11-14, from pinned mathlib's finitely
-supported functions, `ZMod` cardinality and ENNReal geometric series, and the P-6 and
-translation-invariant theorems. No upstream code is copied.
+New proofs, written on 2026-11-14, from pinned mathlib's finitely supported functions, `ZMod`
+cardinality and ENNReal geometric series, and the intensity bounds of
+`PercLib.Percolation.Bond.Intensity` and the translation-invariant theorems. No upstream code is
+copied.
 -/
 module
 
@@ -26,8 +27,8 @@ radial when it depends on the displacement only through its level.
 * `tsum_geometricRadial_le`: the infinite-range kernel `C r^(level z)` with
   `2 L^d r ≤ 1` has total mass at most `2 C`. With `r = L^(-(d+α))` this is the radial
   family `C L^(-(d+α) n)` for `L^α ≥ 2`.
-* `chi_intensity_le_hierarchical` and the threshold bounds: P-6 for every pair intensity
-  with that kernel.
+* `chi_intensity_le_hierarchical` and the threshold bounds: the intensity bounds of
+  `PercLib.Percolation.Bond.Intensity` for every pair intensity with that kernel.
 
 The bound uses the ball count `L^(d n)` for the shell of level `n`, which suffices for
 summability; the exact shell count `L^(d n) - L^(d (n-1))` is not needed and not proved
@@ -151,7 +152,7 @@ theorem exists_hierarchical_kernel (C r : ℝ≥0) :
     fun z => by
     simp only [Finsupp.support_neg]
 
-/-- **P-6 on the hierarchical lattice: susceptibility.** -/
+/-- **Intensity bound on the hierarchical lattice: susceptibility.** -/
 theorem chi_intensity_le_hierarchical (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0)
     (C r : ℝ≥0) (hJ : ∀ x y, J s(x,y) = C * r ^ ((y - x).support.sup Nat.succ))
     (hr : (L : ℝ≥0) ^ d * r * 2 ≤ 1) (β : ℝ≥0)
@@ -160,7 +161,7 @@ theorem chi_intensity_le_hierarchical (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) 
   chi_intensity_le_of_translationInvariant J (fun z => C * r ^ (z.support.sup Nat.succ)) hJ
     (2 * C) (tsum_geometricRadial_le C r hr) β hβ x
 
-/-- **P-6 on the hierarchical lattice: global threshold.** -/
+/-- **Intensity bound on the hierarchical lattice: global threshold.** -/
 theorem inv_le_globalCriticalIntensity_hierarchical
     (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) (C r : ℝ≥0)
     (hJ : ∀ x y, J s(x,y) = C * r ^ ((y - x).support.sup Nat.succ))
@@ -169,7 +170,7 @@ theorem inv_le_globalCriticalIntensity_hierarchical
   inv_le_globalCriticalIntensity_of_translationInvariant J
     (fun z => C * r ^ (z.support.sup Nat.succ)) hJ (2 * C) (tsum_geometricRadial_le C r hr)
 
-/-- **P-6 on the hierarchical lattice: root threshold.** -/
+/-- **Intensity bound on the hierarchical lattice: root threshold.** -/
 theorem inv_le_rootCriticalIntensity_hierarchical
     (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) (C r : ℝ≥0)
     (hJ : ∀ x y, J s(x,y) = C * r ^ ((y - x).support.sup Nat.succ))
