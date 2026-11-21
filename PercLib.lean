@@ -66,6 +66,7 @@ public import PercLib.Analysis.VolumeTail.SizeBiasMGF
 public import PercLib.Analysis.VolumeTail.UpToConstants
 public import PercLib.Basic
 public import PercLib.Combinatorics.DoubleFactorialConvolution
+public import PercLib.Combinatorics.FiniteEdgeChange
 public import PercLib.Combinatorics.ForestBranching
 public import PercLib.Combinatorics.Tags.ForestConnections
 public import PercLib.Combinatorics.Tags.TreeSplitting
@@ -141,7 +142,9 @@ public import PercLib.Models.Tags.KernelsAndSitePaths
 public import PercLib.Models.Tags.Lattice
 public import PercLib.Models.Tags.Line
 public import PercLib.Models.Tags.Site
+public import PercLib.Models.Tags.SmallIntensity
 public import PercLib.Models.Tags.TranslationInvariant
+public import PercLib.Models.Tags.TreeDepth
 public import PercLib.Models.Tags.ZeroOne
 public import PercLib.Models.TranslationInvariant
 public import PercLib.Models.Tree
@@ -233,9 +236,11 @@ public import PercLib.Percolation.Bond.SusceptibilityEndpoint
 public import PercLib.Percolation.Bond.Tags.BoundaryForest
 public import PercLib.Percolation.Bond.Tags.ClusterCorrelation
 public import PercLib.Percolation.Bond.Tags.CoreBoundaryLaws
+public import PercLib.Percolation.Bond.Tags.CoreClosedProducts
 public import PercLib.Percolation.Bond.Tags.CoreConnectivity
 public import PercLib.Percolation.Bond.Tags.CoreCorrelationLength
 public import PercLib.Percolation.Bond.Tags.CoreFiniteVolume
+public import PercLib.Percolation.Bond.Tags.CoreGraphCertificates
 public import PercLib.Percolation.Bond.Tags.CoreGlobalConnectivity
 public import PercLib.Percolation.Bond.Tags.CoreIntegratedSusceptibility
 public import PercLib.Percolation.Bond.Tags.CoreIntensity
@@ -285,6 +290,7 @@ public import PercLib.Probability.Characterization
 public import PercLib.Probability.ChiSquareDeterminacy
 public import PercLib.Probability.ChiSquareLimit
 public import PercLib.Probability.ChiSquareMoments
+public import PercLib.Probability.ClosedProduct
 public import PercLib.Probability.Concentration
 public import PercLib.Probability.Coordinate
 public import PercLib.Probability.CountableBK
