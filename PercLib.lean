@@ -323,6 +323,7 @@ public import PercLib.Percolation.Bond.ZeroOne
 public import PercLib.Probability.BKEndpoints
 public import PercLib.Probability.BKLowDensity
 public import PercLib.Probability.BernoulliDivergence
+public import PercLib.Probability.BranchingRandomWalkMoment
 public import PercLib.Probability.Characterization
 public import PercLib.Probability.ChiSquareDeterminacy
 public import PercLib.Probability.ChiSquareLimit
@@ -387,6 +388,7 @@ public import PercLib.Probability.SizeBias
 public import PercLib.Probability.SizeBiasLimits
 public import PercLib.Probability.SplitCoordinate
 public import PercLib.Probability.Superposition
+public import PercLib.Probability.Tags.BranchingRandomWalkMoment
 public import PercLib.Probability.Tags.Correlation
 public import PercLib.Probability.Tags.CouplingRatio
 public import PercLib.Probability.Tags.DiscreteEntropy
