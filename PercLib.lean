@@ -394,6 +394,7 @@ public import PercLib.Probability.Russo
 public import PercLib.Probability.RussoCylinder
 public import PercLib.Probability.RussoFinset
 public import PercLib.Probability.RussoIntegral
+public import PercLib.Probability.SectionComparison
 public import PercLib.Probability.SizeBias
 public import PercLib.Probability.SizeBias.ClusterMeasure
 public import PercLib.Probability.SizeBiasLimits
@@ -423,6 +424,7 @@ public import PercLib.Probability.Tags.ProfileContinuity
 public import PercLib.Probability.Tags.RevealmentDerivative
 public import PercLib.Probability.Tags.Russo
 public import PercLib.Probability.Tags.RussoCoordinate
+public import PercLib.Probability.Tags.SectionComparison
 public import PercLib.Probability.Tags.SizeBiasedLaws
 public import PercLib.Probability.Tags.SplitCoordinate
 public import PercLib.Probability.Tags.StoppedExploration
