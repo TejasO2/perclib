@@ -1,7 +1,7 @@
 # Status
 
 Handoff file for the coordinator (the LEAD role of D-34). Last updated 21 November 2026,
-03:45 UTC, at the end of coordinator round 2 (third coordinator). A coordinator with no
+03:50 UTC, at the end of coordinator round 2, second pass (fourth coordinator). A coordinator with no
 memory resumes from this file, [COORDINATOR.md](COORDINATOR.md) (the procedure for one
 round), [COORDINATION.md](COORDINATION.md) (worker rules), [DECISIONS.md](DECISIONS.md)
 (D-34, D-35, D-36, D-37) and `/home/user/reports/RULINGS.md` (container-local rulings 1-10;
@@ -11,19 +11,23 @@ obey them).
 
 - Branch `claude/zen-lovelace-rvlcw2` in both repositories. Pushed:
   `origin/claude/zen-lovelace-rvlcw2` = the commit of this STATUS file, whose parent
-  **`9314239`** is the last gated commit. lrp: `5a2943b` (unchanged this round).
-- **Last gate passed: `9314239`** (`scripts/gate.sh 7316ae9`): build (3,922 jobs), axiom
+  **`b40f5f2`** is the last gated commit (plus the regenerated `docs/FRONTIER.md` in the
+  STATUS commit). lrp: `5a2943b` (unchanged; `lrp/wiki` is now frozen, ruling 6d).
+- **Last gate passed: `b40f5f2`** (`scripts/gate.sh 9314239`): build (3,922 jobs), axiom
   audit of 5,954 constants (only `propext`, `Classical.choice`, `Quot.sound`), import
-  closure of 329 modules, forbidden scan, classifier tests, extract, D-35 checks. The
-  classifier reported INTERFACE (`tag` tokens in `Models/BinaryTreeCatalan.lean` and the
-  other attach-models files): these are exactly the 33 tags approved by
-  `audit-attach-models-a/b`. Earlier green this round: `7316ae9` (base `40549b0`,
-  proof-only), `40549b0` (base `4cb4679`, proof-only); predecessor's `4cb4679`, `e12b2f6`,
-  `fa0dc2b`. Local verification, not CI.
+  closure of 329 modules, forbidden scan, classifier tests, extract, D-35 checks;
+  "PROOF-ONLY change against 931423955c86: 0 Lean file(s)" (the batch was `wiki/`,
+  `scripts/` and `docs/` only). `python3 scripts/test_frontier.py`: 7 tests OK. The wiki
+  tree at the tip is byte-identical to `93aaac3`, where `audit-pub-attrib` ran `npm ci`,
+  `npm run build` (77/77 tests, 142 articles) and `npm run test:export`. Earlier green:
+  `9314239` (base `7316ae9`, INTERFACE = the 33 audited Models tags), `7316ae9`, `40549b0`,
+  `4cb4679`. Local verification, not CI.
 - Kernel replay (`scripts/kernel_replay.sh`) last passed on the baseline `4c72765`. Due
   before the next milestone report; run `scripts/kernel_replay.sh 6` when no build runs.
 - `main` (`1df822a`) is an ancestor of the tip and lacks every commit since; no pull
-  request to `main` has been opened (see "For ARCHITECT", first item).
+  request to `main` has been opened (see "For ARCHITECT", first item). **The public wiki is
+  now on the pushed integration branch** (`perclib/wiki`, ruling 6c satisfied by
+  `audit-pub-attrib`'s APPROVE).
 
 Commands (from `/home/user/perclib`, `export PATH=$HOME/.elan/bin:$PATH`):
 
@@ -42,9 +46,14 @@ match audited interface changes. After each gate `git checkout scripts/__pycache
 
 ## Progress (D-35 measure)
 
-Manifest from the `9314239` extract: **263 assertions proved**, 5 statement-only, 1,133
-unformalised, of 1,401 (start of round: 231 / 4 / 1,166). 268 distinct tags in `PercLib/`
-(was 235). Tagged statements audited and merged this round: **33** (attach-models: 23 of
+Manifest from the `b40f5f2` extract (rebuilt with `python3 scripts/build_manifest.py
+.lake/manifest-raw.json --output /home/user/reports/manifest.json`, the builder now lives in
+`perclib/scripts/`): **263 assertions proved**, 5 statement-only, 1,133 unformalised, of
+1,401 (unchanged by this pass: no Lean merged; start of round: 231 / 4 / 1,166). 268
+distinct tags in `PercLib/`. Frontier (`docs/FRONTIER.md`, regenerated at `b40f5f2` with
+`python3 scripts/frontier.py /home/user/reports/manifest.json --proof-uses wiki/records
+--commit <sha> --output docs/FRONTIER.md`): 149 ready, 733 blocked, 256 unproved without
+recorded prerequisites. Tagged statements audited and merged this round: **33** (attach-models: 23 of
 24 approved by audit a, V5OZ after the required change; 9 of 10 by audit b; R01V withheld
 for the ordered-pair form). Wiki: J98J reviewed (`audit-wiki-hier-thm11`, approve with one
 change; independence breached, see "For ARCHITECT"). Every merged tag has a fresh audit
@@ -75,46 +84,65 @@ Round 2 (this round, three gated batches):
   were removed (R01V goes to `fix-nm-longrange`). The coordinator checked the fix diff
   against both audits — gate `9314239`.
 
+Round 2, second pass (fourth coordinator, gate `b40f5f2`):
+- `pub-attrib` (on top of `pub-move`): the wiki moves to `perclib/wiki` and the manifest
+  builder to `scripts/build_manifest.py`; 56 draft-original articles credited "T. Hutchcroft,
+  book in preparation", one catalogue entry `hutchcroft-book`. `audit-pub-attrib`
+  (fresh, did not read the author's report) **APPROVE** on ruling 6b (i)-(iv), nothing
+  withheld. Merge `6146737`; pushed. Irreversible: the wiki is public on the integration
+  branch. `lrp/wiki` is frozen from now on (6d) except the withheld notes-facing files.
+- `frontier-doc`: `scripts/frontier.py`, `scripts/test_frontier.py`, `docs/FRONTIER.md`
+  (non-Lean, merged on the gate; FRONTIER regenerated at `b40f5f2` from `wiki/records`).
+
 Round 1 and earlier: see `git log --merges` (tooling and gate scripts, D-35 checks,
 hierarchical H0-H4 and H6, salvage, D-33 ports, link tags, `nm-analysis`, `d35-binders`).
 
 ## Finished, not merged
 
-- `work/pub-attrib` (93aaac3, on top of `work/pub-move` merged with `4cb4679`): ruling 6a
-  done (56 draft-original articles credited "T. Hutchcroft, book in preparation"; no
-  re-transform needed, lrp `wiki/` unchanged since 1fe07bc). **Waits for
-  `audit-pub-attrib` (claimed)**; on approval (ruling 6c) merge into the tip (expect only
-  the `wiki/` tree, check `git diff --stat`), gate, push. Irreversible; any doubtful
-  passage is withheld and listed "For Tom". After it: `lrp/wiki` frozen (6d), release
-  `HOLD-port-wiki-hier-thm11`, `HOLD-wiki-generator`, `HOLD-wiki-style`.
-- `work/ci-workflow` (560bd59): CI workflow and `scripts/ci_*.sh`; never run on Actions.
-  Waits for `automerge-workflow` (claimed) and then `HOLD-audit-workflows` (ruling 10(2):
-  fresh audit for injection and privilege before reaching `main`).
-- `work/contrib-docs` (705ac8c): `AGENTS.md`, `CONTRIBUTING.md`, issue and PR templates; no
-  private paths (checked by grep). Merge **together with the workflows** after their audit,
-  so the integration branch never describes CI or auto-merge that is not present (D-10).
-- `work/frontier-doc` (460df3e): `scripts/frontier.py`, tests, `docs/FRONTIER.md`; finished
-  at the end of the round, report `/home/user/reports/frontier-doc.md` not yet read. Next
-  round: read, run `python3 scripts/test_frontier.py`, merge on the gate (non-Lean).
-- `work/nm-longrange` (e4e9b59; ZH13, R01V): fix brief `HOLD-fix-nm-longrange`, amended
-  this round with audit b's step 2 (one pair of `Sym2` names `…_of_ne`; R01V wrapper in
+- `work/ci-workflow` (560bd59), `work/automerge-workflow` (279739b; CODEOWNERS,
+  `.github/automerge-authors`, `automerge.yml`, `scripts/automerge_classify.py`, 29 tests;
+  inert until Tom sets `AUTOMERGE_ENABLED` and protects `main`): wait for
+  `316-audit-workflows` (released this pass; ruling 10(2)). The automerge author raises a
+  decision: kernel replay is not part of the auto-merge evidence (fix A: run kernel-replay
+  on every PR and require it; fix B: auto-merge requires that job). Coordinator's choice
+  unless the audit says otherwise: **A**, as a fix after the audit (D-29, ruling 9e).
+- `work/contrib-docs` (705ac8c) and `work/task-board` (0ae16d1; `tasks/README.md`, 28 open
+  tasks, 10 `good-first-task`; nothing outside `tasks/`; grep for private paths clean, only
+  the public port source `PercLib/CriticalLRP/` of `yujinhkim/lrp` named): both describe CI
+  and auto-merge, so they merge **together with the workflows** after `audit-workflows`
+  approves (D-10: the branch never describes CI that is not present). The task-board's
+  mapping: HOLD-200 = tasks cluster-count-any-law, cluster-second-moment-any-law,
+  cluster-mixed-moments-any-law, kernel-comparison-off-diagonal; HOLD-240 =
+  holley-observable-form, profile-perturbation-bound, countable-closed-product; other
+  HOLD-derived tasks keep their ids. When a lane takes one, move its file to
+  `tasks/claimed/` in the same push (ruling 9b).
+- `work/nm-longrange` (e4e9b59; ZH13, R01V): fix brief `HOLD-fix-nm-longrange` (audit b's
+  step 2: one pair of `Sym2` names `…_of_ne`; R01V wrapper in
   `Models/Tags/TranslationInvariant.lean`; exactly one R01V tag; row sums as migrated).
   Release it after the migrations; then a fresh re-audit of R01V.
 - lrp `work/wiki-hier-thm11` (a795d41) + `/home/user/reports/wiki-hier-thm11-baseline.patch`:
-  not merged in lrp because the wiki moves to `perclib` (ruling 6d); carried over by
-  `HOLD-port-wiki-hier-thm11` (adds 7AER to J98J `proof_uses`), then a fresh audit of J98J,
-  then the J98J Lean tag on `HierarchicalTwoPointAveraged` (interface, with audit).
-- `work/pub-move` (c442b2f): superseded by `work/pub-attrib`; remove its worktree after
-  pub-attrib merges.
+  carried over to `perclib` by `317-port-wiki-hier-thm11` (released this pass; adds 7AER to
+  J98J `proof_uses`); then a fresh audit of J98J, then the J98J Lean tag on
+  `HierarchicalTwoPointAveraged` (interface, with audit).
+- `critic-general` (critique `/home/user/reports/critic/general.md`, report
+  `/home/user/reports/critic-general.md`): audit only, nothing to merge. Consumed by
+  `323-wiki-style` (STYLE.md draft) and `324-scout-wiki-math` (its mathematical reports
+  M1, M3, M4). Its flagship recommendation agrees with the coordinator's choice
+  `hierarchical-two-point` (proof to be assembled from `hierarchical-runaway` l. 37-162,
+  auditor to confirm the chain closes); fallback `subcritical-bound`. M2 (hypotheses only in
+  the front-matter `context`) is handled by an instruction: every audit brief that compares
+  a Lean statement with a wiki assertion must say that the assertion includes its article's
+  front-matter context.
 
 ## In flight
 
-Claims without a done marker at 03:45: `automerge-workflow`, `task-board`,
-`audit-pub-attrib`, `critic-general`. Worktrees are `/home/user/wt/<id>`; claims in
-`/home/user/reports/claims/`. The container restarted at 03:18; claims interrupted then
-were re-taken by new workers (several reports mention resuming uncommitted work).
+Claims without a done marker at 03:50: `mig-rowsum` (worktree `/home/user/wt/mig-rowsum`,
+no commit yet), `scout-defs` (claimed 03:41), `audit-d16-tags`, `scout-d33-next`.
+Worktrees are `/home/user/wt/<id>`; claims in `/home/user/reports/claims/`. Remaining
+worktrees: automerge-workflow, ci-workflow, contrib-docs, task-board, nm-longrange,
+mig-rowsum (pub-attrib, pub-move, frontier-doc removed after merge).
 
-## Migration window: OPEN (since 03:42, tip `9314239`)
+## Migration window: OPEN (since 03:42, tip `9314239`; still open at 03:50, `mig-rowsum` claimed, not done)
 
 Preconditions held: `rowsum-def` merged, and no claimed Lean work is open
 (`lrp-driven-ode` and `fix-attach-models` merged). `001-mig-rowsum` is the only startable
@@ -133,22 +161,30 @@ critic) stay startable: they touch no file a migration owns. Sequence:
 
 Claimed briefs stay in the queue directory (never delete a claimed brief); a brief is
 startable when it has no `HOLD-` prefix and no `claims/<id>`.
-Startable at 03:45: `001-mig-rowsum`, `309-critic-general` (just claimed), `311-scout-defs`
-(definition proposals from audits: self-avoiding count, k-ary tree graph, restricted
-connection, boundary susceptibility, hierarchical level, `IsCut`, `RegularlyVarying.const_mul`),
-`313-audit-d16-tags` (PVA8, MQNP, LF50, 6YYS, L82Q), `314-scout-d33-next` (status of the 32
-D-33 packages, draft briefs for those with merged prerequisites), `315-scout-nearmiss`
-(draft briefs for near-miss assertions). Fewer than 8 startable by design during the window.
+Startable at 03:50 (8, pairwise disjoint in files; none is Lean work, as the window
+requires): `315-scout-nearmiss` (read-only), `316-audit-workflows` (read-only),
+`317-port-wiki-hier-thm11` (owns `wiki/articles/hierarchical-two-point.md`, its record,
+`wiki/tags.json`, `wiki/tests/tags.test.mjs`, `wiki/migration-baseline.json`),
+`318-wiki-generator` (generator sources and new tests under `wiki/`, `wiki/README.md`;
+explicitly not the files of 317), `319-audit-driven-ode-I421` (read-only: is Lemma I.4.21
+proved as stated by `Analysis/DrivenODE.lean`? binder table against arXiv:2508.18807v1),
+`322-wiki-proof-uses-a` (`proofUses` in `wiki/records/<a-l>*.json` except the 12 frozen
+articles: records prerequisites of the 256 unproved assertions that have none, so they can
+reach the frontier; a `-b` package for m-z follows), `323-wiki-style` (`wiki/STYLE.md`),
+`324-scout-wiki-math` (read-only: exact texts for critic reports M1 FCU7, M3 erratum tags,
+M4 L82Q's BK).
+Claimed: `001-mig-rowsum`, `311-scout-defs`, `313-audit-d16-tags`, `314-scout-d33-next`.
 Held: `HOLD-190-lrp-first-moment-b`, `HOLD-200-nm-bond-core`, `HOLD-210-lrp-I41-mt`,
 `HOLD-220-lrp-spatial-russo-a`, `HOLD-230-lrp-levy-measures`, `HOLD-240-nm-probability`,
-`HOLD-320-hier-restricted-susc` (H7), `HOLD-310-scout-lrnorm` (window);
-`HOLD-audit-nm-bond-core`, `HOLD-audit-nm-probability` (after their targets);
-`HOLD-audit-workflows` (after `automerge-workflow`); `HOLD-fix-nm-longrange` (after the
-migrations); `HOLD-mig-headers`, `HOLD-mig-linters` (window steps 2-3);
-`HOLD-port-wiki-hier-thm11`, `HOLD-wiki-generator`, `HOLD-wiki-style` (after pub-attrib
-merges; wiki-style also after `critic-general`).
+`HOLD-320-hier-restricted-susc` (H7), `HOLD-330-hier-thm11` (H8, new: after H7 merges and
+the window closes), `HOLD-310-scout-lrnorm` (window); `HOLD-audit-nm-bond-core`,
+`HOLD-audit-nm-probability` (after their targets); `HOLD-fix-nm-longrange` (after the
+migrations); `HOLD-mig-headers`, `HOLD-mig-linters` (window steps 2-3).
+Ownership conflict to watch when the window closes: the task board's `tasks/open/` lists
+the HOLD prover packages too; whichever lane takes one moves its task file to
+`tasks/claimed/` (only once `task-board` has merged).
 
-Next packages to brief after the window: H7 is briefed; then H8 Theorem 1.1, H9
+Next packages to brief after the window: H7 and H8 are briefed; then H9
 (`/home/user/reports/hier-map.md` §(c)); the J98J Lean tag; D-33 packages from
 `scout-d33-next` (next by dependency: 8 after 5, 12 after 10, 14 after 13); near-misses
 from `scout-nearmiss`; definition packages from `scout-defs`; salvage tier 2 (Q-211,
@@ -163,7 +199,11 @@ Q-195, Q-194). Ruling 8: the model article (a flagship one, coordinator's choice
   say "never main, no PRs/issues", and COORDINATOR.md still quotes ruling 5. Not opened;
   `main` (`1df822a`) lacks everything since. Please align the launcher and COORDINATOR.md
   with ruling 10, or confirm ruling 5 stands. (The kernel replay is also due before the
-  first such pull request.)
+  first such pull request.) The fourth coordinator's launch instructions again said "never
+  main, no PRs/issues"; again not opened.
+- **Auto-merge evidence** (from `automerge-workflow`): kernel replay is not required for a
+  proof-only auto-merge. Coordinator intends fix A (kernel-replay on every PR, required by
+  auto-merge) after `audit-workflows`; object if the gate alone should suffice.
 - **Migration window reading.** This round kept read-only scouts, audits and the critic
   startable during the window (they cannot conflict with a migration); only Lean briefs
   are held. Object if the window must hold everything.
@@ -184,9 +224,16 @@ Q-195, Q-194). Ruling 8: the model article (a flagship one, coordinator's choice
 
 ## For Tom
 
-- Publishing the wiki: answered by ruling 6 ("published attributed to the book draft").
-  The attribution pass is done on `work/pub-attrib`; the independent check of ruling 6b is
-  running. Nothing is pushed until it approves.
+- Publishing the wiki: done as ruling 6 directs. The attribution pass (`pub-attrib`, 56
+  articles credited "T. Hutchcroft, book in preparation", one catalogue entry, no locators)
+  was approved by a fresh auditor on all four points of 6b with nothing withheld, and is
+  merged and pushed on `claude/zen-lovelace-rvlcw2` of `perclib` (merge `6146737`). It
+  reaches `main` only with the first pull request (see "For ARCHITECT").
+- The wiki critic's mathematical reports (critic/general.md §5), being settled by
+  `scout-wiki-math`: FCU7 (`sharpness`) has no precise statement; the provisional erratum
+  "susceptibility-lower-coefficient" is attached to W498/V4QQ/YWTU although its text says
+  they are unchanged; `tree-graph` is inconsistent about which BK proves L82Q. Any change to
+  FCU7's content will come to you if the published source does not decide it.
 - Repository settings for ruling 10(2), once the CI workflow is on `main`: (1) Settings →
   Branches → add a protection rule for `main`: require a pull request, require the status
   check `CI / gate`, no force pushes; (2) Settings → General → allow auto-merge;
@@ -231,5 +278,15 @@ Q-195, Q-194). Ruling 8: the model article (a flagship one, coordinator's choice
   D-35 check rejects them in new files; briefs say "repository, branch, commit".
 - **Tags inside `to_additive`:** write `@[tag "XXXX", to_additive …]`.
 - **One coordinator per checkout**, never two `gate.sh` runs at once.
+- **Wiki merges** need no Lean rebuild beyond the gate; verify the merged `wiki/` tree is
+  byte-identical to the audited commit (`git diff --quiet <audited> HEAD -- wiki`) instead of
+  re-running `npm` (no network for `npm ci` is guaranteed).
+- **Docs that describe CI** (contrib-docs, task-board) wait for the workflows; check each
+  non-Lean branch for references to files or processes not yet on the tip.
+- **`frontier.py` leaves an untracked `scripts/__pycache__/frontier.*.pyc`**: delete it before
+  committing.
+- **Kernel replay** was not run this pass: `mig-rowsum` may be building in its worktree
+  (memory). Run `scripts/kernel_replay.sh 6` when no worker builds, before the first pull
+  request to `main`.
 - **Removing worktrees:** only if `done/<id>` exists and the branch is an ancestor of the
   tip (a fresh branch is trivially an ancestor before its first commit).
