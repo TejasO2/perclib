@@ -163,6 +163,7 @@ public import PercLib.Percolation.Bond.BallExploration
 public import PercLib.Percolation.Bond.Basic
 public import PercLib.Percolation.Bond.BoundaryContraction
 public import PercLib.Percolation.Bond.BoundarySusceptibility
+public import PercLib.Percolation.Bond.ChemicalMoments
 public import PercLib.Percolation.Bond.ClosedCertificates
 public import PercLib.Percolation.Bond.ClusterCorrelation.CovarianceGap
 public import PercLib.Percolation.Bond.ClusterCorrelation.Defs
@@ -241,6 +242,7 @@ public import PercLib.Percolation.Bond.SusceptibilityContinuity
 public import PercLib.Percolation.Bond.SusceptibilityDerivative
 public import PercLib.Percolation.Bond.SusceptibilityEndpoint
 public import PercLib.Percolation.Bond.Tags.BoundaryForest
+public import PercLib.Percolation.Bond.Tags.ChemicalMoments
 public import PercLib.Percolation.Bond.Tags.ClusterCorrelation
 public import PercLib.Percolation.Bond.Tags.ConnectionKernel
 public import PercLib.Percolation.Bond.Tags.CoreBoundaryLaws
