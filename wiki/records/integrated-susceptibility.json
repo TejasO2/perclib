@@ -132,7 +132,7 @@
       "locator": "Theorem 1(i); section 2.3, Lemma 2 proof, PDF p. 4; HTML equations (12)\u2013(15)",
       "relationship": "Written deduction or explicitly cited input",
       "status": "pending",
-      "note": "JZG4 is cited. PAFY supplies a local numerical repair, provisional pending Tom confirmation; no full renormalization proof or compiled association is claimed."
+      "note": "JZG4 is proved in the wiki by a written block renormalization following section 2.3, with its own constants and discrete comparison; it uses PAFY's integral identity but not the source's Lemma 2 numerics. PAFY supplies a local numerical repair of the source's estimate, provisional pending Tom confirmation; no compiled association is claimed."
     }
   ],
   "occursIn": [],
@@ -274,6 +274,23 @@
       "tag": "PAFY",
       "proof_uses": [],
       "reason": "Direct integration and a comparison of the lattice sum with the integral; no other wiki assertion is invoked."
+    },
+    {
+      "order": 16,
+      "tag": "JZG4",
+      "proof_uses": [
+        "PAFY"
+      ],
+      "reason": "Multiscale good-block renormalization: overlapping good blocks merge, two disjoint bad blocks are a squared error, and a single bad spot is bridged by one long edge whose failure probability is bounded through the inverse-square block integral (PAFY)."
+    },
+    {
+      "order": 17,
+      "tag": "67W9",
+      "proof_uses": [
+        "F4CV",
+        "H0OC"
+      ],
+      "reason": "A renormalization inequality for crossings by short edges, with bridges bounded through the inverse-square tail and Harris for decreasing events, keeps the non-crossing probability bounded below; closed long edges and the zero-one law then exclude percolation when the tail coefficient times the squared density is below one."
     }
   ]
 }

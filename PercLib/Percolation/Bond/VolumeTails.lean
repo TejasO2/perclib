@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New for this project. No upstream proof is copied.
 -/
 module
@@ -114,7 +116,8 @@ theorem chi_eq_tsum_law_le_encard [Countable V] (q : Sym2 V → unitInterval) (x
 theorem mul_law_le_encard_le_chi [Countable V] (q : Sym2 V → unitInterval) (x : V) (n : ℕ) :
     (n : ℝ≥0∞) * law q {ω | (n : ℕ∞) ≤ (cluster ω x).encard} ≤ chi q x := by
   have h := mul_meas_ge_le_lintegral₀ (μ := law q)
-    ((Measurable.of_discrete (f := ((↑) : ℕ∞ → ℝ≥0∞))).comp (measurable_encard_cluster x)).aemeasurable (n : ℝ≥0∞)
+    ((Measurable.of_discrete (f := ((↑) : ℕ∞ → ℝ≥0∞))).comp
+        (measurable_encard_cluster x)).aemeasurable (n : ℝ≥0∞)
   have hset : {ω : Config V | (n : ℝ≥0∞) ≤ (((cluster ω x).encard : ℕ∞) : ℝ≥0∞)} =
       {ω | (n : ℕ∞) ≤ (cluster ω x).encard} := by
     ext ω
@@ -131,7 +134,7 @@ theorem law_cluster_infinite_eq_zero_of_chi_ne_top [Countable V] (q : Sym2 V →
   rw [ae_iff] at hae
   refine measure_mono_null (fun ω hω => ?_) hae
   simp only [mem_ofPred_eq, not_lt, top_le_iff] at hω ⊢
-  show ((cluster ω x).encard : ℝ≥0∞) = ∞
+  change ((cluster ω x).encard : ℝ≥0∞) = ∞
   rw [Set.encard_eq_top_iff.2 hω]
   rfl
 

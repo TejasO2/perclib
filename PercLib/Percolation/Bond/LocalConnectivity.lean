@@ -1,4 +1,9 @@
 /-
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Generalises the internal-connectivity helpers identified in
 near-critical-diffusivity/Percolation/Literature/SharpnessDCTProofs.lean at
 c820fea91a7482c1755de0ec94ecb9f59ccfcacc (under Tom Hutchcroft's reuse permission recorded in
@@ -43,7 +48,7 @@ theorem measurableSet_localConn (S : Set V) [Countable S] (x y : S) :
 
 /-- Only pairs having both endpoints in the domain affect its induced open graph. -/
 theorem openGraph_induce_eq_of_agree (S : Set V) {ω ω' : Config V}
-    (h : ∀ x ∈ S, ∀ y ∈ S, (s(x,y) ∈ ω ↔ s(x,y) ∈ ω')) :
+    (h : ∀ x ∈ S, ∀ y ∈ S, (s(x, y) ∈ ω ↔ s(x, y) ∈ ω')) :
     (openGraph ω).induce S = (openGraph ω').induce S := by
   ext x y
   simp only [SimpleGraph.induce, SimpleGraph.comap_adj, Function.Embedding.coe_subtype,
@@ -51,7 +56,7 @@ theorem openGraph_induce_eq_of_agree (S : Set V) {ω ω' : Config V}
 
 /-- Internal connection events depend only on internal pairs. -/
 theorem localConn_iff_of_agree (S : Set V) (x y : S) {ω ω' : Config V}
-    (h : ∀ a ∈ S, ∀ b ∈ S, (s(a,b) ∈ ω ↔ s(a,b) ∈ ω')) :
+    (h : ∀ a ∈ S, ∀ b ∈ S, (s(a, b) ∈ ω ↔ s(a, b) ∈ ω')) :
     ((openGraph ω).induce S).Reachable x y ↔
       ((openGraph ω').induce S).Reachable x y := by
   rw [openGraph_induce_eq_of_agree S h]

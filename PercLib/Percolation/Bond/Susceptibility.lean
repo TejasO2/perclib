@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New glue for the bond interface, using pinned mathlib's measurable set cardinality, ENNReal
 cardinality sum, and Tonelli theorem. No upstream proof is copied.
 -/

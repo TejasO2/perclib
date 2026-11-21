@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 The constants `A₃`, `A₄` of Proposition I.3.2 for the chi-square limit law, for T. Hutchcroft,
 *Critical long-range percolation I*, arXiv:2508.18807v1, Proposition I.3.2 and the proof of
 (I.1.7), p. 32.
@@ -89,7 +93,8 @@ theorem rpow_mul_integral_chiSquare_eventuallyEq {a : ℝ} (ha : a ≠ 0) :
         ∫ x, (1 - exp (-(lam * x))) / x ∂gammaMeasure (1 / 2) (1 / 2)) =ᶠ[atTop]
       fun lam => lam ^ (1 / a - 1 / 2) * (√(2 + 1 / lam) - (√lam)⁻¹) := by
   filter_upwards [eventually_gt_atTop (0 : ℝ)] with lam hlam
-  rw [integral_one_sub_exp_neg_mul_div_gammaMeasure_one_half hlam.le, sqrt_one_add_two_mul_sub_one_eq hlam,
+  rw [integral_one_sub_exp_neg_mul_div_gammaMeasure_one_half hlam.le,
+      sqrt_one_add_two_mul_sub_one_eq hlam,
     ← mul_assoc, sqrt_eq_rpow, ← rpow_add hlam]
   congr 2
   field_simp

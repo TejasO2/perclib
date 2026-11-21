@@ -18,6 +18,7 @@
   ],
   "sourceIds": [
     "dct-sharpness",
+    "dt-sharpness-zd",
     "grimmett",
     "hutchcroft-book"
   ],

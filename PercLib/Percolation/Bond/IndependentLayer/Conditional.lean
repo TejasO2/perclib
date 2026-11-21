@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-16. No upstream proof is copied and no definition is added.
 -/
 module
@@ -33,12 +35,12 @@ noncomputable section
 
 open MeasureTheory Set PercLib.Probability
 open scoped ENNReal unitInterval
-open Classical
 
 namespace PercLib.Percolation.Bond
 
 variable {V : Type*}
 
+open Classical in
 /-- The cut-off profile and the omitted profile recombine to the full profile. -/
 theorem union_cutoff_omitted (q : Sym2 V → I) (E₀ : Set (Sym2 V)) :
     (fun e => σ (σ (if e ∈ E₀ then q e else 0) * σ (if e ∈ E₀ then 0 else q e))) = q := by
@@ -47,6 +49,7 @@ theorem union_cutoff_omitted (q : Sym2 V → I) (E₀ : Set (Sym2 V)) :
   · simp [he]
   · simp [he]
 
+open Classical in
 /-- The omitted row bound in the form used by `lintegral_ghost_le_layer`. -/
 theorem omitted_row_le (q : Sym2 V → I) (E₀ : Set (Sym2 V)) {δ : ℝ≥0∞}
     (hδ : ∀ u, (∑' w, if w = u ∨ s(u, w) ∈ E₀ then 0 else
@@ -61,6 +64,7 @@ theorem omitted_row_le (q : Sym2 V → I) (E₀ : Set (Sym2 V)) {δ : ℝ≥0∞
       rfl
     · simp [hw, hE]
 
+open Classical in
 /-- **Omitted-edge ghost comparison.** If the cut-off cluster `X` of `o` is finite almost surely and
 the omitted rows are at most `δ`, then `M₀(h) ≤ M_o(h) ≤ M₀(h) + δ E[X e^{-hX}] M*(h)`. -/
 theorem lintegral_ghost_cutoff_le [Countable V] (q : Sym2 V → I) (E₀ : Set (Sym2 V)) (o : V)
@@ -109,6 +113,7 @@ theorem lintegral_ghost_eq_of_transitive (q : Sym2 V → I)
   rw [lintegral_map_image_sym2Map]
   simp_rw [encard_cluster_image]
 
+open Classical in
 /-- **Transitive form.** When the full profile is transitive, `M* = M_o` and
 `M_o(h) ≤ M₀(h) + δ E[X e^{-hX}] M_o(h)`. -/
 theorem lintegral_ghost_cutoff_le_of_transitive [Countable V] (q : Sym2 V → I)
@@ -138,6 +143,7 @@ theorem lintegral_ghost_cutoff_le_of_transitive [Countable V] (q : Sym2 V → I)
 
 /-! ### Non-vacuity witnesses -/
 
+open Classical in
 /-- `lintegral_ghost_cutoff_le` on `ℤ` with the zero profile and `E₀ = ∅`: the cut-off cluster is
 `{o}`, the omitted rows vanish, and the profile is transitive under translations. -/
 example (h : ℝ) (hh : 0 < h) :
@@ -155,4 +161,9 @@ example (h : ℝ) (hh : 0 < h) :
       (by rw [chi_eq_one_of_offDiagonal_zero _ (fun _ _ _ => rfl)]; exact ENNReal.one_lt_top)
   convert lintegral_ghost_cutoff_le_of_transitive (fun _ : Sym2 ℤ => (0 : I))
     (fun x y => ⟨Equiv.addRight (y - x), by simp, fun _ => rfl⟩) ∅ (0 : ℤ) hh (δ := 0)
-    (by simpa using hfin) (fun u => by simp [unitInterval.toNNReal]; intro _ _; rfl)
+    (by simpa using hfin) (fun u => by
+      simp only [mem_empty_iff_false, or_false, unitInterval.toNNReal, Icc.coe_zero,
+        nonpos_iff_eq_zero, ENNReal.tsum_eq_zero, ite_eq_left_iff]
+      intro _ _; rfl)
+
+end PercLib.Percolation.Bond

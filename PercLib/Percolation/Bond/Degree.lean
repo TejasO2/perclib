@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-14. No upstream proof is copied.
 -/
 module
@@ -26,12 +28,12 @@ file adds no definition.
 
 open MeasureTheory Set PercLib.Probability
 open scoped ENNReal
-open Classical
 
 namespace PercLib.Percolation.Bond
 
 variable {V : Type*}
 
+open Classical in
 /-- The event that two vertices are adjacent in the open graph. -/
 theorem setOf_adj_eq (v w : V) :
     {ω : Config V | (openGraph ω).Adj v w} = if v = w then ∅ else {ω | s(v, w) ∈ ω} := by
@@ -40,6 +42,7 @@ theorem setOf_adj_eq (v w : V) :
   · subst h; simp
   · simp [openGraph_adj_iff, h]
 
+open Classical in
 /-- Adjacency events are measurable, for any vertex type. -/
 theorem measurableSet_adj (v w : V) :
     MeasurableSet {ω : Config V | (openGraph ω).Adj v w} := by
@@ -48,6 +51,7 @@ theorem measurableSet_adj (v w : V) :
   · exact MeasurableSet.empty
   · exact measurableSet_mem _
 
+open Classical in
 /-- The probability that two vertices are adjacent, with the diagonal excluded. -/
 theorem law_adj (q : Sym2 V → unitInterval) (v w : V) :
     law q {ω : Config V | (openGraph ω).Adj v w} =
@@ -70,6 +74,7 @@ theorem degree_eq_tsum (ω : Config V) (v : V) :
   rw [encard_eq_tsum_indicator]
   rfl
 
+open Classical in
 /-- **The expected degree is the off-diagonal row sum**, including the value `∞`. -/
 theorem lintegral_degree [Countable V] (q : Sym2 V → unitInterval) (v : V) :
     ∫⁻ ω, ({w | (openGraph ω).Adj v w}.encard : ℝ≥0∞) ∂law q =
@@ -98,6 +103,7 @@ theorem lintegral_ncard_inter_finset_pairs (q : Sym2 V → unitInterval) (F : Fi
     ∫⁻ ω, ((ω ∩ F).ncard : ℝ≥0∞) ∂law q = ∑ e ∈ F, (unitInterval.toNNReal (q e) : ℝ≥0∞) :=
   lintegral_ncard_inter_finset q F
 
+open Classical in
 /-- **Expected number of open ordered pairs leaving a finite set.** -/
 theorem lintegral_encard_boundary_pairs [Countable V] (q : Sym2 V → unitInterval)
     (Λ : Finset V) :

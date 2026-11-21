@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-16, against pinned mathlib. No upstream proof is copied.
 -/
 module
@@ -756,7 +758,7 @@ example : ((fun r : ℝ => (r ^ 3 / Real.sqrt (6 * Real.log r)) / r ^ 3) ~[atTop
     IsEquivalent.refl IsEquivalent.refl
     (Eventually.of_forall fun r hr => by
       have hr0 : 0 < r := by linarith
-      show deriv (fun r : ℝ => r) r = 1 * r ^ (-1 - 1 : ℝ) * r ^ 2 * (1 - 0)
+      change deriv (fun r : ℝ => r) r = 1 * r ^ (-1 - 1 : ℝ) * r ^ 2 * (1 - 0)
       rw [deriv_id'', show (-1 - 1 : ℝ) = -((2 : ℕ) : ℝ) by norm_num, Real.rpow_neg hr0.le,
         Real.rpow_natCast, sub_zero]
       field_simp)

@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs from this library's hierarchical amplification, truncated-mean and sharpness
 theorems, and pinned mathlib 56a005855ea17e0b0958f73ec801ae140b0a1679. No upstream code is
 copied and no definition is added. Mathematical reference: T. Hutchcroft, arXiv:2103.17013v1,

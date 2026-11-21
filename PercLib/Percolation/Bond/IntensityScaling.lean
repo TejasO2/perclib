@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-14. No upstream proof is copied.
 -/
 module
@@ -35,7 +37,6 @@ This file adds no definition.
 
 open MeasureTheory Set Filter Topology PercLib.Probability
 open scoped ENNReal NNReal
-open Classical
 
 namespace PercLib.Percolation.Bond
 
@@ -220,7 +221,8 @@ private theorem setOf_edges_subset_conn {x y : V} (p : (⊤ : SimpleGraph V).Wal
   intro ω hω
   refine ⟨p.transfer (openGraph ω) fun e he => ?_⟩
   rw [openGraph, SimpleGraph.edgeSet_fromEdgeSet]
-  exact ⟨hω (by simpa using he), SimpleGraph.not_isDiag_of_mem_edgeSet _ (p.edges_subset_edgeSet he)⟩
+  exact ⟨hω (by simpa using he), SimpleGraph.not_isDiag_of_mem_edgeSet _
+      (p.edges_subset_edgeSet he)⟩
 
 /-- **Large intensity connects the support graph.** If `x` and `y` are joined in the support
 graph of `J`, then `τ(x, y) → 1` as `β → ∞`. No countability is needed. -/

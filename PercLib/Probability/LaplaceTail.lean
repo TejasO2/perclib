@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-16, against pinned mathlib. No upstream proof is copied; no Tauberian
 theorem is used.
 -/
@@ -257,7 +259,8 @@ theorem exists_tail_bounds_of_laplace (hT : Measurable T) {a : ℝ} (ha : 0 < a)
           rw [mul_one_div]
           exact hup j (Finset.mem_Icc.1 hj).1
       _ = C * ∑ j ∈ Icc 1 n, 1 / Real.sqrt j := (Finset.mul_sum _ _ _).symm
-      _ ≤ C * (2 * Real.sqrt n) := mul_le_mul_of_nonneg_left (PercLib.Analysis.sum_Icc_one_div_sqrt_le_two_mul n) hC0.le
+      _ ≤ C * (2 * Real.sqrt n) := mul_le_mul_of_nonneg_left
+          (PercLib.Analysis.sum_Icc_one_div_sqrt_le_two_mul n) hC0.le
   -- `G(t) ≥ (a/2) √t`
   have hsqt : Real.sqrt t = 1 / (Real.sqrt L * Real.sqrt n) := by
     rw [ht, Real.sqrt_div' _ (by positivity), Real.sqrt_one, Real.sqrt_mul (by linarith)]

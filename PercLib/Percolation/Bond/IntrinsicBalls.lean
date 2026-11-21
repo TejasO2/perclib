@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Intrinsic balls. New for this project; no upstream proof is copied, and no new definition is
 introduced: the intrinsic distance is mathlib's `(openGraph ω).edist`, and balls and spheres are
 written out as sets.
@@ -159,7 +163,7 @@ theorem cluster_subset_ball_of_sphere_empty (ω : Config V) (o : V) (r : ℕ)
   have hfin : (openGraph ω).edist o y ≠ ⊤ :=
     SimpleGraph.edist_ne_top_iff_reachable.mpr hy
   obtain ⟨m, hm⟩ := ENat.ne_top_iff_exists.mp hfin
-  show (openGraph ω).edist o y ≤ r
+  change (openGraph ω).edist o y ≤ r
   rw [← hm]
   by_contra hlt
   have hrm : r ≤ m := by
@@ -214,7 +218,7 @@ theorem measure_encard_cluster_ge_le [Countable V] (μ : Measure (Config V)) (o 
     · right
       have := (hω.trans (Set.encard_le_encard
         (cluster_subset_ball_of_sphere_empty ω o r hS)))
-      show (n : ℝ≥0∞) ≤ _
+      change (n : ℝ≥0∞) ≤ _
       exact_mod_cast this
   have hn0 : (n : ℝ≥0∞) ≠ 0 := by exact_mod_cast (by omega : n ≠ 0)
   have hmarkov := meas_ge_le_lintegral_div (μ := μ)
@@ -242,7 +246,8 @@ theorem intensity_ratio_bounds {J α β : ℝ} (hJ : 0 ≤ J) (hα : 0 < α) (h�
   have hl0 : 0 ≤ α / β := (div_pos hα hβ).le
   have hl1 : α / β ≤ 1 := (div_le_one hβ).mpr hαβ
   refine ⟨?_, ?_⟩
-  · have h := convexOn_exp.2 (Set.mem_univ (-β * J)) (Set.mem_univ 0) hl0 (by linarith : 0 ≤ 1 - α / β)
+  · have h := convexOn_exp.2 (Set.mem_univ (-β * J)) (Set.mem_univ 0) hl0
+      (by linarith : 0 ≤ 1 - α / β)
       (by ring)
     simp only [smul_eq_mul, mul_zero, add_zero, Real.exp_zero, mul_one] at h
     have he : α / β * (-β * J) = -α * J := by field_simp

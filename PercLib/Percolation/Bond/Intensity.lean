@@ -1,6 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-14, from pinned mathlib's real exponential and ENNReal sums and the
 row-sum theorems of `PercLib.Percolation.Bond.RowSum`. No upstream code is copied.
 -/
@@ -34,7 +37,6 @@ noncomputable section
 
 open MeasureTheory Set
 open scoped ENNReal NNReal
-open Classical
 
 namespace PercLib.Percolation.Bond
 
@@ -65,6 +67,7 @@ theorem intensityProfile_toNNReal_le (J : Sym2 V → ℝ≥0) (β : ℝ≥0) (e 
   have h := Real.add_one_le_exp (-(β : ℝ) * (J e : ℝ))
   linarith
 
+open Classical in
 /-- A row bound `M` on the intensity gives the row bound `β M` on the profile, in the
 off-diagonal form used by `PercLib.Percolation.Bond.RowSum`. -/
 theorem intensity_rowSum_le (J : Sym2 V → ℝ≥0) (M : ℝ≥0)

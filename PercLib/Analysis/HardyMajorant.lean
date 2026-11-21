@@ -1,6 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Adapted from contributor yujinhkim, repository `yujinhkim/lrp`, branch `critical-lrp-1`,
 commit `d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, file
 `PercLib/CriticalLRP/VolumeMoments/FirstMoment/LogIntegrability.lean`. Licence: Apache-2.0
@@ -89,7 +92,7 @@ theorem add (hg : LogarithmicallyIntegrable g) (hh : LogarithmicallyIntegrable h
   have hmeas : AEStronglyMeasurable (fun r => |g r + h r| / r) (volume.restrict (Ioi d)) :=
     (((continuous_abs.measurable.comp hF).div measurable_id).aestronglyMeasurable).congr
       (ae_restrict_of_forall_mem measurableSet_Ioi fun r hr => by
-        show |F r| / r = |g r + h r| / r
+        change |F r| / r = |g r + h r| / r
         rw [hFeq r (hdc.trans hr.le)])
   refine hsum.mono' hmeas (ae_restrict_of_forall_mem measurableSet_Ioi fun r hr => ?_)
   have hr0 : 0 < r := hr₀.trans_le (hd₀.trans hr.le)

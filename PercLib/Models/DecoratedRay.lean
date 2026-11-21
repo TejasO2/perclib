@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs, on the bond interface and the intensity family `intensityProfile`. The
 construction (a ray with pendant paths of length `2^k` and intensity `k^2`) follows the wiki article
 on the infinite-cluster zero-one law (tag SA9P). No source text or code is copied.
@@ -55,7 +59,11 @@ theorem J_facts (J : Sym2 (ℕ × ℕ) → ℝ≥0)
       ∃ a b : ℕ, 1 ≤ a ∧ b + 1 ≤ 2 ^ a ∧ e = s((a, b), (a, b + 1))) := by
   refine ⟨fun i => ?_, fun a b ha hb => ?_, fun a b h => ?_, fun e he => ?_⟩
   · rw [hJ]; simp; omega
-  · rw [hJ]; simp [ha, hb]; intros; omega
+  · rw [hJ]
+    simp only [Nat.add_eq_zero_iff, one_ne_zero, and_false, Nat.left_eq_add, and_self,
+      ↓reduceIte, ha, hb, zero_add, add_zero, true_and, add_eq_left, ite_eq_right_iff, ne_eq,
+      OfNat.ofNat_ne_zero, not_false_eq_true, pow_eq_zero_iff, Nat.cast_eq_zero, and_imp]
+    intros; omega
   · rw [hJ]; simp; omega
   · revert he
     refine Sym2.ind (fun u v => ?_) e
@@ -187,7 +195,7 @@ theorem tau_root_eq (J : Sym2 (ℕ × ℕ) → ℝ≥0)
   refine measure_congr ?_
   filter_upwards [ae_subset_J_pos J β] with ω hω
   refine propext ?_
-  show (openGraph ω).Reachable (0, 0) (k, j) ↔ _ ⊆ ω
+  change (openGraph ω).Reachable (0, 0) (k, j) ↔ _ ⊆ ω
   rw [reachable_root_iff J hJ4 hω]
   simp only [Finset.coe_union, Finset.coe_image, Finset.coe_range, Set.union_subset_iff,
     Set.image_subset_iff]
@@ -271,7 +279,7 @@ theorem ae_forall_cluster_finite (J : Sym2 (ℕ × ℕ) → ℝ≥0)
     refine cluster_subset_of_closed (S := {v : ℕ × ℕ | v.1 ≤ N ∧ v.2 ≤ 2 ^ v.1}) ?_ ?_ |>.trans ?_
     · rintro ⟨a, b⟩ ⟨ha, hb⟩ ⟨c, d⟩ huv
       dsimp only at ha hb
-      show c ≤ N ∧ d ≤ 2 ^ c
+      change c ≤ N ∧ d ≤ 2 ^ c
       rcases hstep _ _ huv with ⟨h1, h2, h3 | h3⟩ | ⟨h1, h2, ⟨h3, h4⟩ | ⟨h3, h4⟩⟩
       · dsimp only at h1 h2 h3
         subst h1 h2 h3

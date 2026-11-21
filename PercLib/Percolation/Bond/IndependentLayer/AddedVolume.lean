@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-16. No upstream proof is copied and no definition is added.
 -/
 module
@@ -36,7 +38,6 @@ noncomputable section
 
 open MeasureTheory Set PercLib.Probability
 open scoped ENNReal unitInterval
-open Classical
 
 namespace PercLib.Percolation.Bond
 
@@ -127,7 +128,10 @@ theorem prodBernoulli_three_explore_added_eq [Countable V] (o : V) (C : Finset V
     rcases i with (e | e) | x <;> simp [P1, P3] at hi h3
   have hdis4 : Disjoint (P1 ∪ P3) P4 := by
     refine Set.disjoint_left.2 fun i hi h4 => ?_
-    rcases i with (e | e) | x <;> simp [P1, P3, P4, hM, hout] at hi h4
+    rcases i with (e | e) | x <;> simp only [hM, union_singleton, mem_insert_iff, Sum.inl.injEq,
+        reduceCtorEq, mem_image, mem_ofPred_eq, exists_eq_right, false_or, hout, SetLike.mem_coe,
+        mem_union, and_false, exists_false, or_false, mem_compl_iff, P1, P3, P4, Sum.inr.injEq,
+        or_self] at hi h4
     · obtain ⟨x, hx, hxC⟩ := hi
       exact h4 x hx hxC
     · subst hi
@@ -185,6 +189,7 @@ theorem measurableSet_mem_added [Countable V] (o v : V) :
       ((measurable_set_mem e).comp measurable_snd)
   exact (hu (measurableSet_conn o v)).diff (measurable_fst (measurableSet_conn o v))
 
+open Classical in
 /-- The off-diagonal row sums of `s` from a finite set `C` to its complement. -/
 theorem tsum_tsum_ite_mem_not_mem_le (s : Sym2 V → I) (C : Finset V) {a : ℝ≥0∞}
     (ha : ∀ u, rowSum (fun e => unitInterval.toENNReal (s e)) u ≤ a) :
@@ -287,7 +292,7 @@ theorem lintegral_ghost_added_mul_le [Countable V] (q₀ s : Sym2 V → I) (o : 
       rw [indicator_of_mem hmem]
       simp only [hΨ_def]
       rw [indicator_of_mem (show (Prod.map split id ∘ first) η ∈ Sd from hηE)]
-      show f (cluster (Sum.inl ⁻¹' (Sum.inl ⁻¹' η) : Config V) o) = _
+      change f (cluster (Sum.inl ⁻¹' (Sum.inl ⁻¹' η) : Config V) o) = _
       exact congrArg f hc
     · simp only [hΨ_def]
       rw [indicator_of_notMem (show (Prod.map split id ∘ first) η ∉ Sd from hηE)]
@@ -433,7 +438,8 @@ example (f : Set Bool → ℝ≥0∞) :
           (((cluster ω' v).encard : ℝ≥0∞) : EReal))))
           ∂(law fun e => σ (σ ((fun _ : Sym2 Bool => (0 : I)) e) *
             σ ((fun _ : Sym2 Bool => (1 : I)) e)))) *
-          (cluster ω false).encard) * f (cluster ω false) ∂(law (fun _ : Sym2 Bool => (0 : I))) := by
+          (cluster ω false).encard) * f (cluster ω false)
+              ∂(law (fun _ : Sym2 Bool => (0 : I))) := by
   refine lintegral_ghost_added_mul_le _ _ false one_pos
     (Filter.Eventually.of_forall fun ω => Set.toFinite _) ?_ f (measurable_of_countable _)
   intro u

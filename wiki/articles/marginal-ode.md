@@ -6,7 +6,7 @@
   "kind": "method",
   "category": "Methods",
   "summary": "A nonlinear correction to power-law growth produces a logarithmic factor. An integrable multiplicative error preserves the leading constant, while an error of order 1/log r can introduce another logarithm.",
-  "context": ["The nonlinear marginal results use positive constants $a,\\gamma,C$ and a positive continuously differentiable function $g$ on $[r_0,\\infty)$, with $r_0>1$; the signed linear result and the driving-term lemma state their own hypotheses.", "The perturbations below are continuous; the error in the nonlinear coefficient tends to zero.", "This is an analytic statement. Applying it to percolation requires a separately justified differential equation."],
+  "context": ["The nonlinear marginal results use positive constants $a,\\gamma,C$ and a positive continuously differentiable function $g$ on $[r_0,\\infty)$, with $r_0>1$; the signed linear result and the driving-term lemma state their own hypotheses.", "In the nonlinear marginal results the perturbations $\\varepsilon,\\delta$ are continuous and the error $\\varepsilon$ in the nonlinear coefficient tends to zero; the other results state the regularity of their own error terms.", "This is an analytic statement. Applying it to percolation requires a separately justified differential equation."],
   "related": ["cutoff-families", "susceptibility", "triangle-condition"],
   "sourceIds": ["hutchcroft-book", "hutchcroft-lrp-1", "perclib-riccati-comparison", "perclib-logarithmic-corrections", "perclib-double-factorial-convolution", "perclib-shared-elementary", "perclib-moment-hierarchy"],
   "aliases": ["marginal ODE", "logarithmic correction", "integrating factor", "Bernoulli equation", "critical dimension"],

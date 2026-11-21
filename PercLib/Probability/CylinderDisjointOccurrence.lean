@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 Adapted from NearCritical/CylinderDisjointOccurrence.lean at
 https://github.com/tomhutchcroft/near-critical-diffusivity/tree/c820fea91a7482c1755de0ec94ecb9f59ccfcacc
 under Tom Hutchcroft's reuse permission recorded in `docs/DECISIONS.md`. The native upstream

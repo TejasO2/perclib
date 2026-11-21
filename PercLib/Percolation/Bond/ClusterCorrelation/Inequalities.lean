@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Proofs of Lemma I.2.1 (i)–(iii) of T. Hutchcroft, *Critical long-range percolation I*,
 arXiv:2508.18807v1, the targets `DisjointClusterBK`, `ClusterFunctionalHarris` and
 `ClusterCovarianceUpper` of `PercLib/Percolation/Bond/ClusterCorrelation/Defs.lean`. The statements

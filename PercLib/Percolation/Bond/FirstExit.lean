@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New first-exit and internal/boundary independence proofs on the canonical bond law.
 This is the elementary q-normalized boundary bound, not a sharpness
 or BK iteration theorem. No upstream proof is copied and no Input is introduced.
@@ -31,7 +35,7 @@ probabilities by the boundary functional of a finite set.
 @[expose] public section
 noncomputable section
 open MeasureTheory ProbabilityTheory Set PercLib.Probability
-open scoped ENNReal NNReal Classical
+open scoped ENNReal NNReal
 
 namespace PercLib.Percolation.Bond
 variable {V : Type*}
@@ -76,7 +80,8 @@ theorem law_localConn_inter_boundary (q : Sym2 V → unitInterval) (S : Set V) [
       Measurable.of_mem (fun a => measurable_set_mem
         (⟨Sym2.map Subtype.val a, Set.mem_range_self a⟩ : R))
     exact (measurableSet_conn x y).preimage hm
-  let B : Set (Set ({e} : Set (Sym2 V))) := {η | (⟨e,Set.mem_singleton e⟩ : ({e} : Set (Sym2 V))) ∈ η}
+  let B : Set (Set ({e} : Set (Sym2 V))) := {η | (⟨e,Set.mem_singleton e⟩ :
+      ({e} : Set (Sym2 V))) ∈ η}
   have hB : MeasurableSet B := measurableSet_mem _
   have h := prodBernoulli_block_inter q R {e} (Set.disjoint_singleton_right.mpr he) A B hA hB
   have hlocal (ω : Config V) : {i : R | (i : Sym2 V) ∈ ω} ∈ A ↔
@@ -114,6 +119,7 @@ theorem law_escape_le_phi_subtype [Countable V] (q : Sym2 V → unitInterval)
       intro z
       exact law_localConn_inter_boundary q (S : Set V) x y z z.property
 
+open Classical in
 /-- The q-normalized boundary functional, written explicitly without introducing a definition. -/
 theorem law_escape_le_phi [Countable V] (q : Sym2 V → unitInterval)
     (S : Finset V) {x : V} (hx : x ∈ S) :
@@ -139,6 +145,7 @@ theorem law_escape_le_phi [Countable V] (q : Sym2 V → unitInterval)
       law q {ω | ((openGraph ω).induce (S : Set V)).Reachable ⟨x,hx⟩ y} *
         (unitInterval.toNNReal (q s((y:V),z)) : ℝ≥0∞)))
 
+open Classical in
 /-- An infinite cluster exits every finite set, so the same boundary functional bounds theta. -/
 theorem law_cluster_infinite_le_phi [Countable V] (q : Sym2 V → unitInterval)
     (S : Finset V) {x : V} (hx : x ∈ S) :
@@ -152,6 +159,7 @@ theorem law_cluster_infinite_le_phi [Countable V] (q : Sym2 V → unitInterval)
   obtain ⟨w,hw,hnot⟩ := hi.exists_notMem_finite S.finite_toSet
   exact Set.mem_iUnion₂.mpr ⟨w,hnot,hw⟩
 
+open Classical in
 /-- A singleton domain gives the explicit off-diagonal row sum. -/
 theorem law_escape_singleton_le_rowSum [Countable V] (q : Sym2 V → unitInterval) (x : V) :
     law q (⋃ w ∈ ({x} : Set V)ᶜ, conn x w) ≤
@@ -159,10 +167,11 @@ theorem law_escape_singleton_le_rowSum [Countable V] (q : Sym2 V → unitInterva
   rw [rowSum_toENNReal]
   simpa using law_escape_le_phi q {x} (Finset.mem_singleton_self x)
 
+open Classical in
 /-- A finite domain with zero boundary profile has zero escape probability. -/
 theorem law_escape_eq_zero_of_boundary_zero [Countable V] (q : Sym2 V → unitInterval)
     (S : Finset V) {x : V} (hx : x ∈ S)
-    (hz : ∀ y ∈ S, ∀ z ∉ S, q s(y,z) = 0) :
+    (hz : ∀ y ∈ S, ∀ z ∉ S, q s(y, z) = 0) :
     law q (⋃ w ∈ (S : Set V)ᶜ, conn x w) = 0 := by
   apply le_antisymm _ zero_le
   refine (law_escape_le_phi q S hx).trans_eq ?_
@@ -177,8 +186,8 @@ theorem law_escape_eq_zero_of_boundary_zero [Countable V] (q : Sym2 V → unitIn
 /-- On the ray, leaving the initial interval is equivalent almost surely to
 reaching its first exterior vertex. -/
 theorem law_escape_nat_range (q : Sym2 ℕ → unitInterval) (t : unitInterval)
-    (hedge : ∀ n, q s(n,n+1) = t)
-    (hz : ∀ m n, m ≠ n → ¬ (m + 1 = n ∨ n + 1 = m) → q s(m,n) = 0)
+    (hedge : ∀ n, q s(n, n + 1) = t)
+    (hz : ∀ m n, m ≠ n → ¬ (m + 1 = n ∨ n + 1 = m) → q s(m, n) = 0)
     (n : ℕ) :
     law q (⋃ w ∈ (Finset.range (n+1) : Set ℕ)ᶜ, conn 0 w) =
       (unitInterval.toNNReal t : ℝ≥0∞) ^ (n+1) := by
@@ -190,7 +199,8 @@ theorem law_escape_nat_range (q : Sym2 ℕ → unitInterval) (t : unitInterval)
     · intro h
       obtain ⟨w,hw,⟨p⟩⟩ := Set.mem_iUnion₂.mp h
       have hle : n + 1 ≤ w := by simpa using hw
-      have hm := SimpleGraph.Walk.mem_support_hasse_of_ge_of_le ℕ (p.mapLe hω) (Nat.zero_le (n+1)) hle
+      have hm := SimpleGraph.Walk.mem_support_hasse_of_ge_of_le ℕ (p.mapLe hω)
+          (Nat.zero_le (n+1)) hle
       have hm' : n+1 ∈ p.support := by simpa using hm
       exact ⟨p.takeUntil (n+1) hm'⟩
     · intro h
@@ -201,8 +211,8 @@ theorem law_escape_nat_range (q : Sym2 ℕ → unitInterval) (t : unitInterval)
 
 /-- The explicit boundary sum is sharp on every finite initial interval of the ray. -/
 theorem phi_nat_range (q : Sym2 ℕ → unitInterval) (t : unitInterval)
-    (hedge : ∀ n, q s(n,n+1) = t)
-    (hz : ∀ m n, m ≠ n → ¬ (m + 1 = n ∨ n + 1 = m) → q s(m,n) = 0)
+    (hedge : ∀ n, q s(n, n + 1) = t)
+    (hz : ∀ m n, m ≠ n → ¬ (m + 1 = n ∨ n + 1 = m) → q s(m, n) = 0)
     (n : ℕ) :
     (∑ y ∈ Finset.range (n+1), ∑' z, if z ∈ Finset.range (n+1) then 0 else
       law q {ω | ∃ hy : y ∈ Finset.range (n+1),

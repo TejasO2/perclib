@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-16. No upstream proof is copied. The model is the Cayley graph of the
 free group of rank two (the 4-regular tree).
 -/
@@ -46,7 +48,6 @@ noncomputable section
 
 open MeasureTheory Set PercLib.Probability PercLib.Percolation.Bond
 open scoped ENNReal NNReal unitInterval
-open Classical
 
 namespace PercLib.Models
 
@@ -65,6 +66,7 @@ theorem freeGroupTree_map_mulLeft_mem_iff (x : FreeGroup (Fin 2)) (e : Sym2 (Fre
   rwa [Sym2.map_map, show ((x⁻¹ * ·) ∘ (x * ·) : FreeGroup (Fin 2) → FreeGroup (Fin 2)) = id
     from funext fun g => by simp, Sym2.map_id, id] at this
 
+open Classical in
 /-- **Transitivity, rooted form** (as in `IntensityForm.lean`). -/
 theorem freeGroupTree_transitive_one :
     ∀ x : FreeGroup (Fin 2), ∃ φ : FreeGroup (Fin 2) ≃ FreeGroup (Fin 2), φ 1 = x ∧ ∀ e,
@@ -80,6 +82,7 @@ theorem freeGroupTree_transitive_one :
   rw [show (⇑(Equiv.mulLeft x) : FreeGroup (Fin 2) → FreeGroup (Fin 2)) = (x * ·) from rfl,
     if_congr (freeGroupTree_map_mulLeft_mem_iff x e) rfl rfl]
 
+open Classical in
 /-- **Transitivity, two-point form** (as in `SusceptibilityDerivative.lean`). -/
 theorem freeGroupTree_transitive :
     ∀ x y : FreeGroup (Fin 2), ∃ ψ : FreeGroup (Fin 2) ≃ FreeGroup (Fin 2), ψ x = y ∧ ∀ e,
@@ -96,6 +99,7 @@ theorem freeGroupTree_transitive :
       ((y * x⁻¹) * ·) from rfl,
     if_congr (freeGroupTree_map_mulLeft_mem_iff (y * x⁻¹) e) rfl rfl]
 
+open Classical in
 /-- The off-diagonal row sum of the Cayley kernel at `1` is finite. -/
 theorem freeGroupTree_rowSum_lt_top :
     rowSum (fun e' => (((fun e : Sym2 (FreeGroup (Fin 2)) =>
@@ -120,6 +124,7 @@ theorem freeGroupTree_rowSum_lt_top :
         exact (eq_inv_of_mul_eq_one_left h1.symm).symm
     simp only [ite_eq_right_iff.2 (fun h => absurd h hmem), ENNReal.coe_zero, ite_self]
 
+open Classical in
 /-- The off-diagonal row sum of the Cayley kernel at `1` is positive. -/
 theorem freeGroupTree_rowSum_pos :
     0 < rowSum (fun e' => (((fun e : Sym2 (FreeGroup (Fin 2)) =>
@@ -130,7 +135,8 @@ theorem freeGroupTree_rowSum_pos :
   have hmem : s(1, FreeGroup.of (0 : Fin 2)) ∈
       {f : Sym2 (FreeGroup (Fin 2)) | ∃ g i, f = s(g, g * FreeGroup.of i)} :=
     ⟨1, 0, by simp⟩
-  simp only [ite_eq_left_iff.2 (fun h => absurd hmem h), ite_eq_right_iff.2 (fun h => absurd h (FreeGroup.of_ne_one _))]
+  simp only [ite_eq_left_iff.2 (fun h => absurd hmem h),
+      ite_eq_right_iff.2 (fun h => absurd h (FreeGroup.of_ne_one _))]
   simp
 
 /-- The vertex reached from `1` by reading a positive word from the left. -/
@@ -185,6 +191,7 @@ theorem freeGroupTree_exists_walk (w : List (Fin 2)) :
     · rw [List.mem_singleton] at he
       exact ⟨_, i, he⟩
 
+open Classical in
 /-- At `β ≥ 1` each Cayley edge is open with probability at least `1/2`. -/
 theorem freeGroupTree_half_le {β : ℝ≥0} (hβ : 1 ≤ β) (e : Sym2 (FreeGroup (Fin 2)))
     (he : e ∈ {f : Sym2 (FreeGroup (Fin 2)) | ∃ g i, f = s(g, g * FreeGroup.of i)}) :
@@ -216,6 +223,7 @@ theorem freeGroupTree_half_le {β : ℝ≥0} (hβ : 1 ≤ β) (e : Sym2 (FreeGro
     rw [ENNReal.ofReal_inv_of_pos (by norm_num)]; simp]
   exact ENNReal.ofReal_le_ofReal (by simpa using hreal)
 
+open Classical in
 /-- **Infinite susceptibility.** On the free-group tree, `χ_β(1) = ⊤` for every `β ≥ 1`. -/
 theorem freeGroupTree_chi_eq_top {β : ℝ≥0} (hβ : 1 ≤ β) :
     chi (intensityProfile
@@ -248,6 +256,7 @@ theorem freeGroupTree_chi_eq_top {β : ℝ≥0} (hβ : 1 ≤ β) :
     _ ≤ ∑' y, tau q 1 y :=
         ENNReal.tsum_comp_le_tsum_of_injective freeGroupTree_mk_reverse_injective _
 
+open Classical in
 /-- **The endpoint witness.** On the free-group tree, `b_χ = sSup {β | χ_β(1) < ⊤}` is a
 finite positive parameter `b ≤ 1`, `χ_β(1) < ⊤` for `β < b`, and `χ_b(1) = ⊤`. -/
 theorem freeGroupTree_chi_endpoint :
@@ -301,6 +310,7 @@ theorem freeGroupTree_chi_endpoint :
       rwa [ENNReal.coe_toNNReal hBtop]
     exact absurd ((add_le_iff_nonpos_right _).1 (ENNReal.coe_le_coe.1 hle')) (not_le.2 hε)
 
+open Classical in
 /-- **The endpoint witness, real parameter** (the form of `SusceptibilityDerivative.lean`):
 some `b > 0` has `χ_β(1) ≠ ⊤` on `(0, b)` and `χ_b(1) = ⊤`. -/
 theorem freeGroupTree_chi_endpoint_real :
@@ -320,6 +330,7 @@ theorem freeGroupTree_chi_endpoint_real :
 
 /-! ### Non-vacuity of the blow-up hypotheses of `SusceptibilityDerivative.lean` -/
 
+open Classical in
 /-- The free-group tree satisfies every hypothesis of `inv_chi_sub_le` on `(0, b)` with
 `χ_b(1) = ⊤` at the finite endpoint `b`. -/
 example : ∃ b : ℝ, 0 < b ∧
@@ -345,6 +356,7 @@ example : ∃ b : ℝ, 0 < b ∧
 
 /-! ### Witnesses for the endpoint theorems of `SusceptibilityEndpoint.lean` -/
 
+open Classical in
 /-- **Endpoint of finite susceptibility.** Every hypothesis of `chi_intensity_sSup_eq_top` holds on
 the free-group tree, so `χ_{b_χ}(1) = ⊤` there. -/
 example : chi (intensityProfile
@@ -361,6 +373,7 @@ example : chi (intensityProfile
   rw [← hb]
   exact ENNReal.coe_lt_top
 
+open Classical in
 /-- **Blow-up of the susceptibility.** Every hypothesis of `one_div_le_chi_of_chi_eq_top` holds on
 `(0, b)` for the free-group tree, with `R > 0`. -/
 example : ∃ b : ℝ, 0 < b ∧ ∃ R : ℝ, 0 < R ∧ ∀ β ∈ Ioo (0 : ℝ) b,

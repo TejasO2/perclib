@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proof that one-dimensional long-range percolation with a kernel of finite first
 moment has only finite clusters (wiki integrated-susceptibility, tag JK7V). No
 upstream proof is copied, no definition is added and no Input is introduced.

@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-16: the upper two-point bound on the hierarchical lattice from bounds
 on the block means. From the first-exit inequality and the hierarchical symmetries of this library
 and pinned mathlib's ENNReal powers and geometric series. No upstream code is copied, no definition
@@ -33,7 +37,7 @@ intensity is radial, `J s(x,y) = f (h (y - x))`, and `q = intensityProfile J β`
 noncomputable section
 
 open MeasureTheory Set
-open scoped ENNReal NNReal Classical
+open scoped ENNReal NNReal
 open PercLib.Percolation.Bond
 
 namespace PercLib.Models
@@ -55,13 +59,14 @@ variable {d L : ℕ} [NeZero L]
 
 /-- Joining inside a domain is symmetric. -/
 theorem setOf_localConn_comm {W : Type*} (D : Set W) (a b : W) :
-    {ω : Config W | ∃ ha : a ∈ D, ∃ hb : b ∈ D, ((openGraph ω).induce D).Reachable ⟨a, ha⟩ ⟨b, hb⟩} =
+    {ω : Config W | ∃ ha : a ∈ D, ∃ hb : b ∈ D, ((openGraph ω).induce D).Reachable ⟨a, ha⟩
+        ⟨b, hb⟩} =
       {ω | ∃ hb : b ∈ D, ∃ ha : a ∈ D, ((openGraph ω).induce D).Reachable ⟨b, hb⟩ ⟨a, ha⟩} := by
   ext ω
   exact ⟨fun ⟨ha, hb, r⟩ => ⟨hb, ha, r.symm⟩, fun ⟨hb, ha, r⟩ => ⟨ha, hb, r.symm⟩⟩
 
 variable (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) (f : ℕ → ℝ≥0)
-  (hJ : ∀ x y, J s(x,y) = f ((y - x).support.sup Nat.succ))
+  (hJ : ∀ x y, J s(x, y) = f ((y - x).support.sup Nat.succ))
 
 include hJ in
 /-- **Translation.** For `x ∈ B_n`, `∑' y, τ_n(x,y) = μ_n`. -/
@@ -396,7 +401,8 @@ theorem tsum_tau_ball_le_powerLaw (hL : 1 ≤ L) {α : ℝ} (hα : 0 < α) (C₀
 /-- The block means are bounded by the susceptibility. -/
 theorem tsum_localConn_le_chi {W : Type*} [Countable W] (q : Sym2 W → unitInterval) (D : Set W)
     (x : W) :
-    ∑' z, law q {ω | ∃ hx : x ∈ D, ∃ hz : z ∈ D, ((openGraph ω).induce D).Reachable ⟨x, hx⟩ ⟨z, hz⟩} ≤
+    ∑' z, law q {ω | ∃ hx : x ∈ D, ∃ hz : z ∈ D, ((openGraph ω).induce D).Reachable ⟨x, hx⟩
+        ⟨z, hz⟩} ≤
       chi q x := by
   rw [chi_eq_tsum_tau]
   exact ENNReal.tsum_le_tsum fun z => measure_mono fun ω ⟨hx, hz, r⟩ =>

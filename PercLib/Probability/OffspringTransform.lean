@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-16, against pinned mathlib. No upstream proof is copied. Reuses
 `PercLib/Probability/GeneratingFunction.lean`.
 -/
@@ -371,7 +373,7 @@ theorem isEquivalent_one_sub_transform_root (hm : ∑' k : ℕ, (k : ℝ≥0∞)
     have hfs' : s * (1 - (1 - F s) + a * (1 - F s) ^ 2 - ε s * (1 - F s) ^ 2) = F s := by
       rw [← hφ]
       simpa using hfs
-    show (1 - (1 - F s)) / (s * (a - ε s)) = (1 - F s) ^ 2 / (1 - s)
+    change (1 - (1 - F s)) / (s * (a - ε s)) = (1 - F s) ^ 2 / (1 - s)
     rw [div_eq_div_iff hd h1s]
     linear_combination (-1 : ℝ) * hfs'
   -- the square root

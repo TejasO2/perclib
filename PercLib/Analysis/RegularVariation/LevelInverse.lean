@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 Level selections for a regularly varying function of positive index (the scale-selection step
 of Proposition I.3.2 of T. Hutchcroft, *Critical long-range percolation I: High effective
 dimension*, arXiv:2508.18807v1, §I.3.2, pp. 30-32) and the comparison of level selections from
@@ -138,7 +142,8 @@ theorem RegularlyVarying.tendsto_div_of_monotoneOn {c₁ c₂ X : ℝ}
   have hbase : ((c₁ / c₂) ^ (1 / ρ)) ^ ρ = c₁ / c₂ := by
     rw [← Real.rpow_mul hc.le, one_div_mul_cancel hρ.ne', Real.rpow_one]
   -- `f ∘ v → ∞`
-  have hfvtop : Tendsto (fun h => f (v h)) l atTop := tendsto_atTop_of_mul_tendsto_zero hc2 hg0 hg hfv
+  have hfvtop : Tendsto (fun h => f (v h)) l atTop :=
+      tendsto_atTop_of_mul_tendsto_zero hc2 hg0 hg hfv
   -- hence `v → ∞`
   have hvtop : Tendsto v l atTop := by
     rw [Filter.tendsto_atTop]
@@ -453,7 +458,8 @@ theorem apply_genInv_of_continuousOn {x₀ y : ℝ} (hcont : ContinuousOn f (Ici
   · rw [← h]; exact hy
   · have hc : Tendsto f (𝓝[<] (genInv f x₀ y)) (𝓝 (f (genInv f x₀ y))) :=
       ((hcont _ hmem.1).mono_of_mem_nhdsWithin
-        (mem_of_superset (Ioo_mem_nhdsLT h) (Ioo_subset_Ioi_self.trans Ioi_subset_Ici_self))).tendsto
+        (mem_of_superset (Ioo_mem_nhdsLT h) (Ioo_subset_Ioi_self.trans
+            Ioi_subset_Ici_self))).tendsto
     refine le_of_tendsto hc ?_
     filter_upwards [Ioo_mem_nhdsLT h] with x hx
     by_contra hlt
@@ -668,7 +674,8 @@ example : Tendsto (fun h : ℝ =>
     (by norm_num) (fun x hx => Real.rpow_pos_of_pos (by linarith) 2)
     continuousOn_sq_Ici_one
   have h2 : (4 : ℝ) ^ ((1 : ℝ) / 2) / (1 : ℝ) ^ ((1 : ℝ) / 2) = 2 := by
-    rw [Real.one_rpow, div_one, show (4 : ℝ) = 2 ^ (2 : ℝ) by norm_num, ← Real.rpow_mul (by norm_num)]
+    rw [Real.one_rpow, div_one, show (4 : ℝ) = 2 ^ (2 : ℝ) by norm_num,
+        ← Real.rpow_mul (by norm_num)]
     norm_num
   rwa [h2] at h
 

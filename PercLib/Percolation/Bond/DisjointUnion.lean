@@ -1,7 +1,9 @@
 /-
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-
+Authors: PercLib contributors
+-/
+/-
 New proofs, written on 2026-11-15. No upstream proof is copied.
 -/
 module
@@ -135,7 +137,8 @@ theorem law_preimage_inl_inter_inr (q : Sym2 (V₁ ⊕ V₂) → unitInterval)
   have h2 : law q {ω | Sym2.map Sum.inr ⁻¹' ω ∈ B} = law (fun e => q (Sym2.map Sum.inr e)) B :=
     prodBernoulli_preimage_preimage q (Sym2.map.injective Sum.inr_injective) hB
   rw [← h1, ← h2]
-  refine PercLib.Probability.prodBernoulli_inter_of_determined_inter q (range (Sym2.map Sum.inl)) (range (Sym2.map Sum.inr)) ?_
+  refine PercLib.Probability.prodBernoulli_inter_of_determined_inter q (range (Sym2.map Sum.inl))
+      (range (Sym2.map Sum.inr)) ?_
     (measurable_preimage_map Sum.inl hA) (measurable_preimage_map Sum.inr hB) ?_ ?_
   · refine Set.disjoint_left.2 ?_
     rintro _ ⟨e, rfl⟩ ⟨e', he'⟩
@@ -217,7 +220,7 @@ theorem chi_inl [Countable V₁] [Countable V₂] (q : Sym2 (V₁ ⊕ V₂) → 
     filter_upwards [ae_no_cross q hq] with ω hω
     rw [cluster_inl_eq hω, Sum.inl_injective.encard_image]
   rw [chi, lintegral_congr_ae hae, chi]
-  show _ = ∫⁻ ω, ((cluster ω a).encard : ℝ≥0∞) ∂law (q ∘ Sym2.map Sum.inl)
+  change _ = ∫⁻ ω, ((cluster ω a).encard : ℝ≥0∞) ∂law (q ∘ Sym2.map Sum.inl)
   rw [← law_map_preimage_map q Sum.inl_injective]
   exact (lintegral_map
     ((measurable_of_countable (fun n : ℕ∞ => (n : ℝ≥0∞))).comp (measurable_encard_cluster a))
@@ -307,7 +310,7 @@ example :
         by_cases hy : (0 : ℕ) = y
         · rw [← hy]; exact mem_cluster_self ω 0
         · exact mem_conn_of_mem hy (h _)
-      show (cluster ω 0).Infinite
+      change (cluster ω 0).Infinite
       rw [this]
       exact infinite_univ
     · refine measure_iUnion_null fun e => (prob_compl_eq_zero_iff (measurableSet_mem e)).2 ?_

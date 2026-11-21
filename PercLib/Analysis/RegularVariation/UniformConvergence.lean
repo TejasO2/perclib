@@ -1,5 +1,9 @@
 /-
-Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
+Copyright (c) 2026 PercLib contributors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: PercLib contributors
+-/
+/-
 The Kestelman–Borwein–Ditor theorem, the uniform convergence theorem for measurable regularly
 varying functions (Bingham–Goldie–Teugels, Theorem 1.2.1), and Potter's bounds (BGT Theorem 1.5.6),
 as used on p. 25 and in Lemma I.2.10 of T. Hutchcroft, *Critical long-range percolation I*,
@@ -306,7 +310,8 @@ theorem tendsto_uniformly_abs_ratio_of_regularlyVarying {f : ℝ → ℝ} {α : 
   set H : ℝ → ℝ := fun x => Real.log |f (Real.exp x)| - α * x with hHdef
   have hHmeas : Measurable H := by
     refine Measurable.sub ?_ ?_
-    · exact Real.measurable_log.comp ((continuous_abs.measurable.comp hmeas).comp Real.measurable_exp)
+    · exact Real.measurable_log.comp ((continuous_abs.measurable.comp hmeas).comp
+        Real.measurable_exp)
     · exact measurable_const.mul measurable_id
   have hHadd : ∀ u : ℝ, Tendsto (fun x : ℝ => H (x + u) - H x) atTop (𝓝 0) := by
     intro u
@@ -474,7 +479,8 @@ theorem potter_core {f : ℝ → ℝ} {α : ℝ} (hmeas : Measurable f)
   set H : ℝ → ℝ := fun x => Real.log |f (Real.exp x)| - α * x with hHdef
   have hHmeas : Measurable H := by
     refine Measurable.sub ?_ ?_
-    · exact Real.measurable_log.comp ((continuous_abs.measurable.comp hmeas).comp Real.measurable_exp)
+    · exact Real.measurable_log.comp ((continuous_abs.measurable.comp hmeas).comp
+        Real.measurable_exp)
     · exact measurable_const.mul measurable_id
   have hHadd : ∀ u : ℝ, Tendsto (fun x : ℝ => H (x + u) - H x) atTop (𝓝 0) := by
     intro u
@@ -1037,7 +1043,8 @@ theorem isLogErrorFunction_of_regularlyVarying {f : ℝ → ℝ} {α : ℝ} (hα
         have h1 : IntegrableOn (fun x : ℝ => x ^ (α + ε - 1)) (Ioi X) :=
           (integrableOn_Ioi_rpow_iff hXpos).2 hεlt'
         exact h1.const_mul _
-      refine hcmp.mono' (((continuous_abs.measurable.comp hmeas).div measurable_id).aestronglyMeasurable.restrict) ?_
+      refine hcmp.mono' (((continuous_abs.measurable.comp hmeas).div
+          measurable_id).aestronglyMeasurable.restrict) ?_
       filter_upwards [ae_restrict_mem measurableSet_Ioi] with x hx
       have hxX : X ≤ x := le_of_lt hx
       have hx0 : 0 < x := lt_of_lt_of_le hXpos hxX
