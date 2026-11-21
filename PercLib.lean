@@ -69,9 +69,12 @@ public import PercLib.Analysis.VolumeTail.Normalizer
 public import PercLib.Analysis.VolumeTail.SizeBiasMGF
 public import PercLib.Analysis.VolumeTail.UpToConstants
 public import PercLib.Basic
+public import PercLib.Combinatorics.BooleanCoefficients
+public import PercLib.Combinatorics.BooleanCoefficients.Defs
 public import PercLib.Combinatorics.DoubleFactorialConvolution
 public import PercLib.Combinatorics.FiniteEdgeChange
 public import PercLib.Combinatorics.ForestBranching
+public import PercLib.Combinatorics.Tags.BooleanCoefficients
 public import PercLib.Combinatorics.Tags.ForestConnections
 public import PercLib.Combinatorics.Tags.TreeSplitting
 public import PercLib.Combinatorics.TreeSplitting
@@ -374,6 +377,8 @@ public import PercLib.Probability.OffspringTransform
 public import PercLib.Probability.OpenEventHarris
 public import PercLib.Probability.PaleyZygmund
 public import PercLib.Probability.Pivotal.Algebra
+public import PercLib.Probability.PoissonTail
+public import PercLib.Probability.PoissonTail.Defs
 public import PercLib.Probability.PredictableSwap
 public import PercLib.Probability.ProdBernoulli
 public import PercLib.Probability.ProdBernoulliIndependence
@@ -385,6 +390,7 @@ public import PercLib.Probability.RussoCylinder
 public import PercLib.Probability.RussoFinset
 public import PercLib.Probability.RussoIntegral
 public import PercLib.Probability.SizeBias
+public import PercLib.Probability.SizeBias.ClusterMeasure
 public import PercLib.Probability.SizeBiasLimits
 public import PercLib.Probability.SplitCoordinate
 public import PercLib.Probability.Superposition
@@ -405,12 +411,14 @@ public import PercLib.Probability.Tags.IntegratedLowerTail
 public import PercLib.Probability.Tags.MassTransport
 public import PercLib.Probability.Tags.MonotoneCoupling
 public import PercLib.Probability.Tags.NearMisses
+public import PercLib.Probability.Tags.PoissonTail
 public import PercLib.Probability.Tags.PredictableSwap
 public import PercLib.Probability.Tags.ProductModel
 public import PercLib.Probability.Tags.ProfileContinuity
 public import PercLib.Probability.Tags.RevealmentDerivative
 public import PercLib.Probability.Tags.Russo
 public import PercLib.Probability.Tags.RussoCoordinate
+public import PercLib.Probability.Tags.SizeBiasedLaws
 public import PercLib.Probability.Tags.SplitCoordinate
 public import PercLib.Probability.Tags.StoppedExploration
 public import PercLib.Probability.Tags.Symmetries
