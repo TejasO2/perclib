@@ -2,7 +2,11 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-Endpoint theorems for the susceptibility, restored on 2026-11-16. The proofs were written earlier in this repository (`chi_intensity_sSup_eq_top`, removed in commit bf0b5ba; `exists_chi_gt_of_chi_eq_top` and `one_div_le_chi_of_chi_eq_top`, removed in commit 77f2eef) and are restored unchanged; they were cut only for want of a non-vacuity witness, now supplied by `PercLib/Models/FreeGroupTree.lean`. No upstream proof is copied.
+Endpoint theorems for the susceptibility, restored on 2026-11-16. The proofs were written earlier in
+this repository (`chi_intensity_sSup_eq_top`, removed in commit bf0b5ba;
+`exists_chi_gt_of_chi_eq_top` and `one_div_le_chi_of_chi_eq_top`, removed in commit 77f2eef) and are
+restored unchanged; they were cut only for want of a non-vacuity witness, now supplied by
+`PercLib/Models/FreeGroupTree.lean`. No upstream proof is copied.
 -/
 module
 

@@ -1154,8 +1154,9 @@ end CutoffContinuity
 
 /-! ### Witnesses -/
 
-/-- Non-vacuity witness for the cut-off family: at `d = 1`, the sup norm, `K(s) = s^{-2}` and `β = 1/10`, the
-cut-off law at `R = 5/2` has finite susceptibility (its kernel has total mass at most `4`). -/
+/-- Non-vacuity witness for the cut-off family: at `d = 1`, the sup norm, `K(s) = s^{-2}` and
+`β = 1/10`, the cut-off law at `R = 5/2` has finite susceptibility (its kernel has total mass at
+most `4`). -/
 theorem chi_cutoff_example_ne_top :
     chi (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (powerLawProfile 1 2)
       (5 / 2)) (1 / 10)) 0 ≠ ⊤ := by

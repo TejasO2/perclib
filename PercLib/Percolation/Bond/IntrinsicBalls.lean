@@ -473,9 +473,9 @@ example (α β : ℝ≥0) (hα : 0 < α) (hαβ : α ≤ β) :
       ((β : ℝ≥0∞) / α) ^ 1 * tau (intensityProfile (fun _ : Sym2 Bool => (1 : ℝ≥0)) α) false true :=
   ⟨law_edist_le_le _ hα hαβ false true 0, law_edist_le_le _ hα hαβ false true 1⟩
 
-/-- `measure_encard_cluster_ge_le` for the deterministic singleton cluster: on `Unit` under the point mass at the
-empty configuration, `Q_r = 0` and `|B_ω(o,r)| = 1`, so the hypotheses hold with `A = 0`,
-`B = 1`. -/
+/-- `measure_encard_cluster_ge_le` for the deterministic singleton cluster: on `Unit` under the
+point mass at the empty configuration, `Q_r = 0` and `|B_ω(o,r)| = 1`, so the hypotheses hold with
+`A = 0`, `B = 1`. -/
 example (n : ℕ) (hn : 1 ≤ n) :
     Measure.dirac (∅ : Config Unit) {ω | (n : ℕ∞) ≤ (cluster ω ()).encard} ≤
       (0 + 2 * 1) / ENNReal.ofReal (Real.sqrt n) := by

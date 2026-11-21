@@ -119,7 +119,8 @@ def offDiagonal (a : V → V → ℝ≥0∞) (v w : V) : ℝ≥0∞ := by
   classical
   exact if w = v then 0 else a v w
 
-/-- Unfolding the mask gives the explicit row-sum spelling used in `PercLib.Percolation.Bond.RowSum`. -/
+/-- Unfolding the mask gives the explicit row-sum spelling used in
+`PercLib.Percolation.Bond.RowSum`. -/
 theorem offDiagonal_apply (a : V → V → ℝ≥0∞) (v w : V) :
     offDiagonal a v w = if w = v then 0 else a v w := rfl
 

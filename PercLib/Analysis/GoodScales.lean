@@ -429,8 +429,8 @@ example : (2 : ℝ) / 1 ≤ 1 * (2 / 1) ^ (1 / ((1 : ℝ) - 0)) := by
   have ht0 : 0 < t := lt_of_lt_of_le one_pos ht.1
   simp only [id, Real.deriv_log, one_div, le_refl]
 
-/-- `good_scale_persists` with `h = d = δ = c = C = r₀ = r_* = 1`, `k = 2`, `λ = 3`, `B = 8`, `M(r) = 2r` and
-`f(r) = 8 r²`. Every scale is good, so the derivative hypothesis is vacuous. -/
+/-- `good_scale_persists` with `h = d = δ = c = C = r₀ = r_* = 1`, `k = 2`, `λ = 3`, `B = 8`,
+`M(r) = 2r` and `f(r) = 8 r²`. Every scale is good, so the derivative hypothesis is vacuous. -/
 example : (1 : ℝ) ≤ 1 * (8 / (1 * 1 ^ 3)) ^ (1 / ((3 : ℝ) - 2)) ∧
     ∀ R, (1 : ℝ) ≤ R →
       1 * (1 * (8 / (1 * 1 ^ 3)) ^ (1 / ((3 : ℝ) - 2))) ^ (-(1 : ℝ)) * R ^ (1 : ℝ) ≤ 2 * R := by
@@ -449,8 +449,8 @@ example : (1 : ℝ) ≤ 1 * (8 / (1 * 1 ^ 3)) ^ (1 / ((3 : ℝ) - 2)) ∧
     rw [Real.rpow_one] at hM
     linarith
 
-/-- `integral_rpow_add_le_of_tail` with `X ≡ 1` under a point mass, `M = p = q = b = 1`, `A = e`: the tail hypothesis
-holds (with equality at `t = 1`). -/
+/-- `integral_rpow_add_le_of_tail` with `X ≡ 1` under a point mass, `M = p = q = b = 1`, `A = e`:
+the tail hypothesis holds (with equality at `t = 1`). -/
 example := integral_rpow_add_le_of_tail (μ := Measure.dirac ()) (X := fun _ : Unit => (1 : ℝ))
     measurable_const (fun _ => zero_le_one) one_pos (Real.exp_pos 1) one_pos one_pos one_pos
     (fun t ht => by

@@ -27,7 +27,8 @@ public import Mathlib.MeasureTheory.Integral.Lebesgue.Basic
 /-! # Lévy measures and exponentially stopped laws
 
 On a finite-dimensional real inner product space `E` of dimension `d`, with Lebesgue measure
-`volume` and a model norm `N : Seminorm ℝ E` (the norm type of the long-range kernels of `PercLib/Models/LongRange/Defs.lean`; the paper allows any norm, and the Euclidean one is
+`volume` and a model norm `N : Seminorm ℝ E` (the norm type of the long-range kernels of
+`PercLib/Models/LongRange/Defs.lean`; the paper allows any norm, and the Euclidean one is
 `normSeminorm ℝ E`), display (I.5.16) defines for `α > 0`
 * the cut-off Lévy measure `Π_l` with density `α ∫_{N(x)}^{l} s^(-d-α-1) ds =
   α/(d+α) (N(x)^(-d-α) - l^(-d-α))₊` (the closed form is the definition; `Π₁` is `l = 1`);

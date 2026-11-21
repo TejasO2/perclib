@@ -838,7 +838,8 @@ example (J : Sym2 V → ℝ≥0) (o : V) {β : ℝ} (hβ : 0 < β) :
   rw [hconst] at hD
   exact hD.unique (hasDerivAt_const β 1)
 
-/-- Two vertices with one pair of intensity `1`: `hasDerivAt_finiteChi_le` applies at every `β > 0`. -/
+/-- Two vertices with one pair of intensity `1`: `hasDerivAt_finiteChi_le` applies at every `β > 0`.
+-/
 example {β : ℝ} (hβ : 0 < β) :=
   hasDerivAt_finiteChi_le (Finset.univ : Finset Bool)
     (fun e : Sym2 Bool => if e = s(false, true) then 1 else 0)
@@ -879,9 +880,9 @@ example : ∀ᵐ β, β ∈ Ioo (0 : ℝ) 1 → DifferentiableAt ℝ (fun u : �
   ae_differentiableAt_chi _ bool_pair_transitive false (by simp [rowSum_def, tsum_fintype]) le_rfl
     fun β _ => chi_bool_ne_top _ _ _
 
-/-- The integrated mean-field inequality on two vertices joined by a pair of intensity `1`: the kernel is transitive (the
-swap of the two vertices), `R = 1`, and every susceptibility is at most `2`, so the
-integrated inequality holds on `(0, b)` for every `b`. -/
+/-- The integrated mean-field inequality on two vertices joined by a pair of intensity `1`: the
+kernel is transitive (the swap of the two vertices), `R = 1`, and every susceptibility is at most
+`2`, so the integrated inequality holds on `(0, b)` for every `b`. -/
 example {s t b : ℝ} (hs : 0 < s) (hst : s ≤ t) (ht : t < b) :
     (chi (intensityProfile (fun e : Sym2 Bool => if e = s(false, true) then 1 else 0)
         t.toNNReal) false).toReal -

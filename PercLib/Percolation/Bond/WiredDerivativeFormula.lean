@@ -488,8 +488,8 @@ theorem hasDerivWithinAt_law_escape (J : Sym2 V → ℝ≥0)
     Finset.sum_finset_coe (fun v => if v ∈ T then P * (τ v * R v) else 0) Λ,
     Finset.sum_ite_mem, Finset.inter_eq_right.2 hT.1, Finset.mul_sum]
 
-/-- **Derivative of the escape probability.** At every `β > 0` the escape probability is differentiable with the
-derivative of `hasDerivWithinAt_law_escape`. -/
+/-- **Derivative of the escape probability.** At every `β > 0` the escape probability is
+differentiable with the derivative of `hasDerivWithinAt_law_escape`. -/
 theorem hasDerivAt_law_escape (J : Sym2 V → ℝ≥0)
     (hJ : ∀ u, Summable fun v => (J s(u, v) : ℝ)) (Λ : Finset V) {o : V} (ho : o ∈ Λ)
     {β : ℝ} (hβ : 0 < β) :

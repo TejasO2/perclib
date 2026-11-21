@@ -250,10 +250,11 @@ theorem lintegral_encard_cluster_inter_ball_bounds (hL : 2 ≤ L) (hd : 1 ≤ d)
   exact ⟨le_tsum_levelBall hL hd ha (tau q) hlow x hn,
     tsum_levelBall_le hL hα hA (tau q) (fun x => (tau_self q x).le) hup x n⟩
 
-/-- **Ball sums, conditional on two-sided bounds for the connection probability inside the smallest common ball.** Write `P(x,y)` for the probability that `x` and `y` are joined by an
-open path inside `B(x, h(y-x))`. If `a L^{-h(y-x)(d-α)} ≤ P(x,y) ≤ A L^{-h(y-x)(d-α)}` for
-`x ≠ y`, then for every `n ≥ 1` the expected number `∑_{y ∈ B(x,n)} P(x,y)` lies between
-`(a/2) L^{αn}` and `(1 + A L^α / (L^α - 1)) L^{αn}`, and `(a/2) L^{αn} ≤ E|K_x ∩ B(x,n)|`. -/
+/-- **Ball sums, conditional on two-sided bounds for the connection probability inside the smallest
+common ball.** Write `P(x,y)` for the probability that `x` and `y` are joined by an open path inside
+`B(x, h(y-x))`. If `a L^{-h(y-x)(d-α)} ≤ P(x,y) ≤ A L^{-h(y-x)(d-α)}` for `x ≠ y`, then for every
+`n ≥ 1` the expected number `∑_{y ∈ B(x,n)} P(x,y)` lies between `(a/2) L^{αn}` and
+`(1 + A L^α / (L^α - 1)) L^{αn}`, and `(a/2) L^{αn} ≤ E|K_x ∩ B(x,n)|`. -/
 theorem localConn_ball_bounds (hL : 2 ≤ L) (hd : 1 ≤ d) {α : ℝ}
     (hα : 0 < α) {a A : ℝ} (ha : 0 ≤ a) (hA : 0 ≤ A)
     (q : Sym2 (ℕ →₀ (Fin d → ZMod L)) → unitInterval)

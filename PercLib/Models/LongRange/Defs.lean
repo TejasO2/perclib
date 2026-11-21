@@ -10,8 +10,8 @@ MQNP, LF50 and 6YYS (article `cutoff-families`) for the power law.
 `PercLib/CriticalLRP/KernelGeometry.lean` (`cutoffProfile`, `radialKernel`, `cutoffKernel`,
 `modelProfile`); licence Apache-2.0 as declared in that file's header; upstream
 `yujinhkim/Critical-Long-range-percolation` at `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf`. Modified:
-kernels are functions on `Sym2 (Fin d → ℤ)` with values in `ℝ≥0` (as `intensityProfile` requires), the
-distance is a norm on `ℝ^d` (a `Seminorm ℝ (Fin d → ℝ)` that vanishes only at `0`) evaluated at
+kernels are functions on `Sym2 (Fin d → ℤ)` with values in `ℝ≥0` (as `intensityProfile` requires),
+the distance is a norm on `ℝ^d` (a `Seminorm ℝ (Fin d → ℝ)` that vanishes only at `0`) evaluated at
 integer points, instead of an arbitrary function `V → V → ℝ`, and the power-law profile carries a
 normalising constant. The API lemmas, targets and witnesses are new.
 -/

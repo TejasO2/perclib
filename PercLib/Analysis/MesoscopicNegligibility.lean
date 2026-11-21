@@ -101,9 +101,9 @@ theorem exists_bounds_of_isEquivalent {a : ℝ → ℝ} {a₀ α θ : ℝ} (ha�
     have : θ⁻¹ * (a₀ * t ^ (-α - 1)) * θ = a₀ * t ^ (-α - 1) := by field_simp
     nlinarith
 
-/-- **Step 1 of mesoscopic negligibility.** Let `f > 0` be absolutely continuous on `[t, R]` with `f' ≤ a f²`
-almost everywhere there, where `0 ≤ a(u) ≤ a₊ u^{-α-1}` on `[t,R]`. If `f(R) ≥ ε R^α` and
-`t ≤ λ R`, then `f(t) ≥ D t^α` with `D = (a₊/α + λ^α/ε)⁻¹`. -/
+/-- **Step 1 of mesoscopic negligibility.** Let `f > 0` be absolutely continuous on `[t, R]` with
+`f' ≤ a f²` almost everywhere there, where `0 ≤ a(u) ≤ a₊ u^{-α-1}` on `[t,R]`. If `f(R) ≥ ε R^α`
+and `t ≤ λ R`, then `f(t) ≥ D t^α` with `D = (a₊/α + λ^α/ε)⁻¹`. -/
 theorem mul_rpow_le_of_reciprocal {f a : ℝ → ℝ} {α ap ε lam t R : ℝ} (hα : 0 < α)
     (hap : 0 < ap) (hε : 0 < ε) (hlam : 0 < lam) (ht0 : 0 < t) (htR : t ≤ R)
     (htlam : t ≤ lam * R) (hac : AbsolutelyContinuousOnInterval f t R)
@@ -182,8 +182,8 @@ theorem div_le_three_mul_of_bounds {α ρ am D t at' T c : ℝ} (hα : 0 < α) (
     _ = 3 * (am * t ^ (-α - 1)) * (ρ * (D * t ^ α)) := by rw [← hpow]; ring
     _ ≤ 3 * at' * (T - c) := by gcongr
 
-/-- **Step 2 of mesoscopic negligibility** (the collision term). If `0 ≤ C`, `δ = η D q^κ / (C + 1)`,
-`q R ≤ t` and `T ≥ D t^α`, then `C δ R^κ t^{α-κ} ≤ η T`. -/
+/-- **Step 2 of mesoscopic negligibility** (the collision term). If `0 ≤ C`,
+`δ = η D q^κ / (C + 1)`, `q R ≤ t` and `T ≥ D t^α`, then `C δ R^κ t^{α-κ} ≤ η T`. -/
 theorem collision_le {C δ η D q κ α R t T : ℝ} (hC : 0 ≤ C) (hη : 0 ≤ η) (hD : 0 ≤ D)
     (hq : 0 < q)
     (hκ : 0 ≤ κ) (hR : 0 < R) (ht : 0 < t) (hqt : q * R ≤ t)
@@ -214,8 +214,8 @@ theorem collision_le {C δ η D q κ α R t T : ℝ} (hC : 0 ≤ C) (hη : 0 ≤
     _ = η * (D * t ^ α) := by ring
     _ ≤ η * T := by gcongr
 
-/-- Choice of the exponents in mesoscopic negligibility: for `0 < α` and `α + κ < 3α` there are `0 < ρ < θ < 1`
-with `ρ < θ²` and `α + κ < 3 α ρ²`. -/
+/-- Choice of the exponents in mesoscopic negligibility: for `0 < α` and `α + κ < 3α` there are
+`0 < ρ < θ < 1` with `ρ < θ²` and `α + κ < 3 α ρ²`. -/
 theorem exists_exponents {α κ : ℝ} (hα : 0 < α) (hκ0 : 0 < κ) (hκ : κ < 2 * α) :
     ∃ ρ θ : ℝ, 0 < ρ ∧ ρ < 1 ∧ 0 < θ ∧ θ < 1 ∧ ρ < θ ^ 2 ∧ α + κ < 3 * α * ρ ^ 2 := by
   set s := (α + κ) / (3 * α) with hs
@@ -523,8 +523,8 @@ theorem truncatedMean_div_mean_twoPoint (hακ : α ≤ κ)
     ← rpow_add hr0, sub_add_cancel, mul_div_assoc, div_self (rpow_pos_of_pos hr0 α).ne',
     mul_one]
 
-/-- The differential inequalities of `tendsto_limsup_truncatedMean_div_mean` for the two-point law, with `a(r) = α r^{-α-1}` and
-`C = 1`. -/
+/-- The differential inequalities of `tendsto_limsup_truncatedMean_div_mean` for the two-point law,
+with `a(r) = α r^{-α-1}` and `C = 1`. -/
 theorem ae_deriv_twoPoint (hα : 0 < α) (hακ : α ≤ κ)
     (hμ : ∀ r, μ r = ENNReal.ofReal (r ^ (α - κ)) • Measure.dirac (r ^ κ) +
       ENNReal.ofReal (1 - r ^ (α - κ)) • Measure.dirac 0)
@@ -587,10 +587,10 @@ theorem ae_deriv_twoPoint (hα : 0 < α) (hακ : α ≤ κ)
         0 := mul_nonpos_of_nonneg_of_nonpos (by positivity) (by nlinarith)
     exact hlhs.trans (mul_nonneg (by linarith) (inv_nonneg.2 hr0.le))
 
-/-- **Non-vacuity witness for `tendsto_limsup_truncatedMean_div_mean`.** For every `0 < α ≤ κ < 2α`, the two-point family satisfies all
-hypotheses of `tendsto_limsup_truncatedMean_div_mean` with `r₀ = 1`, `a(r) = α r^{-α-1}`,
-`a₀ = α`, `b = B = c₁ = 1` and `C = 1`. Its conclusion also holds directly, since the ratio is
-`min 1 δ` (`truncatedMean_div_mean_twoPoint`). -/
+/-- **Non-vacuity witness for `tendsto_limsup_truncatedMean_div_mean`.** For every `0 < α ≤ κ < 2α`,
+the two-point family satisfies all hypotheses of `tendsto_limsup_truncatedMean_div_mean` with
+`r₀ = 1`, `a(r) = α r^{-α-1}`, `a₀ = α`, `b = B = c₁ = 1` and `C = 1`. Its conclusion also holds
+directly, since the ratio is `min 1 δ` (`truncatedMean_div_mean_twoPoint`). -/
 theorem tendsto_twoPoint (hα : 0 < α) (hακ : α ≤ κ) (hκ : κ < 2 * α)
     (hμ : ∀ r, μ r = ENNReal.ofReal (r ^ (α - κ)) • Measure.dirac (r ^ κ) +
       ENNReal.ofReal (1 - r ^ (α - κ)) • Measure.dirac 0) :

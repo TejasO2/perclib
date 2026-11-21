@@ -9,10 +9,11 @@ Ported from the work of contributor `yujinhkim`: repository `yujinhkim/lrp`, bra
 licence Apache-2.0 as declared in that commit's file headers and
 `third_party/critical-lrp/NOTICE.md`; upstream `yujinhkim/Critical-Long-range-percolation` at
 `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf`. Modified: the two files are merged; the source's
-definition `HasPotterBounds f α` is written out as the explicit hypothesis it abbreviates (Potter's bounds, Bingham–Goldie–Teugels Theorem 1.5.6, are proved in `PercLib/Analysis/RegularVariation/UniformConvergence.lean`);
-`RegularlyVaryingAtTop f α` becomes `RegularlyVarying α f` of
-`PercLib/Analysis/RegularVariation/Defs.lean`; `import Mathlib`, `autoImplicit` and disabled linters
-are removed.
+definition `HasPotterBounds f α` is written out as the explicit hypothesis it abbreviates (Potter's
+bounds, Bingham–Goldie–Teugels Theorem 1.5.6, are proved in
+`PercLib/Analysis/RegularVariation/UniformConvergence.lean`); `RegularlyVaryingAtTop f α` becomes
+`RegularlyVarying α f` of `PercLib/Analysis/RegularVariation/Defs.lean`; `import Mathlib`,
+`autoImplicit` and disabled linters are removed.
 -/
 module
 

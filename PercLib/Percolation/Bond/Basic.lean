@@ -3,7 +3,8 @@ Bond percolation interface for this project, written on 2026-11-13.
 
 The proofs of `measurableSet_isChain_openGraph`, `conn_eq_iUnion`, `measurableSet_conn`,
 `cluster_infinite_eq_iInter` and `measurableSet_cluster_infinite` are adapted from the
-site-percolation proofs in Percolation after Anthropic, prompted by Ahmed Bou-Rabee (full attribution in third_party/percolation/NOTICE), Apache License 2.0, at pinned revision
+site-percolation proofs in Percolation after Anthropic, prompted by Ahmed Bou-Rabee
+(full attribution in third_party/percolation/NOTICE), Apache License 2.0, at pinned revision
 a5cc72bd7627f313abbb00bcb47616678abbeb35:
 https://github.com/nitromannitol/percolation-after-anthropic/blob/a5cc72bd7627f313abbb00bcb47616678abbeb35/Hypergraph/SiteStatements.lean
 (lines 308-374 at that revision). They reach this file through this project's adapted

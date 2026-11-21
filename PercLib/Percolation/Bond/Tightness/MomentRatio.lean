@@ -11,9 +11,9 @@ independently verified). Changes: the abstract results are in namespace `PercLib
 source's definitions `momentConst`, `momentConstR`, `momentConstFull` are written out as expressions
 and its `edianOf`/`edianMaxVol`/`clusterMaxVol`/`clusterVolIn`/`TailI26` are replaced by this
 library's `tightnessScale`, `maxClusterIntersection`, `clusterIntersection` and the rooted conjunct
-of `universalTightness`; the bond-interface statements of Corollary I.2.5 and of the lower bound are new; the
-window-monotonicity and edian-existence parts of `RealExponent.lean` are not ported; focused
-imports; `autoImplicit` off; linters on.
+of `universalTightness`; the bond-interface statements of Corollary I.2.5 and of the lower bound are
+new; the window-monotonicity and edian-existence parts of `RealExponent.lean` are not ported;
+focused imports; `autoImplicit` off; linters on.
 -/
 module
 

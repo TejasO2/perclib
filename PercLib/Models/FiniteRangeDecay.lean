@@ -76,9 +76,9 @@ theorem pow_four_le_of_nonneg {x T s : ℝ} (hx : 0 ≤ x) (hT : 0 < T) (hsT : 3
       exact mul_le_mul_of_nonneg_left h3 hx
     nlinarith [sq_nonneg x, sq_nonneg T]
 
-/-- **Fourth moment from an exponential moment.** Let `X ≥ 0` be measurable and integrable on a probability space, with
-`χ = E X ≥ 1`, `X e^{X/(4χ²)}` integrable and `E[X e^{X/(4χ²)}] ≤ √2 χ`. Then `X⁴` and `X²` are
-integrable and `E X⁴ ≤ 1152 χ⁴ (log 2χ)² E X²`. -/
+/-- **Fourth moment from an exponential moment.** Let `X ≥ 0` be measurable and integrable on a
+probability space, with `χ = E X ≥ 1`, `X e^{X/(4χ²)}` integrable and `E[X e^{X/(4χ²)}] ≤ √2 χ`.
+Then `X⁴` and `X²` are integrable and `E X⁴ ≤ 1152 χ⁴ (log 2χ)² E X²`. -/
 theorem integral_pow_four_le {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω}
     [IsProbabilityMeasure P] {X : Ω → ℝ} (hXm : AEStronglyMeasurable X P) (hX0 : ∀ ω, 0 ≤ X ω)
     (hXi : Integrable X P) (hχ : 1 ≤ ∫ ω, X ω ∂P)
@@ -204,7 +204,8 @@ theorem integral_pow_four_le {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω}
   calc ∫ ω, X ω ^ 4 ∂P ≤ 2 * T ^ 2 * ∫ ω, X ω ^ 2 ∂P := by linarith
     _ = 1152 * χ ^ 4 * L ^ 2 * ∫ ω, X ω ^ 2 ∂P := by rw [hT]; ring
 
-/-- **Non-vacuity witness for `integral_pow_four_le`:** `X ≡ 1` under any probability measure (`χ = 1`). -/
+/-- **Non-vacuity witness for `integral_pow_four_le`:** `X ≡ 1` under any probability measure
+(`χ = 1`). -/
 theorem integral_pow_four_le_const_one {Ω : Type*} [MeasurableSpace Ω] (P : Measure Ω)
     [IsProbabilityMeasure P] :
     ∫ _ω, (1 : ℝ) ^ 4 ∂P ≤
@@ -232,11 +233,11 @@ section ClusterVolume
 open PercLib.Probability PercLib.Percolation.Bond
 open scoped ENNReal
 
-/-- **Fourth moment of the cluster volume.** For an independent bond model on a countable vertex set whose
-susceptibility is finite and the same at every vertex, the root cluster volume
-`X = |K_o|` (read in `ℕ`; it is a.s. finite) satisfies `E X⁴ ≤ 1152 χ⁴ log²(2χ) E X²`.
-The exponential-moment hypothesis of `integral_pow_four_le` comes from the tree-graph moment
-bounds (`lintegral_encard_pow_le`) and `lintegral_mul_exp_le` at `r = 1/(4χ²)`. -/
+/-- **Fourth moment of the cluster volume.** For an independent bond model on a countable vertex set
+whose susceptibility is finite and the same at every vertex, the root cluster volume `X = |K_o|`
+(read in `ℕ`; it is a.s. finite) satisfies `E X⁴ ≤ 1152 χ⁴ log²(2χ) E X²`. The exponential-moment
+hypothesis of `integral_pow_four_le` comes from the tree-graph moment bounds
+(`lintegral_encard_pow_le`) and `lintegral_mul_exp_le` at `r = 1/(4χ²)`. -/
 theorem integral_encard_cluster_pow_four_le {V : Type*} [Countable V]
     (q : Sym2 V → unitInterval) (o : V) (hconst : ∀ x, chi q x = chi q o)
     (hfin : chi q o < ⊤) :
@@ -399,9 +400,9 @@ theorem ae_encard_cluster_ge_of_exit (q : Sym2 (LatticeSite d) → unitInterval)
         rw [Set.encard_coe_eq_coe_finsetCard, hcard]
     _ ≤ (cluster ω o).encard := Set.encard_le_encard hsub
 
-/-- **Conditional.** Under the hypotheses of `ae_encard_cluster_ge_of_exit` with
-any real `r`, if `P(|K_o| ≥ n) ≤ (√2 χ / n) e^{-n/(4M²)}` for every `n ≥ 1` (a volume tail bound, here an ordinary hypothesis), then
-`P(o ↔ a vertex outside o + [-r,r]^d) ≤ √2 χ e^{-r/(4RM²)}`. -/
+/-- **Conditional.** Under the hypotheses of `ae_encard_cluster_ge_of_exit` with any real `r`, if
+`P(|K_o| ≥ n) ≤ (√2 χ / n) e^{-n/(4M²)}` for every `n ≥ 1` (a volume tail bound, here an ordinary
+hypothesis), then `P(o ↔ a vertex outside o + [-r,r]^d) ≤ √2 χ e^{-r/(4RM²)}`. -/
 theorem law_exit_le (q : Sym2 (LatticeSite d) → unitInterval) {R r χ M : ℝ} (hR : 0 < R)
     (hq : ∀ x y : LatticeSite d, R < ‖x - y‖ → q s(x, y) = 0) (o : LatticeSite d)
     (hχ : 0 ≤ χ)

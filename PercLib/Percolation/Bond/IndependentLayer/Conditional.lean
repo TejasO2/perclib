@@ -61,8 +61,8 @@ theorem omitted_row_le (q : Sym2 V → I) (E₀ : Set (Sym2 V)) {δ : ℝ≥0∞
       rfl
     · simp [hw, hE]
 
-/-- **Omitted-edge ghost comparison.** If the cut-off cluster `X` of `o` is finite almost surely and the omitted rows
-are at most `δ`, then `M₀(h) ≤ M_o(h) ≤ M₀(h) + δ E[X e^{-hX}] M*(h)`. -/
+/-- **Omitted-edge ghost comparison.** If the cut-off cluster `X` of `o` is finite almost surely and
+the omitted rows are at most `δ`, then `M₀(h) ≤ M_o(h) ≤ M₀(h) + δ E[X e^{-hX}] M*(h)`. -/
 theorem lintegral_ghost_cutoff_le [Countable V] (q : Sym2 V → I) (E₀ : Set (Sym2 V)) (o : V)
     {h : ℝ} (hh : 0 < h)
     (hfin : ∀ᵐ ω ∂(law fun e => if e ∈ E₀ then q e else 0), (cluster ω o).Finite)
@@ -138,8 +138,8 @@ theorem lintegral_ghost_cutoff_le_of_transitive [Countable V] (q : Sym2 V → I)
 
 /-! ### Non-vacuity witnesses -/
 
-/-- `lintegral_ghost_cutoff_le` on `ℤ` with the zero profile and `E₀ = ∅`: the cut-off cluster is `{o}`, the
-omitted rows vanish, and the profile is transitive under translations. -/
+/-- `lintegral_ghost_cutoff_le` on `ℤ` with the zero profile and `E₀ = ∅`: the cut-off cluster is
+`{o}`, the omitted rows vanish, and the profile is transitive under translations. -/
 example (h : ℝ) (hh : 0 < h) :
     ∫⁻ ω, (1 - EReal.exp (-((h : EReal) * (((cluster ω (0 : ℤ)).encard : ℝ≥0∞) : EReal))))
         ∂(law fun _ : Sym2 ℤ => (0 : I)) ≤

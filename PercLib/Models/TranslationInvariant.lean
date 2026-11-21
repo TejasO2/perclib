@@ -2,7 +2,8 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 New proofs, written on 2026-11-14, from pinned mathlib's `Sym2.lift`, `Equiv.tsum_eq` and ENNReal
-sums, and the row-sum theorems of `PercLib.Percolation.Bond.RowSum` and the intensity bounds of `PercLib.Percolation.Bond.Intensity`. No upstream code is copied.
+sums, and the row-sum theorems of `PercLib.Percolation.Bond.RowSum` and the intensity bounds of
+`PercLib.Percolation.Bond.Intensity`. No upstream code is copied.
 -/
 module
 

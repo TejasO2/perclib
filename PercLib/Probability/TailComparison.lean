@@ -311,7 +311,8 @@ example (n : ℕ) (hn : 1 ≤ n) :
     rw [this]
     norm_num
 
-/-- The random-set tail comparison with `K = {o}` deterministic, `Λ_r = {o}`, `C₁ = 0`, `C₂ = 1`, `b = 0`. -/
+/-- The random-set tail comparison with `K = {o}` deterministic, `Λ_r = {o}`, `C₁ = 0`, `C₂ = 1`,
+`b = 0`. -/
 example (μ : Measure Unit) [IsProbabilityMeasure μ] (n : ℕ) (hn : 1 ≤ n) :
     μ {_ω | (n : ℕ∞) ≤ (({()} : Set Unit)).encard} ≤
       ENNReal.ofReal ((2 ^ (1 : ℝ) * 0 + 1) * (n : ℝ) ^ (-(1 : ℝ) / (1 + 0))) := by

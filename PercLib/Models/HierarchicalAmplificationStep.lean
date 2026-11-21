@@ -758,10 +758,10 @@ theorem amplification_scale_example_pow :
   nlinarith
 
 open Classical in
-/-- **Non-vacuity witness** for `tightnessScale_hierarchical_amplification`: `L = 2`, `d = 3`, `α = 1`,
-`c = 1`, `ℓ = 4` and the kernel `J(u, v) = 2^{-4 j}` when `u, v` first share a level-`j`
-block. At `β = 1638400` the hypothesis holds at `n = 0` (the origin block is a single vertex,
-of quantile `2`), so the amplified bound holds at `n = 4`. -/
+/-- **Non-vacuity witness** for `tightnessScale_hierarchical_amplification`: `L = 2`, `d = 3`,
+`α = 1`, `c = 1`, `ℓ = 4` and the kernel `J(u, v) = 2^{-4 j}` when `u, v` first share a level-`j`
+block. At `β = 1638400` the hypothesis holds at `n = 0` (the origin block is a single vertex, of
+quantile `2`), so the amplified bound holds at `n = 4`. -/
 example : ∃ J : Sym2 (ℕ →₀ (Fin 3 → ZMod 2)) → ℝ≥0,
     (∀ x u v, J s(u + x, v + x) = J s(u, v)) ∧
     (∀ u v, u ≠ v → (1 : ℝ) * ((2 : ℕ) : ℝ) ^ (-((((3 : ℕ) : ℝ) + 1) *

@@ -70,8 +70,8 @@ theorem rootCriticalIntensity_eq_globalCriticalIntensity_of_translationInvariant
   rootCriticalIntensity_eq_globalCriticalIntensity_of_transitive J
     (transitive_of_translationInvariant J k hJ) x
 
-/-- **Item 2, finite susceptibility on countable groups.** For a summable translation-invariant pair intensity,
-the susceptibility is finite at every vertex at every intensity below the threshold. -/
+/-- **Item 2, finite susceptibility on countable groups.** For a summable translation-invariant pair
+intensity, the susceptibility is finite at every vertex at every intensity below the threshold. -/
 theorem chi_lt_top_of_lt_globalCriticalIntensity_of_translationInvariant [Countable G]
     (J : Sym2 G → ℝ≥0) (k : G → ℝ≥0) (hJ : ∀ x y, J s(x,y) = k (y - x))
     (hk : ∑' z, (k z : ℝ≥0∞) < ⊤) {β : ℝ≥0} (hβ : (β : ℝ≥0∞) < globalCriticalIntensity J)

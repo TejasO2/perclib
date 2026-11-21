@@ -1,10 +1,10 @@
 /-
-Deterministic set-coordinate consequences of PercLib's finite-profile Russo API.
-The force/flip/difference method originates in NearCritical/Russo.lean at
-Tom Hutchcroft's near-critical-diffusivity revision
-c820fea91a7482c1755de0ec94ecb9f59ccfcacc, reused under Tom Hutchcroft's reuse permission recorded in `docs/DECISIONS.md`.
-We reuse the existing pivotal and force definitions, and their proved identities;
-no probability or differentiation theorem is reproved here.
+Deterministic set-coordinate consequences of PercLib's finite-profile Russo API. The
+force/flip/difference method originates in NearCritical/Russo.lean at Tom Hutchcroft's
+near-critical-diffusivity revision c820fea91a7482c1755de0ec94ecb9f59ccfcacc, reused under Tom
+Hutchcroft's reuse permission recorded in `docs/DECISIONS.md`. We reuse the existing pivotal and
+force definitions, and their proved identities; no probability or differentiation theorem is
+reproved here.
 -/
 module
 

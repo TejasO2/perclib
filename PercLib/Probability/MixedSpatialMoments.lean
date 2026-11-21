@@ -153,11 +153,11 @@ theorem lintegral_pow_mul_sum_le (P : Measure Ω) {α : Type*} [MeasurableSpace 
 
 variable [MeasurableSpace E] [OpensMeasurableSpace E]
 
-/-- **Mixed spatial moments.** Let `K` be a random finite nonempty subset of `E` under a probability measure `P`,
-measurable in the sense that `ω ↦ ∑_{x ∈ K ω} g x` is measurable for measurable `g`, with
-`χ = E|K| < ∞`. Let `P_i(x) = ∏_{j < deg i} ⟨x, u i j⟩` for `i < n`, of total degree
-`p = ∑ deg i ≥ 1`. Writing `E_Q[h] = E[|K| h]/χ` and the uniform choice of `X ∈ K` as the
-average `|K|⁻¹ ∑_{x∈K}`,
+/-- **Mixed spatial moments.** Let `K` be a random finite nonempty subset of `E` under a probability
+measure `P`, measurable in the sense that `ω ↦ ∑_{x ∈ K ω} g x` is measurable for measurable `g`,
+with `χ = E|K| < ∞`. Let `P_i(x) = ∏_{j < deg i} ⟨x, u i j⟩` for `i < n`, of total degree
+`p = ∑ deg i ≥ 1`. Writing `E_Q[h] = E[|K| h]/χ` and the uniform choice of `X ∈ K` as the average
+`|K|⁻¹ ∑_{x∈K}`,
 `E ∑_{x ∈ K^n} ∏_i |P_i(x_i)| ≤ χ (E_Q |K|^{2n-2})^{1/2} max_{ij} (E_Q |⟨X, u_{ij}⟩|^{2p})^{1/2}`.
 -/
 theorem lintegral_mixedMoment_le (P : Measure Ω) [IsProbabilityMeasure P] (K : Ω → Finset E)
@@ -452,8 +452,8 @@ theorem singleton_hypotheses (x : E) :
   refine ⟨fun _ => singleton_nonempty x, fun g _ => measurable_const, ?_⟩
   simp
 
-/-- **Non-vacuity witness for `lintegral_mixedMoment_le`.** For a deterministic single point the theorem reads
-`∏_i |P_i(x)| ≤ max_{ij} (|⟨x, u_{ij}⟩|^{2p})^{1/2}`. -/
+/-- **Non-vacuity witness for `lintegral_mixedMoment_le`.** For a deterministic single point the
+theorem reads `∏_i |P_i(x)| ≤ max_{ij} (|⟨x, u_{ij}⟩|^{2p})^{1/2}`. -/
 theorem prod_le_of_singleton (x : E) {n p : ℕ} (deg : Fin n → ℕ)
     (u : (i : Fin n) → Fin (deg i) → E) (hp : ∑ i, deg i = p) (hp1 : 1 ≤ p) :
     ∏ i, ‖∏ j, ⟪x, u i j⟫‖ₑ ≤ ⨆ f : (Σ i, Fin (deg i)),

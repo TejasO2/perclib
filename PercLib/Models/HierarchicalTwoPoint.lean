@@ -15,11 +15,12 @@ public import PercLib.Models.HierarchicalCutoff
 
 On `ℕ →₀ (Fin d → ZMod L)` with the radial kernel `J s(x, y) = C r^{h(y - x)}`, `r ≤ 1`, where
 `h(z) = z.support.sup Nat.succ` is the level, the ultrametric inequality for `h` gives the
-convolution bound `∑_z J(x, z) J(z, y) ≤ 2 M J(x, y)` for `x ≠ y`, where
-`M = ∑_{z ≠ 0} C r^{h(z)}`. With the convolution bound of `ConvolutionBound.lean`,
-`τ_β(x, y) ≤ β J(x, y) (1 - 2βM)⁻¹ (1 - βM)⁻¹`: at small `β` the two-point function decays like
-the kernel. The ultrametric inequality is proved inline here (the general geometry is in `PercLib/Models/HierarchicalGeometry.lean`).
-This is a subcritical bound and says nothing at criticality.
+convolution bound `∑_z J(x, z) J(z, y) ≤ 2 M J(x, y)` for `x ≠ y`, where `M = ∑_{z ≠ 0} C r^{h(z)}`.
+With the convolution bound of `ConvolutionBound.lean`,
+`τ_β(x, y) ≤ β J(x, y) (1 - 2βM)⁻¹ (1 - βM)⁻¹`: at small `β` the two-point function decays like the
+kernel. The ultrametric inequality is proved inline here (the general geometry is in
+`PercLib/Models/HierarchicalGeometry.lean`). This is a subcritical bound and says nothing at
+criticality.
 -/
 
 @[expose] public section

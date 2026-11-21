@@ -34,7 +34,8 @@ Let `V = FreeGroup (Fin 2)` and let `J e = 1` when `e = s(g, g * FreeGroup.of i)
   at least `(1 - e^{-β})ⁿ ≥ 2⁻ⁿ`.
 * Hence `b_χ` is finite and positive, `χ` is finite below it and infinite at it
   (`freeGroupTree_chi_endpoint`, and the real-parameter form `freeGroupTree_chi_endpoint_real`).
-  These are the non-vacuity witnesses for the endpoint statements of `PercLib/Percolation/Bond/SusceptibilityEndpoint.lean`.
+  These are the non-vacuity witnesses for the endpoint statements of
+  `PercLib/Percolation/Bond/SusceptibilityEndpoint.lean`.
 
 This file adds no definition: the kernel is written out in each statement.
 -/
@@ -344,8 +345,8 @@ example : ∃ b : ℝ, 0 < b ∧
 
 /-! ### Witnesses for the endpoint theorems of `SusceptibilityEndpoint.lean` -/
 
-/-- **Endpoint of finite susceptibility.** Every hypothesis of `chi_intensity_sSup_eq_top` holds on the
-free-group tree, so `χ_{b_χ}(1) = ⊤` there. -/
+/-- **Endpoint of finite susceptibility.** Every hypothesis of `chi_intensity_sSup_eq_top` holds on
+the free-group tree, so `χ_{b_χ}(1) = ⊤` there. -/
 example : chi (intensityProfile
       (fun e : Sym2 (FreeGroup (Fin 2)) =>
         if e ∈ {f : Sym2 (FreeGroup (Fin 2)) | ∃ g i, f = s(g, g * FreeGroup.of i)}

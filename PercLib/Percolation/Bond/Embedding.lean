@@ -19,9 +19,10 @@ non-diagonal pair `e`. Then `τ`, `χ` and `θ` at `q` are at most those at `q'`
 points.
 
 Route: pulling a configuration on `W` back along `Sym2.map f` turns `law q'` into
-`law (q' ∘ Sym2.map f)` (identified on the all-open events of finite sets); connections in
-the pulled-back configuration push forward along `f`; and `q`, with its diagonal set to `0`,
-is dominated by `q' ∘ Sym2.map f`, so the monotone coupling and diagonal insensitivity finish the comparison.
+`law (q' ∘ Sym2.map f)` (identified on the all-open events of finite sets); connections in the
+pulled-back configuration push forward along `f`; and `q`, with its diagonal set to `0`, is
+dominated by `q' ∘ Sym2.map f`, so the monotone coupling and diagonal insensitivity finish the
+comparison.
 -/
 
 @[expose] public section

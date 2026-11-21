@@ -2,8 +2,9 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 New proofs, written on 2026-11-14, from pinned mathlib's finitely supported functions, `ZMod`
-cardinality and ENNReal geometric series, and the intensity bounds of `PercLib.Percolation.Bond.Intensity` and the translation-invariant theorems. No
-upstream code is copied.
+cardinality and ENNReal geometric series, and the intensity bounds of
+`PercLib.Percolation.Bond.Intensity` and the translation-invariant theorems. No upstream code is
+copied.
 -/
 module
 
@@ -26,8 +27,8 @@ radial when it depends on the displacement only through its level.
 * `tsum_geometricRadial_le`: the infinite-range kernel `C r^(level z)` with
   `2 L^d r ≤ 1` has total mass at most `2 C`. With `r = L^(-(d+α))` this is the radial
   family `C L^(-(d+α) n)` for `L^α ≥ 2`.
-* `chi_intensity_le_hierarchical` and the threshold bounds: the intensity bounds of `PercLib.Percolation.Bond.Intensity` for every pair intensity
-  with that kernel.
+* `chi_intensity_le_hierarchical` and the threshold bounds: the intensity bounds of
+  `PercLib.Percolation.Bond.Intensity` for every pair intensity with that kernel.
 
 The bound uses the ball count `L^(d n)` for the shell of level `n`, which suffices for
 summability; the exact shell count `L^(d n) - L^(d (n-1))` is not needed and not proved

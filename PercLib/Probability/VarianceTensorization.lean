@@ -273,8 +273,8 @@ lemma event_homogeneous_hasDerivAt (p : ℝ) (A : Set (Set E)) (hA : IsUpperSet 
       (∑ e, expectation (fun _ : E => p) (fun ω => if pivotal A e ω then 1 else 0)) p := by
   simpa using event_hasDerivAt (fun _ u => u) (fun _ => 1) p (fun _ => hasDerivAt_id p) hA
 
-/-- **Variance bound on the Russo derivative.** For an increasing event and `F(p) = P_p(A)` (as the event polynomial),
-`p(1-p) F'(p) ≥ F(p)(1-F(p))`. Holds on the closed interval `[0,1]`. -/
+/-- **Variance bound on the Russo derivative.** For an increasing event and `F(p) = P_p(A)` (as the
+event polynomial), `p(1-p) F'(p) ≥ F(p)(1-F(p))`. Holds on the closed interval `[0,1]`. -/
 theorem event_variance_le_deriv {A : Set (Set E)} (hA : IsUpperSet A) {p : ℝ}
     (hp : p ∈ Set.Icc (0 : ℝ) 1) :
     expectation (fun _ : E => p) (eventValue A) *
@@ -483,7 +483,8 @@ private lemma singleton_event (p : ℝ) :
     by_cases hω : ω () <;> simp [hω]
   rw [h, expectation_singleton]
 
-/-- One coordinate and `A = {s | () ∈ s}`: `event_variance_le_deriv` is an equality, `p(1-p)·1 = p(1-p)`. -/
+/-- One coordinate and `A = {s | () ∈ s}`: `event_variance_le_deriv` is an equality,
+`p(1-p)·1 = p(1-p)`. -/
 example (p : ℝ) (hp : p ∈ Set.Icc (0 : ℝ) 1) :
     expectation (fun _ : Unit => p) (eventValue {s : Set Unit | () ∈ s}) *
         (1 - expectation (fun _ : Unit => p) (eventValue {s : Set Unit | () ∈ s})) =
@@ -496,7 +497,8 @@ example (p : ℝ) (hp : p ∈ Set.Icc (0 : ℝ) 1) :
   refine ⟨?_, event_variance_le_deriv (fun _ _ hst h => hst h) hp⟩
   simp only [singleton_event, deriv_id'', mul_one]
 
-/-- One coordinate and `A = {s | () ∈ s}`: `odds_ratio_le` is an equality, and its hypotheses hold. -/
+/-- One coordinate and `A = {s | () ∈ s}`: `odds_ratio_le` is an equality, and its hypotheses hold.
+-/
 example (a b : ℝ) (ha : 0 < a) (hab : a < b) (hb : b < 1) :
     expectation (fun _ : Unit => a) (eventValue {s : Set Unit | () ∈ s}) /
         (1 - expectation (fun _ : Unit => a) (eventValue {s : Set Unit | () ∈ s})) *

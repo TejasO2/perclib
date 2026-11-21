@@ -262,7 +262,8 @@ example (u : Fin 1 → ℤ) :
   exact tsum_cutoff_sub_le (d := 1) (j := fun t => t ^ (-((1 : ℕ) : ℝ) - 1)) (α := 1) (A := 1)
     one_pos zero_le_one (fun t _ => by simp) le_rfl u
 
-/-- Non-vacuity witness for `cutoff_bounds`: `j t = t^{-2}` is nonnegative and nonincreasing on `[1, ∞)`. -/
+/-- Non-vacuity witness for `cutoff_bounds`: `j t = t^{-2}` is nonnegative and nonincreasing on
+`[1, ∞)`. -/
 example {u v : Fin 1 → ℤ} (huv : u ≠ v) :
     0 ≤ (if √(∑ i, (((v - u) i : ℤ) : ℝ) ^ 2) ≤ 1 then
           √(∑ i, (((v - u) i : ℤ) : ℝ) ^ 2) ^ (-(2 : ℝ)) - (1 : ℝ) ^ (-(2 : ℝ)) else 0) :=

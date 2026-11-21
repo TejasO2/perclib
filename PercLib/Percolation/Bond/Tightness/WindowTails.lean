@@ -316,11 +316,11 @@ theorem exponent_eq_of_abs_log_le {f : ℝ → ℝ} {a b B B' : ℝ}
   rw [abs_mul, abs_of_pos hlogpos] at hdiff
   nlinarith
 
-/-- **Exponent relations.** Real functions of `r → ∞` (all relations eventually in `r`, with positive
-lower constants): `|Λ_r| ≍ r^d`, `v_r ≍ r^(d_f)`, `E N_r ≍ r^κ`,
-`E ∑ S² ≍ v_r² E N_r`, `E X_r ≍ r^α`, the sampled-root identity `E X_r = E ∑ S² / |Λ_r|`,
-`P(Z ≥ n) ≍ n^(-1/δ)` for `n ≥ 1`, and `P(Z ≥ ⌈v_r⌉) ≍ v_r E N_r / |Λ_r|`. If `d_f > 0` and
-`δ > 0`, then `α = 2 d_f + κ - d` and `d_f / δ = d - d_f - κ > 0`. -/
+/-- **Exponent relations.** Real functions of `r → ∞` (all relations eventually in `r`, with
+positive lower constants): `|Λ_r| ≍ r^d`, `v_r ≍ r^(d_f)`, `E N_r ≍ r^κ`, `E ∑ S² ≍ v_r² E N_r`,
+`E X_r ≍ r^α`, the sampled-root identity `E X_r = E ∑ S² / |Λ_r|`, `P(Z ≥ n) ≍ n^(-1/δ)` for
+`n ≥ 1`, and `P(Z ≥ ⌈v_r⌉) ≍ v_r E N_r / |Λ_r|`. If `d_f > 0` and `δ > 0`, then `α = 2 d_f + κ - d`
+and `d_f / δ = d - d_f - κ > 0`. -/
 theorem exponent_relations {Λ v EN ES EX : ℝ → ℝ} {F : ℕ → ℝ} {d df κ α δ : ℝ}
     (hdf : 0 < df) (hδ : 0 < δ)
     (hΛ : ∃ c C : ℝ, 0 < c ∧ ∀ᶠ r in atTop, c * r ^ d ≤ Λ r ∧ Λ r ≤ C * r ^ d)
@@ -501,7 +501,8 @@ theorem tendsto_log_rpow_div_log (a : ℝ) :
   filter_upwards [eventually_gt_atTop 1] with R hR
   rw [Real.log_rpow (by linarith), mul_div_assoc, div_self (Real.log_pos hR).ne', mul_one]
 
-/-- `dimension_bounds_of_hyperscaling` with equality: `N_R = R`, `M_R = R^(2/3)`, `s_R = R^(1/3)`, `δ = 2`. -/
+/-- `dimension_bounds_of_hyperscaling` with equality: `N_R = R`, `M_R = R^(2/3)`, `s_R = R^(1/3)`,
+`δ = 2`. -/
 example : (2 / 3 : ℝ) / 1 ≤ 2 / (2 + 1) ∧ (1 / 3 : ℝ) ≤ 1 * (2 - 1) / (2 + 1) :=
   dimension_bounds_of_hyperscaling (N := fun R => R ^ (1 : ℝ)) (Mr := fun R => R ^ (2 / 3 : ℝ))
     (s := fun R => R ^ (1 / 3 : ℝ)) (C₁ := 1) (C₂ := 1) one_pos one_lt_two

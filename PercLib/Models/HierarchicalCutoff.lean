@@ -1,7 +1,9 @@
 /-
-Cutoff clusters and the exact omitted row on the hierarchical lattice, and the sharp
-small-intensity bound. New proofs from the existing hierarchical geometry, the row-sum and intensity theorems of `PercLib.Percolation.Bond.RowSum` and `PercLib.Percolation.Bond.Intensity` and pinned mathlib 56a005855ea17e0b0958f73ec801ae140b0a1679's ENNReal
-geometric series and graph reachability. No upstream code is copied.
+Cutoff clusters and the exact omitted row on the hierarchical lattice, and the sharp small-intensity
+bound. New proofs from the existing hierarchical geometry, the row-sum and intensity theorems of
+`PercLib.Percolation.Bond.RowSum` and `PercLib.Percolation.Bond.Intensity` and pinned mathlib
+56a005855ea17e0b0958f73ec801ae140b0a1679's ENNReal geometric series and graph reachability. No
+upstream code is copied.
 -/
 module
 
@@ -157,10 +159,10 @@ theorem encard_level_ball (x : ℕ →₀ (Fin d → ZMod L)) (n : ℕ) :
   congr 1
   exact card_ball n
 
-/-- **Cutoff clusters are trapped in balls.** If the profile vanishes on every pair of level above `n` (only bonds of
-level at most `n` are retained), then almost surely every cluster lies in the level-`n`
-ball of its base vertex, so its volume is at most `N^n`. Loop probabilities are
-arbitrary. -/
+/-- **Cutoff clusters are trapped in balls.** If the profile vanishes on every pair of level above
+`n` (only bonds of level at most `n` are retained), then almost surely every cluster lies in the
+level-`n` ball of its base vertex, so its volume is at most `N^n`. Loop probabilities are arbitrary.
+-/
 theorem ae_cluster_subset_ball (q : Sym2 (ℕ →₀ (Fin d → ZMod L)) → unitInterval) (n : ℕ)
     (hq : ∀ x y, n < (y - x).support.sup Nat.succ → q s(x, y) = 0) :
     ∀ᵐ ω ∂law q, ∀ x, cluster ω x ⊆ {y | (y - x).support.sup Nat.succ ≤ n} ∧
@@ -179,8 +181,8 @@ theorem ae_cluster_subset_ball (q : Sym2 (ℕ →₀ (Fin d → ZMod L)) → uni
 
 /-! ### KL29 (b), (c): the omitted row -/
 
-/-- **The omitted kernel mass.** The kernel mass above level `n` is `C (N − 1) r / (1 − N r) · (N r)^n`.
-In `ℝ≥0∞` this holds with no hypothesis on `N r`. -/
+/-- **The omitted kernel mass.** The kernel mass above level `n` is
+`C (N − 1) r / (1 − N r) · (N r)^n`. In `ℝ≥0∞` this holds with no hypothesis on `N r`. -/
 theorem tsum_level_gt_eq (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) (C r : ℝ≥0)
     (hJ : ∀ x y, J s(x,y) = C * r ^ ((y - x).support.sup Nat.succ)) (n : ℕ)
     (x : ℕ →₀ (Fin d → ZMod L)) :
@@ -225,8 +227,8 @@ theorem tsum_level_gt_eq (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) 
   rw [ENNReal.tsum_mul_left, ENNReal.tsum_geometric, div_eq_mul_inv]
   ring
 
-/-- **The omitted probability row.** In the exponential family the omitted probability row above level `n` is
-at most `β` times the omitted kernel mass. -/
+/-- **The omitted probability row.** In the exponential family the omitted probability row above
+level `n` is at most `β` times the omitted kernel mass. -/
 theorem tsum_level_gt_intensity_le (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) (C r : ℝ≥0)
     (hJ : ∀ x y, J s(x,y) = C * r ^ ((y - x).support.sup Nat.succ)) (β : ℝ≥0) (n : ℕ)
     (x : ℕ →₀ (Fin d → ZMod L)) :
@@ -335,8 +337,9 @@ The statements above take the radial identity on all pairs, including the diagon
 versions below assume it for distinct pairs only (the diagonal is arbitrary) and transfer
 through the all-pairs kernel of `exists_hierarchical_kernel`. -/
 
-/-- **Cutoff clusters are trapped in balls, every configuration.** If every open pair has level at most `n`, every cluster
-lies in the level-`n` ball of its base vertex and has at most `N^n` vertices. -/
+/-- **Cutoff clusters are trapped in balls, every configuration.** If every open pair has level at
+most `n`, every cluster lies in the level-`n` ball of its base vertex and has at most `N^n`
+vertices. -/
 theorem cluster_subset_level_ball_of_forall (n : ℕ) (ω : Config (ℕ →₀ (Fin d → ZMod L)))
     (hω : ∀ a b, a ≠ b → s(a, b) ∈ ω → (b - a).support.sup Nat.succ ≤ n)
     (x : (ℕ →₀ (Fin d → ZMod L))) :
@@ -404,7 +407,8 @@ theorem chi_intensity_le_hierarchical_sharp_of_ne (J : Sym2 (ℕ →₀ (Fin d �
   rw [chi_eq_of_offDiagonal _ _ (intensityProfile_eq_of_offDiagonal hJJ' β) x]
   exact chi_intensity_le_hierarchical_sharp J' C r hJ' hr β hβ x
 
-/-- **Sharp subcritical bound**, no infinite cluster, with the kernel prescribed off the diagonal only. -/
+/-- **Sharp subcritical bound**, no infinite cluster, with the kernel prescribed off the diagonal
+only. -/
 theorem law_exists_infinite_hierarchical_eq_zero_of_ne (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0)
     (C r : ℝ≥0) (hJ : ∀ x y, x ≠ y → J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ))
     (hr : (L : ℝ≥0) ^ d * r < 1) (β : ℝ≥0)
@@ -417,7 +421,8 @@ theorem law_exists_infinite_hierarchical_eq_zero_of_ne (J : Sym2 (ℕ →₀ (Fi
     (intensityProfile_eq_of_offDiagonal hJJ' β)]
   exact law_exists_infinite_hierarchical_eq_zero J' C r hJ' hr β hβ
 
-/-- **Sharp threshold bound**, global threshold, with the kernel prescribed off the diagonal only. -/
+/-- **Sharp threshold bound**, global threshold, with the kernel prescribed off the diagonal only.
+-/
 theorem inv_le_globalCriticalIntensity_hierarchical_sharp_of_ne
     (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0)
     (C r : ℝ≥0) (hJ : ∀ x y, x ≠ y → J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ))
@@ -487,7 +492,8 @@ theorem hierarchical_of_M_eq_zero_of_ne (J : Sym2 (ℕ →₀ (Fin d → ZMod L)
   · rw [rootCriticalIntensity_eq_of_offDiagonal hJJ']
     exact hroot x
 
-/-- **Subcritical bound for `2Nr ≤ 1`**, `χ`, with `2Nr ≤ 1` and the kernel prescribed off the diagonal only. -/
+/-- **Subcritical bound for `2Nr ≤ 1`**, `χ`, with `2Nr ≤ 1` and the kernel prescribed off the
+diagonal only. -/
 theorem chi_intensity_le_hierarchical_of_ne (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0) (C r : ℝ≥0)
     (hJ : ∀ x y, x ≠ y → J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ))
     (hr : (L : ℝ≥0) ^ d * r * 2 ≤ 1) (β : ℝ≥0)
@@ -499,7 +505,8 @@ theorem chi_intensity_le_hierarchical_of_ne (J : Sym2 (ℕ →₀ (Fin d → ZMo
   rw [chi_eq_of_offDiagonal _ _ (intensityProfile_eq_of_offDiagonal hJJ' β) x]
   exact chi_intensity_le_hierarchical J' C r hJ' hr β hβ x
 
-/-- **Subcritical bound for `2Nr ≤ 1`**, global threshold, with the kernel prescribed off the diagonal only. -/
+/-- **Subcritical bound for `2Nr ≤ 1`**, global threshold, with the kernel prescribed off the
+diagonal only. -/
 theorem inv_le_globalCriticalIntensity_hierarchical_of_ne (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0)
     (C r : ℝ≥0) (hJ : ∀ x y, x ≠ y → J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ))
     (hr : (L : ℝ≥0) ^ d * r * 2 ≤ 1) :
@@ -509,7 +516,8 @@ theorem inv_le_globalCriticalIntensity_hierarchical_of_ne (J : Sym2 (ℕ →₀ 
   rw [globalCriticalIntensity_eq_of_offDiagonal hJJ']
   exact inv_le_globalCriticalIntensity_hierarchical J' C r hJ' hr
 
-/-- **Subcritical bound for `2Nr ≤ 1`**, root threshold, with the kernel prescribed off the diagonal only. -/
+/-- **Subcritical bound for `2Nr ≤ 1`**, root threshold, with the kernel prescribed off the diagonal
+only. -/
 theorem inv_le_rootCriticalIntensity_hierarchical_of_ne (J : Sym2 (ℕ →₀ (Fin d → ZMod L)) → ℝ≥0)
     (C r : ℝ≥0) (hJ : ∀ x y, x ≠ y → J s(x, y) = C * r ^ ((y - x).support.sup Nat.succ))
     (hr : (L : ℝ≥0) ^ d * r * 2 ≤ 1) (x : (ℕ →₀ (Fin d → ZMod L))) :

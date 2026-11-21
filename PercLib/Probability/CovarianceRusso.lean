@@ -71,8 +71,8 @@ theorem expectation_coordinate (q : E → ℝ) (e : E) :
   rw [h]
   simp [expectation, sum_weight]
 
-/-- **Covariance with a coordinate.** `Cov_q(f, Xₑ) = qₑ(1-qₑ) E_q[Δₑ f]`, for every real profile (in particular
-every profile in `[0,1]^E`, endpoints included). -/
+/-- **Covariance with a coordinate.** `Cov_q(f, Xₑ) = qₑ(1-qₑ) E_q[Δₑ f]`, for every real profile
+(in particular every profile in `[0,1]^E`, endpoints included). -/
 theorem covariance_coordinate (q : E → ℝ) (e : E) (f : (E → Bool) → ℝ) :
     expectation q (fun ω => f ω * if ω e then 1 else 0) -
         expectation q f * expectation q (fun ω => if ω e then 1 else 0) =

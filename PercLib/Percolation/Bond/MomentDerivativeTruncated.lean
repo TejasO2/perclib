@@ -211,8 +211,8 @@ theorem hasDerivAt_integral_fun_of_transitive (lam : ℝ → Sym2 V → ℝ≥0)
 
 /-! ### MIJ7 -/
 
-/-- **Derivative of the truncated moment.** Let `V` be finite with intensities `λ_u` invariant under a transitively acting
-group, differentiable at `t` with derivatives `w ≥ 0`. For every real `m > 0`,
+/-- **Derivative of the truncated moment.** Let `V` be finite with intensities `λ_u` invariant under
+a transitively acting group, differentiable at `t` with derivatives `w ≥ 0`. For every real `m > 0`,
 `T_m(u) = E_u min(|K_o|, m)` is differentiable at `t`, and its derivative satisfies
 `0 ≤ T_m'(t) ≤ a(t) T_m(t)²`, where `a(t) = ∑_{y ≠ o} w(o, y)`. -/
 theorem hasDerivAt_truncated_moment (lam : ℝ → Sym2 V → ℝ≥0) (w : Sym2 V → ℝ) (t : ℝ)

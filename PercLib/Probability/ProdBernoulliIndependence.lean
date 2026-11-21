@@ -1,10 +1,10 @@
 /-
 Adapted and generalised from Tom Hutchcroft's near-critical-diffusivity,
-Percolation/Literature/BernoulliPercolation.lean at
-c820fea91a7482c1755de0ec94ecb9f59ccfcacc, under Tom Hutchcroft's reuse permission recorded in `docs/DECISIONS.md`.
-Source declarations: bondPercolation_iIndepFun_mem, bondPercolation_indep_holds.
-The profile is arbitrary and no countability, host, or diagonal hypothesis remains.
-Block consequences use mathlib's independence API directly.
+Percolation/Literature/BernoulliPercolation.lean at c820fea91a7482c1755de0ec94ecb9f59ccfcacc, under
+Tom Hutchcroft's reuse permission recorded in `docs/DECISIONS.md`. Source declarations:
+bondPercolation_iIndepFun_mem, bondPercolation_indep_holds. The profile is arbitrary and no
+countability, host, or diagonal hypothesis remains. Block consequences use mathlib's independence
+API directly.
 -/
 module
 

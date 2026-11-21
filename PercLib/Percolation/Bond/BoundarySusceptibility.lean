@@ -100,7 +100,8 @@ theorem conn_subset_deleted_union (S : Set V) (y w : V) :
     refine Or.inr (mem_iUnion.2 ⟨⟨c, not_not.1 hcS⟩, ?_⟩)
     exact mem_disjointOccurrence_of_path p hp hc
 
-/-- **Connection loss on deleting a set.** For `y, w ∉ S`, `τ(y,w) ≤ τ^S(y,w) + ∑_{c ∈ S} τ(y,c) τ(c,w)`. -/
+/-- **Connection loss on deleting a set.** For `y, w ∉ S`,
+`τ(y,w) ≤ τ^S(y,w) + ∑_{c ∈ S} τ(y,c) τ(c,w)`. -/
 theorem tau_le_deleted_add [Countable V] (q : Sym2 V → unitInterval) (S : Set V) (y w : V) :
     tau q y w ≤ law q {ω | ∃ hy : y ∈ Sᶜ, ∃ hw : w ∈ Sᶜ,
         ((openGraph ω).induce Sᶜ).Reachable ⟨y, hy⟩ ⟨w, hw⟩} +
@@ -432,8 +433,8 @@ theorem posPart_sq_div_le_boundarySum_sq_div (q : Sym2 V → unitInterval)
   exact div_le_div_of_nonneg_right
     (pow_le_pow_left₀ (le_max_right _ _) (max_le hle hL0) 2) hD
 
-/-- **Boundary susceptibility bound.** In the intensity family with off-diagonal row sums of `J` at most `1` and
-`χ_max < ∞`, for every finite `S`,
+/-- **Boundary susceptibility bound.** In the intensity family with off-diagonal row sums of `J` at
+most `1` and `χ_max < ∞`, for every finite `S`,
 `Φ_β(S) ≥ L(S)² / (β² χ_max Q(S)) ≥ (χ_min |S| - ∑_{u,v ∈ S} τ(u,v))₊² / (β² χ_max Q(S))`. -/
 theorem boundary_susceptibility_bound
     (hJ : ∀ u, rowSum (fun e => (J e : ℝ≥0∞)) u ≤ 1)
@@ -459,7 +460,8 @@ end Real
 
 /-! ### Non-vacuity -/
 
-/-- `tau_le_deleted_add` with `S = ∅`: deleting nothing loses nothing, and both bounds are equalities. -/
+/-- `tau_le_deleted_add` with `S = ∅`: deleting nothing loses nothing, and both bounds are
+equalities. -/
 example [Countable V] (q : Sym2 V → unitInterval) (y w : V) :
     law q {ω | ∃ hy : y ∈ (∅ : Set V)ᶜ, ∃ hw : w ∈ (∅ : Set V)ᶜ,
       ((openGraph ω).induce (∅ : Set V)ᶜ).Reachable ⟨y, hy⟩ ⟨w, hw⟩} = tau q y w := by
@@ -474,8 +476,8 @@ example (q : Sym2 (Fin 3) → unitInterval) :
       ∑' c : ({1} : Set (Fin 3)), tau q 0 c * tau q c 2 :=
   tau_le_deleted_add q {1} 0 2
 
-/-- On two vertices with `J = 1` on the one pair, the hypotheses of `boundary_susceptibility_bound` hold at every
-`β`: the row sums are `1` and every susceptibility is at most `2`. -/
+/-- On two vertices with `J = 1` on the one pair, the hypotheses of `boundary_susceptibility_bound`
+hold at every `β`: the row sums are `1` and every susceptibility is at most `2`. -/
 example (β : ℝ≥0) :=
   boundary_susceptibility_bound (fun e : Sym2 Bool => if e = s(false, true) then 1 else 0) β
     {false}

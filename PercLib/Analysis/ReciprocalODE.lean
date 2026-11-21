@@ -48,8 +48,8 @@ namespace PercLib.Analysis
 
 /-! ### 1. OP4X -/
 
-/-- **Reciprocal ODE lower bound.** Let `T > 0` be absolutely continuous on `[r₀, R]`, `a ≥ 0` integrable there and
-`T' ≤ a T²` a.e. Then `T(ℓ) ≥ (1/T(R) + ∫_ℓ^R a)⁻¹` for `r₀ ≤ ℓ ≤ R`. -/
+/-- **Reciprocal ODE lower bound.** Let `T > 0` be absolutely continuous on `[r₀, R]`, `a ≥ 0`
+integrable there and `T' ≤ a T²` a.e. Then `T(ℓ) ≥ (1/T(R) + ∫_ℓ^R a)⁻¹` for `r₀ ≤ ℓ ≤ R`. -/
 theorem le_of_deriv_le_mul_sq {T a : ℝ → ℝ} {r₀ R : ℝ}
     (hT : AbsolutelyContinuousOnInterval T r₀ R) (hpos : ∀ s ∈ Icc r₀ R, 0 < T s)
     (ha : IntervalIntegrable a volume r₀ R) (ha0 : ∀ s ∈ Icc r₀ R, 0 ≤ a s)
@@ -373,7 +373,8 @@ theorem exists_pos_le_of_log_deriv {W : ℝ → ℝ} {R₀ c C : ℝ} (hR₀ : 1
 
 /-! ### Non-vacuity -/
 
-/-- `W ≡ 1` satisfies the hypotheses of `exists_pos_le_of_log_deriv` with `R₀ = e`, `c = 1`, `C = 0`. -/
+/-- `W ≡ 1` satisfies the hypotheses of `exists_pos_le_of_log_deriv` with `R₀ = e`, `c = 1`,
+`C = 0`. -/
 example : ∃ η > 0, ∃ R, ∀ r, R ≤ r → η ≤ (fun _ : ℝ => (1 : ℝ)) r := by
   refine exists_pos_le_of_log_deriv (R₀ := Real.exp 1) (c := 1) (C := 0)
     (Real.one_lt_exp_iff.2 one_pos) one_pos
@@ -384,8 +385,8 @@ example : ∃ η > 0, ∃ R, ∀ r, R ≤ r → η ≤ (fun _ : ℝ => (1 : ℝ)
   rw [div_le_one (Real.sqrt_pos.2 (by linarith))]
   exact Real.one_le_sqrt.2 h1
 
-/-- `T(s) = s^α/(A/α)` and `a(s) = A s^{-α-1}` on `[r₀, R]`, `0 < r₀`, satisfy
-`T' = a T²` and `T(R) = (α/A) R^α`. `le_of_deriv_le_mul_sq` then holds with equality, `T(ℓ) ≥ ℓ^α/(A/α)`. -/
+/-- `T(s) = s^α/(A/α)` and `a(s) = A s^{-α-1}` on `[r₀, R]`, `0 < r₀`, satisfy `T' = a T²` and
+`T(R) = (α/A) R^α`. `le_of_deriv_le_mul_sq` then holds with equality, `T(ℓ) ≥ ℓ^α/(A/α)`. -/
 example {α A r₀ R : ℝ} (hα : 0 < α) (hA : 0 < A) (hr₀ : 0 < r₀) {ℓ : ℝ}
     (hℓ : ℓ ∈ Icc r₀ R) :
     ℓ ^ α / (A / α + ((α / A)⁻¹ - A / α) * (ℓ / R) ^ α) ≤ ℓ ^ α / (A / α) := by

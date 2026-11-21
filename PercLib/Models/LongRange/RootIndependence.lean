@@ -68,7 +68,8 @@ theorem lintegral_encard_cluster_eq_of_transitive (q : Sym2 V → unitInterval)
   exact (lintegral_encard_cluster_eq_of_map_law_eq φ
     (prodBernoulli_map_image_sym2_invariant q φ hφ) F x).symm
 
-/-- **Root independence under transitivity of the kernel**, at every intensity (item 4, in the transitivity spelling of `chi_eq_of_transitive`). -/
+/-- **Root independence under transitivity of the kernel**, at every intensity (item 4, in the
+transitivity spelling of `chi_eq_of_transitive`). -/
 theorem lintegral_encard_cluster_intensity_eq_of_transitive (J : Sym2 V → ℝ≥0)
     (hT : ∀ x y : V, ∃ φ : V ≃ V, φ x = y ∧ ∀ e, J (Sym2.map φ e) = J e) (β : ℝ≥0)
     (F : ℕ∞ → ℝ≥0∞) (x y : V) :

@@ -222,7 +222,8 @@ theorem exists_chi_le_mul_ball [Countable V] {N : V → ℝ} {p Cp : ℝ}
     rw [hδ]; field_simp; ring
   nlinarith
 
-/-- **Markov form.** Under the hypothesis of `lintegral_encard_diff_ball_le`, `P(K_o ⊄ B(o, C r)) ≤ (C_p / C)^p χ`. -/
+/-- **Markov form.** Under the hypothesis of `lintegral_encard_diff_ball_le`,
+`P(K_o ⊄ B(o, C r)) ≤ (C_p / C)^p χ`. -/
 theorem law_not_subset_ball_le [Countable V] (q : Sym2 V → unitInterval) (o : V)
     {N : V → ℝ} {p r C Cp : ℝ} (hp : 0 < p) (hr : 0 < r) (hC : 0 < C)
     (hCp : 0 ≤ Cp)
@@ -256,9 +257,9 @@ theorem law_not_subset_ball_le [Countable V] (q : Sym2 V → unitInterval) (o : 
 
 /-! ### Non-vacuity witness -/
 
-/-- **Non-vacuity witness for `lintegral_encard_diff_ball_le`.** On `ℤ` with every pair closed (`q = 0`), `N = |·|`, `p = 1`,
-`C_p = r = 1`: the spatial moment is `N(0) = 0`, so the hypothesis holds and the volume
-outside `B(0, C)` has expectation at most `C⁻¹ χ`. -/
+/-- **Non-vacuity witness for `lintegral_encard_diff_ball_le`.** On `ℤ` with every pair closed
+(`q = 0`), `N = |·|`, `p = 1`, `C_p = r = 1`: the spatial moment is `N(0) = 0`, so the hypothesis
+holds and the volume outside `B(0, C)` has expectation at most `C⁻¹ χ`. -/
 example (C : ℝ) (hC : 0 < C) :
     ∫⁻ ω, ((cluster ω (0 : ℤ) \ {x | |((x - 0 : ℤ) : ℝ)| ≤ C * 1}).encard : ℝ≥0∞)
         ∂law (fun _ : Sym2 ℤ => (0 : unitInterval)) ≤
@@ -361,8 +362,9 @@ theorem exists_moment_ratio_bounds {A b L : ℝ} (hA : 0 < A) (hb : 0 < b) (hL :
       _ ≤ L * ((K 2 + K 3 + K 4) * Q ^ 2 * ∫ ω, X ω ^ 2 ∂μ) := by gcongr; linarith
       _ = L * (K 2 + K 3 + K 4) * Q ^ 2 * ∫ ω, X ω ^ 2 ∂μ := by ring
 
-/-- **Non-vacuity witness for `exists_moment_ratio_bounds`.** `X = Y = 1` under a point mass, `Q = 1`, `A = e`, `b = 1`,
-`L = 1`: the tail hypothesis holds (`P(Y ≥ t) = 0` for `t > 1`) and so does localization. -/
+/-- **Non-vacuity witness for `exists_moment_ratio_bounds`.** `X = Y = 1` under a point mass,
+`Q = 1`, `A = e`, `b = 1`, `L = 1`: the tail hypothesis holds (`P(Y ≥ t) = 0` for `t > 1`) and so
+does localization. -/
 example : ∃ D : ℝ, ∫ ω, (fun _ : Unit => (1 : ℝ)) ω ^ 2 ∂(Measure.dirac ()) ≤
     D * 1 * ∫ ω, (fun _ : Unit => (1 : ℝ)) ω ∂(Measure.dirac ()) := by
   obtain ⟨D, hD⟩ := exists_moment_ratio_bounds (Real.exp_pos 1) one_pos one_pos

@@ -12,10 +12,10 @@ public import PercLib.Combinatorics.TreeSplitting
 
 /-! # The BK step for the largest cluster intersection
 
-`tightnessBK : TightnessBK V` for every countable `V`, on the reading `k ≥ 1` (see `Tightness/Defs.lean`; the definition in `Tightness/Defs.lean` is used unchanged), and the corollary
-`universalTightness : UniversalTightness V`. Each conjunct of both statements is also a
-named lemma (`law_three_pow_mul_le_maxClusterIntersection_le`,
-`law_three_pow_mul_le_clusterIntersection_le`,
+`tightnessBK : TightnessBK V` for every countable `V`, on the reading `k ≥ 1` (see
+`Tightness/Defs.lean`; the definition in `Tightness/Defs.lean` is used unchanged), and the corollary
+`universalTightness : UniversalTightness V`. Each conjunct of both statements is also a named lemma
+(`law_three_pow_mul_le_maxClusterIntersection_le`, `law_three_pow_mul_le_clusterIntersection_le`,
 `law_mul_tightnessScale_le_maxClusterIntersection_le`,
 `law_maxClusterIntersection_lt_mul_tightnessScale_le`,
 `law_mul_tightnessScale_le_clusterIntersection_le`); downstream code uses those.
@@ -279,7 +279,8 @@ theorem law_three_pow_mul_le_clusterIntersection_le [Countable V]
   rw [mul_comm]
   exact law_foldl_replicate_le q Λ l _ (isUpperSet_real_le_clusterIntersection Λ u l)
 
-/-- **The BK step** (Hutchcroft, arXiv:2008.11197v2, Theorem 2.3, reading `k ≥ 1`) for every countable vertex type and every profile. -/
+/-- **The BK step** (Hutchcroft, arXiv:2008.11197v2, Theorem 2.3, reading `k ≥ 1`) for every
+countable vertex type and every profile. -/
 @[tag "JGZB"]
 theorem tightnessBK (V : Type*) [Countable V] : TightnessBK V := fun q Λ hΛ _l hl _k hk =>
   ⟨law_three_pow_mul_le_maxClusterIntersection_le q hΛ hl hk,

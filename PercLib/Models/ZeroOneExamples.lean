@@ -164,8 +164,8 @@ example : globalCriticalIntensity (fun _ : Sym2 (Fin 3) => (1 : ℝ≥0)) = ⊤ 
     ∀ x : Fin 3, rootCriticalIntensity (fun _ : Sym2 (Fin 3) => (1 : ℝ≥0)) x = ⊤ :=
   ⟨globalCriticalIntensity_eq_top_of_finite _, rootCriticalIntensity_eq_top_of_finite _⟩
 
-/-- `exists_root_percolation_eq` at `p = 1/2`: the root percolates with probability `1/2` while an infinite cluster
-exists almost surely. -/
+/-- `exists_root_percolation_eq` at `p = 1/2`: the root percolates with probability `1/2` while an
+infinite cluster exists almost surely. -/
 example : ∃ (V : Type) (_ : Countable V) (q : Sym2 V → unitInterval) (o : V),
     law q {ω | ∃ v, (cluster ω v).Infinite} = 1 ∧
       law q {ω | (cluster ω o).Infinite} = (unitInterval.toNNReal ⟨1 / 2, by norm_num, by norm_num⟩ : ℝ≥0∞) :=

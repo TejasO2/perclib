@@ -1,9 +1,10 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
 Statements written on 2026-11-20: Theorem 1.1 and Corollary 1.2 of T. Hutchcroft, *The critical
-two-point function for long-range percolation on the hierarchical lattice*, arXiv:2103.17013v1, on the bond interface. New statements; no upstream code is copied and no new notion is
-introduced (lattice, level, balls, `intensityProfile`, `rootCriticalIntensity`, `law`, `tau` and
-`openGraph` are the library's).
+two-point function for long-range percolation on the hierarchical lattice*, arXiv:2103.17013v1, on
+the bond interface. New statements; no upstream code is copied and no new notion is introduced
+(lattice, level, balls, `intensityProfile`, `rootCriticalIntensity`, `law`, `tau` and `openGraph`
+are the library's).
 -/
 module
 

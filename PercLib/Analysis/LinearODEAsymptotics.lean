@@ -129,9 +129,9 @@ section Core
 
 variable {α c r₀ : ℝ} {S e g : ℝ → ℝ}
 
-/-- **The integrating factor.** Under the hypotheses of the linear ODE asymptotics, put `E(r) = ∫_{r₀}^r e` and
-`U = S r^{-2α} e^{-E}`. Then `U` is absolutely continuous on every `[r₀, R]` and
-`S = U r^{2α} e^{E}` on `[r₀, ∞)`. Moreover `U' = ψ ≥ 0` a.e. on `[r₀, ∞)`, where
+/-- **The integrating factor.** Under the hypotheses of the linear ODE asymptotics, put
+`E(r) = ∫_{r₀}^r e` and `U = S r^{-2α} e^{-E}`. Then `U` is absolutely continuous on every `[r₀, R]`
+and `S = U r^{2α} e^{E}` on `[r₀, ∞)`. Moreover `U' = ψ ≥ 0` a.e. on `[r₀, ∞)`, where
 `ψ(r)/r^{1-α} → c e^{-E(∞)}`. -/
 theorem linearODE_core (hr₀ : 1 ≤ r₀) (hc : 0 < c)
     (hSac : ∀ R, r₀ ≤ R → AbsolutelyContinuousOnInterval S r₀ R)
@@ -327,7 +327,8 @@ theorem isEquivalent_linearODE_eq (hr₀ : 1 ≤ r₀) (hα2 : α = 2) (hc : 0 <
   rw [hα2]
   norm_num
 
-/-- **Linear ODE asymptotics, `α > 2`.** `S ~ K r^{2α}` for some `K ∈ (0, ∞)`. This case uses `S ≥ 0`. -/
+/-- **Linear ODE asymptotics, `α > 2`.** `S ~ K r^{2α}` for some `K ∈ (0, ∞)`. This case uses
+`S ≥ 0`. -/
 theorem exists_isEquivalent_linearODE_gt (hr₀ : 1 ≤ r₀) (hα2 : 2 < α) (hc : 0 < c)
     (hS0 : ∀ r, r₀ ≤ r → 0 ≤ S r)
     (hSac : ∀ R, r₀ ≤ R → AbsolutelyContinuousOnInterval S r₀ R)
@@ -565,7 +566,8 @@ example : (fun r : ℝ => r ^ 3) ~[atTop] fun r => 1 * r ^ ((1 : ℝ) + 2) / (2 
     integrableOn_zero (fun r hr => mul_nonneg zero_le_one (Real.rpow_nonneg (by linarith) _))
     IsEquivalent.refl
 
-/-- `α = 2`: `S = r⁴ log r` solves `S' = (4/r) S + r³`, and `isEquivalent_linearODE_eq` gives `S ~ r⁴ log r`. -/
+/-- `α = 2`: `S = r⁴ log r` solves `S' = (4/r) S + r³`, and `isEquivalent_linearODE_eq` gives
+`S ~ r⁴ log r`. -/
 example : (fun r : ℝ => r ^ 4 * Real.log r) ~[atTop] fun r => 1 * r ^ (4 : ℝ) * Real.log r :=
   isEquivalent_linearODE_eq (α := 2) (r₀ := 1) (e := fun _ => 0)
     (g := fun r => 1 * r ^ ((2 : ℝ) + 1)) le_rfl rfl one_pos
@@ -583,8 +585,8 @@ example : (fun r : ℝ => r ^ 4 * Real.log r) ~[atTop] fun r => 1 * r ^ (4 : ℝ
     integrableOn_zero (fun r hr => mul_nonneg zero_le_one (Real.rpow_nonneg (by linarith) _))
     IsEquivalent.refl
 
-/-- `α = 3`: `S = r⁶ - r⁵ ≥ 0` solves `S' = (6/r) S + r⁴`, and `exists_isEquivalent_linearODE_gt` gives `S ~ K r⁶` with
-`K > 0`. -/
+/-- `α = 3`: `S = r⁶ - r⁵ ≥ 0` solves `S' = (6/r) S + r⁴`, and `exists_isEquivalent_linearODE_gt`
+gives `S ~ K r⁶` with `K > 0`. -/
 example : ∃ K > 0, (fun r : ℝ => r ^ 6 - r ^ 5) ~[atTop] fun r => K * r ^ (2 * (3 : ℝ)) :=
   exists_isEquivalent_linearODE_gt (α := 3) (r₀ := 1) (e := fun _ => 0)
     (g := fun r => 1 * r ^ ((3 : ℝ) + 1)) le_rfl (by norm_num) one_pos

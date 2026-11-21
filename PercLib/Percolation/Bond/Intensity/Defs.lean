@@ -1,6 +1,7 @@
 /-
-PercLib intensity interface on the bond interface of `PercLib.Percolation.Bond.Basic`. New definitions using mathlib's real exponential and complete-lattice
-infimum; no upstream probability foundation is copied.
+PercLib intensity interface on the bond interface of `PercLib.Percolation.Bond.Basic`. New
+definitions using mathlib's real exponential and complete-lattice infimum; no upstream probability
+foundation is copied.
 -/
 module
 

@@ -504,8 +504,8 @@ private theorem rpow_neg_two_mul_sq {x : ℝ} (hx : 0 < x) : x ^ (-1 - 1 : ℝ) 
   rw [show (-1 - 1 : ℝ) = -((2 : ℕ) : ℝ) by norm_num, Real.rpow_neg hx.le, Real.rpow_natCast,
     inv_mul_cancel₀ (by positivity)]
 
-/-- Non-vacuity: `f r = (α/A) r^α = r` with `h = 0`, at `A = α = r₀ = 1`, satisfies the hypotheses of
-all three items, with equality in the differential inequalities. -/
+/-- Non-vacuity: `f r = (α/A) r^α = r` with `h = 0`, at `A = α = r₀ = 1`, satisfies the hypotheses
+of all three items, with equality in the differential inequalities. -/
 example :
     (∀ r : ℝ, 1 ≤ r → r ≤ 1 / 1 * r ^ (1 : ℝ)) ∧ (∀ r : ℝ, 1 ≤ r → 1 / 1 * r ^ (1 : ℝ) ≤ r) ∧
       ∀ r : ℝ, 1 ≤ r → r = (1 / 1) * r ^ (1 : ℝ) /

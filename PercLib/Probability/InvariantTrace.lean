@@ -203,8 +203,8 @@ example :
     rw [h0, h1, h2, h3, h4]
     norm_num
 
-/-- Non-vacuity witness for kernel powers: on `ZMod 3` the all-ones kernel has row sum `3`, and every row
-and column of its `n`-th power sums to `3^n`. -/
+/-- Non-vacuity witness for kernel powers: on `ZMod 3` the all-ones kernel has row sum `3`, and
+every row and column of its `n`-th power sums to `3^n`. -/
 example (n : ℕ) (x : ZMod 3) :
     ∑' y, (fun K : ZMod 3 → ZMod 3 → ℝ≥0∞ => fun a b => ∑' z, K a z * (fun _ _ => 1) z b)^[n]
       (fun a b => if a = b then 1 else 0) x y = 3 ^ n := by

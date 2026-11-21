@@ -20,8 +20,9 @@ boundary pairs, so `P(K_x = C)` factors (`law_cluster_eq_finset`). The event `{K
 depends only on pairs meeting `C`, so it is independent of every event determined by the
 outer pairs (`law_cluster_eq_inter`, the domain Markov property).
 
-This file adds no definition. The independence of events determined by disjoint
-coordinate sets is used through a private lemma; `PercLib/Probability/DeterminedIndependence.lean` proves a public version.
+This file adds no definition. The independence of events determined by disjoint coordinate sets is
+used through a private lemma; `PercLib/Probability/DeterminedIndependence.lean` proves a public
+version.
 -/
 
 @[expose] public section

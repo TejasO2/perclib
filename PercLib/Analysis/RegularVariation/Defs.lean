@@ -2,8 +2,11 @@
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
 Slow and regular variation at infinity (wiki tag 3491), following Bingham–Goldie–Teugels, *Regular
 Variation*, §1.1–1.4, and the wiki article `regular-variation`. Mathlib at the pinned revision has
-no such notion. New definitions and proofs; nothing is copied for them. The definitions `LogarithmicallyIntegrable`, `IsLogErrorFunction` and `genInv` are adapted from the repository `yujinhkim/lrp` of contributor yujinhkim, as recorded in the section header below (licence Apache-2.0). That repository (branch `critical-lrp-1`) has a variant `RegularlyVaryingAtTop` that asks only for eventual non-vanishing
-and no measurability; it is not used here.
+no such notion. New definitions and proofs; nothing is copied for them. The definitions
+`LogarithmicallyIntegrable`, `IsLogErrorFunction` and `genInv` are adapted from the repository
+`yujinhkim/lrp` of contributor yujinhkim, as recorded in the section header below (licence
+Apache-2.0). That repository (branch `critical-lrp-1`) has a variant `RegularlyVaryingAtTop` that
+asks only for eventual non-vanishing and no measurability; it is not used here.
 -/
 module
 
@@ -216,14 +219,14 @@ example : RegularlyVarying 2 (fun x => x ^ (2 : ℝ) * Real.log x) :=
 
 /-! ### Logarithmic integrability, log-error functions and the generalized inverse
 
-The next three definitions are adapted from the repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
-`d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, files
+The next three definitions are adapted from the repository `yujinhkim/lrp`, branch `critical-lrp-1`,
+commit `d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, files
 `PercLib/CriticalLRP/Analysis/RegularVariation.lean` (`LogarithmicallyIntegrable`,
-`IsLogErrorFunction`) and `PercLib/CriticalLRP/Analysis/GeneralInverse.lean` (`genInv`,
-there written through an auxiliary `levelSet`, which is inlined here); licence Apache-2.0 as
-declared in those file headers; upstream `yujinhkim/Critical-Long-range-percolation` at
-`3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf`. The statements are unchanged; the API lemmas
-and witnesses below are new. -/
+`IsLogErrorFunction`) and `PercLib/CriticalLRP/Analysis/GeneralInverse.lean` (`genInv`, there
+written through an auxiliary `levelSet`, which is inlined here); licence Apache-2.0 as declared in
+those file headers; upstream `yujinhkim/Critical-Long-range-percolation` at
+`3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf`. The statements are unchanged; the API lemmas and
+witnesses below are new. -/
 
 /-- `h` is **logarithmically integrable**: `h` is measurable on some tail `[a, ∞)` (as for
 `RegularlyVarying`) and `∫_{r₀}^∞ |h r| dr / r < ∞` for some `r₀ > 0` (Hutchcroft, *Critical

@@ -632,7 +632,8 @@ theorem damp_unit (q : Sym2 Unit → unitInterval) (u : Unit) (a : ℝ) (ha : 1 
   rw [hempty, measure_empty]
   exact zero_le
 
-/-- `finite_set_hyperscaling` with all hypotheses satisfied: `Unit`, `Λ = {()}`, `C = 1`, `δ = 2`. -/
+/-- `finite_set_hyperscaling` with all hypotheses satisfied: `Unit`, `Λ = {()}`, `C = 1`, `δ = 2`.
+-/
 example (q : Sym2 Unit → unitInterval) :
     (tightnessScale q {()} : ℝ) ≤
       (4 * Real.exp 1 * (1 * (2 / (2 - 1) + 9 * Real.exp (8 / 9)))) ^ ((2 : ℝ) / (2 + 1)) *
@@ -660,7 +661,8 @@ example (q : Sym2 Unit → unitInterval) :
           (Real.rpow_le_rpow_of_exponent_le (by exact_mod_cast hn) (by norm_num))
           zero_le_one)))
 
-/-- The lower rooted moments and `avg_lintegral_pow_clusterIntersection` on a singleton window, where `M = 2` and every count is one. -/
+/-- The lower rooted moments and `avg_lintegral_pow_clusterIntersection` on a singleton window,
+where `M = 2` and every count is one. -/
 example (q : Sym2 Unit → unitInterval) :
     ENNReal.ofReal (2 ^ ((1 : ℝ) + 1) / (Real.exp 1 * 2 ^ ((1 : ℝ) + 1))) ≤
       ∑ x ∈ ({()} : Finset Unit),

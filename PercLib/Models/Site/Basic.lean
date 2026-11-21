@@ -1,5 +1,6 @@
 /-
-Adapted from Percolation after Anthropic, prompted by Ahmed Bou-Rabee (full attribution in third_party/percolation/NOTICE). Apache License 2.0.
+Adapted from Percolation after Anthropic, prompted by Ahmed Bou-Rabee
+(full attribution in third_party/percolation/NOTICE). Apache License 2.0.
 Pinned source: a5cc72bd7627f313abbb00bcb47616678abbeb35.
 Sources:
 https://github.com/nitromannitol/percolation-after-anthropic/blob/a5cc72bd7627f313abbb00bcb47616678abbeb35/Hypergraph/SiteStatements.lean

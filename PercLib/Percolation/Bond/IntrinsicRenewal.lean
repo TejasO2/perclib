@@ -24,8 +24,8 @@ balls. Then for every `r`:
 (The upper bound `b_r ≤ ∑_{j ≤ r} D^j` is `lintegral_encard_ball_le_of_transitive`.)
 
 Route (wiki, R5XZ): under transitivity every radius-`k` ball has mean `b_k`
-(`lintegral_encard_ball_eq_of_transitive`), so the renewal inequality of `BallExploration.lean` reads
-`b_{m+n} ≤ b_m + a_m b_n`. If `a_m < 1` for some `m ≥ 1`, iteration bounds every `b_r` by
+(`lintegral_encard_ball_eq_of_transitive`), so the renewal inequality of `BallExploration.lean`
+reads `b_{m+n} ≤ b_m + a_m b_n`. If `a_m < 1` for some `m ≥ 1`, iteration bounds every `b_r` by
 `b_m / (1 - a_m) < ⊤`, and `χ_o = sup_r b_r` would be finite. Hence `a_m ≥ 1`; and
 `b_{r+1} = b_r + a_{r+1}`.
 -/

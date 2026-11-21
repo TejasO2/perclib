@@ -234,10 +234,10 @@ theorem unsigned_square_three_path_gt (h01 : J s(0, 1) = 99 / 100)
   rw [lt_div_iff₀ hD0]
   nlinarith
 
-/-- **The positive part is needed.** In the three-vertex model at `β = 1` with
-`S = {0, 1}`, the boundary functional `Φ_1(S) = 1/100` is smaller than the unsigned square
-`(χ_min |S| - ∑_{u,v ∈ S} τ(u,v))² / (β² χ_max Q(S))`. So the lower bound of `boundary_susceptibility_bound` fails if
-the positive part is dropped. -/
+/-- **The positive part is needed.** In the three-vertex model at `β = 1` with `S = {0, 1}`, the
+boundary functional `Φ_1(S) = 1/100` is smaller than the unsigned square
+`(χ_min |S| - ∑_{u,v ∈ S} τ(u,v))² / (β² χ_max Q(S))`. So the lower bound of
+`boundary_susceptibility_bound` fails if the positive part is dropped. -/
 theorem not_boundary_bound_unsigned (h01 : J s(0, 1) = 99 / 100)
     (h12 : J s(1, 2) = 1 / 100) (h02 : J s(0, 2) = 0) :
     ¬ (((⨅ u, chi (intensityProfile J 1) u).toReal * (({0, 1} : Finset (Fin 3)).card : ℝ) -

@@ -1,8 +1,8 @@
 /-
 Adapted from NearCritical/Russo.lean by Tom Hutchcroft and collaborators.
 Source: https://github.com/tomhutchcroft/near-critical-diffusivity/blob/c820fea91a7482c1755de0ec94ecb9f59ccfcacc/NearCritical/Russo.lean
-Reuse authorized by Tom Hutchcroft (permission recorded in `docs/DECISIONS.md`). The native source has no
-repository-wide licence inferred from its vendored dependencies.
+Reuse authorized by Tom Hutchcroft (permission recorded in `docs/DECISIONS.md`). The native
+source has no repository-wide licence inferred from its vendored dependencies.
 
 Modified for PercLib on 2026-11-14: individual real coordinate profiles and derivatives;
 division-free pairing of forced-open/forced-closed differences; p and beta specializations.

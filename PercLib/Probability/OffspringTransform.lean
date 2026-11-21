@@ -20,7 +20,8 @@ Let `p : PMF ℕ` be an offspring law with mean `1`, written `∑' k, k p(k) = 1
 `φ(x) = ∑' k, p(k) x^k`.
 
 1. **Expansion** (`tendsto_one_sub_genFun_expansion`). `φ(1-u) = 1 - u + (σ²/2) u² + o(u²)` as
-   `u → 0⁺`. It is stated in the form used by `PercLib/Analysis/QuadraticRecursion.lean` for `ψ(u) = 1 - φ(1-u)` and `a = σ²/2`.
+   `u → 0⁺`. It is stated in the form used by `PercLib/Analysis/QuadraticRecursion.lean` for
+   `ψ(u) = 1 - φ(1-u)` and `a = σ²/2`.
 2. **Transform equation.** Fix `0 ≤ s < 1`.
    * `x ↦ s φ(x) - x` is strictly decreasing on `[0,1]`.
    * `existsUnique_transform_root`: it has exactly one zero `F(s)` in `[0,1)`.
@@ -130,7 +131,8 @@ theorem hasSum_mean_one (hm : ∑' k : ℕ, (k : ℝ≥0∞) * p k = 1) :
 
 /-! ### 1. The second-order expansion at one -/
 
-/-- **Expansion.** `ψ(u) = 1 - φ(1-u)` satisfies `ψ(u) = u - (σ²/2) u² + o(u²)`, in the form used by `PercLib/Analysis/QuadraticRecursion.lean`. -/
+/-- **Expansion.** `ψ(u) = 1 - φ(1-u)` satisfies `ψ(u) = u - (σ²/2) u² + o(u²)`, in the form used by
+`PercLib/Analysis/QuadraticRecursion.lean`. -/
 theorem tendsto_one_sub_genFun_expansion (hm : ∑' k : ℕ, (k : ℝ≥0∞) * p k = 1) {σ2 : ℝ}
     (hσ : HasSum (fun k : ℕ => (k : ℝ) * ((k : ℝ) - 1) * (p k).toReal) σ2) :
     Tendsto (fun u => ((1 - ∑' k, (p k).toReal * (1 - u) ^ k) - u + σ2 / 2 * u ^ 2) / u ^ 2)

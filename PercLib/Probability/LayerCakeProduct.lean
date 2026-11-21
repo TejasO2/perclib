@@ -281,9 +281,9 @@ theorem lintegral_mul_ge_of_meas_lt {μ : Measure Ω} [SFinite μ] {f g : Ω →
 
 /-! ### Non-vacuity -/
 
-/-- **Non-vacuity witness.** `C = univ` and `f = g = 1` under the point mass on `Unit`: the hypotheses
-of `lintegral_mul_indicator_eq_double` and of `lintegral_mul_indicator_le_of_meas_lt` hold, and
-both sides of the inequality equal `1`. -/
+/-- **Non-vacuity witness.** `C = univ` and `f = g = 1` under the point mass on `Unit`: the
+hypotheses of `lintegral_mul_indicator_eq_double` and of `lintegral_mul_indicator_le_of_meas_lt`
+hold, and both sides of the inequality equal `1`. -/
 theorem lintegral_mul_indicator_le_of_meas_lt_one :
     ∫⁻ ω, ((univ : Set Unit).indicator (fun _ => (1 : ℝ≥0∞))) ω *
         ENNReal.ofReal ((fun _ : Unit => (1 : ℝ)) ω * (fun _ : Unit => (1 : ℝ)) ω)

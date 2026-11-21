@@ -8,11 +8,11 @@ Ported from the work of contributor `yujinhkim`: repository `yujinhkim/lrp`, bra
 `PercLib/CriticalLRP/Analysis/RegularVariation.lean`; licence Apache-2.0 as declared in that
 commit's file headers and `third_party/critical-lrp/NOTICE.md`; upstream
 `yujinhkim/Critical-Long-range-percolation` at `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf`. Modified:
-the definitions of that file are those of `PercLib/Analysis/RegularVariation/Defs.lean`; `RegularlyVaryingAtTop f a` becomes `RegularlyVarying a f`, which also requires
-measurability on a tail and eventual positivity, both derived here from the existing hypotheses (no
-statement changes); the helper `intervalIntegrable_of_integrableOn_uIcc` is mathlib's
-`IntegrableOn.intervalIntegrable`; `import Mathlib`, `autoImplicit` and disabled linters are
-removed.
+the definitions of that file are those of `PercLib/Analysis/RegularVariation/Defs.lean`;
+`RegularlyVaryingAtTop f a` becomes `RegularlyVarying a f`, which also requires measurability on a
+tail and eventual positivity, both derived here from the existing hypotheses (no statement changes);
+the helper `intervalIntegrable_of_integrableOn_uIcc` is mathlib's `IntegrableOn.intervalIntegrable`;
+`import Mathlib`, `autoImplicit` and disabled linters are removed.
 -/
 module
 
