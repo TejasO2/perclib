@@ -175,6 +175,7 @@ public import PercLib.Percolation.Bond.ClusterMoments
 public import PercLib.Percolation.Bond.ClusterPartition
 public import PercLib.Percolation.Bond.ClusterTails
 public import PercLib.Percolation.Bond.ConnectionKernel
+public import PercLib.Percolation.Bond.ConsistentGeodesics
 public import PercLib.Percolation.Bond.ConvolutionBound
 public import PercLib.Percolation.Bond.CorrelationLength
 public import PercLib.Percolation.Bond.CrossEdge
@@ -243,6 +244,7 @@ public import PercLib.Percolation.Bond.SusceptibilityEndpoint
 public import PercLib.Percolation.Bond.Tags.BoundaryForest
 public import PercLib.Percolation.Bond.Tags.ClusterCorrelation
 public import PercLib.Percolation.Bond.Tags.ConnectionKernel
+public import PercLib.Percolation.Bond.Tags.ConsistentGeodesics
 public import PercLib.Percolation.Bond.Tags.CoreBoundaryLaws
 public import PercLib.Percolation.Bond.Tags.CoreClosedProducts
 public import PercLib.Percolation.Bond.Tags.CoreConnectivity
