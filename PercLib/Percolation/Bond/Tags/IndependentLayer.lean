@@ -1,13 +1,25 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-90 correspondence wrappers for the ghost field and the independent-layer ghost
-comparisons. All mathematical inputs are proved in the imported modules.
+Correspondence wrappers for the ghost field and the independent-layer ghost comparisons. All
+mathematical inputs are proved in the imported modules.
 -/
 module
 
 public import PercLib.Meta.Tag
 public import PercLib.Percolation.Bond.IndependentLayer.AddedVolume
 public import PercLib.Percolation.Bond.IndependentLayer.Conditional
+
+/-!
+# Independent layers and the ghost field: correspondence
+
+Wiki correspondence for the ghost field and the independent-layer ghost comparisons.
+
+## Main results
+
+* `ghost_field_magnetization`
+* `ghost_comparison_omitted_edges`
+* `ghost_bound_added_mass`
+-/
 
 @[expose] public section
 noncomputable section

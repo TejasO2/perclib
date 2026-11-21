@@ -2,8 +2,7 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New proofs for issue 640 (Q-212, item 1), written on 2026-11-16 by PROVER-F. No upstream
-proof is copied and no definition is added.
+New proofs, written on 2026-11-16. No upstream proof is copied and no definition is added.
 -/
 module
 
@@ -212,8 +211,8 @@ theorem hasDerivAt_integral_fun_of_transitive (lam : ℝ → Sym2 V → ℝ≥0)
 
 /-! ### MIJ7 -/
 
-/-- **MIJ7.** Let `V` be finite with intensities `λ_u` invariant under a transitively acting
-group, differentiable at `t` with derivatives `w ≥ 0`. For every real `m > 0`,
+/-- **Derivative of the truncated moment.** Let `V` be finite with intensities `λ_u` invariant under
+a transitively acting group, differentiable at `t` with derivatives `w ≥ 0`. For every real `m > 0`,
 `T_m(u) = E_u min(|K_o|, m)` is differentiable at `t`, and its derivative satisfies
 `0 ≤ T_m'(t) ≤ a(t) T_m(t)²`, where `a(t) = ∑_{y ≠ o} w(o, y)`. -/
 theorem hasDerivAt_truncated_moment (lam : ℝ → Sym2 V → ℝ≥0) (w : Sym2 V → ℝ) (t : ℝ)
@@ -312,10 +311,10 @@ theorem hasDerivAt_truncated_moment (lam : ℝ → Sym2 V → ℝ≥0) (w : Sym2
           exact mul_le_mul_of_nonneg_left (hy y) (hw _)
       _ = _ := by rw [← Finset.sum_mul]; ring
 
-/-! ### Non-vacuity witness (D-5) -/
+/-! ### Non-vacuity witness -/
 
-/-- **D-5 witness.** On `ZMod 2` with `λ_u = u⁺` (`= u` near `t = 1`), `w = 1` and `m = 1/2`
-(below one, as the issue requires), the hypotheses of MIJ7 hold. -/
+/-- **Non-vacuity witness.** On `ZMod 2` with `λ_u = u⁺` (`= u` near `t = 1`), `w = 1` and `m = 1/2`
+(below one), the hypotheses of `hasDerivAt_truncated_moment` hold. -/
 example : ∃ D : ℝ, HasDerivAt (fun u : ℝ => ∫ ω, min ((cluster ω (0 : ZMod 2)).ncard : ℝ) (1 / 2)
       ∂law (intensityProfile (fun _ : Sym2 (ZMod 2) => u.toNNReal) 1)) D 1 ∧ 0 ≤ D ∧
     D ≤ (∑ y ∈ Finset.univ.erase (0 : ZMod 2), (fun _ : Sym2 (ZMod 2) => (1 : ℝ)) s(0, y)) *

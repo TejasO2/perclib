@@ -2,8 +2,7 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New for this project (issue 169, Q-26). An application of mathlib's Hoeffding inequality;
-no upstream proof is copied.
+New for this project. An application of mathlib's Hoeffding inequality; no upstream proof is copied.
 -/
 module
 

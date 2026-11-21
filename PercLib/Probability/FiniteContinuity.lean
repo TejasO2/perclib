@@ -1,14 +1,29 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New continuity consequences of PercLib.Probability.ProductExpectation, whose
-finite-profile formula is adapted from near-critical-diffusivity under R-3.
-This file copies no upstream proof. It uses finite sums/products and the product
-topology from mathlib at 56a005855ea17e0b0958f73ec801ae140b0a1679.
+New continuity consequences of PercLib.Probability.ProductExpectation, whose finite-profile formula
+is adapted from near-critical-diffusivity under Tom Hutchcroft's reuse permission recorded in
+`docs/DECISIONS.md`. This file copies no upstream proof. It uses finite sums/products and the
+product topology from mathlib at 56a005855ea17e0b0958f73ec801ae140b0a1679.
 -/
 module
 
 public import PercLib.Probability.ProductExpectation
 public import PercLib.Percolation.Bond.Basic
+
+/-!
+# Continuity of finite-event probabilities
+
+Probabilities of events depending on finitely many coordinates are multiaffine, hence continuous, in
+the profile; in particular connection probabilities on finite domains are continuous.
+
+## Main results
+
+* `prodBernoulli_finite_apply`
+* `continuous_prodBernoulli_cylinder`
+* `tendsto_prodBernoulli_cylinder`
+* `continuous_tau_finite`
+* `tendsto_tau_finite_domain`
+-/
 
 @[expose] public section
 

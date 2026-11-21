@@ -1,17 +1,16 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-196 (issue 624): discharge of the premise `hD` that pull request 488 adds to
+Discharge of the premise `hD` that the formalisation of contributor yujinhkim cited below adds to
 Propositions I.3.1 and I.3.2 of T. Hutchcroft, *Critical long-range percolation I*,
-arXiv:2508.18807v1. The premise is read from pull request 488: repository
-`yujinhkim/lrp`, branch `critical-lrp-1`, commit `d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`,
-files `PercLib/CriticalLRP/Analysis/VolumeTailAllN.lean`,
+arXiv:2508.18807v1. The premise is read from the repository `yujinhkim/lrp`, branch
+`critical-lrp-1`, commit `d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, files
+`PercLib/CriticalLRP/Analysis/VolumeTailAllN.lean`,
 `PercLib/CriticalLRP/Analysis/VolumeTailUpper.lean` (hypothesis `hD`) and
-`PercLib/CriticalLRP/CountableProduct/GhostCoupling.lean` (`shiftProb`, written out here);
-licence Apache-2.0 as declared in those file headers and
-`third_party/critical-lrp/NOTICE.md`; upstream `yujinhkim/Critical-Long-range-percolation`
-at `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf` (not independently verified). Contributor:
-yujinhkim. No code is copied: the proofs are new, from the ball counts and power-law tail
-bounds of `PowerLaw.lean`.
+`PercLib/CriticalLRP/CountableProduct/GhostCoupling.lean` (`shiftProb`, written out here); licence
+Apache-2.0 as declared in those file headers and `third_party/critical-lrp/NOTICE.md`; upstream
+`yujinhkim/Critical-Long-range-percolation` at `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf` (not
+independently verified). Contributor: yujinhkim. No code is copied: the proofs are new, from the
+ball counts and power-law tail bounds of `PowerLaw.lean`.
 -/
 module
 
@@ -25,7 +24,7 @@ For a norm `N` on `ℝ^d` (evaluated on `ℤ^d`), a profile `K` and a scale `r`,
 `J = radialKernel N K` and the cut-off kernel `J_r = cutoffKernel N K r`. The omitted kernel
 is `J - J_r` (pointwise truncated subtraction in `ℝ≥0`, which is exact since `J_r ≤ J`).
 
-* `law_intensityProfile_eq_map_union_omitted` (item 1 of issue 624): the full law is the
+* `law_intensityProfile_eq_map_union_omitted` (item 1): the full law is the
   law of `ω ∪ ξ` for independent `ω ~ law (intensityProfile J_r β)` and
   `ξ ~ law (intensityProfile (J - J_r) β)`;
 * `coe_omittedKernel_of_ne` (item 2): `(J - J_r)(x,y) = K r` if `N(x-y) ≤ r` and
@@ -91,7 +90,7 @@ end Additivity
     (x : Fin d → ℤ) : (radialKernel N K - cutoffKernel N K r) s(x, x) = 0 := by
   simp [cutoffKernel_def]
 
-/-- **Item 1 of issue 624.** For a profile nonnegative on `(0, ∞)` and `r > 0`, the full law
+/-- **Item 1.** For a profile nonnegative on `(0, ∞)` and `r > 0`, the full law
 is the law of the union of the cut-off configuration and an independent omitted layer. -/
 theorem law_intensityProfile_eq_map_union_omitted (hN0 : ∀ v, N v = 0 → v = 0)
     (hK : ∀ t, 0 < t → 0 ≤ K t) (hr : 0 < r) (β : ℝ≥0) :
@@ -104,7 +103,7 @@ theorem law_intensityProfile_eq_map_union_omitted (hN0 : ∀ v, N v = 0 → v = 
   funext e
   exact (add_tsub_cancel_of_le (cutoffKernel_le_radialKernel hN0 hK hr e)).symm
 
-/-- **Item 2 of issue 624.** For a profile nonnegative and decreasing on `(0, ∞)` and
+/-- **Item 2.** For a profile nonnegative and decreasing on `(0, ∞)` and
 `r > 0`, off the diagonal the omitted kernel is `K r` inside the cut-off and the full kernel
 outside it. -/
 theorem coe_omittedKernel_of_ne (hN0 : ∀ v, N v = 0 → v = 0) (hK : ∀ t, 0 < t → 0 ≤ K t)
@@ -160,7 +159,7 @@ theorem omitted_const_nonneg {c κ α : ℝ} (hc : 0 ≤ c) (hκ : 0 < κ) (hα 
       κ ^ (-(d : ℝ)) * (((2 * d * 3 ^ (d - 1) : ℕ) : ℝ) * (1 + 1 / α))) := by
   positivity
 
-/-- **Item 3 of issue 624, the omitted kernel.** For the power law `c s^{-(d+α)}` with
+/-- **Item 3, the omitted kernel.** For the power law `c s^{-(d+α)}` with
 `c ≥ 0`, `α > 0`, `d ≥ 1`, and a norm with `κ ‖z‖ ≤ N (Int.cast ∘ z)`, every off-diagonal row of
 `J - J_r` is at most `C r^{-α}` for `r ≥ 1`, with
 `C = c ((1 + 2/κ)^d + κ^{-d} · 2d 3^{d-1} (1 + 1/α))`. -/
@@ -275,7 +274,7 @@ theorem one_sub_exp_neg_mul_le (β X : ℝ) : 1 - Real.exp (-β * X) ≤ β * X 
   have := Real.add_one_le_exp (-β * X)
   linarith
 
-/-- **Item 3 of issue 624, the omitted layer.** Under the hypotheses of
+/-- **Item 3, the omitted layer.** Under the hypotheses of
 `tsum_omittedKernel_le`, at every intensity `β ≥ 0`, every off-diagonal probability row of
 the omitted layer `1 - e^{-β (J - J_r)}` is at most `β C r^{-α}` for `r ≥ 1`. -/
 theorem tsum_omittedLayer_le (hd : 1 ≤ d) {α c κ : ℝ} (hα : 0 < α) (hc : 0 ≤ c)
@@ -296,7 +295,7 @@ theorem tsum_omittedLayer_le (hd : 1 ≤ d) {α c κ : ℝ} (hα : 0 < α) (hc :
   · rw [← ENNReal.ofReal_coe_nnreal, ← ENNReal.ofReal_mul β.coe_nonneg]
     exact ENNReal.ofReal_le_ofReal (one_sub_exp_neg_mul_le _ _)
 
-/-- **Item 3 of issue 624, existential form.** -/
+/-- **Item 3, existential form.** -/
 theorem exists_tsum_omittedLayer_le (hd : 1 ≤ d) {α c : ℝ} (hα : 0 < α) (hc : 0 ≤ c)
     (hN0 : ∀ v, N v = 0 → v = 0) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ r : ℝ, 1 ≤ r → ∀ (β : ℝ≥0) (x : Fin d → ℤ),
@@ -312,7 +311,7 @@ theorem exists_tsum_omittedLayer_le (hd : 1 ≤ d) {α c : ℝ} (hα : 0 < α) (
     ⟨tsum_omittedKernel_le hd hα hc hN0 hκ hN hr x,
       tsum_omittedLayer_le hd hα hc hN0 hκ hN hr β x⟩⟩
 
-/-! ### The fork's spelling of `hD` (item 4 of issue 624) -/
+/-! ### The fork's spelling of `hD` (item 4) -/
 
 /-- The fork's shift probability `(q_∞ - q_r)/(1 - q_r)`, clamped to `[0, 1]`, of the
 intensity profiles of `J` and of `J' ≤ J` is the omitted-layer probability
@@ -334,7 +333,7 @@ theorem shiftProb_intensityProfile_eq {V : Type*} {J J' : Sym2 V → ℝ≥0} (h
   rw [max_eq_right h0.1, min_eq_right h0.2]
   rfl
 
-/-- **Item 4 of issue 624: `hD` in the fork's spelling.** Under the hypotheses of
+/-- **Item 4: `hD` in the fork's spelling.** Under the hypotheses of
 `tsum_omittedKernel_le`, for every `r ≥ 1` and `x`, the full row (diagonal included) of the
 shift probability `min 1 (max 0 ((q_∞ - q_r)/(1 - q_r)))` from the cut-off law `q_r` to the
 full law `q_∞` at intensity `β` is at most `β C r^{-α}`. -/
@@ -361,7 +360,7 @@ theorem tsum_shiftProb_le (hd : 1 ≤ d) {α c κ : ℝ} (hα : 0 < α) (hc : 0 
     simp [intensityProfile]
   · rfl
 
-/-! ### Witnesses (D-5) -/
+/-! ### Witnesses -/
 
 /-- At `d = 1`, the sup norm (`κ = 1`), `α = 1`, `c = 1` and `r = 1`, the omitted kernel is
 the whole kernel off distance `1` and has value `1` at distance `1`. -/

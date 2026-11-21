@@ -13,6 +13,21 @@ public import PercLib.Probability.ProductExpectation
 public import PercLib.Probability.ProdBernoulliIndependence
 public import Mathlib.Data.Sym.Sym2
 
+/-!
+# Exploration transcripts
+
+Finite transcripts of queried coordinates, fixed or adaptive, have the product of their bit weights
+as probability and factor from events on the unqueried coordinates.
+
+## Main results
+
+* `prodBernoulli_transcript`
+* `prodBernoulli_transcript_inter`
+* `adaptive_answers_eq_iff`
+* `prodBernoulli_adaptive_answers`
+* `prodBernoulli_adaptive_answers_inter`
+-/
+
 @[expose] public section
 
 open MeasureTheory ProbabilityTheory Set

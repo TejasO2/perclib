@@ -83,9 +83,9 @@ theorem tendsto_exteriorRow_zero (q : Sym2 V → unitInterval) (u : V)
     (unitInterval.toNNReal (q s(u, v)) : ℝ≥0∞))).trans (tsum_congr fun v => ?_)
   by_cases hv : v ∈ T n <;> simp [Set.indicator, hv]
 
-/-- **RDF0, `⇒` direction.** If the off-diagonal rows of `q` are bounded by `Q < ⊤` and
+/-- **`⇒` direction.** If the off-diagonal rows of `q` are bounded by `Q < ⊤` and
 `chi q o < ⊤`, then along any increasing sequence of finite sets `T_n` exhausting `V`,
-`Φ_q(o, T_n) → 0`. (The issue's hypothesis `o ∈ T_n` is not needed: the internal
+`Φ_q(o, T_n) → 0`. (The hypothesis `o ∈ T_n` is not needed: the internal
 connection probability vanishes when `o ∉ T_n`.) -/
 theorem tendsto_boundaryFlux_exhaustion (q : Sym2 V → unitInterval) {Q : ℝ≥0∞} (hQ : Q < ⊤)
     (hrow : ∀ u, rowSum (fun e => unitInterval.toENNReal (q e)) u ≤ Q)
@@ -154,7 +154,7 @@ theorem tendsto_boundaryFlux_exhaustion (q : Sym2 V → unitInterval) {Q : ℝ�
   exact tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds hlim
     (fun n => zero_le) hle
 
-/-- **RDF0, `⇒` direction, existence form.** Under the same hypotheses, some finite `T ∋ o`
+/-- **`⇒` direction, existence form.** Under the same hypotheses, some finite `T ∋ o`
 has `Φ_q(o,T) < 1`. -/
 theorem exists_boundaryFlux_lt_one (q : Sym2 V → unitInterval) {Q : ℝ≥0∞} (hQ : Q < ⊤)
     (hrow : ∀ u, rowSum (fun e => unitInterval.toENNReal (q e)) u ≤ Q)
@@ -182,7 +182,7 @@ theorem exists_boundaryFlux_lt_one_of_chi_lt_top (J : Sym2 V → ℝ≥0) (M : �
   exists_boundaryFlux_lt_one _ (ENNReal.mul_lt_top ENNReal.coe_lt_top ENNReal.coe_lt_top)
     (fun u => by convert intensity_rowSum_le J M hJ β u) hchi
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
 /-- The nearest-neighbour intensity on `ℤ`. -/
 theorem exists_nearestNeighbour_kernel :

@@ -1,8 +1,7 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written for package Q-67 (issue 374, roadmap T-6), on the D-2 interface.
-Source motivation: T. Hutchcroft, arXiv:2008.11197v2, §2.1, the moment bounds that follow
-Theorem 2.2. No source text or code is copied.
+New proofs, on the bond interface. Source motivation: T. Hutchcroft, arXiv:2008.11197v2,
+§2.1, the moment bounds that follow Theorem 2.2. No source text or code is copied.
 -/
 module
 
@@ -23,7 +22,7 @@ With `Z = maxClusterIntersection Λ`, `M = tightnessScale q Λ`, `Λ` finite non
   `k`, `E Z^k ≤ C_k M^k` with the explicit constant `C_k = 20 · 18^k · k!`.
 
 The second bound is proved for every `k : ℕ`, which includes the requested `k ≥ 1`.
-Expectations are lower Lebesgue integrals in `ℝ≥0∞` (D-2).
+Expectations are lower Lebesgue integrals in `ℝ≥0∞`.
 -/
 
 @[expose] public section
@@ -38,7 +37,7 @@ variable {V : Type*}
 
 /-! ### The first moment from below (unconditional) -/
 
-/-- **First moment from below** (wiki tag AWWZ): `(M - 1) e⁻¹ ≤ E Z`, for every profile on
+/-- **First moment from below**: `(M - 1) e⁻¹ ≤ E Z`, for every profile on
 a countable vertex type and every finite nonempty `Λ`. -/
 theorem lintegral_maxClusterIntersection_ge_sub_one [Countable V]
     (q : Sym2 V → unitInterval) {Λ : Finset V} (hΛ : Λ.Nonempty) :
@@ -61,7 +60,7 @@ theorem lintegral_maxClusterIntersection_ge_sub_one [Countable V]
   rw [hcast, ENNReal.ofReal_mul (Nat.cast_nonneg _), ENNReal.ofReal_natCast]
   gcongr
 
-/-- **First moment from below** (wiki tag AWWZ): `M / (2e) ≤ E Z`. -/
+/-- **First moment from below**: `M / (2e) ≤ E Z`. -/
 theorem lintegral_maxClusterIntersection_ge [Countable V]
     (q : Sym2 V → unitInterval) {Λ : Finset V} (hΛ : Λ.Nonempty) :
     ENNReal.ofReal ((tightnessScale q Λ : ℝ) / (2 * Real.exp 1)) ≤
@@ -114,7 +113,7 @@ private theorem tsum_geometric_le :
   rw [this]
   exact ENNReal.ofReal_le_ofReal (by linarith)
 
-/-- **Higher moments** (wiki tag 2FN1): by universal tightness, for every
+/-- **Higher moments**: by universal tightness, for every
 profile, every finite nonempty `Λ` and every `k`,
 `E Z^k ≤ C_k M^k` with `C_k = 20 · 18^k · k!`, independent of `V`, `q` and `Λ`. -/
 theorem lintegral_maxClusterIntersection_pow_le [Countable V]
@@ -214,7 +213,7 @@ theorem lintegral_maxClusterIntersection_pow_le [Countable V]
                 (M : ℝ≥0∞) ^ k * (k ! * 18 ^ k : ℝ≥0∞) * 19 := by gcongr
           _ = (20 * 18 ^ k * k ! : ℝ≥0∞) * (M : ℝ≥0∞) ^ k := by ring
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
 /-- Item 1 at a singleton: `M = 2` and `Z = 1`. -/
 example (q : Sym2 Unit → unitInterval) :

@@ -1,16 +1,14 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
 
-Adapted from pull request 488: source repository `yujinhkim/lrp`, branch
-`critical-lrp-1`, commit d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc, files
-`PercLib/CriticalLRP/MomentProblem/MGF.lean` and
-`PercLib/CriticalLRP/MomentProblem/Moments.lean`, contributed by `yujinhkim`.
-Licence: Apache-2.0, as declared in those files' headers and in
-`third_party/critical-lrp/NOTICE.md` of that commit (upstream origin
-`yujinhkim/Critical-Long-range-percolation` at
-3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf, not independently verified).
-Changes: namespace `PercLib.Probability`; focused imports; `autoImplicit` off; the two
-files merged; audit commands removed.
+Adapted from the source repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
+d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc, files `PercLib/CriticalLRP/MomentProblem/MGF.lean` and
+`PercLib/CriticalLRP/MomentProblem/Moments.lean`, contributed by `yujinhkim`. Licence: Apache-2.0,
+as declared in those files' headers and in `third_party/critical-lrp/NOTICE.md` of that commit
+(upstream origin `yujinhkim/Critical-Long-range-percolation` at
+3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf, not independently verified). Changes: namespace
+`PercLib.Probability`; focused imports; `autoImplicit` off; the two files merged; audit commands
+removed.
 -/
 module
 
@@ -445,7 +443,7 @@ theorem Measure.eq_of_forall_moment_eq_of_summable {μ ν : Measure ℝ} [IsFini
 
 
 
-/-! ### D-5 witnesses -/
+/-! ### Non-vacuity witnesses -/
 
 /-- The hypotheses of `Measure.eq_of_mgf_eq` hold for `μ = ν = δ₀`: the mgf is finite
 everywhere. -/

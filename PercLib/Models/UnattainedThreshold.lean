@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-New proofs, written for package Q-107 (issue 441, roadmap item AHY3), on the D-2 interface
-and the rooted-tree conventions of `PercLib.Models.Tree`. No source text or code is copied.
+New proofs, on the bond interface and the rooted-tree conventions of
+`PercLib.Models.Tree`. No source text or code is copied.
 -/
 module
 
@@ -381,7 +381,7 @@ theorem exists_globalCriticalIntensity_eq_one_lt_rootCriticalIntensity :
   have : 0 < 1 / ((v.1 : ℝ) + 1) := by positivity
   linarith
 
-/-! ### Non-vacuity (D-5) -/
+/-! ### Non-vacuity -/
 
 /-- The model exists, and at `k = 1` (the tree with index `0`) the root threshold is `2`. -/
 example : ∃ J : Sym2 (ℕ × List (Fin 2)) → ℝ≥0, rootCriticalIntensity J (0, []) = 2 ∧

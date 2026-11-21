@@ -1,8 +1,8 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-83: the mass-transport principle on groups. New for this project; no upstream proof is
-copied. No new definition: the action, its measure preservation and the diagonal
-invariance of the transport are explicit hypotheses.
+The mass-transport principle on groups. New for this project; no upstream proof is copied. No new
+definition: the action, its measure preservation and the diagonal invariance of the transport are
+explicit hypotheses.
 -/
 module
 
@@ -45,7 +45,7 @@ theorem tsum_mass_transport {Γ : Type*} [Group Γ] (F : Γ → Γ → ℝ≥0�
   simp_rw [h]
   exact ((Equiv.inv Γ).tsum_eq (fun x => F 1 x)).symm
 
-/-- **Mass-transport principle for an invariant random transport** (K5ZX), with the action
+/-- **Mass-transport principle for an invariant random transport**, with the action
 given as a family of measure-preserving maps `act g`. No group-action axioms are needed. -/
 @[tag "X5NY", to_additive lintegral_mass_transport_add /-- **Mass-transport principle for an invariant random transport** (K5ZX),
 additive version. -/]
@@ -111,7 +111,7 @@ theorem law_mass_transport {Γ : Type*} [Group Γ] [Countable Γ]
   lintegral_mass_transport (fun g ω => Sym2.map (g * ·) '' ω)
     (measurePreserving_image_sym2Map_mul_left q hq) t ht hinv
 
-/-! ### Non-vacuity witnesses (D-5) -/
+/-! ### Non-vacuity witnesses -/
 
 /-- On `ℤ`, the transport `F x y = 1` if `y = x + 1` (else `0`) sends mass `1` out of `0`
 and `0` receives mass `1`. -/

@@ -8,6 +8,16 @@ module
 public import PercLib.Meta.Tag
 public import PercLib.Models.LongRange.RootIndependence
 
+/-!
+# Root independence of the susceptibility: correspondence
+
+Wiki correspondence for the equality of susceptibilities under a transitive law.
+
+## Main results
+
+* `chi_eq_of_transitive_law`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory PercLib.Percolation.Bond

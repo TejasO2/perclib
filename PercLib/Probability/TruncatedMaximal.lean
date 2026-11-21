@@ -1,8 +1,7 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
 
-New proofs for issue 459 (Q-125), written on 2026-11-16 by PROVER-G, against pinned mathlib.
-No upstream proof is copied.
+New proofs, written on 2026-11-16, against pinned mathlib. No upstream proof is copied.
 -/
 module
 
@@ -13,7 +12,7 @@ public import Mathlib.MeasureTheory.Function.L2Space
 /-!
 # Doob's `L²` maximal inequality
 
-Part 1 of Q-125 (HXNR). For a real martingale `X` with every `X k` in `L²`,
+For a real martingale `X` with every `X k` in `L²`,
 
   `E[(max_{k ≤ n} |X_k|)²] ≤ 4 E[X_n²]`   (`lintegral_sup_abs_sq_le`).
 
@@ -214,7 +213,7 @@ theorem martingale_sq_sub_predictableVariation [IsFiniteMeasure μ] (hX : Martin
     rw [e1, e2, e3, e4, e5]
     ring
 
-/-! ### D-5 witnesses -/
+/-! ### Non-vacuity witnesses -/
 
 /-- The hypotheses of `lintegral_sup_abs_sq_le` hold for the zero martingale on any finite
 measure space. -/

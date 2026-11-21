@@ -10,6 +10,22 @@ public import PercLib.Probability.Cylinder
 public import Mathlib.Combinatorics.SimpleGraph.Acyclic
 public import Mathlib.Data.Nat.Dist
 
+/-!
+# Percolation on forests
+
+When the positive-probability support is acyclic, the two-point function is the product of the
+probabilities along the unique path and the susceptibility is the sum of path weights; on the ray
+these are explicit geometric expressions.
+
+## Main results
+
+* `ae_openGraph_le_support`
+* `tau_eq_prod_of_isAcyclic`
+* `chi_eq_tsum_paths_of_isAcyclic`
+* `tau_nat_eq_pow_dist`
+* `chi_nat_zero_eq_geometric`
+-/
+
 @[expose] public section
 noncomputable section
 open MeasureTheory Set PercLib.Probability

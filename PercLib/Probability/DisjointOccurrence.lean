@@ -2,12 +2,11 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-Adapted from NearCritical/DisjointOccurrence.lean and the certificate part of
-NearCritical/BK.lean at tomhutchcroft/near-critical-diffusivity,
-revision c820fea91a7482c1755de0ec94ecb9f59ccfcacc, with Tom Hutchcroft's reuse
-permission recorded in docs/DECISIONS.md R-3. The upstream native files have no
-per-file licence header; this notice records permission rather than attributing
-an Apache licence to them. No vendored third-party file is copied here.
+Adapted from NearCritical/DisjointOccurrence.lean and the certificate part of NearCritical/BK.lean
+at tomhutchcroft/near-critical-diffusivity, revision c820fea91a7482c1755de0ec94ecb9f59ccfcacc, with
+Tom Hutchcroft's reuse permission recorded in `docs/DECISIONS.md`. The upstream native files have no
+per-file licence header; this notice records permission rather than attributing an Apache licence to
+them. No vendored third-party file is copied here.
 
 Changed on 2026-11-14: configurations are sets, increasingness is mathlib's
 IsUpperSet, and unrelated harmonic-network dependencies are omitted.

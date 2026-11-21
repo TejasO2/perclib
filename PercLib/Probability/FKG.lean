@@ -2,7 +2,7 @@
 Copyright (c) 2026 PercLib contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 
-New for this project (issue 211, Q-41): the measure form of mathlib's `fkg` and `holley`
+New for this project: the measure form of mathlib's `fkg` and `holley`
 (`Mathlib/Combinatorics/SetFamily/FourFunctions.lean`). No upstream proof is copied.
 -/
 module
@@ -183,7 +183,8 @@ example (p : E → unitInterval) {A B : Set (Set E)} (hA : IsUpperSet A) (hB : I
   measure_inter_ge_of_latticeCondition _ (fun ω η => (prodBernoulli_latticeCondition p ω η).le)
     hA hB
 
-/-- The monotone comparison of S-2 on a finite index set, re-derived from Holley. -/
+/-- The monotone comparison of `PercLib.Probability.Coupling.Monotone` on a finite index set,
+re-derived from Holley. -/
 example (p q : E → unitInterval) (hpq : p ≤ q) {A : Set (Set E)} (hA : IsUpperSet A) :
     prodBernoulli p A ≤ prodBernoulli q A :=
   measure_le_of_holley _ _ (prodBernoulli_holley p q hpq) hA

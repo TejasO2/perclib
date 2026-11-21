@@ -1,19 +1,14 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
 
-Adapted for Q-188 (issue 616) from contributor yujinhkim, repository
-`yujinhkim/lrp`, branch `critical-lrp-1`, commit
-`d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, file
-`PercLib/CriticalLRP/Analysis/LaplaceUnique.lean` (blob `19a96549c5`).
-Licence: Apache-2.0 as declared in that revision's header and
-`third_party/critical-lrp/NOTICE.md`. Upstream origin:
-`yujinhkim/Critical-Long-range-percolation`, revision
-`3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf` (not independently verified).
-Changes: inline the trapezoid weights, omit the unused Tauberian dependency,
-use focused mathlib imports, enabled linters and explicit witnesses.
-Salvaged from branch `work/Q-188-laplace-uniqueness` at tip commit `f26e49c`
-and rebased onto the current tree; the helper `integrableOn_mul_of_norm_bound`
-is replaced by mathlib's `MeasureTheory.Integrable.bdd_mul`.
+Adapted from contributor yujinhkim, repository `yujinhkim/lrp`, branch `critical-lrp-1`, commit
+`d382e4c28d92dd4e698ebf4f2aaf0bc932ae73fc`, file `PercLib/CriticalLRP/Analysis/LaplaceUnique.lean`
+(blob `19a96549c5`). Licence: Apache-2.0 as declared in that revision's header and
+`third_party/critical-lrp/NOTICE.md`. Upstream origin: `yujinhkim/Critical-Long-range-percolation`,
+revision `3b3d1d0e43ef940bfaa2292ee5c2ee094ac4edbf` (not independently verified). Changes: inline
+the trapezoid weights, omit the unused Tauberian dependency, use focused mathlib imports, enabled
+linters and explicit witnesses. The helper `integrableOn_mul_of_norm_bound` is replaced by mathlib's
+`MeasureTheory.Integrable.bdd_mul`.
 
 Uniqueness of the Laplace transform on L¹(0,∞), supporting the Tauberian
 converse of Hutchcroft, Critical long-range percolation I, Theorem I.2.11.
@@ -24,6 +19,21 @@ public import Mathlib.Topology.ContinuousMap.Weierstrass
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.LebesgueDifferentiationThm
 public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 public import Mathlib.Analysis.SpecificLimits.Basic
+
+/-!
+# Uniqueness of the Laplace transform on `(0, ∞)`
+
+An integrable function on `(0, ∞)` whose Laplace transform vanishes identically is zero almost
+everywhere. The proof shows that all moments of `D ∘ (-log)` against polynomials vanish,
+approximates interval indicators by continuous trapezoid functions, and concludes that every
+interval integral vanishes.
+
+## Main results
+
+* `integral_eq_zero_of_forall_laplace_eq_zero`
+* `integral_Ioo_eq_zero`
+* `eq_zero_ae_of_forall_laplace_eq_zero`
+-/
 
 @[expose] public section
 noncomputable section
@@ -453,11 +463,11 @@ theorem eq_zero_ae_of_forall_laplace_eq_zero {D : ℝ → ℝ}
   rw [← h1]
   exact hu
 
-/-- D-5: the zero function meets every positive-rate hypothesis. -/
+/-- Non-vacuity: the zero function meets every positive-rate hypothesis. -/
 example : (fun _ : ℝ => (0 : ℝ)) =ᵐ[volume.restrict (Ioi (0 : ℝ))] 0 :=
   eq_zero_ae_of_forall_laplace_eq_zero (by simp) (by simp)
 
-/-- D-5: a nonzero compactly supported function has an explicitly nonzero
+/-- Non-vacuity: a nonzero compactly supported function has an explicitly nonzero
 Laplace transform. -/
 example :
     IntegrableOn ((Ioo (0 : ℝ) 1).indicator (fun _ => (1 : ℝ))) (Ioi 0) ∧

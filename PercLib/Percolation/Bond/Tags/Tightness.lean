@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 PercLib contributors. Released under Apache 2.0.
-Q-90 correspondence wrappers for the universal tightness, quantile moment and finite-set
-hyperscaling assertions. All mathematical inputs are proved in the imported modules.
+Correspondence wrappers for the universal tightness, quantile moment and finite-set hyperscaling
+assertions. All mathematical inputs are proved in the imported modules.
 -/
 module
 
@@ -11,6 +11,24 @@ public import PercLib.Percolation.Bond.Tightness.Moments
 public import PercLib.Percolation.Bond.Tightness.TruncatedMean
 public import PercLib.Percolation.Bond.Tightness.WindowTails
 public import PercLib.Percolation.Bond.Forest
+
+/-!
+# Universal tightness and hyperscaling: correspondence
+
+Wiki correspondence for universal tightness, quantile moments and finite-set hyperscaling.
+
+## Main results
+
+* `universal_upper_lower_tails`
+* `rooted_upper_tail`
+* `tails_from_witness_splitting`
+* `moment_le_quantile_pow`
+* `expected_maximum_comparable`
+* `finite_set_hyperscaling`
+* `finite_window_hyperscaling`
+* `hyperscaling_exponent_inequalities`
+* `exponent_relations_sampled_root`
+-/
 
 @[expose] public section
 noncomputable section
@@ -357,7 +375,7 @@ theorem exponent_relations_sampled_root [Countable V] (q : ℝ → Sym2 V → un
   field_simp
   ring
 
-/-! ### Non-vacuity of 7VCS (D-5)
+/-! ### Non-vacuity of 7VCS
 
 The zero profile on `ℕ` with windows `{0, …, ⌈R⌉₊ - 1}`: every cluster is a single
 vertex almost surely, so `C = 1`, `δ = 2` give the cluster tail, `M = 2`, the averaged
