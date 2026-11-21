@@ -6,7 +6,14 @@ deprecated alias for one release where that is possible.
 
 ## Announced, not yet merged
 
-None.
+### Size-biased law (`sizeBiased`)
+
+- **What:** a new definition `PercLib.Probability.sizeBiased` in the new file
+  `PercLib/Probability/SizeBias/Defs.lean`: the size-biased law of a nonnegative random
+  variable as a `withDensity` measure, with its API; `PercLib/Probability/SizeBias.lean` now
+  uses it. Tags 6L9Z, IDIL (`work/p-b-6L9Z`, audit `audit-p-b-6L9Z` APPROVE).
+- **Breaks:** nothing; existing statements keep their names (additive change).
+- **Merging:** in the round-12 batch onto `ef5afb7`.
 
 ## Merged
 
