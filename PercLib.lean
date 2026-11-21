@@ -40,6 +40,7 @@ public import PercLib.Analysis.RegularVariation.UniformConvergence
 public import PercLib.Analysis.RiccatiBootstrap
 public import PercLib.Analysis.RiccatiComparison
 public import PercLib.Analysis.SignedDrivenODE
+public import PercLib.Analysis.SqrtLowerBound
 public import PercLib.Analysis.Tags.CriticalExponents
 public import PercLib.Analysis.Tags.IntegratedSusceptibility
 public import PercLib.Analysis.Tags.InverseSquareBlock
@@ -48,6 +49,7 @@ public import PercLib.Analysis.Tags.MarginalODETail
 public import PercLib.Analysis.Tags.MesoscopicTailTransfer
 public import PercLib.Analysis.Tags.ReciprocalCutoff
 public import PercLib.Analysis.Tags.SpatialCutoffMoments
+public import PercLib.Analysis.Tags.SqrtLowerBound
 public import PercLib.Analysis.Tauberian.Laplace
 public import PercLib.Analysis.Tauberian.Converse
 public import PercLib.Analysis.Tauberian.Endpoints
