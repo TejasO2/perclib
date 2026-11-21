@@ -244,6 +244,7 @@ public import PercLib.Percolation.Bond.Tags.CoreGraphCertificates
 public import PercLib.Percolation.Bond.Tags.CoreGlobalConnectivity
 public import PercLib.Percolation.Bond.Tags.CoreIntegratedSusceptibility
 public import PercLib.Percolation.Bond.Tags.CoreIntensity
+public import PercLib.Percolation.Bond.Tags.CoreNearMisses
 public import PercLib.Percolation.Bond.Tags.CoreOpenDegree
 public import PercLib.Percolation.Bond.Tags.CorePaths
 public import PercLib.Percolation.Bond.Tags.CoreRussoContinuity
