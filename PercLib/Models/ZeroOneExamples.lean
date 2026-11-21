@@ -104,6 +104,7 @@ theorem law_root_cluster_infinite_eq (p : unitInterval) (q : Sym2 (Option ℤ) �
 /-- **1J3B.** For every `p ∈ [0,1]` (in particular every `p ∈ (0,1)`) there are a countable
 vertex type, a profile and a root such that an infinite cluster exists almost surely while
 the root percolates with probability exactly `p`. -/
+@[tag "1J3B"]
 theorem exists_root_percolation_eq (p : unitInterval) :
     ∃ (V : Type) (_ : Countable V) (q : Sym2 V → unitInterval) (o : V),
       law q {ω | ∃ v, (cluster ω v).Infinite} = 1 ∧

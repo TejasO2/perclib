@@ -49,6 +49,7 @@ namespace PercLib.Models.Site
 abbrev LatticeSite (d : ℕ) : Type := Fin d → ℤ
 
 /-- The nearest-neighbour lattice graph, represented by the Hasse graph. -/
+@[tag "6RWC"]
 abbrev zdGraph (d : ℕ) : SimpleGraph (LatticeSite d) := SimpleGraph.hasse (LatticeSite d)
 
 /-- A site configuration: the set of open vertices. -/
@@ -66,6 +67,7 @@ def siteCluster (G : SimpleGraph V) (ω : SiteConfig V) (x : V) : Set V :=
   {y | x ∈ ω ∧ (openSiteGraph G ω).Reachable x y}
 
 /-- The event that `x` and `y` are joined by a path of open vertices. -/
+@[tag "8FLS"]
 def siteConn (G : SimpleGraph V) (x y : V) : Set (SiteConfig V) :=
   {ω | x ∈ ω ∧ (openSiteGraph G ω).Reachable x y}
 
@@ -216,6 +218,7 @@ noncomputable def thetaSite (d : ℕ) (p : unitInterval) : ℝ :=
 
 /-- The critical parameter of site percolation on `ℤ^d`: the infimum of the parameters at which the
 origin percolates, together with `1`. -/
+@[tag "8EIH"]
 noncomputable def criticalProbSite (d : ℕ) : ℝ :=
   sInf ({p : ℝ | ∃ h : p ∈ unitInterval, 0 < thetaSite d ⟨p, h⟩} ∪ {1})
 

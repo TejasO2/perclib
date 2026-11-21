@@ -173,4 +173,37 @@ example :
   change ((1 / 2 : ℝ≥0) * (1 / 2)) * ((1 / 2) * (1 / 2)) < 1 / 2
   norm_num
 
+/-- For distinct vertices, a connection has probability at most `w_x w_y`: both endpoints
+must be open. -/
+theorem siteBernoulli_siteConn_le_mul_of_ne (G : SimpleGraph V) (w : V → unitInterval)
+    {x y : V} (hxy : x ≠ y) :
+    siteBernoulli w (siteConn G x y) ≤
+      (unitInterval.toNNReal (w x) : ℝ≥0∞) * (unitInterval.toNNReal (w y) : ℝ≥0∞) := by
+  have hsub : siteConn G x y ⊆ {ω : Set V | (↑({x, y} : Finset V) : Set V) ⊆ ω} := by
+    intro ω hω
+    have h := siteConn_subset G x y hω
+    simp only [Finset.coe_insert, Finset.coe_singleton, Set.insert_subset_iff,
+      Set.singleton_subset_iff]
+    exact h
+  calc siteBernoulli w (siteConn G x y)
+      ≤ siteBernoulli w {ω : Set V | (↑({x, y} : Finset V) : Set V) ⊆ ω} := measure_mono hsub
+    _ = _ := by simpa [siteBernoulli, hxy] using prodBernoulli_subset w ({x, y} : Finset V)
+
+/-- The infinite-cluster event along an increasing exhaustion `F n ↑ V` by finite sets:
+`{|K_s(x)| = ∞} = ⋂ n, ⋃ y ∉ F n, {x ↔ₛ y}`. -/
+theorem siteInfinite_eq_iInter_of_monotone (G : SimpleGraph V) (x : V) (F : ℕ → Finset V)
+    (hF : Monotone F) (hcov : ∀ v, ∃ n, v ∈ F n) :
+    {ω : SiteConfig V | (siteCluster G ω x).Infinite} =
+      ⋂ n, ⋃ y ∈ ((F n : Set V))ᶜ, siteConn G x y := by
+  rw [siteInfinite_eq_iInter]
+  ext ω
+  simp only [Set.mem_iInter, Set.mem_iUnion, Set.mem_compl_iff, Finset.mem_coe, exists_prop]
+  constructor
+  · intro h n
+    exact h (F n)
+  · intro h S
+    choose N hN using hcov
+    obtain ⟨y, hyF, hy⟩ := h (S.sup N)
+    exact ⟨y, fun hyS => hyF (hF (Finset.le_sup hyS) (hN y)), hy⟩
+
 end PercLib.Models.Site

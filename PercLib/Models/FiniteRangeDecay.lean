@@ -11,6 +11,8 @@ public import PercLib.Models.Site.Basic
 public import PercLib.Percolation.Bond.Forest
 public import Mathlib.Analysis.Complex.ExponentialBounds
 public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import PercLib.Probability.ExponentialMoments
+public import PercLib.Percolation.Bond.TreeGraph.Moments
 
 /-! # Exponential comparisons for cluster volumes
 
@@ -18,6 +20,8 @@ public import Mathlib.MeasureTheory.Integral.Bochner.Basic
   `X⁴` is integrable and `E X⁴ ≤ 1152 χ⁴ (log 2χ)² E X²`. With `T = 24 χ² log(2χ)` and
   `s = 1/(4χ²)`, pointwise `X⁴ ≤ T² X² + T³ e^{-sT} X e^{sX}`, because `x³ e^{-sx}` is
   decreasing on `[T, ∞)`; then `E X² ≥ χ²` absorbs the second term.
+* `integral_encard_cluster_pow_four_le` (IXEZ for percolation): the same bound for the root
+  cluster volume of a model with finite susceptibility that is the same at every vertex.
 * `ae_encard_cluster_ge_of_exit` (YVJT, geometric step): for a profile on `ℤ^d` vanishing on
   pairs at sup distance `> R`, almost surely a connection from `o` to a vertex at sup distance
   `> r` forces `|K_o| ≥ ⌊r/R⌋ + 1`.
@@ -220,6 +224,118 @@ theorem integral_pow_four_le_const_one {Ω : Type*} [MeasurableSpace Ω] (P : Me
     exact (exp_le_exp.2 (by linarith : (1 / 2 : ℝ) ≤ Real.log 2)).trans_eq
       (Real.exp_log (by norm_num))
   linarith
+
+/-! ### IXEZ for cluster volumes -/
+
+section ClusterVolume
+
+open PercLib.Probability PercLib.Percolation.Bond
+open scoped ENNReal
+
+/-- **IXEZ for percolation.** For an independent bond model on a countable vertex set whose
+susceptibility is finite and the same at every vertex, the root cluster volume
+`X = |K_o|` (read in `ℕ`; it is a.s. finite) satisfies `E X⁴ ≤ 1152 χ⁴ log²(2χ) E X²`.
+The exponential-moment hypothesis of `integral_pow_four_le` comes from the tree-graph moment
+bounds (`lintegral_encard_pow_le`) and `lintegral_mul_exp_le` at `r = 1/(4χ²)`. -/
+theorem integral_encard_cluster_pow_four_le {V : Type*} [Countable V]
+    (q : Sym2 V → unitInterval) (o : V) (hconst : ∀ x, chi q x = chi q o)
+    (hfin : chi q o < ⊤) :
+    Integrable (fun ω => ((cluster ω o).encard.toNat : ℝ) ^ 4) (law q) ∧
+      Integrable (fun ω => ((cluster ω o).encard.toNat : ℝ) ^ 2) (law q) ∧
+      ∫ ω, ((cluster ω o).encard.toNat : ℝ) ^ 4 ∂law q ≤
+        1152 * (chi q o).toReal ^ 4 * Real.log (2 * (chi q o).toReal) ^ 2 *
+          ∫ ω, ((cluster ω o).encard.toNat : ℝ) ^ 2 ∂law q := by
+  set χ := (chi q o).toReal with hχdef
+  set X : Config V → ℝ := fun ω => ((cluster ω o).encard.toNat : ℝ) with hXdef
+  have hEm : Measurable fun ω : Config V => (cluster ω o).encard := measurable_encard_cluster o
+  have hXm : Measurable X := (measurable_of_countable (fun n : ℕ∞ => (n.toNat : ℝ))).comp hEm
+  have hX0 : ∀ ω, 0 ≤ X ω := fun ω => Nat.cast_nonneg _
+  have hχtop : chi q o ≠ ⊤ := hfin.ne
+  have hχ1 : 1 ≤ chi q o := by
+    calc (1 : ℝ≥0∞) = ∫⁻ _, 1 ∂law q := by simp
+      _ ≤ chi q o := lintegral_mono fun ω => by
+        have h : (1 : ℕ∞) ≤ (cluster ω o).encard :=
+          Set.one_le_encard_iff_nonempty.2 ⟨o, SimpleGraph.Reachable.refl o⟩
+        have h' := ENat.toENNReal_le.2 h
+        simpa using h'
+  have hχ : 1 ≤ χ := by
+    have := ENNReal.toReal_mono hχtop hχ1
+    simpa using this
+  have hχ0 : 0 < χ := zero_lt_one.trans_le hχ
+  -- `ofReal X ≤ |K_o|` everywhere, with equality where the cluster is finite.
+  have hle : ∀ ω, ENNReal.ofReal (X ω) ≤ ((cluster ω o).encard : ℝ≥0∞) := by
+    intro ω
+    rcases eq_or_ne (cluster ω o).encard ⊤ with h | h
+    · simp [h]
+    · obtain ⟨m, hm⟩ := ENat.ne_top_iff_exists.1 h
+      simp [hXdef, ← hm]
+  have hae : ∀ᵐ ω ∂law q, ENNReal.ofReal (X ω) = ((cluster ω o).encard : ℝ≥0∞) := by
+    have hmeas : Measurable fun ω : Config V => ((cluster ω o).encard : ℝ≥0∞) :=
+      (measurable_of_countable (fun n : ℕ∞ => (n : ℝ≥0∞))).comp hEm
+    filter_upwards [ae_lt_top hmeas hχtop] with ω hω
+    have h : (cluster ω o).encard ≠ ⊤ := (ENat.toENNReal_lt_top.1 hω).ne
+    obtain ⟨m, hm⟩ := ENat.ne_top_iff_exists.1 h
+    simp [hXdef, ← hm]
+  have hlint : ∫⁻ ω, ENNReal.ofReal (X ω) ∂law q = chi q o := lintegral_congr_ae hae
+  have hXi : Integrable X (law q) :=
+    (lintegral_ofReal_ne_top_iff_integrable hXm.aestronglyMeasurable
+      (Filter.Eventually.of_forall hX0)).1 (by rw [hlint]; exact hχtop)
+  have hint : ∫ ω, X ω ∂law q = χ := by
+    rw [integral_eq_lintegral_of_nonneg_ae (Filter.Eventually.of_forall hX0)
+      hXm.aestronglyMeasurable, hlint]
+  -- Moment bounds from the tree-graph inequality (Y84V).
+  have hmom : ∀ m : ℕ, 1 ≤ m → ∫⁻ ω, ENNReal.ofReal (X ω ^ m) ∂law q ≤
+      ENNReal.ofReal (Nat.doubleFactorial (2 * m - 3) * χ ^ (2 * m - 1)) := by
+    intro m hm
+    have hY := lintegral_encard_pow_le q (M := chi q o) (fun x => (hconst x).le) m hm o
+    calc ∫⁻ ω, ENNReal.ofReal (X ω ^ m) ∂law q
+        ≤ ∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ^ m ∂law q := lintegral_mono fun ω => by
+          rw [ENNReal.ofReal_pow (hX0 ω)]
+          exact pow_le_pow_left₀ zero_le (hle ω) m
+      _ ≤ _ := hY
+      _ = ENNReal.ofReal (Nat.doubleFactorial (2 * m - 3) * χ ^ (2 * m - 1)) := by
+        rw [← ENNReal.ofReal_toReal hχtop, ← hχdef,
+          ENNReal.ofReal_mul (Nat.cast_nonneg _), ENNReal.ofReal_natCast,
+          ← ENNReal.ofReal_pow hχ0.le,
+          show 2 * m - 1 = (2 * m - 2) + 1 by omega, pow_succ,
+          ENNReal.ofReal_mul (by positivity)]
+        ring
+  -- The exponential moment (0BQB).
+  set r : ℝ := 1 / (4 * χ ^ 2) with hrdef
+  have hr : 0 ≤ r := by positivity
+  have hr1 : r < (2 * χ ^ 2)⁻¹ := by
+    rw [hrdef, one_div]
+    exact inv_strictAnti₀ (by positivity) (by nlinarith [sq_pos_of_pos hχ0])
+  have hexpL := lintegral_mul_exp_le (P := law q) hXm hX0 hχ0 hmom hr hr1
+  have hval : χ / √(1 - 2 * r * χ ^ 2) = √2 * χ := by
+    have h1 : 1 - 2 * r * χ ^ 2 = 2⁻¹ := by
+      rw [hrdef]
+      field_simp
+      norm_num
+    rw [h1, Real.sqrt_inv, div_inv_eq_mul, mul_comm]
+  rw [hval] at hexpL
+  have hEm' : Measurable fun ω => X ω * exp (r * X ω) :=
+    hXm.mul (measurable_exp.comp (hXm.const_mul r))
+  have hE0 : ∀ ω, 0 ≤ X ω * exp (r * X ω) := fun ω => mul_nonneg (hX0 ω) (exp_pos _).le
+  have hexpi : Integrable (fun ω => X ω * exp (r * X ω)) (law q) :=
+    (lintegral_ofReal_ne_top_iff_integrable hEm'.aestronglyMeasurable
+      (Filter.Eventually.of_forall hE0)).1 (ne_top_of_le_ne_top ENNReal.ofReal_ne_top hexpL)
+  have hexp : ∫ ω, X ω * exp (r * X ω) ∂law q ≤ √2 * χ := by
+    rw [integral_eq_lintegral_of_nonneg_ae (Filter.Eventually.of_forall hE0)
+      hEm'.aestronglyMeasurable]
+    exact ENNReal.toReal_le_of_le_ofReal (by positivity) hexpL
+  have hfun : (fun ω => X ω * exp (X ω / (4 * (∫ ω, X ω ∂law q) ^ 2))) =
+      fun ω => X ω * exp (r * X ω) := by
+    funext ω
+    rw [hint, hrdef]
+    ring_nf
+  have main := integral_pow_four_le (P := law q) (X := X) hXm.aestronglyMeasurable hX0 hXi
+    (by rw [hint]; exact hχ) (by rw [hfun]; exact hexpi)
+    (by rw [hfun, hint]; exact hexp)
+  rw [hint] at main
+  exact main
+
+end ClusterVolume
 
 /-! ### YVJT -/
 

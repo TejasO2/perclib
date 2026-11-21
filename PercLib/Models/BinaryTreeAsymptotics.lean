@@ -454,6 +454,75 @@ theorem binaryTree_law_le_encard_isEquivalent (p : unitInterval)
     ← tsum_catalan_div_four_pow_tail n]
   exact tsum_congr fun k => by norm_num
 
+/-- The closed-form Catalan expression of the asymptotic theorems is the Catalan law:
+`Cat(n)/4^n · (1-p)/p · (4p(1-p))^n = Cat(n) p^(n-1) (1-p)^(n+1)` for `p ≠ 0`, `n ≥ 1`. -/
+theorem catalan_div_four_pow_mul_eq {p : ℝ} (hp : p ≠ 0) {n : ℕ} (hn : 1 ≤ n) :
+    (catalan n : ℝ) / 4 ^ n * ((1 - p) / p) * (4 * p * (1 - p)) ^ n =
+      (catalan n : ℝ) * p ^ (n - 1) * (1 - p) ^ (n + 1) := by
+  obtain ⟨m, rfl⟩ : ∃ m, n = m + 1 := ⟨n - 1, by omega⟩
+  rw [show m + 1 - 1 = m by omega, show 4 * p * (1 - p) = 4 * (p * (1 - p)) by ring,
+    mul_pow, mul_pow]
+  field_simp
+  ring
+
+/-- **V5OZ, uniform asymptotics.** For a family of tree profiles `q p` with parameter `p`,
+`P_p(|K| = n) ~ (1-p)/(p√π) n^{-3/2} (4p(1-p))^n` uniformly in `p ∈ (0,1)`. -/
+theorem binaryTree_law_card_tendstoUniformlyOn
+    (q : unitInterval → Sym2 (List (Fin 2)) → unitInterval)
+    (hq : ∀ p e, ¬ e.IsDiag → q p e =
+      if e ∈ (SimpleGraph.fromRel fun u w : List (Fin 2) => ∃ b, w = b :: u).edgeSet then p
+        else 0) :
+    TendstoUniformlyOn (fun (n : ℕ) (p : unitInterval) =>
+      (law (q p) {ω | (cluster ω []).ncard = n ∧ (cluster ω []).Finite}).toReal /
+        ((1 - (p : ℝ)) / ((p : ℝ) * √π) * (n : ℝ) ^ (-(3 / 2 : ℝ)) *
+          (4 * (p : ℝ) * (1 - (p : ℝ))) ^ n))
+      (fun _ => 1) atTop {p : unitInterval | (p : ℝ) ∈ Set.Ioo 0 1} := by
+  have h := catalan_tendstoUniformlyOn_ratio.comp (fun p : unitInterval => (p : ℝ))
+  refine h.congr (eventually_atTop.2 ⟨1, fun n hn p hp => ?_⟩)
+  have hp0 : (p : ℝ) ≠ 0 := hp.1.ne'
+  simp only [Function.comp_apply]
+  rw [binaryTree_law_cluster_card_toReal p (q p) (hq p) hn, catalan_div_four_pow_mul_eq hp0 hn]
+
+/-- **V5OZ, exact ratio.** For `0 < p < 1` and `n ≥ 1`, the ratio of `P_p(|K| = n)` to
+`(1-p)/(p√π) n^{-3/2} (4p(1-p))^n` equals `(Cat(n)/4^n) / (n^{-3/2}/√π)`, a function of `n`
+alone. -/
+theorem binaryTree_law_card_ratio_eq (q : unitInterval → Sym2 (List (Fin 2)) → unitInterval)
+    (hq : ∀ p e, ¬ e.IsDiag → q p e =
+      if e ∈ (SimpleGraph.fromRel fun u w : List (Fin 2) => ∃ b, w = b :: u).edgeSet then p else 0)
+    {p : unitInterval} (hp : (p : ℝ) ∈ Set.Ioo 0 1) {n : ℕ} (hn : 1 ≤ n) :
+    (law (q p) {ω | (cluster ω []).ncard = n ∧ (cluster ω []).Finite}).toReal /
+        ((1 - (p : ℝ)) / ((p : ℝ) * √π) * (n : ℝ) ^ (-(3 / 2 : ℝ)) *
+          (4 * (p : ℝ) * (1 - (p : ℝ))) ^ n) =
+      (catalan n : ℝ) / 4 ^ n / ((n : ℝ) ^ (-(3 / 2 : ℝ)) / √π) := by
+  rw [binaryTree_law_cluster_card_toReal p (q p) (hq p) hn,
+    ← catalan_div_four_pow_mul_eq hp.1.ne' hn, catalan_ratio_eq hp.1 hp.2 n]
+
+/-- **V5OZ, near-critical window.** If `p_n = 1/2 + ε_n` with `ε_n → 0` and `n ε_n⁴ → 0`,
+then `P_{p_n}(|K| = n) ~ n^{-3/2} e^{-4nε_n²}/√π`. -/
+theorem binaryTree_law_card_nearCritical_isEquivalent (pn : ℕ → unitInterval)
+    (q : ℕ → Sym2 (List (Fin 2)) → unitInterval)
+    (hq : ∀ n e, ¬ e.IsDiag → q n e =
+      if e ∈ (SimpleGraph.fromRel fun u w : List (Fin 2) => ∃ b, w = b :: u).edgeSet then pn n
+        else 0)
+    (h1 : Tendsto (fun n => (pn n : ℝ) - 1 / 2) atTop (𝓝 0))
+    (h2 : Tendsto (fun n : ℕ => (n : ℝ) * ((pn n : ℝ) - 1 / 2) ^ 4) atTop (𝓝 0)) :
+    (fun n : ℕ => (law (q n) {ω | (cluster ω []).ncard = n ∧ (cluster ω []).Finite}).toReal)
+      ~[atTop] (fun n : ℕ => (n : ℝ) ^ (-(3 / 2 : ℝ)) *
+        Real.exp (-4 * n * ((pn n : ℝ) - 1 / 2) ^ 2) / √π) := by
+  have h := catalan_nearCritical_isEquivalent (fun n => (pn n : ℝ) - 1 / 2) h1 h2
+  refine h.congr_left ?_
+  have hev := h1.eventually (Ioo_mem_nhds (by norm_num : (-1 / 2 : ℝ) < 0)
+    (by norm_num : (0 : ℝ) < 1 / 2))
+  filter_upwards [hev, eventually_ge_atTop 1] with n hn hn1
+  have hp0 : (pn n : ℝ) ≠ 0 := by
+    have := hn.1
+    intro h0
+    rw [h0] at this
+    norm_num at this
+  simp only [add_sub_cancel]
+  rw [binaryTree_law_cluster_card_toReal (pn n) (q n) (hq n) hn1,
+    catalan_div_four_pow_mul_eq hp0 hn1]
+
 end Tree
 
 /-! ### Non-vacuity (D-5) -/

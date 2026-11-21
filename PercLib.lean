@@ -108,6 +108,14 @@ public import PercLib.Models.NormalizedSmallIntensityLine
 public import PercLib.Models.Site.Basic
 public import PercLib.Models.Site.Harris
 public import PercLib.Models.Site.SelfAvoiding
+public import PercLib.Models.Tags.BinaryTree
+public import PercLib.Models.Tags.Boundary
+public import PercLib.Models.Tags.FiniteRangeDecay
+public import PercLib.Models.Tags.Hierarchical
+public import PercLib.Models.Tags.Lattice
+public import PercLib.Models.Tags.Line
+public import PercLib.Models.Tags.Site
+public import PercLib.Models.Tags.ZeroOne
 public import PercLib.Models.TranslationInvariant
 public import PercLib.Models.Tree
 public import PercLib.Models.TreeRecursion
