@@ -41,7 +41,7 @@ theorem measurable_restrict_pairs (S : Set V) :
 
 /-- Internal connectivity is measurable on every countable domain, even when the
 ambient vertex type is uncountable. Finite domains need no extra assumption. -/
-theorem measurableSet_localConn (S : Set V) [Countable S] (x y : S) :
+theorem measurableSet_setOf_reachable_induce (S : Set V) [Countable S] (x y : S) :
     MeasurableSet {ω : Config V | ((openGraph ω).induce S).Reachable x y} := by
   simpa only [openGraph_induce, conn, Set.preimage_ofPred_eq] using
     (measurableSet_conn x y).preimage (measurable_restrict_pairs S)
@@ -81,8 +81,7 @@ theorem conn_of_localConn (ω : Config V) (S : Set V) (x y : S)
 /-- Every global connection is witnessed in a finite vertex domain. No ambient
 countability, interaction-range, or degree assumption is needed. -/
 theorem conn_iff_exists_finset_localConn (ω : Config V) (x y : V) :
-    ω ∈ conn x y ↔ ∃ S : Finset V, ∃ hx : x ∈ S, ∃ hy : y ∈ S,
-      ((openGraph ω).induce (S : Set V)).Reachable ⟨x, hx⟩ ⟨y, hy⟩ := by
+    ω ∈ conn x y ↔ ∃ S : Finset V, ω ∈ localConn (S : Set V) x y := by
   classical
   constructor
   · rintro ⟨w⟩
@@ -102,12 +101,11 @@ example (x : V) :
 /-- Finite-domain events are measurable without ambient countability. -/
 example (S : Finset V) (x y : S) :
     MeasurableSet {ω : Config V | ((openGraph ω).induce (S : Set V)).Reachable x y} :=
-  measurableSet_localConn (S : Set V) x y
+  measurableSet_setOf_reachable_induce (S : Set V) x y
 
 /-- Internal connection events increase with an increasing family of domains. -/
 theorem monotone_localConn {S : ℕ → Set V} (hS : Monotone S) (x y : V) :
-    Monotone (fun n => {ω : Config V | ∃ hx : x ∈ S n, ∃ hy : y ∈ S n,
-      ((openGraph ω).induce (S n)).Reachable ⟨x, hx⟩ ⟨y, hy⟩}) := by
+    Monotone (fun n => localConn (S n) x y) := by
   intro n m hnm ω hω
   rcases hω with ⟨hx, hy, hxy⟩
   exact ⟨hS hnm hx, hS hnm hy,
@@ -117,11 +115,9 @@ theorem monotone_localConn {S : ℕ → Set V} (hS : Monotone S) (x y : V) :
 domain; this does not bound the length of an edge or the number of potential neighbours. -/
 theorem conn_eq_iUnion_localConn {S : ℕ → Set V} (hS : Monotone S)
     (hcover : ∀ v, ∃ n, v ∈ S n) (x y : V) :
-    (conn x y : Set (Config V)) = ⋃ n, {ω : Config V |
-      ∃ hx : x ∈ S n, ∃ hy : y ∈ S n,
-        ((openGraph ω).induce (S n)).Reachable ⟨x, hx⟩ ⟨y, hy⟩} := by
+    (conn x y : Set (Config V)) = ⋃ n, localConn (S n) x y := by
   ext ω
-  simp only [Set.mem_iUnion, Set.mem_ofPred_eq]
+  simp only [Set.mem_iUnion]
   constructor
   · intro h
     obtain ⟨F, hx, hy, hxy⟩ := (conn_iff_exists_finset_localConn ω x y).mp h
@@ -137,16 +133,14 @@ theorem conn_eq_iUnion_localConn {S : ℕ → Set V} (hS : Monotone S)
 This uses continuity from below, without subtracting an infinite susceptibility. -/
 theorem tau_eq_iSup_localConn (q : Sym2 V → unitInterval)
     {S : ℕ → Set V} (hS : Monotone S) (hcover : ∀ v, ∃ n, v ∈ S n) (x y : V) :
-    tau q x y = ⨆ n, law q {ω : Config V | ∃ hx : x ∈ S n, ∃ hy : y ∈ S n,
-      ((openGraph ω).induce (S n)).Reachable ⟨x, hx⟩ ⟨y, hy⟩} := by
+    tau q x y = ⨆ n, law q (localConn (S n) x y) := by
   rw [tau, conn_eq_iUnion_localConn hS hcover]
   exact (monotone_localConn hS x y).measure_iUnion
 
 /-- Probability convergence along any increasing domain exhaustion. -/
 theorem tendsto_localConn_probability (q : Sym2 V → unitInterval)
     {S : ℕ → Set V} (hS : Monotone S) (hcover : ∀ v, ∃ n, v ∈ S n) (x y : V) :
-    Filter.Tendsto (fun n => law q {ω : Config V | ∃ hx : x ∈ S n, ∃ hy : y ∈ S n,
-      ((openGraph ω).induce (S n)).Reachable ⟨x, hx⟩ ⟨y, hy⟩})
+    Filter.Tendsto (fun n => law q (localConn (S n) x y))
       Filter.atTop (nhds (tau q x y)) := by
   have h := tendsto_measure_iUnion_atTop (μ := law q) (monotone_localConn hS x y)
   simpa only [← conn_eq_iUnion_localConn hS hcover, tau, Function.comp_def] using h

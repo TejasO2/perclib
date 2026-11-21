@@ -13,6 +13,8 @@ module
 
 public import PercLib.Probability.Cylinder
 public import PercLib.Probability.Russo
+public import PercLib.Probability.Pivotal.Algebra
+public import PercLib.Probability.FiniteEnergy.Insertion
 public import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 
 /-!
@@ -28,6 +30,10 @@ pivotal coordinates.
 * `prodBernoulli_hasDerivWithinAt_open_pivotal`
 * `prodBernoulli_sub_eq_integral_pivotal`
 * `prodBernoulli_sub_eq_integral_segment`
+* `prodBernoulli_real_open_pivotal_of_measurableSet` and
+  `prodBernoulli_real_closed_pivotal_of_measurableSet`: the pivotal factorisation on an
+  arbitrary index type
+* `eq_setOf_sdiff_mem_union_open_pivotal`
 -/
 
 @[expose] public section
@@ -283,5 +289,86 @@ example (p₁ p₂ : unitInterval) :
     simp [measureReal_def, prodBernoulli_setOf_mem, two_mul]
   have h := prodBernoulli_sub_eq_integral_pivotal hA p₁ p₂
   simpa only [hevent, hsum] using h
+
+end PercLib.Probability
+
+/-! ### Pivotal events on an arbitrary index type -/
+
+namespace PercLib.Probability
+
+variable {I : Type*}
+
+/-- The open-pivotal event of a measurable event is measurable, on any index type. -/
+theorem measurableSet_setOf_insert_mem_and_sdiff_notMem {A : Set (Set I)}
+    (hA : MeasurableSet A) (e : I) :
+    MeasurableSet {ω : Set I | insert e ω ∈ A ∧ ω \ {e} ∉ A} := by
+  classical
+  simpa only [FiniteProfile.pivotal_decide_iff] using
+    FiniteProfile.measurableSet_pivotal_decide hA e
+
+/-- Pivotality of `e` does not depend on the state of `e`. -/
+theorem insert_mem_and_sdiff_notMem_iff_of_sdiff_eq (A : Set (Set I)) (e : I)
+    {ω ω' : Set I} (h : ω \ {e} = ω' \ {e}) :
+    (insert e ω ∈ A ∧ ω \ {e} ∉ A) ↔ (insert e ω' ∈ A ∧ ω' \ {e} ∉ A) := by
+  classical
+  simpa only [FiniteProfile.pivotal_decide_iff] using
+    FiniteProfile.pivotal_decide_of_sdiff_eq A e h
+
+/-- **Open pivotal factorisation on any index type.** The open part of the pivotal event of a
+measurable event has probability `p e` times that of the pivotal event; no countability of the
+index type is needed. -/
+theorem prodBernoulli_real_open_pivotal_of_measurableSet (p : I → unitInterval)
+    {A : Set (Set I)} (hA : MeasurableSet A) (e : I) :
+    (prodBernoulli p).real {ω | (insert e ω ∈ A ∧ ω \ {e} ∉ A) ∧ e ∈ ω} =
+      (p e : ℝ) * (prodBernoulli p).real {ω | insert e ω ∈ A ∧ ω \ {e} ∉ A} := by
+  classical
+  have h := prodBernoulli_inter_pattern p {e} {e} (Finset.Subset.refl _) _
+    (measurableSet_setOf_insert_mem_and_sdiff_notMem hA e)
+    (fun ω ω' h => insert_mem_and_sdiff_notMem_iff_of_sdiff_eq A e (by simpa using h))
+  have heq : {ω : Set I | ω ∩ (({e} : Finset I) : Set I) = (({e} : Finset I) : Set I)} =
+      {ω | e ∈ ω} := by
+    ext ω; simp [Set.inter_eq_right]
+  rw [heq] at h
+  simp only [Finset.sdiff_self, Finset.prod_empty, mul_one, Finset.prod_singleton] at h
+  rw [measureReal_def, show {ω : Set I | (insert e ω ∈ A ∧ ω \ {e} ∉ A) ∧ e ∈ ω} =
+    {ω | insert e ω ∈ A ∧ ω \ {e} ∉ A} ∩ {ω | e ∈ ω} from rfl, h, ENNReal.toReal_mul,
+    mul_comm, measureReal_def]
+  rfl
+
+/-- **Closed pivotal factorisation on any index type.** The closed part of the pivotal event of a
+measurable event has probability `1 - p e` times that of the pivotal event. -/
+theorem prodBernoulli_real_closed_pivotal_of_measurableSet (p : I → unitInterval)
+    {A : Set (Set I)} (hA : MeasurableSet A) (e : I) :
+    (prodBernoulli p).real {ω | (insert e ω ∈ A ∧ ω \ {e} ∉ A) ∧ e ∉ ω} =
+      (1 - (p e : ℝ)) * (prodBernoulli p).real {ω | insert e ω ∈ A ∧ ω \ {e} ∉ A} := by
+  classical
+  have h := prodBernoulli_inter_pattern p {e} ∅ (Finset.empty_subset _) _
+    (measurableSet_setOf_insert_mem_and_sdiff_notMem hA e)
+    (fun ω ω' h => insert_mem_and_sdiff_notMem_iff_of_sdiff_eq A e (by simpa using h))
+  have heq : {ω : Set I | ω ∩ (({e} : Finset I) : Set I) = ((∅ : Finset I) : Set I)} =
+      {ω | e ∉ ω} := by
+    ext ω; simp [Set.inter_singleton_eq_empty]
+  rw [heq] at h
+  simp only [Finset.sdiff_empty, Finset.prod_empty, mul_one, Finset.prod_singleton] at h
+  rw [measureReal_def, show {ω : Set I | (insert e ω ∈ A ∧ ω \ {e} ∉ A) ∧ e ∉ ω} =
+    {ω | insert e ω ∈ A ∧ ω \ {e} ∉ A} ∩ {ω | e ∉ ω} from rfl, h, ENNReal.toReal_mul,
+    mul_comm, measureReal_def]
+  congr 1
+
+/-- **Pivotal decomposition.** An increasing event splits into the configurations that stay
+in it after closing `e`, and the open pivotal configurations. -/
+theorem eq_setOf_sdiff_mem_union_open_pivotal {A : Set (Set I)} (hA : IsUpperSet A) (e : I) :
+    A = {ω | ω \ {e} ∈ A} ∪ {ω | (insert e ω ∈ A ∧ ω \ {e} ∉ A) ∧ e ∈ ω} := by
+  classical
+  rw [union_comm]
+  simpa only [FiniteProfile.pivotal_decide_iff] using
+    FiniteProfile.event_eq_pivotal_open_union hA e
+
+/-- The two parts of the pivotal decomposition are disjoint, for every event. -/
+theorem disjoint_setOf_sdiff_mem_open_pivotal (A : Set (Set I)) (e : I) :
+    Disjoint {ω | ω \ {e} ∈ A} {ω | (insert e ω ∈ A ∧ ω \ {e} ∉ A) ∧ e ∈ ω} := by
+  classical
+  simpa only [FiniteProfile.pivotal_decide_iff] using
+    (FiniteProfile.disjoint_pivotal_open_closed A e).symm
 
 end PercLib.Probability

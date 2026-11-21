@@ -85,16 +85,14 @@ theorem mem_disjointOccurrence_of_path {ω : Config V} {x y c : V}
 
 /-- Connection with `S` deleted implies connection. -/
 theorem law_deleted_le_tau (q : Sym2 V → unitInterval) (S : Set V) (y w : V) :
-    law q {ω | ∃ hy : y ∈ Sᶜ, ∃ hw : w ∈ Sᶜ,
-        ((openGraph ω).induce Sᶜ).Reachable ⟨y, hy⟩ ⟨w, hw⟩} ≤ tau q y w := by
+    law q (localConn Sᶜ y w) ≤ tau q y w := by
   refine measure_mono fun ω ⟨hy, hw, h⟩ => ?_
   exact conn_of_localConn ω Sᶜ ⟨y, hy⟩ ⟨w, hw⟩ h
 
 /-- An open connection from `y` to `w` that is lost when `S` is deleted passes through some
 `c ∈ S`, and then `y ↔ c` and `c ↔ w` occur disjointly. -/
 theorem conn_subset_deleted_union (S : Set V) (y w : V) :
-    conn y w ⊆ {ω | ∃ hy : y ∈ Sᶜ, ∃ hw : w ∈ Sᶜ,
-        ((openGraph ω).induce Sᶜ).Reachable ⟨y, hy⟩ ⟨w, hw⟩} ∪
+    conn y w ⊆ localConn Sᶜ y w ∪
       ⋃ c : S, disjointOccurrence (conn y (c : V)) (conn (c : V) w) := by
   intro ω hω
   obtain ⟨p, hp⟩ := (show (openGraph ω).Reachable y w from hω).exists_isPath
@@ -108,8 +106,7 @@ theorem conn_subset_deleted_union (S : Set V) (y w : V) :
 /-- **Connection loss on deleting a set.** For `y, w ∉ S`,
 `τ(y,w) ≤ τ^S(y,w) + ∑_{c ∈ S} τ(y,c) τ(c,w)`. -/
 theorem tau_le_deleted_add [Countable V] (q : Sym2 V → unitInterval) (S : Set V) (y w : V) :
-    tau q y w ≤ law q {ω | ∃ hy : y ∈ Sᶜ, ∃ hw : w ∈ Sᶜ,
-        ((openGraph ω).induce Sᶜ).Reachable ⟨y, hy⟩ ⟨w, hw⟩} +
+    tau q y w ≤ law q (localConn Sᶜ y w) +
       ∑' c : S, tau q y c * tau q c w := by
   refine (measure_mono (conn_subset_deleted_union S y w)).trans
     ((measure_union_le _ _).trans (add_le_add_right ?_ _))
@@ -120,23 +117,10 @@ theorem tau_le_deleted_add [Countable V] (q : Sym2 V → unitInterval) (S : Set 
 
 /-- Connection inside the whole vertex set to a singleton is connection. -/
 theorem setOf_induce_univ_singleton (y u : V) :
-    {ω : Config V | ∃ b ∈ ({u} : Set V), ∃ hy : y ∈ (univ : Set V),
-      ∃ hb : b ∈ (univ : Set V), ((openGraph ω).induce univ).Reachable ⟨y, hy⟩ ⟨b, hb⟩} =
+    {ω : Config V | ∃ b ∈ ({u} : Set V), ω ∈ localConn univ y b} =
       conn y u := by
   ext ω
-  simp only [mem_singleton_iff, exists_eq_left, mem_univ, exists_true_left, mem_ofPred_eq]
-  constructor
-  · exact fun h => conn_of_localConn ω univ ⟨y, mem_univ y⟩ ⟨u, mem_univ u⟩ h
-  · exact fun h => h.map (SimpleGraph.induceUnivIso (openGraph ω)).symm.toHom
-
-/-- Connection with `S` deleted is symmetric. -/
-theorem setOf_deleted_comm (S : Set V) (z w : V) :
-    {ω : Config V | ∃ hz : z ∈ Sᶜ, ∃ hw : w ∈ Sᶜ,
-      ((openGraph ω).induce Sᶜ).Reachable ⟨z, hz⟩ ⟨w, hw⟩} =
-    {ω : Config V | ∃ hw : w ∈ Sᶜ, ∃ hz : z ∈ Sᶜ,
-      ((openGraph ω).induce Sᶜ).Reachable ⟨w, hw⟩ ⟨z, hz⟩} := by
-  ext ω
-  exact ⟨fun ⟨hz, hw, h⟩ => ⟨hw, hz, h.symm⟩, fun ⟨hw, hz, h⟩ => ⟨hz, hw, h.symm⟩⟩
+  simp only [mem_singleton_iff, exists_eq_left, mem_ofPred_eq, localConn_univ]
 
 open Classical in
 /-- **Last exit.** For `u ∈ S` and `w ∉ S`, an open path from `u` to `w` has a last pair
@@ -145,8 +129,7 @@ open Classical in
 theorem tau_le_lastExit [Countable V] (q : Sym2 V → unitInterval) (S : Set V) {u w : V}
     (hu : u ∈ S) (hw : w ∉ S) :
     tau q u w ≤ ∑' x, ∑' y, if y ∈ S then
-      law q {ω | ∃ hw : w ∈ Sᶜ, ∃ hx : x ∈ Sᶜ,
-        ((openGraph ω).induce Sᶜ).Reachable ⟨w, hw⟩ ⟨x, hx⟩} *
+      law q (localConn Sᶜ w x) *
       (unitInterval.toNNReal (q s(x, y)) : ℝ≥0∞) * tau q y u else 0 := by
   have h := law_reach_le_firstExit q (S := Sᶜ) (A := univ) (B := {u}) (u := w) hw
     (by
@@ -169,13 +152,11 @@ where `χ_{Sᶜ}(x) = ∑_w τ^S(x,w)`. -/
 theorem boundarySum_le [Countable V] (q : Sym2 V → unitInterval) (S : Finset V) :
     ∑ u ∈ S, ∑' w, (if w ∈ S then 0 else tau q u w) ≤
       ∑ y ∈ S, (∑ u ∈ S, tau q y u) * ∑' x, (unitInterval.toNNReal (q s(y, x)) : ℝ≥0∞) *
-        ∑' w, law q {ω | ∃ hx : x ∈ (S : Set V)ᶜ, ∃ hw : w ∈ (S : Set V)ᶜ,
-          ((openGraph ω).induce (S : Set V)ᶜ).Reachable ⟨x, hx⟩ ⟨w, hw⟩} := by
-  set D : V → V → ℝ≥0∞ := fun x w => law q {ω | ∃ hx : x ∈ (S : Set V)ᶜ,
-    ∃ hw : w ∈ (S : Set V)ᶜ, ((openGraph ω).induce (S : Set V)ᶜ).Reachable ⟨x, hx⟩ ⟨w, hw⟩}
+        ∑' w, law q (localConn (S : Set V)ᶜ x w) := by
+  set D : V → V → ℝ≥0∞ := fun x w => law q (localConn (S : Set V)ᶜ x w)
   have hD : ∀ x w, D x w = D w x := fun x w => by
     simp only [D]
-    rw [setOf_deleted_comm]
+    rw [localConn_comm]
   set qq : V → V → ℝ≥0∞ := fun x y => (unitInterval.toNNReal (q s(x, y)) : ℝ≥0∞)
   have hqq : ∀ x y, qq x y = qq y x := fun x y => by simp only [qq, Sym2.eq_swap]
   calc ∑ u ∈ S, ∑' w, (if w ∈ S then 0 else tau q u w)
@@ -209,17 +190,15 @@ theorem boundarySum_le [Countable V] (q : Sym2 V → unitInterval) (S : Finset V
 /-- The deleted susceptibility is at most the susceptibility. -/
 theorem tsum_law_deleted_le_chi [Countable V] (q : Sym2 V → unitInterval) (S : Set V)
     (x : V) :
-    ∑' w, law q {ω | ∃ hx : x ∈ Sᶜ, ∃ hw : w ∈ Sᶜ,
-      ((openGraph ω).induce Sᶜ).Reachable ⟨x, hx⟩ ⟨w, hw⟩} ≤ chi q x := by
+    ∑' w, law q (localConn Sᶜ x w) ≤ chi q x := by
   rw [chi_eq_tsum_tau]
   exact ENNReal.tsum_le_tsum fun w => law_deleted_le_tau q S x w
 
 /-- Connection with `S` deleted from a vertex of `S` is impossible. -/
 theorem setOf_deleted_of_mem (S : Set V) {x : V} (hx : x ∈ S) (w : V) :
-    {ω : Config V | ∃ hx : x ∈ Sᶜ, ∃ hw : w ∈ Sᶜ,
-      ((openGraph ω).induce Sᶜ).Reachable ⟨x, hx⟩ ⟨w, hw⟩} = ∅ := by
+    localConn Sᶜ x w = ∅ := by
   ext ω
-  simp only [mem_ofPred_eq, mem_empty_iff_false, iff_false]
+  simp only [mem_empty_iff_false, iff_false]
   exact fun ⟨hx', _⟩ => hx' hx
 
 open Classical in
@@ -229,17 +208,13 @@ theorem boundarySum_le_intensity [Countable V] (J : Sym2 V → ℝ≥0) (β : �
     ∑ u ∈ S, ∑' w, (if w ∈ S then 0 else tau (intensityProfile J β) u w) ≤
       ∑ y ∈ S, (∑ u ∈ S, tau (intensityProfile J β) y u) * ((β : ℝ≥0∞) *
         ∑' x, (if x ∈ S then 0 else (J s(y, x) : ℝ≥0∞)) *
-          ∑' w, law (intensityProfile J β) {ω | ∃ hx : x ∈ (S : Set V)ᶜ,
-            ∃ hw : w ∈ (S : Set V)ᶜ,
-            ((openGraph ω).induce (S : Set V)ᶜ).Reachable ⟨x, hx⟩ ⟨w, hw⟩}) := by
+          ∑' w, law (intensityProfile J β) (localConn (S : Set V)ᶜ x w)) := by
   refine (boundarySum_le _ S).trans (Finset.sum_le_sum fun y _ => ?_)
   refine mul_le_mul_right ?_ _
   rw [← ENNReal.tsum_mul_left]
   refine ENNReal.tsum_le_tsum fun x => ?_
   by_cases hx : x ∈ S
-  · have h0 : ∀ w, law (intensityProfile J β) {ω | ∃ hx : x ∈ (S : Set V)ᶜ,
-        ∃ hw : w ∈ (S : Set V)ᶜ,
-        ((openGraph ω).induce (S : Set V)ᶜ).Reachable ⟨x, hx⟩ ⟨w, hw⟩} = 0 := fun w => by
+  · have h0 : ∀ w, law (intensityProfile J β) (localConn (S : Set V)ᶜ x w) = 0 := fun w => by
       rw [setOf_deleted_of_mem _ (Finset.mem_coe.2 hx), measure_empty]
     simp only [h0, tsum_zero, mul_zero, zero_le]
   · rw [ite_eq_right hx, ← mul_assoc]
@@ -253,9 +228,7 @@ theorem boundaryRow_le_iSup_chi [Countable V] (J : Sym2 V → ℝ≥0) (β : ℝ
     (hJ : ∀ u, rowSum (fun e => (J e : ℝ≥0∞)) u ≤ 1) (S : Finset V)
     {y : V} (hy : y ∈ S) :
     ∑' x, (if x ∈ S then 0 else (J s(y, x) : ℝ≥0∞)) *
-        ∑' w, law (intensityProfile J β) {ω | ∃ hx : x ∈ (S : Set V)ᶜ,
-          ∃ hw : w ∈ (S : Set V)ᶜ,
-          ((openGraph ω).induce (S : Set V)ᶜ).Reachable ⟨x, hx⟩ ⟨w, hw⟩} ≤
+        ∑' w, law (intensityProfile J β) (localConn (S : Set V)ᶜ x w) ≤
       ⨆ u, chi (intensityProfile J β) u := by
   calc _ ≤ ∑' x, (if x = y then 0 else (J s(y, x) : ℝ≥0∞)) *
         ⨆ u, chi (intensityProfile J β) u := by
@@ -278,25 +251,17 @@ variable [Countable V] (J : Sym2 V → ℝ≥0) (β : ℝ≥0) (S : Finset V)
 
 omit [Countable V] in
 theorem toReal_tsum_law_deleted (q : Sym2 V → unitInterval) (x : V) :
-    (∑' w, law q {ω | ∃ hx : x ∈ (S : Set V)ᶜ, ∃ hw : w ∈ (S : Set V)ᶜ,
-      ((openGraph ω).induce (S : Set V)ᶜ).Reachable ⟨x, hx⟩ ⟨w, hw⟩}).toReal =
-    ∑' w, (law q).real {ω | ∃ hx : x ∈ (S : Set V)ᶜ, ∃ hw : w ∈ (S : Set V)ᶜ,
-      ((openGraph ω).induce (S : Set V)ᶜ).Reachable ⟨x, hx⟩ ⟨w, hw⟩} :=
+    (∑' w, law q (localConn (S : Set V)ᶜ x w)).toReal =
+    ∑' w, (law q).real (localConn (S : Set V)ᶜ x w) :=
   ENNReal.tsum_toReal_eq fun _ => measure_ne_top _ _
 
 open Classical in
 theorem toReal_boundaryRow (hχ : (⨆ u, chi (intensityProfile J β) u) ≠ ⊤) (y : V) :
     (∑' x, (if x ∈ S then 0 else (J s(y, x) : ℝ≥0∞)) *
-        ∑' w, law (intensityProfile J β) {ω | ∃ hx : x ∈ (S : Set V)ᶜ,
-          ∃ hw : w ∈ (S : Set V)ᶜ,
-          ((openGraph ω).induce (S : Set V)ᶜ).Reachable ⟨x, hx⟩ ⟨w, hw⟩}).toReal =
+        ∑' w, law (intensityProfile J β) (localConn (S : Set V)ᶜ x w)).toReal =
       ∑' x, (if x ∈ S then 0 else (J s(y, x) : ℝ)) *
-        ∑' w, (law (intensityProfile J β)).real {ω | ∃ hx : x ∈ (S : Set V)ᶜ,
-          ∃ hw : w ∈ (S : Set V)ᶜ,
-          ((openGraph ω).induce (S : Set V)ᶜ).Reachable ⟨x, hx⟩ ⟨w, hw⟩} := by
-  have hfin : ∀ x, ∑' w, law (intensityProfile J β) {ω | ∃ hx : x ∈ (S : Set V)ᶜ,
-      ∃ hw : w ∈ (S : Set V)ᶜ,
-      ((openGraph ω).induce (S : Set V)ᶜ).Reachable ⟨x, hx⟩ ⟨w, hw⟩} ≠ ⊤ := fun x =>
+        ∑' w, (law (intensityProfile J β)).real (localConn (S : Set V)ᶜ x w) := by
+  have hfin : ∀ x, ∑' w, law (intensityProfile J β) (localConn (S : Set V)ᶜ x w) ≠ ⊤ := fun x =>
     ne_top_of_le_ne_top hχ ((tsum_law_deleted_le_chi _ _ x).trans (le_iSup _ x))
   rw [ENNReal.tsum_toReal_eq fun x => ENNReal.mul_ne_top (by split_ifs <;> simp) (hfin x)]
   refine tsum_congr fun x => ?_
@@ -315,16 +280,12 @@ theorem boundarySum_sq_div_le
     (∑ u ∈ S, ∑' w, if w ∈ S then 0 else (tau (intensityProfile J β) u w).toReal) ^ 2 /
         ((β : ℝ) ^ 2 * (⨆ u, chi (intensityProfile J β) u).toReal *
           ∑ u ∈ S, (∑ v ∈ S, (tau (intensityProfile J β) u v).toReal) ^ 2) ≤
-      ∑ v ∈ S, ∑' z, (if z ∈ S then 0 else (J s(v, z) : ℝ)) *
-        ∑' w, (law (intensityProfile J β)).real {ω | ∃ hz : z ∈ (S : Set V)ᶜ,
-          ∃ hw : w ∈ (S : Set V)ᶜ,
-          ((openGraph ω).induce (S : Set V)ᶜ).Reachable ⟨z, hz⟩ ⟨w, hw⟩} := by
+      boundarySusceptibility J β S := by
   set q := intensityProfile J β
   set M := (⨆ u, chi q u).toReal
   set a : V → ℝ := fun y => ∑ u ∈ S, (tau q y u).toReal
   set φ : V → ℝ := fun y => ∑' x, (if x ∈ S then 0 else (J s(y, x) : ℝ)) *
-    ∑' w, (law q).real {ω | ∃ hx : x ∈ (S : Set V)ᶜ, ∃ hw : w ∈ (S : Set V)ᶜ,
-      ((openGraph ω).induce (S : Set V)ᶜ).Reachable ⟨x, hx⟩ ⟨w, hw⟩}
+    ∑' w, (law q).real (localConn (S : Set V)ᶜ x w)
   set L := ∑ u ∈ S, ∑' w, if w ∈ S then 0 else (tau q u w).toReal
   have htau : ∀ u v, tau q u v ≠ ⊤ := fun u v => ne_top_of_le_ne_top ENNReal.one_ne_top
     (tau_le_one q u v)
@@ -332,13 +293,11 @@ theorem boundarySum_sq_div_le
   have hF1 : L ≤ β * ∑ y ∈ S, a y * φ y := by
     have hE := boundarySum_le_intensity J β S
     have hrow : ∀ y ∈ S, (∑' x, (if x ∈ S then 0 else (J s(y, x) : ℝ≥0∞)) *
-        ∑' w, law q {ω | ∃ hx : x ∈ (S : Set V)ᶜ, ∃ hw : w ∈ (S : Set V)ᶜ,
-          ((openGraph ω).induce (S : Set V)ᶜ).Reachable ⟨x, hx⟩ ⟨w, hw⟩}) ≠ ⊤ :=
+        ∑' w, law q (localConn (S : Set V)ᶜ x w)) ≠ ⊤ :=
       fun y hy => ne_top_of_le_ne_top hχ (boundaryRow_le_iSup_chi J β hJ S hy)
     have hfinR : ∀ y ∈ S, (∑ u ∈ S, tau q y u) * ((β : ℝ≥0∞) *
         ∑' x, (if x ∈ S then 0 else (J s(y, x) : ℝ≥0∞)) *
-          ∑' w, law q {ω | ∃ hx : x ∈ (S : Set V)ᶜ, ∃ hw : w ∈ (S : Set V)ᶜ,
-            ((openGraph ω).induce (S : Set V)ᶜ).Reachable ⟨x, hx⟩ ⟨w, hw⟩}) ≠ ⊤ :=
+          ∑' w, law q (localConn (S : Set V)ᶜ x w)) ≠ ⊤ :=
       fun y hy => ENNReal.mul_ne_top (ENNReal.sum_ne_top.2 fun u _ => htau y u)
         (ENNReal.mul_ne_top ENNReal.coe_ne_top (hrow y hy))
     have hL : ∀ u ∈ S, ∑' w, (if w ∈ S then 0 else tau q u w) ≠ ⊤ := fun u _ =>
@@ -456,10 +415,7 @@ theorem boundary_susceptibility_bound
     (∑ u ∈ S, ∑' w, if w ∈ S then 0 else (tau (intensityProfile J β) u w).toReal) ^ 2 /
         ((β : ℝ) ^ 2 * (⨆ u, chi (intensityProfile J β) u).toReal *
           ∑ u ∈ S, (∑ v ∈ S, (tau (intensityProfile J β) u v).toReal) ^ 2) ≤
-      ∑ v ∈ S, ∑' z, (if z ∈ S then 0 else (J s(v, z) : ℝ)) *
-        ∑' w, (law (intensityProfile J β)).real {ω | ∃ hz : z ∈ (S : Set V)ᶜ,
-          ∃ hw : w ∈ (S : Set V)ᶜ,
-          ((openGraph ω).induce (S : Set V)ᶜ).Reachable ⟨z, hz⟩ ⟨w, hw⟩} ∧
+      boundarySusceptibility J β S ∧
     (max ((⨅ u, chi (intensityProfile J β) u).toReal * S.card -
           ∑ u ∈ S, ∑ v ∈ S, (tau (intensityProfile J β) u v).toReal) 0) ^ 2 /
         ((β : ℝ) ^ 2 * (⨆ u, chi (intensityProfile J β) u).toReal *
@@ -477,16 +433,13 @@ end Real
 /-- `tau_le_deleted_add` with `S = ∅`: deleting nothing loses nothing, and both bounds are
 equalities. -/
 example [Countable V] (q : Sym2 V → unitInterval) (y w : V) :
-    law q {ω | ∃ hy : y ∈ (∅ : Set V)ᶜ, ∃ hw : w ∈ (∅ : Set V)ᶜ,
-      ((openGraph ω).induce (∅ : Set V)ᶜ).Reachable ⟨y, hy⟩ ⟨w, hw⟩} = tau q y w := by
+    law q (localConn (∅ : Set V)ᶜ y w) = tau q y w := by
   refine le_antisymm (law_deleted_le_tau q ∅ y w) ?_
   simpa using tau_le_deleted_add q ∅ y w
 
 /-- `tau_le_deleted_add` with `S = {1}` on the path `0 - 1 - 2`. -/
 example (q : Sym2 (Fin 3) → unitInterval) :
-    tau q 0 2 ≤ law q {ω | ∃ hy : (0 : Fin 3) ∈ ({1} : Set (Fin 3))ᶜ,
-        ∃ hw : (2 : Fin 3) ∈ ({1} : Set (Fin 3))ᶜ,
-        ((openGraph ω).induce ({1} : Set (Fin 3))ᶜ).Reachable ⟨0, hy⟩ ⟨2, hw⟩} +
+    tau q 0 2 ≤ law q (localConn ({1} : Set (Fin 3))ᶜ 0 2) +
       ∑' c : ({1} : Set (Fin 3)), tau q 0 c * tau q c 2 :=
   tau_le_deleted_add q {1} 0 2
 

@@ -75,9 +75,13 @@
         "L82Q",
         "AFH6",
         "UZ7J",
-        "70KD"
+        "70KD",
+        "JL1S",
+        "36PN",
+        "CSY8",
+        "MBV2"
       ],
-      "reason": "Susceptibility estimate only (the critical tail and order-parameter estimates have no written proof). Lower bound: finite-volume Russo (4IHK) and BK (JRCI) give chi' <= 2d chi^2; exhaustion (5UJQ), monotone coupling (2ML7) and chi(p_c) = infinity (JQLC) integrate it. Upper bound: a one-sided Russo inequality proved in place expresses chi' as a boundary sum over the finite cluster (INZI); BK for three events (AUUG) and Cauchy-Schwarz bound it below by moments estimated with the tree-graph inequalities (L82Q, AFH6); the cubic bound (UZ7J) and Fourier positivity from 70KD reduce the diagrams to the triangle, giving chi' >= c chi^2 near p_c. NUJY gives 0 < p_c < 1 and 8DSI the two-point sum identity."
+      "reason": "Susceptibility estimate. Lower bound: finite-volume Russo (4IHK) and BK (JRCI) give chi' <= 2d chi^2; exhaustion (5UJQ), monotone coupling (2ML7) and chi(p_c) = infinity (JQLC) integrate it. Upper bound: a one-sided Russo inequality proved in place expresses chi' as a boundary sum over the finite cluster (INZI); BK for three events (AUUG) and Cauchy-Schwarz bound it below by moments estimated with the tree-graph inequalities (L82Q, AFH6); the cubic bound (UZ7J) and Fourier positivity from 70KD reduce the diagrams to the triangle, giving chi' >= c chi^2 near p_c. NUJY gives 0 < p_c < 1 and 8DSI the two-point sum identity. Critical tail: with beta = -log(1-p) and unit nearest-neighbour weights, the entropy cluster-tail comparison (JL1S) at beta(p_c - n^(-1/2)) and beta(p_c) with the susceptibility upper bound gives P(|K| >= n) <= C n^(-1/2); the universal integrated tail (36PN), the tail-sum identity (CSY8) and MBV2 give the matching lower bound. Order parameter: JL1S at beta(2p_c - p) and beta(p), letting n -> infinity, gives theta(p) <= C (p - p_c); JQLC gives theta(p) >= p - p_c."
     }
   ]
 }

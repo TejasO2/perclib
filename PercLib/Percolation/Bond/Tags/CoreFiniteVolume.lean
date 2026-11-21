@@ -27,18 +27,13 @@ probabilities. -/
 @[tag "6QN7"]
 theorem induced_domains_recover_cluster (q : Sym2 V → unitInterval) {S : ℕ → Set V}
     (hS : Monotone S) (hcover : ∀ v, ∃ n, v ∈ S n) (x : V) :
-    (∀ ω : Config V, Monotone fun n => {y | ∃ hx : x ∈ S n, ∃ hy : y ∈ S n,
-      ((openGraph ω).induce (S n)).Reachable ⟨x, hx⟩ ⟨y, hy⟩}) ∧
-    (∀ ω : Config V, (⋃ n, {y | ∃ hx : x ∈ S n, ∃ hy : y ∈ S n,
-      ((openGraph ω).induce (S n)).Reachable ⟨x, hx⟩ ⟨y, hy⟩}) = cluster ω x) ∧
-    (∀ ω : Config V, (cluster ω x).encard = ⨆ n, ({y | ∃ hx : x ∈ S n, ∃ hy : y ∈ S n,
-      ((openGraph ω).induce (S n)).Reachable ⟨x, hx⟩ ⟨y, hy⟩} : Set V).encard) ∧
-    (Countable V → chi q x = ⨆ n, ∫⁻ ω, (({y | ∃ hx : x ∈ S n, ∃ hy : y ∈ S n,
-      ((openGraph ω).induce (S n)).Reachable ⟨x, hx⟩ ⟨y, hy⟩} : Set V).encard : ℝ≥0∞)
+    (∀ ω : Config V, Monotone fun n => localCluster ω (S n) x) ∧
+    (∀ ω : Config V, (⋃ n, localCluster ω (S n) x) = cluster ω x) ∧
+    (∀ ω : Config V, (cluster ω x).encard = ⨆ n, (localCluster ω (S n) x : Set V).encard) ∧
+    (Countable V → chi q x = ⨆ n, ∫⁻ ω, ((localCluster ω (S n) x : Set V).encard : ℝ≥0∞)
         ∂law q) ∧
     (∀ F : Set V, law q (⋃ y ∈ Fᶜ, conn x y) = ⨆ n, law q {ω | ∃ y ∉ F,
-      y ∈ {y | ∃ hx : x ∈ S n, ∃ hy : y ∈ S n,
-        ((openGraph ω).induce (S n)).Reachable ⟨x, hx⟩ ⟨y, hy⟩}}) :=
+      y ∈ localCluster ω (S n) x}) :=
   ⟨fun ω => monotone_induce_cluster hS ω x, fun ω => iUnion_induce_cluster hS hcover ω x,
     fun ω => encard_cluster_eq_iSup_induce hS hcover ω x,
     fun _ => chi_eq_iSup_lintegral_induce q hS hcover x,
