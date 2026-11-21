@@ -329,7 +329,7 @@ g_v(x)=\frac1{(2\pi)^d}\int_{\mathbb R^d}e^{-ik\cdot x-v|k|^\alpha}\,dk.$$</div>
 \sim\frac{\Gamma((d-\alpha)/2)}{2^\alpha\pi^{d/2}\Gamma(\alpha/2)\,v}|x|^{\alpha-d}
 \qquad(|x|\to\infty).$$</div>
 <p>For $d\leq\alpha$, $G_p(x)=\infty$ at every $x$. If a holding probability $h\in[0,1)$ is added, so $p_h=h\delta_0+(1-h)p$, then $G_{p_h}=G_p/(1-h)$; the displayed equivalent uses $v_h=(1-h)v$.</p>
-<p><em>Proof.</em> Positivity at each nonzero lattice point and the tail equivalent give global two-sided comparison with $|z|^{-d-\alpha}$ after adjusting constants on a finite set. Apply the <a href="/tag/48GR/">Bass–Levin estimate</a> with $C_{xy}=p(y-x)$, whose row sum is one. The recurrence statement and finiteness in the transient range follow from UQEK.</p>
+<p><em>Proof.</em> Positivity at each nonzero lattice point and the tail equivalent give global two-sided comparison with $|z|^{-d-\alpha}$ after adjusting constants on a finite set. Apply the <a href="/tag/48GR/">Bass–Levin estimate</a> with $C_{xy}=p(y-x)$, whose row sum is one. The recurrence statement and finiteness in the transient range follow from the <a href="/tag/UQEK/">long-range Green potential bounds</a>.</p>
 <p>Assume $d&gt;\alpha$, write $R=|x|$ and $e=x/R$, and fix $0&lt;a&lt;b&lt;\infty$. The local limit gives, uniformly in unit directions,</p>
 <div class="math-display">$$R^{d-\alpha}\sum_{aR^\alpha\leq n\leq bR^\alpha}p^{*n}(x)
 \longrightarrow\int_a^b t^{-d/\alpha}g_v(e/t^{1/\alpha})\,dt.$$</div>
@@ -381,7 +381,7 @@ U(x)&=\frac1{v\Gamma(\alpha/2)}\int_0^\infty s^{\alpha/2-1}(4\pi s)^{-d/2}e^{-|x
 <p>The modification inside radius $L$ affects only the bounded term. Write $\rho=|k|$ and expand $1-\cos(k\cdot z)$ through its quadratic term for $|z|\leq\rho^{-1}$. The remainder is at most</p>
 <div class="math-display">$$C\rho^4\sum_{|z|\leq\rho^{-1}}D_L(z)|z|^4=O_L(\rho^2),$$</div>
 <p>and the omitted tail is bounded by $2\sum_{|z|&gt;\rho^{-1}}D_L(z)=O_L(\rho^2)$. The covariance identity proves the symbol expansion with the stated constant.</p>
-<p>Put $\varphi=\widehat D_L$. Every nonzero lattice point has positive mass. As in <a href="/tag/7C2W/">7C2W</a>, equality $|\varphi(k)|=1$ forces the phases at $e_i$ and $2e_i$ to coincide, hence $k=0$ on the torus. Choose $\delta&lt;e^{-1/2}$ small enough that $\varphi$ is positive and</p>
+<p>Put $\varphi=\widehat D_L$. Every nonzero lattice point has positive mass. As in the proof of the <a href="/tag/7C2W/">stable local limit for an exact radial tail</a>, equality $|\varphi(k)|=1$ forces the phases at $e_i$ and $2e_i$ to coincide, hence $k=0$ on the torus. Choose $\delta&lt;e^{-1/2}$ small enough that $\varphi$ is positive and</p>
 <div class="math-display">$$|\varphi(k)|\leq\exp\{-c|k|^2\log(1/|k|)\}\qquad(0&lt;|k|\leq\delta).$$</div>
 <p>For fixed $t$, the expansion and $\log a_n/\log n\to1/2$ imply</p>
 <div class="math-display">$$\varphi(t/a_n)^n\longrightarrow e^{-v_L|t|^2/2}.$$</div>
@@ -462,7 +462,7 @@ U(x)&=\frac1{v\Gamma(\alpha/2)}\int_0^\infty s^{\alpha/2-1}(4\pi s)^{-d/2}e^{-|x
 <div class="math-display">$$\frac1{\Gamma(j)}\int_0^\infty t^{j-1}(4\pi t)^{-d/2}e^{-1/(4t)}\,dt
 =\frac{\Gamma(d/2-j)}{4^j\pi^{d/2}\Gamma(j)}.$$</div>
 <p>Multiplying by $N_R^j/R^d$ proves the first equivalent.</p>
-<p>At $d=2j$, the dominant times are much later. Put $M_R=R^2/\log R$. The contribution of $1\leq n\leq M_R$ is $O_L((\log R)^{-j})$ by the marginal transition bound. Between $M_R$ and $R^2$, V7FQ gives the bound</p>
+<p>At $d=2j$, the dominant times are much later. Put $M_R=R^2/\log R$. The contribution of $1\leq n\leq M_R$ is $O_L((\log R)^{-j})$ by the marginal transition bound. Between $M_R$ and $R^2$, the upper bound in the uniform local limit gives the bound</p>
 <div class="math-display">$$C_L\sum_{M_R&lt;n&lt;R^2}\frac1{n(\log n)^j}
 =O_L\!\left(\frac{\log\log R}{(\log R)^j}\right)
 =o((\log R)^{1-j}).$$</div>
