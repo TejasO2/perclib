@@ -119,6 +119,7 @@ public import PercLib.Models.Tags.Hierarchical
 public import PercLib.Models.Tags.Lattice
 public import PercLib.Models.Tags.Line
 public import PercLib.Models.Tags.Site
+public import PercLib.Models.Tags.TranslationInvariant
 public import PercLib.Models.Tags.ZeroOne
 public import PercLib.Models.TranslationInvariant
 public import PercLib.Models.Tree
