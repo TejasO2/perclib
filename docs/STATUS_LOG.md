@@ -627,3 +627,6 @@ package (critic M-X3) and the article splits (X-S1/A-S1, deferred); restructurin
 - **This round's throughput:** about 25 done markers in 50 minutes. Integrate in several gated
   batches within the round (each wiki-only gate is ~2.5 min warm) rather than leaving finished
   work for the next coordinator.
+
+- Round 14 (new series, 21 Nov ~23:15): batch gated at `29c7c4b` (11 tagged statements), 343 proved; full STATUS at `13418dc`.
+- Round 15 (21 Nov ~23:15): batch gated at `c26219e` (10 tagged statements: 32GP, R2Y7, J2TE, L9YJ, XA7C, CYYG, 94E7, CUE4, N0HM, TIKW), 353 proved.
