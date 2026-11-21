@@ -6,6 +6,10 @@ deprecated alias for one release where that is possible.
 
 ## Announced, not yet merged
 
+None.
+
+## Merged
+
 ### Long-range norm structure (`ModelNorm`)
 
 - **What:** a new structure `ModelNorm E` extending `Seminorm ℝ E` with definiteness
@@ -19,8 +23,15 @@ deprecated alias for one release where that is possible.
 - **Recipe:** replace a seminorm `N` together with its definiteness proof by a `ModelNorm`
   (`ModelNorm.ofNorm E` for the norm of a normed space); drop the definiteness argument at
   call sites.
+- **Renames** (merged with `work/mig-model-norm` at `d1295a4`; no deprecated aliases were
+  kept, since no outside branch used the old names):
 
-## Merged
+  | Old name | New name |
+  |---|---|
+  | `seminorm_intCast_pos` | `ModelNorm.intCast_comp_pos` |
+  | `norm_sub_pos` | `ModelNorm.intCast_comp_sub_pos` |
+  | `LongRange.exists_pos_mul_norm_le` | `ModelNorm.exists_pos_mul_norm_le` (deleted, use this) |
+  | `normSeminorm_eq_zero`, `euclidean_seminorm_eq_zero` | `ModelNorm.ofNorm`, Euclidean `ModelNorm.comp` |
 
 ### Connection probability under a general measure (`connProb`)
 
