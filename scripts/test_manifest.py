@@ -5,9 +5,11 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 import unittest
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 from build_manifest import build, fingerprint, frontier, definition_index
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -22,7 +24,7 @@ def run(*args, env=None):
         raise RuntimeError(e.output) from e
 
 
-def fixture(directory, renamed=False, changed=False, duplicate=False, malformed=False, opaque=False, alias=False, opaque_alias=False, extra_source=''):
+def fixture(directory, renamed=False, changed=False, duplicate=False, malformed=False, opaque=False, alias=False, opaque_alias=False, extra_source='', extra_imports=''):
     a = directory / 'ManifestFixture'
     a.mkdir(exist_ok=True)
     name = 'renamed' if renamed else 'predicate'
@@ -45,7 +47,7 @@ end Example
 ''')
     (a / 'B.lean').write_text('''module
 public import ManifestFixture.A
-public section
+''' + extra_imports + '''public section
 namespace Example
 @[tag "F000"] theorem both (h : predicate 0) : predicate 0 := by
   have _ := witness 0
@@ -137,6 +139,30 @@ class ManifestTests(unittest.TestCase):
         for tag in ('G000', 'H000', 'I000'):
             self.assertEqual(entries[tag]['proof_status'], 'proved')
         self.assertEqual(entries['E000']['proof_status'], 'statement-only')
+
+    def test_set_and_predicate_definitions_are_not_statements(self):
+        # `Set α` and a predicate alias reduce to `α → Prop`, so Lean reports them as
+        # Prop-valued; only a declared `Prop` codomain is a D-16 statement.
+        raw = fixture(self.directory, extra_source='''
+abbrev NatPredicate := Nat → Prop
+@[tag "G000"] def predicateDefinition (n : Nat) : NatPredicate := fun m => n ≤ m
+@[tag "H000"] def setDefinition (n : Nat) : Set Nat := {m | n ≤ m}
+@[tag "I000"] def parametricStatement (n m : Nat) : Prop := n ≤ m
+@[tag "J000"] opaque opaqueSet : Set Nat := {m | 0 ≤ m}
+''', extra_imports='public import Mathlib.Data.Set.Defs\n')
+        tagged = {d['tag']: d for d in raw['declarations'] if d['tag']}
+        for tag in ('G000', 'H000', 'I000', 'J000'):
+            self.assertTrue(tagged[tag]['prop_valued'], tag)
+        entries = {e['tag']: e for e in build(raw,
+            {**CATALOG, 'G000': {}, 'H000': {}, 'I000': {}, 'J000': {}}, CONTEXT)['assertions']}
+        for tag in ('G000', 'H000', 'J000'):
+            self.assertEqual(entries[tag]['proof_status'], 'proved', tag)
+            self.assertEqual(entries[tag]['statement'], tagged[tag]['display_type'])
+        # A theorem cannot be compiled without a proof (`sorry` fails the axiom check), so
+        # an unproved assertion is a Prop-valued definition; it stays statement-only.
+        self.assertEqual(entries['I000']['proof_status'], 'statement-only')
+        self.assertEqual(entries['E000']['proof_status'], 'statement-only')
+        self.assertEqual(entries['A000']['proof_status'], 'proved')
 
     def test_rename_and_definition_change(self):
         renamed = build(fixture(self.directory, renamed=True), CATALOG, CONTEXT)

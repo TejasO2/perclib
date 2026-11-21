@@ -6,7 +6,7 @@
   "kind": "method",
   "category": "Methods",
   "summary": "A nonlinear correction to power-law growth produces a logarithmic factor. An integrable multiplicative error preserves the leading constant, while an error of order 1/log r can introduce another logarithm.",
-  "context": ["The nonlinear marginal results use positive constants $a,\\gamma,C$ and a positive continuously differentiable function $g$ on $[r_0,\\infty)$, with $r_0>1$; the signed linear result states its own hypotheses.", "The perturbations below are continuous; the error in the nonlinear coefficient tends to zero.", "This is an analytic statement. Applying it to percolation requires a separately justified differential equation."],
+  "context": ["The nonlinear marginal results use positive constants $a,\\gamma,C$ and a positive continuously differentiable function $g$ on $[r_0,\\infty)$, with $r_0>1$; the signed linear result and the driving-term lemma state their own hypotheses.", "The perturbations below are continuous; the error in the nonlinear coefficient tends to zero.", "This is an analytic statement. Applying it to percolation requires a separately justified differential equation."],
   "related": ["cutoff-families", "susceptibility", "triangle-condition"],
   "sourceIds": ["hutchcroft-book", "hutchcroft-lrp-1", "perclib-riccati-comparison", "perclib-logarithmic-corrections", "perclib-double-factorial-convolution", "perclib-shared-elementary", "perclib-moment-hierarchy"],
   "aliases": ["marginal ODE", "logarithmic correction", "integrating factor", "Bernoulli equation", "critical dimension"],
@@ -29,6 +29,30 @@
 <p>One may see this directly by setting $t=ru$: on compact subintervals of $(0,1]$ the normalized integrand tends to $u^{b-a-1}$. A regular-variation bound by $Cu^{b-a-1-\eta}$, with $0&lt;\eta&lt;b-a$, controls the part where $ru$ is large; the remaining fixed initial interval contributes $o(q(r))$. Integration gives the displayed equivalent.</p>
 <p>The integral containing $\delta$ is $o(q(r))$: after a fixed large threshold its absolute value is bounded by $\sup_{t\geq T}|\delta(t)|$ times the positive integral just estimated, and the initial interval is negligible. Also $H(r)/h(r)=1/q(r)\to0$. Divide the variation-of-constants formula by $h(r)$ to obtain the claim, including when $A=0$.</p>
 <p>This gives the signed ODE step used for spatial monomials in <a href="https://arxiv.org/html/2508.18807v1">Critical LRP I</a>, Lemma I.5.26, with local absolute continuity sufficient. It does not differentiate a slowly varying normalization, and it does not require the error multiplying $f$ to be integrable: the positive index gap $b-a$ makes the forcing dominant. The marginal equation below has no such positive gap and requires different error control.</p>
+
+## An asymptotic equation with a dominant driving term {#section-driving-term}
+
+<a id="tag-B5SL" data-assertion="theorem" data-title="An asymptotic linear equation with dominant regularly varying driving term"></a>
+<p>Let $a&gt;0$, and let $h:(0,\infty)\to(0,\infty)$ be a measurable function, <a href="/tag/3491/">regularly varying</a> with index $b&gt;0$. Suppose that $f:(0,\infty)\to\mathbb R$ is differentiable and</p>
+<div class="math-display">$$f'(r)\sim\frac{af(r)+h(r)}{r}\qquad(r\to\infty),$$</div>
+<p>that is, the ratio of the left side to the right side tends to $1$. If $b&gt;a$, then</p>
+<div class="math-display">$$f(r)\sim\frac{h(r)}{b-a}\qquad(r\to\infty).$$</div>
+<p>In particular, $f$ is eventually positive and its restriction to some half-line $[r_2,\infty)$ is <a href="/tag/3491/">regularly varying</a> with index $b$.</p>
+<p>This is Lemma I.4.21 of <a href="https://arxiv.org/abs/2508.18807v1">Critical LRP I</a>, where the term $h$ is called the driving term; Hutchcroft applies it to the higher moments of cutoff cluster volumes, whose driving terms have a larger index than their linear terms. The function $f$ may take either sign; its eventual positivity is part of the conclusion.</p>
+<p><em>Idea of the proof.</em> Write the asymptotic relation as an exact equation $rf'=(1-\theta)(af+h)$ with a relative error $\theta(r)\to0$. This is the equation of the <a href="/tag/2KB9/">signed linear theorem</a> with both errors proportional to $\theta$, and the index gap $b-a&gt;0$ makes the driving term determine the limit of $f/h$. Regular variation of $f$ is then inherited from $h$.</p>
+:::details Proof
+<p><em>Step 1 (an exact equation).</em> By hypothesis the ratio $\rho(r)=rf'(r)/(af(r)+h(r))$ is defined for all large $r$ and tends to $1$. Choose $r_1&gt;0$ such that $af(r)+h(r)\neq0$ and $|\rho(r)-1|\leq\tfrac12$ for every $r\geq r_1$, and put $\theta(r)=1-\rho(r)$ there. Then, for every $r\geq r_1$,</p>
+<div class="math-display">$$rf'(r)=(1-\theta(r))\bigl(af(r)+h(r)\bigr)=\bigl(a+\varepsilon(r)\bigr)f(r)+\bigl(1+\delta(r)\bigr)h(r),\qquad\varepsilon=-a\theta,\quad\delta=-\theta.$$</div>
+<p>The function $f$ is differentiable, hence continuous, and $f'$ is the pointwise limit of the continuous functions $r\mapsto n\bigl(f(r+1/n)-f(r)\bigr)$, hence measurable. As $h$ is measurable, $\theta$ is measurable on $[r_1,\infty)$. It satisfies $|\theta|\leq\tfrac12$ and $\theta(r)\to0$, so $\varepsilon$ and $\delta$ are bounded measurable functions tending to zero.</p>
+<p><em>Step 2 (local boundedness of $h$).</em> By the uniform convergence theorem for measurable regularly varying functions (Bingham, Goldie and Teugels, Regular Variation, Theorem 1.5.2), $h(\lambda x)/h(x)\to\lambda^b$ uniformly in $\lambda\in[1,2]$ as $x\to\infty$. Choose $X&gt;0$ such that $h(\lambda x)\leq(2^b+1)h(x)$ for all $x\geq X$ and $\lambda\in[1,2]$. Then $h\leq(2^b+1)h(2^kX)$ on $[2^kX,2^{k+1}X]$ for every integer $k\geq0$, so $h$ is bounded on every compact subinterval of $[X,\infty)$. Being measurable, it is integrable on each such interval.</p>
+<p><em>Step 3 (absolute continuity of $f$).</em> Put $r_0=\max(r_1,X,1)$ and fix $R&gt;r_0$. On $[r_0,R]$ the continuous function $f$ is bounded, $h$ is bounded by Step 2, and $r\geq1$, so by Step 1</p>
+<div class="math-display">$$|f'(r)|\leq\tfrac32\bigl(a|f(r)|+h(r)\bigr)\leq M_R\qquad(r_0\leq r\leq R)$$</div>
+<p>for a constant $M_R$. By the mean value theorem, $|f(s)-f(t)|\leq M_R|s-t|$ for $s,t\in[r_0,R]$. Thus $f$ is Lipschitz, hence absolutely continuous, on every compact subinterval of $[r_0,\infty)$, and the equation of Step 1 holds at every point of $[r_0,\infty)$.</p>
+<p><em>Step 4 (the limit).</em> On $[r_0,\infty)$ all hypotheses of the <a href="/tag/2KB9/">signed linear theorem</a> hold with the given $a$ and $b$, the constant $A=1$ and the errors $\varepsilon,\delta$ of Step 1: $b&gt;a$; $h$ is positive, measurable, locally integrable (Step 2) and regularly varying with index $b$; $f$ is locally absolutely continuous (Step 3); $\varepsilon$ and $\delta$ are locally bounded, measurable and tend to zero. That theorem gives $f(r)/h(r)\to1/(b-a)$. Since $b-a&gt;0$, this is the same as $f(r)\big/\bigl(h(r)/(b-a)\bigr)\to1$, that is, $f(r)\sim h(r)/(b-a)$.</p>
+<p><em>Step 5 (regular variation).</em> Since $h&gt;0$ and $f/h$ tends to the positive limit $1/(b-a)$, there is $r_2\geq r_0$ with $f(r)&gt;0$ for all $r\geq r_2$. On $[r_2,\infty)$ the function $f$ is positive and continuous, hence measurable. Fix $\lambda&gt;0$. As $r\to\infty$ also $\lambda r\to\infty$, so</p>
+<div class="math-display">$$\frac{f(\lambda r)}{f(r)}=\frac{f(\lambda r)}{h(\lambda r)}\cdot\frac{h(\lambda r)}{h(r)}\cdot\frac{h(r)}{f(r)}\longrightarrow\frac1{b-a}\cdot\lambda^b\cdot(b-a)=\lambda^b.$$</div>
+<p>Hence $f$, restricted to $[r_2,\infty)$, is regularly varying with index $b$.</p>
+:::
 
 ## The asymptotic {#section-asymptotic}
 
