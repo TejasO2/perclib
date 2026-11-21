@@ -1,10 +1,12 @@
 module
 
 public import PercLib.Analysis.AbelianSums
+public import PercLib.Analysis.CriticalDrivenODE
 public import PercLib.Analysis.DiscreteConvolution
 public import PercLib.Analysis.DominatedDerivative
 public import PercLib.Analysis.DrivenODE
 public import PercLib.Analysis.Elementary
+public import PercLib.Analysis.FirstMomentAsymptotic
 public import PercLib.Analysis.FirstMomentBootstrap
 public import PercLib.Analysis.GoodScales
 public import PercLib.Analysis.GyrationODE
@@ -33,6 +35,7 @@ public import PercLib.Analysis.RegularVariation.PotterODE
 public import PercLib.Analysis.RegularVariation.UniformConvergence
 public import PercLib.Analysis.RiccatiBootstrap
 public import PercLib.Analysis.RiccatiComparison
+public import PercLib.Analysis.SignedDrivenODE
 public import PercLib.Analysis.Tags.CriticalExponents
 public import PercLib.Analysis.Tags.IntegratedSusceptibility
 public import PercLib.Analysis.Tags.MarginalODE
@@ -42,6 +45,7 @@ public import PercLib.Analysis.Tags.SpatialCutoffMoments
 public import PercLib.Analysis.Tauberian.Laplace
 public import PercLib.Analysis.Tauberian.Converse
 public import PercLib.Analysis.Tauberian.Endpoints
+public import PercLib.Analysis.Tauberian.Complete
 public import PercLib.Analysis.VolumeTail.ChiSquareConstants
 public import PercLib.Analysis.VolumeTail.SizeBiasMGF
 public import PercLib.Analysis.VolumeTail.UpToConstants
@@ -75,6 +79,7 @@ public import PercLib.Models.HierarchicalCutoff
 public import PercLib.Models.HierarchicalEndpoint
 public import PercLib.Models.HierarchicalGeometry
 public import PercLib.Models.HierarchicalPowerKernel
+public import PercLib.Models.HierarchicalRestrictedSusc
 public import PercLib.Models.HierarchicalRunaway
 public import PercLib.Models.HierarchicalSibling
 public import PercLib.Models.HierarchicalSymmetry
@@ -327,6 +332,7 @@ public import PercLib.Probability.Transport.Pullback
 public import PercLib.Probability.Transport.Reindexing
 public import PercLib.Probability.TruncatedMaximal
 public import PercLib.Probability.VarianceTensorization
+public import PercLib.Probability.WeakKernels
 public import PercLib.Probability.ZeroOne
 
 /-
