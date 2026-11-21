@@ -366,6 +366,7 @@ public import PercLib.Probability.KilledGreen
 public import PercLib.Probability.LaplaceTail
 public import PercLib.Probability.LayerCake
 public import PercLib.Probability.LayerCakeProduct
+public import PercLib.Probability.LongRangeGreenBubble
 public import PercLib.Probability.MassTransport
 public import PercLib.Probability.MassTransportTuple
 public import PercLib.Probability.MixedSpatialMoments
