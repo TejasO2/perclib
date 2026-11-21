@@ -23,3 +23,5 @@ time `T` (possibly infinite) and finite `λ ≥ 0`:
 - `PercLib/Probability/TruncatedMaximal.lean` (append only).
 - New `PercLib/Probability/Tags/StoppedExploration.lean`.
 - Its import line in `PercLib.lean`.
+
+Done: merged in the round-13 batch gated at `e0ae3ec` (HXNR, 4GBV). A second, independent proof of HXNR (`work/frontier-maximal-martingale`, `e9ec3b0`) duplicated this target and was not merged.
