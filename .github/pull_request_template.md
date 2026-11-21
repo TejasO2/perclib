@@ -14,7 +14,9 @@ which `…Input` hypotheses. -->
 - [ ] Tags added or changed are listed (or "none").
 - [ ] Searched-for lemmas listed: what I searched in mathlib and PercLib, and what I found.
 - [ ] Gate result: `scripts/gate.sh main` run locally on the stated commit, final lines pasted
-      below (CI is not active yet; see "Running the gate locally" in AGENTS.md).
+      below (the CI workflow `.github/workflows/ci.yml` runs on pull requests once it is
+      on `main`; auto-merge is not active and a maintainer merges every pull request; see
+      "Running the gate locally" in AGENTS.md).
 - [ ] Interface changes listed below: every new or changed `def`, `structure`, `class`,
       `instance`, `abbrev`, notation or tagged statement, and every change outside
       `PercLib/` (or "none (proof-only)").
