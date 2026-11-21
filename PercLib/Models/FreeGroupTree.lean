@@ -97,10 +97,10 @@ theorem freeGroupTree_transitive :
 
 /-- The off-diagonal row sum of the Cayley kernel at `1` is finite. -/
 theorem freeGroupTree_rowSum_lt_top :
-    (∑' y : FreeGroup (Fin 2), if y = 1 then 0 else
-      (((fun e : Sym2 (FreeGroup (Fin 2)) =>
+    rowSum (fun e' => (((fun e : Sym2 (FreeGroup (Fin 2)) =>
           if e ∈ {f : Sym2 (FreeGroup (Fin 2)) | ∃ g i, f = s(g, g * FreeGroup.of i)}
-          then (1 : ℝ≥0) else 0) s(1, y) : ℝ≥0) : ℝ≥0∞)) < ⊤ := by
+          then (1 : ℝ≥0) else 0) e' : ℝ≥0) : ℝ≥0∞)) 1 < ⊤ := by
+  rw [rowSum_def]
   set T : Finset (FreeGroup (Fin 2)) :=
     (Finset.univ : Finset (Fin 2 × Bool)).image
       fun ib => if ib.2 then FreeGroup.of ib.1 else (FreeGroup.of ib.1)⁻¹
@@ -121,10 +121,10 @@ theorem freeGroupTree_rowSum_lt_top :
 
 /-- The off-diagonal row sum of the Cayley kernel at `1` is positive. -/
 theorem freeGroupTree_rowSum_pos :
-    0 < (∑' y : FreeGroup (Fin 2), if y = 1 then 0 else
-      (((fun e : Sym2 (FreeGroup (Fin 2)) =>
+    0 < rowSum (fun e' => (((fun e : Sym2 (FreeGroup (Fin 2)) =>
           if e ∈ {f : Sym2 (FreeGroup (Fin 2)) | ∃ g i, f = s(g, g * FreeGroup.of i)}
-          then (1 : ℝ≥0) else 0) s(1, y) : ℝ≥0) : ℝ≥0∞)) := by
+          then (1 : ℝ≥0) else 0) e' : ℝ≥0) : ℝ≥0∞)) 1 := by
+  rw [rowSum_def]
   refine lt_of_lt_of_le ?_ (ENNReal.le_tsum (FreeGroup.of (0 : Fin 2)))
   have hmem : s(1, FreeGroup.of (0 : Fin 2)) ∈
       {f : Sym2 (FreeGroup (Fin 2)) | ∃ g i, f = s(g, g * FreeGroup.of i)} :=
@@ -279,10 +279,8 @@ theorem freeGroupTree_chi_endpoint :
     rw [← hβe]
     exact ENNReal.coe_le_one_iff.2 (hA β hβ).le
   have hBtop : B ≠ ⊤ := ne_top_of_le_ne_top ENNReal.one_ne_top hB1
-  have hL' : (∑' y : FreeGroup (Fin 2), @ite ℝ≥0∞ (y = 1) (Classical.propDecidable _) 0
-      (J s(1, y) : ℝ≥0∞)) < ⊤ := by convert hL
   have hBpos : 0 < B := lt_of_lt_of_le
-    (ENNReal.inv_pos.2 hL'.ne) (inv_le_chiCriticalIntensity htr hL')
+    (ENNReal.inv_pos.2 hL.ne) (inv_le_chiCriticalIntensity htr hL)
   have hmono : ∀ {β β' : ℝ≥0}, β ≤ β' →
       chi (intensityProfile J β) 1 ≤ chi (intensityProfile J β') 1 := fun h =>
     chi_mono (fun e => intensityProfile_mono J h e) 1
@@ -295,7 +293,7 @@ theorem freeGroupTree_chi_endpoint :
     obtain ⟨_, ⟨β', hβ', rfl⟩, hlt⟩ := lt_sSup_iff.1 this
     exact (hmono (ENNReal.coe_le_coe.1 hlt.le)).trans_lt hβ'
   · by_contra h
-    obtain ⟨ε, hε, hfin⟩ := exists_pos_chi_intensity_add_lt_top htr hL'
+    obtain ⟨ε, hε, hfin⟩ := exists_pos_chi_intensity_add_lt_top htr hL
       (lt_top_iff_ne_top.2 h)
     have hle : ((B.toNNReal + ε : ℝ≥0) : ℝ≥0∞) ≤ B := le_sSup ⟨_, hfin, rfl⟩
     have hle' : ((B.toNNReal + ε : ℝ≥0) : ℝ≥0∞) ≤ (B.toNNReal : ℝ≥0∞) := by
@@ -343,7 +341,6 @@ example : ∃ b : ℝ, 0 < b ∧
   refine ⟨b, hb, htop, _, ENNReal.toReal_pos hR0.ne' hR.ne, fun s t hs hst ht => ?_⟩
   convert inv_chi_sub_le _ freeGroupTree_transitive 1 (by convert hR.ne) le_rfl hfin hs hst ht
     using 3
-  exact tsum_congr fun y => by congr
 
 /-! ### Witnesses for the endpoint theorems of `SusceptibilityEndpoint.lean` -/
 
@@ -376,7 +373,6 @@ example : ∃ b : ℝ, 0 < b ∧ ∃ R : ℝ, 0 < R ∧ ∀ β ∈ Ioo (0 : ℝ)
   refine ⟨b, hb, _, ENNReal.toReal_pos hR0.ne' hR.ne, fun β hβ => ?_⟩
   convert one_div_le_chi_of_chi_eq_top _ freeGroupTree_transitive 1 (by convert hR.ne)
     (by convert hR0) le_rfl hfin htop hβ using 4
-  exact tsum_congr fun y => by congr
 
 end PercLib.Models
 
