@@ -100,6 +100,7 @@ public import PercLib.Models.HierarchicalSymmetry
 public import PercLib.Models.HierarchicalTranslation
 public import PercLib.Models.HierarchicalTwoPoint
 public import PercLib.Models.HierarchicalTwoPointAveraged
+public import PercLib.Models.HierarchicalTwoPointRadial
 public import PercLib.Models.HierarchicalTwoPointUpper
 public import PercLib.Models.Lattice
 public import PercLib.Models.Line
