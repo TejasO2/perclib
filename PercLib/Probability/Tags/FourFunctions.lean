@@ -25,8 +25,6 @@ operations `⊓` and `⊔` are `∩` and `∪` by definition, so the mathlib sta
 ## Main results
 
 * `four_functions_inequality`: the statement over all subsets of a finite type.
-* `four_functions_inequality_powerset`: the same inequality over `u.powerset` for
-  `u : Finset α`.
 -/
 
 @[expose] public section
@@ -44,14 +42,5 @@ theorem four_functions_inequality {E : Type*} [Fintype E] [DecidableEq E]
     (h : ∀ S T, a S * b T ≤ c (S ∩ T) * d (S ∪ T)) :
     (∑ S, a S) * (∑ S, b S) ≤ (∑ S, c S) * (∑ S, d S) :=
   four_functions_theorem_univ a b c d ha hb hc hd h
-
-/-- The four-functions inequality for the subsets of a finite set `u`, with sums over
-`u.powerset`. -/
-theorem four_functions_inequality_powerset {α : Type*} [DecidableEq α] (u : Finset α)
-    {a b c d : Finset α → ℝ} (ha : 0 ≤ a) (hb : 0 ≤ b) (hc : 0 ≤ c) (hd : 0 ≤ d)
-    (h : ∀ ⦃S⦄, S ⊆ u → ∀ ⦃T⦄, T ⊆ u → a S * b T ≤ c (S ∩ T) * d (S ∪ T)) :
-    (∑ S ∈ u.powerset, a S) * (∑ S ∈ u.powerset, b S) ≤
-      (∑ S ∈ u.powerset, c S) * (∑ S ∈ u.powerset, d S) := by
-  simpa using u.four_functions_theorem ha hb hc hd h subset_rfl subset_rfl
 
 end PercLib.Probability
