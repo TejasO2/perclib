@@ -6,7 +6,18 @@ deprecated alias for one release where that is possible.
 
 ## Announced, not yet merged
 
-None.
+### Stopped priority exploration (`priorityExploration`)
+
+- **What:** new definitions in the new file
+  `PercLib/Probability/Exploration/PriorityStopped/Defs.lean`, namespace
+  `PercLib.Percolation.Bond`: the structure `PriorityExploration.State G` (discovered vertices,
+  queried edges; `@[ext]`), `State.init`, `State.eligible`, `State.nextQuery`, `State.step`,
+  and `priorityExploration G ι o n ω t` (tag 28UY), `priorityQuery`, `priorityAnswer` for a
+  graph `G : SimpleGraph V`, an edge order `ι : G.edgeSet ↪ ℕ`, a root `o`, a threshold `n`
+  and a bond configuration `ω`. The root cluster is `cluster (ω ∩ G.edgeSet) o`. API and tag
+  PWBU in `PercLib/Probability/Exploration/PriorityStopped.lean` and its `Tags/` file
+  (`work/frontier-priority-exploration`).
+- **Breaks:** nothing (additive change).
 
 ## Merged
 
