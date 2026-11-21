@@ -324,6 +324,7 @@ public import PercLib.Probability.CylinderDisjointOccurrence
 public import PercLib.Probability.Defs
 public import PercLib.Probability.DeterminedIndependence
 public import PercLib.Probability.DeterministicModification
+public import PercLib.Probability.DiscreteEntropy
 public import PercLib.Probability.DiscreteLayerCake
 public import PercLib.Probability.DisjointOccurrence
 public import PercLib.Probability.DisjointOccurrenceAlgebra
@@ -371,6 +372,7 @@ public import PercLib.Probability.SplitCoordinate
 public import PercLib.Probability.Superposition
 public import PercLib.Probability.Tags.Correlation
 public import PercLib.Probability.Tags.CouplingRatio
+public import PercLib.Probability.Tags.DiscreteEntropy
 public import PercLib.Probability.Tags.DisjointOccurrence
 public import PercLib.Probability.Tags.EntropyComparison
 public import PercLib.Probability.Tags.Ergodicity
