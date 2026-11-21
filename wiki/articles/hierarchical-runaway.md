@@ -272,12 +272,17 @@ O(\varepsilon^{(4d-11\alpha)/(2d-5\alpha)}).
 
 <p><em>Main article: <a href="/articles/hierarchical-block-coalescent/">Exact block layers of hierarchical percolation</a>.</em></p>
 <p>Fix integers $L\geq2$, $d\geq1$, an exponent $\alpha&gt;0$ and an intensity $\beta\geq0$. Write $s=d+\alpha$, $Q=L^d$, and let $h(x,y)$ be the least level of a block containing distinct vertices $x,y$ of $\mathbb H_L^d$. Thus $\|x-y\|=L^{h(x,y)}$. By the <a href="/tag/VI3Y/">layer decomposition</a>, percolation at intensity $\beta$ with the exact radial kernel $J_\infty(x,y)=\frac{L^s}{L^s-1}\|x-y\|^{-s}$ is the union of independent layers, one for each finite block; the layer of an $n$-block is independent percolation on the complete graph on that block with edge probability $1-e^{-t_n}$, where $t_n=\beta L^{-sn}$. The union $\eta_B$ of the layers of the blocks inside $B$ is the truncated block law. Its clusters are contained in the intersections of the full clusters with $B$, which may also contain vertices reached by paths leaving $B$.</p>
-<p>Inside an $n$-block, start from the terminal cluster partitions of its $Q$ children and run the parent layer for time $t\in[0,t_n]$. The resulting partition $X_{n,t}$ is a <a href="/articles/multiplicative-coalescent/">finite multiplicative coalescent</a>, and its terminal state is the cluster partition of $\eta_{B_n}$. By <a href="/tag/54V4/">independent-child gluing</a>, its power sums $S_p(n,t)=\sum_{A\in X_{n,t}}|A|^p$ start each level as sums over $Q$ independent children, and the cluster $K_{n,t}(o)$ of the root satisfies $\mathbb E|K_{n,t}(o)|^q=Q^{-n}\mathbb ES_{q+1}(n,t)$. Let $Z_{n,t}$ be the largest cluster size, $M_n$ the terminal integer quantile of $Z_{n,t_n}$ and $\mu_n(t)=\mathbb ES_2(n,t)$. The <a href="/tag/X2A4/">uniform moment control</a> bounds all power sums by $\mu_n$ and powers of $M_n$ and gives the mean equation $\mu_n'=(1-\epsilon_n)\mu_n^2$ with $0\leq\epsilon_n\leq\min\{1,CM_n^2/\mu_n\}$.</p>
+<p>Inside an $n$-block, start from the terminal cluster partitions of its $Q$ children and run the parent layer for time $t\in[0,t_n]$. The resulting partition $X_{n,t}$ is a <a href="/articles/multiplicative-coalescent/">finite multiplicative coalescent</a>, and its terminal state is the cluster partition of $\eta_{B_n}$. By <a href="/tag/54V4/">independent-child gluing</a>, its power sums $S_p(n,t)=\sum_{A\in X_{n,t}}|A|^p$ start each level as sums over $Q$ independent children, and the cluster $K_{n,t}(o)$ of the root satisfies $\mathbb E|K_{n,t}(o)|^q=Q^{-n}\mathbb ES_{q+1}(n,t)$. Let $Z_{n,t}$ be the largest cluster size, $Z_n=Z_{n,t_n}$ its terminal value, $M_n$ the integer quantile of $Z_n$ and $\mu_n(t)=\mathbb ES_2(n,t)$. The <a href="/tag/X2A4/">uniform moment control</a> bounds the expected power sums by $\mu_n$ and powers of $M_n$ and gives the mean equation $\mu_n'=(1-\epsilon_n)\mu_n^2$ with $0\leq\epsilon_n\leq\min\{1,CM_n^2/\mu_n\}$.</p>
 
 ## The finite multiplicative coalescent {#section-coalescent-summary}
 
 <p><em>Main article: <a href="/articles/multiplicative-coalescent/">The finite multiplicative coalescent</a>.</em></p>
 <p>In a finite multiplicative coalescent two blocks of sizes $a$ and $b$ merge at rate $ab$; its <a href="/tag/Z960/">generator</a> $\mathcal L$ is a finite matrix. The <a href="/tag/22H8/">moment equations</a> give exact equations for all mixed moments of the power sums, for example $\frac{d}{dt}\mathbb ES_2=\mathbb E(S_2^2-S_4)$ and $\frac{d}{dt}\mathbb ES_3=3\mathbb E(S_2S_3-S_5)$. On a set of $N$ points the expectations of the products of $S_2,\ldots,S_N$ <a href="/tag/W8PB/">determine the law of the block sizes</a>.</p>
+
+## The periodic block kernel {#section-periodic-kernel-summary}
+
+<p><em>Main article: <a href="/articles/hierarchical-block-coalescent/#section-periodic-block-kernel">Exact block layers of hierarchical percolation</a>.</em></p>
+<p>Periodizing the exact kernel on an $n$-block, by summing it over the fibres of the projection of $\mathbb H$ onto $B_n$ that forgets the coordinates above $n$, adds the constant $\frac{q}{1-q}L^{-(d+\alpha)n}$ to the truncated kernel, where $q=L^{-\alpha}$. Periodic percolation on $B_n$ is independent bond percolation on $B_n$ with edge probabilities $1-\exp(-\beta J_n^{\mathrm{per}}(x,y))$ for this periodized kernel $J_n^{\mathrm{per}}$. By the <a href="/tag/YY9S/">periodic-kernel identity</a>, it has the cluster law of the block process with its last coalescent stage run to time $\beta L^{-(d+\alpha)n}/(1-q)$.</p>
 
 
 
@@ -840,7 +845,7 @@ C_0=2C_\alpha+\frac{L^{-d}}{1-L^{-d}}.$$</div>
 ## Exact variance and covariance equations {#section-variance-covariance-summary}
 
 <p><em>Main article: <a href="/articles/multiplicative-coalescent/">The finite multiplicative coalescent</a>.</em></p>
-<p>In any finite multiplicative coalescent, the variance $V=\operatorname{Var}(S_2)$ and the covariance $C=\operatorname{Cov}(S_2,S_3)$ satisfy <a href="/tag/C1BP/">exact differential equations</a> in terms of the means $f_j=\mathbb ES_j$ and centred mixed moments. In the hierarchical block process, independent children give the gluing identities $V_{n+1}(0)=QV_n(t_n)$ and $C_{n+1}(0)=QC_n(t_n)$.</p>
+<p>In the block process write $f_{j,n}(t)=\mathbb ES_j(n,t)$, $\nu_n=f_{3,n}$, $V_n(t)=\operatorname{Var}(S_2(n,t))$ and $C_n(t)=\operatorname{Cov}(S_2(n,t),S_3(n,t))$. Within a level, $V_n$ and $C_n$ satisfy the <a href="/tag/C1BP/">exact variance and covariance equations</a> of the finite multiplicative coalescent, in terms of the means and centred mixed moments, and independent children give the gluing identities $V_{n+1}(0)=QV_n(t_n)$ and $C_{n+1}(0)=QC_n(t_n)$.</p>
 
 ## The leading norm correlations {#section-leading-norm-correlations}
 
@@ -1014,11 +1019,6 @@ c_*=\frac{\beta_cL^{-\alpha}}{1-L^{-\alpha}}.$$</div>
 <p>The tail just proved makes the integral at infinity comparable to $\int_2^\infty t^{p-3/2}(\log t)^{1/4}\,dt$. It converges exactly when $p&lt;1/2$, including divergence at equality. Finally, the upper bound on $M(h)$ was already established, and its matching lower bound follows from $M(h)\geq(1-e^{-1})\mathbb P(T\geq1/h)$.</p>
 <p>This proves Theorem 1.7, whose original statement correctly uses thresholds at least two. The logarithmic exponent is unaffected by the provisional amplitude correction in WQ7B. In the proof, the logarithmic expression for $M(h)$ is used only for small $h$; it cannot hold for every $h&gt;0$ as written after the optimization in section 6.4. The scale choice above displays the logarithm of the full balancing product without ambiguity.</p>
 
-
-## The periodic block kernel {#section-periodic-kernel-summary}
-
-<p><em>Main article: <a href="/articles/hierarchical-block-coalescent/">Exact block layers of hierarchical percolation</a>.</em></p>
-<p>Periodizing the exact kernel on an $n$-block, by summing it over the fibres of the projection of $\mathbb H$ onto $B_n$ that forgets the coordinates above $n$, adds the constant $\frac{q}{1-q}L^{-(d+\alpha)n}$ to the truncated kernel, where $q=L^{-\alpha}$. By the <a href="/tag/YY9S/">periodic-kernel identity</a>, periodic percolation on $B_n$ therefore has the cluster law of the block process with its last coalescent stage run to time $\beta L^{-(d+\alpha)n}/(1-q)$.</p>
 
 ## A continuous renormalization map {#section-renormalization-map}
 

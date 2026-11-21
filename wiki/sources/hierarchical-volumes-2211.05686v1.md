@@ -7,7 +7,7 @@ The paper works with an exact power-law radial kernel, with a fixed geometric-se
 | Source passage | Written treatment |
 | --- | --- |
 | Section 1.1, exact radial kernel and block layers | [VI3Y](../articles/hierarchical-block-coalescent.md#section-exact-block-layers) proves the independent-layer construction, the missing ancestor intensity in a finite block, and the increasing finite-witness limit. |
-| Section 2, transition display and (2.1); Remark 2.2 | [Z960](../articles/multiplicative-coalescent.md#section-block-coalescent) derives the finite generator and intermediate independent-bond law, including zero intensity without dividing by the terminal time. |
+| Section 2, transition display and (2.1); Remark 2.2 | [Z960](../articles/multiplicative-coalescent.md#section-block-coalescent) derives the finite generator; the intermediate independent-bond law, including zero intensity without dividing by the terminal time, is in [the exact block process](../articles/hierarchical-block-coalescent.md#section-definitions). |
 | Lemma 2.3 and (2.4) | [22H8](../articles/multiplicative-coalescent.md#section-coalescent-moments) proves every mixed-moment equation explicitly, retaining the diagonal and merger corrections. |
 | (2.2)–(2.3), (2.5)–(2.7) | [54V4](../articles/hierarchical-block-coalescent.md#section-coalescent-gluing) proves the full multinomial recursion across independent children and the identity with rooted moments. |
 | Component-size determination after (2.4) | [W8PB](../articles/multiplicative-coalescent.md#section-size-determination) gives a finite Vandermonde and polynomial-interpolation proof. It determines the size multiset, not the labelled partition. |
@@ -125,7 +125,7 @@ Reading update, 17 November 2026: sections 6.2–6.3 are now fully read in versi
 | Source passage | Treatment |
 | --- | --- |
 | Lemma 6.11; Theorem 6.12 as used here | [I2YU](../articles/hierarchical-runaway.md#section-cluster-fourth-moment) proves the ordered-discovery dependence statement by cluster conditioning, then the finite-valued convex comparison and a sufficient fourth-moment bound with coefficient three. The general unbounded-variable theorem is not added. |
-| Lemma 6.9 | [C1BP](../articles/multiplicative-coalescent.md#section-norm-covariance-equations) gives both exact covariance equations and independent-child gluing. |
+| Lemma 6.9 | [C1BP](../articles/multiplicative-coalescent.md#section-norm-covariance-equations) gives both exact covariance equations; independent-child gluing is [after 54V4](../articles/hierarchical-block-coalescent.md#section-coalescent-gluing). |
 | Propositions 6.5 and 6.10 | [LWRN](../articles/hierarchical-runaway.md#section-leading-norm-correlations) controls every remainder and proves the two covariance constants by stable ratio equations. |
 | Corollaries 6.6–6.7 | [5B41](../articles/hierarchical-runaway.md#section-first-mean-correction) supplies the geometric domination needed for the future-scale series and corrects the terminal endpoint of the time integral. |
 | Lemma 6.4 | [S23T](../articles/hierarchical-runaway.md#section-polynomial-recursion) proves the general decay law by inverse-power increments. |

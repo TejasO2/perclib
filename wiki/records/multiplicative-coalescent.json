@@ -29,11 +29,11 @@
     {
       "source": "hutchcroft-hierarchical-volumes-2022",
       "order": 3,
-      "label": "Scale recursion and finite determination",
-      "locator": "Equations (2.2)–(2.3) and (2.5)–(2.7); discussion after (2.4)",
+      "label": "Finite determination of the size law",
+      "locator": "Discussion after (2.4)",
       "relationship": "Written derivation",
       "status": "pending",
-      "note": "54V4 supplies the full multinomial gluing proof and rooted identity; W8PB proves finite determination of the size multiset, without a labelled-law or infinite-ODE uniqueness claim."
+      "note": "W8PB proves finite determination of the size multiset, without a labelled-law or infinite-ODE uniqueness claim."
     },
     {
       "source": "hutchcroft-hierarchical-volumes-2022",
@@ -50,10 +50,8 @@
     {
       "order": 2,
       "tag": "Z960",
-      "proof_uses": [
-        "VI3Y"
-      ],
-      "reason": "The finite generator is proved from clocks; VI3Y identifies its hierarchical terminal law."
+      "proof_uses": [],
+      "reason": "The finite generator is proved directly from the edge clocks; no other wiki assertion is invoked. The hierarchical terminal law is identified by the layer decomposition on the exact block layers page."
     },
     {
       "order": 3,
@@ -67,10 +65,9 @@
       "order": 28,
       "tag": "C1BP",
       "proof_uses": [
-        "22H8",
-        "54V4"
+        "22H8"
       ],
-      "reason": "Apply the merger generator to S2 squared and S2 times S3, then subtract derivatives of the mean products. Independent children give variance and covariance gluing."
+      "reason": "Apply the merger generator to S2 squared and S2 times S3, as for the moment equations, then subtract derivatives of the mean products."
     },
     {
       "order": 63,

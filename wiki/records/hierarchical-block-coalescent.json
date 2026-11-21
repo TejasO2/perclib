@@ -29,11 +29,11 @@
     {
       "source": "hutchcroft-hierarchical-volumes-2022",
       "order": 3,
-      "label": "Scale recursion and finite determination",
-      "locator": "Equations (2.2)–(2.3) and (2.5)–(2.7); discussion after (2.4)",
+      "label": "Scale recursion",
+      "locator": "Equations (2.2)–(2.3) and (2.5)–(2.7)",
       "relationship": "Written derivation",
       "status": "pending",
-      "note": "54V4 supplies the full multinomial gluing proof and rooted identity; W8PB proves finite determination of the size multiset, without a labelled-law or infinite-ODE uniqueness claim."
+      "note": "54V4 supplies the full multinomial gluing proof and rooted identity."
     },
     {
       "source": "hutchcroft-hierarchical-volumes-2022",
@@ -69,19 +69,19 @@
       "order": 5,
       "tag": "X2A4",
       "proof_uses": [
+        "VI3Y",
         "25TW",
         "25Z4",
         "Z960",
         "22H8"
       ],
-      "reason": "Independent intermediate bonds give moment control and covariance; the finite generator supplies the exact mean equation."
+      "reason": "The layer decomposition and the finite coalescent give independent intermediate bonds, hence moment control and covariance; the finite generator supplies the exact mean equation."
     },
     {
       "order": 36,
       "tag": "YY9S",
       "proof_uses": [
-        "VI3Y",
-        "54V4"
+        "VI3Y"
       ],
       "reason": "Count fibres of the projection to the first n coordinate blocks, sum the geometric kernel tail, and interpret the added constant intensity as an independent final coalescent interval."
     },

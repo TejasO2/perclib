@@ -7,7 +7,7 @@
   "category": "Methods",
   "summary": "Independent edge clocks on a finite set give a Markov chain on partitions in which two blocks merge at rate the product of their sizes. Its generator gives exact equations for the expected power sums of the block sizes, and these moments determine the law of the block sizes.",
   "context": [
-    "$\\Omega$ is a finite set of $N\\geq1$ points, and the states of the process are partitions of $\\Omega$.",
+    "$\\Omega$ is a finite set of $N$ points, and the states of the process are partitions of $\\Omega$.",
     "$S_p(P)=\\sum_{A\\in P}|A|^p$ is the $p$th mass power sum of a partition $P$; $S_1=N$."
   ],
   "related": [
@@ -33,14 +33,14 @@
 
 <p>The <strong>finite multiplicative coalescent</strong> is the Markov process on partitions of a finite set in which any two blocks, of sizes $a$ and $b$, merge at rate $ab$. It is obtained by giving each pair of points an independent exponential clock and joining blocks along the pairs whose clocks have rung. Started from singletons, its state at time $t$ is the partition into components of the <a href="/articles/finite-random-graphs/">Erdős–Rényi random graph</a> with edge probability $1-e^{-t}$.</p>
 
-<p>The generator acts simply on the power sums $S_p=\sum_A|A|^p$ of the block sizes. For example $\frac{d}{dt}\mathbb E S_2=\mathbb E(S_2^2-S_4)$, and every mixed moment of $S_2,S_3,\ldots$ satisfies an explicit equation of the same kind; the variance of $S_2$ and its covariance with $S_3$ satisfy exact equations in terms of centred moments. On a set of $N$ points the expectations of the products of $S_2,\ldots,S_N$ determine the law of the multiset of block sizes.</p>
+<p>The generator acts simply on the power sums $S_p=\sum_A|A|^p$ of the block sizes. These carry the cluster-size information a probabilist needs: $S_2=\sum_{v\in\Omega}|K_v|$, where $K_v$ is the block containing $v$, so $\mathbb ES_2/N$ is the expected size of the block of a uniformly chosen point, the susceptibility of the random graph. For example $\frac{d}{dt}\mathbb E S_2=\mathbb E(S_2^2-S_4)$, and every mixed moment of $S_2,S_3,\ldots$ satisfies an explicit equation of the same kind. On a set of $N$ points the expectations of the products of $S_2,\ldots,S_N$ determine the law of the multiset of block sizes.</p>
 
-<p>In <a href="/articles/hierarchical-block-coalescent/">exact hierarchical percolation</a> each block layer runs such a coalescent for a finite time, started from the clusters of the smaller blocks, and these identities are the starting point of Hutchcroft's analysis of critical cluster volumes (2022). The coalescent with infinitely many square-summable masses, introduced by Aldous (1997), is treated in <a href="/articles/finite-triangle-window/">the finite triangle window</a>.</p>
+<p>The process is the Marcus–Lushnikov stochastic coalescent (Marcus 1968; Lushnikov 1978) with multiplicative kernel, the finite-particle counterpart of Smoluchowski's coagulation equation, and started from singletons it is the classical edge-clock construction of the Erdős–Rényi random graph process. In <a href="/articles/hierarchical-block-coalescent/">exact hierarchical percolation</a> each block layer runs such a coalescent for a finite time, started from the clusters of the smaller blocks, and Hutchcroft (2022) used its moment identities as the starting point of his analysis of critical cluster volumes. The coalescent with infinitely many square-summable masses, introduced by Aldous (1997), is treated in <a href="/articles/finite-triangle-window/">the finite triangle window</a>.</p>
 
 ## Definitions and setting {#section-definitions}
 
-<p>Let $\Omega$ be a finite set of $N\geq1$ points. A partition $P$ of $\Omega$ is a set of disjoint nonempty blocks with union $\Omega$; the size, or mass, of a block $A$ is its cardinality $|A|$. For distinct blocks $A,B\in P$, the partition obtained by merging them is $P^{A,B}=(P\setminus\{A,B\})\cup\{A\cup B\}$. The <strong>mass power sums</strong> of $P$ are $S_p(P)=\sum_{A\in P}|A|^p$ for $p\geq1$. Thus $S_1=N$ for every partition, and $S_2$ is the sum of the squared block sizes.</p>
-<p>Let $P_0$ be a random partition of $\Omega$. Attach to each unordered pair of distinct points an independent rate-one exponential clock, independent of $P_0$, and let $X_t$ be the partition obtained from $P_0$ by joining blocks along the pairs whose clocks have rung by time $t$. The process $(X_t)_{t\geq0}$ is the <strong>finite multiplicative coalescent</strong> started from $P_0$. Its generator $\mathcal L$, which acts on functions on the finite set of partitions, is identified in the next section. When $P_0$ is the partition into singletons, $X_t$ is the partition into components of independent <a href="/articles/product-model/">bond percolation</a> on the complete graph on $\Omega$ with edge probability $1-e^{-t}$.</p>
+<p>Let $\Omega$ be a finite set of $N$ points. A partition $P$ of $\Omega$ is a set of disjoint nonempty blocks with union $\Omega$; the size, or mass, of a block $A$ is its cardinality $|A|$. For distinct blocks $A,B\in P$, the partition obtained by merging them is $P^{A,B}=(P\setminus\{A,B\})\cup\{A\cup B\}$. The <strong>mass power sums</strong> of $P$ are $S_p(P)=\sum_{A\in P}|A|^p$ for $p\geq1$. Thus $S_1=N$ for every partition, and $S_2$ is the sum of the squared block sizes.</p>
+<p>Let $P_0$ be a random partition of $\Omega$. Attach to each unordered pair of distinct points an independent rate-one exponential clock, independent of $P_0$, and let $X_t$ be the partition obtained from $P_0$ by joining blocks along the pairs whose clocks have rung by time $t$. The process $(X_t)_{t\geq0}$ is the <strong>finite multiplicative coalescent</strong> started from $P_0$. When $P_0$ is the partition into singletons, $X_t$ is the partition into components of independent <a href="/articles/product-model/">bond percolation</a> on the complete graph on $\Omega$ with edge probability $1-e^{-t}$.</p>
 
 ## The generator {#section-block-coalescent}
 
@@ -49,15 +49,10 @@
 <div class="math-display">$$\frac{d}{dt}\mathbb E F(X_t)=\mathbb E[\mathcal L F(X_t)],\qquad
 \mathcal L F(P)=\sum_{\{A,B\}\subset P}|A||B|\bigl[F(P^{A,B})-F(P)\bigr],$$</div>
 <p>where the sum is over two distinct blocks without ordering, and $P^{A,B}=(P\setminus\{A,B\})\cup\{A\cup B\}$. Expectations are smooth in $t$, including right derivatives at zero, for every initial law independent of the clocks.</p>
-<p><em>Idea of the proof.</em> Given the history up to time $t$, the $|A||B|$ clocks joining two current blocks $A$ and $B$ have not rung, and by memorylessness their residual times are independent rate-one exponentials. The first of them therefore rings at rate $|A||B|$, while clocks inside a block change nothing. The process is a Markov chain on a finite state space with these jump rates.</p>
+<p><em>Idea of the proof.</em> By memorylessness, the $|A||B|$ unrung clocks joining two current blocks $A$ and $B$ ring first at rate $|A||B|$, and clocks inside a block change nothing.</p>
 :::details Proof
-<p>If $A$ and $B$ are distinct current blocks, none of their $|A||B|$ joining clocks has rung. Conditional on the clock history, their residual times are independent rate-one exponentials by memorylessness. Their minimum has rate $|A||B|$. All other rings either merge another pair or leave the partition unchanged. There are finitely many clocks, so the probability of two or more rings during an interval of length $\varepsilon$ is $O(\varepsilon^2)$, uniformly over states. This gives the generator and the Markov property. The transition matrix is the exponential of a finite matrix, which proves smoothness and the expectation identity, also after averaging over $P_0$.</p>
+<p>If $A$ and $B$ are distinct current blocks, none of their $|A||B|$ joining clocks has rung. Conditional on the clock history, their residual times are independent rate-one exponentials by memorylessness. Their minimum has rate $|A||B|$, so the chain leaves $P$ at rate $\lambda(P)=\sum_{\{A,B\}\subset P}|A||B|=\frac12\bigl(N^2-S_2(P)\bigr)$. All other rings either merge another pair or leave the partition unchanged. There are finitely many clocks, so the probability of two or more rings during an interval of length $\varepsilon$ is $O(\varepsilon^2)$, uniformly over states. This gives the generator and the Markov property. The transition matrix is the exponential of a finite matrix, which proves smoothness and the expectation identity, also after averaging over $P_0$.</p>
 :::
-<p>The holding rate is consequently</p>
-<div class="math-display">$$\lambda(P)=\sum_{\{A,B\}\subset P}|A||B|
-=\frac12\sum_{A\ne B}|A||B|=\frac{N^2-\sum_A|A|^2}{2},\qquad
-\mathbb P(X_{t+\varepsilon}=P\mid X_t=P)=1-\varepsilon\lambda(P)+O(\varepsilon^2).$$</div>
-<p>For two singleton blocks this is $e^{-\varepsilon}=1-\varepsilon+O(\varepsilon^2)$.</p>
 
 ## Moment equations {#section-coalescent-moments}
 
@@ -85,13 +80,15 @@ S_{1+D_I-\sum_{i\in I}k_i}-S_{2+D_I}\right].
 <div class="math-display">$$\Delta_p(a,b)=(a+b)^p-a^p-b^p
 =\sum_{k=1}^{p-1}\binom pk a^k b^{p-k}.$$</div>
 <p>Use the ordered-pair form of the generator, including its factor $1/2$. For a single factor, the term indexed by $k$ sums $a^{k+1}b^{p-k+1}$ over distinct blocks. Summing over all ordered pairs and subtracting the diagonal gives $S_{k+1}S_{p-k+1}-S_{p+2}$.</p>
-<p>For several labelled factors, expand $\prod_i(S_{p_i}+\Delta_{p_i})-\prod_i S_{p_i}$ according to the nonempty set $I$ of factors from which an increment is chosen. Expand each increment by the binomial theorem and multiply by the merger rate $ab$. The two exponents of $a,b$ are $1+\sum_{i\in I}k_i$ and $1+D_I-\sum_{i\in I}k_i$. Subtracting the diagonal now gives the displayed bracket. The untouched factors supply the remaining degree. All sums and all state spaces are finite, so differentiation requires no moment or convergence assumption.</p>
+<p>For several labelled factors, expand $\prod_i(S_{p_i}+\Delta_{p_i})-\prod_i S_{p_i}$ according to the nonempty set $I$ of factors from which an increment is chosen. Expand each increment by the binomial theorem and multiply by the merger rate $ab$. The two exponents of $a,b$ are $1+\sum_{i\in I}k_i$ and $1+D_I-\sum_{i\in I}k_i$. Subtracting the diagonal now gives the displayed bracket. The untouched factors supply the remaining degree. All sums are finite, so the expectations may be differentiated term by term.</p>
 :::
-<p>For example the product rule has a genuine merger correction:</p>
+<p>For a product of two power sums the generator has a merger correction:</p>
 <div class="math-display">$$\mathcal L(S_pS_q)=S_p\mathcal L S_q+S_q\mathcal L S_p
 +\sum_{\{A,B\}\subset P}|A||B|\Delta_p(|A|,|B|)\Delta_q(|A|,|B|).$$</div>
 <p>In particular $\mathcal L(S_2^2)=2S_2(S_2^2-S_4)+2(S_3^2-S_6)$.</p>
-<p>The equations for the means are not closed: the derivative of $\mathbb E S_2$ involves $\mathbb E S_2^2$ and $\mathbb E S_4$. If $S_2$ is concentrated and $\mathbb E S_4$ is small compared with $(\mathbb E S_2)^2$, the mean $\mu=\mathbb E S_2$ approximately solves $\mu'=\mu^2$, the equation satisfied by the second moment of Smoluchowski's coagulation equation with multiplicative kernel. In hierarchical percolation this approximation is justified under the <a href="/articles/hierarchical-block-coalescent/#section-definitions">hydrodynamic condition</a>.</p>
+<p>The equations for the means are not closed: the derivative of $\mathbb E S_2$ involves $\mathbb E S_2^2$ and $\mathbb E S_4$. If $S_2$ is concentrated and $\mathbb E S_4$ is small compared with $(\mathbb E S_2)^2$, the mean $\mu=\mathbb E S_2$ approximately solves $\mu'=\mu^2$. This is the equation for the second moment $\sum_kk^2n_k$ of a solution of Smoluchowski's coagulation equation with multiplicative kernel,</p>
+<div class="math-display">$$\frac{d}{dt}n_k=\frac12\sum_{i+j=k}ij\,n_in_j-kn_k\sum_{j\geq1}jn_j\qquad(k\geq1),$$</div>
+<p>where $n_k(t)$ is the density of blocks of mass $k$. The first moment $\sum_kkn_k$ is conserved, and the second moment solves $\mu'=\mu^2$ until it blows up at the gelation time $1/\mu(0)$. In <a href="/articles/hierarchical-block-coalescent/">exact hierarchical percolation</a> the relative error in the approximation is at most a constant times $M_n^2/\mu_n(t)$, where $M_n$ is a typical size of the largest cluster of a block of level $n$, so the approximation is justified when $\sup_tM_n^2/\mu_n(t)\to0$. This holds under the <a href="/articles/hierarchical-block-coalescent/#section-definitions">hydrodynamic condition</a> together with a lower bound on $\mu_n$ of its critical order, by the <a href="/tag/X2A4/">moment-control theorem</a>.</p>
 
 ## Variance and covariance equations {#section-norm-covariance-equations}
 
@@ -105,7 +102,7 @@ C'&amp;=5\mu C+3\nu V+6\nu f_4+4\mathbb E(\Delta_3\Delta_2^2)
 \end{aligned}$$</div>
 <p><em>Idea of the proof.</em> The merger increments of $S_2$ and $S_3$ give the generator applied to $S_2^2$ and to $S_2S_3$, exactly as for the <a href="/tag/22H8/">moment equations</a>. Subtracting the derivatives of $\mu^2$ and $\mu\nu$ and writing the cubic terms through centred moments gives the two identities.</p>
 :::details Proof
-<p>A merger of components of sizes $a,b$ has rate $ab$ and increments $S_2$ by $2ab$ and $S_3$ by $3ab(a+b)$. Applying the finite generator and writing distinct-pair sums as products minus diagonals gives</p>
+<p>A merger of blocks of sizes $a,b$ has rate $ab$ and increments $S_2$ by $2ab$ and $S_3$ by $3ab(a+b)$. Applying the finite generator and writing distinct-pair sums as products minus diagonals gives</p>
 <div class="math-display">$$\begin{aligned}
 \mathcal L S_2&amp;=S_2^2-S_4,&amp;\mathcal L S_3&amp;=3(S_2S_3-S_5),\\
 \mathcal L(S_2^2)&amp;=2(S_2^3-S_2S_4+S_3^2-S_6),\\
@@ -114,7 +111,7 @@ C'&amp;=5\mu C+3\nu V+6\nu f_4+4\mathbb E(\Delta_3\Delta_2^2)
 <p>For example the product increment is $3ab(a+b)S_2+2abS_3+6a^2b^2(a+b)$; summation over unordered pairs gives the last formula. Differentiate $V=\mathbb ES_2^2-\mu^2$ and $C=\mathbb E(S_2S_3)-\mu\nu$, then use</p>
 <div class="math-display">$$\mathbb ES_2^3=\mu^3+3\mu V+\mathbb E\Delta_2^3,\qquad
 \mathbb E(S_2^2S_3)=\mu^2\nu+2\mu C+\nu V+\mathbb E(\Delta_3\Delta_2^2).$$</div>
-<p>Collecting the remaining mixed products into covariances proves both identities. They hold for every finite initial distribution.</p>
+<p>Collecting the remaining mixed products into covariances proves both identities, for every initial law independent of the clocks.</p>
 :::
 
 ## Mass moments determine the size law {#section-size-determination}
@@ -123,18 +120,18 @@ C'&amp;=5\mu C+3\nu V+6\nu f_4+4\mathbb E(\Delta_3\Delta_2^2)
 <p>For a random partition of a fixed $N$-element set with $N\geq1$, the expectations of all products of $S_2,\ldots,S_N$ determine the law of its multiset of component sizes. They need not determine the labelled partition law.</p>
 <p><em>Idea of the proof.</em> The power sums $S_p=\sum_a a^pc_a$ are linear in the numbers $c_a$ of blocks of each size $a$, with an invertible Vandermonde-type matrix, so $(S_2,\ldots,S_N)$ determines the size multiset. As there are finitely many multisets, the indicator of each one is a polynomial in $S_2,\ldots,S_N$, and its expectation is the probability of that multiset.</p>
 :::details Proof
-<p>Let $c_a$ be the number of components of size $a$, for $1\leq a\leq N$. Then $S_p=\sum_{a=1}^N a^p c_a$. The matrix $(a^p)_{1\leq p,a\leq N}$ is invertible: factor $a$ from column $a$ to leave the Vandermonde matrix on the distinct points $1,\ldots,N$. Since $S_1=N$ is fixed, the vector $(S_2,\ldots,S_N)$ distinguishes all possible component-size multisets.</p>
+<p>Let $c_a$ be the number of blocks of size $a$, for $1\leq a\leq N$. Then $S_p=\sum_{a=1}^N a^p c_a$. The matrix $(a^p)_{1\leq p,a\leq N}$ is invertible: factor $a$ from column $a$ to leave the Vandermonde matrix on the distinct points $1,\ldots,N$. Since $S_1=N$ is fixed, the vector $(S_2,\ldots,S_N)$ distinguishes all possible block-size multisets.</p>
 <p>There are finitely many such multisets. For a fixed one $\lambda$ and each other one $\mu$, choose $k(\mu)\in\{2,\ldots,N\}$ with $S_{k(\mu)}(\lambda)\ne S_{k(\mu)}(\mu)$. The polynomial</p>
 <div class="math-display">$$I_\lambda(S)=\prod_{\mu\ne\lambda}
 \frac{S_{k(\mu)}-S_{k(\mu)}(\mu)}
 {S_{k(\mu)}(\lambda)-S_{k(\mu)}(\mu)}$$</div>
-<p>is one at $\lambda$ and zero at every other possible multiset. Its expectation is therefore the probability of $\lambda$, determined by the mixed moments. For $N=1$ there is only one possible multiset and the assertion is immediate.</p>
+<p>is one at $\lambda$ and zero at every other possible multiset. Its expectation is therefore the probability of $\lambda$, determined by the mixed moments. For $N=1$ there is only one possible multiset.</p>
 :::
 
 ## Examples {#section-examples}
 
 <p><em>Two points.</em> If $N=2$ and $P_0$ consists of two singletons, the blocks merge at time $T$, an exponential variable of rate one. Before the merger $S_2=2$ and $S_4=2$; afterwards $S_2=4$ and $S_4=16$. Hence $\mathbb E S_2(X_t)=4-2e^{-t}$, and the <a href="/tag/22H8/">moment equation</a> $\frac{d}{dt}\mathbb E S_2=\mathbb E(S_2^2-S_4)=2\,\mathbb P(T&gt;t)=2e^{-t}$ agrees with it.</p>
-<p><em>Erdős–Rényi graphs.</em> Started from singletons, $X_t$ is the component partition of the <a href="/articles/finite-random-graphs/">Erdős–Rényi graph</a> on $N$ vertices with edge probability $1-e^{-t}$. Since $S_2=\sum_{v\in\Omega}|C(v)|$, where $C(v)$ is the component of $v$, the moment equations give exact differential equations for $N$ times the expected size of the component of a uniformly chosen vertex. In the <a href="/articles/critical-random-graph-clusters/">critical window</a> $1-e^{-t}=(1+\lambda N^{-1/3})/N$, $\mathbb E S_2$ is of order $N^{4/3}$.</p>
+<p><em>Erdős–Rényi graphs.</em> Started from singletons, $X_t$ is the component partition of the <a href="/articles/finite-random-graphs/">Erdős–Rényi graph</a> on $N$ vertices with edge probability $1-e^{-t}$. Since $S_2=\sum_{v\in\Omega}|K_v|$, where $K_v$ is the component of $v$, the moment equations give exact differential equations for $N$ times the expected size of the component of a uniformly chosen vertex. In the <a href="/articles/critical-random-graph-clusters/">critical window</a> $1-e^{-t}=(1+\lambda N^{-1/3})/N$, $\mathbb E S_2$ is of order $N^{4/3}$.</p>
 <p><em>Labelled partitions are not determined.</em> On $\Omega=\{1,2,3\}$ the partitions $\{\{1,2\},\{3\}\}$ and $\{\{1,3\},\{2\}\}$ have the same power sums $S_p=2^p+1$. The point masses at these two partitions therefore have the same mixed moments, although they are different laws; the moments determine only the law of the size multiset.</p>
 
 ## Consequences and applications {#section-consequences}
@@ -147,9 +144,9 @@ C'&amp;=5\mu C+3\nu V+6\nu f_4+4\mathbb E(\Delta_3\Delta_2^2)
 
 ## History and attribution {#section-history}
 
-<p>Aldous (1997) introduced the multiplicative coalescent, constructed it on square-summable mass sequences, and identified the standard multiplicative coalescent as the scaling limit of the ranked component sizes of <a href="/articles/critical-random-graph-clusters/">critical Erdős–Rényi graphs</a>. The finite generator and the single moment equations are stated by Hutchcroft (2022, section 2, Lemma 2.3), the variance and covariance equations are his Lemma 6.9, and the observation that the mixed moments determine the component sizes is made in his discussion after equation (2.4). The general formula for mixed moments and the finite determination argument are written out in full here.</p>
-<p>The first transition display of section 2 of the arXiv version of Hutchcroft (2022) omits the factor $1/2$ of the ordered sum in its holding rate; equation (2.1), which follows it, has the correct factor, and the moment identities derived from it are unaffected (see the <a href="/errata/hutchcroft-hierarchical-volumes-2022/">errata</a>).</p>
+<p>Finite stochastic coalescents, in which two clusters of masses $a$ and $b$ merge at rate $K(a,b)$, go back to Marcus (1968) and Lushnikov (1978) and are called Marcus–Lushnikov processes. They are the finite-particle counterparts of the coagulation equation of Smoluchowski (1916); Aldous (1999) surveys both from a probabilistic point of view. With the multiplicative kernel $K(a,b)=ab$ and singleton initial state, the edge-clock construction gives the component process of the <a href="/articles/finite-random-graphs/">Erdős–Rényi random graph</a> (Erdős and Rényi 1960) in continuous time. Aldous (1997) introduced the multiplicative coalescent on square-summable mass sequences and identified the standard multiplicative coalescent as the scaling limit of the ranked component sizes of <a href="/articles/critical-random-graph-clusters/">critical Erdős–Rényi graphs</a>.</p>
+<p>Hutchcroft (2022) used these identities in the analysis of hierarchical percolation: the finite generator and the single moment equations are in his section 2 (Lemma 2.3), the variance and covariance equations are his Lemma 6.9, and the determination of the size law by the mixed moments is in his discussion after equation (2.4).</p>
 
 ## References {#section-references}
 
-<ul><li>D. Aldous, <a href="https://doi.org/10.1214/aop/1024404421">Brownian excursions, critical random graphs and the multiplicative coalescent</a>, Ann. Probab. 25 (1997), 812–854.</li><li>T. Hutchcroft, <a href="https://arxiv.org/abs/2211.05686v1">Critical cluster volumes in hierarchical percolation</a>, arXiv:2211.05686 (2022).</li></ul>
+<ul><li>D. Aldous, <a href="https://doi.org/10.1214/aop/1024404421">Brownian excursions, critical random graphs and the multiplicative coalescent</a>, Ann. Probab. 25 (1997), 812–854.</li><li>D. Aldous, Deterministic and stochastic models for coalescence (aggregation and coagulation): a review of the mean-field theory for probabilists, Bernoulli 5 (1999), 3–48.</li><li>P. Erdős and A. Rényi, On the evolution of random graphs, Publ. Math. Inst. Hung. Acad. Sci. 5 (1960), 17–61.</li><li>A. A. Lushnikov, Coagulation in finite systems, J. Colloid Interface Sci. 65 (1978), 276–285.</li><li>A. H. Marcus, Stochastic coalescence, Technometrics 10 (1968), 133–143.</li><li>M. von Smoluchowski, Drei Vorträge über Diffusion, Brownsche Molekularbewegung und Koagulation von Kolloidteilchen, Physik. Z. 17 (1916), 557–571 and 585–599.</li><li>T. Hutchcroft, <a href="https://arxiv.org/abs/2211.05686v1">Critical cluster volumes in hierarchical percolation</a>, arXiv:2211.05686 (2022).</li></ul>
