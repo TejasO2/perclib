@@ -461,4 +461,246 @@ theorem measureReal_visitCount_le_le_min [IsProbabilityMeasure μ] (hm : ∀ k, 
   rw [measureReal_def]
   exact ENNReal.toReal_le_of_le_ofReal zero_le_one (by rw [ENNReal.ofReal_one]; exact prob_le_one)
 
+section Moments
+
+/-! ### Fractional moments from a moment bound and a linear lower tail -/
+
+omit [MeasurableSpace S] [DiscreteMeasurableSpace S] [Countable S] [DecidableEq S] in
+/-- A lower bound `E W^p ≥ 4^{-|p|}/2` for every real `p`, from `E W ≤ 1` and
+`P(W ≤ t) ≤ t`. -/
+theorem ofReal_le_lintegral_rpow_of_tail [IsProbabilityMeasure μ] {W : Ω → ℝ}
+    (hW : Measurable W) (hW0 : ∀ ω, 0 ≤ W ω) (h1 : ∫⁻ ω, ENNReal.ofReal (W ω) ∂μ ≤ 1)
+    (hT : ∀ t : ℝ, 0 ≤ t → μ {ω | W ω ≤ t} ≤ ENNReal.ofReal t) (p : ℝ) :
+    ENNReal.ofReal ((4 : ℝ) ^ (-|p|) / 2) ≤ ∫⁻ ω, ENNReal.ofReal (W ω ^ p) ∂μ := by
+  set A := {ω | 1 / 4 < W ω ∧ W ω < 4} with hAdef
+  have hA : MeasurableSet A :=
+    (measurableSet_lt measurable_const hW).inter (measurableSet_lt hW measurable_const)
+  have hlo : μ.real {ω | W ω ≤ 1 / 4} ≤ 1 / 4 := by
+    rw [measureReal_def]
+    exact ENNReal.toReal_le_of_le_ofReal (by norm_num) (hT _ (by norm_num))
+  have hhi : 4 * μ.real {ω | 4 ≤ W ω} ≤ 1 := by
+    have h := (mul_meas_ge_le_lintegral₀ hW.ennreal_ofReal.aemeasurable 4).trans h1
+    have e : {ω | (4 : ℝ≥0∞) ≤ ENNReal.ofReal (W ω)} = {ω | 4 ≤ W ω} := by
+      ext ω
+      simp only [Set.mem_ofPred_eq]
+      rw [show (4 : ℝ≥0∞) = ENNReal.ofReal 4 by norm_num, ENNReal.ofReal_le_ofReal_iff (hW0 ω)]
+    rw [e] at h
+    have := ENNReal.toReal_mono ENNReal.one_ne_top h
+    rwa [ENNReal.toReal_mul, ENNReal.toReal_ofNat, ENNReal.toReal_one, ← measureReal_def] at this
+  have hu : Set.univ ⊆ ({ω | W ω ≤ 1 / 4} ∪ {ω | 4 ≤ W ω}) ∪ A := by
+    intro ω _
+    simp only [hAdef, Set.mem_union, Set.mem_ofPred_eq]
+    rcases le_or_gt (W ω) (1 / 4) with h | h
+    · exact Or.inl (Or.inl h)
+    rcases le_or_gt 4 (W ω) with h' | h'
+    · exact Or.inl (Or.inr h')
+    · exact Or.inr ⟨h, h'⟩
+  have hcov : (1 : ℝ) ≤ μ.real {ω | W ω ≤ 1 / 4} + μ.real {ω | 4 ≤ W ω} + μ.real A := by
+    calc (1 : ℝ) = μ.real Set.univ := by simp
+      _ ≤ μ.real (({ω | W ω ≤ 1 / 4} ∪ {ω | 4 ≤ W ω}) ∪ A) := measureReal_mono hu
+      _ ≤ _ := (measureReal_union_le _ _).trans (by gcongr; exact measureReal_union_le _ _)
+  have hAge : ENNReal.ofReal (1 / 2) ≤ μ A := by
+    rw [← ofReal_measureReal]
+    exact ENNReal.ofReal_le_ofReal (by linarith)
+  have hpt : ∀ ω, A.indicator (fun _ => ENNReal.ofReal ((4 : ℝ) ^ (-|p|))) ω ≤
+      ENNReal.ofReal (W ω ^ p) := by
+    intro ω
+    by_cases hω : ω ∈ A
+    · rw [Set.indicator_of_mem hω]
+      apply ENNReal.ofReal_le_ofReal
+      obtain ⟨h1, h2⟩ := hω
+      rcases le_or_gt 0 p with hp | hp
+      · rw [abs_of_nonneg hp, Real.rpow_neg (by norm_num), ← Real.inv_rpow (by norm_num)]
+        exact Real.rpow_le_rpow (by norm_num) (by norm_num at h1 ⊢; linarith) hp
+      · rw [abs_of_neg hp, neg_neg]
+        exact Real.rpow_le_rpow_of_nonpos (by linarith) h2.le hp.le
+    · simp [hω]
+  calc ENNReal.ofReal ((4 : ℝ) ^ (-|p|) / 2)
+        = ENNReal.ofReal ((4 : ℝ) ^ (-|p|)) * ENNReal.ofReal (1 / 2) := by
+        rw [← ENNReal.ofReal_mul (by positivity)]
+        congr 1
+        ring
+    _ ≤ ENNReal.ofReal ((4 : ℝ) ^ (-|p|)) * μ A := by gcongr
+    _ = ∫⁻ ω, A.indicator (fun _ => ENNReal.ofReal ((4 : ℝ) ^ (-|p|))) ω ∂μ :=
+        (lintegral_indicator_const hA _).symm
+    _ ≤ _ := lintegral_mono hpt
+
+omit [MeasurableSpace S] [DiscreteMeasurableSpace S] [Countable S] [DecidableEq S] in
+/-- An upper bound `E W^p ≤ 1 + ⌈p⌉!` for `p ≥ 0`, from `E W^j ≤ j!`. -/
+theorem lintegral_rpow_le_of_moment [IsProbabilityMeasure μ] {W : Ω → ℝ}
+    (hW0 : ∀ ω, 0 ≤ W ω) (hmom : ∀ j : ℕ, ∫⁻ ω, ENNReal.ofReal (W ω ^ j) ∂μ ≤ j !) {p : ℝ}
+    (hp : 0 ≤ p) :
+    ∫⁻ ω, ENNReal.ofReal (W ω ^ p) ∂μ ≤ ENNReal.ofReal (1 + (⌈p⌉₊ ! : ℝ)) := by
+  have hpt : ∀ ω, ENNReal.ofReal (W ω ^ p) ≤ 1 + ENNReal.ofReal (W ω ^ ⌈p⌉₊) := by
+    intro ω
+    rcases le_or_gt (W ω) 1 with h | h
+    · exact (ENNReal.ofReal_le_one.2 (Real.rpow_le_one (hW0 ω) h hp)).trans le_self_add
+    · refine (ENNReal.ofReal_le_ofReal ?_).trans le_add_self
+      rw [← Real.rpow_natCast]
+      exact Real.rpow_le_rpow_of_exponent_le h.le (Nat.le_ceil p)
+  calc _ ≤ ∫⁻ ω, (1 + ENNReal.ofReal (W ω ^ ⌈p⌉₊)) ∂μ := lintegral_mono hpt
+    _ = 1 + ∫⁻ ω, ENNReal.ofReal (W ω ^ ⌈p⌉₊) ∂μ := by
+        rw [lintegral_add_left measurable_const]
+        simp
+    _ ≤ 1 + (⌈p⌉₊ ! : ℝ≥0∞) := by gcongr; exact hmom _
+    _ = _ := by
+        rw [ENNReal.ofReal_add zero_le_one (by positivity)]
+        simp
+
+omit [MeasurableSpace S] [DiscreteMeasurableSpace S] [Countable S] [DecidableEq S] in
+/-- An upper bound `E W^p ≤ 1/(1 + p)` for `-1 < p < 0`, from `P(W ≤ t) ≤ t`. -/
+theorem lintegral_rpow_le_of_tail [IsProbabilityMeasure μ] {W : Ω → ℝ} (hW : Measurable W)
+    (hW0 : ∀ ω, 0 ≤ W ω) (hT : ∀ t : ℝ, 0 ≤ t → μ {ω | W ω ≤ t} ≤ ENNReal.ofReal t) {p : ℝ}
+    (hp1 : -1 < p) (hp0 : p < 0) :
+    ∫⁻ ω, ENNReal.ofReal (W ω ^ p) ∂μ ≤ ENNReal.ofReal (1 / (1 + p)) := by
+  obtain ⟨q, hq⟩ : ∃ q : ℝ, q = -p := ⟨_, rfl⟩
+  have hq0 : 0 < q := by linarith
+  have hq1 : q < 1 := by linarith
+  have hpt : ∀ ω, W ω ^ p = (W ω)⁻¹ ^ q := by
+    intro ω
+    rw [Real.inv_rpow (hW0 ω), ← Real.rpow_neg (hW0 ω), hq, neg_neg]
+  simp_rw [hpt]
+  rw [lintegral_rpow_eq_lintegral_meas_le_mul μ
+    (Filter.Eventually.of_forall fun ω => inv_nonneg.2 (hW0 ω)) hW.inv.aemeasurable hq0]
+  have hint1 : ∫⁻ t in Set.Ioc (0 : ℝ) 1, ENNReal.ofReal (t ^ (q - 1)) =
+      ENNReal.ofReal (1 / q) := by
+    rw [← ofReal_integral_eq_lintegral_ofReal
+      ((intervalIntegral.intervalIntegrable_rpow' (by linarith)).1)
+      ((ae_restrict_iff' measurableSet_Ioc).2
+        (Filter.Eventually.of_forall fun t ht => Real.rpow_nonneg ht.1.le _)),
+      ← intervalIntegral.integral_of_le zero_le_one, integral_rpow (Or.inl (by linarith))]
+    congr 1
+    rw [sub_add_cancel, Real.one_rpow, Real.zero_rpow hq0.ne', sub_zero]
+  have hint2 : ∫⁻ t in Set.Ioi (1 : ℝ), ENNReal.ofReal (t ^ (q - 2)) =
+      ENNReal.ofReal (1 / (1 - q)) := by
+    rw [← ofReal_integral_eq_lintegral_ofReal (integrableOn_Ioi_rpow_of_lt (by linarith) one_pos)
+      ((ae_restrict_iff' measurableSet_Ioi).2
+        (Filter.Eventually.of_forall fun t ht =>
+          Real.rpow_nonneg (zero_le_one.trans (le_of_lt ht)) _)),
+      integral_Ioi_rpow_of_lt (by linarith) one_pos]
+    congr 1
+    rw [Real.one_rpow, show q - 2 + 1 = -(1 - q) by ring, neg_div_neg_eq]
+  have hmeas : ∀ t : ℝ, 0 < t → μ {a | t ≤ (W a)⁻¹} ≤ min 1 (ENNReal.ofReal t⁻¹) := by
+    intro t ht
+    refine le_min prob_le_one ((measure_mono fun a ha => ?_).trans (hT _ (inv_nonneg.2 ht.le)))
+    have := inv_anti₀ ht ha
+    rwa [inv_inv] at this
+  rw [← Set.Ioc_union_Ioi_eq_Ioi zero_le_one,
+    lintegral_union measurableSet_Ioi Set.Ioc_disjoint_Ioi_same]
+  have b1 : ∫⁻ t in Set.Ioc (0 : ℝ) 1, μ {a | t ≤ (W a)⁻¹} * ENNReal.ofReal (t ^ (q - 1)) ≤
+      ENNReal.ofReal (1 / q) := by
+    rw [← hint1]
+    refine lintegral_mono_ae ((ae_restrict_iff' measurableSet_Ioc).2
+      (Filter.Eventually.of_forall fun t ht => ?_))
+    calc _ ≤ 1 * ENNReal.ofReal (t ^ (q - 1)) := by
+          gcongr; exact (hmeas t ht.1).trans (min_le_left _ _)
+      _ = _ := one_mul _
+  have b2 : ∫⁻ t in Set.Ioi (1 : ℝ), μ {a | t ≤ (W a)⁻¹} * ENNReal.ofReal (t ^ (q - 1)) ≤
+      ENNReal.ofReal (1 / (1 - q)) := by
+    rw [← hint2]
+    refine lintegral_mono_ae ((ae_restrict_iff' measurableSet_Ioi).2
+      (Filter.Eventually.of_forall fun t ht => ?_))
+    have ht0 : (0 : ℝ) < t := zero_lt_one.trans ht
+    calc _ ≤ ENNReal.ofReal t⁻¹ * ENNReal.ofReal (t ^ (q - 1)) := by
+          gcongr; exact (hmeas t ht0).trans (min_le_right _ _)
+      _ = _ := by
+          rw [← ENNReal.ofReal_mul (inv_nonneg.2 ht0.le)]
+          congr 1
+          rw [show q - 2 = (q - 1) + (-1) by ring, Real.rpow_add ht0, Real.rpow_neg_one, mul_comm]
+  calc _ ≤ ENNReal.ofReal q * (ENNReal.ofReal (1 / q) + ENNReal.ofReal (1 / (1 - q))) := by
+        gcongr
+    _ = ENNReal.ofReal (1 / (1 + p)) := by
+        rw [← ENNReal.ofReal_add (div_nonneg zero_le_one hq0.le)
+          (div_nonneg zero_le_one (by linarith)), ← ENNReal.ofReal_mul hq0.le]
+        congr 1
+        have h1 : 1 - q ≠ 0 := by linarith
+        have h2 : 1 + p ≠ 0 := by linarith
+        have h3 : p ≠ 0 := hp0.ne
+        rw [hq] at h1 ⊢
+        field_simp
+        ring
+
+end Moments
+
+/-- `P(ℓ_n / U_n ≤ t) ≤ t` for `t ≥ 0`. -/
+theorem measure_visitCount_div_le_le [IsProbabilityMeasure μ] (hm : ∀ k, Measurable (Z k))
+    (hZ : ∀ (n : ℕ) (x : Fin (n + 1) → S), μ {ω | ∀ i : Fin (n + 1), Z i ω = x i} =
+        (if x 0 = o then 1 else 0) * ∏ i : Fin n
+            , P (x i.castSucc) {x i.succ}) (n : ℕ) {t : ℝ} (ht : 0 ≤ t) :
+    μ {ω | ((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ) / ∑ k ∈ range (n + 1)
+        , μ.real {ω | Z k ω = o} ≤ t} ≤ ENNReal.ofReal t := by
+  have hU : 0 < ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}
+      := one_pos.trans_le (one_le_sum_measureReal hZ n)
+  have e : {ω | ((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ)
+      / ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o} ≤ t} =
+      {ω | (∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0) ≤ ⌊t * ∑ k ∈ range (n + 1)
+          , μ.real {ω | Z k ω = o}⌋₊} := by
+    ext ω
+    simp only [Set.mem_ofPred_eq]
+    rw [div_le_iff₀ hU, Nat.le_floor_iff (mul_nonneg ht hU.le)]
+  rw [e, ← ofReal_measureReal]
+  refine ENNReal.ofReal_le_ofReal ((measureReal_visitCount_le_le_div hm hZ n _).trans ?_)
+  rw [div_le_iff₀ hU]
+  exact Nat.floor_le (mul_nonneg ht hU.le)
+
+/-- **Fractional moments of the root visit count**: for `p > -1`,
+`4^{-|p|}/2 · U_n^p ≤ E ℓ_n^p ≤ C_p U_n^p` with `C_p = 1 + ⌈p⌉!` for `p ≥ 0` and
+`C_p = 1/(1 + p)` for `p < 0`. -/
+theorem integral_visitCount_rpow_bounds [IsProbabilityMeasure μ] (hm : ∀ k, Measurable (Z k))
+    (hZ : ∀ (n : ℕ) (x : Fin (n + 1) → S), μ {ω | ∀ i : Fin (n + 1), Z i ω = x i} =
+        (if x 0 = o then 1 else 0) * ∏ i : Fin n
+            , P (x i.castSucc) {x i.succ}) {p : ℝ} (hp : -1 < p) (n : ℕ) :
+    (4 : ℝ) ^ (-|p|) / 2 * (∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ^ p ≤ ∫ ω
+        , ((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ) ^ p ∂μ ∧
+      ∫ ω, ((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ) ^ p ∂μ ≤ (if 0
+          ≤ p then 1 + (⌈p⌉₊ ! : ℝ) else 1 / (1 + p)) * (∑ k ∈ range (n + 1), μ.real {ω | Z k ω
+              = o}) ^ p := by
+  have hU : 0 < ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}
+      := one_pos.trans_le (one_le_sum_measureReal hZ n)
+  obtain ⟨W, hWdef⟩ : ∃ W : Ω → ℝ, W = fun ω => ((∑ k ∈ range (n + 1), if Z k ω
+      = o then 1 else 0 : ℕ) : ℝ) / ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o} := ⟨_, rfl⟩
+  have hW : Measurable W := by
+    rw [hWdef]
+    exact (measurable_of_countable (fun c : ℕ => (c : ℝ) / ∑ k ∈ range (n + 1)
+        , μ.real {ω | Z k ω = o})).comp
+      (measurable_count hm (fun i => i) (n + 1))
+  have hW0 : ∀ ω, 0 ≤ W ω := fun ω => by
+    rw [hWdef]; exact div_nonneg (Nat.cast_nonneg _) hU.le
+  have hmom : ∀ j : ℕ, ∫⁻ ω, ENNReal.ofReal (W ω ^ j) ∂μ ≤ j ! := by
+    rw [hWdef]; exact lintegral_ofReal_visitCount_div_pow_le hm hZ n
+  have hT : ∀ t : ℝ, 0 ≤ t → μ {ω | W ω ≤ t} ≤ ENNReal.ofReal t := by
+    rw [hWdef]; exact fun t ht => measure_visitCount_div_le_le hm hZ n ht
+  have hlow := ofReal_le_lintegral_rpow_of_tail hW hW0 (by simpa using hmom 1) hT p
+  have hupp : ∫⁻ ω, ENNReal.ofReal (W ω ^ p) ∂μ ≤
+      ENNReal.ofReal (if 0 ≤ p then 1 + (⌈p⌉₊ ! : ℝ) else 1 / (1 + p)) := by
+    split_ifs with h
+    · exact lintegral_rpow_le_of_moment hW0 hmom h
+    · exact lintegral_rpow_le_of_tail hW hW0 hT hp (not_le.1 h)
+  have hC0 : 0 ≤ (if 0 ≤ p then 1 + (⌈p⌉₊ ! : ℝ) else 1 / (1 + p)) := by
+    split_ifs
+    · positivity
+    · exact div_nonneg zero_le_one (by linarith)
+  have hint : ∫ ω, ((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ) ^ p ∂μ
+      = (∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ^ p * (∫⁻ ω
+          , ENNReal.ofReal (W ω ^ p) ∂μ).toReal := by
+    have e : ∀ ω, ((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ) ^ p
+        = (∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ^ p * W ω ^ p := fun ω => by
+      rw [← Real.mul_rpow hU.le (hW0 ω), hWdef]
+      congr 1
+      field_simp
+    simp_rw [e]
+    rw [integral_const_mul, integral_eq_lintegral_of_nonneg_ae
+      (Filter.Eventually.of_forall fun ω => Real.rpow_nonneg (hW0 ω) _)
+      (hW.pow_const p).aestronglyMeasurable]
+  rw [hint]
+  constructor
+  · rw [mul_comm]
+    gcongr
+    exact (ENNReal.ofReal_le_iff_le_toReal (ne_top_of_le_ne_top ENNReal.ofReal_ne_top hupp)).1
+      hlow
+  · rw [mul_comm _ ((∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ^ p)]
+    gcongr
+    exact ENNReal.toReal_le_of_le_ofReal hC0 hupp
+
 end PercLib.Probability
+
