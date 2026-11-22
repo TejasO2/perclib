@@ -45,6 +45,8 @@ tree has no nontrivial leaf-fixing automorphism.
   a tree.
 * `TrivalentTree.existsUnique_canonical`: each trivalent tree has a unique canonical relabelling.
 * `card_treeShape`: `Nat.card (TreeShape k) = (2 * k - 5)‼` for `2 ≤ k`.
+* `card_internal_and_card_edgeFinset_of_isTree`: a finite tree with `k` labelled leaves and all
+  other vertices of degree three has `k - 2` internal vertices and `2k - 3` edges.
 -/
 
 @[expose] public section
@@ -722,6 +724,29 @@ theorem card_canonical (n : ℕ) : Nat.card (canonical n) = Nat.doubleFactorial 
       ring
 
 end TrivalentTree
+
+/-- A finite tree whose leaves carry the distinct labels `0, …, k - 1` and whose other vertices
+have degree three has `k - 2` internal vertices and `2k - 3` edges (degree sum: with `j`
+internal vertices, `k + 3j = 2(k + j - 1)`). -/
+theorem card_internal_and_card_edgeFinset_of_isTree {α : Type*} [Fintype α] [DecidableEq α]
+    {H : SimpleGraph α} [DecidableRel H.Adj] (hH : H.IsTree) {k : ℕ} (ℓ : Fin k ↪ α)
+    (hleaf : ∀ i, H.degree (ℓ i) = 1) (hint : ∀ v, (∀ i, ℓ i ≠ v) → H.degree v = 3) :
+    (Finset.univ.filter fun v => ∀ i, ℓ i ≠ v).card = k - 2 ∧
+      H.edgeFinset.card = 2 * k - 3 := by
+  have hcompl : (Finset.univ.filter fun v => ¬ ∀ i, ℓ i ≠ v) = Finset.univ.map ℓ := by
+    ext v
+    simp
+  have hcard := Finset.card_filter_add_card_filter_not (s := Finset.univ)
+    (fun v => ∀ i, ℓ i ≠ v)
+  rw [hcompl, Finset.card_map, Finset.card_univ, Fintype.card_fin, Finset.card_univ] at hcard
+  have hsum := Finset.sum_filter_add_sum_filter_not Finset.univ (fun v => ∀ i, ℓ i ≠ v)
+    (fun v => H.degree v)
+  rw [hcompl, Finset.sum_map, H.sum_degrees_eq_twice_card_edges,
+    Finset.sum_congr rfl fun v hv => hint v (Finset.mem_filter.1 hv).2] at hsum
+  simp only [hleaf, Finset.sum_const, Finset.card_univ, Fintype.card_fin, smul_eq_mul,
+    mul_one] at hsum
+  have htree := hH.card_edgeFinset
+  omega
 
 open TrivalentTree in
 /-- **The number of leaf-labelled trivalent tree shapes.** For `k ≥ 2`,
