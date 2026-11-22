@@ -131,3 +131,12 @@ deprecated alias for one release where that is possible.
 
 Earlier respellings (the `localConn`/`localCluster`/`boundaryFlux`/`IsCut` fold, the header
 and linter migrations) predate this file; see `git log` of the integration branch.
+
+## Announced 22 November 2026 (round 2): new definitions awaiting audit
+
+New definitions only (no renames, nothing removed); each merges after a fresh D-35 audit approves it.
+
+- `PercLib.Probability.generationSize` (`Probability/GaltonWatson/Defs.lean`, branch `work/p-b-NCWZ`; audit `audit-r18-b`).
+- `PercLib.Percolation.Bond.truncatedChi` (`Percolation/Bond/TruncatedSusceptibility.lean`, branch `work/p-c-2DZD`; audit `audit-r18-c`).
+- `pairBoundary`, `SeparatesPairs` (`Percolation/Bond/ClosedSeparators/Defs.lean`) and `openDegree`, `incidentCount`
+  (`Percolation/Bond/Degree/Defs.lean`), branch `work/p-d-B2ZL`; audit `audit-r18-d`.
