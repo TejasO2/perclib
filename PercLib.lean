@@ -131,6 +131,8 @@ public import PercLib.Models.NormalizedSmallIntensityLine
 public import PercLib.Models.Planar.Arms.Defs
 public import PercLib.Models.Planar.Arms.OneArm
 public import PercLib.Models.Planar.Arms.Separator
+public import PercLib.Models.Planar.Arms.ThreePoint
+public import PercLib.Models.Planar.Arms.TwoPoint
 public import PercLib.Models.Planar.CriticalProbability
 public import PercLib.Models.Planar.CrossingSymmetry
 public import PercLib.Models.Planar.Defs
