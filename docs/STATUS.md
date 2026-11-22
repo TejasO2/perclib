@@ -98,7 +98,9 @@ to `audit-requests/done/`). Wiki/tooling slot: free (integrate-culprit merged; w
 ## For Tom
 
 - **Next pull request to `main` (ruling 22.1):** https://github.com/tomhutchcroft/perclib/compare/main...claude/zen-lovelace-rvlcw2 —
-  gate passed on `d5dcd74` (372 proved); last gate + kernel replay: `a747905`. Opened this round if the API allowed (see PR list).
+  gate passed on `d5dcd74` (372 proved); last gate + kernel replay: `a747905`. **PR #8 opened** (head `c4e9a7e`); the merge call
+  (PUT `/pulls/8/merge`) was refused by this session's permission layer, so it waits: Tom merges it, or a later coordinator
+  whose permissions allow it (do not work around a refusal). After it merges, merge `origin/main` back.
 - CI on `main` `45309ab` failed in the wiki job (shallow-fetch race in tests, not the library); fix `fd30085` rides on the next PR.
 - PR #5 (`yujinhkim`, `lrp-I41-mt`) was closed without merge; review stays in `docs/reviews/pr-5.md`.
 - Issue #1 can be closed (fixed on `main`). Older questions: STATUS_LOG.md "For Tom".
