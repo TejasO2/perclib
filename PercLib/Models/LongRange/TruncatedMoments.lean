@@ -9681,3 +9681,821 @@ theorem hasDerivAt_integral_cutoff_pow_binomial {d : ℕ}
       hKa hK' hK'c β p hp hχ cw hcw hu hur hrv hvR hcorner hins Kd hKdint hKd hmeas hcont hrate
 
 end PercLib.Models.LongRange
+
+
+/-! ### Parameter measurability and per-vertex moments -/
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability
+
+/-- **The set of cut-off corners is null.** The corner values of the cut-off family are the
+norms `N (Int.cast ∘ z)` of the non-zero lattice displacements; there are countably many, so
+they are Lebesgue-null and the Russo derivative formula holds at almost every scale. -/
+theorem ae_notMem_cutoff_corners (d : ℕ) (N : ModelNorm (Fin d → ℝ)) :
+    ∀ᵐ r : ℝ ∂volume, r ∉ ⋃ e : Sym2 (Fin d → ℤ),
+      {a : ℝ | ∃ x y, e = s(x, y) ∧ a = N (Int.cast ∘ (x - y))} := by
+  have hcorners : (⋃ e : Sym2 (Fin d → ℤ),
+      {a : ℝ | ∃ x y, e = s(x, y) ∧ a = N (Int.cast ∘ (x - y))}).Countable :=
+    Set.countable_iUnion fun _ => countable_cutoff_corners _
+  exact measure_eq_zero_iff_ae_notMem.1 (hcorners.measure_zero volume)
+
+/-- **A.e. strong measurability of the capped cut-off flux in the cut-off parameter.**
+
+For `0 < u` and `v ≤ R`, the capped flux
+`r ↦ ∑'_e c_r(e) * ∫⁻ (min n |K_o(ω ∪ {e})|^p - min n |K_o(ω \ {e})|^p) ∂μ_r`
+is a.e. strongly measurable on `(u, v)`. Every hypothesis is a hypothesis of the cut-off family
+and of the bounded Russo formula: monotonicity and differentiability of the profile, continuity
+of `K'`, finiteness of the susceptibility at the cut-off scale `R`, and the defining equation
+for the derivative weight `cw`. -/
+theorem aestronglyMeasurable_capped_flux_cutoff {d : ℕ} {N : ModelNorm (Fin d → ℝ)}
+    {K K' : ℝ → ℝ} (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) (o : Fin d → ℤ) (p : ℕ) (hp : 1 ≤ p) {R : ℝ}
+    (hχ : chi (intensityProfile (cutoffKernel N K R) β) o ≠ ⊤)
+    (cw : ℝ → Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ r e, cw r e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ))))
+    {u v : ℝ} (hu : 0 < u) (hvR : v ≤ R) (n : ℕ) :
+    AEStronglyMeasurable (fun r => ∑' e, cw r e *
+      (∫⁻ ω, (min (n : ℝ≥0∞) (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p) -
+        min (n : ℝ≥0∞) (((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p))
+        ∂(law (intensityProfile (cutoffKernel N K r) β))).toReal)
+      (volume.restrict (Ioo u v)) := by
+  refine (measurable_deriv (fun r : ℝ =>
+      ∫ ω, (min (n : ℝ≥0∞) (((cluster ω o).encard : ℝ≥0∞) ^ p)).toReal
+        ∂(law (intensityProfile (cutoffKernel N K r) β)))).aestronglyMeasurable.restrict.congr ?_
+  filter_upwards [ae_restrict_mem measurableSet_Ioo,
+    ae_restrict_of_ae (ae_notMem_cutoff_corners d N)] with r hr hbad
+  have hcorner : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ≠ r := by
+    intro z hz
+    exact hbad (Set.mem_iUnion.2 ⟨s(0, z), 0, z, rfl,
+      by simpa only [zero_sub, intCast_comp_neg, map_neg_eq_map] using hz.symm⟩)
+  exact (hasDerivAt_capped_moment_cutoff_of_weight hKa hK' hK'c β p n hp o hχ cw hcw
+    (hu.trans hr.1) (hr.2.trans_le hvR) hcorner).deriv
+
+/-- **`∀`-form of the capped-flux measurability.** This is the `hmeas` input of
+`hasDerivAt_integral_cutoff_pow_binomial_of_insert_moments`, for the cut-off family at the
+origin of `ℤ^d`, with the interval `(u, v)` and the cut-off scale `R ≥ v`. -/
+theorem aestronglyMeasurable_capped_flux_cutoff_binomial {d : ℕ} {N : ModelNorm (Fin d → ℝ)}
+    {K K' : ℝ → ℝ} (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p) {R : ℝ}
+    (hχ : chi (intensityProfile (cutoffKernel (d := d) N K R) β) 0 ≠ ⊤)
+    (cw : ℝ → Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ r e, cw r e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K r e : ℝ))))
+    {u v : ℝ} (hu : 0 < u) (hvR : v ≤ R) :
+    ∀ n : ℕ, AEStronglyMeasurable (fun r => ∑' e, cw r e *
+      (∫⁻ ω, (min (n : ℝ≥0∞) (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p) -
+        min (n : ℝ≥0∞) (((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p))
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))).toReal)
+      (volume.restrict (Ioo u v)) :=
+  fun n => aestronglyMeasurable_capped_flux_cutoff hKa hK' hK'c β 0 p hp hχ cw hcw
+    hu hvR n
+
+end PercLib.Models.LongRange
+
+end
+
+
+noncomputable section
+
+open MeasureTheory Set Filter
+open scoped ENNReal NNReal Topology
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability
+
+open Classical in
+/-- **The binomial cut-off moment derivative with its measurability input discharged.**
+
+This is `hasDerivAt_integral_cutoff_pow_binomial_of_insert_moments` with the hypothesis `hmeas`
+removed: `aestronglyMeasurable_capped_flux_cutoff_binomial` supplies it from the remaining
+hypotheses alone. The point is the endpoint: the packaged statement has only `v ≤ R`, while the
+cap measurability available from the bounded Russo formula (and `measurable_capped_flux_cutoff`)
+is stated on `uIoc s t` with `t < R`. Working on the open interval `(u, v)` removes that gap,
+because `r ∈ (u, v)` gives `r < v ≤ R` and only the interior point `r₀ ∈ (u, v)` needs the
+derivative identity.
+
+No other hypothesis changes, so the geometric inputs (the per-pair inserted moments `hins`, the
+all-pairs dominator `Kd` with its interval integrability and bound `hKd`, the corner condition
+`hcorner`, the uncapped flux continuity `hcont` and the nonvanishing rate `hrate`) stay explicit;
+this remains a conditional statement and says nothing about sharpness. -/
+theorem hasDerivAt_integral_cutoff_pow_binomial_of_insert_moments_of_measurable
+    {d : ℕ} {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p) {R : ℝ}
+    (hχ : chi (intensityProfile (cutoffKernel (d := d) N K R) β) 0 ≠ ⊤)
+    (cw : ℝ → Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ r e, cw r e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K r e : ℝ))))
+    {u v r₀ : ℝ} (hu : 0 < u) (hur : u < r₀) (hrv : r₀ < v) (hvR : v ≤ R)
+    (hcorner : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Ioo u v)
+    (hins : ∀ r ∈ Ioo u v, ∀ e, (∫⁻ ω, ((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≠ ⊤)
+    (Kd : ℝ → ℝ) (hKdint : ∀ a ∈ Ioo u v, ∀ b ∈ Ioo u v, IntervalIntegrable Kd volume a b)
+    (hKd : ∀ r ∈ Ioo u v, ∀ S : Finset (Sym2 (Fin d → ℤ)), ∑ e ∈ S, |cw r e| *
+      |∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))| ≤ Kd r)
+    (hcont : ContinuousOn (fun r => ∑' e, cw r e *
+      ∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) (Ioo u v))
+    (hrate : (β : ℝ) * -K' r₀ ≠ 0) :
+    HasDerivAt (fun r => ∫ ω, (((cluster ω 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β)))
+      ((β : ℝ) * -K' r₀ * ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ) *
+        ∫ ω, (((cluster ω 0).encard : ℝ≥0∞).toReal) ^ (ℓ + 1) *
+          (∑' y, (if N (Int.cast ∘ y) ≤ r₀ then 1 else 0) *
+            (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ)) ω *
+            (((cluster ω y).encard : ℝ≥0∞).toReal) ^ (p - ℓ))
+          ∂(law (intensityProfile (cutoffKernel (d := d) N K r₀) β))) r₀ :=
+  hasDerivAt_integral_cutoff_pow_binomial_of_insert_moments hKa hK' hK'c β p hp hχ cw hcw
+    hu hur hrv hvR hcorner hins Kd hKdint hKd
+    (aestronglyMeasurable_capped_flux_cutoff_binomial hKa hK' hK'c β p hp hχ cw hcw hu hvR)
+    hcont hrate
+
+end PercLib.Models.LongRange
+
+end
+
+noncomputable section
+
+open MeasureTheory Set Filter
+open scoped ENNReal NNReal Topology
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability
+
+open Classical in
+/-- **The cap passage for the cut-off family with its measurability input discharged.**
+
+This is `hasDerivAt_integral_cutoff_pow` with the hypothesis `hmeas` removed: the general-root
+form `aestronglyMeasurable_capped_flux_cutoff` supplies it from the remaining hypotheses alone.
+Everything else, in particular the uncapped flux continuity `hcont` and the finite-moment,
+a.e.-finiteness and finite-flux inputs, stays explicit. -/
+theorem hasDerivAt_integral_cutoff_pow_of_measurable
+    {d : ℕ} {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p) (o : Fin d → ℤ) {R : ℝ}
+    (hχ : chi (intensityProfile (cutoffKernel N K R) β) o ≠ ⊤)
+    (cw : ℝ → Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ r e, cw r e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ))))
+    {u v r₀ : ℝ} (hu : 0 < u) (hur : u < r₀) (hrv : r₀ < v) (hvR : v ≤ R)
+    (hcorner : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Ioo u v)
+    (hmom : ∀ r ∈ Ioo u v, (∫⁻ ω, (((cluster ω o).encard : ℝ≥0∞) ^ p)
+      ∂(law (intensityProfile (cutoffKernel N K r) β))) ≠ ⊤)
+    (hfin : ∀ r ∈ Ioo u v, ∀ e, ∀ᵐ ω ∂(law (intensityProfile (cutoffKernel N K r) β)),
+      ((cluster (insert e ω) o).encard : ℝ≥0∞) ≠ ⊤)
+    (hflux : ∀ r ∈ Ioo u v, ∀ e, (∫⁻ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+      ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)
+      ∂(law (intensityProfile (cutoffKernel N K r) β))) ≠ ⊤)
+    (Kd : ℝ → ℝ) (hKdint : ∀ a ∈ Ioo u v, ∀ b ∈ Ioo u v, IntervalIntegrable Kd volume a b)
+    (hKd : ∀ r ∈ Ioo u v, ∀ S : Finset (Sym2 (Fin d → ℤ)), ∑ e ∈ S, |cw r e| *
+      |∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel N K r) β))| ≤ Kd r)
+    (hcont : ContinuousOn (fun r => ∑' e, cw r e *
+      ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel N K r) β))) (Ioo u v)) :
+    HasDerivAt (fun r => ∫ ω, (((cluster ω o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel N K r) β)))
+      (∑' e, cw r₀ e *
+        ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+          ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+          ∂(law (intensityProfile (cutoffKernel N K r₀) β))) r₀ :=
+  hasDerivAt_integral_cutoff_pow hKa hK' hK'c β p hp o hχ cw hcw hu hur hrv hvR hcorner
+    hmom hfin hflux Kd hKdint hKd
+    (aestronglyMeasurable_capped_flux_cutoff hKa hK' hK'c β o p hp hχ cw hcw hu hvR) hcont
+
+end PercLib.Models.LongRange
+
+end
+
+noncomputable section
+
+open MeasureTheory Set Filter
+open scoped ENNReal NNReal Topology
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability
+
+open Classical in
+/-- **The insert-moments cap passage for the cut-off family with `hmeas` discharged.**
+
+This is `hasDerivAt_integral_cutoff_pow_of_insert_moments` with the measurability input removed;
+`aestronglyMeasurable_capped_flux_cutoff` supplies it from the remaining hypotheses. This is the
+form in which the capped measurability is consumed by the binomial moment derivative, so a
+consumer of that chain no longer carries a separate measurability obligation. -/
+theorem hasDerivAt_integral_cutoff_pow_of_insert_moments_of_measurable
+    {d : ℕ}
+    {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p) (o : Fin d → ℤ) {R : ℝ}
+    (hχ : chi (intensityProfile (cutoffKernel N K R) β) o ≠ ⊤)
+    (cw : ℝ → Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ r e, cw r e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ))))
+    {u v r₀ : ℝ} (hu : 0 < u) (hur : u < r₀) (hrv : r₀ < v) (hvR : v ≤ R)
+    (hcorner : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Ioo u v)
+    (hins : ∀ r ∈ Ioo u v, ∀ e, (∫⁻ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p
+      ∂(law (intensityProfile (cutoffKernel N K r) β))) ≠ ⊤)
+    (Kd : ℝ → ℝ) (hKdint : ∀ a ∈ Ioo u v, ∀ b ∈ Ioo u v, IntervalIntegrable Kd volume a b)
+    (hKd : ∀ r ∈ Ioo u v, ∀ S : Finset (Sym2 (Fin d → ℤ)), ∑ e ∈ S, |cw r e| *
+      |∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel N K r) β))| ≤ Kd r)
+    (hcont : ContinuousOn (fun r => ∑' e, cw r e *
+      ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel N K r) β))) (Ioo u v)) :
+    HasDerivAt (fun r => ∫ ω, (((cluster ω o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel N K r) β)))
+      (∑' e, cw r₀ e *
+        ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+          ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+          ∂(law (intensityProfile (cutoffKernel N K r₀) β))) r₀ :=
+  hasDerivAt_integral_cutoff_pow_of_insert_moments hKa hK' hK'c β p hp o hχ cw hcw
+    hu hur hrv hvR hcorner hins Kd hKdint hKd
+    (aestronglyMeasurable_capped_flux_cutoff hKa hK' hK'c β o p hp hχ cw hcw hu hvR) hcont
+
+end PercLib.Models.LongRange
+
+end
+
+noncomputable section
+
+open MeasureTheory Set Filter
+open scoped ENNReal NNReal Topology
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability
+
+open Classical in
+/-- **The binomial cut-off moment derivative with neither `hmeas` nor `hrate` as an input.**
+
+This is `hasDerivAt_integral_cutoff_pow_binomial`, the rate-free form of the binomial moment
+derivative, with the capped-flux measurability input removed:
+`aestronglyMeasurable_capped_flux_cutoff_binomial` supplies it from the remaining hypotheses.
+The zero-rate case is already handled there by `hasDerivAt_of_zero_cutoff_rate`, so what remains
+here is exactly the geometric and moment data: the inserted moments `hins`, the dominator `Kd`
+with `hKdint` and `hKd`, the corner condition `hcorner`, and the uncapped flux continuity `hcont`.
+This is still a conditional statement; it is not a proof of sharpness. -/
+theorem hasDerivAt_integral_cutoff_pow_binomial_of_measurable
+    {d : ℕ}
+    {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p) {R : ℝ}
+    (hχ : chi (intensityProfile (cutoffKernel (d := d) N K R) β) 0 ≠ ⊤)
+    (cw : ℝ → Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ r e, cw r e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K r e : ℝ))))
+    {u v r₀ : ℝ} (hu : 0 < u) (hur : u < r₀) (hrv : r₀ < v) (hvR : v ≤ R)
+    (hcorner : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Ioo u v)
+    (hins : ∀ r ∈ Ioo u v, ∀ e, (∫⁻ ω, ((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≠ ⊤)
+    (Kd : ℝ → ℝ) (hKdint : ∀ a ∈ Ioo u v, ∀ b ∈ Ioo u v, IntervalIntegrable Kd volume a b)
+    (hKd : ∀ r ∈ Ioo u v, ∀ S : Finset (Sym2 (Fin d → ℤ)), ∑ e ∈ S, |cw r e| *
+      |∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))| ≤ Kd r)
+    (hcont : ContinuousOn (fun r => ∑' e, cw r e *
+      ∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) (Ioo u v)) :
+    HasDerivAt (fun r => ∫ ω, (((cluster ω 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β)))
+      ((β : ℝ) * -K' r₀ * ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ) *
+        ∫ ω, (((cluster ω 0).encard : ℝ≥0∞).toReal) ^ (ℓ + 1) *
+          (∑' y, (if N (Int.cast ∘ y) ≤ r₀ then 1 else 0) *
+            (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ)) ω *
+            (((cluster ω y).encard : ℝ≥0∞).toReal) ^ (p - ℓ))
+          ∂(law (intensityProfile (cutoffKernel (d := d) N K r₀) β))) r₀ :=
+  hasDerivAt_integral_cutoff_pow_binomial hKa hK' hK'c β p hp hχ cw hcw
+    hu hur hrv hvR hcorner hins Kd hKdint hKd
+    (aestronglyMeasurable_capped_flux_cutoff_binomial hKa hK' hK'c β p hp hχ cw hcw hu hvR)
+    hcont
+
+end PercLib.Models.LongRange
+
+end
+
+
+namespace PercLib.Percolation.Bond
+
+variable {V : Type*} [Countable V]
+
+/-- The `ℝ≥0∞`-valued cluster volume of a fixed vertex is measurable. -/
+theorem measurable_encard_cluster_toENNReal (y : V) :
+    Measurable fun ω : Config V => ((cluster ω y).encard : ℝ≥0∞) :=
+  Measurable.of_discrete.comp (measurable_encard_cluster (x := y))
+
+/-- A per-vertex cluster is finite almost surely as soon as its `p`-th moment is finite. -/
+theorem ae_ne_top_encard_cluster_of_lintegral_pow_ne_top (μ : Measure (Config V)) (y : V)
+    (p : ℕ) (hp : 1 ≤ p) (h : (∫⁻ ω, ((cluster ω y).encard : ℝ≥0∞) ^ p ∂μ) ≠ ⊤) :
+    ∀ᵐ ω ∂μ, ((cluster ω y).encard : ℝ≥0∞) ≠ ⊤ :=
+  PercLib.Models.LongRange.ae_ne_top_of_lintegral_pow_ne_top
+    (measurable_encard_cluster_toENNReal y) p hp h
+
+/-- The real `p`-th per-vertex cluster moment is integrable as soon as the `ℝ≥0∞`-valued one
+is finite. -/
+theorem integrable_toReal_pow_encard_cluster_of_lintegral_ne_top (μ : Measure (Config V))
+    (y : V) (p : ℕ) (h : (∫⁻ ω, ((cluster ω y).encard : ℝ≥0∞) ^ p ∂μ) ≠ ⊤) :
+    Integrable (fun ω => ((cluster ω y).encard : ℝ≥0∞).toReal ^ p) μ := by
+  have hm : AEMeasurable (fun ω : Config V => ((cluster ω y).encard : ℝ≥0∞) ^ p) μ :=
+    ((measurable_encard_cluster_toENNReal y).pow_const p).aemeasurable
+  refine (integrable_toReal_of_lintegral_ne_top hm h).congr ?_
+  filter_upwards with ω
+  exact ENNReal.toReal_pow _ p
+
+/-- A uniform `ℝ≥0∞` bound on the per-vertex `p`-th moment bounds the real expectation. -/
+theorem integral_toReal_pow_encard_cluster_le (μ : Measure (Config V)) (y : V) (p : ℕ)
+    (hp : 1 ≤ p) {M : ℝ≥0∞} (hM : (∫⁻ ω, ((cluster ω y).encard : ℝ≥0∞) ^ p ∂μ) ≤ M)
+    (hMtop : M ≠ ⊤) :
+    ∫ ω, ((cluster ω y).encard : ℝ≥0∞).toReal ^ p ∂μ ≤ M.toReal := by
+  have hfin : (∫⁻ ω, ((cluster ω y).encard : ℝ≥0∞) ^ p ∂μ) ≠ ⊤ :=
+    ne_of_lt (lt_of_le_of_lt hM (lt_top_iff_ne_top.2 hMtop))
+  have hae := ae_ne_top_encard_cluster_of_lintegral_pow_ne_top μ y p hp hfin
+  have hne : ∀ᵐ ω ∂μ, ((cluster ω y).encard : ℝ≥0∞) ^ p ≠ ⊤ := by
+    filter_upwards [hae] with ω hω
+    exact ENNReal.pow_ne_top hω
+  have hm : AEMeasurable (fun ω : Config V => ((cluster ω y).encard : ℝ≥0∞) ^ p) μ :=
+    ((measurable_encard_cluster_toENNReal y).pow_const p).aemeasurable
+  calc ∫ ω, ((cluster ω y).encard : ℝ≥0∞).toReal ^ p ∂μ
+      = ∫ ω, (((cluster ω y).encard : ℝ≥0∞) ^ p).toReal ∂μ := by
+        refine integral_congr_ae ?_
+        filter_upwards with ω
+        exact (ENNReal.toReal_pow _ p).symm
+    _ = (∫⁻ ω, ((cluster ω y).encard : ℝ≥0∞) ^ p ∂μ).toReal :=
+        integral_toReal_eq_toReal_lintegral hm hne
+    _ ≤ M.toReal := ENNReal.toReal_mono hMtop hM
+
+/-- **Opening one pair preserves finiteness of the `p`-th cluster moment.**
+
+The pointwise volume bound `encard_cluster_insert_pow_le` dominates the inserted `p`-th moment
+by the moments of the three clusters at the root and at the endpoints of the pair; all three
+are per-vertex data.  No finiteness of the cluster of the root itself is assumed, and a vertex
+with an infinite cluster is allowed: the moment hypothesis is what excludes it. -/
+theorem lintegral_pow_encard_cluster_insert_ne_top (μ : Measure (Config V)) (o a b : V) (p : ℕ)
+    (ho : (∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ^ p ∂μ) ≠ ⊤)
+    (ha : (∫⁻ ω, ((cluster ω a).encard : ℝ≥0∞) ^ p ∂μ) ≠ ⊤)
+    (hb : (∫⁻ ω, ((cluster ω b).encard : ℝ≥0∞) ^ p ∂μ) ≠ ⊤) :
+    (∫⁻ ω, ((cluster (insert s(a, b) ω) o).encard : ℝ≥0∞) ^ p ∂μ) ≠ ⊤ := by
+  have hmo : AEMeasurable (fun ω : Config V => ((cluster ω o).encard : ℝ≥0∞) ^ p) μ :=
+    ((measurable_encard_cluster_toENNReal o).pow_const p).aemeasurable
+  have hma : AEMeasurable (fun ω : Config V => ((cluster ω a).encard : ℝ≥0∞) ^ p) μ :=
+    ((measurable_encard_cluster_toENNReal a).pow_const p).aemeasurable
+  have hmb : AEMeasurable (fun ω : Config V => ((cluster ω b).encard : ℝ≥0∞) ^ p) μ :=
+    ((measurable_encard_cluster_toENNReal b).pow_const p).aemeasurable
+  have htwo : (2 : ℝ≥0∞) ^ (p - 1) ≠ ⊤ := ENNReal.pow_ne_top (by simp)
+  have hrhs : (∫⁻ ω, (((cluster ω o).encard : ℝ≥0∞) ^ p +
+        2 ^ (p - 1) * (((cluster ω a).encard : ℝ≥0∞) ^ p +
+          ((cluster ω b).encard : ℝ≥0∞) ^ p)) ∂μ) =
+      (∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ^ p ∂μ) +
+        2 ^ (p - 1) * ((∫⁻ ω, ((cluster ω a).encard : ℝ≥0∞) ^ p ∂μ) +
+          ∫⁻ ω, ((cluster ω b).encard : ℝ≥0∞) ^ p ∂μ) := by
+    rw [lintegral_add_left' hmo,
+      lintegral_const_mul'' ((2 : ℝ≥0∞) ^ (p - 1))
+        (f := fun ω => ((cluster ω a).encard : ℝ≥0∞) ^ p +
+          ((cluster ω b).encard : ℝ≥0∞) ^ p) (hma.add hmb),
+      lintegral_add_left' hma]
+  have hbound : (∫⁻ ω, ((cluster (insert s(a, b) ω) o).encard : ℝ≥0∞) ^ p ∂μ) ≤
+      ∫⁻ ω, (((cluster ω o).encard : ℝ≥0∞) ^ p +
+        2 ^ (p - 1) * (((cluster ω a).encard : ℝ≥0∞) ^ p +
+          ((cluster ω b).encard : ℝ≥0∞) ^ p)) ∂μ :=
+    lintegral_mono fun ω => encard_cluster_insert_pow_le ω a b o p
+  refine ne_top_of_le_ne_top ?_ hbound
+  rw [hrhs]
+  exact ENNReal.add_ne_top.2
+    ⟨ho, ENNReal.mul_ne_top htwo (ENNReal.add_ne_top.2 ⟨ha, hb⟩)⟩
+
+/-- The pair-by-pair form: every insertion keeps the `p`-th cluster moment of the root
+finite, as soon as every vertex has a finite `p`-th cluster moment. -/
+theorem lintegral_pow_encard_cluster_insert_ne_top_forall (μ : Measure (Config V)) (o : V)
+    (p : ℕ) (h : ∀ y : V, (∫⁻ ω, ((cluster ω y).encard : ℝ≥0∞) ^ p ∂μ) ≠ ⊤) :
+    ∀ e : Sym2 V, (∫⁻ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p ∂μ) ≠ ⊤ := by
+  intro e
+  induction e using Sym2.ind with
+  | _ a b => exact lintegral_pow_encard_cluster_insert_ne_top μ o a b p (h o) (h a) (h b)
+
+end PercLib.Percolation.Bond
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Percolation.Bond PercLib.Analysis
+
+variable {d : ℕ}
+
+/-! ### The inserted-moment hypothesis from per-vertex moments -/
+
+/-- **`hins` from per-vertex moments.**  The cutoff interfaces ask for finiteness of the `p`-th
+moment of the cluster of the root after *opening* a pair `e`; per-vertex moment finiteness at
+every vertex supplies it, for the law of any cutoff profile. -/
+theorem insert_moments_of_vertex_moments {N : Seminorm ℝ (Fin d → ℝ)} {K : ℝ → ℝ}
+    (β : ℝ≥0) (p : ℕ) (r : ℝ) (o : Fin d → ℤ)
+    (hmom : ∀ y : Fin d → ℤ, (∫⁻ ω, ((cluster ω y).encard : ℝ≥0∞) ^ p
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≠ ⊤) :
+    ∀ e : Sym2 (Fin d → ℤ), (∫⁻ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≠ ⊤ :=
+  PercLib.Percolation.Bond.lintegral_pow_encard_cluster_insert_ne_top_forall _ o p hmom
+
+/-- The same, uniformly over a scale interval: this is the shape of the `hins` hypothesis of
+`hasDerivAt_integral_cutoff_pow_binomial_of_insert_moments`. -/
+theorem insert_moments_of_vertex_moments_Ioo {N : Seminorm ℝ (Fin d → ℝ)} {K : ℝ → ℝ}
+    (β : ℝ≥0) (p : ℕ) (o : Fin d → ℤ) {u v : ℝ}
+    (hmom : ∀ r ∈ Ioo u v, ∀ y : Fin d → ℤ, (∫⁻ ω, ((cluster ω y).encard : ℝ≥0∞) ^ p
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≠ ⊤) :
+    ∀ r ∈ Ioo u v, ∀ e : Sym2 (Fin d → ℤ),
+      (∫⁻ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≠ ⊤ :=
+  fun r hr => insert_moments_of_vertex_moments β p r o (hmom r hr)
+
+/-- The same for a `ModelNorm`, which is the norm type of the cutoff derivative interface. -/
+theorem insert_moments_of_vertex_moments_Ioo_modelNorm {N : ModelNorm (Fin d → ℝ)} {K : ℝ → ℝ}
+    (β : ℝ≥0) (p : ℕ) (o : Fin d → ℤ) {u v : ℝ}
+    (hmom : ∀ r ∈ Ioo u v, ∀ y : Fin d → ℤ, (∫⁻ ω, ((cluster ω y).encard : ℝ≥0∞) ^ p
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≠ ⊤) :
+    ∀ r ∈ Ioo u v, ∀ e : Sym2 (Fin d → ℤ),
+      (∫⁻ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≠ ⊤ :=
+  fun r hr => PercLib.Percolation.Bond.lintegral_pow_encard_cluster_insert_ne_top_forall
+    _ o p (hmom r hr)
+
+/-! ### The flux interface with per-vertex moments -/
+
+open Classical in
+/-- The cutoff flux is finite, with the per-pair inserted-moment hypothesis replaced by
+per-vertex moment finiteness. -/
+theorem lintegral_radial_pivotal_ne_top_of_vertex_moments {N : Seminorm ℝ (Fin d → ℝ)}
+    {K K' : ℝ → ℝ} (p : ℕ) (β : ℝ≥0) (r : ℝ) (o : Fin d → ℤ)
+    (cw : Sym2 (Fin d → ℤ) → ℝ) (Kd : ℝ)
+    (hcw : ∀ e, cw e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ))))
+    (hp : 1 ≤ p)
+    (hmom : ∀ y : Fin d → ℤ, (∫⁻ ω, ((cluster ω y).encard : ℝ≥0∞) ^ p
+      ∂(law (intensityProfile (cutoffKernel N K r) β))) ≠ ⊤)
+    (hKd : ∀ S : Finset (Sym2 (Fin d → ℤ)), ∑ e ∈ S, |cw e| *
+      |∫ ω, ((((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+        (((cluster (ω \ {e}) o).encard : ℝ≥0∞).toReal) ^ p)
+        ∂(law (intensityProfile (cutoffKernel N K r) β))| ≤ Kd)
+    (hrate : (β : ℝ) * -K' r ≠ 0) :
+    (∫⁻ ω, (∑' e : Sym2 (Fin d → ℤ),
+        ((radialKernel N (fun s => if s < r then 1 else 0) e : ℝ≥0) : ℝ≥0∞) *
+          (if e ∈ ω then (0 : ℝ≥0∞) else
+            ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+              ((cluster ω o).encard : ℝ≥0∞) ^ p))
+        ∂(law (intensityProfile (cutoffKernel N K r) β))) ≠ ⊤ :=
+  lintegral_radial_pivotal_ne_top_of_insert_moments p β r o cw Kd hcw hp
+    (insert_moments_of_vertex_moments β p r o hmom) hKd hrate
+
+end PercLib.Models.LongRange
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Percolation.Bond PercLib.Analysis
+
+open Classical in
+/-- **The cutoff cluster moment has the paper's binomial derivative at the origin, from
+per-vertex moments.**
+
+This is `hasDerivAt_integral_cutoff_pow_binomial_of_insert_moments` with the per-pair
+inserted-moment hypothesis `hins` replaced by moment finiteness at every vertex, uniformly over
+the scale interval `Ioo u v` (`insert_moments_of_vertex_moments_Ioo`).  The geometric,
+`hKd`, measurability, continuity and nonzero-rate inputs are unchanged and explicit; this is
+still a conditional statement, not a proof of Lemma I.4.1 or of sharpness. -/
+theorem hasDerivAt_integral_cutoff_pow_binomial_of_vertex_moments {d : ℕ}
+    {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p) {R : ℝ}
+    (hχ : chi (intensityProfile (cutoffKernel (d := d) N K R) β) 0 ≠ ⊤)
+    (cw : ℝ → Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ r e, cw r e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K r e : ℝ))))
+    {u v r₀ : ℝ} (hu : 0 < u) (hur : u < r₀) (hrv : r₀ < v) (hvR : v ≤ R)
+    (hcorner : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Ioo u v)
+    (hmom : ∀ r ∈ Ioo u v, ∀ y : Fin d → ℤ, (∫⁻ ω, ((cluster ω y).encard : ℝ≥0∞) ^ p
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≠ ⊤)
+    (Kd : ℝ → ℝ) (hKdint : ∀ a ∈ Ioo u v, ∀ b ∈ Ioo u v, IntervalIntegrable Kd volume a b)
+    (hKd : ∀ r ∈ Ioo u v, ∀ S : Finset (Sym2 (Fin d → ℤ)), ∑ e ∈ S, |cw r e| *
+      |∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))| ≤ Kd r)
+    (hmeas : ∀ n : ℕ, AEStronglyMeasurable (fun r => ∑' e, cw r e *
+      (∫⁻ ω, (min (n : ℝ≥0∞) (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p) -
+        min (n : ℝ≥0∞) (((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p))
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))).toReal)
+      (volume.restrict (Ioo u v)))
+    (hcont : ContinuousOn (fun r => ∑' e, cw r e *
+      ∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) (Ioo u v))
+    :
+    HasDerivAt (fun r => ∫ ω, (((cluster ω 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β)))
+      ((β : ℝ) * -K' r₀ * ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ) *
+        ∫ ω, (((cluster ω 0).encard : ℝ≥0∞).toReal) ^ (ℓ + 1) *
+          (∑' y, (if N (Int.cast ∘ y) ≤ r₀ then 1 else 0) *
+            (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ)) ω *
+            (((cluster ω y).encard : ℝ≥0∞).toReal) ^ (p - ℓ))
+          ∂(law (intensityProfile (cutoffKernel (d := d) N K r₀) β))) r₀ :=
+  hasDerivAt_integral_cutoff_pow_binomial (K := K) (K' := K')
+    (R := R) (u := u) (v := v) (r₀ := r₀)
+    hKa hK' hK'c β p hp hχ cw hcw hu hur hrv hvR hcorner
+    (insert_moments_of_vertex_moments_Ioo_modelNorm β p 0 hmom) Kd hKdint hKd hmeas hcont
+
+end PercLib.Models.LongRange
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Percolation.Bond PercLib.Analysis
+
+open Classical in
+/-- **The three real per-vertex inputs from one `ℝ≥0∞` per-vertex moment bound.**
+
+`forall_inputs_of_uniform_vertex_moment` asks for almost sure finiteness, integrability and a
+uniform real bound for the per-vertex `p`-th moments.  All three follow from the single
+`ℝ≥0∞`-valued bound `∫⁻ |K_y| ^ p ≤ ofReal m`, uniformly in the scale and in the vertex.  So
+the model-side moment input of the cutoff campaign can be stated once, at every vertex, in the
+extended-nonnegative form in which cluster moments are actually computed. -/
+theorem vertex_moment_inputs_of_lintegral_le {V : Type*} [Countable V]
+    (q : ℝ → Sym2 V → unitInterval) (pow : ℕ) (hp : 1 ≤ pow) {m : ℝ} (hm : 0 ≤ m) {u v : ℝ}
+    (hU : ∀ r ∈ Ioo u v, ∀ y : V,
+      (∫⁻ ω, ((cluster ω y).encard : ℝ≥0∞) ^ pow ∂(law (q r))) ≤ ENNReal.ofReal m) :
+    (∀ r ∈ Ioo u v, ∀ y : V, ∀ᵐ ω ∂(law (q r)), ((cluster ω y).encard : ℝ≥0∞) ≠ ⊤) ∧
+      (∀ r ∈ Ioo u v, ∀ y : V, Integrable (fun ω =>
+        ((cluster ω y).encard : ℝ≥0∞).toReal ^ pow) (law (q r))) ∧
+      (∀ r ∈ Ioo u v, ∀ y : V, ∫ ω, ((cluster ω y).encard : ℝ≥0∞).toReal ^ pow
+        ∂(law (q r)) ≤ m) := by
+  have hne : ∀ r ∈ Ioo u v, ∀ y : V,
+      (∫⁻ ω, ((cluster ω y).encard : ℝ≥0∞) ^ pow ∂(law (q r))) ≠ ⊤ := by
+    intro r hr y
+    exact ne_of_lt (lt_of_le_of_lt (hU r hr y) ENNReal.ofReal_lt_top)
+  refine ⟨?_, ?_, ?_⟩
+  · intro r hr y
+    exact ae_ne_top_encard_cluster_of_lintegral_pow_ne_top _ y pow hp (hne r hr y)
+  · intro r hr y
+    exact integrable_toReal_pow_encard_cluster_of_lintegral_ne_top _ y pow (hne r hr y)
+  · intro r hr y
+    have hle := integral_toReal_pow_encard_cluster_le (law (q r)) y pow hp
+      (M := ENNReal.ofReal m) (hU r hr y) ENNReal.ofReal_ne_top
+    rwa [ENNReal.toReal_ofReal hm] at hle
+
+end PercLib.Models.LongRange
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Percolation.Bond PercLib.Analysis
+
+open Classical in
+/-- **The `hKd` integral/sum interchange from `ℝ≥0∞` per-vertex moments.**
+
+`integral_tsum_closed_pivotal_real_of_hKd_vertexMoments` takes two per-vertex real inputs
+(`hfinU`, `hintU`).  Both are consequences of `ℝ≥0∞`-valued moment finiteness at every vertex
+(and `1 ≤ p`), so this restatement has a single per-vertex moment hypothesis. -/
+theorem integral_tsum_closed_pivotal_real_of_hKd_lintegral {d : ℕ}
+    {N : Seminorm ℝ (Fin d → ℝ)} {K K' : ℝ → ℝ} (p : ℕ) (β : ℝ≥0) (r : ℝ) (o : Fin d → ℤ)
+    (cw : Sym2 (Fin d → ℤ) → ℝ) (Kd : ℝ)
+    (hcw : ∀ e, cw e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ))))
+    (hK' : (β : ℝ) * -K' r ≠ 0) (hp : 1 ≤ p)
+    (hmom : ∀ y : Fin d → ℤ, (∫⁻ ω, ((cluster ω y).encard : ℝ≥0∞) ^ p
+      ∂(law (intensityProfile (cutoffKernel N K r) β))) ≠ ⊤)
+    (hKd : ∀ S : Finset (Sym2 (Fin d → ℤ)), ∑ e ∈ S, |cw e| *
+      |∫ ω, ((((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+        (((cluster (ω \ {e}) o).encard : ℝ≥0∞).toReal) ^ p)
+        ∂(law (intensityProfile (cutoffKernel N K r) β))| ≤ Kd) :
+    ∫ ω, (∑' e, (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+        (if e ∈ ω then 0 else
+          (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+            (((cluster ω o).encard : ℝ≥0∞).toReal) ^ p))
+        ∂(law (intensityProfile (cutoffKernel N K r) β)) =
+      ∑' e, (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+        ∫ ω, (if e ∈ ω then 0 else
+          (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+            (((cluster ω o).encard : ℝ≥0∞).toReal) ^ p)
+          ∂(law (intensityProfile (cutoffKernel N K r) β)) :=
+  integral_tsum_closed_pivotal_real_of_hKd_vertexMoments (K := K) (K' := K')
+    p β r o cw Kd hcw hK'
+    (fun y => ae_ne_top_encard_cluster_of_lintegral_pow_ne_top _ y p hp (hmom y))
+    (fun y => integrable_toReal_pow_encard_cluster_of_lintegral_ne_top _ y p (hmom y)) hKd
+
+end PercLib.Models.LongRange
+
+namespace PercLib.Percolation.Bond
+
+section Nonvacuity
+
+open PercLib.Probability
+
+/-- **Non-vacuity of the per-vertex moment input: the zero profile.**  Under `law 0` every pair
+is closed almost surely, so every cluster is a single vertex and every per-vertex `p`-th moment
+equals `1`.  This is an honest bond profile on an infinite vertex set, so the new hypothesis is
+not vacuous. -/
+theorem vertex_moment_ne_top_zeroProfile {V : Type*} [Countable V] (y : V) (p : ℕ) :
+    (∫⁻ ω : Config V, ((cluster ω y).encard : ℝ≥0∞) ^ p
+      ∂(law (fun _ : Sym2 V => (0 : unitInterval)))) ≠ ⊤ := by
+  have hae : ∀ᵐ ω ∂(law (fun _ : Sym2 V => (0 : unitInterval))), ω = ∅ := by
+    filter_upwards [ae_config_subset_positive (fun _ : Sym2 V => (0 : unitInterval))] with ω hω
+    exact Set.subset_empty_iff.mp fun e he => (lt_irrefl (0 : ℝ) (hω he))
+  have hone : (fun ω : Config V => ((cluster ω y).encard : ℝ≥0∞) ^ p)
+      =ᵐ[law (fun _ : Sym2 V => (0 : unitInterval))] fun _ => 1 := by
+    filter_upwards [hae] with ω h
+    rw [h, cluster_empty, Set.encard_singleton]
+    simp
+  rw [lintegral_congr_ae hone, lintegral_const, measure_univ, mul_one]
+  exact ENNReal.one_ne_top
+
+/-- **Non-vacuity on a finite ball: the per-vertex moment input is free.**  Every cluster has at
+most `N` vertices, so the per-vertex `p`-th moment is finite for *every* bond profile and every
+vertex of `Fin N`.  This is the finite-volume regime in which the cutoff hypotheses hold without
+a moment theorem. -/
+theorem vertex_moment_ne_top_fin (N : ℕ) (q : Sym2 (Fin N) → unitInterval) (y : Fin N)
+    (p : ℕ) : (∫⁻ ω : Config (Fin N), ((cluster ω y).encard : ℝ≥0∞) ^ p ∂(law q)) ≠ ⊤ := by
+  have hcard : ∀ ω : Config (Fin N), ((cluster ω y).encard : ℝ≥0∞) ≤ (N : ℝ≥0∞) := by
+    intro ω
+    have h := Set.encard_mono (Set.subset_univ (cluster ω y))
+    rw [Set.encard_univ, ENat.card_eq_coe_fintype_card] at h
+    simpa using h
+  have hle : (∫⁻ ω : Config (Fin N), ((cluster ω y).encard : ℝ≥0∞) ^ p ∂(law q))
+      ≤ (N : ℝ≥0∞) ^ p := by
+    calc (∫⁻ ω : Config (Fin N), ((cluster ω y).encard : ℝ≥0∞) ^ p ∂(law q))
+        ≤ ∫⁻ _ : Config (Fin N), (N : ℝ≥0∞) ^ p ∂(law q) :=
+          lintegral_mono fun ω => ENNReal.pow_le_pow_left (hcard ω)
+      _ = (N : ℝ≥0∞) ^ p * (law q) Set.univ := lintegral_const _
+      _ = (N : ℝ≥0∞) ^ p := by rw [measure_univ, mul_one]
+  exact ne_top_of_le_ne_top (ENNReal.pow_ne_top (by simp)) hle
+
+end Nonvacuity
+
+end PercLib.Percolation.Bond
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Percolation.Bond PercLib.Analysis
+
+open Classical in
+/-- **The cutoff binomial derivative from one per-vertex moment hypothesis.**
+
+`hasDerivAt_integral_cutoff_pow_binomial_of_insert_moments` takes both the per-pair inserted
+moments `hins` on `Ioo u v` and the susceptibility bound `hχ` at the outer scale `R`.  Both are
+consequences of the single hypothesis that every per-vertex `p`-th cluster moment is finite on
+`Ioo u v ∪ {R}`: `hins` from `insert_moments_of_vertex_moments_Ioo`, and `hχ` from
+`chi_ne_top_of_lintegral_pow_ne_top` at `r = R` (the cluster of the root contains the root, so a
+finite moment bounds the susceptibility).  Every other input stays explicit. -/
+theorem hasDerivAt_integral_cutoff_pow_binomial_of_moments {d : ℕ}
+    {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p) {R : ℝ}
+    (cw : ℝ → Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ r e, cw r e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K r e : ℝ))))
+    {u v r₀ : ℝ} (hu : 0 < u) (hur : u < r₀) (hrv : r₀ < v) (hvR : v ≤ R)
+    (hcorner : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Ioo u v)
+    (hmom : ∀ r ∈ (Ioo u v ∪ {R} : Set ℝ), ∀ y : Fin d → ℤ,
+      (∫⁻ ω, ((cluster ω y).encard : ℝ≥0∞) ^ p
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≠ ⊤)
+    (Kd : ℝ → ℝ) (hKdint : ∀ a ∈ Ioo u v, ∀ b ∈ Ioo u v, IntervalIntegrable Kd volume a b)
+    (hKd : ∀ r ∈ Ioo u v, ∀ S : Finset (Sym2 (Fin d → ℤ)), ∑ e ∈ S, |cw r e| *
+      |∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))| ≤ Kd r)
+    (hmeas : ∀ n : ℕ, AEStronglyMeasurable (fun r => ∑' e, cw r e *
+      (∫⁻ ω, (min (n : ℝ≥0∞) (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p) -
+        min (n : ℝ≥0∞) (((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p))
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))).toReal)
+      (volume.restrict (Ioo u v)))
+    (hcont : ContinuousOn (fun r => ∑' e, cw r e *
+      ∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) (Ioo u v))
+    :
+    HasDerivAt (fun r => ∫ ω, (((cluster ω 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β)))
+      ((β : ℝ) * -K' r₀ * ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ) *
+        ∫ ω, (((cluster ω 0).encard : ℝ≥0∞).toReal) ^ (ℓ + 1) *
+          (∑' y, (if N (Int.cast ∘ y) ≤ r₀ then 1 else 0) *
+            (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ)) ω *
+            (((cluster ω y).encard : ℝ≥0∞).toReal) ^ (p - ℓ))
+          ∂(law (intensityProfile (cutoffKernel (d := d) N K r₀) β))) r₀ := by
+  have hχ : chi (intensityProfile (cutoffKernel (d := d) N K R) β) 0 ≠ ⊤ :=
+    chi_ne_top_of_lintegral_pow_ne_top _ 0 p hp (hmom R (Set.mem_union_right _ rfl) 0)
+  refine hasDerivAt_integral_cutoff_pow_binomial_of_vertex_moments (K := K) (K' := K')
+    (R := R) (u := u) (v := v) (r₀ := r₀) hKa hK' hK'c β p hp hχ cw hcw hu hur hrv hvR
+    hcorner ?_ Kd hKdint hKd hmeas hcont
+  exact fun r hr => hmom r (Set.mem_union_left _ hr)
+
+end PercLib.Models.LongRange
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Percolation.Bond PercLib.Analysis
+
+variable {d : ℕ}
+
+open Classical in
+/-- **The cutoff law is translation invariant, so the vertex in the moment hypothesis is free.**
+
+For the cutoff profile the law is invariant under every shift of the configuration
+(`law_cutoffKernel_map_translate`), and a shift carries the cluster of `y` to the cluster of the
+origin (`encard_cluster_translate`).  Hence finiteness of the `p`-th moment of the cluster of a
+single vertex — the shape in which moment bounds are proved — gives it at every vertex. -/
+theorem vertex_moment_ne_top_of_root_moment {N : ModelNorm (Fin d → ℝ)} {K : ℝ → ℝ}
+    (β : ℝ≥0) (r : ℝ) (p : ℕ) (y : Fin d → ℤ)
+    (h : (∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ p
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≠ ⊤) :
+    (∫⁻ ω, ((cluster ω y).encard : ℝ≥0∞) ^ p
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≠ ⊤ := by
+  have hmap : (law (intensityProfile (cutoffKernel (d := d) N K r) β)).map
+      (fun ω : Config (Fin d → ℤ) => Sym2.map (fun x : Fin d → ℤ => x + -y) '' ω) =
+      law (intensityProfile (cutoffKernel (d := d) N K r) β) :=
+    law_cutoffKernel_map_translate (N := N) K r β (-y)
+  have hcl : ∀ ω : Config (Fin d → ℤ),
+      ((cluster (Sym2.map (fun x : Fin d → ℤ => x + -y) '' ω) 0).encard : ℝ≥0∞) =
+        ((cluster ω y).encard : ℝ≥0∞) := by
+    intro ω
+    have h' := encard_cluster_translate (-y) y ω
+    rw [show y + -y = 0 from add_neg_cancel y] at h'
+    rw [h']
+  have hstep : (∫⁻ ω, ((cluster (Sym2.map (fun x : Fin d → ℤ => x + -y) '' ω) 0).encard :
+        ℝ≥0∞) ^ p ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) =
+      (∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ p
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) := by
+    rw [← lintegral_map_shift (law (intensityProfile (cutoffKernel (d := d) N K r) β)) (-y)
+      (fun ω => ((cluster ω 0).encard : ℝ≥0∞) ^ p), hmap]
+  have hfin : (∫⁻ ω, ((cluster ω y).encard : ℝ≥0∞) ^ p
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) =
+      (∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ p
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) := by
+    calc (∫⁻ ω, ((cluster ω y).encard : ℝ≥0∞) ^ p
+          ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β)))
+        = ∫⁻ ω, ((cluster (Sym2.map (fun x : Fin d → ℤ => x + -y) '' ω) 0).encard :
+            ℝ≥0∞) ^ p ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β)) :=
+          lintegral_congr fun ω => by rw [hcl ω]
+      _ = _ := hstep
+  rw [hfin]
+  exact h
+
+end PercLib.Models.LongRange
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Percolation.Bond PercLib.Analysis
+
+variable {d : ℕ}
+
+open Classical in
+/-- **The cutoff binomial derivative from the root moment alone.**
+
+On `ℤ^d` the cutoff law is translation invariant, so the per-vertex moment hypothesis of
+`hasDerivAt_integral_cutoff_pow_binomial_of_moments` is the same as finiteness of the `p`-th
+moment of the cluster of the origin at each scale in `Ioo u v ∪ {R}`
+(`vertex_moment_ne_top_of_root_moment`).  This is the sharpest form of the moment input in the
+file: one vertex, and `hχ` is not needed separately.  Everything else — the profile
+hypotheses, the corner condition, `hKd` with its interval integrability, `hmeas`, `hcont` and
+the nonvanishing rate — stays explicit, and sharpness is not claimed. -/
+theorem hasDerivAt_integral_cutoff_pow_binomial_of_root_moment {N : ModelNorm (Fin d → ℝ)}
+    {K K' : ℝ → ℝ}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p) {R : ℝ}
+    (cw : ℝ → Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ r e, cw r e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K r e : ℝ))))
+    {u v r₀ : ℝ} (hu : 0 < u) (hur : u < r₀) (hrv : r₀ < v) (hvR : v ≤ R)
+    (hcorner : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Ioo u v)
+    (hroot : ∀ r ∈ (Ioo u v ∪ {R} : Set ℝ), (∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ p
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≠ ⊤)
+    (Kd : ℝ → ℝ) (hKdint : ∀ a ∈ Ioo u v, ∀ b ∈ Ioo u v, IntervalIntegrable Kd volume a b)
+    (hKd : ∀ r ∈ Ioo u v, ∀ S : Finset (Sym2 (Fin d → ℤ)), ∑ e ∈ S, |cw r e| *
+      |∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))| ≤ Kd r)
+    (hmeas : ∀ n : ℕ, AEStronglyMeasurable (fun r => ∑' e, cw r e *
+      (∫⁻ ω, (min (n : ℝ≥0∞) (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p) -
+        min (n : ℝ≥0∞) (((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p))
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))).toReal)
+      (volume.restrict (Ioo u v)))
+    (hcont : ContinuousOn (fun r => ∑' e, cw r e *
+      ∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) (Ioo u v))
+    :
+    HasDerivAt (fun r => ∫ ω, (((cluster ω 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β)))
+      ((β : ℝ) * -K' r₀ * ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ) *
+        ∫ ω, (((cluster ω 0).encard : ℝ≥0∞).toReal) ^ (ℓ + 1) *
+          (∑' y, (if N (Int.cast ∘ y) ≤ r₀ then 1 else 0) *
+            (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ)) ω *
+            (((cluster ω y).encard : ℝ≥0∞).toReal) ^ (p - ℓ))
+          ∂(law (intensityProfile (cutoffKernel (d := d) N K r₀) β))) r₀ :=
+  hasDerivAt_integral_cutoff_pow_binomial_of_moments (K := K) (K' := K') (R := R) (u := u)
+    (v := v) (r₀ := r₀) hKa hK' hK'c β p hp cw hcw hu hur hrv hvR hcorner
+    (fun r hr y => vertex_moment_ne_top_of_root_moment β r p y (hroot r hr))
+    Kd hKdint hKd hmeas hcont
+
+end PercLib.Models.LongRange
