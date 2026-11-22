@@ -201,7 +201,8 @@ annuli are independent with probability `≥ c'` each (`CrossingBounds`, Harris)
   members lie in different clusters (a member between two same-colour members separates them:
   primal–primal or mixed interlacing), so the new family is disjoint, keeps the starts and lands
   at separated, fenced tips. This is done up to the bookkeeping of the statement.
-* **Packs** (two or more consecutive same-colour members in one cluster, `OO` in `OCOOC`): the
+* **Packs** (closed in A2b, see `separation-b.md`; kept for the record) (two or more consecutive
+  same-colour members in one cluster, `OO` in `OCOOC`): the
   members must be sent to distinct tips of the same exploration by disjoint walks. This is a
   linkage statement (planar Menger type: `m` disjoint crossings from given starts to `m` of the
   greedy tips). **Open.** Mathlib has no Menger theorem. Two routes: (i) prove that greedy
@@ -211,6 +212,14 @@ annuli are independent with probability `≥ c'` each (`CrossingBounds`, Harris)
   the linkage from the same exchange argument.
 
 ## Correction to the source's rerouting step
+
+**Update (A2b, `separation-b.md`).** Checked against the paper (arXiv v1, pp. 25-26). The rule
+paraphrased below is the paper's rule, and the counterexample stands; the paper has no step
+labels, so "step (f)" is only this note's name for it. The paper does not treat packs separately.
+Cutting at the first intersection, as suggested below, **also fails**: there is a counterexample
+with three greedy crossings in `separation-b.md`. A different rule, right to left, is proved there
+for every family, packs included (`exists_reroute_of_exploration`). The "Surgery" section above is
+superseded.
 
 The subagent's paraphrase of Nolin's step (f) (arXiv v1, Lemma 14; journal Lemma 15, not
 re-read): crossing `c'_k` of the given family is matched to the lowest greedy crossing `c_{v_k}` it
