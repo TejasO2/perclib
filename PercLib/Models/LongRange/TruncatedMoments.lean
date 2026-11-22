@@ -13150,3 +13150,199 @@ theorem not_rpow_le_rpow_sub_one_mul :
   norm_num
 
 end PercLib.Analysis
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability
+
+open Classical in
+/-- The cutoff derivative weight of one pair is continuous on a norm-corner-free interval. -/
+theorem continuousOn_cutoff_deriv_weight {d : ℕ} {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) {u v : ℝ} (hu : 0 < u)
+    (hI : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Ioo u v)
+    (e : Sym2 (Fin d → ℤ)) :
+    ContinuousOn (fun r => (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K r e : ℝ)))) (Ioo u v) := by
+  have hKc : ContinuousOn K (Ioi 0) := fun t ht => (hK' t ht).continuousAt.continuousWithinAt
+  have hsub : Ioo u v ⊆ Ioi 0 := fun r hr => hu.trans hr.1
+  induction e using Sym2.ind with
+  | _ x y =>
+    by_cases hxy : x = y
+    · subst hxy
+      simp only [radialKernel_diag, NNReal.coe_zero, zero_mul]
+      exact continuousOn_const
+    have hcst : ∃ a : ℝ, ∀ r ∈ Ioo u v,
+        (radialKernel N (fun s => if s < r then 1 else 0) s(x, y) : ℝ) = a := by
+      have hz := hI (x - y)
+      by_cases hle : N (Int.cast ∘ (x - y)) ≤ u
+      · exact ⟨1, fun r hr => by
+          rw [radialKernel_of_ne hxy]
+          simp [hle.trans_lt hr.1]⟩
+      · have hge : v ≤ N (Int.cast ∘ (x - y)) := by
+          by_contra h'
+          exact hz ⟨not_le.1 hle, not_le.1 h'⟩
+        exact ⟨0, fun r hr => by
+          rw [radialKernel_of_ne hxy]
+          simp [not_lt.2 (hr.2.le.trans hge)]⟩
+    obtain ⟨a, ha⟩ := hcst
+    refine ContinuousOn.congr (f := fun r => a * ((β : ℝ) * -K' r *
+      Real.exp (-(β : ℝ) * max (K (N (Int.cast ∘ (x - y))) - K r) 0))) ?_ fun r hr => ?_
+    · have h1 : ContinuousOn (fun r => K (N (Int.cast ∘ (x - y))) - K r) (Ioo u v) :=
+        continuousOn_const.sub (hKc.mono hsub)
+      have h2 : ContinuousOn (fun r => max (K (N (Int.cast ∘ (x - y))) - K r) 0) (Ioo u v) :=
+        ContinuousOn.sup h1 continuousOn_const
+      exact continuousOn_const.mul ((continuousOn_const.mul ((hK'c.mono hsub).neg)).mul
+        (Real.continuous_exp.comp_continuousOn (continuousOn_const.mul h2)))
+    · simp only
+      rw [ha r hr, coe_cutoffKernel_eq_max hKa (hsub hr) hxy]
+
+open Classical in
+/-- The full weighted uncapped summand of a cutoff pair is continuous from a uniform finite
+root `(p+1)`-moment. This is single-pair regularity, not an all-pairs small-tail estimate. -/
+theorem continuousOn_cutoff_weight_mul_pivotal_uncapped_of_root_succ_moment {d : ℕ}
+    {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p) (o : Fin d → ℤ) {R : ℝ}
+    {u v : ℝ} (hu : 0 < u) (hvR : v ≤ R)
+    (hI : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Ioo u v)
+    (e : Sym2 (Fin d → ℤ)) (M : ℝ≥0∞) (hM : M ≠ ⊤)
+    (hroot : ∀ r ∈ (Ioo u v ∪ {R} : Set ℝ), (∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ (p + 1)
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≤ M) :
+    ContinuousOn (fun r =>
+      ((radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+        ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K r e : ℝ)))) *
+      ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) (Ioo u v) := by
+  have hRoM : (∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ^ (p + 1)
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K R) β))) ≤ M :=
+    lintegral_pow_encard_cluster_le_of_root_le β R (p + 1) o M
+      (hroot R (Set.mem_union_right _ rfl))
+  have hχR : chi (intensityProfile (cutoffKernel (d := d) N K R) β) o ≠ ⊤ := by
+    apply chi_ne_top_of_lintegral_pow_ne_top _ o p hp
+    refine ne_top_of_le_ne_top (ne_top_of_le_ne_top hM hRoM) ?_
+    refine lintegral_mono fun ω => ?_
+    have hbase : (1 : ℝ≥0∞) ≤ ((cluster ω o).encard : ℝ≥0∞) := by
+      exact_mod_cast one_le_encard_cluster ω o
+    exact pow_le_pow_right₀ hbase (Nat.le_succ p)
+  have hχv : chi (intensityProfile (cutoffKernel (d := d) N K v) β) o ≠ ⊤ :=
+    ne_top_of_le_ne_top hχR (chi_mono (intensityProfile_le_of_le
+      (fun e => monotone_cutoffKernel hKa e hvR) β) o)
+  have hpiv : ContinuousOn (fun r => ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+      ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) (Ioo u v) := by
+    refine continuousOn_pivotal_cutoff_uncapped_of_uniform_vertex_moment
+      hKa hK' hK'c β p hp o hχv hu e M hM ?_
+    intro r hr y
+    exact lintegral_pow_encard_cluster_le_of_root_le β r (p + 1) y M
+      (hroot r (Set.mem_union_left _ hr))
+  exact (continuousOn_cutoff_deriv_weight hKa hK' hK'c β hu hI e).mul hpiv
+
+end PercLib.Models.LongRange
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability
+
+open Classical in
+/-- Higher root moments supply every weighted summand's continuity. The whole pair series is
+then continuous from pointwise absolute summability and a local small-tail estimate. -/
+theorem continuousOn_flux_cutoff_of_root_succ_moment_of_local_tail {d : ℕ}
+    {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p) (o : Fin d → ℤ) {R : ℝ}
+    (M : ℝ≥0∞) (hM : M ≠ ⊤)
+    (cw : ℝ → Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ r e, cw r e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K r e : ℝ))))
+    {u v : ℝ} (hu : 0 < u) (hvR : v ≤ R)
+    (hI : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Ioo u v)
+    (hroot : ∀ r ∈ (Ioo u v ∪ {R} : Set ℝ), (∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ (p + 1)
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≤ M)
+    (habs : ∀ r ∈ Ioo u v, Summable fun e => ‖cw r e *
+      ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))‖)
+    (htail : ∀ r₀ ∈ Ioo u v, ∀ ε > 0, ∃ U ∈ 𝓝 r₀, ∃ F : Finset (Sym2 (Fin d → ℤ)),
+      ∀ r ∈ U ∩ Ioo u v, ∑' e : ↥(F : Set (Sym2 (Fin d → ℤ)))ᶜ,
+        ‖cw r e.1 * ∫ ω, (((cluster (insert e.1 ω) o).encard : ℝ≥0∞) ^ p -
+          ((cluster (ω \ {e.1}) o).encard : ℝ≥0∞) ^ p).toReal
+          ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))‖ ≤ ε) :
+    ContinuousOn (fun r => ∑' e, cw r e *
+      ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) (Ioo u v) := by
+  let Q : ℝ → Sym2 (Fin d → ℤ) → ℝ := fun r e =>
+    (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ)))
+  have hpair : ∀ e : Sym2 (Fin d → ℤ), ContinuousOn (fun r => Q r e *
+      ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel N K r) β))) (Ioo u v) := by
+    intro e
+    refine (continuousOn_cutoff_weight_mul_pivotal_uncapped_of_root_succ_moment
+      hKa hK' hK'c β p hp o hu hvR hI e M hM hroot).congr ?_
+    intro r hr
+    simp only [Q]
+  have habs' : ∀ r ∈ Ioo u v, Summable fun e => ‖Q r e *
+      ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel N K r) β))‖ := by
+    intro r hr
+    simpa only [Q, hcw] using habs r hr
+  have hseries := PercLib.Analysis.continuousOn_tsum_of_uniform_tail hpair habs'
+    (fun r₀ hr₀ ε hε => by
+      obtain ⟨U, hU, F, hF⟩ := htail r₀ hr₀ ε hε
+      exact ⟨U, hU, F, fun r hr => by simpa only [Q, hcw] using hF r hr⟩)
+  refine hseries.congr ?_
+  intro r hr
+  exact tsum_congr fun e => by simp only [Q, hcw]
+
+
+end PercLib.Models.LongRange
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability
+
+open Classical in
+/-- The cutoff binomial derivative from higher root moments, pointwise absolute
+summability, and a local small-tail estimate. The latter replaces an explicit global continuity
+assumption. Sharpness and the literal all-radius corner claim are not asserted. -/
+theorem hasDerivAt_integral_cutoff_pow_binomial_of_root_succ_moment_of_local_tail {d : ℕ}
+    {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p) {R : ℝ}
+    (M : ℝ≥0∞) (hM : M ≠ ⊤)
+    (cw : ℝ → Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ r e, cw r e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K r e : ℝ))))
+    {u v r₀ : ℝ} (hu : 0 < u) (hur : u < r₀) (hrv : r₀ < v) (hvR : v ≤ R)
+    (hcorner : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Ioo u v)
+    (hroot : ∀ r ∈ (Ioo u v ∪ {R} : Set ℝ), (∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ (p + 1)
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≤ M)
+    (habs : ∀ r ∈ Ioo u v, Summable fun e => ‖cw r e *
+      ∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))‖)
+    (htail : ∀ r₀ ∈ Ioo u v, ∀ ε > 0, ∃ U ∈ 𝓝 r₀, ∃ F : Finset (Sym2 (Fin d → ℤ)),
+      ∀ r ∈ U ∩ Ioo u v, ∑' e : ↥(F : Set (Sym2 (Fin d → ℤ)))ᶜ,
+        ‖cw r e.1 * ∫ ω, (((cluster (insert e.1 ω) 0).encard : ℝ≥0∞) ^ p -
+          ((cluster (ω \ {e.1}) 0).encard : ℝ≥0∞) ^ p).toReal
+          ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))‖ ≤ ε) :
+    HasDerivAt (fun r => ∫ ω, (((cluster ω 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β)))
+      ((β : ℝ) * -K' r₀ * ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ) *
+        ∫ ω, (((cluster ω 0).encard : ℝ≥0∞).toReal) ^ (ℓ + 1) *
+          (∑' y, (if N (Int.cast ∘ y) ≤ r₀ then 1 else 0) *
+            (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ)) ω *
+            (((cluster ω y).encard : ℝ≥0∞).toReal) ^ (p - ℓ))
+          ∂(law (intensityProfile (cutoffKernel (d := d) N K r₀) β))) r₀ := by
+  exact hasDerivAt_integral_cutoff_pow_binomial_of_root_succ_moment
+    (K := K) (K' := K') (R := R) (u := u) (v := v) (r₀ := r₀)
+    hKa hK' hK'c β p hp M hM cw hcw hu hur hrv hvR hcorner hroot
+    (continuousOn_flux_cutoff_of_root_succ_moment_of_local_tail
+      hKa hK' hK'c β p hp 0 M hM cw hcw hu hvR hcorner hroot habs htail)
+
+end PercLib.Models.LongRange
