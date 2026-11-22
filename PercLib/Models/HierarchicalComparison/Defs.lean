@@ -79,6 +79,12 @@ def offset (n : ℕ) : Fin d → ℤ := fun i => ∑ m ∈ Finset.range n, (L : 
 /-- The index `⌊(x - t_n) / L^n⌋` of the level-`n` block containing `x`. -/
 def blockIndex (n : ℕ) (x : Fin d → ℤ) : Fin d → ℤ := fun i => (x i - σ.offset n i) / (L : ℤ) ^ n
 
+/-- The corner `t_n + L^n k` of the level-`n` block with index `k`. -/
+def blockCorner (n : ℕ) (k : Fin d → ℤ) : Fin d → ℤ := fun i => σ.offset n i + (L : ℤ) ^ n * k i
+
+theorem blockCorner_apply (n : ℕ) (k : Fin d → ℤ) (i : Fin d) :
+    σ.blockCorner n k i = σ.offset n i + (L : ℤ) ^ n * k i := rfl
+
 /-- The level-`n` block `t_n + L^n k + {0, …, L^n-1}^d` containing `z`. -/
 def block (n : ℕ) (z : Fin d → ℤ) : Finset (Fin d → ℤ) :=
   (Fintype.piFinset fun _ : Fin d => Finset.Ico (0 : ℤ) ((L : ℤ) ^ n)).image

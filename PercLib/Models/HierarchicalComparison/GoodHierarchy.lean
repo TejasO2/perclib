@@ -144,9 +144,6 @@ variable {d L : ℕ} (σ : DigitHierarchy d L)
 
 /-! ### Dependence on the block only -/
 
-/-- The corner `t_n + L^n k` of the level-`n` block with index `k`. -/
-def blockCorner (n : ℕ) (k : Fin d → ℤ) : Fin d → ℤ := fun i => σ.offset n i + (L : ℤ) ^ n * k i
-
 theorem block_congr {n : ℕ} {y z : Fin d → ℤ} (h : σ.blockIndex n y = σ.blockIndex n z) :
     σ.block n y = σ.block n z := by
   unfold block; rw [h]
