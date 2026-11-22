@@ -14426,3 +14426,783 @@ theorem hasDerivAt_integral_linear_cutoff_pow_small_tail (p : ℕ) (hp : 1 ≤ p
 
 
 end PercLib.Models.LongRange
+
+open PercLib.Models.LongRange
+
+namespace PercLib.Percolation.Bond
+
+variable {d : ℕ}
+
+/-! ### Geometry: where far pivotal pairs can sit -/
+
+/-- **A pair whose `K_o`-endpoint is in the window `Λ_L` and whose displacement is at most `v`
+lies in `Λ_{L+v}`.** -/
+theorem mem_window_of_le_norm_sub (N : Seminorm ℝ (Fin d → ℝ)) {x y : Fin d → ℤ} {L v : ℝ}
+    (hv : 0 ≤ v) (hxv : N (Int.cast ∘ x) ≤ L) (hd : N (Int.cast ∘ (y - x)) ≤ v) :
+    ∀ z ∈ s(x, y), N (Int.cast ∘ z) ≤ L + v := by
+  intro z hz
+  rw [Sym2.mem_iff] at hz
+  rcases hz with hzx | hzy
+  · rw [hzx]; linarith
+  · rw [hzy]
+    have hadd : (Int.cast ∘ (y - x) : Fin d → ℝ) + (Int.cast ∘ x) = Int.cast ∘ y := by
+      funext i
+      simp only [Function.comp_apply, Pi.add_apply, Pi.sub_apply]
+      push_cast
+      ring
+    calc N (Int.cast ∘ y)
+        = N ((Int.cast ∘ (y - x) : Fin d → ℝ) + (Int.cast ∘ x)) := by rw [hadd]
+      _ ≤ N (Int.cast ∘ (y - x)) + N (Int.cast ∘ x) := N.add_le' _ _
+      _ ≤ v + L := by linarith
+      _ = L + v := by ring
+
+/-! ### Where the capped pivotal increment is supported -/
+
+/-- **The capped pivotal increment vanishes if the pair misses the root cluster.** -/
+theorem min_sub_min_eq_zero_of_forall_not_mem {V : Type*} {ω : Config V} {o : V} {e : Sym2 V}
+    {pow : ℕ} (M : ℝ≥0∞) (he : ∀ x ∈ e, x ∉ cluster ω o) :
+    min M (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ pow) -
+        min M (((cluster ω o).encard : ℝ≥0∞) ^ pow) = 0 := by
+  rw [cluster_insert_eq_of_forall_not_mem he, tsub_self]
+
+/-- **The capped pivotal increment vanishes if both endpoints are in the root cluster.** -/
+theorem min_sub_min_eq_zero_of_mem_mem {V : Type*} {ω : Config V} {o a b : V} {pow : ℕ}
+    (M : ℝ≥0∞) (ha : o ∈ cluster ω a) (hb : o ∈ cluster ω b) :
+    min M (((cluster (insert s(a, b) ω) o).encard : ℝ≥0∞) ^ pow) -
+        min M (((cluster ω o).encard : ℝ≥0∞) ^ pow) = 0 := by
+  rw [cluster_insert_eq_of_mem_of_mem ha hb, tsub_self]
+
+/-- A truncated difference of two capped quantities is at most the cap. -/
+theorem min_tsub_min_le (M X Y : ℝ≥0∞) : min M X - min M Y ≤ M :=
+  (tsub_le_self).trans (min_le_left _ _)
+
+/-- **The capped pivotal increment is at most the cap.** -/
+theorem min_sub_min_le_cap {V : Type*} {ω : Config V} {o : V} {e : Sym2 V} {pow : ℕ}
+    (M : ℝ≥0∞) :
+    min M (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ pow) -
+        min M (((cluster ω o).encard : ℝ≥0∞) ^ pow) ≤ M :=
+  (tsub_le_self).trans (min_le_left _ _)
+
+end PercLib.Percolation.Bond
+
+/-! ### The far-tail count
+
+The two model inputs below are used: (i) a pair with a weight and displacement at most `v` whose
+`K_o`-endpoint lies in `Λ_L` is itself contained in `Λ_{L+v}`, so it carries no tail weight;
+(ii) the capped pivotal increment is at most the cap and vanishes off the pivotal pairs.  The
+rolling map `x ↦ (the pairs of displacement at most v through x)` has at most `#Λ_v` elements
+per cluster point, which is why the far tail costs one factor of the far part of the root
+cluster and nothing else.
+-/
+
+namespace PercLib.Percolation.Bond
+
+variable {d : ℕ}
+
+/-- An indicator of a `{0,1}`-valued proposition is at most one. -/
+theorem ite_one_zero_le_one (p : Prop) [Decidable p] : (if p then (1 : ℝ≥0∞) else 0) ≤ 1 := by
+  split <;> simp
+
+/-- The complementary indicator is at most one. -/
+theorem ite_zero_one_le_one (p : Prop) [Decidable p] : (if p then (0 : ℝ≥0∞) else 1) ≤ 1 := by
+  split <;> simp
+
+open Classical in
+/-- **Tail weight kills the window part.** If a pair has a nonzero weight, displacement at most
+`v`, and its `K_o`-endpoint lies in `Λ_L`, then it is contained in `Λ_{L+v}`, hence carries the
+tail weight `0`. -/
+theorem tail_weight_eq_zero_of_mem_window (N : Seminorm ℝ (Fin d → ℝ))
+    (rad : Sym2 (Fin d → ℤ) → ℝ≥0∞) {v L : ℝ} (hv : 0 ≤ v)
+    (hradB : ∀ x y, x ≠ y → rad s(x, y) ≠ 0 → N (Int.cast ∘ (y - x)) ≤ v)
+    {ω : Config (Fin d → ℤ)} {o x y : Fin d → ℤ}
+    (hx : x ∈ cluster ω o) (hy : y ∉ cluster ω o) (hxL : N (Int.cast ∘ x) ≤ L) :
+    (if ∀ z ∈ s(x, y), N (Int.cast ∘ z) ≤ L + v then (0 : ℝ≥0∞) else rad s(x, y)) = 0 := by
+  classical
+  by_cases hr : rad s(x, y) = 0
+  · by_cases hc : (∀ z ∈ s(x, y), N (Int.cast ∘ z) ≤ L + v)
+    · rw [ite_eq_left hc]
+    · rw [ite_eq_right hc, hr]
+  · have hxy : x ≠ y := by rintro rfl; exact hy hx
+    rw [ite_eq_left (mem_window_of_le_norm_sub N hv hxL (hradB x y hxy hr))]
+
+open Classical in
+/-- **The tail weight of a pair is bounded by the ball indicator.** -/
+theorem tail_weight_le_ball (N : Seminorm ℝ (Fin d → ℝ))
+    (rad : Sym2 (Fin d → ℤ) → ℝ≥0∞) {v C : ℝ}
+    (hradC : ∀ e, rad e ≤ ENNReal.ofReal C)
+    (hradB : ∀ x y, x ≠ y → rad s(x, y) ≠ 0 → N (Int.cast ∘ (y - x)) ≤ v)
+    (hrad0 : ∀ x, rad s(x, x) = 0) (x y : Fin d → ℤ) :
+    rad s(x, y) ≤ ENNReal.ofReal C * (if N (Int.cast ∘ (y - x)) ≤ v then (1 : ℝ≥0∞) else 0) := by
+  classical
+  by_cases hxy : x = y
+  · subst hxy
+    rw [hrad0 x]
+    simp
+  · by_cases hr : rad s(x, y) = 0
+    · rw [hr]; simp
+    · rw [ite_eq_left (hradB x y hxy hr), mul_one]
+      exact hradC _
+
+end PercLib.Percolation.Bond
+
+namespace PercLib.Percolation.Bond
+
+variable {d : ℕ}
+
+/-- A product of two complementary indicators is at most one. -/
+theorem ite_mul_ite_le_one (p q : Prop) [Decidable p] [Decidable q] :
+    (if p then (1 : ℝ≥0∞) else 0) * (if q then 0 else 1) ≤ 1 := by
+  refine le_trans (mul_le_mul (ite_one_zero_le_one p) (ite_zero_one_le_one q)
+    (by positivity) (by positivity)) ?_
+  simp
+
+/-- Dropping the two pivotal indicators from a capped summand. -/
+theorem indicator_mul_indicator_mul_le (p q : Prop) [Decidable p] [Decidable q]
+    (a b : ℝ≥0∞) : (if p then (1 : ℝ≥0∞) else 0) * a * (if q then 0 else 1) * b ≤ a * b := by
+  calc (if p then (1 : ℝ≥0∞) else 0) * a * (if q then 0 else 1) * b
+      = ((if p then (1 : ℝ≥0∞) else 0) * (if q then 0 else 1)) * (a * b) := by ring
+    _ ≤ 1 * (a * b) := by
+        refine mul_le_mul_of_nonneg_right (ite_mul_ite_le_one p q) (by positivity)
+    _ = a * b := one_mul _
+
+open Classical in
+/-- **The far tail of the capped ordered pivotal sum.**
+
+The capped Russo integrand of Lemma I.4.1 (ordered, with the closed ball of radius `v`) restricted
+to the pairs outside the window `Λ_{L+v}` is bounded by the cap times one rolling factor `#Λ_v`
+per *far* point of the root cluster.  No summability, moment or independence hypothesis is used:
+the count is the pointwise one, since the tail pairs must leave the window through the root
+cluster. -/
+theorem far_tail_ordered_le (N : Seminorm ℝ (Fin d → ℝ))
+    (ω : Config (Fin d → ℤ)) (o : Fin d → ℤ) (pow : ℕ) {Mcap C v L : ℝ}
+    (hv : 0 ≤ v) (rad : Sym2 (Fin d → ℤ) → ℝ≥0∞)
+    (hradC : ∀ e, rad e ≤ ENNReal.ofReal C)
+    (hradB : ∀ x y, x ≠ y → rad s(x, y) ≠ 0 → N (Int.cast ∘ (y - x)) ≤ v)
+    (hrad0 : ∀ x, rad s(x, x) = 0) :
+    (∑' x : Fin d → ℤ, ∑' y : Fin d → ℤ,
+        (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) *
+          (if ∀ z ∈ s(x, y), N (Int.cast ∘ z) ≤ L + v then (0 : ℝ≥0∞) else rad s(x, y)) *
+          (if y ∈ cluster ω o then 0 else 1) *
+          (min (ENNReal.ofReal (Mcap ^ pow))
+              ((((cluster ω o).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ pow) -
+            min (ENNReal.ofReal (Mcap ^ pow)) (((cluster ω o).encard : ℝ≥0∞) ^ pow)))
+      ≤ ENNReal.ofReal (Mcap ^ pow) * ENNReal.ofReal C *
+          (∑' z : Fin d → ℤ, (if N (Int.cast ∘ z) ≤ v then (1 : ℝ≥0∞) else 0)) *
+          (∑' x : Fin d → ℤ,
+            (if x ∈ cluster ω o ∧ ¬ (N (Int.cast ∘ x) ≤ L) then (1 : ℝ≥0∞) else 0)) := by
+  have hterm : ∀ x y : Fin d → ℤ,
+      (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) *
+          (if ∀ z ∈ s(x, y), N (Int.cast ∘ z) ≤ L + v then (0 : ℝ≥0∞) else rad s(x, y)) *
+          (if y ∈ cluster ω o then 0 else 1) *
+          (min (ENNReal.ofReal (Mcap ^ pow))
+              ((((cluster ω o).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ pow) -
+            min (ENNReal.ofReal (Mcap ^ pow)) (((cluster ω o).encard : ℝ≥0∞) ^ pow))
+      ≤ (if x ∈ cluster ω o ∧ ¬ (N (Int.cast ∘ x) ≤ L) then (1 : ℝ≥0∞) else 0) *
+          (ENNReal.ofReal (Mcap ^ pow) * (ENNReal.ofReal C *
+            (if N (Int.cast ∘ (y - x)) ≤ v then (1 : ℝ≥0∞) else 0))) := by
+    intro x y
+    by_cases hx : x ∈ cluster ω o
+    · by_cases hxL : N (Int.cast ∘ x) ≤ L
+      · have hzero : (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) *
+            (if ∀ z ∈ s(x, y), N (Int.cast ∘ z) ≤ L + v then (0 : ℝ≥0∞) else rad s(x, y)) *
+            (if y ∈ cluster ω o then 0 else 1) *
+            (min (ENNReal.ofReal (Mcap ^ pow))
+                ((((cluster ω o).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ pow) -
+              min (ENNReal.ofReal (Mcap ^ pow)) (((cluster ω o).encard : ℝ≥0∞) ^ pow)) = 0 := by
+          by_cases hy : y ∈ cluster ω o
+          · simp [hy]
+          · rw [tail_weight_eq_zero_of_mem_window N rad hv hradB hx hy hxL]
+            simp
+        rw [hzero, ite_eq_right (by tauto : ¬ (x ∈ cluster ω o ∧ ¬ (N (Int.cast ∘ x) ≤ L)))]
+        simp
+      · have hidx : (if x ∈ cluster ω o ∧ ¬ (N (Int.cast ∘ x) ≤ L) then (1 : ℝ≥0∞) else 0) = 1 :=
+          ite_eq_left ⟨hx, hxL⟩
+        rw [hidx, one_mul]
+        have hstep : (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) *
+              (if ∀ z ∈ s(x, y), N (Int.cast ∘ z) ≤ L + v then (0 : ℝ≥0∞) else rad s(x, y)) *
+              (if y ∈ cluster ω o then 0 else 1) *
+              (min (ENNReal.ofReal (Mcap ^ pow))
+                  ((((cluster ω o).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ pow) -
+                min (ENNReal.ofReal (Mcap ^ pow)) (((cluster ω o).encard : ℝ≥0∞) ^ pow))
+            ≤ rad s(x, y) * ENNReal.ofReal (Mcap ^ pow) := by
+          have h1 := indicator_mul_indicator_mul_le (x ∈ cluster ω o) (y ∈ cluster ω o)
+            (rad s(x, y))
+            (min (ENNReal.ofReal (Mcap ^ pow))
+                ((((cluster ω o).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ pow) -
+              min (ENNReal.ofReal (Mcap ^ pow)) (((cluster ω o).encard : ℝ≥0∞) ^ pow))
+          have h2 : (min (ENNReal.ofReal (Mcap ^ pow))
+                ((((cluster ω o).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ pow) -
+              min (ENNReal.ofReal (Mcap ^ pow)) (((cluster ω o).encard : ℝ≥0∞) ^ pow))
+              ≤ ENNReal.ofReal (Mcap ^ pow) := min_tsub_min_le _ _ _
+          have h3 : (if ∀ z ∈ s(x, y), N (Int.cast ∘ z) ≤ L + v then (0 : ℝ≥0∞)
+              else rad s(x, y)) ≤ rad s(x, y) := by
+            split
+            · exact bot_le
+            · exact le_rfl
+          calc (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) *
+                (if ∀ z ∈ s(x, y), N (Int.cast ∘ z) ≤ L + v then (0 : ℝ≥0∞) else rad s(x, y)) *
+                (if y ∈ cluster ω o then 0 else 1) *
+                (min (ENNReal.ofReal (Mcap ^ pow))
+                    ((((cluster ω o).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ pow) -
+                  min (ENNReal.ofReal (Mcap ^ pow)) (((cluster ω o).encard : ℝ≥0∞) ^ pow))
+              ≤ (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) * rad s(x, y) *
+                  (if y ∈ cluster ω o then 0 else 1) * ENNReal.ofReal (Mcap ^ pow) := by
+                gcongr
+            _ ≤ rad s(x, y) * ENNReal.ofReal (Mcap ^ pow) :=
+                indicator_mul_indicator_mul_le _ _ _ _
+        refine hstep.trans ?_
+        have hball := tail_weight_le_ball N rad hradC hradB hrad0 x y
+        calc rad s(x, y) * ENNReal.ofReal (Mcap ^ pow)
+            ≤ (ENNReal.ofReal C * (if N (Int.cast ∘ (y - x)) ≤ v then (1 : ℝ≥0∞) else 0)) *
+                ENNReal.ofReal (Mcap ^ pow) := by
+              exact mul_le_mul_of_nonneg_right hball (by positivity)
+          _ = ENNReal.ofReal (Mcap ^ pow) * (ENNReal.ofReal C *
+                (if N (Int.cast ∘ (y - x)) ≤ v then (1 : ℝ≥0∞) else 0)) := by ring
+    · rw [ite_eq_right hx, zero_mul, zero_mul,
+        ite_eq_right (by tauto : ¬ (x ∈ cluster ω o ∧ ¬ (N (Int.cast ∘ x) ≤ L)))]
+      simp
+  calc (∑' x : Fin d → ℤ, ∑' y : Fin d → ℤ,
+        (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) *
+          (if ∀ z ∈ s(x, y), N (Int.cast ∘ z) ≤ L + v then (0 : ℝ≥0∞) else rad s(x, y)) *
+          (if y ∈ cluster ω o then 0 else 1) *
+          (min (ENNReal.ofReal (Mcap ^ pow))
+              ((((cluster ω o).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ pow) -
+            min (ENNReal.ofReal (Mcap ^ pow)) (((cluster ω o).encard : ℝ≥0∞) ^ pow)))
+      ≤ ∑' x : Fin d → ℤ, ∑' y : Fin d → ℤ,
+          (if x ∈ cluster ω o ∧ ¬ (N (Int.cast ∘ x) ≤ L) then (1 : ℝ≥0∞) else 0) *
+            (ENNReal.ofReal (Mcap ^ pow) * (ENNReal.ofReal C *
+              (if N (Int.cast ∘ (y - x)) ≤ v then (1 : ℝ≥0∞) else 0))) :=
+        ENNReal.tsum_le_tsum fun x => ENNReal.tsum_le_tsum fun y => hterm x y
+    _ = ∑' x : Fin d → ℤ,
+          (if x ∈ cluster ω o ∧ ¬ (N (Int.cast ∘ x) ≤ L) then (1 : ℝ≥0∞) else 0) *
+            ((ENNReal.ofReal (Mcap ^ pow) * ENNReal.ofReal C) *
+              (∑' z : Fin d → ℤ, (if N (Int.cast ∘ z) ≤ v then (1 : ℝ≥0∞) else 0))) := by
+        refine tsum_congr fun x => ?_
+        have hreindex : (∑' y : Fin d → ℤ,
+            (if N (Int.cast ∘ (y - x)) ≤ v then (1 : ℝ≥0∞) else 0))
+            = ∑' z : Fin d → ℤ, (if N (Int.cast ∘ z) ≤ v then (1 : ℝ≥0∞) else 0) := by
+          simp only [sub_eq_add_neg]
+          exact (Equiv.addRight (-x)).tsum_eq
+            (fun z => (if N (Int.cast ∘ z) ≤ v then (1 : ℝ≥0∞) else 0))
+        simp only [ENNReal.tsum_mul_left, hreindex]
+        ring
+    _ = ENNReal.ofReal (Mcap ^ pow) * ENNReal.ofReal C *
+          (∑' z : Fin d → ℤ, (if N (Int.cast ∘ z) ≤ v then (1 : ℝ≥0∞) else 0)) *
+          (∑' x : Fin d → ℤ,
+            (if x ∈ cluster ω o ∧ ¬ (N (Int.cast ∘ x) ≤ L) then (1 : ℝ≥0∞) else 0)) := by
+        simp only [ENNReal.tsum_mul_right]
+        ring
+
+end PercLib.Percolation.Bond
+
+namespace PercLib.Percolation.Bond
+
+variable {d : ℕ}
+
+open Classical in
+/-- **Non-vacuity on the actual cutoff weight.** The radial indicator of the cutoff derivative
+satisfies the three weight hypotheses of `far_tail_ordered_le` with `C = 1` and `v = r`: it is
+bounded by one, vanishes on the diagonal, and vanishes at every pair whose displacement is at
+least `r`. -/
+theorem radial_indicator_weight_hypotheses (N : Seminorm ℝ (Fin d → ℝ)) (r : ℝ) :
+    (∀ e : Sym2 (Fin d → ℤ),
+        ((radialKernel N (fun s => if s < r then 1 else 0) e : ℝ≥0) : ℝ≥0∞) ≤ ENNReal.ofReal 1) ∧
+      (∀ x y : Fin d → ℤ, x ≠ y →
+        ((radialKernel N (fun s => if s < r then 1 else 0) s(x, y) : ℝ≥0) : ℝ≥0∞) ≠ 0 →
+        N (Int.cast ∘ (y - x)) ≤ r) ∧
+      (∀ x : Fin d → ℤ,
+        ((radialKernel N (fun s => if s < r then 1 else 0) s(x, x) : ℝ≥0) : ℝ≥0∞) = 0) := by
+  refine ⟨?_, ?_, ?_⟩
+  · intro e
+    have hreal : (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) ≤ 1 := by
+      rcases radialKernel_indicator_eq_zero_or_one N r e with h | h
+      · simp [h]
+      · simp [h]
+    have hnn : (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ≥0) ≤ 1 := by
+      exact_mod_cast hreal
+    calc ((radialKernel N (fun s => if s < r then 1 else 0) e : ℝ≥0) : ℝ≥0∞)
+        ≤ ((1 : ℝ≥0) : ℝ≥0∞) := ENNReal.coe_le_coe.2 hnn
+      _ = ENNReal.ofReal 1 := by simp
+  · intro x y hxy hne
+    by_contra hcon
+    have hnot : ¬ N (Int.cast ∘ (y - x)) < r := not_lt.2 (le_of_lt (not_le.1 hcon))
+    have h0 : (radialKernel N (fun s => if s < r then 1 else 0) s(x, y) : ℝ≥0) = 0 := by
+      apply NNReal.coe_injective
+      rw [Sym2.eq_swap,
+        radialKernel_indicator_eq_zero_of_not_lt (N := N) (x := y) (y := x) hnot]
+      simp
+    exact hne (by rw [h0]; simp)
+  · intro x
+    rw [radialKernel_diag]
+    simp
+
+end PercLib.Percolation.Bond
+
+namespace PercLib.Percolation.Bond
+
+variable {d : ℕ}
+
+open Classical in
+/-- **The far tail of the actual cut-off Russo sum.** Specialisation of `far_tail_ordered_le` to
+the radial indicator of the cut-off derivative: for `0 ≤ r` and `0 ≤ Mcap`, the pairs outside
+`Λ_{L+r}` contribute at most `Mcap^pow · #Λ_r · |K_o \ Λ_L|` to the capped ordered pivotal sum.
+This is a statement about the actual bond model on `ℤ^d`, uniform in everything but the root
+configuration. -/
+theorem far_tail_cutoff_le (N : Seminorm ℝ (Fin d → ℝ)) {r : ℝ} (hr : 0 ≤ r)
+    (ω : Config (Fin d → ℤ)) (o : Fin d → ℤ) (pow : ℕ) (Mcap : ℝ) (L : ℝ) :
+    (∑' x : Fin d → ℤ, ∑' y : Fin d → ℤ,
+        (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) *
+          (if ∀ z ∈ s(x, y), N (Int.cast ∘ z) ≤ L + r then (0 : ℝ≥0∞)
+            else ((radialKernel N (fun s => if s < r then 1 else 0) s(x, y) : ℝ≥0) : ℝ≥0∞)) *
+          (if y ∈ cluster ω o then 0 else 1) *
+          (min (ENNReal.ofReal (Mcap ^ pow))
+              ((((cluster ω o).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ pow) -
+            min (ENNReal.ofReal (Mcap ^ pow)) (((cluster ω o).encard : ℝ≥0∞) ^ pow)))
+      ≤ ENNReal.ofReal (Mcap ^ pow) *
+          (∑' z : Fin d → ℤ, (if N (Int.cast ∘ z) ≤ r then (1 : ℝ≥0∞) else 0)) *
+          (∑' x : Fin d → ℤ,
+            (if x ∈ cluster ω o ∧ ¬ (N (Int.cast ∘ x) ≤ L) then (1 : ℝ≥0∞) else 0)) := by
+  obtain ⟨hC, hB, h0⟩ := radial_indicator_weight_hypotheses N r
+  have hmain := far_tail_ordered_le N ω o pow (Mcap := Mcap) (C := 1) (v := r) (L := L) hr
+    (fun e => ((radialKernel N (fun s => if s < r then 1 else 0) e : ℝ≥0) : ℝ≥0∞))
+    hC hB h0
+  refine hmain.trans (le_of_eq ?_)
+  rw [ENNReal.ofReal_one, mul_one]
+
+end PercLib.Percolation.Bond
+
+namespace PercLib.Models.LongRange
+
+/-- The cut-off kernel of the linear profile `s ↦ -s` at a unit displacement, for every scale
+`r > 1`: the profile difference `-1 - (-r)` is positive, so the truncation does nothing. -/
+theorem coe_cutoffKernel_linear_unit {x y : Fin 1 → ℤ} {r : ℝ} (hr : 1 < r) (hxy : x ≠ y)
+    (h : ((x - y) 0).natAbs = 1) :
+    ((cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) r) s(x, y) : ℝ) = r - 1 := by
+  rw [cutoffKernel_def, radialKernel_of_ne hxy, normSeminorm_fin_one_intCast, h]
+  rw [cutoffProfile_of_le (K := fun s => -s) (r := r) (s := ((1 : ℕ) : ℝ))
+    (by exact_mod_cast hr.le)]
+  rw [Real.coe_toNNReal _ (by push_cast; linarith)]
+  push_cast
+  ring
+
+/-- The open probability of a unit-displacement pair at every scale `r > 1`:
+`1 - e^{-β (r-1)}`. -/
+theorem coe_intensityProfile_linear_unit {x y : Fin 1 → ℤ} {r : ℝ} (hr : 1 < r) (hxy : x ≠ y)
+    (h : ((x - y) 0).natAbs = 1) (β : ℝ≥0) :
+    ((intensityProfile (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) r) β) s(x, y) : ℝ)
+      = 1 - Real.exp (-(β : ℝ) * (r - 1)) := by
+  simp only [intensityProfile, coe_cutoffKernel_linear_unit hr hxy h]
+
+/-- At a genuinely interacting scale `r > 1` and a nonzero intensity, a unit bond is open with
+probability strictly between `0` and `1`: neither the all-closed nor the all-open event is
+forced. -/
+theorem bond_prob_linear_unit_pos {x y : Fin 1 → ℤ} {r : ℝ} (hr : 1 < r) (hxy : x ≠ y)
+    (h : ((x - y) 0).natAbs = 1) {β : ℝ≥0} (hβ : (β : ℝ) ≠ 0) :
+    0 < ((intensityProfile (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) r) β)
+        s(x, y) : ℝ) ∧
+      ((intensityProfile (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) r) β)
+        s(x, y) : ℝ) < 1 := by
+  have hβpos : (0 : ℝ) < (β : ℝ) := lt_of_le_of_ne β.coe_nonneg (Ne.symm hβ)
+  have harg : 0 < (β : ℝ) * (r - 1) := mul_pos hβpos (by linarith)
+  rw [coe_intensityProfile_linear_unit hr hxy h β]
+  constructor
+  · have hlt : Real.exp (-(β : ℝ) * (r - 1)) < 1 := by
+      rw [Real.exp_lt_one_iff]; linarith
+    linarith
+  · have hpos : 0 < Real.exp (-(β : ℝ) * (r - 1)) := Real.exp_pos _
+    linarith
+
+/-- The exact marginal of a single unit bond under the interacting law. -/
+theorem law_open_linear_unit {x y : Fin 1 → ℤ} {r : ℝ} (hr : 1 < r)
+    (hxy : x ≠ y) (h : ((x - y) 0).natAbs = 1) (β : ℝ≥0) :
+    law (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) r) β)
+        {ω | s(x, y) ∈ ω}
+      = ENNReal.ofReal (1 - Real.exp (-(β : ℝ) * (r - 1))) := by
+  have hset : {ω : Config (Fin 1 → ℤ) | s(x, y) ∈ ω} =
+      {ω | (({s(x, y)} : Finset (Sym2 (Fin 1 → ℤ))) : Set (Sym2 (Fin 1 → ℤ))) ⊆ ω} := by
+    ext ω
+    simp
+  rw [law, hset, prodBernoulli_subset, Finset.prod_singleton]
+  rw [← ENNReal.ofReal_coe_nnreal, unitInterval.coe_toNNReal,
+    coe_intensityProfile_linear_unit hr hxy h β]
+
+/-- **The two-point function of the interacting window is strictly positive.** -/
+theorem tau_linear_unit_pos {r : ℝ} (hr : 1 < r) {β : ℝ≥0} (hβ : (β : ℝ) ≠ 0) :
+    0 < tau (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) r) β)
+      (0 : Fin 1 → ℤ) (fun _ => (1 : ℤ)) := by
+  have hxy : (0 : Fin 1 → ℤ) ≠ (fun _ => (1 : ℤ)) := by
+    intro hc
+    have h0 := congrFun hc 0
+    simp at h0
+  have hnat : (((0 : Fin 1 → ℤ) - (fun _ => (1 : ℤ)) : Fin 1 → ℤ) 0).natAbs = 1 := by
+    have hz : ((0 : Fin 1 → ℤ) - (fun _ => (1 : ℤ)) : Fin 1 → ℤ) 0 = -1 := by
+      simp
+    rw [hz]
+    norm_num
+  have hsub : {ω : Config (Fin 1 → ℤ) | s((0 : Fin 1 → ℤ), (fun _ => (1 : ℤ))) ∈ ω} ⊆
+      conn (0 : Fin 1 → ℤ) (fun _ => (1 : ℤ)) :=
+    fun ω hω => mem_conn_of_mem hxy hω
+  have hpos := (bond_prob_linear_unit_pos hr hxy hnat hβ).1
+  rw [coe_intensityProfile_linear_unit hr hxy hnat β] at hpos
+  have hne : law (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) r) β)
+      {ω | s((0 : Fin 1 → ℤ), (fun _ => (1 : ℤ))) ∈ ω} ≠ 0 := by
+    rw [law_open_linear_unit hr hxy hnat]
+    exact (ENNReal.ofReal_pos.2 hpos).ne'
+  exact lt_of_lt_of_le (zero_lt_iff.2 hne) (measure_mono hsub)
+
+/-- **The susceptibility of the interacting window is strictly bigger than one.** The cluster of
+the origin contains the second endpoint whenever the unit bond is open, so
+`|K| ≥ 1 + 1{0 ↔ 1}` pointwise and `χ ≥ 1 + τ(0,1) > 1`. -/
+theorem one_lt_chi_linear_unit {r : ℝ} (hr : 1 < r) {β : ℝ≥0} (hβ : (β : ℝ) ≠ 0) :
+    1 < chi (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) r) β)
+      (0 : Fin 1 → ℤ) := by
+  have hxy : (0 : Fin 1 → ℤ) ≠ (fun _ => (1 : ℤ)) := by
+    intro hc
+    have h0 := congrFun hc 0
+    simp at h0
+  have htau := tau_linear_unit_pos hr hβ
+  have hle : ∀ ω : Config (Fin 1 → ℤ),
+      ((1 : ℝ≥0∞) + (conn (0 : Fin 1 → ℤ) (fun _ => (1 : ℤ))).indicator (fun _ => 1) ω) ≤
+        ((cluster ω (0 : Fin 1 → ℤ)).encard : ℝ≥0∞) := by
+    intro ω
+    by_cases hc : ω ∈ conn (0 : Fin 1 → ℤ) (fun _ => (1 : ℤ))
+    · rw [Set.indicator_of_mem hc]
+      have hsub : (({((0 : Fin 1 → ℤ)), (fun _ => (1 : ℤ))} : Set (Fin 1 → ℤ))) ⊆
+          cluster ω (0 : Fin 1 → ℤ) := by
+        intro v hv
+        rcases Set.mem_insert_iff.1 hv with hv0 | hv1
+        · rw [hv0]; exact mem_cluster_self ω 0
+        · rw [Set.mem_singleton_iff.1 hv1]
+          exact (mem_cluster_iff ω (0 : Fin 1 → ℤ) (fun _ => (1 : ℤ))).2 hc
+      have h2 : (2 : ℝ≥0∞) ≤ ((cluster ω (0 : Fin 1 → ℤ)).encard : ℝ≥0∞) := by
+        have hmono := Set.encard_mono hsub
+        rw [Set.encard_pair hxy] at hmono
+        exact_mod_cast hmono
+      rw [show (1 : ℝ≥0∞) + 1 = 2 by norm_num]
+      exact h2
+    · rw [Set.indicator_of_notMem hc]
+      simp only [add_zero]
+      exact_mod_cast one_le_encard_cluster ω (0 : Fin 1 → ℤ)
+  have hmono : (∫⁻ ω, ((1 : ℝ≥0∞) +
+        (conn (0 : Fin 1 → ℤ) (fun _ => (1 : ℤ))).indicator (fun _ => 1) ω)
+        ∂(law (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ))
+          (fun s => -s) r) β)))
+      ≤ chi (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) r) β)
+        (0 : Fin 1 → ℤ) :=
+    lintegral_mono hle
+  have heq : (∫⁻ ω, ((1 : ℝ≥0∞) +
+        (conn (0 : Fin 1 → ℤ) (fun _ => (1 : ℤ))).indicator (fun _ => 1) ω)
+        ∂(law (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ))
+          (fun s => -s) r) β)))
+      = 1 + tau (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ))
+          (fun s => -s) r) β) (0 : Fin 1 → ℤ) (fun _ => (1 : ℤ)) := by
+    rw [lintegral_add_left measurable_const]
+    congr 1
+    · rw [lintegral_const, measure_univ, mul_one]
+    · rw [lintegral_indicator (measurableSet_conn _ _), lintegral_const,
+        Measure.restrict_apply_univ, one_mul]
+      rfl
+  rw [heq] at hmono
+  exact lt_of_lt_of_le (ENNReal.lt_add_right (by simp) htau.ne') hmono
+
+/-! ### The interacting window is nearest-neighbour percolation -/
+
+/-- The linear cut-off kernel vanishes at every displacement of norm at least two, for every
+scale `r < 2`. -/
+theorem coe_cutoffKernel_linear_eq_zero_of_two_le {x y : Fin 1 → ℤ} {r : ℝ} (hr : r < 2)
+    (hxy : x ≠ y) (h : 2 ≤ ((x - y) 0).natAbs) :
+    ((cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) r) s(x, y) : ℝ) = 0 := by
+  rw [cutoffKernel_def, radialKernel_of_ne hxy, normSeminorm_fin_one_intCast]
+  have hlt : r < (((x - y) 0).natAbs : ℝ) := by
+    have h2 : (2 : ℝ) ≤ (((x - y) 0).natAbs : ℝ) := by exact_mod_cast h
+    linarith
+  rw [cutoffProfile_of_lt hlt, Real.toNNReal_zero]
+  simp
+
+/-- The open probability at a displacement of norm at least two vanishes at every scale `r < 2`. -/
+theorem coe_intensityProfile_linear_eq_zero_of_two_le {x y : Fin 1 → ℤ} {r : ℝ} (hr : r < 2)
+    (hxy : x ≠ y) (h : 2 ≤ ((x - y) 0).natAbs) (β : ℝ≥0) :
+    ((intensityProfile (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) r) β)
+      s(x, y) : ℝ) = 0 := by
+  simp only [intensityProfile, coe_cutoffKernel_linear_eq_zero_of_two_le hr hxy h]
+  simp
+
+/-- **Almost surely every open bond of the interacting window has unit displacement**: for
+`1 < r < 2` the law is nearest-neighbour bond percolation with open probability
+`1 - exp (-(β (r-1)))`, and no longer bond is ever open. -/
+theorem ae_open_pair_natAbs_one {r : ℝ} (_hr : 1 < r) (hr2 : r < 2) (β : ℝ≥0) :
+    ∀ᵐ ω ∂(law (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) r) β)),
+      ∀ x y : Fin 1 → ℤ, s(x, y) ∈ ω → x ≠ y → ((x - y) 0).natAbs = 1 := by
+  filter_upwards [ae_config_subset_positive
+    (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) r) β)]
+    with ω hω x y hmem hxy
+  have hne0 : (x - y) 0 ≠ 0 := by
+    intro hc
+    apply hxy
+    rw [fun_fin_one_eq_iff]
+    simp only [Pi.sub_apply] at hc
+    linarith
+  by_contra hcon
+  have h2 : 2 ≤ ((x - y) 0).natAbs := by omega
+  have hzero : ((intensityProfile (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) r) β)
+      s(x, y) : ℝ) = 0 := coe_intensityProfile_linear_eq_zero_of_two_le hr2 hxy h2 β
+  have hpos : (0 : unitInterval) <
+      (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) r) β) s(x, y) :=
+    hω hmem
+  have hzero' : (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) r) β)
+      s(x, y) = 0 := by
+    apply Subtype.ext
+    simpa using hzero
+  rw [hzero'] at hpos
+  exact absurd hpos (not_lt.2 (le_refl _))
+
+/-- **The derivative weight of the interacting window is supported on unit bonds.** For `r < 2`
+the strict radial indicator `1{N (x-y) < r}` kills every pair of displacement norm at least two,
+whatever the cut-off rate and the exponential factor. -/
+theorem coe_cutoff_weight_eq_zero_of_two_le {x y : Fin 1 → ℤ} {r : ℝ} (hr : r < 2)
+    (h : 2 ≤ ((x - y) 0).natAbs) {K' : ℝ → ℝ} {β : ℝ} :
+    (radialKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => if s < r then 1 else 0) s(x, y) : ℝ) *
+      (β * -K' r * Real.exp (-β * ((cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ))
+        (fun s => -s) r) s(x, y) : ℝ))) = 0 := by
+  have hlt : ¬ (normSeminorm ℝ (Fin 1 → ℝ) (Int.cast ∘ (x - y)) < r) := by
+    rw [normSeminorm_fin_one_intCast]
+    have h2 : (2 : ℝ) ≤ (((x - y) 0).natAbs : ℝ) := by exact_mod_cast h
+    linarith
+  rw [radialKernel_indicator_eq_zero_of_not_lt hlt]
+  simp
+
+/-! ### Exact finite support of the Lemma I.4.1 right-hand side at `r₀ = 3/2` -/
+
+/-- Displacements of sup norm at most `3 / 2` in the one-dimensional lattice are `0`, `1` and
+`-1`: no integer displacement has norm strictly between one and two. -/
+theorem fin_one_intCast_le_three_halves {y : Fin 1 → ℤ}
+    (h : normSeminorm ℝ (Fin 1 → ℝ) (Int.cast ∘ y) ≤ (3 / 2 : ℝ)) :
+    y = (0 : Fin 1 → ℤ) ∨ y = (fun _ => (1 : ℤ)) ∨ y = (fun _ => (-1 : ℤ)) := by
+  rw [normSeminorm_fin_one_intCast] at h
+  have h1 : (y 0).natAbs ≤ 1 := by
+    by_contra hc
+    have h2 : 2 ≤ (y 0).natAbs := by omega
+    have h3 : (2 : ℝ) ≤ ((y 0).natAbs : ℝ) := by exact_mod_cast h2
+    linarith
+  have hy : y 0 = -1 ∨ y 0 = 0 ∨ y 0 = 1 := by omega
+  rcases hy with h' | h' | h'
+  · exact Or.inr (Or.inr ((fun_fin_one_eq_iff y (fun _ => (-1 : ℤ))).2 (by simpa using h')))
+  · exact Or.inl ((fun_fin_one_eq_iff y (0 : Fin 1 → ℤ)).2 (by simpa using h'))
+  · exact Or.inr (Or.inl ((fun_fin_one_eq_iff y (fun _ => (1 : ℤ))).2 (by simpa using h')))
+
+/-- At `r₀ = 3 / 2` the inner vertex sum of the Lemma I.4.1 right-hand side is supported on the
+three neighbours `0, 1, -1` of the origin, and the `y = 0` term vanishes because the origin is
+always connected to itself.  Hence the interacting-window right-hand side is the two-term
+nearest-neighbour expression displayed below: only the bonds `{0,1}` and `{0,-1}` contribute. -/
+theorem tsum_i41_neighbour_support (p ℓ : ℕ) (ω : Config (Fin 1 → ℤ)) :
+    (∑' y : Fin 1 → ℤ,
+      (if normSeminorm ℝ (Fin 1 → ℝ) (Int.cast ∘ y) ≤ (3 / 2 : ℝ) then (1 : ℝ) else 0) *
+        (conn (0 : Fin 1 → ℤ) y)ᶜ.indicator (fun _ => (1 : ℝ)) ω *
+        (((cluster ω y).encard : ℝ≥0∞).toReal) ^ (p - ℓ))
+      = (conn (0 : Fin 1 → ℤ) (fun _ => (1 : ℤ)))ᶜ.indicator (fun _ => (1 : ℝ)) ω *
+          (((cluster ω (fun _ => (1 : ℤ))).encard : ℝ≥0∞).toReal) ^ (p - ℓ) +
+        (conn (0 : Fin 1 → ℤ) (fun _ => (-1 : ℤ)))ᶜ.indicator (fun _ => (1 : ℝ)) ω *
+          (((cluster ω (fun _ => (-1 : ℤ))).encard : ℝ≥0∞).toReal) ^ (p - ℓ) := by
+  classical
+  have hsupp : ∀ y : Fin 1 → ℤ, y ≠ (0 : Fin 1 → ℤ) → y ≠ (fun _ => (1 : ℤ)) →
+      y ≠ (fun _ => (-1 : ℤ)) →
+      (if normSeminorm ℝ (Fin 1 → ℝ) (Int.cast ∘ y) ≤ (3 / 2 : ℝ) then (1 : ℝ) else 0) = 0 := by
+    intro y h0 h1 hm1
+    split_ifs with hle
+    · rcases fin_one_intCast_le_three_halves hle with h | h | h
+      · exact absurd h h0
+      · exact absurd h h1
+      · exact absurd h hm1
+    · rfl
+  have hzero : (if normSeminorm ℝ (Fin 1 → ℝ) (Int.cast ∘ (0 : Fin 1 → ℤ)) ≤ (3 / 2 : ℝ)
+      then (1 : ℝ) else 0) *
+        (conn (0 : Fin 1 → ℤ) (0 : Fin 1 → ℤ))ᶜ.indicator (fun _ => (1 : ℝ)) ω *
+        (((cluster ω (0 : Fin 1 → ℤ)).encard : ℝ≥0∞).toReal) ^ (p - ℓ) = 0 := by
+    rw [conn_self]
+    simp
+  have h01 : (0 : Fin 1 → ℤ) ≠ ((fun _ => (1 : ℤ)) : Fin 1 → ℤ) := by
+    intro hc
+    have h := congrFun hc 0
+    simp at h
+  have h0m : (0 : Fin 1 → ℤ) ≠ ((fun _ => (-1 : ℤ)) : Fin 1 → ℤ) := by
+    intro hc
+    have h := congrFun hc 0
+    simp at h
+  have h1m : ((fun _ => (1 : ℤ)) : Fin 1 → ℤ) ≠ ((fun _ => (-1 : ℤ)) : Fin 1 → ℤ) := by
+    intro hc
+    have h := congrFun hc 0
+    simp at h
+  rw [tsum_eq_sum (s := ({(0 : Fin 1 → ℤ), (fun _ => (1 : ℤ)), (fun _ => (-1 : ℤ))} :
+    Finset (Fin 1 → ℤ))) (fun y hy => by
+      simp only [Finset.mem_insert, Finset.mem_singleton, not_or] at hy
+      rw [hsupp y hy.1 hy.2.1 hy.2.2]
+      simp)]
+  have hm1 : (0 : Fin 1 → ℤ) ∉ ({(fun _ => (1 : ℤ)), (fun _ => (-1 : ℤ))} :
+      Finset (Fin 1 → ℤ)) := by
+    simp only [Finset.mem_insert, Finset.mem_singleton, not_or]
+    exact ⟨h01, h0m⟩
+  have hm2 : (fun _ => (1 : ℤ)) ∉ ({(fun _ => (-1 : ℤ))} : Finset (Fin 1 → ℤ)) := by
+    simp only [Finset.mem_singleton]
+    exact h1m
+  have hone : (if normSeminorm ℝ (Fin 1 → ℝ)
+      (Int.cast ∘ ((fun _ => (1 : ℤ)) : Fin 1 → ℤ)) ≤ (3 / 2 : ℝ) then (1 : ℝ) else 0) = 1 := by
+    rw [normSeminorm_fin_one_intCast]
+    norm_num
+  have honem : (if normSeminorm ℝ (Fin 1 → ℝ)
+      (Int.cast ∘ ((fun _ => (-1 : ℤ)) : Fin 1 → ℤ)) ≤ (3 / 2 : ℝ) then (1 : ℝ) else 0) = 1 := by
+    rw [normSeminorm_fin_one_intCast]
+    norm_num
+  rw [Finset.sum_insert hm1, Finset.sum_insert hm2, Finset.sum_singleton, hzero, zero_add,
+    hone, honem, one_mul, one_mul]
+
+/-! ### The interacting window as a genuine instance of the cut-off derivative interface -/
+
+/-- **The interacting window at `r₀ = 3 / 2` is a genuine instance of the Lemma I.4.1 cut-off
+derivative interface.** For `d = 1`, `K s = -s`, `β = 1`, window `u = 5/4`, `v = R = 8/5` and
+`r₀ = 3/2` (which is corner-free), every hypothesis of
+`hasDerivAt_integral_cutoff_pow_binomial_of_root_succ_moment_of_small_tail` is discharged except
+the two genuinely model-dependent inputs: the uniform root `(p+1)`-moment `M` and the local
+small-tail estimate `htail`.  Both are stated here for the actual nearest-neighbour window, so
+the remaining gap is visible in one place. -/
+theorem hasDerivAt_linear_three_halves_of_moment_of_tail
+    (p : ℕ) (hp : 1 ≤ p) (M : ℝ≥0∞) (hM : M ≠ ⊤)
+    (hroot : ∀ r ∈ (Set.Ioo (5 / 4 : ℝ) (8 / 5) ∪ {(8 / 5 : ℝ)} : Set ℝ),
+      (∫⁻ ω, ((cluster ω (0 : Fin 1 → ℤ)).encard : ℝ≥0∞) ^ (p + 1)
+        ∂(law (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) r)
+          (1 : ℝ≥0)))) ≤ M)
+    (htail : ∀ r₀ ∈ Set.Ioo (5 / 4 : ℝ) (8 / 5), ∀ ε > 0, ∃ U ∈ 𝓝 r₀,
+      ∃ F : Finset (Sym2 (Fin 1 → ℤ)), ∀ r ∈ U ∩ Set.Ioo (5 / 4 : ℝ) (8 / 5),
+        ∑' e : ↥(F : Set (Sym2 (Fin 1 → ℤ)))ᶜ,
+          ‖((radialKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => if s < r then 1 else 0)
+              e.1 : ℝ) *
+            ((1 : ℝ) * -((fun _ : ℝ => -1) r) *
+              Real.exp (-(1 : ℝ) *
+                (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) r e.1 : ℝ)))) *
+           ∫ ω, (((cluster (insert e.1 ω) (0 : Fin 1 → ℤ)).encard : ℝ≥0∞) ^ p -
+             ((cluster (ω \ {e.1}) (0 : Fin 1 → ℤ)).encard : ℝ≥0∞) ^ p).toReal
+             ∂(law (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ))
+               (fun s => -s) r) (1 : ℝ≥0)))‖ ≤ ε) :
+    HasDerivAt (fun r : ℝ => ∫ ω, (((cluster ω (0 : Fin 1 → ℤ)).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) r)
+          (1 : ℝ≥0))))
+      (((1 : ℝ≥0) : ℝ) * -((fun _ : ℝ => -1) (3 / 2)) *
+        ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ) *
+          ∫ ω, (((cluster ω (0 : Fin 1 → ℤ)).encard : ℝ≥0∞).toReal) ^ (ℓ + 1) *
+            (∑' y : Fin 1 → ℤ,
+              (if normSeminorm ℝ (Fin 1 → ℝ) (Int.cast ∘ y) ≤ (3 / 2 : ℝ) then (1 : ℝ) else 0) *
+              (conn (0 : Fin 1 → ℤ) y)ᶜ.indicator (fun _ => (1 : ℝ)) ω *
+              (((cluster ω y).encard : ℝ≥0∞).toReal) ^ (p - ℓ))
+            ∂(law (intensityProfile
+              (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) (3 / 2))
+              (1 : ℝ≥0))))
+      (3 / 2) := by
+  let cw : ℝ → Sym2 (Fin 1 → ℤ) → ℝ := fun r e =>
+    (radialKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((1 : ℝ) * -((fun _ : ℝ => -1) r) *
+        Real.exp (-(1 : ℝ) *
+          (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) r e : ℝ)))
+  have hcw : ∀ (r : ℝ) (e : Sym2 (Fin 1 → ℤ)), cw r e =
+      (radialKernel (ModelNorm.ofNorm (Fin 1 → ℝ)) (fun s => if s < r then 1 else 0) e : ℝ) *
+        (((1 : ℝ≥0) : ℝ) * -((fun _ : ℝ => -1) r) *
+          Real.exp (-(((1 : ℝ≥0) : ℝ)) *
+            (cutoffKernel (ModelNorm.ofNorm (Fin 1 → ℝ)) (fun s => -s) r e : ℝ))) :=
+    fun _ _ => rfl
+  have hcorner : ∀ z : Fin 1 → ℤ,
+      ModelNorm.ofNorm (Fin 1 → ℝ) (Int.cast ∘ z) ∉ Set.Ioo (5 / 4 : ℝ) (8 / 5) := by
+    intro z hz
+    have hsub : Set.Ioo (5 / 4 : ℝ) (8 / 5) ⊆ Set.Ioo (1 : ℝ) 2 := by
+      intro t ht
+      exact ⟨by linarith [ht.1], by linarith [ht.2]⟩
+    exact corner_free_at_three_halves z (hsub hz)
+  have hroot' : ∀ r ∈ (Set.Ioo (5 / 4 : ℝ) (8 / 5) ∪ {(8 / 5 : ℝ)} : Set ℝ),
+      (∫⁻ ω, ((cluster ω (0 : Fin 1 → ℤ)).encard : ℝ≥0∞) ^ (p + 1)
+        ∂(law (intensityProfile (cutoffKernel (ModelNorm.ofNorm (Fin 1 → ℝ)) (fun s => -s) r)
+          (1 : ℝ≥0)))) ≤ M := by
+    intro r hr
+    simpa only [ModelNorm.toSeminorm_ofNorm] using hroot r hr
+  have key := hasDerivAt_integral_cutoff_pow_binomial_of_root_succ_moment_of_small_tail
+    (d := 1) (N := ModelNorm.ofNorm (Fin 1 → ℝ)) (K := fun s => -s) (K' := fun _ => -1)
+    (R := (8 / 5 : ℝ)) (u := (5 / 4 : ℝ)) (v := (8 / 5 : ℝ)) (r₀ := (3 / 2 : ℝ))
+    (by intro a _ b _ hab; change -b ≤ -a; linarith)
+    (by intro t _; exact (hasDerivAt_id t).neg)
+    (continuous_const : Continuous fun _ : ℝ => (-1 : ℝ)).continuousOn
+    (1 : ℝ≥0) p hp M hM cw hcw (by norm_num) (by norm_num) (by norm_num) (le_refl _)
+    hcorner hroot'
+    (by
+      intro r₀ hr₀ ε hε
+      obtain ⟨U, hU, F, hF⟩ := htail r₀ hr₀ ε hε
+      exact ⟨U, hU, F, fun r hr => hF r hr⟩)
+  have hcoe : ∀ x : Fin 1 → ℝ,
+      (ModelNorm.ofNorm (Fin 1 → ℝ)) x = (normSeminorm ℝ (Fin 1 → ℝ)) x := by
+    intro x
+    change (ModelNorm.ofNorm (Fin 1 → ℝ)).toSeminorm x = _
+    rw [ModelNorm.toSeminorm_ofNorm]
+  simpa only [ModelNorm.toSeminorm_ofNorm, hcoe] using key
+
+/-- **The Lemma I.4.1 integrand at `r₀ = 3/2` reduces to its two nearest-neighbour terms**:
+the vertex sum inside the flux integral is exactly the sum over `y = 1` and `y = -1`. -/
+theorem integral_linear_three_halves_i41_integrand (p ℓ : ℕ) :
+    (∫ ω, (((cluster ω (0 : Fin 1 → ℤ)).encard : ℝ≥0∞).toReal) ^ (ℓ + 1) *
+        (∑' y : Fin 1 → ℤ,
+          (if normSeminorm ℝ (Fin 1 → ℝ) (Int.cast ∘ y) ≤ (3 / 2 : ℝ) then (1 : ℝ) else 0) *
+          (conn (0 : Fin 1 → ℤ) y)ᶜ.indicator (fun _ => (1 : ℝ)) ω *
+          (((cluster ω y).encard : ℝ≥0∞).toReal) ^ (p - ℓ))
+        ∂(law (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s)
+          (3 / 2)) (1 : ℝ≥0))))
+      = ∫ ω, (((cluster ω (0 : Fin 1 → ℤ)).encard : ℝ≥0∞).toReal) ^ (ℓ + 1) *
+        ((conn (0 : Fin 1 → ℤ) ((fun _ => (1 : ℤ)) : Fin 1 → ℤ))ᶜ.indicator
+            (fun _ => (1 : ℝ)) ω *
+          (((cluster ω ((fun _ => (1 : ℤ)) : Fin 1 → ℤ)).encard : ℝ≥0∞).toReal) ^ (p - ℓ) +
+        (conn (0 : Fin 1 → ℤ) ((fun _ => (-1 : ℤ)) : Fin 1 → ℤ))ᶜ.indicator
+            (fun _ => (1 : ℝ)) ω *
+          (((cluster ω ((fun _ => (-1 : ℤ)) : Fin 1 → ℤ)).encard : ℝ≥0∞).toReal) ^ (p - ℓ))
+        ∂(law (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s)
+          (3 / 2)) (1 : ℝ≥0))) := by
+  refine integral_congr_ae (Filter.Eventually.of_forall fun ω => ?_)
+  dsimp only
+  rw [tsum_i41_neighbour_support p ℓ ω]
+
+/-- **The same interacting derivative with the right-hand side reduced to its two
+nearest-neighbour terms.** This is the shape the sharpness input has to match: only the bonds
+`{0,1}` and `{0,-1}` appear, with the two-point factors `1{0 not↔ ±1}`. -/
+theorem hasDerivAt_linear_three_halves_neighbours
+    (p : ℕ) (hp : 1 ≤ p) (M : ℝ≥0∞) (hM : M ≠ ⊤)
+    (hroot : ∀ r ∈ (Set.Ioo (5 / 4 : ℝ) (8 / 5) ∪ {(8 / 5 : ℝ)} : Set ℝ),
+      (∫⁻ ω, ((cluster ω (0 : Fin 1 → ℤ)).encard : ℝ≥0∞) ^ (p + 1)
+        ∂(law (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) r)
+          (1 : ℝ≥0)))) ≤ M)
+    (htail : ∀ r₀ ∈ Set.Ioo (5 / 4 : ℝ) (8 / 5), ∀ ε > 0, ∃ U ∈ 𝓝 r₀,
+      ∃ F : Finset (Sym2 (Fin 1 → ℤ)), ∀ r ∈ U ∩ Set.Ioo (5 / 4 : ℝ) (8 / 5),
+        ∑' e : ↥(F : Set (Sym2 (Fin 1 → ℤ)))ᶜ,
+          ‖((radialKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => if s < r then 1 else 0)
+              e.1 : ℝ) *
+            ((1 : ℝ) * -((fun _ : ℝ => -1) r) *
+              Real.exp (-(1 : ℝ) *
+                (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) r e.1 : ℝ)))) *
+           ∫ ω, (((cluster (insert e.1 ω) (0 : Fin 1 → ℤ)).encard : ℝ≥0∞) ^ p -
+             ((cluster (ω \ {e.1}) (0 : Fin 1 → ℤ)).encard : ℝ≥0∞) ^ p).toReal
+             ∂(law (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ))
+               (fun s => -s) r) (1 : ℝ≥0)))‖ ≤ ε) :
+    HasDerivAt (fun r : ℝ => ∫ ω, (((cluster ω (0 : Fin 1 → ℤ)).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) r)
+          (1 : ℝ≥0))))
+      (((1 : ℝ≥0) : ℝ) * -((fun _ : ℝ => -1) (3 / 2)) *
+        ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ) *
+          ∫ ω, (((cluster ω (0 : Fin 1 → ℤ)).encard : ℝ≥0∞).toReal) ^ (ℓ + 1) *
+            ((conn (0 : Fin 1 → ℤ) ((fun _ => (1 : ℤ)) : Fin 1 → ℤ))ᶜ.indicator
+                (fun _ => (1 : ℝ)) ω *
+              (((cluster ω ((fun _ => (1 : ℤ)) : Fin 1 → ℤ)).encard : ℝ≥0∞).toReal) ^ (p - ℓ) +
+            (conn (0 : Fin 1 → ℤ) ((fun _ => (-1 : ℤ)) : Fin 1 → ℤ))ᶜ.indicator
+                (fun _ => (1 : ℝ)) ω *
+              (((cluster ω ((fun _ => (-1 : ℤ)) : Fin 1 → ℤ)).encard : ℝ≥0∞).toReal) ^ (p - ℓ))
+            ∂(law (intensityProfile
+              (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) (3 / 2))
+              (1 : ℝ≥0))))
+      (3 / 2) := by
+  refine (hasDerivAt_linear_three_halves_of_moment_of_tail
+    p hp M hM hroot htail).congr_deriv ?_
+  congr 1
+  exact Finset.sum_congr rfl fun ℓ _ => by
+    rw [integral_linear_three_halves_i41_integrand p ℓ]
+
+end PercLib.Models.LongRange
