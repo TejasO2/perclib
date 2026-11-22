@@ -6,6 +6,14 @@ deprecated alias for one release where that is possible.
 
 ## Announced, not yet merged
 
+- `frontier-trivalent-count` (SO5J; audited APPROVE WITH CHANGES, `audit-r15-frontier-a`, change applied in
+  `work/frontier-trivalent-count-fix` @ `d65cae9`): in new `PercLib/Percolation/Bond/Multipoint/TrivalentCount.lean`:
+  `Vtx`, `embed`, `hat`, `graft`, `prune`, `canonical`. Additive.
+
+## Merged
+
+### New definitions, 21-22 Nov batches (gated at `28c5f0a` and `1f14e57`) (additive; no existing name changed)
+
 - `p-a-EKDO` (audited APPROVE with 3 exact edits applied verbatim, `audit-r14-outside-batch`): in new
   `PercLib/Models/HierarchicalComparison/Defs.lean`: `DigitHierarchy` and `DigitHierarchy.offset`, `blockIndex`, `block`,
   `commonLevel`, `childHierarchy`, `translate`; `layerWeight`, `InStrictAncestor`, `InBlockLayer`, `layerKernel`,
@@ -37,8 +45,6 @@ deprecated alias for one release where that is possible.
   `fullConfig`, `blockConfig`, `ancestorConfig`, `exactKernel`, `truncatedKernel`, `ancestorKernel`. Additive.
 - `frontier-section-comparison` (9GXY; audited APPROVE, `audit-r14-frontier-b`): in new
   `PercLib/Probability/SectionComparison.lean` (namespace `PercLib.Probability`): `SamplingTree` and `law`. Additive.
-
-## Merged
 
 ### New definitions, round 15 batch (`p-b-CUE4-fix`, `frontier-brw-first-moment`) (additive; no existing name changed)
 
