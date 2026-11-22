@@ -359,16 +359,16 @@ theorem ofReal_sum_measureReal [IsProbabilityMeasure μ] (n : ℕ) :
 
 /-- `E (ℓ_n / U_n)^j ≤ j!`. -/
 theorem lintegral_ofReal_visitCount_div_pow_le [IsProbabilityMeasure μ]
-    (hm : ∀ k, Measurable (Z k)) (hZ : ∀ (n : ℕ) (x : Fin (n + 1) → S), μ {ω | ∀ i : Fin (n + 1)
-        , Z i ω = x i} =
+    (hm : ∀ k, Measurable (Z k)) (hZ : ∀ (n : ℕ) (x : Fin (n + 1) → S),
+        μ {ω | ∀ i : Fin (n + 1), Z i ω = x i} =
         (if x 0 = o then 1 else 0) * ∏ i : Fin n, P (x i.castSucc) {x i.succ}) (n j : ℕ) :
-    ∫⁻ ω, ENNReal.ofReal ((((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ)
-        / ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ^ j) ∂μ ≤ j ! := by
-  have hU : 0 < ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}
-      := one_pos.trans_le (one_le_sum_measureReal hZ n)
+    ∫⁻ ω, ENNReal.ofReal ((((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ) /
+        ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ^ j) ∂μ ≤ j ! := by
+  have hU : 0 < ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o} :=
+      one_pos.trans_le (one_le_sum_measureReal hZ n)
   have hV0 : ENNReal.ofReal (∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ≠ 0 := by simpa using hU
-  have hpt : ∀ ω, ENNReal.ofReal ((((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ)
-      / ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ^ j) =
+  have hpt : ∀ ω, ENNReal.ofReal ((((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ) /
+      ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ^ j) =
       ((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ≥0∞) ^ j *
         (ENNReal.ofReal (∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ^ j)⁻¹ := by
     intro ω
@@ -377,8 +377,8 @@ theorem lintegral_ofReal_visitCount_div_pow_le [IsProbabilityMeasure μ]
       ENNReal.inv_pow]
   simp_rw [hpt]
   rw [lintegral_mul_const' _ _ (ENNReal.inv_ne_top.2 (pow_ne_zero _ hV0))]
-  calc _ ≤ (j ! : ℝ≥0∞) * ENNReal.ofReal (∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ^ j
-      * (ENNReal.ofReal (∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ^ j)⁻¹ := by
+  calc _ ≤ (j ! : ℝ≥0∞) * ENNReal.ofReal (∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ^ j *
+      (ENNReal.ofReal (∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ^ j)⁻¹ := by
         rw [ofReal_sum_measureReal]
         gcongr
         exact lintegral_visitCount_pow_le hm hZ j n
@@ -389,17 +389,17 @@ theorem lintegral_ofReal_visitCount_div_pow_le [IsProbabilityMeasure μ]
 /-- **Exponential upper tail**: `E exp (θ ℓ_n / U_n) ≤ (1 - θ)⁻¹` for `0 ≤ θ < 1`. -/
 theorem lintegral_exp_visitCount_le [IsProbabilityMeasure μ] (hm : ∀ k, Measurable (Z k))
     (hZ : ∀ (n : ℕ) (x : Fin (n + 1) → S), μ {ω | ∀ i : Fin (n + 1), Z i ω = x i} =
-        (if x 0 = o then 1 else 0) * ∏ i : Fin n
-            , P (x i.castSucc) {x i.succ}) (n : ℕ) {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ < 1) :
+        (if x 0 = o then 1 else 0) * ∏ i : Fin n,
+            P (x i.castSucc) {x i.succ}) (n : ℕ) {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ < 1) :
     ∫⁻ ω, ENNReal.ofReal (Real.exp (θ * (((∑ k ∈ range (n + 1), if Z k ω
         = o then 1 else 0 : ℕ) : ℝ) / ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}))) ∂μ
             ≤ ENNReal.ofReal (1 - θ)⁻¹ := by
-  have hU : 0 < ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}
-      := one_pos.trans_le (one_le_sum_measureReal hZ n)
-  have hX : Measurable fun ω => ((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ)
-      / ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o} :=
-    (measurable_of_countable (fun c : ℕ => (c : ℝ) / ∑ k ∈ range (n + 1), μ.real {ω | Z k ω
-        = o})).comp
+  have hU : 0 < ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o} :=
+      one_pos.trans_le (one_le_sum_measureReal hZ n)
+  have hX : Measurable fun ω => ((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ) /
+      ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o} :=
+    (measurable_of_countable (fun c : ℕ => (c : ℝ) / ∑ k ∈ range (n + 1),
+        μ.real {ω | Z k ω = o})).comp
       (measurable_count hm (fun i => i) (n + 1))
   have h := lintegral_pow_mul_exp (P := μ) hX (fun ω => div_nonneg (Nat.cast_nonneg _) hU.le)
     hθ0 0
@@ -421,14 +421,14 @@ theorem lintegral_exp_visitCount_le [IsProbabilityMeasure μ] (hm : ∀ k, Measu
 /-- **Exponential upper tail**, as a Bochner integral. -/
 theorem integral_exp_visitCount_le [IsProbabilityMeasure μ] (hm : ∀ k, Measurable (Z k))
     (hZ : ∀ (n : ℕ) (x : Fin (n + 1) → S), μ {ω | ∀ i : Fin (n + 1), Z i ω = x i} =
-        (if x 0 = o then 1 else 0) * ∏ i : Fin n
-            , P (x i.castSucc) {x i.succ}) (n : ℕ) {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ < 1) :
-    ∫ ω, Real.exp (θ * (((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ)
-        / ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o})) ∂μ ≤ 1 / (1 - θ) := by
-  have hX : Measurable fun ω => ((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ)
-      / ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o} :=
-    (measurable_of_countable (fun c : ℕ => (c : ℝ) / ∑ k ∈ range (n + 1), μ.real {ω | Z k ω
-        = o})).comp
+        (if x 0 = o then 1 else 0) * ∏ i : Fin n,
+            P (x i.castSucc) {x i.succ}) (n : ℕ) {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ < 1) :
+    ∫ ω, Real.exp (θ * (((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ) /
+        ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o})) ∂μ ≤ 1 / (1 - θ) := by
+  have hX : Measurable fun ω => ((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ) /
+      ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o} :=
+    (measurable_of_countable (fun c : ℕ => (c : ℝ) / ∑ k ∈ range (n + 1),
+        μ.real {ω | Z k ω = o})).comp
       (measurable_count hm (fun i => i) (n + 1))
   rw [integral_eq_lintegral_of_nonneg_ae (Filter.Eventually.of_forall fun ω => (Real.exp_pos _).le)
     (Real.measurable_exp.comp (hX.const_mul θ)).aestronglyMeasurable, one_div]
@@ -439,10 +439,10 @@ theorem integral_exp_visitCount_le [IsProbabilityMeasure μ] (hm : ∀ k, Measur
 theorem measureReal_visitCount_le_le_div [IsProbabilityMeasure μ] (hm : ∀ k, Measurable (Z k))
     (hZ : ∀ (n : ℕ) (x : Fin (n + 1) → S), μ {ω | ∀ i : Fin (n + 1), Z i ω = x i} =
         (if x 0 = o then 1 else 0) * ∏ i : Fin n, P (x i.castSucc) {x i.succ}) (n m : ℕ) :
-    μ.real {ω | (∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0) ≤ m} ≤ m / ∑ k ∈ range (n + 1)
-        , μ.real {ω | Z k ω = o} := by
-  have hU : 0 < ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}
-      := one_pos.trans_le (one_le_sum_measureReal hZ n)
+    μ.real {ω | (∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0) ≤ m} ≤ m / ∑ k ∈ range (n + 1),
+        μ.real {ω | Z k ω = o} := by
+  have hU : 0 < ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o} :=
+      one_pos.trans_le (one_le_sum_measureReal hZ n)
   rw [le_div_iff₀ hU, measureReal_def]
   have h := measure_visitCount_le_mul_le hm hZ n m
   rw [← ofReal_sum_measureReal] at h
@@ -454,10 +454,10 @@ theorem measureReal_visitCount_le_le_min [IsProbabilityMeasure μ] (hm : ∀ k, 
     (hZ : ∀ (n : ℕ) (x : Fin (n + 1) → S), μ {ω | ∀ i : Fin (n + 1), Z i ω = x i} =
         (if x 0 = o then 1 else 0) * ∏ i : Fin n, P (x i.castSucc) {x i.succ}) (n m : ℕ) :
     μ.real {ω | (∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0) ≤ m} ≤
-      min 1 (Real.exp 1 / (1 - Real.exp (-1)) * (m / ∑ k ∈ range (n + 1), μ.real {ω | Z k ω
-          = o})) := by
-  have hU : 0 < ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}
-      := one_pos.trans_le (one_le_sum_measureReal hZ n)
+      min 1 (Real.exp 1 / (1 - Real.exp (-1)) * (m / ∑ k ∈ range (n + 1),
+          μ.real {ω | Z k ω = o})) := by
+  have hU : 0 < ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o} :=
+      one_pos.trans_le (one_le_sum_measureReal hZ n)
   have he : Real.exp (-1) < 1 := Real.exp_lt_one_iff.2 (by norm_num)
   have hC : 1 ≤ Real.exp 1 / (1 - Real.exp (-1)) := by
     rw [le_div_iff₀ (by linarith)]
@@ -631,16 +631,16 @@ end Moments
 /-- `P(ℓ_n / U_n ≤ t) ≤ t` for `t ≥ 0`. -/
 theorem measure_visitCount_div_le_le [IsProbabilityMeasure μ] (hm : ∀ k, Measurable (Z k))
     (hZ : ∀ (n : ℕ) (x : Fin (n + 1) → S), μ {ω | ∀ i : Fin (n + 1), Z i ω = x i} =
-        (if x 0 = o then 1 else 0) * ∏ i : Fin n
-            , P (x i.castSucc) {x i.succ}) (n : ℕ) {t : ℝ} (ht : 0 ≤ t) :
-    μ {ω | ((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ) / ∑ k ∈ range (n + 1)
-        , μ.real {ω | Z k ω = o} ≤ t} ≤ ENNReal.ofReal t := by
-  have hU : 0 < ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}
-      := one_pos.trans_le (one_le_sum_measureReal hZ n)
-  have e : {ω | ((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ)
-      / ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o} ≤ t} =
-      {ω | (∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0) ≤ ⌊t * ∑ k ∈ range (n + 1)
-          , μ.real {ω | Z k ω = o}⌋₊} := by
+        (if x 0 = o then 1 else 0) * ∏ i : Fin n,
+            P (x i.castSucc) {x i.succ}) (n : ℕ) {t : ℝ} (ht : 0 ≤ t) :
+    μ {ω | ((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ) /
+        ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o} ≤ t} ≤ ENNReal.ofReal t := by
+  have hU : 0 < ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o} :=
+      one_pos.trans_le (one_le_sum_measureReal hZ n)
+  have e : {ω | ((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ) /
+        ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o} ≤ t} =
+      {ω | (∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0) ≤
+        ⌊t * ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}⌋₊} := by
     ext ω
     simp only [Set.mem_ofPred_eq]
     rw [div_le_iff₀ hU, Nat.le_floor_iff (mul_nonneg ht hU.le)]
@@ -654,21 +654,21 @@ theorem measure_visitCount_div_le_le [IsProbabilityMeasure μ] (hm : ∀ k, Meas
 `C_p = 1/(1 + p)` for `p < 0`. -/
 theorem integral_visitCount_rpow_bounds [IsProbabilityMeasure μ] (hm : ∀ k, Measurable (Z k))
     (hZ : ∀ (n : ℕ) (x : Fin (n + 1) → S), μ {ω | ∀ i : Fin (n + 1), Z i ω = x i} =
-        (if x 0 = o then 1 else 0) * ∏ i : Fin n
-            , P (x i.castSucc) {x i.succ}) {p : ℝ} (hp : -1 < p) (n : ℕ) :
-    (4 : ℝ) ^ (-|p|) / 2 * (∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ^ p ≤ ∫ ω
-        , ((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ) ^ p ∂μ ∧
+        (if x 0 = o then 1 else 0) * ∏ i : Fin n,
+            P (x i.castSucc) {x i.succ}) {p : ℝ} (hp : -1 < p) (n : ℕ) :
+    (4 : ℝ) ^ (-|p|) / 2 * (∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ^ p ≤ ∫ ω,
+        ((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ) ^ p ∂μ ∧
       ∫ ω, ((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ) ^ p ∂μ ≤ (if 0
-          ≤ p then 1 + (⌈p⌉₊ ! : ℝ) else 1 / (1 + p)) * (∑ k ∈ range (n + 1), μ.real {ω | Z k ω
-              = o}) ^ p := by
-  have hU : 0 < ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}
-      := one_pos.trans_le (one_le_sum_measureReal hZ n)
+          ≤ p then 1 + (⌈p⌉₊ ! : ℝ) else 1 / (1 + p)) * (∑ k ∈ range (n + 1),
+              μ.real {ω | Z k ω = o}) ^ p := by
+  have hU : 0 < ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o} :=
+      one_pos.trans_le (one_le_sum_measureReal hZ n)
   obtain ⟨W, hWdef⟩ : ∃ W : Ω → ℝ, W = fun ω => ((∑ k ∈ range (n + 1), if Z k ω
       = o then 1 else 0 : ℕ) : ℝ) / ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o} := ⟨_, rfl⟩
   have hW : Measurable W := by
     rw [hWdef]
-    exact (measurable_of_countable (fun c : ℕ => (c : ℝ) / ∑ k ∈ range (n + 1)
-        , μ.real {ω | Z k ω = o})).comp
+    exact (measurable_of_countable (fun c : ℕ => (c : ℝ) / ∑ k ∈ range (n + 1),
+        μ.real {ω | Z k ω = o})).comp
       (measurable_count hm (fun i => i) (n + 1))
   have hW0 : ∀ ω, 0 ≤ W ω := fun ω => by
     rw [hWdef]; exact div_nonneg (Nat.cast_nonneg _) hU.le
@@ -687,8 +687,8 @@ theorem integral_visitCount_rpow_bounds [IsProbabilityMeasure μ] (hm : ∀ k, M
     · positivity
     · exact div_nonneg zero_le_one (by linarith)
   have hint : ∫ ω, ((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ) ^ p ∂μ
-      = (∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ^ p * (∫⁻ ω
-          , ENNReal.ofReal (W ω ^ p) ∂μ).toReal := by
+      = (∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ^ p * (∫⁻ ω,
+          ENNReal.ofReal (W ω ^ p) ∂μ).toReal := by
     have e : ∀ ω, ((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ) ^ p
         = (∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ^ p * W ω ^ p := fun ω => by
       rw [← Real.mul_rpow hU.le (hW0 ω), hWdef]
@@ -710,16 +710,16 @@ theorem integral_visitCount_rpow_bounds [IsProbabilityMeasure μ] (hm : ∀ k, M
 
 /-- The exponential upper tail and the linear lower tail of the root visit count. -/
 theorem integral_exp_and_measureReal_visitCount_le [IsProbabilityMeasure μ]
-    (hm : ∀ k, Measurable (Z k)) (hZ : ∀ (n : ℕ) (x : Fin (n + 1) → S), μ {ω | ∀ i : Fin (n + 1)
-        , Z i ω = x i} =
+    (hm : ∀ k, Measurable (Z k)) (hZ : ∀ (n : ℕ) (x : Fin (n + 1) → S),
+        μ {ω | ∀ i : Fin (n + 1), Z i ω = x i} =
         (if x 0 = o then 1 else 0) * ∏ i : Fin n, P (x i.castSucc) {x i.succ}) :
     (∀ (n : ℕ) (θ : ℝ), 0 ≤ θ → θ < 1 →
-      ∫ ω, Real.exp (θ * (((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ)
-          / ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o})) ∂μ ≤ 1 / (1 - θ)) ∧
+      ∫ ω, Real.exp (θ * (((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ) /
+          ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o})) ∂μ ≤ 1 / (1 - θ)) ∧
     (∀ n m : ℕ, 1 ≤ m →
       μ.real {ω | (∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0) ≤ m} ≤
-        min 1 (Real.exp 1 / (1 - Real.exp (-1)) * (m / ∑ k ∈ range (n + 1), μ.real {ω | Z k ω
-            = o}))) :=
+        min 1 (Real.exp 1 / (1 - Real.exp (-1)) * (m / ∑ k ∈ range (n + 1),
+            μ.real {ω | Z k ω = o}))) :=
   ⟨fun n _ h0 h1 => integral_exp_visitCount_le hm hZ n h0 h1,
     fun n m _ => measureReal_visitCount_le_le_min hm hZ n m⟩
 
@@ -729,13 +729,13 @@ theorem exists_integral_visitCount_rpow_bounds {p : ℝ} (hp : -1 < p) :
     ∃ c > 0, ∃ C > 0, ∀ {Ω : Type u} {S : Type v} [MeasurableSpace Ω] [MeasurableSpace S]
       [DiscreteMeasurableSpace S] [Countable S] [DecidableEq S] (μ : Measure Ω)
       [IsProbabilityMeasure μ] (P : Kernel S S) (Z : ℕ → Ω → S) (o : S),
-      (∀ k, Measurable (Z k)) → (∀ (n : ℕ) (x : Fin (n + 1) → S), μ {ω | ∀ i : Fin (n + 1)
-          , Z i ω = x i} =
+      (∀ k, Measurable (Z k)) → (∀ (n : ℕ) (x : Fin (n + 1) → S),
+          μ {ω | ∀ i : Fin (n + 1), Z i ω = x i} =
         (if x 0 = o then 1 else 0) * ∏ i : Fin n, P (x i.castSucc) {x i.succ}) →
-      ∀ n : ℕ, c * (∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ^ p ≤ ∫ ω
-          , ((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ) ^ p ∂μ ∧ ∫ ω
-              , ((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ) ^ p ∂μ ≤ C
-                  * (∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ^ p := by
+      ∀ n : ℕ, c * (∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ^ p ≤ ∫ ω, ((∑ k ∈ range (n + 1),
+          if Z k ω = o then 1 else 0 : ℕ) : ℝ) ^ p ∂μ ∧ ∫ ω, ((∑ k ∈ range (n + 1), if Z k ω =
+              o then 1 else 0 : ℕ) : ℝ) ^ p ∂μ ≤ C * (∑ k ∈ range (n + 1),
+                  μ.real {ω | Z k ω = o}) ^ p := by
   refine ⟨(4 : ℝ) ^ (-|p|) / 2, by positivity,
     if 0 ≤ p then 1 + (⌈p⌉₊ ! : ℝ) else 1 / (1 + p), ?_, ?_⟩
   · split_ifs

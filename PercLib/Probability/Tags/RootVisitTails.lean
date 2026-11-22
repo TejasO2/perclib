@@ -45,26 +45,28 @@ theorem root_visit_count_tails :
     (∀ {Ω : Type u} {S : Type v} [MeasurableSpace Ω] [MeasurableSpace S]
       [DiscreteMeasurableSpace S] [Countable S] [DecidableEq S] (μ : Measure Ω)
       [IsProbabilityMeasure μ] (P : Kernel S S) [IsMarkovKernel P] (Z : ℕ → Ω → S) (o : S),
-      (∀ k, Measurable (Z k)) → (∀ (n : ℕ) (x : Fin (n + 1) → S), μ {ω | ∀ i : Fin (n + 1)
-          , Z i ω = x i} =
-          (if x 0 = o then 1 else 0) * ∏ i : Fin n, P (x i.castSucc) {x i.succ}) →
+      (∀ k, Measurable (Z k)) →
+      (∀ (n : ℕ) (x : Fin (n + 1) → S), μ {ω | ∀ i : Fin (n + 1), Z i ω = x i} =
+        (if x 0 = o then 1 else 0) * ∏ i : Fin n, P (x i.castSucc) {x i.succ}) →
       (∀ (n : ℕ) (θ : ℝ), 0 ≤ θ → θ < 1 →
-        ∫ ω, Real.exp (θ * (((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ)
-            / ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o})) ∂μ ≤ 1 / (1 - θ)) ∧
+        ∫ ω, Real.exp (θ * (((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ) /
+          ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o})) ∂μ ≤ 1 / (1 - θ)) ∧
       (∀ n m : ℕ, 1 ≤ m →
         μ.real {ω | (∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0) ≤ m} ≤
-          min 1 (Real.exp 1 / (1 - Real.exp (-1)) * (m / ∑ k ∈ range (n + 1), μ.real {ω | Z k ω
-              = o})))) ∧
-    (∀ p : ℝ, -1 < p → ∃ c > 0, ∃ C > 0, ∀ {Ω : Type u} {S : Type v} [MeasurableSpace Ω]
-      [MeasurableSpace S] [DiscreteMeasurableSpace S] [Countable S] [DecidableEq S]
-      (μ : Measure Ω) [IsProbabilityMeasure μ] (P : Kernel S S) [IsMarkovKernel P]
-      (Z : ℕ → Ω → S) (o : S), (∀ k, Measurable (Z k)) → (∀ (n : ℕ) (x : Fin (n + 1) → S)
-          , μ {ω | ∀ i : Fin (n + 1), Z i ω = x i} =
-          (if x 0 = o then 1 else 0) * ∏ i : Fin n, P (x i.castSucc) {x i.succ}) →
-      ∀ n : ℕ, c * (∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ^ p ≤ ∫ ω
-          , ((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ) ^ p ∂μ ∧ ∫ ω
-              , ((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ) ^ p ∂μ ≤ C
-                  * (∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ^ p) := by
+          min 1 (Real.exp 1 / (1 - Real.exp (-1)) *
+            (m / ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o})))) ∧
+    (∀ p : ℝ, -1 < p → ∃ c > 0, ∃ C > 0,
+      ∀ {Ω : Type u} {S : Type v} [MeasurableSpace Ω] [MeasurableSpace S]
+      [DiscreteMeasurableSpace S] [Countable S] [DecidableEq S] (μ : Measure Ω)
+      [IsProbabilityMeasure μ] (P : Kernel S S) [IsMarkovKernel P] (Z : ℕ → Ω → S) (o : S),
+      (∀ k, Measurable (Z k)) →
+      (∀ (n : ℕ) (x : Fin (n + 1) → S), μ {ω | ∀ i : Fin (n + 1), Z i ω = x i} =
+        (if x 0 = o then 1 else 0) * ∏ i : Fin n, P (x i.castSucc) {x i.succ}) →
+      ∀ n : ℕ,
+        c * (∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ^ p ≤
+          ∫ ω, ((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ) ^ p ∂μ ∧
+        ∫ ω, ((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ) ^ p ∂μ ≤
+          C * (∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ^ p) := by
   refine ⟨fun μ _ P _ Z o hm hZ => integral_exp_and_measureReal_visitCount_le hm hZ, ?_⟩
   intro p hp
   obtain ⟨c, hc, C, hC, h⟩ := exists_integral_visitCount_rpow_bounds.{u, v} hp
