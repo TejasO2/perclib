@@ -29,7 +29,7 @@ arms are cut at both ends, and the inequality loses one unit at each radius:
 * **Cutting the arms.** An open arm of `ω` from `B_r(z)` to the boundary of `B_R(z)` is started at
   its last vertex in `Icc (z - r - 1) (z + r + 2)` and stopped at its first vertex outside
   `Icc (z - R + 2) (z + R - 1)`; translated by `(-1, -1)` it is a dual arm of `dualConfig ω` from
-  `B_{r+1}(z)` to the boundary of `B_{R-1}(z)`. A dual arm of `ω` is started at its last face in
+  `B_{r+1}(z)` to the boundary of `B_{R - 1}(z)`. A dual arm of `ω` is started at its last face in
   `Icc (z - r - 1) (z + r + 1)` and stopped at its first face outside
   `Icc (z - R + 2) (z + R - 2)`; it is an open arm of `dualConfig ω`. The second vertex of an open
   arm lies in the larger inner box, so the cut open arms lie in the tails of the old ones and the
@@ -505,7 +505,7 @@ end Inversion
 /-- **Colour inversion of the multi-arm event.** For `r + 2 < R`, if `ω` has `j` disjoint arms of
 colours `σ` in counterclockwise order from `B_r(z)` to the boundary of `B_R(z)`, then the dual
 configuration has `j` disjoint arms of the inverted colours `not ∘ σ` in counterclockwise order
-from `B_{r+1}(z)` to the boundary of `B_{R-1}(z)`. This holds for every configuration. -/
+from `B_{r+1}(z)` to the boundary of `B_{R - 1}(z)`. This holds for every configuration. -/
 theorem dualConfig_mem_multiArmEvent {j : ℕ} {σ : Fin j → Bool} {z : LatticeSite 2} {r R : ℕ}
     (h : r + 2 < R) {ω : Config (LatticeSite 2)} (hω : ω ∈ multiArmEvent σ z r R) :
     dualConfig ω ∈ multiArmEvent (not ∘ σ) z (r + 1) (R - 1) := by
@@ -555,7 +555,7 @@ theorem dualConfig_mem_multiArmEvent {j : ℕ} {σ : Fin j → Bool} {z : Lattic
 /-- **Colour inversion at one half.** When every edge of `ℤ²` is open with probability `1/2`, the
 probability of `j` disjoint arms of colours `σ` in counterclockwise order from `B_r(z)` to the
 boundary of `B_R(z)` is at most that of `j` such arms of the inverted colours `not ∘ σ` from
-`B_{r+1}(z)` to the boundary of `B_{R-1}(z)`, for `r + 2 < R`:
+`B_{r+1}(z)` to the boundary of `B_{R - 1}(z)`, for `r + 2 < R`:
 `π_σ(r, R) ≤ π_{not ∘ σ}(r + 1, R - 1)`.
 The dual configuration has the law of the configuration on the events that read only edges of
 `ℤ²` (self-duality), and it lies in the inverted event whenever the configuration lies in the
