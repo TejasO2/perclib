@@ -2306,3 +2306,191 @@ theorem exists_abs_toReal_cond_armEvent_sub_le (z : LatticeSite 2)
         field_simp
 
 end PercLib.Models.Planar
+
+/-! ### Cylinder events: intersections, continuity, events of the pairs inside a finite set -/
+
+namespace PercLib.Probability
+
+variable {ι : Type*}
+
+/-- **Intersections of cylinder events.** If `A` is determined by the finite set `F` and `B` by
+`G`, then `A ∩ B` is determined by `F ∪ G`. -/
+theorem mem_inter_iff_inter_union_mem_of_determined [DecidableEq ι] {F G : Finset ι}
+    {A B : Set (Set ι)} (hA : ∀ ω, ω ∈ A ↔ ω ∩ ↑F ∈ A) (hB : ∀ ω, ω ∈ B ↔ ω ∩ ↑G ∈ B)
+    (ω : Set ι) : ω ∈ A ∩ B ↔ ω ∩ ↑(F ∪ G) ∈ A ∩ B := by
+  have hF : ω ∩ ↑(F ∪ G) ∩ ↑F = ω ∩ ↑F := by
+    rw [inter_assoc, Finset.coe_union, union_inter_cancel_left]
+  have hG : ω ∩ ↑(F ∪ G) ∩ ↑G = ω ∩ ↑G := by
+    rw [inter_assoc, Finset.coe_union, union_inter_cancel_right]
+  rw [mem_inter_iff, mem_inter_iff, hA ω, hB ω, hA (ω ∩ ↑(F ∪ G)), hB (ω ∩ ↑(F ∪ G)), hF, hG]
+
+/-- **Cylinder probabilities are continuous in the profile.** The probability of an event
+determined by a finite set of coordinates is a continuous function of the profile, for the
+product topology. -/
+theorem continuous_prodBernoulli_of_determined {F : Finset ι} {A : Set (Set ι)}
+    (hA : ∀ ω, ω ∈ A ↔ ω ∩ ↑F ∈ A) :
+    Continuous fun p : ι → unitInterval => prodBernoulli p A := by
+  have hset : {ω : Set ι | (Subtype.val ⁻¹' ω : Set F) ∈ {η : Set F | Subtype.val '' η ∈ A}} =
+      A := by
+    ext ω
+    have h : Subtype.val '' (Subtype.val ⁻¹' ω : Set F) = ω ∩ ↑F := by
+      ext x
+      simp [and_comm]
+    simp only [mem_ofPred_eq, h]
+    exact (hA ω).symm
+  have hc := continuous_prodBernoulli_cylinder F {η : Set F | Subtype.val '' η ∈ A}
+  rwa [hset] at hc
+
+end PercLib.Probability
+
+namespace PercLib.Percolation.Bond
+
+/-- **Events of the pairs inside a finite set are cylinder events.** An event determined by the
+pairs with both ends in the finite set `T` is determined by the finite set `T.sym2` of these
+pairs. -/
+theorem mem_iff_inter_sym2_mem_of_determined {V : Type*} {T : Finset V} {E : Set (Config V)}
+    (hE : ∀ ω ω' : Config V, ω ∩ {e | ∀ v ∈ e, v ∈ (T : Set V)} =
+      ω' ∩ {e | ∀ v ∈ e, v ∈ (T : Set V)} → (ω ∈ E ↔ ω' ∈ E)) (ω : Config V) :
+    ω ∈ E ↔ ω ∩ ↑T.sym2 ∈ E := by
+  have hT : (↑T.sym2 : Set (Sym2 V)) = {e | ∀ v ∈ e, v ∈ (T : Set V)} := by
+    ext e
+    simp only [Finset.mem_coe, Finset.mem_sym2_iff, mem_ofPred_eq]
+  refine hE ω _ ?_
+  rw [hT, inter_assoc, inter_self]
+
+end PercLib.Percolation.Bond
+
+namespace PercLib.Models.Planar
+
+open Filter Topology
+open scoped NNReal ProbabilityTheory
+
+/-! ### The infinite cluster and the arm events -/
+
+/-- **The arm event is a cylinder event.** `z ↔ ∂B_n(z)` is determined by the finite set of pairs
+inside the box `B_n(z)`. -/
+theorem mem_armEvent_iff_inter_sym2_mem {d : ℕ} (z : LatticeSite d) (n : ℕ)
+    (ω : Config (LatticeSite d)) :
+    ω ∈ armEvent z n ↔
+      ω ∩ ↑(Finset.Icc (z - (n : LatticeSite d)) (z + n)).sym2 ∈ armEvent z n :=
+  mem_iff_inter_sym2_mem_of_determined
+    (fun _ _ h => mem_armEvent_iff_of_inter_eq (Finset.coe_Icc _ _).ge h) ω
+
+/-- **The infinite cluster as a limit of arm events.** The open cluster of `x` is infinite exactly
+when `x ↔ ∂B_{r + 1}(x)` for every `r`: an infinite cluster leaves every box, and a finite one
+lies in some box. -/
+theorem setOf_cluster_infinite_eq_iInter_armEvent {d : ℕ} (x : LatticeSite d) :
+    {ω : Config (LatticeSite d) | (cluster (ω ∩ (zdGraph d).edgeSet) x).Infinite} =
+      ⋂ r : ℕ, armEvent x (r + 1) := by
+  ext ω
+  simp only [mem_ofPred_eq, mem_iInter]
+  constructor
+  · intro h r
+    obtain ⟨y, hy, hyB⟩ := h.exists_notMem_finite (finite_Icc
+      (x - ((r + 1 : ℕ) : LatticeSite d) + 1) (x + ((r + 1 : ℕ) : LatticeSite d) - 1))
+    exact mem_armEvent_iff_exists_notMem_conn.2 ⟨y, hyB, hy⟩
+  · intro h hfin
+    obtain ⟨R, hR⟩ := (Metric.isBounded_iff_subset_closedBall x).1 hfin.isBounded
+    obtain ⟨y, hy, hc⟩ := mem_armEvent_iff_exists_notMem_conn.1 (h ⌈R⌉₊)
+    have h₁ : y ∈ Metric.closedBall x (⌈R⌉₊ : ℝ) :=
+      Metric.closedBall_subset_closedBall (Nat.le_ceil R) (hR hc)
+    rw [closedBall_eq_Icc] at h₁
+    refine hy ?_
+    have e₁ : x - ((⌈R⌉₊ + 1 : ℕ) : LatticeSite d) + 1 = x - (⌈R⌉₊ : LatticeSite d) := by
+      push_cast
+      ring
+    have e₂ : x + ((⌈R⌉₊ + 1 : ℕ) : LatticeSite d) - 1 = x + (⌈R⌉₊ : LatticeSite d) := by
+      push_cast
+      ring
+    rw [e₁, e₂]
+    exact h₁
+
+/-- The event that the open cluster of `x` is infinite is measurable. -/
+theorem measurableSet_setOf_cluster_inter_edgeSet_infinite {d : ℕ} (x : LatticeSite d) :
+    MeasurableSet
+      {ω : Config (LatticeSite d) | (cluster (ω ∩ (zdGraph d).edgeSet) x).Infinite} := by
+  rw [setOf_cluster_infinite_eq_iInter_armEvent]
+  exact MeasurableSet.iInter fun r => measurableSet_armEvent x (r + 1)
+
+/-- **Conditioning on the infinite cluster as a limit** (continuity from above along the arm
+events). For every profile under which the open cluster of `z` is infinite with positive
+probability and every measurable event `A`, `P(A | z ↔ ∂B_n(z)) → P(A | |K_z| = ∞)`. -/
+theorem tendsto_cond_armEvent_cond_setOf_cluster_infinite {d : ℕ}
+    (q : Sym2 (LatticeSite d) → unitInterval) (z : LatticeSite d)
+    (hpos : law q {ω | (cluster (ω ∩ (zdGraph d).edgeSet) z).Infinite} ≠ 0)
+    {A : Set (Config (LatticeSite d))} (hA : MeasurableSet A) :
+    Tendsto (fun n => (law q)[A | armEvent z n]) atTop
+      (𝓝 ((law q)[A | {ω | (cluster (ω ∩ (zdGraph d).edgeSet) z).Infinite}])) := by
+  have hK := setOf_cluster_infinite_eq_iInter_armEvent z
+  have hanti : Antitone fun r : ℕ => armEvent z (r + 1) :=
+    fun r s h => armEvent_anti z (Nat.add_le_add_right h 1)
+  have h₁ : Tendsto (fun r : ℕ => law q (armEvent z (r + 1))) atTop
+      (𝓝 (law q {ω | (cluster (ω ∩ (zdGraph d).edgeSet) z).Infinite})) := by
+    rw [hK]
+    exact tendsto_measure_iInter_atTop
+      (fun r => (measurableSet_armEvent z (r + 1)).nullMeasurableSet) hanti
+      ⟨0, measure_ne_top _ _⟩
+  have h₂ : Tendsto (fun r : ℕ => law q (armEvent z (r + 1) ∩ A)) atTop
+      (𝓝 (law q ({ω | (cluster (ω ∩ (zdGraph d).edgeSet) z).Infinite} ∩ A))) := by
+    rw [hK, iInter_inter]
+    exact tendsto_measure_iInter_atTop
+      (fun r => ((measurableSet_armEvent z (r + 1)).inter hA).nullMeasurableSet)
+      (fun r s h => inter_subset_inter_left _ (hanti h)) ⟨0, measure_ne_top _ _⟩
+  rw [← tendsto_add_atTop_iff_nat 1]
+  simp only [ProbabilityTheory.cond_apply (measurableSet_armEvent z _),
+    ProbabilityTheory.cond_apply (measurableSet_setOf_cluster_inter_edgeSet_infinite z)]
+  exact ENNReal.Tendsto.mul (tendsto_inv_iff.2 h₁) (Or.inr (measure_ne_top _ _)) h₂
+    (Or.inr (ENNReal.inv_ne_top.2 hpos))
+
+/-! ### The intensities `β ≥ log 2` -/
+
+/-- **The profiles of the intensities `β ≥ log 2`.** At intensity `β ≥ log 2` every edge of `ℤ²` is
+open with probability `1 - e^{-β} ≥ 1/2`. -/
+theorem half_le_intensityProfile_indicator_edgeSet {β : ℝ≥0} (hβ : Real.log 2 ≤ β)
+    {e : Sym2 (LatticeSite 2)} (he : e ∈ (zdGraph 2).edgeSet) :
+    (1 / 2 : ℝ) ≤ intensityProfile ((zdGraph 2).edgeSet.indicator 1) β e := by
+  have hle : (Real.log 2).toNNReal ≤ β := Real.toNNReal_le_iff_le_coe.2 hβ
+  rw [← intensityProfile_indicator_edgeSet_log_two he]
+  exact intensityProfile_mono _ hle e
+
+/-- **Percolation above `log 2`, nearest-neighbour edges.** At intensity `β > log 2` the cluster
+of every vertex in the open nearest-neighbour edges is infinite with positive probability. -/
+theorem law_setOf_cluster_inter_edgeSet_infinite_pos {β : ℝ≥0} (hβ : Real.log 2 < β)
+    (x : LatticeSite 2) :
+    0 < law (intensityProfile ((zdGraph 2).edgeSet.indicator 1) β)
+      {ω | (cluster (ω ∩ (zdGraph 2).edgeSet) x).Infinite} := by
+  have h₀ : ∀ e, e ∉ (zdGraph 2).edgeSet →
+      intensityProfile ((zdGraph 2).edgeSet.indicator 1) β e = 0 := fun e he =>
+    Subtype.ext (by simp [intensityProfile, indicator_of_notMem he])
+  have hae : {ω : Config (LatticeSite 2) | (cluster ω x).Infinite} =ᵐ[law
+      (intensityProfile ((zdGraph 2).edgeSet.indicator 1) β)]
+      {ω | (cluster (ω ∩ (zdGraph 2).edgeSet) x).Infinite} := by
+    filter_upwards [ae_config_subset_host (zdGraph 2) _ h₀] with ω hω
+    rw [inter_eq_left.2 hω]
+  rw [← measure_congr hae]
+  exact law_cluster_infinite_indicator_edgeSet_pos_of_log_two_lt hβ x
+
+/-- **Conditional arm probabilities are continuous in the profile.** For a continuous family of
+profiles that are at least `1/2` on the edges on a set `s`, `P(A | z ↔ ∂B_n(z))` is continuous on
+`s` for every cylinder event `A` (both probabilities are cylinder probabilities, and the
+denominator is positive). -/
+theorem continuousOn_toReal_cond_armEvent {X : Type*} [TopologicalSpace X]
+    {q : X → Sym2 (LatticeSite 2) → unitInterval} (hqc : Continuous q) {s : Set X}
+    (hq : ∀ x ∈ s, ∀ e ∈ (zdGraph 2).edgeSet, (1 / 2 : ℝ) ≤ q x e) (z : LatticeSite 2) (n : ℕ)
+    {F : Finset (Sym2 (LatticeSite 2))} {A : Set (Config (LatticeSite 2))}
+    (hA : ∀ ω, ω ∈ A ↔ ω ∩ ↑F ∈ A) :
+    ContinuousOn (fun x => ((law (q x))[A | armEvent z n]).toReal) s := by
+  classical
+  have hB := mem_armEvent_iff_inter_sym2_mem z n
+  have hAB := mem_inter_iff_inter_union_mem_of_determined hA hB
+  have hnum : Continuous fun x => (law (q x) (A ∩ armEvent z n)).toReal :=
+    ENNReal.continuousOn_toReal.comp_continuous
+      ((continuous_prodBernoulli_of_determined hAB).comp hqc) fun x => measure_ne_top _ _
+  have hden : Continuous fun x => (law (q x) (armEvent z n)).toReal :=
+    ENNReal.continuousOn_toReal.comp_continuous
+      ((continuous_prodBernoulli_of_determined hB).comp hqc) fun x => measure_ne_top _ _
+  simp_rw [toReal_cond_armEvent]
+  exact hnum.continuousOn.div hden.continuousOn fun x hx =>
+    (ENNReal.toReal_pos (law_armEvent_pos (hq x hx) z n).ne' (measure_ne_top _ _)).ne'
+
+end PercLib.Models.Planar
