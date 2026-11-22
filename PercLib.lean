@@ -251,6 +251,8 @@ public import PercLib.Percolation.Bond.Multipoint.ShapeCount
 public import PercLib.Percolation.Bond.Multipoint.Sweep
 public import PercLib.Percolation.Bond.Multipoint.Tags.Dilation
 public import PercLib.Percolation.Bond.Multipoint.Tags.SmallSets
+public import PercLib.Percolation.Bond.Multipoint.Tags.ThreePartMultigraph
+public import PercLib.Percolation.Bond.Multipoint.ThreePartMultigraph
 public import PercLib.Percolation.Bond.Multipoint.Ultrametric
 public import PercLib.Percolation.Bond.PathComparison
 public import PercLib.Percolation.Bond.PathLowerBounds
