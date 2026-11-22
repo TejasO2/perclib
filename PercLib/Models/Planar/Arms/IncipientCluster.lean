@@ -1990,4 +1990,164 @@ theorem toReal_cond_armEvent (q : Sym2 (LatticeSite 2) → unitInterval) (z : La
   rw [ProbabilityTheory.cond_apply (measurableSet_armEvent z n), ENNReal.toReal_mul,
     ENNReal.toReal_inv, inter_comm, div_eq_inv_mul]
 
+/-- **The uniform Cauchy property for increasing events** (Basu–Sapozhnikov (2.1), (2.8) on
+`ℤ²`). For every centre `z`, every `N` and every `ε > 0` there is `n₀` such that for every profile
+opening each edge with probability at least `1/2` (in particular `p = 1 - e^{-β}` on the edges,
+`β ≥ log 2`), every measurable increasing event `E` determined by the edges inside `B_N(z)` and
+the pairs off the edges, and all `m, n ≥ n₀`,
+`|P(E | z ↔ ∂B_m(z)) - P(E | z ↔ ∂B_n(z))| ≤ ε`. -/
+theorem exists_abs_toReal_cond_armEvent_sub_le_of_isUpperSet (z : LatticeSite 2) (N : ℕ)
+    {ε : ℝ} (hε : 0 < ε) :
+    ∃ n₀ : ℕ, ∀ q : Sym2 (LatticeSite 2) → unitInterval,
+      (∀ e ∈ (zdGraph 2).edgeSet, (1 / 2 : ℝ) ≤ q e) →
+      ∀ E : Set (Config (LatticeSite 2)), IsUpperSet E → MeasurableSet E →
+      (∀ ω ω', ω ∩ {e | e ∉ (zdGraph 2).edgeSet ∨
+          ∀ v ∈ e, v ∈ Icc (z - (N : LatticeSite 2)) (z + N)} =
+        ω' ∩ {e | e ∉ (zdGraph 2).edgeSet ∨
+          ∀ v ∈ e, v ∈ Icc (z - (N : LatticeSite 2)) (z + N)} → (ω ∈ E ↔ ω' ∈ E)) →
+      ∀ m n, n₀ ≤ m → n₀ ≤ n →
+        |(ProbabilityTheory.cond (law q) (armEvent z m) E).toReal -
+          (ProbabilityTheory.cond (law q) (armEvent z n) E).toReal| ≤ ε := by
+  obtain ⟨κ, hκ, hchain⟩ := exists_chain_of_cuts
+  obtain ⟨c₀, hc₀, herr⟩ := exists_law_inter_armEvent_le_add_of_cuts
+  -- the contraction factor of one matrix
+  have hκ2 : 1 ≤ κ ^ 2 := one_le_pow₀ hκ
+  have hθ0 : 0 ≤ (κ ^ 2 - 1) / (κ ^ 2 + 1) := div_nonneg (by linarith) (by linarith)
+  have hθ1 : (κ ^ 2 - 1) / (κ ^ 2 + 1) < 1 := (div_lt_one (by linarith)).2 (by linarith)
+  obtain ⟨S, hS⟩ := exists_pow_lt_of_lt_one (half_pos hε) hθ1
+  -- the failure rate of one cut
+  have hρ0 : 0 ≤ (1 - c₀).toReal := ENNReal.toReal_nonneg
+  have hρ1 : (1 - c₀).toReal < 1 := by
+    have h : 1 - c₀ < 1 := ENNReal.sub_lt_self ENNReal.one_ne_top one_ne_zero hc₀.ne'
+    have := (ENNReal.toReal_lt_toReal (h.trans ENNReal.one_lt_top).ne ENNReal.one_ne_top).2 h
+    rwa [ENNReal.toReal_one] at this
+  have hη : 0 < min (ε / (16 * (S + 1))) (1 / (4 * (S + 1))) :=
+    lt_min (by positivity) (by positivity)
+  obtain ⟨K, hK⟩ := exists_pow_lt_of_lt_one hη hρ1
+  obtain ⟨δ, hδ⟩ : ∃ δ : ℝ, δ = (S + 1) * (2 * (1 - c₀).toReal ^ K) := ⟨_, rfl⟩
+  have hδ0 : 0 ≤ δ := by rw [hδ]; positivity
+  have hK₁' : (1 - c₀).toReal ^ K < ε / (16 * (S + 1)) := hK.trans_le (min_le_left _ _)
+  have hK₂' : (1 - c₀).toReal ^ K < 1 / (4 * (S + 1)) := hK.trans_le (min_le_right _ _)
+  have hS1 : (0 : ℝ) < S + 1 := by positivity
+  have hδ2 : δ ≤ 1 / 2 := by
+    rw [hδ]
+    have := (lt_div_iff₀ (by positivity)).1 hK₂'
+    nlinarith
+  have hδε : 4 * δ ≤ ε / 2 := by
+    rw [hδ]
+    have := (lt_div_iff₀ (by positivity)).1 hK₁'
+    nlinarith
+  -- the radii of the cuts
+  obtain ⟨a, ha0, has⟩ : ∃ a : ℕ → ℕ, a 0 = N + 2 ∧
+      ∀ k, a (k + 1) = 4 * (4 ^ K * (4 ^ K * a k + 1) + 2) + 2 :=
+    ⟨fun k => Nat.rec (N + 2) (fun _ x => 4 * (4 ^ K * (4 ^ K * x + 1) + 2) + 2) k, rfl,
+      fun _ => rfl⟩
+  obtain ⟨c, hc⟩ : ∃ c : ℕ → ℕ, ∀ k, c k = 4 ^ K * a k + 1 := ⟨_, fun _ => rfl⟩
+  obtain ⟨b, hb⟩ : ∃ b : ℕ → ℕ, ∀ k, b k = 4 ^ K * c k + 1 := ⟨_, fun _ => rfl⟩
+  have h4K : 0 < 4 ^ K := by positivity
+  have ha1 : ∀ k, 1 ≤ a k := fun k => by
+    cases k with
+    | zero => omega
+    | succ k => rw [has k]; omega
+  have hac : ∀ k, a k < c k := fun k => by
+    have := Nat.le_mul_of_pos_left (a k) h4K
+    rw [hc k]
+    omega
+  have hcb : ∀ k, c k < b k := fun k => by
+    have := Nat.le_mul_of_pos_left (c k) h4K
+    rw [hb k]
+    omega
+  have hgap : ∀ k, 4 * (b k + 1) + 2 ≤ a (k + 1) := fun k =>
+    le_of_eq (by rw [has k, hb k, hc k])
+  have hK₁ : ∀ k, 4 ^ K * a k ≤ c k := fun k => by rw [hc k]; exact Nat.le_succ _
+  have hK₂ : ∀ k, 4 ^ K * c k ≤ b k := fun k => by rw [hb k]; exact Nat.le_succ _
+  have hbmono : Monotone b := monotone_nat_of_le_succ fun k => by
+    have := hgap k
+    have := hac (k + 1)
+    have := hcb (k + 1)
+    omega
+  refine ⟨b S + 1, fun q hq E hEu hEm hE m n hm hn => ?_⟩
+  have hE' : ∀ ω ω', ω ∩ {e | e ∉ (zdGraph 2).edgeSet ∨
+      ∀ v ∈ e, v ∈ Icc (z - (a 0 : LatticeSite 2) + 1) (z + a 0 - 1)} =
+      ω' ∩ {e | e ∉ (zdGraph 2).edgeSet ∨
+      ∀ v ∈ e, v ∈ Icc (z - (a 0 : LatticeSite 2) + 1) (z + a 0 - 1)} → (ω ∈ E ↔ ω' ∈ E) :=
+    fun ω ω' h => hE ω ω' (inter_eq_inter_of_inter_eq_of_subset h fun e he => by
+      rcases he with he | he
+      · exact Or.inl he
+      · refine Or.inr fun v hv => ?_
+        have := he v hv
+        rw [ha0]
+        rw [mem_Icc_two_iff] at this ⊢
+        simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply, Pi.one_apply] at this ⊢
+        push_cast
+        omega)
+  obtain ⟨T, M, u', u'', hM, hu'0, hu', hw⟩ :=
+    hchain q hq z a c b (by rw [ha0]; omega) hac hcb hgap S E hEm hE'
+  obtain ⟨Good, hGood⟩ : ∃ Good : Set (Config (LatticeSite 2)), Good = {ω | ∀ k ≤ S,
+      ∀ x ∈ boxBoundary (z - (a k : LatticeSite 2)) (z + a k),
+        ∀ m ∈ boxBoundary (z - (c k : LatticeSite 2)) (z + c k),
+        ∀ m' ∈ boxBoundary (z - (c k : LatticeSite 2)) (z + c k),
+        ∀ y ∈ boxBoundary (z - (b k : LatticeSite 2)) (z + b k),
+          ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (c k : LatticeSite 2)) (z + c k) \
+            Icc (z - (a k : LatticeSite 2) + 1) (z + a k - 1)) x m →
+          ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (b k : LatticeSite 2)) (z + b k) \
+            Icc (z - (c k : LatticeSite 2) + 1) (z + c k - 1)) m' y →
+          ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (b k : LatticeSite 2)) (z + b k) \
+            Icc (z - (a k : LatticeSite 2) + 1) (z + a k - 1)) x y} := ⟨_, rfl⟩
+  rw [← hGood] at hw
+  obtain ⟨wm, hwm, hwmS, hPm, hQm⟩ := hw m (by omega)
+  obtain ⟨wn, hwn, hwnS, hPn, hQn⟩ := hw n (by omega)
+  -- the error of the decomposition
+  have hδ' : (((S + 1 : ℕ) : ℝ≥0∞) * (2 * (1 - c₀) ^ K)).toReal = δ := by
+    rw [hδ, ENNReal.toReal_mul, ENNReal.toReal_mul, ENNReal.toReal_pow, ENNReal.toReal_natCast,
+      ENNReal.toReal_ofNat]
+    push_cast
+    ring
+  have key : ∀ E' : Set (Config (LatticeSite 2)), IsUpperSet E' → MeasurableSet E' →
+      ∀ r, b S < r → (law q (E' ∩ armEvent z r)).toReal ≤
+        (law q (E' ∩ armEvent z r ∩ Good)).toReal + δ * (law q (E' ∩ armEvent z r)).toReal := by
+    intro E' hu hm' r hr
+    have h := herr q hq E' hu hm' z a c b S K r ha1 hac hcb hK₁ hK₂
+      fun k hk => lt_of_le_of_lt (hbmono hk) hr
+    rw [← hGood] at h
+    have hfin : ((S + 1 : ℕ) : ℝ≥0∞) * (2 * (1 - c₀) ^ K) * law q (E' ∩ armEvent z r) ≠ ⊤ :=
+      ENNReal.mul_ne_top (ENNReal.mul_ne_top (ENNReal.natCast_ne_top _)
+        (ENNReal.mul_ne_top ENNReal.ofNat_ne_top (ENNReal.pow_ne_top
+          (ne_top_of_le_ne_top ENNReal.one_ne_top tsub_le_self)))) (measure_ne_top _ _)
+    have h' := ENNReal.toReal_mono (ENNReal.add_ne_top.2 ⟨measure_ne_top _ _, hfin⟩) h
+    rwa [ENNReal.toReal_add (measure_ne_top _ _) hfin, ENNReal.toReal_mul, hδ'] at h'
+  have hbound : ∀ r, b S < r →
+      |(law q (E ∩ armEvent z r)).toReal / (law q (armEvent z r)).toReal -
+        (law q (E ∩ armEvent z r ∩ Good)).toReal / (law q (armEvent z r ∩ Good)).toReal| ≤
+        2 * δ := by
+    intro r hr
+    have h₁ := key E hEu hEm r hr
+    have h₂ := key univ isUpperSet_univ MeasurableSet.univ r hr
+    simp only [univ_inter] at h₂
+    refine abs_div_sub_div_le_two_mul ENNReal.toReal_nonneg
+      (ENNReal.toReal_mono (measure_ne_top _ _) (measure_mono inter_subset_right))
+      (ENNReal.toReal_pos (law_armEvent_pos hq z r).ne' (measure_ne_top _ _)) hδ0 hδ2
+      (by linarith) (ENNReal.toReal_mono (measure_ne_top _ _) (measure_mono inter_subset_left))
+      (by linarith) (ENNReal.toReal_mono (measure_ne_top _ _) (measure_mono inter_subset_left))
+  have hQpos : ∀ r, b S < r → 0 < (law q (armEvent z r ∩ Good)).toReal := by
+    intro r hr
+    have h₂ := key univ isUpperSet_univ MeasurableSet.univ r hr
+    simp only [univ_inter] at h₂
+    have hB := ENNReal.toReal_pos (law_armEvent_pos hq z r).ne' (measure_ne_top _ _)
+    nlinarith
+  have hcontr := abs_ratio_sub_ratio_le_of_crossRatio_of_backward M hM hu'0 hu' hwm hwn hwmS
+    hwnS (by rw [hQm]; exact hQpos m (by omega)) (by rw [hQn]; exact hQpos n (by omega))
+  rw [hPm, hQm, hPn, hQn] at hcontr
+  rw [toReal_cond_armEvent, toReal_cond_armEvent]
+  have hbm := hbound m (by omega)
+  have hbn := hbound n (by omega)
+  rw [abs_sub_comm] at hbn
+  calc _ ≤ |(law q (E ∩ armEvent z m)).toReal / (law q (armEvent z m)).toReal -
+          (law q (E ∩ armEvent z m ∩ Good)).toReal / (law q (armEvent z m ∩ Good)).toReal| +
+        |(law q (E ∩ armEvent z m ∩ Good)).toReal / (law q (armEvent z m ∩ Good)).toReal -
+          (law q (E ∩ armEvent z n)).toReal / (law q (armEvent z n)).toReal| := abs_sub_le _ _ _
+    _ ≤ 2 * δ + (((κ ^ 2 - 1) / (κ ^ 2 + 1)) ^ S + 2 * δ) := by
+        refine add_le_add hbm ((abs_sub_le _ _ _).trans (add_le_add hcontr hbn))
+    _ ≤ ε := by linarith
+
 end PercLib.Models.Planar
