@@ -7318,3 +7318,988 @@ theorem nonneg_cutoff_deriv_weight {d : ℕ} {N : Seminorm ℝ (Fin d → ℝ)} 
 
 
 end PercLib.Models.LongRange
+
+/-! ### Real and extended-nonnegative cutoff-moment bridges -/
+
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Percolation.Bond
+
+variable {V : Type*}
+
+/-! ### Per-pair arithmetic of the truncated subtraction -/
+
+/-- **The truncated subtraction casts to the real difference, except in one case.**
+
+For `B ≤ A`, the `ℝ`-cast of the truncated difference `A ^ p - B ^ p` is the real difference of
+the cast `p`-th powers, provided `A` is finite, or `B` is zero (both sides are then the cast of
+`A ^ p`), or `B` is infinite (and then `A = ⊤` as well, and both sides vanish). -/
+theorem toReal_pow_sub_pow_of_finite_or_zero {A B : ℝ≥0∞} (hBA : B ≤ A) (p : ℕ)
+    (h : A ≠ ⊤ ∨ B = 0 ∨ B = ⊤) :
+    (A ^ p - B ^ p).toReal = A.toReal ^ p - B.toReal ^ p := by
+  rcases h with hA | hB0 | hBtop
+  · exact toReal_pow_sub_pow hBA hA p
+  · subst hB0
+    rcases eq_or_ne p 0 with rfl | hp
+    · simp
+    · rw [zero_pow hp, tsub_zero, ENNReal.toReal_pow, ENNReal.toReal_zero, zero_pow hp,
+        sub_zero]
+  · have hA : A = ⊤ := top_le_iff.1 (hBtop ▸ hBA)
+    subst hA
+    subst hBtop
+    rcases eq_or_ne p 0 with rfl | hp
+    · simp
+    · rw [ENNReal.top_pow hp, tsub_self, ENNReal.toReal_zero, ENNReal.toReal_top,
+        zero_pow hp, sub_self]
+
+/-- **Sharp form of `toReal_pow_sub_pow_of_finite_or_zero` for `p ≥ 1`.**
+
+For `p ≥ 1` and `B ≤ A`, the cast of the truncated difference agrees with the real difference
+exactly when `A ≠ ⊤`, or `B = 0`, or `B = ⊤`.  Hence the only obstruction to the pointwise
+real/extended-nonnegative conversion is a pair whose inserted cluster is infinite while its
+deleted cluster is finite and nonempty. -/
+theorem toReal_pow_sub_pow_eq_iff {A B : ℝ≥0∞} (hBA : B ≤ A) {p : ℕ} (hp : 1 ≤ p) :
+    (A ^ p - B ^ p).toReal = A.toReal ^ p - B.toReal ^ p ↔
+      (A ≠ ⊤ ∨ B = 0 ∨ B = ⊤) := by
+  refine ⟨fun h => ?_, toReal_pow_sub_pow_of_finite_or_zero hBA p⟩
+  by_contra hc
+  push Not at hc
+  obtain ⟨hA, hB0, hBtop⟩ := hc
+  subst hA
+  have hpne : p ≠ 0 := by omega
+  have hBne : B ^ p ≠ ⊤ := ENNReal.pow_ne_top hBtop
+  have hBpos : 0 < B.toReal := ENNReal.toReal_pos hB0 hBtop
+  have hpow : 0 < B.toReal ^ p := pow_pos hBpos p
+  rw [ENNReal.top_pow hpne, ENNReal.top_sub hBne, ENNReal.toReal_top,
+    zero_pow hpne, zero_sub] at h
+  exact hpow.ne' (neg_eq_zero.1 h.symm)
+
+/-! ### The pointwise series identity -/
+
+/-- **The pivotal increment in real form, one pair at a time.**  The cast of the truncated
+difference of the `p`-th cluster moments over the pair `e` is the real difference of the cast
+moments, as soon as the inserted cluster is finite (or the deleted one is empty or infinite). -/
+theorem toReal_pivotal_increment {ω : Config V} {o : V} (e : Sym2 V) (p : ℕ)
+    (h : ((cluster (insert e ω) o).encard : ℝ≥0∞) ≠ ⊤ ∨
+      ((cluster (ω \ {e}) o).encard : ℝ≥0∞) = 0 ∨
+      ((cluster (ω \ {e}) o).encard : ℝ≥0∞) = ⊤) :
+    ((((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal) =
+      (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+        (((cluster (ω \ {e}) o).encard : ℝ≥0∞).toReal) ^ p :=
+  toReal_pow_sub_pow_of_finite_or_zero (encard_cluster_sdiff_le_insert_coe ω e o) p h
+
+/-- **The cast of the weighted pivotal series is the weighted real pivotal series.**
+
+For a fixed bond configuration and an `ℝ≥0∞`-valued weight, if every weighted truncated pivotal
+increment is finite (`hjunk`, which for a finite weight only asks the inserted cluster to be
+finite) and every pair casts correctly (`hmatch`), then the `ℝ`-cast of the extended-nonnegative
+pivotal series is the real pivotal series.  There is no summability hypothesis: if the
+nonnegative extended-nonnegative series diverges, `ENNReal.tsum_toReal_eq` reports `0` on both
+sides. -/
+theorem toReal_tsum_pivotal_eq_tsum_real [Countable V] (ω : Config V) (o : V) (p : ℕ)
+    (w : Sym2 V → ℝ≥0∞)
+    (hjunk : ∀ e, w e * (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+      ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p) ≠ ⊤)
+    (hmatch : ∀ e, ((cluster (insert e ω) o).encard : ℝ≥0∞) ≠ ⊤ ∨
+      ((cluster (ω \ {e}) o).encard : ℝ≥0∞) = 0 ∨
+      ((cluster (ω \ {e}) o).encard : ℝ≥0∞) = ⊤) :
+    (∑' e : Sym2 V, w e * (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)).toReal =
+      ∑' e : Sym2 V, (w e).toReal *
+        ((((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+          (((cluster (ω \ {e}) o).encard : ℝ≥0∞).toReal) ^ p) := by
+  rw [ENNReal.tsum_toReal_eq hjunk]
+  refine tsum_congr fun e => ?_
+  rw [ENNReal.toReal_mul, toReal_pivotal_increment e p (hmatch e)]
+
+/-- **The cast of the weighted pivotal series is the weighted real pivotal series**, in the
+usable form: the weight is finite and the inserted cluster is finite for every pair. -/
+theorem toReal_tsum_pivotal_eq_tsum_real_of_finite [Countable V] (ω : Config V) (o : V) (p : ℕ)
+    (w : Sym2 V → ℝ≥0∞) (hw : ∀ e, w e ≠ ⊤)
+    (hfin : ∀ e, ((cluster (insert e ω) o).encard : ℝ≥0∞) ≠ ⊤) :
+    (∑' e : Sym2 V, w e * (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)).toReal =
+      ∑' e : Sym2 V, (w e).toReal *
+        ((((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+          (((cluster (ω \ {e}) o).encard : ℝ≥0∞).toReal) ^ p) :=
+  toReal_tsum_pivotal_eq_tsum_real ω o p w
+    (fun e => ENNReal.mul_ne_top (hw e)
+      (ne_top_of_le_ne_top (ENNReal.pow_ne_top (hfin e)) tsub_le_self))
+    (fun e => Or.inl (hfin e))
+
+open Classical in
+/-- **The closed-coordinate series in real form.**  Off the open event `e ∈ ω` the pair
+contributes its pivotal increment; on it, the closed-coordinate normalisation of
+`i41_enn_of_root_finite` sets the contribution to zero, and the real series does the same. -/
+theorem toReal_tsum_closed_eq_tsum_real [Countable V] (ω : Config V) (o : V) (p : ℕ)
+    (w : Sym2 V → ℝ≥0∞) (hw : ∀ e, w e ≠ ⊤)
+    (hfin : ∀ e, ((cluster (insert e ω) o).encard : ℝ≥0∞) ≠ ⊤) :
+    (∑' e : Sym2 V, w e * (if e ∈ ω then (0 : ℝ≥0∞) else
+        ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+          ((cluster ω o).encard : ℝ≥0∞) ^ p)).toReal =
+      ∑' e : Sym2 V, (w e).toReal * (if e ∈ ω then (0 : ℝ) else
+        (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+          (((cluster ω o).encard : ℝ≥0∞).toReal) ^ p) := by
+  have hdiff : ∀ e : Sym2 V, e ∉ ω →
+      (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p - ((cluster ω o).encard : ℝ≥0∞) ^ p) ≠ ⊤ := by
+    intro e _
+    refine ne_top_of_le_ne_top (ENNReal.pow_ne_top (hfin e)) tsub_le_self
+  rw [ENNReal.tsum_toReal_eq (f := fun e => w e * (if e ∈ ω then (0 : ℝ≥0∞) else
+    ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p - ((cluster ω o).encard : ℝ≥0∞) ^ p)) ?_]
+  · refine tsum_congr fun e => ?_
+    rw [ENNReal.toReal_mul]
+    by_cases he : e ∈ ω
+    · rw [ite_eq_left he, ite_eq_left he, ENNReal.toReal_zero]
+    · rw [ite_eq_right he, ite_eq_right he]
+      have hsd : ω \ {e} = ω := Set.sdiff_singleton_eq_self he
+      rw [toReal_pow_sub_pow (B := ((cluster ω o).encard : ℝ≥0∞)) (by
+        have h := encard_cluster_sdiff_le_insert_coe ω e o
+        rwa [hsd] at h) (hfin e) p]
+  · intro e
+    by_cases he : e ∈ ω
+    · rw [ite_eq_left he, mul_zero]
+      exact ENNReal.zero_ne_top
+    · rw [ite_eq_right he]
+      exact ENNReal.mul_ne_top (hw e) (hdiff e he)
+
+/-- **The a.e. form under per-pair a.e. finiteness.**  Since `Sym2 V` is countable, the null
+sets of the per-pair hypotheses have a null union, and the pointwise identity holds almost
+surely. -/
+theorem ae_toReal_tsum_pivotal_eq_tsum_real [Countable V]
+    (μ : MeasureTheory.Measure (Config V)) (o : V)
+    (p : ℕ) (w : Sym2 V → ℝ≥0∞) (hw : ∀ e, w e ≠ ⊤)
+    (hfin : ∀ e, ∀ᵐ ω ∂μ, ((cluster (insert e ω) o).encard : ℝ≥0∞) ≠ ⊤) :
+    ∀ᵐ ω ∂μ, (∑' e : Sym2 V, w e * (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)).toReal =
+      ∑' e : Sym2 V, (w e).toReal *
+        ((((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+          (((cluster (ω \ {e}) o).encard : ℝ≥0∞).toReal) ^ p) := by
+  filter_upwards [MeasureTheory.ae_all_iff.2 hfin] with ω hω
+  exact toReal_tsum_pivotal_eq_tsum_real_of_finite ω o p w hw hω
+
+open Classical in
+/-- **The a.e. closed-coordinate form under per-pair a.e. finiteness.** -/
+theorem ae_toReal_tsum_closed_eq_tsum_real [Countable V]
+    (μ : MeasureTheory.Measure (Config V)) (o : V)
+    (p : ℕ) (w : Sym2 V → ℝ≥0∞) (hw : ∀ e, w e ≠ ⊤)
+    (hfin : ∀ e, ∀ᵐ ω ∂μ, ((cluster (insert e ω) o).encard : ℝ≥0∞) ≠ ⊤) :
+    ∀ᵐ ω ∂μ, (∑' e : Sym2 V, w e * (if e ∈ ω then (0 : ℝ≥0∞) else
+        ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+          ((cluster ω o).encard : ℝ≥0∞) ^ p)).toReal =
+      ∑' e : Sym2 V, (w e).toReal * (if e ∈ ω then (0 : ℝ) else
+        (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+          (((cluster ω o).encard : ℝ≥0∞).toReal) ^ p) := by
+  filter_upwards [MeasureTheory.ae_all_iff.2 hfin] with ω hω
+  exact toReal_tsum_closed_eq_tsum_real ω o p w hw hω
+
+
+/-! ### The per-pair finiteness hypothesis is not removable -/
+
+/-- **A cluster is a singleton when the root has no open pair.** -/
+theorem cluster_eq_singleton_of_isolated {ω : Config V} {x : V}
+    (h : ∀ y, ¬ (openGraph ω).Adj x y) : cluster ω x = {x} := by
+  have hkey : ∀ {u v : V}, (openGraph ω).Walk u v → u = x → v = x := by
+    intro u v w
+    induction w with
+    | nil => exact id
+    | cons hadj _ _ =>
+      intro hu
+      exact absurd (hu ▸ hadj) (h _)
+  ext y
+  constructor
+  · intro hy
+    obtain ⟨w⟩ := hy
+    exact hkey w rfl
+  · intro hy
+    rw [Set.mem_singleton_iff] at hy
+    rw [hy]
+    exact mem_cluster_self ω x
+
+/-- **The star configuration on `ℕ`** `{ {1,n} : n ≥ 2 }`: the origin is isolated. -/
+theorem star_zero_isolated :
+    ∀ y : ℕ, ¬ (openGraph {f : Sym2 ℕ | ∃ n : ℕ, 2 ≤ n ∧ f = s(1, n)}).Adj 0 y := by
+  intro y hy
+  obtain ⟨hmem, -⟩ := (openGraph_adj_iff _ 0 y).1 hy
+  obtain ⟨n, hn, hEq⟩ := hmem
+  rcases Sym2.eq_iff.1 hEq with ⟨h1, -⟩ | ⟨h1, -⟩
+  · exact Nat.zero_ne_one h1
+  · omega
+
+/-- In the star configuration the cluster of the origin is a singleton. -/
+theorem star_cluster_zero :
+    cluster {f : Sym2 ℕ | ∃ n : ℕ, 2 ≤ n ∧ f = s(1, n)} 0 = {0} :=
+  cluster_eq_singleton_of_isolated star_zero_isolated
+
+/-- The pair `{0,1}` is closed in the star configuration. -/
+theorem star_not_mem : s(0, 1) ∉ {f : Sym2 ℕ | ∃ n : ℕ, 2 ≤ n ∧ f = s(1, n)} := by
+  rintro ⟨n, hn, hEq⟩
+  rcases Sym2.eq_iff.1 hEq with ⟨h1, -⟩ | ⟨h1, -⟩
+  · exact Nat.zero_ne_one h1
+  · omega
+
+/-- Opening `{0,1}` in the star configuration connects the origin to everything. -/
+theorem star_insert_cluster_univ :
+    cluster (insert (s(0, 1)) {f : Sym2 ℕ | ∃ n : ℕ, 2 ≤ n ∧ f = s(1, n)}) 0 = Set.univ := by
+  ext y
+  simp only [Set.mem_univ, iff_true]
+  rcases eq_or_ne y 0 with rfl | h0
+  · exact mem_cluster_self _ 0
+  rcases eq_or_ne y 1 with rfl | h1
+  · exact mem_conn_of_mem (by norm_num) (Set.mem_insert _ _)
+  · have hy : 2 ≤ y := by omega
+    exact conn_trans (mem_conn_of_mem (by norm_num) (Set.mem_insert _ _))
+      (mem_conn_of_mem (by omega) (Set.mem_insert_of_mem _ ⟨y, hy, rfl⟩))
+
+/-- In the star configuration the inserted cluster of the origin is infinite. -/
+theorem star_insert_cluster_encard_top :
+    ((cluster (insert (s(0, 1)) {f : Sym2 ℕ | ∃ n : ℕ, 2 ≤ n ∧ f = s(1, n)}) 0).encard :
+      ℝ≥0∞) = ⊤ := by
+  rw [star_insert_cluster_univ]
+  have hinf : (Set.univ : Set ℕ).Infinite := Set.infinite_univ
+  rw [hinf.encard_eq]
+  simp
+
+/-- **The general obstruction to removing the finiteness hypothesis.**  If one pair `e₀` carries
+all the weight, has an infinite inserted cluster and a finite nonempty deleted cluster, then the
+cast of the weighted extended-nonnegative pivotal series is `0` while the weighted real pivotal
+series is strictly negative. -/
+theorem toReal_tsum_pivotal_ne_tsum_real [Countable V] (ω : Config V) (o : V) (p : ℕ)
+    (hp : 1 ≤ p) (w : Sym2 V → ℝ≥0∞) (e₀ : Sym2 V) (hsupp : ∀ e, e ≠ e₀ → w e = 0)
+    (hw0 : w e₀ ≠ 0) (hwt : w e₀ ≠ ⊤)
+    (hA : ((cluster (insert e₀ ω) o).encard : ℝ≥0∞) = ⊤)
+    (hB0 : ((cluster (ω \ {e₀}) o).encard : ℝ≥0∞) ≠ 0)
+    (hBt : ((cluster (ω \ {e₀}) o).encard : ℝ≥0∞) ≠ ⊤) :
+    (∑' e : Sym2 V, w e * (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)).toReal ≠
+      ∑' e : Sym2 V, (w e).toReal *
+        ((((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+          (((cluster (ω \ {e}) o).encard : ℝ≥0∞).toReal) ^ p) := by
+  have hpne : p ≠ 0 := by omega
+  have hBfin : ((cluster (ω \ {e₀}) o).encard : ℝ≥0∞) ^ p ≠ ⊤ := ENNReal.pow_ne_top hBt
+  have hdiff : ((cluster (insert e₀ ω) o).encard : ℝ≥0∞) ^ p -
+      ((cluster (ω \ {e₀}) o).encard : ℝ≥0∞) ^ p = ⊤ := by
+    rw [hA, ENNReal.top_pow hpne, ENNReal.top_sub hBfin]
+  have hL : (∑' e : Sym2 V, w e * (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+      ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)) = ⊤ := by
+    rw [tsum_eq_single e₀]
+    · rw [hdiff, ENNReal.mul_top hw0]
+    · intro e he
+      rw [hsupp e he, zero_mul]
+  have hR : (∑' e : Sym2 V, (w e).toReal *
+      ((((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+        (((cluster (ω \ {e}) o).encard : ℝ≥0∞).toReal) ^ p)) =
+      (w e₀).toReal * (-((((cluster (ω \ {e₀}) o).encard : ℝ≥0∞)).toReal ^ p)) := by
+    rw [tsum_eq_single e₀]
+    · rw [hA, ENNReal.toReal_top, zero_pow hpne, zero_sub]
+    · intro e he
+      rw [hsupp e he, ENNReal.toReal_zero, zero_mul]
+  have hBpos : 0 < (((cluster (ω \ {e₀}) o).encard : ℝ≥0∞)).toReal :=
+    ENNReal.toReal_pos hB0 hBt
+  have hwpos : (w e₀).toReal ≠ 0 := (ENNReal.toReal_pos hw0 hwt).ne'
+  have hpow : 0 < ((((cluster (ω \ {e₀}) o).encard : ℝ≥0∞)).toReal ^ p) := pow_pos hBpos p
+  rw [hL, hR, ENNReal.toReal_top]
+  intro hcontra
+  rw [mul_neg] at hcontra
+  exact mul_ne_zero hwpos hpow.ne' (neg_eq_zero.1 hcontra.symm)
+
+/-- **The per-pair finiteness hypothesis of `toReal_tsum_pivotal_eq_tsum_real` is not
+removable.**  In the star configuration on `ℕ` the origin is isolated, so deleting the pair
+`{0,1}` leaves the cluster of `0` a singleton, while opening it merges the origin into the
+infinite component of `1`.  For the weight concentrated on that single pair and `p = 1` the cast
+of the extended-nonnegative pivotal series is `0`, while the real pivotal series is `-1`. -/
+theorem star_counterexample_pivotal :
+    (∑' e : Sym2 ℕ, (if e = s(0, 1) then (1 : ℝ≥0∞) else 0) *
+        (((cluster (insert e {f : Sym2 ℕ | ∃ n : ℕ, 2 ≤ n ∧ f = s(1, n)}) 0).encard :
+            ℝ≥0∞) ^ 1 -
+          ((cluster ({f : Sym2 ℕ | ∃ n : ℕ, 2 ≤ n ∧ f = s(1, n)} \ {e}) 0).encard :
+            ℝ≥0∞) ^ 1)).toReal ≠
+      ∑' e : Sym2 ℕ, ((if e = s(0, 1) then (1 : ℝ≥0∞) else 0)).toReal *
+        ((((cluster (insert e {f : Sym2 ℕ | ∃ n : ℕ, 2 ≤ n ∧ f = s(1, n)}) 0).encard :
+            ℝ≥0∞).toReal) ^ 1 -
+          (((cluster ({f : Sym2 ℕ | ∃ n : ℕ, 2 ≤ n ∧ f = s(1, n)} \ {e}) 0).encard :
+            ℝ≥0∞).toReal) ^ 1) := by
+  let ω : Config ℕ := {f : Sym2 ℕ | ∃ n : ℕ, 2 ≤ n ∧ f = s(1, n)}
+  have hBval : ((cluster (ω \ {s(0, 1)}) 0).encard : ℝ≥0∞) = 1 := by
+    rw [Set.sdiff_singleton_eq_self (star_not_mem), star_cluster_zero]
+    simp
+  refine toReal_tsum_pivotal_ne_tsum_real ω 0 1 le_rfl
+    (fun e => if e = s(0, 1) then (1 : ℝ≥0∞) else 0) (s(0, 1)) ?_ ?_ ?_ ?_ ?_ ?_
+  · intro e he
+    exact ite_eq_right he
+  · simp
+  · simp
+  · exact star_insert_cluster_encard_top
+  · rw [hBval]
+    exact one_ne_zero
+  · rw [hBval]
+    exact ENNReal.one_ne_top
+
+open Classical in
+/-- **The closed-coordinate a.e. conversion in the shape used by the cutoff derivative.**  The
+weight is the library's `radialKernel` of the cutoff indicator, whose `ℝ`-cast is the weight of
+`tsum_cutoff_pivotal_eq_closed_pow`. -/
+theorem ae_toReal_tsum_radialKernel_closed_eq_tsum_real {d : ℕ}
+    {N : Seminorm ℝ (Fin d → ℝ)} {r : ℝ}
+    (μ : MeasureTheory.Measure (Config (Fin d → ℤ))) (p : ℕ)
+    (hfin : ∀ e, ∀ᵐ ω ∂μ, ((cluster (insert e ω) 0).encard : ℝ≥0∞) ≠ ⊤) :
+    ∀ᵐ ω ∂μ, (∑' e : Sym2 (Fin d → ℤ),
+        (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ≥0∞) *
+          (if e ∈ ω then (0 : ℝ≥0∞) else
+            ((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+              ((cluster ω 0).encard : ℝ≥0∞) ^ p)).toReal =
+      ∑' e : Sym2 (Fin d → ℤ),
+        (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+          (if e ∈ ω then (0 : ℝ) else
+            (((cluster (insert e ω) 0).encard : ℝ≥0∞).toReal) ^ p -
+              (((cluster ω 0).encard : ℝ≥0∞).toReal) ^ p) := by
+  filter_upwards [ae_toReal_tsum_closed_eq_tsum_real μ 0 p
+    (fun e => (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ≥0∞))
+    (fun e => ENNReal.coe_ne_top) hfin] with ω hω
+  refine hω.trans (tsum_congr fun e => ?_)
+  simp
+
+open Classical in
+/-- **The assembled real form of the closed-coordinate flux from its extended-nonnegative
+identity.**
+
+This is the exact composition of the two real/extended-nonnegative passages:
+`integral_toReal_eq_toReal_lintegral` on the extended-nonnegative series (inputs: a.e. finiteness
+of the series and its a.e. measurability), the pointwise conversion
+`ae_toReal_tsum_closed_eq_tsum_real`, and the integral/sum interchange `hinter`.
+
+The interchange is *not* supplied by `hKd`: `hKd` bounds the pivotal flux, and
+`summable_closed_flux_of_hKd` needs its `hpair` input as well.  The a.e. finiteness `hne` of the
+extended-nonnegative series is likewise not implied by the per-pair finiteness `hflux` of
+`hasDerivAt_integral_cutoff_pow`: it is a genuine extra input of the real passage. -/
+theorem toReal_lintegral_tsum_closed_eq_tsum_integral [Countable V]
+    (μ : MeasureTheory.Measure (Config V)) (o : V) (p : ℕ) (w : Sym2 V → ℝ≥0∞)
+    (hw : ∀ e, w e ≠ ⊤)
+    (hfin : ∀ e, ∀ᵐ ω ∂μ, ((cluster (insert e ω) o).encard : ℝ≥0∞) ≠ ⊤)
+    (hmeas : AEMeasurable (fun ω => ∑' e : Sym2 V, w e *
+      (if e ∈ ω then (0 : ℝ≥0∞) else ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster ω o).encard : ℝ≥0∞) ^ p)) μ)
+    (hne : ∀ᵐ ω ∂μ, (∑' e : Sym2 V, w e *
+      (if e ∈ ω then (0 : ℝ≥0∞) else ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster ω o).encard : ℝ≥0∞) ^ p)) ≠ ⊤)
+    (hinter : ∫ ω, (∑' e : Sym2 V, (w e).toReal * (if e ∈ ω then (0 : ℝ) else
+        (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+          (((cluster ω o).encard : ℝ≥0∞).toReal) ^ p)) ∂μ =
+      ∑' e : Sym2 V, (w e).toReal * ∫ ω, (if e ∈ ω then (0 : ℝ) else
+        (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+          (((cluster ω o).encard : ℝ≥0∞).toReal) ^ p) ∂μ) :
+    (∫⁻ ω, ∑' e : Sym2 V, w e * (if e ∈ ω then (0 : ℝ≥0∞) else
+        ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+          ((cluster ω o).encard : ℝ≥0∞) ^ p) ∂μ).toReal =
+      ∑' e : Sym2 V, (w e).toReal * ∫ ω, (if e ∈ ω then (0 : ℝ) else
+        (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+          (((cluster ω o).encard : ℝ≥0∞).toReal) ^ p) ∂μ := by
+  rw [← integral_toReal_eq_toReal_lintegral hmeas hne,
+    MeasureTheory.integral_congr_ae
+      (ae_toReal_tsum_closed_eq_tsum_real μ o p w hw hfin), hinter]
+
+end PercLib.Models.LongRange
+
+namespace PercLib.Models.LongRange
+
+/-! ### Almost sure finiteness from finite moments -/
+
+/-- **A.e. finiteness from a finite moment.** If the `p`-th power of a nonnegative
+observable has finite integral (`p ≥ 1`), the observable is finite almost surely. -/
+theorem ae_ne_top_of_lintegral_pow_ne_top {α : Type*} [MeasurableSpace α] {μ : Measure α}
+    {f : α → ℝ≥0∞} (hf : Measurable f) (p : ℕ) (hp : 1 ≤ p)
+    (hmom : (∫⁻ a, f a ^ p ∂μ) ≠ ⊤) :
+    ∀ᵐ a ∂μ, f a ≠ ⊤ := by
+  filter_upwards [ae_lt_top (hf.pow_const p) hmom] with a ha htop
+  rw [htop, ENNReal.top_pow (by omega : p ≠ 0)] at ha
+  exact absurd ha (lt_irrefl ⊤)
+
+/-- **Integrability of the inserted real moment from the inserted `ℝ≥0∞` moment.** Under a
+finite inserted `p`-th moment, the real function `|K_o(ω ∪ {e})|^p` (`toReal` applied
+pointwise) is integrable. This is the `hint` input of `summable_closed_flux_cutoff_of_hKd`,
+obtained from the same moment hypothesis that gives `hflux`. -/
+theorem integrable_toReal_pow_encard_cluster_insert {V : Type*} [Countable V]
+    {μ : Measure (Config V)} (e : Sym2 V) (o : V) (p : ℕ)
+    (h : (∫⁻ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p ∂μ) ≠ ⊤) :
+    Integrable (fun ω => (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p) μ := by
+  have hm : AEMeasurable
+      (fun ω : Config V => ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p) μ :=
+    ((measurable_encard_cluster_insert_coe e o).pow_const p).aemeasurable
+  refine (integrable_toReal_of_lintegral_ne_top hm h).congr ?_
+  filter_upwards with ω
+  exact ENNReal.toReal_pow _ p
+
+/-- **The susceptibility is bounded by any moment.** The cluster of `o` always contains `o`,
+so its volume is at least `1`; hence `|K_o| ≤ |K_o|^p` for `p ≥ 1` and the first moment
+(`chi`) is finite as soon as the `p`-th moment is. This discharges the susceptibility input
+of the cutoff derivative from a moment hypothesis at the same scale. -/
+theorem chi_ne_top_of_lintegral_pow_ne_top {V : Type*} (q : Sym2 V → unitInterval) (o : V)
+    (p : ℕ) (hp : 1 ≤ p)
+    (hmom : (∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ^ p ∂(law q)) ≠ ⊤) :
+    chi q o ≠ ⊤ := by
+  refine ne_top_of_le_ne_top hmom (lintegral_mono fun ω => ?_)
+  have h1 : (1 : ℝ≥0∞) ≤ ((cluster ω o).encard : ℝ≥0∞) := by
+    exact_mod_cast one_le_encard_cluster ω o
+  exact le_self_pow₀ h1 (by omega)
+
+/-! ### The pivotal increment is bounded by the inserted moment -/
+
+/-- **The plain moment is bounded by the inserted moment.** Inserting a pair can only
+enlarge the cluster of `o`, so finiteness of the inserted `p`-th moment gives finiteness of
+the plain one. -/
+theorem lintegral_pow_encard_ne_top_of_insert {V : Type*} {μ : Measure (Config V)}
+    (e : Sym2 V) (o : V) (p : ℕ)
+    (h : (∫⁻ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p ∂μ) ≠ ⊤) :
+    (∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ^ p ∂μ) ≠ ⊤ :=
+  ne_top_of_le_ne_top h (lintegral_mono fun ω => ENNReal.pow_le_pow_left (by
+    exact_mod_cast Set.encard_mono (cluster_mono (subset_insert e ω) o)))
+
+/-- **The pivotal increment is at most the inserted moment.** For every configuration the
+truncated difference `|K_o(ω ∪ {e})|^p - |K_o(ω \ {e})|^p` is bounded by the first term,
+so the same holds for the integrals. No finiteness is needed for this step. -/
+theorem lintegral_pivotal_increment_le_lintegral_insert_pow {V : Type*} {μ : Measure (Config V)}
+    (e : Sym2 V) (o : V) (p : ℕ) :
+    (∫⁻ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+      ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p) ∂μ) ≤
+      ∫⁻ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p ∂μ :=
+  lintegral_mono fun _ => tsub_le_self
+
+/-- **`hflux` from a finite inserted moment.** -/
+theorem lintegral_pivotal_increment_ne_top_of_lintegral_insert_pow_ne_top {V : Type*}
+    {μ : Measure (Config V)} (e : Sym2 V) (o : V) (p : ℕ)
+    (h : (∫⁻ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p ∂μ) ≠ ⊤) :
+    (∫⁻ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+      ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p) ∂μ) ≠ ⊤ :=
+  ne_top_of_le_ne_top h (lintegral_pivotal_increment_le_lintegral_insert_pow e o p)
+
+/-! ### The inserted moment is the moment in the law with `e` forced open -/
+
+open Classical in
+/-- **Finite-energy form of the inserted moment.** Inserting the pair `e` into a
+configuration with law `law q` produces the law in which the open probability of `e` is
+`1`, so the `p`-th moment of the cluster of `o` after inserting `e` is the `p`-th moment of
+the plain cluster of `o` under `law (Function.update q e 1)`. -/
+theorem lintegral_insert_pow_encard_eq_update {V : Type*} [Countable V]
+    (q : Sym2 V → unitInterval) (e : Sym2 V) (o : V) (p : ℕ) :
+    (∫⁻ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p ∂(law q)) =
+      ∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ^ p ∂(law (Function.update q e 1)) := by
+  change (∫⁻ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p ∂(prodBernoulli q)) =
+    ∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ^ p ∂(prodBernoulli (Function.update q e 1))
+  rw [← prodBernoulli_map_insert q e,
+    lintegral_map (f := fun ω : Config V => ((cluster ω o).encard : ℝ≥0∞) ^ p)
+      (g := fun ω : Config V => insert e ω)
+      ((Measurable.of_discrete.comp (measurable_encard_cluster (x := o))).pow_const p)
+      (measurable_insert e)]
+
+open Classical in
+/-- The same statement in the form in which the derivative interface uses it. -/
+theorem lintegral_insert_pow_ne_top_iff_update {V : Type*} [Countable V]
+    (q : Sym2 V → unitInterval) (e : Sym2 V) (o : V) (p : ℕ) :
+    ((∫⁻ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p ∂(law q)) ≠ ⊤) ↔
+      ((∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ^ p ∂(law (Function.update q e 1))) ≠ ⊤) := by
+  rw [lintegral_insert_pow_encard_eq_update]
+
+/-! ### The derivative interface with one moment hypothesis -/
+
+open Classical in
+/-- **The cutoff Russo derivative from per-pair moment finiteness.**
+
+This is `hasDerivAt_integral_cutoff_pow` with the three finiteness hypotheses `hmom`,
+`hfin` and `hflux` replaced by the single per-pair hypothesis `hins`: for every scale `r`
+in the interval and every pair `e`, the `p`-th moment of the cluster of `o` after inserting
+`e` is finite. Each of the three is recovered from `hins`:
+
+* `hmom` because `cluster ω o ⊆ cluster (insert e ω) o` monotone in the configuration;
+* `hfin` by `ae_ne_top_of_lintegral_pow_ne_top`;
+* `hflux` by `lintegral_pivotal_increment_ne_top_of_lintegral_insert_pow_ne_top`.
+
+The all-pairs dominator (`hKd` with `hKdint`), the a.e. strong measurability of the capped
+flux series (`hmeas`) and the continuity of the uncapped flux series (`hcont`) remain
+inputs: moment finiteness does not supply them. -/
+theorem hasDerivAt_integral_cutoff_pow_of_insert_moments {d : ℕ}
+    {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p) (o : Fin d → ℤ) {R : ℝ}
+    (hχ : chi (intensityProfile (cutoffKernel N K R) β) o ≠ ⊤)
+    (cw : ℝ → Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ r e, cw r e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ))))
+    {u v r₀ : ℝ} (hu : 0 < u) (hur : u < r₀) (hrv : r₀ < v) (hvR : v ≤ R)
+    (hcorner : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Ioo u v)
+    (hins : ∀ r ∈ Ioo u v, ∀ e, (∫⁻ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p
+      ∂(law (intensityProfile (cutoffKernel N K r) β))) ≠ ⊤)
+    (Kd : ℝ → ℝ) (hKdint : ∀ a ∈ Ioo u v, ∀ b ∈ Ioo u v, IntervalIntegrable Kd volume a b)
+    (hKd : ∀ r ∈ Ioo u v, ∀ S : Finset (Sym2 (Fin d → ℤ)), ∑ e ∈ S, |cw r e| *
+      |∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel N K r) β))| ≤ Kd r)
+    (hmeas : ∀ n : ℕ, AEStronglyMeasurable (fun r => ∑' e, cw r e *
+      (∫⁻ ω, (min (n : ℝ≥0∞) (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p) -
+        min (n : ℝ≥0∞) (((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p))
+        ∂(law (intensityProfile (cutoffKernel N K r) β))).toReal)
+      (volume.restrict (Ioo u v)))
+    (hcont : ContinuousOn (fun r => ∑' e, cw r e *
+      ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel N K r) β))) (Ioo u v)) :
+    HasDerivAt (fun r => ∫ ω, (((cluster ω o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel N K r) β)))
+      (∑' e, cw r₀ e *
+        ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+          ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+          ∂(law (intensityProfile (cutoffKernel N K r₀) β))) r₀ := by
+  refine hasDerivAt_integral_cutoff_pow hKa hK' hK'c β p hp o hχ cw hcw hu hur hrv hvR
+    hcorner ?_ ?_ ?_ Kd hKdint hKd hmeas hcont
+  · -- `hmom`: the plain cluster is contained in the inserted cluster
+    intro r hr
+    exact lintegral_pow_encard_ne_top_of_insert s(0, 0) o p (hins r hr s(0, 0))
+  · -- `hfin`
+    intro r hr e
+    exact ae_ne_top_of_lintegral_pow_ne_top (measurable_encard_cluster_insert_coe e o)
+      p hp (hins r hr e)
+  · -- `hflux`
+    intro r hr e
+    exact lintegral_pivotal_increment_ne_top_of_lintegral_insert_pow_ne_top e o p (hins r hr e)
+
+/-! ### The moment hypothesis is not a consequence of the flux bound -/
+
+open Classical in
+/-- **A finite pivotal flux does not force a finite inserted moment.**
+
+This is the sharpness of the reduction: `hflux` alone cannot replace `hins`. On `ℤ` with
+the configuration that has every pair open, both the inserted and the deleted cluster of `0`
+are the whole line, so the truncated pivotal increment is `⊤ - ⊤ = 0` while the inserted
+moment is `⊤`. Hence the moment hypothesis of
+`hasDerivAt_integral_cutoff_pow_of_insert_moments` is a genuine input (in the paper it comes
+from sharpness of the phase transition), not a consequence of the flux bound. -/
+theorem pivotal_flux_ne_top_of_insert_moment_eq_top :
+    ((∫⁻ ω : Config ℤ, (((cluster (insert s(0, 0) ω) 0).encard : ℝ≥0∞) ^ 1 -
+        ((cluster (ω \ {s(0, 0)}) 0).encard : ℝ≥0∞) ^ 1)
+        ∂(Measure.dirac (Set.univ : Config ℤ))) ≠ ⊤) ∧
+      ((∫⁻ ω : Config ℤ, ((cluster (insert s(0, 0) ω) 0).encard : ℝ≥0∞) ^ 1
+        ∂(Measure.dirac (Set.univ : Config ℤ))) = ⊤) := by
+  -- the pair `s(0,0)` is a loop, so neither inserting nor deleting it changes the graph
+  have hclins : cluster (insert s(0, 0) (Set.univ : Config ℤ)) 0 = Set.univ := by
+    ext y
+    simp only [Set.mem_univ, iff_true, mem_cluster_iff]
+    rcases eq_or_ne y 0 with rfl | hy
+    · exact mem_cluster_self _ 0
+    · exact mem_conn_of_mem (Ne.symm hy) (by simp)
+  have hsdiff : cluster ((Set.univ : Config ℤ) \ {s(0, 0)}) 0 = Set.univ := by
+    ext y
+    simp only [Set.mem_univ, iff_true, mem_cluster_iff]
+    rcases eq_or_ne y 0 with rfl | hy
+    · exact mem_cluster_self _ 0
+    · refine mem_conn_of_mem (Ne.symm hy) ?_
+      simp only [Set.mem_sdiff, Set.mem_univ, Set.mem_singleton_iff, true_and]
+      intro h
+      rcases Sym2.eq_iff.1 h with ⟨-, h2⟩ | ⟨-, h2⟩
+      · exact hy h2
+      · exact hy h2
+  have henc : ((Set.univ : Set ℤ).encard : ℝ≥0∞) = ⊤ := by
+    have hinf : (Set.univ : Set ℤ).Infinite := Set.infinite_univ
+    rw [hinf.encard_eq]
+    simp
+  have hflux : (∫⁻ ω : Config ℤ, (((cluster (insert s(0, 0) ω) 0).encard : ℝ≥0∞) ^ 1 -
+      ((cluster (ω \ {s(0, 0)}) 0).encard : ℝ≥0∞) ^ 1)
+      ∂(Measure.dirac (Set.univ : Config ℤ))) = 0 := by
+    rw [lintegral_dirac' _ (measurable_pivotal (s(0, 0)) 0 1), hclins, hsdiff, henc]
+    simp
+  have hmom : (∫⁻ ω : Config ℤ, ((cluster (insert s(0, 0) ω) 0).encard : ℝ≥0∞) ^ 1
+      ∂(Measure.dirac (Set.univ : Config ℤ))) = ⊤ := by
+    rw [lintegral_dirac' _ ((measurable_encard_cluster_insert_coe (s(0, 0)) 0).pow_const 1),
+      hclins, henc]
+    simp
+  exact ⟨by rw [hflux]; simp, hmom⟩
+
+
+/-! ### Closed-flux summability from the inserted moment -/
+
+open Classical in
+/-- **Radially weighted closed-flux summability from the inserted moment.**
+
+This is `summable_closed_flux_cutoff_of_hKd` with its two finiteness inputs (`hfin`, the a.e.
+finiteness of the inserted cluster, and `hint`, the real integrability of its `p`-th
+moment) derived from the single `ℝ≥0∞` moment hypothesis `hins`, exactly as in
+`hasDerivAt_integral_cutoff_pow_of_insert_moments`. The exponent is required to be at least
+one so that `⊤ ^ p = ⊤` recovers a.e. finiteness. The dominator `hKd` and its bound, the
+defining weight equation and the nonvanishing of the rate remain inputs. -/
+theorem summable_closed_flux_cutoff_of_insert_moments {d : ℕ} {N : Seminorm ℝ (Fin d → ℝ)}
+    {K K' : ℝ → ℝ} (p : ℕ) (β : ℝ≥0) (r : ℝ) (o : Fin d → ℤ)
+    (cw : Sym2 (Fin d → ℤ) → ℝ) (Kd : ℝ)
+    (hcw : ∀ e, cw e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ))))
+    (hp : 1 ≤ p)
+    (hins : ∀ e, (∫⁻ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p
+      ∂(law (intensityProfile (cutoffKernel N K r) β))) ≠ ⊤)
+    (hKd : ∀ S : Finset (Sym2 (Fin d → ℤ)), ∑ e ∈ S, |cw e| *
+      |∫ ω, ((((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+        (((cluster (ω \ {e}) o).encard : ℝ≥0∞).toReal) ^ p)
+        ∂(law (intensityProfile (cutoffKernel N K r) β))| ≤ Kd)
+    (hrate : (β : ℝ) * -K' r ≠ 0) :
+    Summable (fun e => (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+        ∫ ω, (if e ∈ ω then (0 : ℝ) else
+          (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+            (((cluster ω o).encard : ℝ≥0∞).toReal) ^ p)
+          ∂(law (intensityProfile (cutoffKernel N K r) β))) ∧
+      (∑' e, |(radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+        ∫ ω, (if e ∈ ω then (0 : ℝ) else
+          (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+            (((cluster ω o).encard : ℝ≥0∞).toReal) ^ p)
+          ∂(law (intensityProfile (cutoffKernel N K r) β))| ≤
+        |((β : ℝ) * -K' r)⁻¹| * Kd) :=
+  summable_closed_flux_cutoff_of_hKd p β r o cw Kd hcw
+    (fun e => ae_ne_top_of_lintegral_pow_ne_top (measurable_encard_cluster_insert_coe e o)
+      p hp (hins e))
+    (fun e => integrable_toReal_pow_encard_cluster_insert e o p (hins e))
+    hKd hrate
+
+end PercLib.Models.LongRange
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Percolation.Bond
+
+/-! ### The abstract interchange -/
+
+/-- **Integral and sum commute for a nonnegative family with a finite `ℓ¹` flux.**
+
+No integrability is assumed: the finite `ℓ¹` hypothesis makes both sides honest.  This is the
+form in which the interchange is needed; the content is that the pointwise `tsum` on the left
+is *not* junk, because the family of `L¹` norms is summable. -/
+theorem integral_tsum_of_nonneg_of_lintegral_tsum_ne_top {α : Type*} [MeasurableSpace α]
+    {μ : Measure α} {ι : Type*} [Countable ι] {F : ι → α → ℝ}
+    (hF : ∀ e, AEStronglyMeasurable (F e) μ)
+    (h0 : ∀ e, ∀ᵐ ω ∂μ, 0 ≤ F e ω)
+    (hsum : (∑' e, ∫⁻ ω, ENNReal.ofReal (F e ω) ∂μ) ≠ ⊤) :
+    ∫ ω, ∑' e, F e ω ∂μ = ∑' e, ∫ ω, F e ω ∂μ := by
+  have hnorm : ∀ e, ∫⁻ ω, ‖F e ω‖ₑ ∂μ = ∫⁻ ω, ENNReal.ofReal (F e ω) ∂μ := by
+    intro e
+    refine lintegral_congr_ae ?_
+    filter_upwards [h0 e] with ω h
+    rw [Real.enorm_eq_ofReal h]
+  refine MeasureTheory.integral_tsum hF ?_
+  rw [tsum_congr hnorm]
+  exact hsum
+
+/-- **Interchange through an `ℝ≥0∞` model of the flux.**
+
+The pointwise identity `ofReal (F e ω) = w e * φ e ω` transfers the finiteness of the
+`ℝ≥0∞` flux `∑' e, w e * ∫⁻ φ e` to the `ℓ¹` hypothesis of
+`integral_tsum_of_nonneg_of_lintegral_tsum_ne_top`. -/
+theorem integral_tsum_of_nonneg_of_bridge {α : Type*} [MeasurableSpace α]
+    {μ : Measure α} {ι : Type*} [Countable ι] {F : ι → α → ℝ} {φ : ι → α → ℝ≥0∞}
+    {w : ι → ℝ≥0∞}
+    (hF : ∀ e, AEStronglyMeasurable (F e) μ)
+    (h0 : ∀ e, ∀ᵐ ω ∂μ, 0 ≤ F e ω)
+    (hφ : ∀ e, Measurable (φ e))
+    (hbridge : ∀ e, ∀ᵐ ω ∂μ, ENNReal.ofReal (F e ω) = w e * φ e ω)
+    (hsum : (∑' e, w e * ∫⁻ ω, φ e ω ∂μ) ≠ ⊤) :
+    ∫ ω, ∑' e, F e ω ∂μ = ∑' e, ∫ ω, F e ω ∂μ := by
+  refine integral_tsum_of_nonneg_of_lintegral_tsum_ne_top hF h0 ?_
+  have h1 : (∑' e, ∫⁻ ω, ENNReal.ofReal (F e ω) ∂μ)
+      = ∑' e, w e * ∫⁻ ω, φ e ω ∂μ := by
+    refine tsum_congr fun e => ?_
+    rw [lintegral_congr_ae (hbridge e), lintegral_const_mul (w e) (hφ e)]
+  rw [h1]
+  exact hsum
+
+/-! ### The `toReal` bridge for the pivotal increment -/
+
+/-- **`ofReal` of the real `p`-th power difference is the `ℝ≥0∞` pivotal increment.**
+
+For `B ≤ A` and `A ≠ ⊤`, the truncated `ℝ≥0∞` difference of the `p`-th powers is the
+`ofReal` of the honest real difference of the `toReal`s.  This is the converse direction of
+`toReal_pow_sub_pow`, and it is what lets the finiteness of an `ℝ≥0∞` flux bound the `ℓ¹`
+norm of the real family. -/
+theorem ofReal_toReal_pow_sub_pow {A B : ℝ≥0∞} (hBA : B ≤ A) (hA : A ≠ ⊤) (p : ℕ) :
+    ENNReal.ofReal (A.toReal ^ p - B.toReal ^ p) = A ^ p - B ^ p := by
+  have hB : B ≠ ⊤ := ne_top_of_le_ne_top hA hBA
+  have hBA' : B.toReal ≤ A.toReal := ENNReal.toReal_mono hA hBA
+  rw [ENNReal.ofReal_sub _ (by positivity), ENNReal.ofReal_pow (by positivity),
+    ENNReal.ofReal_pow (by positivity), ENNReal.ofReal_toReal hA, ENNReal.ofReal_toReal hB]
+
+/-! ### Measurability of the two families -/
+
+variable {d : ℕ}
+
+open Classical in
+/-- Measurability of the closed-coordinate pivotal family `1(e ∉ ω)(|K_o(ω ∪ e)|^p - |K_o(ω)|^p)`,
+with the indicator `1(e ∉ ω)` retained. -/
+theorem measurable_closed_pivotal (e : Sym2 (Fin d → ℤ)) (o : Fin d → ℤ) (p : ℕ) :
+    Measurable fun ω : Config (Fin d → ℤ) =>
+      (if e ∈ ω then 0 else (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster ω o).encard : ℝ≥0∞) ^ p)) := by
+  have hB : Measurable fun ω : Config (Fin d → ℤ) => ((cluster ω o).encard : ℝ≥0∞) :=
+    Measurable.of_discrete.comp (measurable_encard_cluster (x := o))
+  exact Measurable.ite (measurableSet_mem e) measurable_const
+    (((measurable_encard_cluster_insert_coe e o).pow_const p).sub (hB.pow_const p))
+
+open Classical in
+/-- Measurability of the *real* closed-coordinate pivotal family. -/
+theorem measurable_real_closed_pivotal (e : Sym2 (Fin d → ℤ)) (o : Fin d → ℤ) (p : ℕ) :
+    Measurable fun ω : Config (Fin d → ℤ) =>
+      (if e ∈ ω then 0 else (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal ^ p -
+        ((cluster ω o).encard : ℝ≥0∞).toReal ^ p)) := by
+  have hB : Measurable fun ω : Config (Fin d → ℤ) =>
+      ((cluster ω o).encard : ℝ≥0∞).toReal :=
+    ENNReal.measurable_toReal.comp
+      (Measurable.of_discrete.comp (measurable_encard_cluster (x := o)))
+  have hA : Measurable fun ω : Config (Fin d → ℤ) =>
+      ((cluster (insert e ω) o).encard : ℝ≥0∞).toReal :=
+    ENNReal.measurable_toReal.comp (measurable_encard_cluster_insert_coe e o)
+  exact Measurable.ite (measurableSet_mem e) measurable_const
+    ((hA.pow_const p).sub (hB.pow_const p))
+
+/-- Measurability of the *real* pivotal family in `insert`/`sdiff` form. -/
+theorem measurable_real_pivotal (e : Sym2 (Fin d → ℤ)) (o : Fin d → ℤ) (p : ℕ) :
+    Measurable fun ω : Config (Fin d → ℤ) =>
+      ((((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+        (((cluster (ω \ {e}) o).encard : ℝ≥0∞).toReal) ^ p) :=
+  ((ENNReal.measurable_toReal.comp (measurable_encard_cluster_insert_coe e o)).pow_const p).sub
+    ((ENNReal.measurable_toReal.comp (measurable_encard_cluster_sdiff_coe e o)).pow_const p)
+
+/-- Monotonicity of the closed-coordinate cluster volume: `|K_o(ω)| ≤ |K_o(ω ∪ e)|`. -/
+theorem encard_cluster_le_insert_coe (ω : Config (Fin d → ℤ)) (e : Sym2 (Fin d → ℤ))
+    (o : Fin d → ℤ) :
+    ((cluster ω o).encard : ℝ≥0∞) ≤ ((cluster (insert e ω) o).encard : ℝ≥0∞) := by
+  exact_mod_cast Set.encard_mono (cluster_mono (subset_insert e ω) o)
+
+/-! ### The closed-coordinate form (the paper's family) -/
+
+open Classical in
+/-- **Integral/sum interchange for the closed-coordinate real pivotal flux.**
+
+The real series `∑' e, r k e * 1(e ∉ ω)(|K_o(ω ∪ e)|^p - |K_o(ω)|^p)` is the family whose
+`ℝ≥0∞` version appears in `i41_enn_of_root_finite`; this is the step that turns the series of
+per-pair integrals back into an integral of the pointwise pair sum.  The finiteness
+hypothesis `hsum` is exactly finiteness of the paper's `ℝ≥0∞` pivotal flux. -/
+theorem integral_tsum_closed_pivotal_real (μ : Measure (Config (Fin d → ℤ)))
+    (p : ℕ) (o : Fin d → ℤ) (rk : Sym2 (Fin d → ℤ) → ℝ) (hrk : ∀ e, 0 ≤ rk e)
+    (hfin : ∀ e, ∀ᵐ ω ∂μ, ((cluster (insert e ω) o).encard : ℝ≥0∞) ≠ ⊤)
+    (hsum : (∑' e, ENNReal.ofReal (rk e) * ∫⁻ ω,
+      (if e ∈ ω then 0 else (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster ω o).encard : ℝ≥0∞) ^ p)) ∂μ) ≠ ⊤) :
+    ∫ ω, (∑' e, rk e * (if e ∈ ω then 0 else
+        (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+          (((cluster ω o).encard : ℝ≥0∞).toReal) ^ p)) ∂μ
+      = ∑' e, rk e * ∫ ω, (if e ∈ ω then 0 else
+        (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+          (((cluster ω o).encard : ℝ≥0∞).toReal) ^ p) ∂μ := by
+  have hmain : ∫ ω, (∑' e, rk e * (if e ∈ ω then 0 else
+        (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+          (((cluster ω o).encard : ℝ≥0∞).toReal) ^ p)) ∂μ
+      = ∑' e, ∫ ω, rk e * (if e ∈ ω then 0 else
+        (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+          (((cluster ω o).encard : ℝ≥0∞).toReal) ^ p) ∂μ := by
+    refine integral_tsum_of_nonneg_of_bridge (w := fun e => ENNReal.ofReal (rk e))
+      (φ := fun e ω => if e ∈ ω then 0 else (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster ω o).encard : ℝ≥0∞) ^ p)) ?_ ?_ ?_ ?_ hsum
+    · intro e
+      exact (measurable_const.mul (measurable_real_closed_pivotal e o p)).aestronglyMeasurable
+    · intro e
+      filter_upwards [hfin e] with ω hω
+      refine mul_nonneg (hrk e) ?_
+      split_ifs with he
+      · exact le_refl 0
+      · exact sub_nonneg.2 (pow_le_pow_left₀ ENNReal.toReal_nonneg
+          (ENNReal.toReal_mono hω (encard_cluster_le_insert_coe ω e o)) p)
+    · intro e
+      exact measurable_closed_pivotal e o p
+    · intro e
+      filter_upwards [hfin e] with ω hω
+      by_cases he : e ∈ ω
+      · simp only [he, ite_true, mul_zero, ENNReal.ofReal_zero]
+      · simp only [he, ite_false]
+        rw [ENNReal.ofReal_mul (hrk e),
+          ofReal_toReal_pow_sub_pow (encard_cluster_le_insert_coe ω e o) hω p]
+  refine hmain.trans (tsum_congr fun e => ?_)
+  rw [integral_const_mul]
+
+/-! ### The pivotal form (the family of `hasDerivAt_integral_cutoff_pow`) -/
+
+/-- **Integral/sum interchange for the real pivotal flux in `insert`/`sdiff` form.**
+
+This is the family that `hasDerivAt_integral_cutoff_pow` produces, with the deleted cluster
+`K_o(ω ∖ e)` rather than the closed-coordinate `K_o(ω)`; it differs from the closed family
+exactly on the event `e ∈ ω`, where the closed family is set to `0` by its indicator.  The
+`ℝ≥0∞` finiteness hypothesis is again the pivotal flux itself, now in the untruncated
+`insert`/`sdiff` normalisation. -/
+theorem integral_tsum_pivotal_real (μ : Measure (Config (Fin d → ℤ)))
+    (p : ℕ) (o : Fin d → ℤ) (rk : Sym2 (Fin d → ℤ) → ℝ) (hrk : ∀ e, 0 ≤ rk e)
+    (hfin : ∀ e, ∀ᵐ ω ∂μ, ((cluster (insert e ω) o).encard : ℝ≥0∞) ≠ ⊤)
+    (hsum : (∑' e, ENNReal.ofReal (rk e) * ∫⁻ ω,
+      (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p) ∂μ) ≠ ⊤) :
+    ∫ ω, (∑' e, rk e * ((((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+        (((cluster (ω \ {e}) o).encard : ℝ≥0∞).toReal) ^ p)) ∂μ
+      = ∑' e, rk e * ∫ ω, ((((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+        (((cluster (ω \ {e}) o).encard : ℝ≥0∞).toReal) ^ p) ∂μ := by
+  have hmain : ∫ ω, (∑' e, rk e * ((((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+        (((cluster (ω \ {e}) o).encard : ℝ≥0∞).toReal) ^ p)) ∂μ
+      = ∑' e, ∫ ω, rk e * ((((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+        (((cluster (ω \ {e}) o).encard : ℝ≥0∞).toReal) ^ p) ∂μ := by
+    refine integral_tsum_of_nonneg_of_bridge (w := fun e => ENNReal.ofReal (rk e))
+      (φ := fun e ω => (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)) ?_ ?_ ?_ ?_ hsum
+    · intro e
+      exact (measurable_const.mul (measurable_real_pivotal e o p)).aestronglyMeasurable
+    · intro e
+      filter_upwards [hfin e] with ω hω
+      refine mul_nonneg (hrk e) (sub_nonneg.2 ?_)
+      exact pow_le_pow_left₀ ENNReal.toReal_nonneg
+        (ENNReal.toReal_mono hω (encard_cluster_sdiff_le_insert_coe ω e o)) p
+    · intro e
+      exact measurable_pivotal e o p
+    · intro e
+      filter_upwards [hfin e] with ω hω
+      rw [ENNReal.ofReal_mul (hrk e),
+        ofReal_toReal_pow_sub_pow (encard_cluster_sdiff_le_insert_coe ω e o) hω p]
+  refine hmain.trans (tsum_congr fun e => ?_)
+  rw [integral_const_mul]
+
+/-! ### The hypothesis in the shape of the paper's `ℝ≥0∞` flux -/
+
+open Classical in
+/-- **The `ℝ≥0∞` flux series is the `ℝ≥0∞` integral of the pointwise flux** (Tonelli).
+
+This is the bridge that makes the hypothesis of `integral_tsum_closed_pivotal_real`
+recognisable: the left-hand side is the series of per-pair `ℝ≥0∞` fluxes, the right-hand side
+is the `ℝ≥0∞` pivotal flux integral `∫⁻ ω, ∑' e, …` of Lemma I.4.1 (the left-hand side of
+`i41_enn_of_root_finite`, with the weight and the root `o` generalised). -/
+theorem tsum_lintegral_closed_pivotal (μ : Measure (Config (Fin d → ℤ)))
+    (p : ℕ) (o : Fin d → ℤ) (w : Sym2 (Fin d → ℤ) → ℝ≥0∞) :
+    (∑' e, w e * ∫⁻ ω, (if e ∈ ω then 0 else
+        (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+          ((cluster ω o).encard : ℝ≥0∞) ^ p)) ∂μ)
+      = ∫⁻ ω, ∑' e, w e * (if e ∈ ω then 0 else
+          (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+            ((cluster ω o).encard : ℝ≥0∞) ^ p)) ∂μ := by
+  rw [lintegral_tsum]
+  · exact tsum_congr fun e =>
+      (lintegral_const_mul (w e) (measurable_closed_pivotal e o p)).symm
+  · intro e
+    exact (measurable_const.mul (measurable_closed_pivotal e o p)).aemeasurable
+
+open Classical in
+/-- **The closed-coordinate interchange with the finiteness hypothesis in the paper's shape.**
+
+Same statement as `integral_tsum_closed_pivotal_real`, but the finiteness input is now
+`hflux : ∫⁻ ω, ∑' e, … ≠ ⊤`, i.e. *the pivotal flux integral of Lemma I.4.1 is finite* —
+the same object that the extended-nonnegative identity `i41_enn_of_root_finite` computes. -/
+theorem integral_tsum_closed_pivotal_real_of_lintegral (μ : Measure (Config (Fin d → ℤ)))
+    (p : ℕ) (o : Fin d → ℤ) (rk : Sym2 (Fin d → ℤ) → ℝ) (hrk : ∀ e, 0 ≤ rk e)
+    (hfin : ∀ e, ∀ᵐ ω ∂μ, ((cluster (insert e ω) o).encard : ℝ≥0∞) ≠ ⊤)
+    (hflux : (∫⁻ ω, ∑' e, ENNReal.ofReal (rk e) * (if e ∈ ω then 0 else
+        (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+          ((cluster ω o).encard : ℝ≥0∞) ^ p)) ∂μ) ≠ ⊤) :
+    ∫ ω, (∑' e, rk e * (if e ∈ ω then 0 else
+        (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+          (((cluster ω o).encard : ℝ≥0∞).toReal) ^ p)) ∂μ
+      = ∑' e, rk e * ∫ ω, (if e ∈ ω then 0 else
+        (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+          (((cluster ω o).encard : ℝ≥0∞).toReal) ^ p) ∂μ :=
+  integral_tsum_closed_pivotal_real μ p o rk hrk hfin
+    ((tsum_lintegral_closed_pivotal μ p o (fun e => ENNReal.ofReal (rk e))).trans_ne hflux)
+
+
+/-! ### The `Summable` form, matching `hasSum_integral_of_summable_integral_norm` -/
+
+/-- **The interchange from `L¹`-norm summability, in the `Summable` normalisation.**
+
+This is the same conclusion as `integral_tsum_of_nonneg_of_lintegral_tsum_ne_top`, but with
+the hypothesis in the shape used by `hasSum_integral_of_summable_integral_norm`: individual
+integrability plus `Summable (fun e => ∫ ω, ‖F e ω‖ ∂μ)`.  Nothing here is nonnegative, so this
+is the general form; the proof is exactly Mathlib's dominated convergence for series.  It is
+this hypothesis — summability of the family of *`L¹` norms* — that `hKd` would have to supply
+and does not: `hKd` bounds `∑_{e ∈ S} |rk e * ∫ g_e|`, i.e. absolute values *after*
+integrating. -/
+theorem integral_tsum_of_summable_integral_norm {α : Type*} [MeasurableSpace α]
+    {μ : Measure α} {ι : Type*} [Countable ι] {F : ι → α → ℝ}
+    (hint : ∀ e, Integrable (F e) μ)
+    (hsum : Summable fun e => ∫ ω, ‖F e ω‖ ∂μ) :
+    (∑' e, ∫ ω, F e ω ∂μ) = ∫ ω, ∑' e, F e ω ∂μ :=
+  (MeasureTheory.hasSum_integral_of_summable_integral_norm hint hsum).tsum_eq
+
+open Classical in
+/-- **The cutoff derivative's series is the integral of the pointwise closed-coordinate flux.**
+
+This composes the summed closed-coordinate rewrite `tsum_cutoff_pivotal_eq_closed_pow` with the
+integral/sum interchange `integral_tsum_closed_pivotal_real_of_lintegral`.  The result is the
+shape in which Lemma I.4.1 states its right-hand side — the profile rate `β |K'(r)|` times an
+*expectation of a pointwise sum over pairs*, rather than a series of per-pair expectations.
+
+Inputs, all explicit:
+
+* `hcw`, `hfin`, `hint`: the inputs of `tsum_cutoff_pivotal_eq_closed_pow`; `hfin`/`hint`
+  concern the cluster of `o` after opening a pair and are derivable from per-vertex moments via
+  `tsum_cutoff_pivotal_eq_closed_pow_of_vertexMoments`;
+* `hflux`: finiteness of the paper's `ℝ≥0∞` pivotal flux `∫⁻ ω, ∑' e, J_r(e) 1(e ∉ ω) (…)`,
+  the object that `i41_enn_of_root_finite` computes and that any passage of the identity through
+  `ENNReal.toReal` must assume.  It is *not* implied by `hKd`. -/
+theorem tsum_cutoff_pivotal_eq_integral_closed {d : ℕ} {N : Seminorm ℝ (Fin d → ℝ)}
+    {K K' : ℝ → ℝ} (p : ℕ) (β : ℝ≥0) (r : ℝ) (o : Fin d → ℤ)
+    (cw : Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ e, cw e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ))))
+    (hfin : ∀ e, ∀ᵐ ω ∂(law (intensityProfile (cutoffKernel N K r) β)),
+      ((cluster (insert e ω) o).encard : ℝ≥0∞) ≠ ⊤)
+    (hint : ∀ e, Integrable (fun ω => (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p)
+      (law (intensityProfile (cutoffKernel N K r) β)))
+    (hflux : (∫⁻ ω, ∑' e,
+        ENNReal.ofReal (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+        (if e ∈ ω then 0 else
+          (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+            ((cluster ω o).encard : ℝ≥0∞) ^ p))
+        ∂(law (intensityProfile (cutoffKernel N K r) β))) ≠ ⊤) :
+    (∑' e, cw e * ∫ ω, ((((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+        (((cluster (ω \ {e}) o).encard : ℝ≥0∞).toReal) ^ p)
+        ∂(law (intensityProfile (cutoffKernel N K r) β)))
+      = ((β : ℝ) * -K' r) *
+        ∫ ω, (∑' e, (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+          (if e ∈ ω then 0 else
+            (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+              (((cluster ω o).encard : ℝ≥0∞).toReal) ^ p))
+          ∂(law (intensityProfile (cutoffKernel N K r) β)) := by
+  let rk : Sym2 (Fin d → ℤ) → ℝ :=
+    fun e => (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ)
+  have hrk : ∀ e, 0 ≤ rk e := fun e => by positivity
+  have hflux' : (∫⁻ ω, ∑' e, ENNReal.ofReal (rk e) * (if e ∈ ω then 0 else
+      (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster ω o).encard : ℝ≥0∞) ^ p))
+      ∂(law (intensityProfile (cutoffKernel N K r) β))) ≠ ⊤ := by
+    simpa only [rk] using hflux
+  refine (tsum_cutoff_pivotal_eq_closed_pow (N := N) (K := K) (K' := K') p β r o cw
+    hcw hfin hint).trans ?_
+  rw [← integral_tsum_closed_pivotal_real_of_lintegral
+    (μ := law (intensityProfile (cutoffKernel N K r) β)) p o rk hrk hfin hflux']
+
+end PercLib.Models.LongRange
+
+namespace PercLib.Analysis
+
+/-- If every finite sum of absolute real contributions is bounded and the extended-nonnegative
+terms are finite, then the extended-nonnegative series is finite. -/
+theorem tsum_ofReal_mul_ne_top_of_real_bound {ι : Type*} (rk : ι → ℝ) (hrk : ∀ e, 0 ≤ rk e)
+    (q : ι → ℝ≥0∞) (hq : ∀ e, q e ≠ ⊤) (Kd : ℝ)
+    (hbound : ∀ S : Finset ι, ∑ e ∈ S, |rk e| * |(q e).toReal| ≤ Kd) :
+    (∑' e, ENNReal.ofReal (rk e) * q e) ≠ ⊤ := by
+  have hnn : ∀ e, 0 ≤ |rk e| * |(q e).toReal| := fun e => mul_nonneg (abs_nonneg _) (abs_nonneg _)
+  have hsumm : Summable (fun e => |rk e| * |(q e).toReal|) :=
+    summable_of_sum_le hnn hbound
+  have hpt : ∀ e, ENNReal.ofReal (rk e) * q e =
+      ENNReal.ofReal (|rk e| * |(q e).toReal|) := by
+    intro e
+    rw [abs_of_nonneg (hrk e), abs_of_nonneg ENNReal.toReal_nonneg,
+      ENNReal.ofReal_mul (hrk e), ENNReal.ofReal_toReal (hq e)]
+  refine ne_top_of_le_ne_top (b := ENNReal.ofReal Kd) ENNReal.ofReal_ne_top ?_
+  calc (∑' e, ENNReal.ofReal (rk e) * q e)
+      = ENNReal.ofReal (∑' e, |rk e| * |(q e).toReal|) := by
+        rw [ENNReal.ofReal_tsum_of_nonneg hnn hsumm]
+        exact tsum_congr hpt
+    _ ≤ ENNReal.ofReal Kd := ENNReal.ofReal_le_ofReal (Real.tsum_le_of_sum_le hnn hbound)
+
+
+end PercLib.Analysis
