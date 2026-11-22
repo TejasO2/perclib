@@ -4228,13 +4228,6 @@ theorem sum_abs_weight_mul_abs_integral_pivotal_le (μ : Measure (Config V)) (c 
     _ = C * K * (Fintype.card (Sym2 V) : ℝ) := by ring
 
 omit [Countable V] in
-/-- The constant `Kd` of `sum_abs_weight_mul_abs_integral_pivotal_le` is interval integrable, which
-is the `hKdint` hypothesis of `hasDerivAt_integral_pow_of_cap_flux`. -/
-theorem intervalIntegrable_const_dominator {C K : ℝ} (u v : ℝ) :
-    IntervalIntegrable (fun _ : ℝ => C * K * (Fintype.card (Sym2 V) : ℝ)) volume u v :=
-  intervalIntegrable_const
-
-omit [Countable V] in
 /-- The weighted inserted `p`-th moments are summable on a finite vertex set, with the explicit
 bound `C K #(Sym2 V)`. This is the `hsum` of `abs_tsum_capped_flux_le` under a pointwise weight
 bound, i.e. `Summable fun e => |c r e|` supplied concretely. -/
@@ -4322,7 +4315,7 @@ theorem exists_dominator_fintype (p : ℝ → Sym2 V → unitInterval) (c : ℝ 
       ((Fintype.card V : ℝ) ^ pow) (Eventually.of_forall fun ω => ?_)
     rw [Real.norm_of_nonneg (pow_nonneg ENNReal.toReal_nonneg pow)]
     exact encard_cluster_insert_toReal_pow_le_card e o pow ω
-  refine ⟨fun r S => ?_, fun u v => intervalIntegrable_const_dominator u v⟩
+  refine ⟨fun r S => ?_, fun u v => intervalIntegrable_const⟩
   exact sum_abs_weight_mul_abs_integral_pivotal_le (law (p r)) (c r) o pow hC hK (hw r)
     (hfin r) (hint r) (fun e => integral_encard_cluster_pow_le_card (p r) e o pow) S
 
