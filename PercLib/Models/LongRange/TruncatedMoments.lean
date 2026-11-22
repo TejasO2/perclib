@@ -12,6 +12,7 @@ module
 
 public import PercLib.Percolation.Bond.UniformVolumeTail
 public import PercLib.Models.LongRange.InfiniteVolumeRusso
+public import PercLib.Models.LongRange.MassTransportI41
 public import PercLib.Probability.Coordinate
 public import PercLib.Percolation.Bond.RootIndependence
 public import PercLib.Probability.MassTransportTuple
@@ -6261,5 +6262,932 @@ theorem summable_closed_flux_cutoff_of_hKd {d : ℕ} {N : Seminorm ℝ (Fin d �
       (by rw [h1]; norm_num) (hfin e) (hint e)
     simpa only [hcw e, h1, one_mul] using hp.symm
 
+
+end PercLib.Models.LongRange
+
+
+/-! ### Ordered crossing sums and the binomial expectation -/
+
+namespace PercLib.Percolation.Bond
+
+variable {V : Type*}
+
+open Classical in
+/-- **Fibre computation for the collapse of a double vertex sum onto `Sym2`.**
+
+For distinct `u v`, the double sum over `(x, y)` of the indicator of `s(x, y) = s(u, v)`
+times an arbitrary weight is the sum of the two orientations `g u v + g v u`.  This is the
+counting step that turns the ordered crossing sum of Lemma I.4.1 into an unordered edge
+sum: every unordered non-degenerate pair has exactly two ordered representatives, and a
+crossing pair has exactly one of them with the first endpoint inside the root cluster. -/
+theorem tsum_tsum_sym2_eq_add {u v : V} (huv : u ≠ v) (g : V → V → ℝ≥0∞) :
+    ∑' x : V, ∑' y : V, (if s(x, y) = s(u, v) then (1 : ℝ≥0∞) else 0) * g x y
+      = g u v + g v u := by
+  classical
+  have hmem : ∀ x y : V, s(x, y) = s(u, v) → y = u ∨ y = v := by
+    intro x y h
+    rcases Sym2.eq_iff.1 h with ⟨-, h2⟩ | ⟨-, h2⟩
+    · exact Or.inr h2
+    · exact Or.inl h2
+  have hxmem : ∀ x y : V, s(x, y) = s(u, v) → x = u ∨ x = v := by
+    intro x y h
+    rcases Sym2.eq_iff.1 h with ⟨h1, -⟩ | ⟨h1, -⟩
+    · exact Or.inl h1
+    · exact Or.inr h1
+  have hinner : ∀ x : V, (∑' y : V, (if s(x, y) = s(u, v) then (1 : ℝ≥0∞) else 0) * g x y)
+      = ∑ y ∈ ({u, v} : Finset V),
+          (if s(x, y) = s(u, v) then (1 : ℝ≥0∞) else 0) * g x y := by
+    intro x
+    refine tsum_eq_sum (s := ({u, v} : Finset V)) ?_
+    intro y hy
+    have hy' : y ≠ u ∧ y ≠ v := by
+      simpa only [Finset.mem_insert, Finset.mem_singleton, not_or] using hy
+    have hne : s(x, y) ≠ s(u, v) := fun h => (hmem x y h).elim hy'.1 hy'.2
+    simp only [hne, ite_false, zero_mul]
+  have houter : (∑' x : V, ∑ y ∈ ({u, v} : Finset V),
+        (if s(x, y) = s(u, v) then (1 : ℝ≥0∞) else 0) * g x y)
+      = ∑ x ∈ ({u, v} : Finset V), ∑ y ∈ ({u, v} : Finset V),
+          (if s(x, y) = s(u, v) then (1 : ℝ≥0∞) else 0) * g x y := by
+    refine tsum_eq_sum (s := ({u, v} : Finset V)) ?_
+    intro x hx
+    have hx' : x ≠ u ∧ x ≠ v := by
+      simpa only [Finset.mem_insert, Finset.mem_singleton, not_or] using hx
+    refine Finset.sum_eq_zero fun y _ => ?_
+    have hne : s(x, y) ≠ s(u, v) := fun h => (hxmem x y h).elim hx'.1 hx'.2
+    simp only [hne, ite_false, zero_mul]
+  rw [tsum_congr hinner, houter]
+  have hpair : ∀ x : V, (∑ y ∈ ({u, v} : Finset V),
+      (if s(x, y) = s(u, v) then (1 : ℝ≥0∞) else 0) * g x y)
+      = (if s(x, u) = s(u, v) then (1 : ℝ≥0∞) else 0) * g x u
+        + (if s(x, v) = s(u, v) then (1 : ℝ≥0∞) else 0) * g x v := by
+    intro x
+    rw [show ({u, v} : Finset V) = insert u {v} from rfl,
+      Finset.sum_insert (by simp [huv]), Finset.sum_singleton]
+  rw [show ({u, v} : Finset V) = insert u {v} from rfl,
+    Finset.sum_insert (by simp [huv]), Finset.sum_singleton]
+  rw [hpair u, hpair v]
+  simp only [Sym2.eq_swap, ite_true]
+  have huu : s(u, u) ≠ s(u, v) := by
+    intro h
+    rcases Sym2.eq_iff.1 h with ⟨-, h2⟩ | ⟨h1, -⟩
+    · exact huv h2
+    · exact huv h1
+  have hvv : s(v, v) ≠ s(u, v) := by
+    intro h
+    rcases Sym2.eq_iff.1 h with ⟨h1, -⟩ | ⟨-, h1⟩
+    · exact huv h1.symm
+    · exact huv h1.symm
+  simp only [huu, hvv, ite_false, zero_mul, add_zero, one_mul, zero_add]
+
+open Classical in
+/-- The diagonal fibre: the only ordered pair representing the loop `s(u, u)` is `(u, u)`. -/
+theorem tsum_tsum_sym2_eq_diag {u : V} (g : V → V → ℝ≥0∞) :
+    ∑' x : V, ∑' y : V, (if s(x, y) = s(u, u) then (1 : ℝ≥0∞) else 0) * g x y
+      = g u u := by
+  classical
+  have hmem : ∀ x y : V, s(x, y) = s(u, u) → y = u := by
+    intro x y h
+    rcases Sym2.eq_iff.1 h with ⟨-, h2⟩ | ⟨-, h2⟩
+    · exact h2
+    · exact h2
+  have hxmem : ∀ x y : V, s(x, y) = s(u, u) → x = u := by
+    intro x y h
+    rcases Sym2.eq_iff.1 h with ⟨h1, -⟩ | ⟨h1, -⟩
+    · exact h1
+    · exact h1
+  have hinner : ∀ x : V, (∑' y : V, (if s(x, y) = s(u, u) then (1 : ℝ≥0∞) else 0) * g x y)
+      = ∑ y ∈ ({u} : Finset V),
+          (if s(x, y) = s(u, u) then (1 : ℝ≥0∞) else 0) * g x y := by
+    intro x
+    refine tsum_eq_sum (s := ({u} : Finset V)) ?_
+    intro y hy
+    have hy' : y ≠ u := by simpa using hy
+    have hne : s(x, y) ≠ s(u, u) := fun h => hy' (hmem x y h)
+    simp only [hne, ite_false, zero_mul]
+  have houter : (∑' x : V, ∑ y ∈ ({u} : Finset V),
+        (if s(x, y) = s(u, u) then (1 : ℝ≥0∞) else 0) * g x y)
+      = ∑ x ∈ ({u} : Finset V), ∑ y ∈ ({u} : Finset V),
+          (if s(x, y) = s(u, u) then (1 : ℝ≥0∞) else 0) * g x y := by
+    refine tsum_eq_sum (s := ({u} : Finset V)) ?_
+    intro x hx
+    have hx' : x ≠ u := by simpa using hx
+    refine Finset.sum_eq_zero fun y _ => ?_
+    have hne : s(x, y) ≠ s(u, u) := fun h => hx' (hxmem x y h)
+    simp only [hne, ite_false, zero_mul]
+  rw [tsum_congr hinner, houter, Finset.sum_singleton, Finset.sum_singleton]
+  simp
+
+
+/-- Rearrangement helper: a vanishing indicator product kills the term.  Used to read the
+increment `pivotal_increment_eq_crossing` in the factor order of the ordered crossing sum. -/
+theorem mul_left_eq_zero_of_mul_eq_zero {c₁ c₂ r H : ℝ≥0∞} (h : c₁ * c₂ = 0) :
+    c₁ * r * c₂ * H = 0 := by
+  rw [show c₁ * r * c₂ * H = (c₁ * c₂) * (r * H) from by ring, h, zero_mul]
+
+open Classical in
+/-- **The pivotal increment of the root cluster as the sum of the two crossing orientations.**
+
+For any pair `s(a, b)` and any `p`, opening `s(a, b)` changes the `p`-th power of the `encard`
+of the root cluster by `1(a ∈ K_o) 1(b ∉ K_o) ((|K_o| + |K_b|)^p - |K_o|^p)` plus the same
+expression with `a` and `b` interchanged.  Each summand carries the root cluster volume and the
+volume of the *outside* endpoint's cluster, so this is the unordered (edge-indexed) form of the
+Lemma I.4.1 summand.  Only one of the two terms can be nonzero, and the diagonal `a = b` gives
+`0` on both sides.
+
+No finiteness hypothesis is used: with an infinite root cluster the truncated subtraction is
+`⊤ - ⊤ = 0` on both sides and with `|K_b| = ⊤` both are infinite. -/
+theorem pivotal_increment_eq_crossing {ω : Config V} {o a b : V} (p : ℕ) :
+    (((cluster (insert s(a, b) ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster ω o).encard : ℝ≥0∞) ^ p) =
+      (if a ∈ cluster ω o then (1 : ℝ≥0∞) else 0) *
+          (if b ∈ cluster ω o then 0 else 1) *
+          ((((cluster ω o).encard : ℝ≥0∞) + ((cluster ω b).encard : ℝ≥0∞)) ^ p -
+            ((cluster ω o).encard : ℝ≥0∞) ^ p) +
+        (if b ∈ cluster ω o then (1 : ℝ≥0∞) else 0) *
+          (if a ∈ cluster ω o then 0 else 1) *
+          ((((cluster ω o).encard : ℝ≥0∞) + ((cluster ω a).encard : ℝ≥0∞)) ^ p -
+            ((cluster ω o).encard : ℝ≥0∞) ^ p) := by
+  classical
+  rw [encard_cluster_insert_pow_sub_eq_cases (ω := ω) (a := a) (b := b) (x := o) p]
+  simp only [mem_cluster_comm ω o a, mem_cluster_comm ω o b]
+  by_cases ha : o ∈ cluster ω a
+  · by_cases hb : o ∈ cluster ω b
+    · simp [ha, hb]
+    · have hKa : cluster ω a = cluster ω o :=
+        cluster_eq_of_mem_conn ((mem_cluster_iff ω a o).1 ha)
+      simp [hb, hKa]
+  · by_cases hb : o ∈ cluster ω b
+    · have hKb : cluster ω b = cluster ω o :=
+        cluster_eq_of_mem_conn ((mem_cluster_iff ω b o).1 hb)
+      have hsum : (((cluster ω a).encard : ℝ≥0∞) + ((cluster ω o).encard : ℝ≥0∞)) =
+          (((cluster ω o).encard : ℝ≥0∞) + ((cluster ω a).encard : ℝ≥0∞)) := add_comm _ _
+      simp [ha, hKb, hsum]
+    · simp [ha, hb]
+
+open Classical in
+/-- **An open pair has both endpoints on the same side of the root cluster.**
+
+If `s(a, b)` is already open, then `a` and `b` are in a common cluster, so the two crossing
+factors of `pivotal_increment_eq_crossing` cannot both be nonzero: an open pair contributes no
+pivotal flux.  This is why the `1(e ∉ ω)` factor of the closed-coordinate form is redundant on
+the pivotal side. -/
+theorem crossing_indicator_eq_zero_of_mem {ω : Config V} {o a b : V} (hab : a ≠ b)
+    (hopen : s(a, b) ∈ ω) :
+    (if a ∈ cluster ω o then (1 : ℝ≥0∞) else 0) *
+        (if b ∈ cluster ω o then 0 else 1) = 0 ∧
+      (if b ∈ cluster ω o then (1 : ℝ≥0∞) else 0) *
+        (if a ∈ cluster ω o then 0 else 1) = 0 := by
+  classical
+  have hcl : cluster ω a = cluster ω b := cluster_eq_of_mem_conn (mem_conn_of_mem hab hopen)
+  have hiff : a ∈ cluster ω o ↔ b ∈ cluster ω o := by
+    rw [mem_cluster_comm ω o a, mem_cluster_comm ω o b, hcl]
+  constructor
+  · by_cases ha : a ∈ cluster ω o
+    · rw [show (if a ∈ cluster ω o then (1 : ℝ≥0∞) else 0) = 1 from ite_eq_left ha,
+        show (if b ∈ cluster ω o then (0 : ℝ≥0∞) else 1) = 0 from ite_eq_left (hiff.1 ha),
+        mul_zero]
+    · rw [show (if a ∈ cluster ω o then (1 : ℝ≥0∞) else 0) = 0 from ite_eq_right ha, zero_mul]
+  · by_cases ha : a ∈ cluster ω o
+    · rw [show (if a ∈ cluster ω o then (0 : ℝ≥0∞) else 1) = 0 from ite_eq_left ha, mul_zero]
+    · rw [show (if a ∈ cluster ω o then (0 : ℝ≥0∞) else 1) = 1 from ite_eq_right ha,
+        show (if b ∈ cluster ω o then (1 : ℝ≥0∞) else 0) = 0 from
+          ite_eq_right (fun h => ha (hiff.2 h)),
+        zero_mul]
+
+open Classical in
+/-- **The pivotal increment is killed by an open pair.** -/
+theorem pivotal_increment_eq_zero_of_mem {ω : Config V} {o a b : V} (p : ℕ) (hab : a ≠ b)
+    (hopen : s(a, b) ∈ ω) :
+    (((cluster (insert s(a, b) ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster ω o).encard : ℝ≥0∞) ^ p) = 0 := by
+  obtain ⟨h1, h2⟩ := crossing_indicator_eq_zero_of_mem (o := o) hab hopen
+  rw [pivotal_increment_eq_crossing (ω := ω) (o := o) (a := a) (b := b) p, h1, h2]
+  simp
+
+
+open Classical in
+/-- **The unordered pivotal sum is the ordered crossing sum (Lemma I.4.1, pointwise, `ℝ≥0∞`).**
+
+For a fixed configuration `ω`, root `o`, exponent `p` and an arbitrary edge weight `radial`,
+the pivotal sum over *unordered* pairs
+
+`∑' e, radial e * (1(e ∉ ω)) · (|K_o(ω ∪ e)|^p − |K_o(ω)|^p)`
+
+equals the *ordered* crossing sum of the paper's proof of Lemma I.4.1,
+
+`∑' x, ∑' y, 1(x ∈ K_o) · radial {x,y} · 1(y ∉ K_o) · ((|K_o| + |K_y|)^p − |K_o|^p)`.
+
+Each crossing unordered pair `{x, y}` occurs exactly once on the right, with the inside endpoint
+as `x`; diagonal pairs and pairs with both endpoints on the same side contribute `0` on both
+sides.  The `1(e ∉ ω)` factor on the left is redundant:
+`pivotal_increment_eq_zero_of_mem` kills the increment of an already-open pair, and no case
+split on `e ∈ ω` is needed.
+
+Everything is `ℝ≥0∞` with truncated subtraction, so there is no finiteness hypothesis: an
+infinite root cluster gives `⊤ - ⊤ = 0` termwise on both sides, and an infinite far cluster gives
+`⊤` on both sides.  No summability hypothesis is needed either, since `ℝ≥0∞` sums are
+unconditionally defined and Tonelli applies to `ENNReal.tsum_comm`.
+
+The reduction is: (i) `Sym2.inductionOn` plus the fibre counts `tsum_tsum_sym2_eq_add` /
+`tsum_tsum_sym2_eq_diag` collapse the ordered sum onto the unordered one, (ii) the per-pair
+identity `pivotal_increment_eq_crossing` identifies the two summands, (iii) `ENNReal.tsum_comm`
+twice moves the `Sym2` sum innermost. -/
+theorem tsum_pivotal_eq_tsum_crossing {V : Type*} (ω : Config V) (o : V) (p : ℕ)
+    (radial : Sym2 V → ℝ≥0∞) :
+    (∑' e : Sym2 V, radial e * (if e ∈ ω then (0 : ℝ≥0∞) else
+        (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p - ((cluster ω o).encard : ℝ≥0∞) ^ p))) =
+      ∑' x : V, ∑' y : V,
+        (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) * radial s(x, y) *
+          (if y ∈ cluster ω o then 0 else 1) *
+          ((((cluster ω o).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+            ((cluster ω o).encard : ℝ≥0∞) ^ p) := by
+  classical
+  let G : V → V → ℝ≥0∞ := fun x y =>
+      (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) * radial s(x, y) *
+        (if y ∈ cluster ω o then 0 else 1) *
+        ((((cluster ω o).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+          ((cluster ω o).encard : ℝ≥0∞) ^ p)
+  change (∑' e : Sym2 V, radial e * (if e ∈ ω then (0 : ℝ≥0∞) else
+        (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p - ((cluster ω o).encard : ℝ≥0∞) ^ p)))
+      = ∑' x : V, ∑' y : V, G x y
+  have hkey : ∀ e : Sym2 V, radial e * (if e ∈ ω then (0 : ℝ≥0∞) else
+      (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p - ((cluster ω o).encard : ℝ≥0∞) ^ p))
+      = ∑' x : V, ∑' y : V, (if s(x, y) = e then (1 : ℝ≥0∞) else 0) * G x y := by
+    intro e
+    refine Sym2.inductionOn e ?_
+    intro a b
+    by_cases hab : a = b
+    · subst hab
+      rw [tsum_tsum_sym2_eq_diag (u := a) (g := G), cluster_insert_diag, tsub_self]
+      by_cases ha : a ∈ cluster ω o
+      · dsimp only [G]
+        simp [ha]
+      · dsimp only [G]
+        simp [ha]
+    · rw [tsum_tsum_sym2_eq_add (u := a) (v := b) hab (g := G),
+        pivotal_increment_eq_crossing (ω := ω) (o := o) (a := a) (b := b) p]
+      dsimp only [G]
+      rw [show radial (s(b, a)) = radial (s(a, b)) from by rw [Sym2.eq_swap]]
+      by_cases hopen : s(a, b) ∈ ω
+      · obtain ⟨h1, h2⟩ := crossing_indicator_eq_zero_of_mem (o := o) hab hopen
+        rw [ite_eq_left hopen, mul_zero,
+          mul_left_eq_zero_of_mul_eq_zero (r := radial s(a, b)) h1,
+          mul_left_eq_zero_of_mul_eq_zero (r := radial s(a, b)) h2]
+        simp
+      · rw [ite_eq_right hopen, mul_add]
+        ring
+  calc (∑' e : Sym2 V, radial e * (if e ∈ ω then (0 : ℝ≥0∞) else
+        (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p - ((cluster ω o).encard : ℝ≥0∞) ^ p)))
+      = ∑' e : Sym2 V, ∑' x : V, ∑' y : V,
+          (if s(x, y) = e then (1 : ℝ≥0∞) else 0) * G x y := tsum_congr hkey
+    _ = ∑' x : V, ∑' e : Sym2 V, ∑' y : V,
+          (if s(x, y) = e then (1 : ℝ≥0∞) else 0) * G x y := ENNReal.tsum_comm
+    _ = ∑' x : V, ∑' y : V, ∑' e : Sym2 V,
+          (if s(x, y) = e then (1 : ℝ≥0∞) else 0) * G x y :=
+          tsum_congr fun _ => ENNReal.tsum_comm
+    _ = ∑' x : V, ∑' y : V, G x y := by
+          refine tsum_congr fun x => tsum_congr fun y => ?_
+          rw [tsum_eq_single (s(x, y)) (fun e he => by simp [Ne.symm he])]
+          simp
+
+
+end PercLib.Percolation.Bond
+
+
+namespace PercLib.Percolation.Bond
+
+open Classical in
+/-- **Non-vacuity of the crossing identity.**  On `Bool` with the empty configuration and root
+`false`, the ordered crossing sum of unit weight at `p = 1` is `1`: the only crossing pair is
+`{false, true}`, contributing `(|K_false| + |K_true|) - |K_false| = (1 + 1) - 1`. -/
+theorem tsum_crossing_bool_empty :
+    (∑' x : Bool, ∑' y : Bool,
+        (if x ∈ cluster (∅ : Config Bool) false then (1 : ℝ≥0∞) else 0) * (1 : ℝ≥0∞) *
+          (if y ∈ cluster (∅ : Config Bool) false then 0 else 1) *
+          ((((cluster (∅ : Config Bool) false).encard : ℝ≥0∞) +
+              ((cluster (∅ : Config Bool) y).encard : ℝ≥0∞)) ^ 1 -
+            ((cluster (∅ : Config Bool) false).encard : ℝ≥0∞) ^ 1)) = 1 := by
+  classical
+  simp only [tsum_fintype, Fintype.sum_bool]
+  simp [cluster_empty]
+
+open Classical in
+/-- **The pivotal sum of the witness is `1` as well**, so `tsum_pivotal_eq_tsum_crossing` is not
+the identity `0 = 0` on this configuration. -/
+theorem tsum_pivotal_bool_empty :
+    (∑' e : Sym2 Bool, (1 : ℝ≥0∞) *
+        (((cluster (insert e (∅ : Config Bool)) false).encard : ℝ≥0∞) ^ 1 -
+          ((cluster (∅ : Config Bool) false).encard : ℝ≥0∞) ^ 1)) = 1 := by
+  classical
+  have h := (tsum_pivotal_eq_tsum_crossing (ω := (∅ : Config Bool)) (o := false) (p := 1)
+    (radial := fun _ => (1 : ℝ≥0∞))).trans tsum_crossing_bool_empty
+  simpa using h
+
+end PercLib.Percolation.Bond
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Percolation.Bond
+
+/-- The radial indicator of a non-diagonal pair, as a `ℝ≥0`-valued ball indicator.  This is
+`radialKernel_indicator_eq_ball_of_ne` with the `ℝ`-coercion removed, so that it can be used as
+a factor in an `ℝ≥0∞` sum. -/
+theorem radialKernel_indicator_eq_ball_of_ne_nn {d : ℕ} {N : Seminorm ℝ (Fin d → ℝ)} {u v r : ℝ}
+    (hcorner : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Set.Ioo u v) (hr : r ∈ Set.Ioo u v)
+    {x y : Fin d → ℤ} (hxy : x ≠ y) :
+    radialKernel N (fun s => if s < r then 1 else 0) s(x, y) =
+      if N (Int.cast ∘ (y - x)) ≤ r then (1 : ℝ≥0) else 0 := by
+  have h := radialKernel_indicator_eq_ball_of_ne N hcorner hr hxy
+  by_cases hc : N (Int.cast ∘ (y - x)) ≤ r
+  · rw [ite_eq_left hc]
+    rw [ite_eq_left hc] at h
+    apply NNReal.coe_injective
+    rw [h, NNReal.coe_one]
+  · rw [ite_eq_right hc]
+    rw [ite_eq_right hc] at h
+    apply NNReal.coe_injective
+    rw [h, NNReal.coe_zero]
+
+/-- The same reconciliation in `ℝ≥0∞`, the shape in which it multiplies an `ℝ≥0∞` flux. -/
+theorem radialKernel_indicator_eq_ball_of_ne_enn {d : ℕ} {N : Seminorm ℝ (Fin d → ℝ)} {u v r : ℝ}
+    (hcorner : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Set.Ioo u v) (hr : r ∈ Set.Ioo u v)
+    {x y : Fin d → ℤ} (hxy : x ≠ y) :
+    ((radialKernel N (fun s => if s < r then 1 else 0) s(x, y) : ℝ≥0) : ℝ≥0∞) =
+      if N (Int.cast ∘ (y - x)) ≤ r then (1 : ℝ≥0∞) else 0 := by
+  have h := radialKernel_indicator_eq_ball_of_ne_nn hcorner hr hxy
+  by_cases hc : N (Int.cast ∘ (y - x)) ≤ r
+  · rw [ite_eq_left hc]
+    rw [ite_eq_left hc] at h
+    rw [h, ENNReal.coe_one]
+  · rw [ite_eq_right hc]
+    rw [ite_eq_right hc] at h
+    rw [h, ENNReal.coe_zero]
+
+open Classical in
+/-- **Lemma I.4.1, boundary-sum form at the cut-off radius (pointwise, `ℝ≥0∞`).**
+
+Specializing `tsum_pivotal_eq_tsum_crossing` to the radial indicator `1(N(y - x) < r)` of the
+cut-off derivative coefficient, and reconciling the derivative's *strict* indicator with the
+paper's *closed* ball `B_r(x) = {y : ‖y - x‖ ≤ r}`, gives the unordered pivotal sum as the
+ordered lattice sum
+
+`∑' x, ∑' y, 1(x ∈ K_o) · 1(‖y - x‖ ≤ r) · 1(y ∉ K_o) · ((|K_o| + |K_y|)^p − |K_o|^p)`,
+
+which is the integrand of the first display in the proof of Lemma I.4.1 (before the
+mass-transport step).  The corner hypothesis is used *only* to pass from `< r` to `≤ r`; on the
+diagonal nothing is needed, because `1(y ∉ K_o)` with `y = x ∈ K_o` already vanishes. -/
+theorem tsum_radialKernel_pivotal_eq_tsum_ball {d : ℕ} {N : Seminorm ℝ (Fin d → ℝ)} {u v r : ℝ}
+    (hcorner : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Set.Ioo u v) (hr : r ∈ Set.Ioo u v)
+    (ω : Config (Fin d → ℤ)) (o : Fin d → ℤ) (p : ℕ) :
+    (∑' e : Sym2 (Fin d → ℤ),
+        ((radialKernel N (fun s => if s < r then 1 else 0) e : ℝ≥0) : ℝ≥0∞) *
+          (if e ∈ ω then (0 : ℝ≥0∞) else
+            (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+              ((cluster ω o).encard : ℝ≥0∞) ^ p))) =
+      ∑' x : Fin d → ℤ, ∑' y : Fin d → ℤ,
+        (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) *
+          (if N (Int.cast ∘ (y - x)) ≤ r then (1 : ℝ≥0∞) else 0) *
+          (if y ∈ cluster ω o then 0 else 1) *
+          ((((cluster ω o).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+            ((cluster ω o).encard : ℝ≥0∞) ^ p) := by
+  classical
+  rw [PercLib.Percolation.Bond.tsum_pivotal_eq_tsum_crossing (ω := ω) (o := o) (p := p)
+    (radial := fun e => ((radialKernel N (fun s => if s < r then 1 else 0) e : ℝ≥0) : ℝ≥0∞))]
+  refine tsum_congr fun x => tsum_congr fun y => ?_
+  by_cases hxy : x = y
+  · subst hxy
+    rw [radialKernel_diag]
+    simp only [ENNReal.coe_zero]
+    by_cases hx : x ∈ cluster ω o
+    · simp [hx]
+    · simp [hx]
+  · rw [radialKernel_indicator_eq_ball_of_ne_enn hcorner hr hxy]
+
+end PercLib.Models.LongRange
+
+
+open MeasureTheory Set
+open scoped ENNReal NNReal BigOperators
+open PercLib.Percolation.Bond
+open PercLib.Analysis
+
+namespace PercLib.Models.LongRange
+
+variable {V : Type*}
+variable {d : ℕ}
+
+/-! ### The sharpened pointwise binomial step -/
+
+/-- **The `ℝ≥0∞` binomial step needs only the root cluster to be finite.**
+
+For `A ≠ ⊤` and *arbitrary* `B : ℝ≥0∞` (in particular `B = ⊤`, an infinite far cluster),
+
+`A * ((A + B)^p − A^p) = ∑_{ℓ<p} C(p,ℓ) A^{ℓ+1} B^{p−ℓ}`.
+
+This drops the hypothesis `B ≠ ⊤` of `mul_pow_sub_pow_eq_sum_choose_ennreal`.  The case
+`B = ⊤` is the degenerate one: for `A ≠ 0` both sides are `⊤`, for `A = 0` both are `0`. -/
+theorem mul_pow_sub_pow_eq_sum_choose_ennreal_of_finite {A B : ℝ≥0∞} (hA : A ≠ ⊤) (p : ℕ) :
+    A * ((A + B) ^ p - A ^ p) =
+      ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ≥0∞) * A ^ (ℓ + 1) * B ^ (p - ℓ) := by
+  by_cases hB : B = ⊤
+  · subst hB
+    rcases eq_or_ne A 0 with hA0 | hA0
+    · simp [hA0]
+    · rcases Nat.eq_zero_or_pos p with hp | hp
+      · subst hp
+        simp
+      · have htop : (⊤ : ℝ≥0∞) ^ p = ⊤ := by
+          cases p with
+          | zero => omega
+          | succ n => simp
+        have hAp : A ^ p ≠ ⊤ := ENNReal.pow_ne_top hA
+        have hL : A * ((A + ⊤) ^ p - A ^ p) = ⊤ := by
+          rw [add_top, htop, ENNReal.sub_eq_top_iff.2 ⟨rfl, hAp⟩, ENNReal.mul_top hA0]
+        rw [hL]
+        refine (ENNReal.sum_eq_top.2 ⟨0, Finset.mem_range.2 hp, ?_⟩).symm
+        rw [Nat.choose_zero_right, Nat.cast_one, one_mul, Nat.sub_zero, Nat.zero_add, htop,
+          pow_one]
+        exact ENNReal.mul_top hA0
+  · exact mul_pow_sub_pow_eq_sum_choose_ennreal hA hB p
+
+/-! ### The root-cluster finiteness is not removable -/
+
+/-- **Sharpness: with an infinite root cluster the binomial step fails.**
+
+For `A = ⊤`, `B ≠ 0` and `p ≥ 1` the left side is `⊤ * (⊤ − ⊤) = 0` while the binomial
+sum is `⊤` (its `ℓ = 0` term is `⊤`).  So the hypothesis `A ≠ ⊤` in
+`mul_pow_sub_pow_eq_sum_choose_ennreal_of_finite` is exactly the right one. -/
+theorem top_mul_pow_sub_pow_ne_sum_choose {B : ℝ≥0∞} (hB : B ≠ 0) {p : ℕ} (hp : 1 ≤ p) :
+    (⊤ : ℝ≥0∞) * ((⊤ + B) ^ p - ⊤ ^ p) ≠
+      ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ≥0∞) * ⊤ ^ (ℓ + 1) * B ^ (p - ℓ) := by
+  have htop : (⊤ : ℝ≥0∞) ^ p = ⊤ := by
+    cases p with
+    | zero => omega
+    | succ n => simp
+  have hL : (⊤ : ℝ≥0∞) * ((⊤ + B) ^ p - ⊤ ^ p) = 0 := by
+    rw [top_add, htop, tsub_self, mul_zero]
+  have hR : ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ≥0∞) * ⊤ ^ (ℓ + 1) * B ^ (p - ℓ) = ⊤ := by
+    refine ENNReal.sum_eq_top.2 ⟨0, Finset.mem_range.2 hp, ?_⟩
+    rw [Nat.choose_zero_right, Nat.cast_one, one_mul, Nat.sub_zero, Nat.zero_add, pow_one]
+    exact ENNReal.top_mul (pow_ne_zero p hB)
+  rw [hL, hR]
+  exact ENNReal.zero_ne_top
+
+/-- **In the bond model the failure is at hand at every infinite root cluster.**
+
+A cluster volume is never `0` (`one_le_encard_cluster`), so for `p ≥ 1` the pointwise
+binomial step fails at every configuration whose root cluster is infinite, for every far
+vertex `y`.  Hence the `A ≠ ⊤` hypothesis of the sharpened step is not removable inside
+the model, and no argument that only inspects the pointwise algebra can prove the binomial
+step of Lemma I.4.1 without almost-sure finiteness of the root cluster. -/
+theorem root_cluster_binomial_fails_of_encard_eq_top (ω : Config V) (o y : V) {p : ℕ}
+    (hp : 1 ≤ p) (h : ((cluster ω o).encard : ℝ≥0∞) = ⊤) :
+    ((cluster ω o).encard : ℝ≥0∞) *
+        ((((cluster ω o).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+          ((cluster ω o).encard : ℝ≥0∞) ^ p) ≠
+      ∑ ℓ ∈ Finset.range p,
+        (p.choose ℓ : ℝ≥0∞) * ((cluster ω o).encard : ℝ≥0∞) ^ (ℓ + 1) *
+          ((cluster ω y).encard : ℝ≥0∞) ^ (p - ℓ) := by
+  have hpos : (1 : ℝ≥0∞) ≤ ((cluster ω y).encard : ℝ≥0∞) := by
+    have h1 : (1 : ℕ∞) ≤ (cluster ω y).encard := one_le_encard_cluster ω y
+    exact_mod_cast h1
+  have hB : ((cluster ω y).encard : ℝ≥0∞) ≠ 0 := ne_of_gt (lt_of_lt_of_le one_pos hpos)
+  simpa only [h] using
+    top_mul_pow_sub_pow_ne_sum_choose (B := ((cluster ω y).encard : ℝ≥0∞)) hB hp
+
+
+
+/-! ### The pointwise binomial form with a finite root cluster only -/
+
+/-- **The pointwise binomial form of (I.4.1)** under finiteness of the root cluster alone. -/
+theorem russoRHS_eq_binomial_of_root_finite {ω : Config (Fin d → ℤ)}
+    (h : ((cluster ω 0).encard : ℝ≥0∞) ≠ ⊤) (p : ℕ)
+    (N : Seminorm ℝ (Fin d → ℝ)) (r : ℝ) :
+    (((cluster ω 0).encard : ℝ≥0∞) *
+        ∑' y,
+          (if N (Int.cast ∘ y) ≤ r then 1 else 0) *
+            (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+            ((((cluster ω 0).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+              ((cluster ω 0).encard : ℝ≥0∞) ^ p))
+      = ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ≥0∞) * ((cluster ω 0).encard : ℝ≥0∞) ^ (ℓ + 1) *
+          ∑' y,
+            (if N (Int.cast ∘ y) ≤ r then 1 else 0) *
+              (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+              ((cluster ω y).encard : ℝ≥0∞) ^ (p - ℓ) := by
+  have hA0 : ((cluster ω 0).encard : ℝ≥0∞) ≠ ⊤ := h
+  have hbin : ∀ y : Fin d → ℤ,
+      ((cluster ω 0).encard : ℝ≥0∞) *
+          ((((cluster ω 0).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+            ((cluster ω 0).encard : ℝ≥0∞) ^ p)
+        = ∑ ℓ ∈ Finset.range p,
+            (p.choose ℓ : ℝ≥0∞) * ((cluster ω 0).encard : ℝ≥0∞) ^ (ℓ + 1) *
+              ((cluster ω y).encard : ℝ≥0∞) ^ (p - ℓ) :=
+    fun y => mul_pow_sub_pow_eq_sum_choose_ennreal_of_finite hA0 p
+  calc (((cluster ω 0).encard : ℝ≥0∞) *
+        ∑' y,
+          (if N (Int.cast ∘ y) ≤ r then 1 else 0) *
+            (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+            ((((cluster ω 0).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+              ((cluster ω 0).encard : ℝ≥0∞) ^ p))
+      = ∑' y,
+          ((if N (Int.cast ∘ y) ≤ r then 1 else 0) *
+            (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω) *
+            (((cluster ω 0).encard : ℝ≥0∞) *
+              ((((cluster ω 0).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+                ((cluster ω 0).encard : ℝ≥0∞) ^ p)) := by
+        rw [← ENNReal.tsum_mul_left]
+        exact tsum_congr fun y => by ac_rfl
+    _ = ∑' y,
+          ((if N (Int.cast ∘ y) ≤ r then 1 else 0) *
+            (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω) *
+            ∑ ℓ ∈ Finset.range p,
+              (p.choose ℓ : ℝ≥0∞) * ((cluster ω 0).encard : ℝ≥0∞) ^ (ℓ + 1) *
+                ((cluster ω y).encard : ℝ≥0∞) ^ (p - ℓ) :=
+        tsum_congr fun y => by rw [hbin y]
+    _ = ∑' y, ∑ ℓ ∈ Finset.range p,
+          ((if N (Int.cast ∘ y) ≤ r then 1 else 0) *
+            (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω) *
+            ((p.choose ℓ : ℝ≥0∞) * ((cluster ω 0).encard : ℝ≥0∞) ^ (ℓ + 1) *
+              ((cluster ω y).encard : ℝ≥0∞) ^ (p - ℓ)) :=
+        tsum_congr fun y => Finset.mul_sum ..
+    _ = ∑ ℓ ∈ Finset.range p,
+          (p.choose ℓ : ℝ≥0∞) * ((cluster ω 0).encard : ℝ≥0∞) ^ (ℓ + 1) *
+            ∑' y,
+              ((if N (Int.cast ∘ y) ≤ r then 1 else 0) *
+                (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω) *
+                ((cluster ω y).encard : ℝ≥0∞) ^ (p - ℓ) := by
+        rw [Summable.tsum_finsetSum (s := Finset.range p) (fun ℓ _ => ENNReal.summable)]
+        refine Finset.sum_congr rfl fun ℓ _ => ?_
+        rw [← ENNReal.tsum_mul_left]
+        exact tsum_congr fun y => by ac_rfl
+
+/-! ### The binomial step with a finite root cluster only -/
+
+/-- **Lemma I.4.1 in binomial form, with the root-cluster finiteness hypothesis only.**
+
+The far clusters `K_y` may be infinite; the `ℝ≥0∞` identity absorbs them, and by
+`root_cluster_binomial_fails_of_encard_eq_top` the present hypothesis on `K_0` is not
+removable.  No moment finiteness is assumed. -/
+theorem i41_binomial_of_root_finite (μ : Measure (Config (Fin d → ℤ)))
+    (hfin : μ {ω : Config (Fin d → ℤ) | ((cluster ω 0).encard : ℝ≥0∞) = ⊤} = 0)
+    (p : ℕ) (N : Seminorm ℝ (Fin d → ℝ)) (r : ℝ) :
+    ∫⁻ ω, (((cluster ω 0).encard : ℝ≥0∞) *
+        ∑' y,
+          (if N (Int.cast ∘ y) ≤ r then 1 else 0) *
+            (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+            ((((cluster ω 0).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+              ((cluster ω 0).encard : ℝ≥0∞) ^ p)) ∂μ
+      = ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ≥0∞) *
+        ∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ (ℓ + 1) *
+          (∑' y,
+            (if N (Int.cast ∘ y) ≤ r then 1 else 0) *
+              (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+              ((cluster ω y).encard : ℝ≥0∞) ^ (p - ℓ)) ∂μ := by
+  have htsum : ∀ ℓ : ℕ, Measurable fun ω : Config (Fin d → ℤ) =>
+      ∑' y,
+        (if N (Int.cast ∘ y) ≤ r then 1 else 0) *
+          (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+          ((cluster ω y).encard : ℝ≥0∞) ^ (p - ℓ) := by
+    intro ℓ
+    refine Measurable.tsum fun y => ?_
+    exact (measurable_const.mul
+      (measurable_const.indicator (measurableSet_conn 0 y).compl)).mul
+      ((measurable_encard_cluster_coe y).pow_const (p - ℓ))
+  have hAS : ∀ ℓ : ℕ, Measurable fun ω : Config (Fin d → ℤ) =>
+      ((cluster ω 0).encard : ℝ≥0∞) ^ (ℓ + 1) *
+        (∑' y,
+          (if N (Int.cast ∘ y) ≤ r then 1 else 0) *
+            (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+            ((cluster ω y).encard : ℝ≥0∞) ^ (p - ℓ)) :=
+    fun ℓ => ((measurable_encard_cluster_coe 0).pow_const (ℓ + 1)).mul (htsum ℓ)
+  have hsummand : ∀ ℓ : ℕ, Measurable fun ω : Config (Fin d → ℤ) =>
+      ((p.choose ℓ : ℝ≥0∞) * ((cluster ω 0).encard : ℝ≥0∞) ^ (ℓ + 1)) *
+        (∑' y,
+          (if N (Int.cast ∘ y) ≤ r then 1 else 0) *
+            (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+            ((cluster ω y).encard : ℝ≥0∞) ^ (p - ℓ)) :=
+    fun ℓ => (measurable_const.mul ((measurable_encard_cluster_coe 0).pow_const (ℓ + 1))).mul
+      (htsum ℓ)
+  have hae : ∀ᵐ ω ∂μ, ((cluster ω 0).encard : ℝ≥0∞) ≠ ⊤ := by
+    filter_upwards [measure_eq_zero_iff_ae_notMem.mp hfin] with ω h
+    exact h
+  calc ∫⁻ ω, (((cluster ω 0).encard : ℝ≥0∞) *
+        ∑' y,
+          (if N (Int.cast ∘ y) ≤ r then 1 else 0) *
+            (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+            ((((cluster ω 0).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+              ((cluster ω 0).encard : ℝ≥0∞) ^ p)) ∂μ
+      = ∫⁻ ω, (∑ ℓ ∈ Finset.range p,
+          (p.choose ℓ : ℝ≥0∞) * ((cluster ω 0).encard : ℝ≥0∞) ^ (ℓ + 1) *
+            ∑' y,
+              (if N (Int.cast ∘ y) ≤ r then 1 else 0) *
+                (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+                ((cluster ω y).encard : ℝ≥0∞) ^ (p - ℓ)) ∂μ := by
+        refine lintegral_congr_ae ?_
+        filter_upwards [hae] with ω h
+        exact russoRHS_eq_binomial_of_root_finite h p N r
+    _ = ∑ ℓ ∈ Finset.range p, ∫⁻ ω,
+          (p.choose ℓ : ℝ≥0∞) * ((cluster ω 0).encard : ℝ≥0∞) ^ (ℓ + 1) *
+            ∑' y,
+              (if N (Int.cast ∘ y) ≤ r then 1 else 0) *
+                (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+                ((cluster ω y).encard : ℝ≥0∞) ^ (p - ℓ) ∂μ :=
+        lintegral_finsetSum _ fun ℓ _ => hsummand ℓ
+    _ = ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ≥0∞) *
+        ∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ (ℓ + 1) *
+          (∑' y,
+            (if N (Int.cast ∘ y) ≤ r then 1 else 0) *
+              (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+              ((cluster ω y).encard : ℝ≥0∞) ^ (p - ℓ)) ∂μ := by
+        refine Finset.sum_congr rfl fun ℓ _ => ?_
+        conv_lhs =>
+          enter [2, ω]
+          rw [mul_assoc]
+        rw [lintegral_const_mul]
+        exact hAS ℓ
+
+
+
+/-! ### The moment form: only the root moment has to be finite -/
+
+/-- **The binomial step of Lemma I.4.1 under finiteness of the root moment.**
+
+`i41_binomial` assumes that every cluster is almost surely finite.  By the sharpened
+pointwise step only the root cluster matters, so that hypothesis can be replaced by the
+paper's actual input, finiteness of the `p`-th moment of `|K_0|` (which implies
+`|K_0| < ∞` almost surely).  The far clusters are unrestricted. -/
+theorem i41_binomial_of_root_moment (μ : Measure (Config (Fin d → ℤ))) {p : ℕ} (hp : 1 ≤ p)
+    (hmom : ∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ p ∂μ ≠ ⊤)
+    (N : Seminorm ℝ (Fin d → ℝ)) (r : ℝ) :
+    ∫⁻ ω, (((cluster ω 0).encard : ℝ≥0∞) *
+        ∑' y,
+          (if N (Int.cast ∘ y) ≤ r then 1 else 0) *
+            (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+            ((((cluster ω 0).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+              ((cluster ω 0).encard : ℝ≥0∞) ^ p)) ∂μ
+      = ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ≥0∞) *
+        ∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ (ℓ + 1) *
+          (∑' y,
+            (if N (Int.cast ∘ y) ≤ r then 1 else 0) *
+              (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+              ((cluster ω y).encard : ℝ≥0∞) ^ (p - ℓ)) ∂μ := by
+  have hSmeas : MeasurableSet {ω : Config (Fin d → ℤ) | ((cluster ω 0).encard : ℝ≥0∞) = ⊤} :=
+    (measurable_encard_cluster_coe (0 : Fin d → ℤ)) (measurableSet_singleton ⊤)
+  have hzero : μ {ω : Config (Fin d → ℤ) | ((cluster ω 0).encard : ℝ≥0∞) = ⊤} = 0 := by
+    by_contra hne
+    apply hmom
+    refine le_antisymm le_top ?_
+    have htop : (⊤ : ℝ≥0∞) * μ {ω : Config (Fin d → ℤ) |
+        ((cluster ω 0).encard : ℝ≥0∞) = ⊤} = ⊤ := by
+      rw [ENNReal.top_mul hne]
+    calc (⊤ : ℝ≥0∞)
+        = ⊤ * μ {ω : Config (Fin d → ℤ) | ((cluster ω 0).encard : ℝ≥0∞) = ⊤} := htop.symm
+      _ = ∫⁻ ω, ({ω : Config (Fin d → ℤ) |
+            ((cluster ω 0).encard : ℝ≥0∞) = ⊤}.indicator (fun _ => ⊤) ω) ∂μ :=
+          (lintegral_indicator_const hSmeas ⊤).symm
+      _ ≤ ∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ p ∂μ := by
+          refine lintegral_mono fun ω => ?_
+          by_cases hω : ω ∈ {ω : Config (Fin d → ℤ) | ((cluster ω 0).encard : ℝ≥0∞) = ⊤}
+          · rw [Set.indicator_of_mem hω]
+            have hc : ((cluster ω 0).encard : ℝ≥0∞) = ⊤ := hω
+            rw [hc]
+            exact le_of_eq (by
+              cases p with
+              | zero => omega
+              | succ n => simp)
+          · rw [Set.indicator_of_notMem hω]
+            exact zero_le
+  exact i41_binomial_of_root_finite μ hzero p N r
+
+/-! ### Non-vacuity of the sharpness statement -/
+
+/-- With every bond open the cluster of the origin is everything, so the configuration in
+`root_cluster_binomial_fails_of_encard_eq_top` exists: the sharpness statement is not
+vacuous, and its hypothesis `|K_o| = ⊤` is realised on the infinite line. -/
+theorem cluster_univ_int_encard_eq_top :
+    ((cluster (Set.univ : Config ℤ) 0).encard : ℝ≥0∞) = ⊤ := by
+  have hcl : cluster (Set.univ : Config ℤ) 0 = Set.univ := by
+    ext y
+    simp only [Set.mem_univ, iff_true, mem_cluster_iff]
+    rcases eq_or_ne y 0 with rfl | hy
+    · exact mem_cluster_self Set.univ 0
+    · exact mem_conn_of_mem (Ne.symm hy) (Set.mem_univ _)
+  rw [hcl]
+  have hinf : (Set.univ : Set ℤ).Infinite := Set.infinite_univ
+  rw [hinf.encard_eq]
+  simp
+
+/-- The sharpness statement at a concrete, non-vacuous configuration: with every bond open
+on `ℤ` the pointwise binomial step of `i41_binomial` fails at `p = 2`, `o = 0`, `y = 1`. -/
+example :
+    ((cluster (Set.univ : Config ℤ) 0).encard : ℝ≥0∞) *
+        ((((cluster (Set.univ : Config ℤ) 0).encard : ℝ≥0∞) +
+          ((cluster (Set.univ : Config ℤ) 1).encard : ℝ≥0∞)) ^ 2 -
+          ((cluster (Set.univ : Config ℤ) 0).encard : ℝ≥0∞) ^ 2) ≠
+      ∑ ℓ ∈ Finset.range 2,
+        ((2 : ℕ).choose ℓ : ℝ≥0∞) * ((cluster (Set.univ : Config ℤ) 0).encard : ℝ≥0∞) ^ (ℓ + 1) *
+          ((cluster (Set.univ : Config ℤ) 1).encard : ℝ≥0∞) ^ (2 - ℓ) :=
+  root_cluster_binomial_fails_of_encard_eq_top (ω := Set.univ) 0 1 (by norm_num)
+    cluster_univ_int_encard_eq_top
+
+
+/-! ### The production forms: cut-off and general intensity -/
+
+/-- **Lemma I.4.1 in binomial form for the cut-off model, with a moment hypothesis.**
+
+This is `i41_cutoff_binomial` with its hypothesis "every cluster is almost surely finite"
+replaced by finiteness of the `p`-th moment of the root cluster volume, which is the input
+the paper actually has. -/
+theorem i41_cutoff_binomial_of_root_moment {N : ModelNorm (Fin d → ℝ)} (K : ℝ → ℝ) (r : ℝ)
+    (β : ℝ≥0) {p : ℕ} (hp : 1 ≤ p)
+    (hmom : ∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ p
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β)) ≠ ⊤) :
+   ∫⁻ ω, (((cluster ω 0).encard : ℝ≥0∞) *
+        ∑' y,
+          (if N (Int.cast ∘ y) ≤ r then 1 else 0) *
+            (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+            ((((cluster ω 0).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+              ((cluster ω 0).encard : ℝ≥0∞) ^ p))
+          ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))
+      = ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ≥0∞) *
+        ∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ (ℓ + 1) *
+          (∑' y,
+            (if N (Int.cast ∘ y) ≤ r then 1 else 0) *
+              (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+              ((cluster ω y).encard : ℝ≥0∞) ^ (p - ℓ))
+          ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β)) :=
+  i41_binomial_of_root_moment _ hp hmom N r
+
+/-- **Lemma I.4.1 in binomial form for any intensity, with a moment hypothesis.**
+
+This is `i41_intensityProfile_binomial` with its all-clusters a.e.-finiteness hypothesis
+replaced by finiteness of the root moment; no translation invariance is needed. -/
+theorem i41_intensityProfile_binomial_of_root_moment {J : Sym2 (Fin d → ℤ) → ℝ≥0}
+    (β : ℝ≥0) {p : ℕ} (hp : 1 ≤ p) (N : Seminorm ℝ (Fin d → ℝ)) (r : ℝ)
+    (hmom : ∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ p ∂(law (intensityProfile J β)) ≠ ⊤) :
+   ∫⁻ ω, (((cluster ω 0).encard : ℝ≥0∞) *
+        ∑' y,
+          (if N (Int.cast ∘ y) ≤ r then 1 else 0) *
+            (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+            ((((cluster ω 0).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+              ((cluster ω 0).encard : ℝ≥0∞) ^ p)) ∂(law (intensityProfile J β))
+      = ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ≥0∞) *
+        ∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ (ℓ + 1) *
+          (∑' y,
+            (if N (Int.cast ∘ y) ≤ r then 1 else 0) *
+              (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+              ((cluster ω y).encard : ℝ≥0∞) ^ (p - ℓ)) ∂(law (intensityProfile J β)) :=
+  i41_binomial_of_root_moment _ hp hmom N r
+
+end PercLib.Models.LongRange
+
+namespace PercLib.Models.LongRange
+
+variable {d : ℕ}
+
+open Classical in
+/-- **The corner reconciliation of the ordered sum.**
+
+At a radius `r` with no lattice displacement of norm in the corner interval `(u, v)`, the
+ordered double sum of Lemma I.4.1 with the cutoff derivative's *strict* pair weight
+`radialKernel N 1(s < r)` equals the paper's sum with the *closed* ball indicator
+`1(∥y - x∥ ≤ r)`.  Both sums carry `1(x ∈ K_0)` and `1(y ∉ K_0)`, so the diagonal `x = y`
+contributes `0` to both sides and the loop convention of `radialKernel` never needs to be
+matched against the ball indicator there. -/
+theorem tsum_ordered_radial_eq_ball (N : Seminorm ℝ (Fin d → ℝ)) {u v r : ℝ}
+    (hcorner : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Ioo u v) (hr : r ∈ Ioo u v)
+    (ω : Config (Fin d → ℤ)) (p : ℕ) :
+    (∑' x, ∑' y,
+        (conn 0 x).indicator (fun _ => (1 : ℝ≥0∞)) ω *
+          (radialKernel N (fun s => if s < r then 1 else 0) s(x, y) : ℝ≥0∞) *
+          (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+          ((((cluster ω 0).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+            ((cluster ω 0).encard : ℝ≥0∞) ^ p))
+      = ∑' x, ∑' y,
+        (conn 0 x).indicator (fun _ => (1 : ℝ≥0∞)) ω *
+          (if N (Int.cast ∘ (y - x)) ≤ r then 1 else 0) *
+          (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+          ((((cluster ω 0).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+            ((cluster ω 0).encard : ℝ≥0∞) ^ p) := by
+  classical
+  refine tsum_congr fun x => tsum_congr fun y => ?_
+  have hx1 : (conn 0 x).indicator (fun _ => (1 : ℝ≥0∞)) ω =
+      if ω ∈ conn 0 x then 1 else 0 := by
+    simp [Set.indicator_apply]
+  have hy1 : (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω =
+      if ω ∈ (conn 0 y)ᶜ then 1 else 0 := by
+    simp [Set.indicator_apply]
+  rw [hx1, hy1]
+  by_cases hx : ω ∈ conn 0 x
+  · by_cases hy : ω ∈ conn 0 y
+    · have hy'' : ¬ (ω ∈ (conn 0 y)ᶜ) := fun h => h hy
+      rw [ite_eq_left hx, ite_eq_right hy'']
+      simp
+    · have hxy : x ≠ y := by
+        rintro rfl
+        exact hy hx
+      have hy' : ω ∈ (conn 0 y)ᶜ := hy
+      rw [ite_eq_left hx, ite_eq_left hy',
+        radialKernel_indicator_eq_ball_of_ne_enn (N := N) hcorner hr hxy]
+  · rw [ite_eq_right hx]
+    simp
+
+
+end PercLib.Models.LongRange
+
+/-! ### The assembled extended-nonnegative binomial identity -/
+
+namespace PercLib.Models.LongRange
+
+variable {d : ℕ}
+
+open PercLib.Percolation.Bond
+
+/-- The ordered strict-radial crossing sum has the paper's binomial form under only
+almost-sure finiteness of the root cluster. -/
+theorem i41_ordered_binomial_of_root_finite (μ : Measure (Config (Fin d → ℤ)))
+    (hμ : ∀ t : Fin d → ℤ,
+      μ.map (fun ω => Sym2.map (fun x : Fin d → ℤ => x + t) '' ω) = μ)
+    (hfin : μ {ω : Config (Fin d → ℤ) | ((cluster ω 0).encard : ℝ≥0∞) = ⊤} = 0)
+    {N : Seminorm ℝ (Fin d → ℝ)} {r : ℝ} {p : ℕ} {u v : ℝ}
+    (hcorner : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Ioo u v) (hr : r ∈ Ioo u v) :
+    ∫⁻ ω, (∑' x, ∑' y,
+        (conn 0 x).indicator (fun _ => (1 : ℝ≥0∞)) ω *
+          (radialKernel N (fun s => if s < r then 1 else 0) s(x, y) : ℝ≥0∞) *
+          (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+          ((((cluster ω 0).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+            ((cluster ω 0).encard : ℝ≥0∞) ^ p)) ∂μ =
+      ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ≥0∞) *
+        ∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ (ℓ + 1) *
+          (∑' y,
+            (if N (Int.cast ∘ y) ≤ r then 1 else 0) *
+              (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+              ((cluster ω y).encard : ℝ≥0∞) ^ (p - ℓ)) ∂μ :=
+  (lintegral_congr fun ω => tsum_ordered_radial_eq_ball N hcorner hr ω p).trans
+    ((i41_massTransport μ hμ p N r).trans (i41_binomial_of_root_finite μ hfin p N r))
+
+open Classical in
+/-- The unordered-to-ordered reindex is sufficient for the assembled extended-nonnegative
+identity, with only root-cluster finiteness required in the binomial step. -/
+theorem i41_enn_of_pointwise_reindex (μ : Measure (Config (Fin d → ℤ)))
+    (hμ : ∀ t : Fin d → ℤ,
+      μ.map (fun ω => Sym2.map (fun x : Fin d → ℤ => x + t) '' ω) = μ)
+    (hfin : μ {ω : Config (Fin d → ℤ) | ((cluster ω 0).encard : ℝ≥0∞) = ⊤} = 0)
+    {N : Seminorm ℝ (Fin d → ℝ)} {r : ℝ} {p : ℕ} {u v : ℝ}
+    (hcorner : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Ioo u v) (hr : r ∈ Ioo u v)
+    (hreindex : ∀ ω : Config (Fin d → ℤ),
+      (∑' e : Sym2 (Fin d → ℤ),
+          (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ≥0∞) *
+            (if e ∈ ω then 0 else
+              ((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+                ((cluster ω 0).encard : ℝ≥0∞) ^ p))
+        = ∑' x, ∑' y,
+            (conn 0 x).indicator (fun _ => (1 : ℝ≥0∞)) ω *
+              (radialKernel N (fun s => if s < r then 1 else 0) s(x, y) : ℝ≥0∞) *
+              (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+              ((((cluster ω 0).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+                ((cluster ω 0).encard : ℝ≥0∞) ^ p)) :
+    ∫⁻ ω, (∑' e : Sym2 (Fin d → ℤ),
+        (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ≥0∞) *
+          (if e ∈ ω then 0 else
+            ((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+              ((cluster ω 0).encard : ℝ≥0∞) ^ p)) ∂μ =
+      ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ≥0∞) *
+        ∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ (ℓ + 1) *
+          (∑' y,
+            (if N (Int.cast ∘ y) ≤ r then 1 else 0) *
+              (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+              ((cluster ω y).encard : ℝ≥0∞) ^ (p - ℓ)) ∂μ :=
+  (lintegral_congr hreindex).trans
+    (i41_ordered_binomial_of_root_finite μ hμ hfin hcorner hr)
+
+open Classical in
+/-- The unordered pivotal flux has the paper's extended-nonnegative binomial form under
+shift invariance and almost-sure finiteness of the root cluster. -/
+theorem i41_enn_of_root_finite (μ : Measure (Config (Fin d → ℤ)))
+    (hμ : ∀ t : Fin d → ℤ,
+      μ.map (fun ω => Sym2.map (fun x : Fin d → ℤ => x + t) '' ω) = μ)
+    (hfin : μ {ω : Config (Fin d → ℤ) | ((cluster ω 0).encard : ℝ≥0∞) = ⊤} = 0)
+    {N : Seminorm ℝ (Fin d → ℝ)} {r : ℝ} {p : ℕ} {u v : ℝ}
+    (hcorner : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Ioo u v) (hr : r ∈ Ioo u v) :
+    ∫⁻ ω, (∑' e : Sym2 (Fin d → ℤ),
+        (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ≥0∞) *
+          (if e ∈ ω then 0 else
+            ((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+              ((cluster ω 0).encard : ℝ≥0∞) ^ p)) ∂μ =
+      ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ≥0∞) *
+        ∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ (ℓ + 1) *
+          (∑' y,
+            (if N (Int.cast ∘ y) ≤ r then 1 else 0) *
+              (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+              ((cluster ω y).encard : ℝ≥0∞) ^ (p - ℓ)) ∂μ := by
+  apply i41_enn_of_pointwise_reindex μ hμ hfin hcorner hr
+  intro ω
+  have h := PercLib.Percolation.Bond.tsum_pivotal_eq_tsum_crossing ω 0 p
+    (fun e => (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ≥0∞))
+  simp only [mem_cluster_iff] at h
+  refine h.trans ?_
+  refine tsum_congr fun x => tsum_congr fun y => ?_
+  by_cases hy : ω ∈ conn 0 y <;> simp [Set.indicator_apply, hy]
 
 end PercLib.Models.LongRange
