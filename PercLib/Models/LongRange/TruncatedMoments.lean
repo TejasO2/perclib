@@ -23,6 +23,7 @@ public import PercLib.Models.LongRange.CutoffCorner
 public import PercLib.Percolation.Bond.Forest
 public import PercLib.Probability.Cylinder
 public import PercLib.Analysis.DominatedDerivative
+public import Mathlib.Analysis.Calculus.FDeriv.Extend
 
 /-!
 # Tail sums of cluster volumes
@@ -11978,5 +11979,394 @@ theorem linear_diagram_derivative_value_eq_zero (d : ℕ) (p : ℕ) (hp : 1 ≤ 
               (1 : ℝ≥0)))) = 0 :=
   (hasDerivAt_integral_linear_cutoff_pow_diagram d p hp).unique
     (hasDerivAt_integral_linear_cutoff_pow_zero d p)
+
+end PercLib.Models.LongRange
+
+open Filter Set Topology
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability
+open scoped Topology NNReal ENNReal
+
+namespace PercLib.Models.LongRange
+
+/-! ## One-sided limits of the derivative -/
+
+/-- If `f` is differentiable at `n` and its derivative tends to `L` from the left at `n`, then
+`L` is the derivative of `f` at `n`. -/
+theorem tendsto_deriv_nhdsLT_eq_deriv {f : ℝ → ℝ} {n L m : ℝ}
+    (hdiff : ∀ y < n, DifferentiableAt ℝ f y) (hcont : ContinuousAt f n)
+    (hL : Tendsto (deriv f) (𝓝[<] n) (𝓝 L)) (hm : HasDerivAt f m n) : L = m := by
+  have h1 : HasDerivWithinAt f L (Iic n) n :=
+    hasDerivWithinAt_Iic_of_tendsto_deriv (fun y hy => (hdiff y hy).differentiableWithinAt)
+      hcont.continuousWithinAt self_mem_nhdsWithin hL
+  have e1 : derivWithin f (Iic n) n = L := h1.derivWithin (uniqueDiffWithinAt_Iic n)
+  have e2 : derivWithin f (Iic n) n = m :=
+    hm.hasDerivWithinAt.derivWithin (uniqueDiffWithinAt_Iic n)
+  rw [← e1, e2]
+
+/-- If `f` is differentiable at `n` and its derivative tends to `L` from the right at `n`, then
+`L` is the derivative of `f` at `n`. -/
+theorem tendsto_deriv_nhdsGT_eq_deriv {f : ℝ → ℝ} {n L m : ℝ}
+    (hdiff : ∀ y, n < y → DifferentiableAt ℝ f y) (hcont : ContinuousAt f n)
+    (hR : Tendsto (deriv f) (𝓝[>] n) (𝓝 L)) (hm : HasDerivAt f m n) : L = m := by
+  have h1 : HasDerivWithinAt f L (Ici n) n :=
+    hasDerivWithinAt_Ici_of_tendsto_deriv (fun y hy => (hdiff y hy).differentiableWithinAt)
+      hcont.continuousWithinAt self_mem_nhdsWithin hR
+  have e1 : derivWithin f (Ici n) n = L := h1.derivWithin (uniqueDiffWithinAt_Ici n)
+  have e2 : derivWithin f (Ici n) n = m :=
+    hm.hasDerivWithinAt.derivWithin (uniqueDiffWithinAt_Ici n)
+  rw [← e1, e2]
+
+/-- If `f` is differentiable on both sides of `n`, continuous at `n`, and its derivative has the
+common one-sided limit `L` at `n`, then `f` is differentiable at `n` with derivative `L`. -/
+theorem hasDerivAt_of_tendsto_deriv_oneSided {f : ℝ → ℝ} {n L : ℝ}
+    (hdiffL : ∀ y < n, DifferentiableAt ℝ f y) (hdiffR : ∀ y, n < y → DifferentiableAt ℝ f y)
+    (hcont : ContinuousAt f n)
+    (hL : Tendsto (deriv f) (𝓝[<] n) (𝓝 L)) (hR : Tendsto (deriv f) (𝓝[>] n) (𝓝 L)) :
+    HasDerivAt f L n := by
+  have h1 : HasDerivWithinAt f L (Iic n) n :=
+    hasDerivWithinAt_Iic_of_tendsto_deriv (fun y hy => (hdiffL y hy).differentiableWithinAt)
+      hcont.continuousWithinAt self_mem_nhdsWithin hL
+  have h2 : HasDerivWithinAt f L (Ici n) n :=
+    hasDerivWithinAt_Ici_of_tendsto_deriv (fun y hy => (hdiffR y hy).differentiableWithinAt)
+      hcont.continuousWithinAt self_mem_nhdsWithin hR
+  simpa using h2.union h1
+
+/-- **Corner criterion.** Suppose that `f` is differentiable on both sides of `n`, continuous at
+`n`, and that `deriv f` has one-sided limits `L₁` (from below) and `L₂` (from above) at `n`.
+Then `f` has a two-sided derivative at `n` if and only if the two one-sided limits agree; and
+then the derivative is their common value. -/
+theorem exists_hasDerivAt_iff_tendsto_deriv_oneSided {f : ℝ → ℝ} {n L₁ L₂ : ℝ}
+    (hdiffL : ∀ y < n, DifferentiableAt ℝ f y) (hdiffR : ∀ y, n < y → DifferentiableAt ℝ f y)
+    (hcont : ContinuousAt f n)
+    (hL : Tendsto (deriv f) (𝓝[<] n) (𝓝 L₁)) (hR : Tendsto (deriv f) (𝓝[>] n) (𝓝 L₂)) :
+    (∃ m, HasDerivAt f m n) ↔ L₁ = L₂ := by
+  constructor
+  · rintro ⟨m, hm⟩
+    exact (tendsto_deriv_nhdsLT_eq_deriv hdiffL hcont hL hm).trans
+      (tendsto_deriv_nhdsGT_eq_deriv hdiffR hcont hR hm).symm
+  · intro h
+    subst h
+    exact ⟨L₁, hasDerivAt_of_tendsto_deriv_oneSided hdiffL hdiffR hcont hL hR⟩
+
+/-- **Corner obstruction.** Different one-sided limits of the derivative at `n` exclude every
+two-sided derivative at `n`. -/
+theorem not_exists_hasDerivAt_of_tendsto_deriv_oneSided_ne {f : ℝ → ℝ} {n L₁ L₂ : ℝ}
+    (hdiffL : ∀ y < n, DifferentiableAt ℝ f y) (hdiffR : ∀ y, n < y → DifferentiableAt ℝ f y)
+    (hcont : ContinuousAt f n)
+    (hL : Tendsto (deriv f) (𝓝[<] n) (𝓝 L₁)) (hR : Tendsto (deriv f) (𝓝[>] n) (𝓝 L₂))
+    (hne : L₁ ≠ L₂) : ¬ ∃ m, HasDerivAt f m n := by
+  rw [exists_hasDerivAt_iff_tendsto_deriv_oneSided hdiffL hdiffR hcont hL hR]
+  exact hne
+
+/-- **Corner recovery stated for the flux.** Let `ψ` be a scale-dependent expectation whose
+scale derivative is the flux `Φ` at every scale other than `n`, and let `Φ` have one-sided limits
+`L₁` (from below) and `L₂` (from above) at `n`. Then a two-sided derivative of `ψ` at `n` exists if
+and only if `L₁ = L₂`, and then it is their common value. This is the form in which the
+corner-free interval theorems feed the corner: they supply `Φ` on each side of `n`. -/
+theorem exists_hasDerivAt_iff_tendsto_flux_oneSided {ψ Φ : ℝ → ℝ} {n L₁ L₂ : ℝ}
+    (hd : ∀ y, y ≠ n → HasDerivAt ψ (Φ y) y) (hψ : ContinuousAt ψ n)
+    (hL : Tendsto Φ (𝓝[<] n) (𝓝 L₁)) (hR : Tendsto Φ (𝓝[>] n) (𝓝 L₂)) :
+    (∃ m, HasDerivAt ψ m n) ↔ L₁ = L₂ := by
+  have hEqL : Φ =ᶠ[𝓝[<] n] deriv ψ := by
+    filter_upwards [self_mem_nhdsWithin] with y hy
+    exact ((hd y (ne_of_lt hy)).deriv).symm
+  have hEqR : Φ =ᶠ[𝓝[>] n] deriv ψ := by
+    filter_upwards [self_mem_nhdsWithin] with y hy
+    exact ((hd y (ne_of_gt hy)).deriv).symm
+  exact exists_hasDerivAt_iff_tendsto_deriv_oneSided
+    (fun y hy => (hd y (ne_of_lt hy)).differentiableAt)
+    (fun y hy => (hd y (ne_of_gt hy)).differentiableAt)
+    hψ (Filter.Tendsto.congr' hEqL hL) (Filter.Tendsto.congr' hEqR hR)
+
+/-- **Concrete obstruction for the cut-off moment.** If the flux `Φ` has different one-sided
+limits at the corner `n` and `ψ' = Φ` off `n`, then `ψ` has no two-sided derivative at `n`. -/
+theorem not_exists_hasDerivAt_of_tendsto_flux_oneSided_ne {ψ Φ : ℝ → ℝ} {n L₁ L₂ : ℝ}
+    (hd : ∀ y, y ≠ n → HasDerivAt ψ (Φ y) y) (hψ : ContinuousAt ψ n)
+    (hL : Tendsto Φ (𝓝[<] n) (𝓝 L₁)) (hR : Tendsto Φ (𝓝[>] n) (𝓝 L₂))
+    (hne : L₁ ≠ L₂) : ¬ ∃ m, HasDerivAt ψ m n := by
+  rw [exists_hasDerivAt_iff_tendsto_flux_oneSided hd hψ hL hR]
+  exact hne
+
+/-! ## The corner of the cut-off edge probability in the scale
+
+The cut-off edge probability of a non-diagonal pair at distance `s` is `0` on `(-∞, s]` and
+`1 - exp (-(β (K s - K r)))` for `r > s`. Its derivative in the scale therefore has the
+one-sided limits `0` (from below) and `β (-K'(s))` (from above) at `r = s`; this is the
+sharpest instance of the corner of the cut-off family, and the criterion above turns the
+mismatch into the absence of a two-sided derivative. -/
+
+variable {d : ℕ} {N : ModelNorm (Fin d → ℝ)} {K K₂ : ℝ → ℝ} {β : ℝ≥0}
+
+/-- The cut-off edge probability of a non-diagonal pair vanishes below its length. -/
+theorem coe_cutoffEdgeProbability_eq_zero_of_lt {x y : Fin d → ℤ} (hxy : x ≠ y) {r : ℝ}
+    (hr : r < N (Int.cast ∘ (x - y))) :
+    (intensityProfile (cutoffKernel N K r) β s(x, y) : ℝ) = 0 := by
+  rw [coe_intensityProfile_eq]
+  have hk : (cutoffKernel N K r s(x, y) : ℝ≥0) = 0 := by
+    rw [cutoffKernel_def, radialKernel_of_ne hxy]
+    have h : cutoffProfile K r (N.toSeminorm (Int.cast ∘ (x - y))) = 0 := cutoffProfile_of_lt hr
+    rw [h, Real.toNNReal_zero]
+  rw [hk, NNReal.coe_zero, mul_zero]
+  simp
+
+/-- **Left limit of the scale derivative at an edge length.** Below the length of the pair the
+cut-off edge probability is identically zero, so its derivative tends to `0`. -/
+theorem tendsto_deriv_cutoffEdgeProbability_nhdsLT {x y : Fin d → ℤ} (hxy : x ≠ y) :
+    Tendsto (deriv fun r => (intensityProfile (cutoffKernel N K r) β s(x, y) : ℝ))
+      (𝓝[<] N (Int.cast ∘ (x - y))) (𝓝 0) := by
+  have hEq : deriv (fun r => (intensityProfile (cutoffKernel N K r) β s(x, y) : ℝ))
+      =ᶠ[𝓝[<] N (Int.cast ∘ (x - y))] fun _ => (0 : ℝ) := by
+    filter_upwards [self_mem_nhdsWithin] with r hr
+    have hev : (fun r' => (intensityProfile (cutoffKernel N K r') β s(x, y) : ℝ))
+        =ᶠ[𝓝 r] fun _ => (0 : ℝ) := by
+      filter_upwards [Iio_mem_nhds hr] with r' hr'
+      exact coe_cutoffEdgeProbability_eq_zero_of_lt hxy hr'
+    rw [Filter.EventuallyEq.deriv_eq hev]
+    simp
+  exact Filter.Tendsto.congr' hEq.symm tendsto_const_nhds
+
+/-- **Right limit of the scale derivative at an edge length.** Above the length of the pair the
+derivative of the cut-off edge probability is `β (-K' r) exp (-(β (K s - K r)))`, which tends to
+`β (-K' s)` at the corner. -/
+theorem tendsto_deriv_cutoffEdgeProbability_nhdsGT (hKa : AntitoneOn K (Ioi 0))
+    (hK₂ : ∀ t, 0 < t → HasDerivAt K (K₂ t) t) (hK₂c : ContinuousOn K₂ (Ioi 0))
+    {x y : Fin d → ℤ} (hxy : x ≠ y) :
+    Tendsto (deriv fun r => (intensityProfile (cutoffKernel N K r) β s(x, y) : ℝ))
+      (𝓝[>] N (Int.cast ∘ (x - y))) (𝓝 ((β : ℝ) * -K₂ (N (Int.cast ∘ (x - y))))) := by
+  rw [cutoffEdgeProbability_eq_one_sub_exp (N := N) hKa hxy]
+  simp only [neg_mul]
+  set s₀ : ℝ := N (Int.cast ∘ (x - y)) with hs₀
+  have hs : 0 < s₀ := N.intCast_comp_sub_pos hxy
+  have hEq : deriv (fun r => 1 - Real.exp (-(β * cutoffProfile K r s₀)))
+      =ᶠ[𝓝[>] s₀] fun r =>
+        (β : ℝ) * -K₂ r * Real.exp (-(β * cutoffProfile K r s₀)) := by
+    filter_upwards [self_mem_nhdsWithin] with r hr
+    have hd := hasDerivAt_cutoffEdgeProbability_if (K := K) (K' := -K₂ r) (r := r) (s := s₀)
+      (ne_of_lt hr) (by simpa using hK₂ r (hs.trans hr)) (β : ℝ)
+    rw [hd.deriv, ite_eq_left hr.le]
+  rw [tendsto_congr' hEq]
+  have hKcont : Tendsto K (𝓝[>] s₀) (𝓝 (K s₀)) :=
+    (hK₂ s₀ hs).continuousAt.mono_left nhdsWithin_le_nhds
+  have hK₂cont : Tendsto K₂ (𝓝[>] s₀) (𝓝 (K₂ s₀)) :=
+    tendsto_nhdsWithin_mono_left (Ioi_subset_Ioi hs.le) (hK₂c s₀ hs)
+  have hprof : Tendsto (fun r => cutoffProfile K r s₀) (𝓝[>] s₀) (𝓝 0) := by
+    have hev : (fun r => cutoffProfile K r s₀) =ᶠ[𝓝[>] s₀] fun r => K s₀ - K r := by
+      filter_upwards [self_mem_nhdsWithin] with r hr
+      exact cutoffProfile_of_le hr.le
+    rw [tendsto_congr' hev]
+    simpa using hKcont.const_sub (K s₀)
+  have hexp : Tendsto (fun r => Real.exp (-(β * cutoffProfile K r s₀)))
+      (𝓝[>] s₀) (𝓝 1) := by
+    have h1 : Tendsto (fun r => -(β * cutoffProfile K r s₀)) (𝓝[>] s₀) (𝓝 0) := by
+      simpa using (hprof.const_mul (β : ℝ)).neg
+    simpa only [Function.comp_def, Real.exp_zero] using
+      Real.continuous_exp.continuousAt.tendsto.comp h1
+  have := (hK₂cont.neg.const_mul (β : ℝ)).mul hexp
+  simpa using this
+
+/-- Off the corner the cut-off edge probability of a non-diagonal pair is differentiable in the
+scale. -/
+theorem differentiableAt_cutoffEdgeProbability_of_ne (hKa : AntitoneOn K (Ioi 0))
+    (hK₂ : ∀ t, 0 < t → HasDerivAt K (K₂ t) t) {x y : Fin d → ℤ} (hxy : x ≠ y) {r : ℝ}
+    (hr : r ≠ N (Int.cast ∘ (x - y))) :
+    DifferentiableAt ℝ (fun r' => (intensityProfile (cutoffKernel N K r') β s(x, y) : ℝ)) r := by
+  set s₀ : ℝ := N (Int.cast ∘ (x - y)) with hs₀
+  have hs : 0 < s₀ := N.intCast_comp_sub_pos hxy
+  rcases lt_or_gt_of_ne hr with h | h
+  · refine ((hasDerivAt_const (x := r) (c := (0 : ℝ))).congr_of_eventuallyEq ?_).differentiableAt
+    filter_upwards [Iio_mem_nhds h] with r' hr'
+    exact coe_cutoffEdgeProbability_eq_zero_of_lt hxy hr'
+  · rw [cutoffEdgeProbability_eq_one_sub_exp (N := N) hKa hxy]
+    simp only [neg_mul]
+    exact (hasDerivAt_cutoffEdgeProbability_if (K := K) (K' := -K₂ r) (r := r) (s := s₀)
+      (ne_of_lt h) (by simpa using hK₂ r (hs.trans h)) (β : ℝ)).differentiableAt
+
+/-- The cut-off edge probability of a non-diagonal pair is continuous in the scale at the corner:
+both one-sided branches meet at `0`. -/
+theorem continuousAt_cutoffEdgeProbability (hKa : AntitoneOn K (Ioi 0))
+    (hK₂ : ∀ t, 0 < t → HasDerivAt K (K₂ t) t) {x y : Fin d → ℤ} (hxy : x ≠ y) :
+    ContinuousAt (fun r' => (intensityProfile (cutoffKernel N K r') β s(x, y) : ℝ))
+      (N (Int.cast ∘ (x - y))) := by
+  rw [cutoffEdgeProbability_eq_one_sub_exp (N := N) hKa hxy]
+  simp only [neg_mul]
+  set s₀ : ℝ := N (Int.cast ∘ (x - y)) with hs₀
+  have hs : 0 < s₀ := N.intCast_comp_sub_pos hxy
+  have hbound : ∀ r : ℝ, ‖cutoffProfile K r s₀‖ ≤ ‖K s₀ - K r‖ := by
+    intro r
+    rw [Real.norm_eq_abs, Real.norm_eq_abs]
+    rcases le_or_gt s₀ r with h | h
+    · rw [cutoffProfile_of_le h]
+    · rw [cutoffProfile_of_lt h, abs_zero]
+      exact abs_nonneg _
+  have hdiff : Tendsto (fun r => K s₀ - K r) (𝓝 s₀) (𝓝 0) := by
+    simpa using (hK₂ s₀ hs).continuousAt.const_sub (K s₀)
+  have hnorm : Tendsto (fun r => ‖K s₀ - K r‖) (𝓝 s₀) (𝓝 0) := by
+    simpa using hdiff.norm
+  have hprof : Tendsto (fun r => cutoffProfile K r s₀) (𝓝 s₀) (𝓝 0) :=
+    squeeze_zero_norm hbound hnorm
+  have hexp : Tendsto (fun r => Real.exp (-(β * cutoffProfile K r s₀)))
+      (𝓝 s₀) (𝓝 1) := by
+    have h1 : Tendsto (fun r => -(β * cutoffProfile K r s₀)) (𝓝 s₀) (𝓝 0) := by
+      simpa using (hprof.const_mul (β : ℝ)).neg
+    simpa only [Function.comp_def, Real.exp_zero] using
+      Real.continuous_exp.continuousAt.tendsto.comp h1
+  have hmain : Tendsto (fun r => 1 - Real.exp (-(β * cutoffProfile K r s₀)))
+      (𝓝 s₀) (𝓝 0) := by
+    simpa using (tendsto_const_nhds.sub hexp :
+      Tendsto (fun r => 1 - Real.exp (-(β * cutoffProfile K r s₀))) (𝓝 s₀) (𝓝 (1 - 1)))
+  have hval : (fun r => 1 - Real.exp (-(β * cutoffProfile K r s₀))) s₀ = 0 := by
+    have h0 : cutoffProfile K s₀ s₀ = 0 := by
+      rw [cutoffProfile_of_le (le_refl s₀), sub_self]
+    simp only [h0, mul_zero, neg_zero, Real.exp_zero, sub_self]
+  change Tendsto (fun r => 1 - Real.exp (-(β * cutoffProfile K r s₀))) (𝓝 s₀)
+    (𝓝 ((fun r => 1 - Real.exp (-(β * cutoffProfile K r s₀))) s₀))
+  rw [hval]
+  exact hmain
+
+/-- **The corner of the cut-off edge probability, seen through the criterion.** At the length of
+a non-diagonal pair the one-sided limits of the scale derivative are `0` and `β (-K' s)`; when
+the latter is nonzero no two-sided derivative exists. This is the model-level instance of
+`not_exists_hasDerivAt_of_tendsto_deriv_oneSided_ne`, with both one-sided values explicit. -/
+theorem not_exists_hasDerivAt_cutoffEdgeProbability_oneSided (hKa : AntitoneOn K (Ioi 0))
+    (hK₂ : ∀ t, 0 < t → HasDerivAt K (K₂ t) t) (hK₂c : ContinuousOn K₂ (Ioi 0))
+    {x y : Fin d → ℤ} (hxy : x ≠ y)
+    (hβK : (β : ℝ) * -K₂ (N (Int.cast ∘ (x - y))) ≠ 0) :
+    ¬ ∃ m, HasDerivAt (fun r => (intensityProfile (cutoffKernel N K r) β s(x, y) : ℝ)) m
+      (N (Int.cast ∘ (x - y))) := by
+  refine not_exists_hasDerivAt_of_tendsto_deriv_oneSided_ne
+    (fun r hr => differentiableAt_cutoffEdgeProbability_of_ne hKa hK₂ hxy (ne_of_lt hr))
+    (fun r hr => differentiableAt_cutoffEdgeProbability_of_ne hKa hK₂ hxy (ne_of_gt hr))
+    (continuousAt_cutoffEdgeProbability hKa hK₂ hxy)
+    (tendsto_deriv_cutoffEdgeProbability_nhdsLT (K := K) (β := β) hxy)
+    (tendsto_deriv_cutoffEdgeProbability_nhdsGT hKa hK₂ hK₂c hxy) ?_
+  intro h0
+  exact hβK h0.symm
+
+/-- **Corner recovery at an edge length, sharp form.** The cut-off edge probability of a
+non-diagonal pair has a two-sided derivative in the scale at its own length if and only if the
+cut-off rate `β (-K')` vanishes there. So the corner restriction of
+`hasDerivAt_integral_cutoff_pow_binomial_of_root_moment_of_diagram` cannot be dropped at a scale
+carrying a nonvanishing rate: the one-sided values really differ. -/
+theorem exists_hasDerivAt_cutoffEdgeProbability_iff (hKa : AntitoneOn K (Ioi 0))
+    (hK₂ : ∀ t, 0 < t → HasDerivAt K (K₂ t) t) (hK₂c : ContinuousOn K₂ (Ioi 0))
+    {x y : Fin d → ℤ} (hxy : x ≠ y) :
+    (∃ m, HasDerivAt (fun r => (intensityProfile (cutoffKernel N K r) β s(x, y) : ℝ)) m
+      (N (Int.cast ∘ (x - y)))) ↔ (β : ℝ) * -K₂ (N (Int.cast ∘ (x - y))) = 0 := by
+  have hcrit := exists_hasDerivAt_iff_tendsto_deriv_oneSided
+    (f := fun r => (intensityProfile (cutoffKernel N K r) β s(x, y) : ℝ))
+    (n := N (Int.cast ∘ (x - y))) (L₁ := 0) (L₂ := (β : ℝ) * -K₂ (N (Int.cast ∘ (x - y))))
+    (fun r hr => differentiableAt_cutoffEdgeProbability_of_ne hKa hK₂ hxy (ne_of_lt hr))
+    (fun r hr => differentiableAt_cutoffEdgeProbability_of_ne hKa hK₂ hxy (ne_of_gt hr))
+    (continuousAt_cutoffEdgeProbability hKa hK₂ hxy)
+    (tendsto_deriv_cutoffEdgeProbability_nhdsLT (K := K) (β := β) hxy)
+    (tendsto_deriv_cutoffEdgeProbability_nhdsGT hKa hK₂ hK₂c hxy)
+  refine hcrit.trans (eq_comm (a := (0 : ℝ)) (b := (β : ℝ) * -K₂ (N (Int.cast ∘ (x - y)))))
+
+/-- **The linear model has a genuine corner with the maximal rate.** For the profile
+`K s = -s` and `β = 1` the cut-off rate at every positive scale is `β (-K') = 1`, so the cut-off
+edge probability of any non-diagonal pair has no two-sided derivative in the scale at its own
+length. -/
+theorem not_exists_hasDerivAt_cutoffEdgeProbability_linear {d : ℕ} {N : ModelNorm (Fin d → ℝ)}
+    {x y : Fin d → ℤ} (hxy : x ≠ y) :
+    ¬ ∃ m, HasDerivAt (fun r => (intensityProfile
+        (cutoffKernel N (fun s => -s) r) 1 s(x, y) : ℝ)) m (N (Int.cast ∘ (x - y))) := by
+  refine not_exists_hasDerivAt_cutoffEdgeProbability_oneSided
+    (K := fun s => -s) (K₂ := fun _ => -1) (β := 1)
+    (fun a ha b hb hab => neg_le_neg hab)
+    (fun t ht => by simpa using (hasDerivAt_id t).const_mul (-1))
+    (continuousOn_const) hxy ?_
+  norm_num
+
+/-- **The rate factor of the derivative coefficient does not change inside a corner-free
+interval.** For `r, r'` in an interval containing no lattice norm, the paper's ball indicator is
+the same, so the only scale dependence of the right-hand side inside the interval comes from the
+law and the rate. -/
+theorem ball_indicator_eq_of_corner_free {d : ℕ} (N : Seminorm ℝ (Fin d → ℝ)) {u v r r' : ℝ}
+    (hcorner : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Ioo u v) (hr : r ∈ Ioo u v)
+    (hr' : r' ∈ Ioo u v) (z : Fin d → ℤ) :
+    (if N (Int.cast ∘ z) ≤ r then (1 : ℝ≥0∞) else 0) =
+      if N (Int.cast ∘ z) ≤ r' then 1 else 0 := by
+  have hz : N (Int.cast ∘ z) ∉ Ioo u v := hcorner z
+  rcases le_or_gt (N (Int.cast ∘ z)) u with h | h
+  · have h1 : N (Int.cast ∘ z) ≤ r := h.trans hr.1.le
+    have h2 : N (Int.cast ∘ z) ≤ r' := h.trans hr'.1.le
+    rw [ite_eq_left h1, ite_eq_left h2]
+  · have hlt : v ≤ N (Int.cast ∘ z) := by
+      by_contra hlt
+      exact hz ⟨h, not_le.1 hlt⟩
+    have h1 : ¬ N (Int.cast ∘ z) ≤ r := not_le.2 (hr.2.trans_le hlt)
+    have h2 : ¬ N (Int.cast ∘ z) ≤ r' := not_le.2 (hr'.2.trans_le hlt)
+    rw [ite_eq_right h1, ite_eq_right h2]
+
+/-- **The rate factor of the derivative coefficient jumps at an exact-edge scale.** For a
+non-diagonal pair the strict radial factor `1 (N(x − y) < r)` of the cut-off derivative
+coefficient tends to `0` from below the pair's length and to `1` from above it. -/
+theorem tendsto_radialKernel_indicator_nhdsLT {d : ℕ} {N : Seminorm ℝ (Fin d → ℝ)}
+    {x y : Fin d → ℤ} (hxy : x ≠ y) :
+    Tendsto (fun r => (radialKernel N (fun s => if s < r then 1 else 0) s(x, y) : ℝ))
+      (𝓝[<] N (Int.cast ∘ (x - y))) (𝓝 0) := by
+  have hfun : ∀ r : ℝ, (radialKernel N (fun s => if s < r then 1 else 0) s(x, y) : ℝ) =
+      if N (Int.cast ∘ (x - y)) < r then 1 else 0 := by
+    intro r
+    rw [coe_radialKernel_of_ne hxy (by positivity)]
+  simp only [hfun]
+  have hEq : (fun r => (if N (Int.cast ∘ (x - y)) < r then (1 : ℝ) else 0))
+      =ᶠ[𝓝[<] N (Int.cast ∘ (x - y))] fun _ => (0 : ℝ) := by
+    filter_upwards [self_mem_nhdsWithin] with r hr
+    rw [ite_eq_right (not_lt.2 hr.le)]
+  exact Filter.Tendsto.congr' hEq.symm tendsto_const_nhds
+
+/-- The same rate factor tends to `1` from above the pair's length. -/
+theorem tendsto_radialKernel_indicator_nhdsGT {d : ℕ} {N : Seminorm ℝ (Fin d → ℝ)}
+    {x y : Fin d → ℤ} (hxy : x ≠ y) :
+    Tendsto (fun r => (radialKernel N (fun s => if s < r then 1 else 0) s(x, y) : ℝ))
+      (𝓝[>] N (Int.cast ∘ (x - y))) (𝓝 1) := by
+  have hfun : ∀ r : ℝ, (radialKernel N (fun s => if s < r then 1 else 0) s(x, y) : ℝ) =
+      if N (Int.cast ∘ (x - y)) < r then 1 else 0 := by
+    intro r
+    rw [coe_radialKernel_of_ne hxy (by positivity)]
+  simp only [hfun]
+  have hEq : (fun r => (if N (Int.cast ∘ (x - y)) < r then (1 : ℝ) else 0))
+      =ᶠ[𝓝[>] N (Int.cast ∘ (x - y))] fun _ => (1 : ℝ) := by
+    filter_upwards [self_mem_nhdsWithin] with r hr
+    rw [ite_eq_left (show N (Int.cast ∘ (x - y)) < r from hr)]
+  exact Filter.Tendsto.congr' hEq.symm tendsto_const_nhds
+
+/-! ## The strict radial indicator and the closed ball at a corner
+
+The derivative coefficient of the cut-off family carries the *strict* radial indicator
+`1 (N (y - x) < r)` (the edge of length exactly `r` is closed at scale `r`, so its contribution
+to the derivative vanishes), while the Russo formula of the paper carries the closed ball
+`1 (‖y - x‖ ≤ r)`. Off the corners the two agree (`indicator_lt_eq_le`); at a corner they differ
+by exactly the displacements of norm exactly `n`. -/
+
+/-- At a corner `n` the closed-ball weight is the strict weight plus the exact-length weight. -/
+theorem tsum_ball_indicator_eq_strict_add_corner {d : ℕ} (N : Seminorm ℝ (Fin d → ℝ))
+    (f : (Fin d → ℤ) → ℝ≥0∞) (n : ℝ) :
+    (∑' (z : Fin d → ℤ), (if N (Int.cast ∘ z) ≤ n then (1 : ℝ≥0∞) else 0) * f z) =
+      (∑' (z : Fin d → ℤ), (if N (Int.cast ∘ z) < n then (1 : ℝ≥0∞) else 0) * f z) +
+        ∑' (z : Fin d → ℤ), (if N (Int.cast ∘ z) = n then (1 : ℝ≥0∞) else 0) * f z := by
+  rw [← ENNReal.tsum_add]
+  refine tsum_congr fun z => ?_
+  rcases lt_trichotomy (N (Int.cast ∘ z)) n with h | h | h
+  · simp [h, h.le, ne_of_lt h]
+  · simp [h]
+  · have hle : ¬ N (Int.cast ∘ z) ≤ n := not_le.2 h
+    have hlt : ¬ N (Int.cast ∘ z) < n := not_lt.2 h.le
+    have hne : N (Int.cast ∘ z) ≠ n := ne_of_gt h
+    simp [hle, hlt, hne]
+
+/-- Consequently, at a corner `n` the closed-ball weight is *strictly* larger than the strict
+weight whenever the exact-length term does not vanish and the strict sum is finite. So the two
+conventions of the derivative formula differ exactly by the flux through the displacements of
+norm exactly `n`. -/
+theorem tsum_strict_indicator_lt_ball {d : ℕ} (N : Seminorm ℝ (Fin d → ℝ))
+    (f : (Fin d → ℤ) → ℝ≥0∞) (n : ℝ)
+    (hC : (∑' (z : Fin d → ℤ), (if N (Int.cast ∘ z) = n then (1 : ℝ≥0∞) else 0) * f z) ≠ 0)
+    (hS : (∑' (z : Fin d → ℤ), (if N (Int.cast ∘ z) < n then (1 : ℝ≥0∞) else 0) * f z) ≠ ⊤) :
+    (∑' (z : Fin d → ℤ), (if N (Int.cast ∘ z) < n then (1 : ℝ≥0∞) else 0) * f z) <
+      ∑' (z : Fin d → ℤ), (if N (Int.cast ∘ z) ≤ n then (1 : ℝ≥0∞) else 0) * f z := by
+  rw [tsum_ball_indicator_eq_strict_add_corner N f n]
+  exact ENNReal.lt_add_right hS hC
 
 end PercLib.Models.LongRange
