@@ -318,6 +318,7 @@ public import PercLib.Percolation.Bond.Tags.SubcriticalBound
 public import PercLib.Percolation.Bond.Tags.Tightness
 public import PercLib.Percolation.Bond.Tags.TreeGraph
 public import PercLib.Percolation.Bond.Tags.WindowAndCorrelation
+public import PercLib.Percolation.Bond.Tags.WindowMassMoments
 public import PercLib.Percolation.Bond.ThetaSemicontinuity
 public import PercLib.Percolation.Bond.Tightness.BKStep
 public import PercLib.Percolation.Bond.Tightness.Defs
@@ -338,6 +339,7 @@ public import PercLib.Percolation.Bond.TriangleDecay
 public import PercLib.Percolation.Bond.UniformVolumeTail
 public import PercLib.Percolation.Bond.VolumeTails
 public import PercLib.Percolation.Bond.WalkSum
+public import PercLib.Percolation.Bond.WindowMassMoments
 public import PercLib.Percolation.Bond.WindowPartition
 public import PercLib.Percolation.Bond.WiredDerivative
 public import PercLib.Percolation.Bond.WiredDerivativeFormula
