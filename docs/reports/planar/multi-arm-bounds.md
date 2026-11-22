@@ -18,7 +18,8 @@ Three of the four remaining A1 items are done, in the order A2 needs them:
 * item 6, the a priori upper bound for multi-arm events, for both colours (Nolin's
   Proposition 14, upper half).
 
-Item 7 (colour inversion at `1/2`) and the optional item 4 are not done; see "Not done here".
+Item 7 (colour inversion at `1/2`) was done afterwards (A1c, `colour-inversion.md`); the
+optional item 4 is not done; see "Not done here".
 
 Numbering: these are the numbers of the published version (EJP 13, 2008). The arXiv version
 0711.4948v1 numbers them one lower: Lemma 13 is its Lemma 12, Proposition 14 its
@@ -207,14 +208,9 @@ start, so it is used directly.
 
 ## Not done here
 
-* **Item 7, colour inversion at `1/2`**:
-  `law q (multiArmEvent σ z r R) ≤ law q (multiArmEvent (not ∘ σ) z (r + 1) (R - 1))` for
-  `r + 2 < R`, at `1/2`. The route checked on paper in `multi-arm-basics.md`, §"Not done here",
-  stands. Its new ingredient is order invariance for walks contained in the doubled arms of a
-  disjoint family and stopped at their first exit from an intermediate doubled box, which is
-  `cyclicallyOrdered_end_iff_of_pairwise_disjoint` with the disjointness of
-  `IsArm.double_disjoint`. The probability step is `law_preimage_dualConfig_eq` with
-  `mem_multiArmEventTo_iff_of_agree`. About 300 lines; nothing needed from this package.
+* **Item 7, colour inversion at `1/2`**: done afterwards (A1c) in
+  `Arms/ColourInversion.lean`, `law_multiArmEvent_comp_not_le`, by the route checked on paper in
+  `multi-arm-basics.md`; see `colour-inversion.md`.
 * **Item 4** (optional): nonemptiness of the I2b example sequences for every `R ≥ 1`.
 
 ## What A2 has from A1 and A1b
