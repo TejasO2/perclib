@@ -137,6 +137,7 @@ public import PercLib.Models.Planar.Arms.MultiArmBasics
 public import PercLib.Models.Planar.Arms.MultiArmBounds
 public import PercLib.Models.Planar.Arms.OneArm
 public import PercLib.Models.Planar.Arms.QuadDuality
+public import PercLib.Models.Planar.Arms.Separation
 public import PercLib.Models.Planar.Arms.Separator
 public import PercLib.Models.Planar.Arms.ThreePoint
 public import PercLib.Models.Planar.Arms.TwoPoint
