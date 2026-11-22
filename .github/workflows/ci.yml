@@ -83,6 +83,7 @@ jobs:
       head: ${{ steps.base.outputs.head }}
     steps:
       - name: Take the result of this job in the push run of the head commit
+        id: pushrun
         if: env.USE_PUSH_RUN == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -95,6 +96,7 @@ jobs:
             || { echo "Malformed head commit or repository name."; exit 1; }
           runs="repos/$REPO/actions/workflows/ci.yml/runs?event=push&branch=$INTEGRATION_BRANCH&head_sha=$HEAD_SHA&per_page=1"
           run_id=""
+          conclusion=""
           # A failed API call (5xx, rate limit) counts as "not found yet" and is retried
           # within the same budget of 90 polls; no run id at the end fails the step.
           for _ in $(seq 90); do
@@ -112,17 +114,36 @@ jobs:
               && gh api "repos/$REPO/actions/runs/$run_id/jobs?filter=latest&per_page=100" > "$RUNNER_TEMP/jobs.json" \
               || { echo "GitHub API error; retrying in 60 s."; sleep 60; continue; }
             job=$(jq -c --arg j "$JOB" '[.jobs[] | select(.name == $j)][0] // {}' "$RUNNER_TEMP/jobs.json")
-            [ "$(jq -r '.status // ""' <<< "$job")" = completed ] && break
+            if [ "$(jq -r '.status // ""' <<< "$job")" = completed ]; then
+              conclusion=$(jq -r '.conclusion // ""' <<< "$job")
+              break
+            fi
             [ "$run_status" = completed ] \
-              && { echo "The push run completed without running job $JOB."; exit 1; }
+              && { echo "The push run completed without running job $JOB."; break; }
             sleep 60
           done
-          conclusion=$(jq -r '.conclusion // ""' <<< "$job")
-          echo "Job $JOB of the push run: $conclusion"
-          [ "$conclusion" = success ]
+          echo "Job $JOB of the push run: ${conclusion:-not run}"
+          [ "$conclusion" = success ] && exit 0
+          # A push run cancelled by the concurrency group (a newer commit was pushed to the
+          # branch before it finished) has no result for this commit: then this run executes
+          # the job's own steps itself (output fallback=true). Only a job that was cancelled,
+          # skipped or not run, in a push run whose own conclusion is `cancelled`, falls back;
+          # every other outcome fails closed.
+          case $conclusion in cancelled | skipped | "") ;; *) exit 1 ;; esac
+          while :; do
+            gh api "repos/$REPO/actions/runs/$run_id" > "$RUNNER_TEMP/run.json" \
+              || { echo "GitHub API error; retrying in 60 s."; sleep 60; continue; }
+            [ "$(jq -r '.status // ""' "$RUNNER_TEMP/run.json")" = completed ] && break
+            sleep 60
+          done
+          run_conclusion=$(jq -r '.conclusion // ""' "$RUNNER_TEMP/run.json")
+          echo "Push run conclusion: ${run_conclusion:-none}"
+          [ "$run_conclusion" = cancelled ] || exit 1
+          echo "The push run was cancelled; this run executes job $JOB itself."
+          echo "fallback=true" >> "$GITHUB_OUTPUT"
 
       - name: Check out the pull request head (or the pushed commit) with full history
-        if: env.USE_PUSH_RUN != 'true'
+        if: (env.USE_PUSH_RUN != 'true' || steps.pushrun.outputs.fallback == 'true')
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
@@ -130,17 +151,17 @@ jobs:
           persist-credentials: false
 
       - name: Set up Python
-        if: env.USE_PUSH_RUN != 'true'
+        if: (env.USE_PUSH_RUN != 'true' || steps.pushrun.outputs.fallback == 'true')
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.13'
 
       - name: Install elan and the pinned toolchain
-        if: env.USE_PUSH_RUN != 'true'
+        if: (env.USE_PUSH_RUN != 'true' || steps.pushrun.outputs.fallback == 'true')
         run: scripts/ci_install_elan.sh
 
       - name: Restore the library build
-        if: github.event_name == 'push' && env.USE_PUSH_RUN != 'true'
+        if: github.event_name == 'push' && (env.USE_PUSH_RUN != 'true' || steps.pushrun.outputs.fallback == 'true')
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .lake/build
@@ -149,17 +170,17 @@ jobs:
             lake-build-${{ runner.os }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
 
       - name: Forbidden-construct scan before any build
-        if: env.USE_PUSH_RUN != 'true'
+        if: (env.USE_PUSH_RUN != 'true' || steps.pushrun.outputs.fallback == 'true')
         run: python3 scripts/check_forbidden.py PercLib
 
       - name: Fetch dependencies and the mathlib build cache
-        if: env.USE_PUSH_RUN != 'true'
+        if: (env.USE_PUSH_RUN != 'true' || steps.pushrun.outputs.fallback == 'true')
         run: |
           lake exe cache get
           df -h .
 
       - name: Determine the base commit
-        if: env.USE_PUSH_RUN != 'true'
+        if: (env.USE_PUSH_RUN != 'true' || steps.pushrun.outputs.fallback == 'true')
         id: base
         env:
           EVENT: ${{ github.event_name }}
@@ -173,24 +194,24 @@ jobs:
           echo "Base: ${base:-none}; head: $head"
 
       - name: Build the base and extract its manifest
-        if: steps.base.outputs.base != '' && env.USE_PUSH_RUN != 'true'
+        if: steps.base.outputs.base != '' && (env.USE_PUSH_RUN != 'true' || steps.pushrun.outputs.fallback == 'true')
         env:
           BASE: ${{ steps.base.outputs.base }}
         run: scripts/ci_base_manifest.sh "$BASE"
 
       - name: Run the gate
-        if: env.USE_PUSH_RUN != 'true'
+        if: (env.USE_PUSH_RUN != 'true' || steps.pushrun.outputs.fallback == 'true')
         env:
           BASE: ${{ steps.base.outputs.base }}
         run: scripts/gate.sh ${BASE:+"$BASE"} 2>&1 | tee .lake/gate.log
 
       - name: Manifest integration tests (need lake and the packages)
-        if: env.USE_PUSH_RUN != 'true'
+        if: (env.USE_PUSH_RUN != 'true' || steps.pushrun.outputs.fallback == 'true')
         run: python3 scripts/test_manifest.py
 
       - name: Classify the change
         id: classify
-        if: always() && env.USE_PUSH_RUN != 'true'
+        if: always() && (env.USE_PUSH_RUN != 'true' || steps.pushrun.outputs.fallback == 'true')
         env:
           BASE: ${{ steps.base.outputs.base }}
           HEAD_SHA: ${{ steps.base.outputs.head }}
@@ -210,18 +231,18 @@ jobs:
           echo "Classification: $classification"
 
       - name: Save the library build
-        if: success() && github.event_name == 'push' && env.USE_PUSH_RUN != 'true'
+        if: success() && github.event_name == 'push' && (env.USE_PUSH_RUN != 'true' || steps.pushrun.outputs.fallback == 'true')
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .lake/build
           key: lake-build-${{ runner.os }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-${{ github.sha }}
 
       - name: Collect the manifest, definitions index and frontier
-        if: success() && env.USE_PUSH_RUN != 'true'
+        if: success() && (env.USE_PUSH_RUN != 'true' || steps.pushrun.outputs.fallback == 'true')
         run: scripts/ci_artifacts.sh
 
       - name: Upload artifacts
-        if: success() && env.USE_PUSH_RUN != 'true'
+        if: success() && (env.USE_PUSH_RUN != 'true' || steps.pushrun.outputs.fallback == 'true')
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: manifest
@@ -246,6 +267,7 @@ jobs:
       contents: read
     steps:
       - name: Take the result of this job in the push run of the head commit
+        id: pushrun
         if: env.USE_PUSH_RUN == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -258,6 +280,7 @@ jobs:
             || { echo "Malformed head commit or repository name."; exit 1; }
           runs="repos/$REPO/actions/workflows/ci.yml/runs?event=push&branch=$INTEGRATION_BRANCH&head_sha=$HEAD_SHA&per_page=1"
           run_id=""
+          conclusion=""
           # A failed API call (5xx, rate limit) counts as "not found yet" and is retried
           # within the same budget of 90 polls; no run id at the end fails the step.
           for _ in $(seq 90); do
@@ -275,28 +298,47 @@ jobs:
               && gh api "repos/$REPO/actions/runs/$run_id/jobs?filter=latest&per_page=100" > "$RUNNER_TEMP/jobs.json" \
               || { echo "GitHub API error; retrying in 60 s."; sleep 60; continue; }
             job=$(jq -c --arg j "$JOB" '[.jobs[] | select(.name == $j)][0] // {}' "$RUNNER_TEMP/jobs.json")
-            [ "$(jq -r '.status // ""' <<< "$job")" = completed ] && break
+            if [ "$(jq -r '.status // ""' <<< "$job")" = completed ]; then
+              conclusion=$(jq -r '.conclusion // ""' <<< "$job")
+              break
+            fi
             [ "$run_status" = completed ] \
-              && { echo "The push run completed without running job $JOB."; exit 1; }
+              && { echo "The push run completed without running job $JOB."; break; }
             sleep 60
           done
-          conclusion=$(jq -r '.conclusion // ""' <<< "$job")
-          echo "Job $JOB of the push run: $conclusion"
-          [ "$conclusion" = success ]
+          echo "Job $JOB of the push run: ${conclusion:-not run}"
+          [ "$conclusion" = success ] && exit 0
+          # A push run cancelled by the concurrency group (a newer commit was pushed to the
+          # branch before it finished) has no result for this commit: then this run executes
+          # the job's own steps itself (output fallback=true). Only a job that was cancelled,
+          # skipped or not run, in a push run whose own conclusion is `cancelled`, falls back;
+          # every other outcome fails closed.
+          case $conclusion in cancelled | skipped | "") ;; *) exit 1 ;; esac
+          while :; do
+            gh api "repos/$REPO/actions/runs/$run_id" > "$RUNNER_TEMP/run.json" \
+              || { echo "GitHub API error; retrying in 60 s."; sleep 60; continue; }
+            [ "$(jq -r '.status // ""' "$RUNNER_TEMP/run.json")" = completed ] && break
+            sleep 60
+          done
+          run_conclusion=$(jq -r '.conclusion // ""' "$RUNNER_TEMP/run.json")
+          echo "Push run conclusion: ${run_conclusion:-none}"
+          [ "$run_conclusion" = cancelled ] || exit 1
+          echo "The push run was cancelled; this run executes job $JOB itself."
+          echo "fallback=true" >> "$GITHUB_OUTPUT"
 
       - name: Check out the commit the gate checked
-        if: env.USE_PUSH_RUN != 'true'
+        if: (env.USE_PUSH_RUN != 'true' || steps.pushrun.outputs.fallback == 'true')
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ needs.gate.outputs.head }}
           persist-credentials: false
 
       - name: Install elan and the pinned toolchain
-        if: env.USE_PUSH_RUN != 'true'
+        if: (env.USE_PUSH_RUN != 'true' || steps.pushrun.outputs.fallback == 'true')
         run: scripts/ci_install_elan.sh
 
       - name: Restore the library build saved by the gate
-        if: github.event_name == 'push' && env.USE_PUSH_RUN != 'true'
+        if: github.event_name == 'push' && (env.USE_PUSH_RUN != 'true' || steps.pushrun.outputs.fallback == 'true')
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .lake/build
@@ -305,13 +347,13 @@ jobs:
             lake-build-${{ runner.os }}-${{ hashFiles('lean-toolchain', 'lake-manifest.json') }}-
 
       - name: Fetch dependencies, mathlib build cache, and finish the build
-        if: env.USE_PUSH_RUN != 'true'
+        if: (env.USE_PUSH_RUN != 'true' || steps.pushrun.outputs.fallback == 'true')
         run: |
           lake exe cache get
           lake build
 
       - name: Kernel replay of every module
-        if: env.USE_PUSH_RUN != 'true'
+        if: (env.USE_PUSH_RUN != 'true' || steps.pushrun.outputs.fallback == 'true')
         run: scripts/kernel_replay.sh 6
 
   scripts:
