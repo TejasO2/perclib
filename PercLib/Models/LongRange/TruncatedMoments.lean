@@ -13521,3 +13521,308 @@ theorem hasDerivAt_integral_cutoff_pow_binomial_of_root_succ_moment_of_small_tai
 
 
 end PercLib.Models.LongRange
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability MeasureTheory
+open Filter Set
+open scoped ENNReal NNReal Topology
+
+open Classical in
+/-- **Uniform bound on the total absolute weighted cutoff flux.**
+
+A uniform finite root `(p+1)`-moment bound on a corner-free interval `Ioo u v` produces a single
+constant `C` such that, at every `r ∈ Ioo u v`, the weighted uncapped cutoff pivotal series is
+absolutely summable and its total mass is at most `|β(-K'(r))| * C`.
+
+The proof does not assume the finite-sum dominator `hKd` or the summand behaviour: those come from
+the root moment, through the binomial diagram. The case `β(-K'(r)) = 0`, where the summands vanish
+identically, is treated separately; the nonzero case uses the closed-coordinate criterion with the
+per-pair conversion identity. -/
+theorem exists_uniform_tsum_norm_cutoff_flux_le_of_root_succ_moment {d : ℕ}
+    {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ} (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p)
+    (M : ℝ≥0∞) (hM : M ≠ ⊤)
+    (cw : ℝ → Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ r e, cw r e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K r e : ℝ))))
+    {u v : ℝ} (hcorner : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Ioo u v)
+    (hroot : ∀ r ∈ Ioo u v, (∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ (p + 1)
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≤ M) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ r ∈ Ioo u v,
+      Summable (fun e => ‖cw r e *
+        ∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+          ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal
+          ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))‖) ∧
+      (∑' e, ‖cw r e *
+        ∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+          ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal
+          ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))‖) ≤
+        |(β : ℝ) * -K' r| * C := by
+  obtain ⟨D, hDtop, hD⟩ := exists_uniform_i41_diagram_bound_of_root_succ_moment
+    (K := K) β p M hM hroot
+  refine ⟨(∑ ℓ ∈ Finset.range p, D ℓ).toReal, ENNReal.toReal_nonneg, ?_⟩
+  have hrootp : ∀ r ∈ Ioo u v, (∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ p
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≠ ⊤ := by
+    intro r hr
+    refine ne_top_of_le_ne_top (ne_top_of_le_ne_top hM (hroot r hr)) ?_
+    refine lintegral_mono fun ω => ?_
+    have hbase : (1 : ℝ≥0∞) ≤ ((cluster ω 0).encard : ℝ≥0∞) := by
+      exact_mod_cast one_le_encard_cluster ω 0
+    exact pow_le_pow_right₀ hbase (Nat.le_succ p)
+  have hvmom : ∀ r ∈ Ioo u v, ∀ y : Fin d → ℤ,
+      (∫⁻ ω, ((cluster ω y).encard : ℝ≥0∞) ^ p
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≠ ⊤ := by
+    intro r hr y
+    exact vertex_moment_ne_top_of_root_moment β r p y (hrootp r hr)
+  have hins := insert_moments_of_vertex_moments_Ioo_modelNorm β p 0 hvmom
+  intro r hr
+  have hKd : ∀ S : Finset (Sym2 (Fin d → ℤ)), ∑ e ∈ S, |cw r e| *
+      |∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))| ≤
+      |(β : ℝ) * -K' r| * (∑ ℓ ∈ Finset.range p, D ℓ).toReal :=
+    fun S => finite_sum_cutoff_pivotal_le_of_binomial_diagram β p hp r cw hcw
+      (hins r hr) D hDtop (hD r hr) hcorner hr S
+  by_cases hrate : (β : ℝ) * -K' r = 0
+  · have hzero : (fun e : Sym2 (Fin d → ℤ) => ‖cw r e *
+        ∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+          ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal
+          ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))‖) = fun _ => 0 := by
+      funext e
+      simp [hcw r e, hrate]
+    refine ⟨?_, ?_⟩
+    · rw [hzero]
+      exact summable_zero
+    · rw [hzero, tsum_zero]
+      simp [hrate]
+  · have hfin : ∀ e, ∀ᵐ ω ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β)),
+        ((cluster (insert e ω) 0).encard : ℝ≥0∞) ≠ ⊤ := by
+      intro e
+      exact ae_ne_top_of_lintegral_pow_ne_top (measurable_encard_cluster_insert_coe e 0)
+        p hp (hins r hr e)
+    have hint : ∀ e, Integrable
+        (fun ω => (((cluster (insert e ω) 0).encard : ℝ≥0∞).toReal) ^ p)
+        (law (intensityProfile (cutoffKernel (d := d) N K r) β)) := by
+      intro e
+      exact integrable_toReal_pow_encard_cluster_insert e 0 p (hins r hr e)
+    have hKdReal : ∀ S : Finset (Sym2 (Fin d → ℤ)), ∑ e ∈ S, |cw r e| *
+        |∫ ω, ((((cluster (insert e ω) 0).encard : ℝ≥0∞).toReal) ^ p -
+          (((cluster (ω \ {e}) 0).encard : ℝ≥0∞).toReal) ^ p)
+          ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))| ≤
+        |(β : ℝ) * -K' r| * (∑ ℓ ∈ Finset.range p, D ℓ).toReal := by
+      intro S
+      refine le_trans ?_ (hKd S)
+      refine Finset.sum_le_sum fun e _ => ?_
+      rw [integral_pivotal_pow_eq_real_sub _ e 0 p (hfin e)]
+    have hclosed := summable_closed_flux_cutoff_of_insert_moments
+      (N := N.toSeminorm) (K := K) (K' := K') p β r 0 (cw r)
+      (|(β : ℝ) * -K' r| * (∑ ℓ ∈ Finset.range p, D ℓ).toReal)
+      (hcw r) hp (fun e => hins r hr e) hKdReal hrate
+    have hpair : ∀ e : Sym2 (Fin d → ℤ), cw r e *
+        ∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+          ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal
+          ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β)) =
+        ((β : ℝ) * -K' r) *
+          ((radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+            ∫ ω, (if e ∈ ω then (0 : ℝ) else
+              (((cluster (insert e ω) 0).encard : ℝ≥0∞).toReal) ^ p -
+                (((cluster ω 0).encard : ℝ≥0∞).toReal) ^ p)
+              ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) := by
+      intro e
+      rw [cutoff_weight_mul_integral_eq_rate_mul_closed_toReal p β r 0 (cw r) (hcw r)
+          hfin hint e,
+        integral_toReal_closed_pivotal _ e 0 p (hfin e)]
+    have hsum : Summable fun e : Sym2 (Fin d → ℤ) => ((β : ℝ) * -K' r) *
+        ((radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+          ∫ ω, (if e ∈ ω then (0 : ℝ) else
+            (((cluster (insert e ω) 0).encard : ℝ≥0∞).toReal) ^ p -
+              (((cluster ω 0).encard : ℝ≥0∞).toReal) ^ p)
+            ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) :=
+      hclosed.1.mul_left _
+    have hsum' : Summable fun e : Sym2 (Fin d → ℤ) => cw r e *
+        ∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+          ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal
+          ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β)) :=
+      hsum.congr fun e => (hpair e).symm
+    refine ⟨hsum'.norm, ?_⟩
+    have hnormeq : (∑' e, ‖cw r e *
+          ∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+            ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal
+            ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))‖) =
+        |(β : ℝ) * -K' r| * ∑' e,
+          |(radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+            ∫ ω, (if e ∈ ω then (0 : ℝ) else
+              (((cluster (insert e ω) 0).encard : ℝ≥0∞).toReal) ^ p -
+                (((cluster ω 0).encard : ℝ≥0∞).toReal) ^ p)
+              ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))| := by
+      have hcongr : (fun e : Sym2 (Fin d → ℤ) => ‖cw r e *
+            ∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+              ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal
+              ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))‖) =
+          fun e => |(β : ℝ) * -K' r| *
+            |(radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+              ∫ ω, (if e ∈ ω then (0 : ℝ) else
+                (((cluster (insert e ω) 0).encard : ℝ≥0∞).toReal) ^ p -
+                  (((cluster ω 0).encard : ℝ≥0∞).toReal) ^ p)
+                ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))| := by
+        funext e
+        rw [hpair e, norm_mul, Real.norm_eq_abs, Real.norm_eq_abs]
+      rw [hcongr, tsum_mul_left]
+    rw [hnormeq]
+    refine le_trans (mul_le_mul_of_nonneg_left hclosed.2 (abs_nonneg _)) ?_
+    rw [abs_inv, ← mul_assoc, mul_inv_cancel₀ (abs_ne_zero.mpr hrate), one_mul]
+
+end PercLib.Models.LongRange
+
+namespace PercLib.Analysis
+
+/-- A finite `ℝ≥0∞`-valued tail on a cofinite set forces summability of the norm series. -/
+theorem summable_norm_of_ennreal_tsum_compl_ne_top {ι : Type*} (g : ι → ℝ) (F : Finset ι)
+    (h : (∑' e : ↥((F : Set ι)ᶜ), ENNReal.ofReal ‖g e.1‖) ≠ ⊤) :
+    Summable fun e => ‖g e‖ := by
+  have hsub : Summable fun e : ↥((F : Set ι)ᶜ) => ‖g (e : ι)‖ := by
+    refine summable_of_sum_le (f := fun e : ↥((F : Set ι)ᶜ) => ‖g (e : ι)‖)
+      (c := (∑' e : ↥((F : Set ι)ᶜ), ENNReal.ofReal ‖g (e : ι)‖).toReal)
+      (fun e => norm_nonneg _) fun s => ?_
+    have hle : (∑ e ∈ s, ENNReal.ofReal ‖g (e : ι)‖) ≤
+        ∑' e : ↥((F : Set ι)ᶜ), ENNReal.ofReal ‖g (e : ι)‖ := ENNReal.sum_le_tsum s
+    have hfin : (∑ e ∈ s, ENNReal.ofReal ‖g (e : ι)‖) =
+        ENNReal.ofReal (∑ e ∈ s, ‖g (e : ι)‖) :=
+      (ENNReal.ofReal_sum_of_nonneg (fun e _ => norm_nonneg _)).symm
+    have hto : (∑ e ∈ s, ENNReal.ofReal ‖g (e : ι)‖).toReal = ∑ e ∈ s, ‖g (e : ι)‖ := by
+      rw [hfin, ENNReal.toReal_ofReal (Finset.sum_nonneg (fun e _ => norm_nonneg _))]
+    calc ∑ e ∈ s, ‖g (e : ι)‖ = (∑ e ∈ s, ENNReal.ofReal ‖g (e : ι)‖).toReal := hto.symm
+      _ ≤ (∑' e : ↥((F : Set ι)ᶜ), ENNReal.ofReal ‖g (e : ι)‖).toReal :=
+          ENNReal.toReal_mono h hle
+  exact (Finset.summable_compl_iff (s := F) (f := fun e : ι => ‖g e‖)).mp hsub
+
+/-- A local `ℝ≥0∞` small-tail estimate gives pointwise absolute summability. -/
+theorem summable_of_local_ennreal_tail {ι : Type*} {s : Set ℝ} {f : ι → ℝ → ℝ}
+    (htail : ∀ x₀ ∈ s, ∀ ε > 0, ∃ U ∈ 𝓝 x₀, ∃ F : Finset ι, ∀ x ∈ U ∩ s,
+      (∑' e : ↥((F : Set ι)ᶜ), ENNReal.ofReal ‖f e.1 x‖) ≤ ENNReal.ofReal ε) :
+    ∀ x ∈ s, Summable fun e => ‖f e x‖ := by
+  intro x hx
+  obtain ⟨U, hU, F, hF⟩ := htail x hx 1 one_pos
+  have hxU : x ∈ U := mem_of_mem_nhds hU
+  have hle : (∑' e : ↥((F : Set ι)ᶜ), ENNReal.ofReal ‖f e.1 x‖) ≤ 1 := by
+    simpa using hF x ⟨hxU, hx⟩
+  exact summable_norm_of_ennreal_tsum_compl_ne_top (fun e => f e x) F
+    (ne_top_of_le_ne_top ENNReal.one_ne_top hle)
+
+/-- A real tail bound follows from the `ℝ≥0∞` one, using the summability it supplies. -/
+theorem tsum_compl_le_of_ennreal_tail {ι : Type*} {g : ι → ℝ} (F : Finset ι) {ε : ℝ}
+    (h : (∑' e : ↥((F : Set ι)ᶜ), ENNReal.ofReal ‖g e.1‖) ≤ ENNReal.ofReal ε)
+    (hε : 0 ≤ ε) (hsum : Summable fun e => ‖g e‖) :
+    (∑' e : ↥((F : Set ι)ᶜ), ‖g e.1‖) ≤ ε := by
+  have hsub : Summable fun e : ↥((F : Set ι)ᶜ) => ‖g (e : ι)‖ := hsum.subtype _
+  have hkey : ENNReal.ofReal (∑' e : ↥((F : Set ι)ᶜ), ‖g (e : ι)‖) =
+      ∑' e : ↥((F : Set ι)ᶜ), ENNReal.ofReal ‖g (e : ι)‖ :=
+    ENNReal.ofReal_tsum_of_nonneg (f := fun e : ↥((F : Set ι)ᶜ) => ‖g (e : ι)‖)
+      (fun e => norm_nonneg _) hsub
+  rw [← hkey] at h
+  exact (ENNReal.ofReal_le_ofReal_iff hε).mp h
+
+/-- **Continuity of a series from a local `ℝ≥0∞` small-tail estimate.**
+
+This is `continuousOn_tsum_of_uniform_tail` with the pointwise absolute summability hypothesis
+removed: the `ℝ≥0∞` tail bound is total (it is `⊤` exactly when the tail fails to be summable),
+so it already implies summability at every point of `s`. -/
+theorem continuousOn_tsum_of_local_tail_ennreal {ι : Type*} {s : Set ℝ} {f : ι → ℝ → ℝ}
+    (hcont : ∀ e, ContinuousOn (f e) s)
+    (htail : ∀ x₀ ∈ s, ∀ ε > 0, ∃ U ∈ 𝓝 x₀, ∃ F : Finset ι, ∀ x ∈ U ∩ s,
+      (∑' e : ↥((F : Set ι)ᶜ), ENNReal.ofReal ‖f e.1 x‖) ≤ ENNReal.ofReal ε) :
+    ContinuousOn (fun x => ∑' e, f e x) s := by
+  have habs := summable_of_local_ennreal_tail htail
+  refine continuousOn_tsum_of_uniform_tail hcont habs fun x₀ hx₀ ε hε => ?_
+  obtain ⟨U, hU, F, hF⟩ := htail x₀ hx₀ ε hε
+  exact ⟨U, hU, F, fun x hx =>
+    tsum_compl_le_of_ennreal_tail F (hF x hx) hε.le (habs x hx.2)⟩
+
+/-- The `ℝ≥0∞` local tail is equivalent to a bound on every finite sub-sum of the complement,
+which is the form supplied by a finite-exhaustion estimate. -/
+theorem localTail_ennreal_of_finite_subset_tail {ι : Type*} {s : Set ℝ} {f : ι → ℝ → ℝ}
+    (h : ∀ x₀ ∈ s, ∀ ε > 0, ∃ U ∈ 𝓝 x₀, ∃ F : Finset ι, ∀ x ∈ U ∩ s,
+      ∀ t : Finset ↥((F : Set ι)ᶜ), ∑ e ∈ t, ‖f (e : ι) x‖ ≤ ε) :
+    ∀ x₀ ∈ s, ∀ ε > 0, ∃ U ∈ 𝓝 x₀, ∃ F : Finset ι, ∀ x ∈ U ∩ s,
+      (∑' e : ↥((F : Set ι)ᶜ), ENNReal.ofReal ‖f e.1 x‖) ≤ ENNReal.ofReal ε := by
+  intro x₀ hx₀ ε hε
+  obtain ⟨U, hU, F, hF⟩ := h x₀ hx₀ ε hε
+  refine ⟨U, hU, F, fun x hx => ?_⟩
+  have hbound : ∀ t : Finset ↥((F : Set ι)ᶜ),
+      ∑ e ∈ t, ENNReal.ofReal ‖f (e : ι) x‖ ≤ ENNReal.ofReal ε := by
+    intro t
+    have hsplit : (∑ e ∈ t, ENNReal.ofReal ‖f (e : ι) x‖) =
+        ENNReal.ofReal (∑ e ∈ t, ‖f (e : ι) x‖) :=
+      (ENNReal.ofReal_sum_of_nonneg (f := fun e : ↥((F : Set ι)ᶜ) => ‖f (e : ι) x‖)
+        (fun e _ => norm_nonneg _)).symm
+    rw [hsplit]
+    exact ENNReal.ofReal_le_ofReal (hF x hx t)
+  calc (∑' e : ↥((F : Set ι)ᶜ), ENNReal.ofReal ‖f (e : ι) x‖)
+      = ⨆ t : Finset ↥((F : Set ι)ᶜ), ∑ e ∈ t, ENNReal.ofReal ‖f (e : ι) x‖ :=
+        ENNReal.tsum_eq_iSup_sum
+    _ ≤ ENNReal.ofReal ε := iSup_le hbound
+
+/-- The finite-subset form of the local small tail already gives continuity, with no separate
+summability hypothesis. -/
+theorem continuousOn_tsum_of_finite_subset_tail {ι : Type*} {s : Set ℝ} {f : ι → ℝ → ℝ}
+    (hcont : ∀ e, ContinuousOn (f e) s)
+    (h : ∀ x₀ ∈ s, ∀ ε > 0, ∃ U ∈ 𝓝 x₀, ∃ F : Finset ι, ∀ x ∈ U ∩ s,
+      ∀ t : Finset ↥((F : Set ι)ᶜ), ∑ e ∈ t, ‖f (e : ι) x‖ ≤ ε) :
+    ContinuousOn (fun x => ∑' e, f e x) s :=
+  continuousOn_tsum_of_local_tail_ennreal hcont (localTail_ennreal_of_finite_subset_tail h)
+
+/-- Conversely, the `ℝ≥0∞` local tail bounds every finite sub-sum of the complement. -/
+theorem finite_subset_tail_of_localTail_ennreal {ι : Type*} {s : Set ℝ} {f : ι → ℝ → ℝ}
+    (htail : ∀ x₀ ∈ s, ∀ ε > 0, ∃ U ∈ 𝓝 x₀, ∃ F : Finset ι, ∀ x ∈ U ∩ s,
+      (∑' e : ↥((F : Set ι)ᶜ), ENNReal.ofReal ‖f e.1 x‖) ≤ ENNReal.ofReal ε) :
+    ∀ x₀ ∈ s, ∀ ε > 0, ∃ U ∈ 𝓝 x₀, ∃ F : Finset ι, ∀ x ∈ U ∩ s,
+      ∀ t : Finset ↥((F : Set ι)ᶜ), ∑ e ∈ t, ‖f (e : ι) x‖ ≤ ε := by
+  intro x₀ hx₀ ε hε
+  obtain ⟨U, hU, F, hF⟩ := htail x₀ hx₀ ε hε
+  refine ⟨U, hU, F, fun x hx t => ?_⟩
+  have hsplit : (∑ e ∈ t, ENNReal.ofReal ‖f (e : ι) x‖) =
+      ENNReal.ofReal (∑ e ∈ t, ‖f (e : ι) x‖) :=
+    (ENNReal.ofReal_sum_of_nonneg (f := fun e : ↥((F : Set ι)ᶜ) => ‖f (e : ι) x‖)
+      (fun e _ => norm_nonneg _)).symm
+  have hle : (∑ e ∈ t, ENNReal.ofReal ‖f (e : ι) x‖) ≤ ENNReal.ofReal ε :=
+    (ENNReal.sum_le_tsum t).trans (hF x hx)
+  rw [hsplit] at hle
+  exact (ENNReal.ofReal_le_ofReal_iff hε.le).mp hle
+
+/-- A local summable majorant supplies the `ℝ≥0∞` local small-tail hypothesis. -/
+theorem localTail_ennreal_of_local_dominator {ι : Type*} {s : Set ℝ} {f : ι → ℝ → ℝ}
+    (hloc : ∀ x₀ ∈ s, ∃ U ∈ 𝓝 x₀, ∃ g : ι → ℝ, Summable g ∧
+      ∀ e, ∀ x ∈ U ∩ s, ‖f e x‖ ≤ g e) :
+    ∀ x₀ ∈ s, ∀ ε > 0, ∃ U ∈ 𝓝 x₀, ∃ F : Finset ι, ∀ x ∈ U ∩ s,
+      (∑' e : ↥((F : Set ι)ᶜ), ENNReal.ofReal ‖f e.1 x‖) ≤ ENNReal.ofReal ε := by
+  intro x₀ hx₀ ε hε
+  obtain ⟨U, hU, g, hg, hb⟩ := hloc x₀ hx₀
+  have hx₀U : x₀ ∈ U := mem_of_mem_nhds hU
+  have hg0 : ∀ e, 0 ≤ g e := fun e => (norm_nonneg _).trans (hb e x₀ ⟨hx₀U, hx₀⟩)
+  obtain ⟨F, hF⟩ := exists_finset_tsum_compl_le hg hg0 hε
+  refine ⟨U, hU, F, fun x hx => ?_⟩
+  have hsub : Summable fun e : ↥((F : Set ι)ᶜ) => g (e : ι) := hg.subtype _
+  calc (∑' e : ↥((F : Set ι)ᶜ), ENNReal.ofReal ‖f e.1 x‖)
+      ≤ ∑' e : ↥((F : Set ι)ᶜ), ENNReal.ofReal (g (e : ι)) :=
+        ENNReal.tsum_le_tsum fun e => ENNReal.ofReal_le_ofReal (hb (e : ι) x ⟨hx.1, hx.2⟩)
+    _ = ENNReal.ofReal (∑' e : ↥((F : Set ι)ᶜ), g (e : ι)) :=
+        (ENNReal.ofReal_tsum_of_nonneg (f := fun e : ↥((F : Set ι)ᶜ) => g (e : ι))
+          (fun e => hg0 (e : ι)) hsub).symm
+    _ ≤ ENNReal.ofReal ε := ENNReal.ofReal_le_ofReal hF
+
+/-- The real-valued small-tail hypothesis together with pointwise summability implies the
+`ℝ≥0∞` form, so the new criterion generalises the existing one. -/
+theorem localTail_ennreal_of_real_tail {ι : Type*} {s : Set ℝ} {f : ι → ℝ → ℝ}
+    (habs : ∀ x ∈ s, Summable fun e => ‖f e x‖)
+    (htail : ∀ x₀ ∈ s, ∀ ε > 0, ∃ U ∈ 𝓝 x₀, ∃ F : Finset ι, ∀ x ∈ U ∩ s,
+      ∑' e : ↥((F : Set ι)ᶜ), ‖f e.1 x‖ ≤ ε) :
+    ∀ x₀ ∈ s, ∀ ε > 0, ∃ U ∈ 𝓝 x₀, ∃ F : Finset ι, ∀ x ∈ U ∩ s,
+      (∑' e : ↥((F : Set ι)ᶜ), ENNReal.ofReal ‖f e.1 x‖) ≤ ENNReal.ofReal ε := by
+  intro x₀ hx₀ ε hε
+  obtain ⟨U, hU, F, hF⟩ := htail x₀ hx₀ ε hε
+  refine ⟨U, hU, F, fun x hx => ?_⟩
+  rw [← ENNReal.ofReal_tsum_of_nonneg (f := fun e : ↥((F : Set ι)ᶜ) => ‖f (e : ι) x‖)
+    (fun e => norm_nonneg _) ((habs x hx.2).subtype _)]
+  exact ENNReal.ofReal_le_ofReal (hF x hx)
+
+end PercLib.Analysis
