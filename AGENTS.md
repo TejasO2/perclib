@@ -145,6 +145,14 @@ the commands above are the check.
 12. **Honesty.** A compilation claim refers to a build that ran on the stated commit.
     Call anything else an uncompiled draft.
 
+## Licence of contributions
+
+Contributions to the wiki prose in `wiki/` are accepted under Creative Commons Attribution
+4.0 International (CC BY 4.0, see `wiki/NOTICE`); contributions to Lean code and tooling
+are accepted under Apache-2.0 (see `LICENSE`). The person who submits material generated
+with AI assistance vouches for it: they have checked it and have the right to license it
+on these terms.
+
 ## Reviewing a pull request
 
 Do not review proof bodies or helper lemmas: the kernel, `lake build --wfail` and the
