@@ -299,6 +299,7 @@ public import PercLib.Percolation.Bond.Susceptibility
 public import PercLib.Percolation.Bond.SusceptibilityContinuity
 public import PercLib.Percolation.Bond.SusceptibilityDerivative
 public import PercLib.Percolation.Bond.SusceptibilityEndpoint
+public import PercLib.Percolation.Bond.SusceptibilityLevel
 public import PercLib.Percolation.Bond.Tags.BoundaryForest
 public import PercLib.Percolation.Bond.Tags.ChemicalMoments
 public import PercLib.Percolation.Bond.Tags.ClusterCorrelation
@@ -330,6 +331,7 @@ public import PercLib.Percolation.Bond.Tags.IndependentLayer
 public import PercLib.Percolation.Bond.Tags.OptimizedClusterTail
 public import PercLib.Percolation.Bond.Tags.RootGlobalPercolation
 public import PercLib.Percolation.Bond.Tags.SubcriticalBound
+public import PercLib.Percolation.Bond.Tags.SusceptibilityLevel
 public import PercLib.Percolation.Bond.Tags.Tightness
 public import PercLib.Percolation.Bond.Tags.TreeGraph
 public import PercLib.Percolation.Bond.Tags.WindowAndCorrelation
