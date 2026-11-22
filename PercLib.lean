@@ -133,6 +133,7 @@ public import PercLib.Models.Planar.Arms.Defs
 public import PercLib.Models.Planar.Arms.IncipientCluster
 public import PercLib.Models.Planar.Arms.Interlacing
 public import PercLib.Models.Planar.Arms.MultiArmBasics
+public import PercLib.Models.Planar.Arms.MultiArmBounds
 public import PercLib.Models.Planar.Arms.OneArm
 public import PercLib.Models.Planar.Arms.QuadDuality
 public import PercLib.Models.Planar.Arms.Separator
@@ -334,6 +335,7 @@ public import PercLib.Probability.InvariantTrace
 public import PercLib.Probability.LaplaceTail
 public import PercLib.Probability.LayerCake
 public import PercLib.Probability.LayerCakeProduct
+public import PercLib.Probability.LocallyMonotone
 public import PercLib.Probability.MassTransport
 public import PercLib.Probability.MassTransportTuple
 public import PercLib.Probability.MixedSpatialMoments
