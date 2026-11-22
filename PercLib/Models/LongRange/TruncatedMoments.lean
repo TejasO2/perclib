@@ -11481,3 +11481,269 @@ theorem hasDerivAt_integral_cutoff_pow_binomial_of_root_moment_of_diagram {d : �
 
 
 end PercLib.Models.LongRange
+
+namespace PercLib.Percolation.Bond
+
+open Classical in
+/-- A uniform `n`-th moment at every vertex bounds the mixed finite-ball cluster diagram
+with exponents summing to `n`. The estimate also holds for an infinite vertex set. -/
+theorem lintegral_cluster_mul_tsum_compl_pow_le {V : Type*} [Countable V]
+    (μ : Measure (Config V)) (o : V) (W : Set V) (a b n : ℕ) (hab : a + b = n)
+    (M : ℝ≥0∞) (hmom : ∀ y, (∫⁻ ω, ((cluster ω y).encard : ℝ≥0∞) ^ n ∂μ) ≤ M) :
+    (∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ^ a *
+      (∑' y, (if y ∈ W then (1 : ℝ≥0∞) else 0) *
+        (conn o y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+        ((cluster ω y).encard : ℝ≥0∞) ^ b) ∂μ) ≤
+      (W.encard : ℝ≥0∞) * (2 * M) := by
+  have hA (k : ℕ) : Measurable (fun ω : Config V => ((cluster ω o).encard : ℝ≥0∞) ^ k) :=
+    ((measurable_of_countable (fun n : ℕ∞ => (n : ℝ≥0∞))).comp
+      (measurable_encard_cluster o)).pow_const k
+  have hB (y : V) (k : ℕ) :
+      Measurable (fun ω : Config V => ((cluster ω y).encard : ℝ≥0∞) ^ k) :=
+    ((measurable_of_countable (fun n : ℕ∞ => (n : ℝ≥0∞))).comp
+      (measurable_encard_cluster y)).pow_const k
+  have hind (o y : V) : Measurable (fun ω : Config V =>
+      (conn o y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω) :=
+    measurable_const.indicator (measurableSet_conn o y).compl
+  have hpow (A B : ℝ≥0∞) : A ^ a * B ^ b ≤ A ^ n + B ^ n := by
+    rcases le_total A B with hAB | hBA
+    · calc
+        A ^ a * B ^ b ≤ B ^ a * B ^ b := mul_le_mul_left (pow_le_pow_left' hAB a) _
+        _ = B ^ (a + b) := (pow_add _ _ _).symm
+        _ = B ^ n := by rw [hab]
+        _ ≤ A ^ n + B ^ n := le_add_left le_rfl
+    · calc
+        A ^ a * B ^ b ≤ A ^ a * A ^ b := mul_le_mul_right (pow_le_pow_left' hBA b) _
+        _ = A ^ (a + b) := (pow_add _ _ _).symm
+        _ = A ^ n := by rw [hab]
+        _ ≤ A ^ n + B ^ n := le_add_right le_rfl
+  have hterm : ∀ y : V, (∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ^ a *
+      ((if y ∈ W then (1 : ℝ≥0∞) else 0) *
+        (conn o y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+        ((cluster ω y).encard : ℝ≥0∞) ^ b) ∂μ) ≤
+      if y ∈ W then 2 * M else 0 := by
+    intro y
+    by_cases hy : y ∈ W
+    · simp only [hy, ite_true, one_mul]
+      calc
+        (∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ^ a *
+          ((conn o y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+            ((cluster ω y).encard : ℝ≥0∞) ^ b) ∂μ) ≤
+            ∫⁻ ω, (((cluster ω o).encard : ℝ≥0∞) ^ n +
+              ((cluster ω y).encard : ℝ≥0∞) ^ n) ∂μ := by
+          refine lintegral_mono fun ω => ?_
+          calc
+            ((cluster ω o).encard : ℝ≥0∞) ^ a *
+                ((conn o y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+                  ((cluster ω y).encard : ℝ≥0∞) ^ b) ≤
+              ((cluster ω o).encard : ℝ≥0∞) ^ a *
+                ((cluster ω y).encard : ℝ≥0∞) ^ b := by
+              apply mul_le_mul_right
+              calc
+                (conn o y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+                    ((cluster ω y).encard : ℝ≥0∞) ^ b ≤
+                    1 * ((cluster ω y).encard : ℝ≥0∞) ^ b := by
+                  apply mul_le_mul_left
+                  by_cases h : ω ∈ conn o y <;> simp [h]
+                _ = ((cluster ω y).encard : ℝ≥0∞) ^ b := one_mul _
+            _ ≤ ((cluster ω o).encard : ℝ≥0∞) ^ n +
+                ((cluster ω y).encard : ℝ≥0∞) ^ n := hpow _ _
+        _ = (∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ^ n ∂μ) +
+            (∫⁻ ω, ((cluster ω y).encard : ℝ≥0∞) ^ n ∂μ) := lintegral_add_left (hA n) _
+        _ ≤ M + M := add_le_add (hmom o) (hmom y)
+        _ = 2 * M := by ring
+    · simp [hy]
+  calc
+    (∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ^ a *
+      (∑' y, (if y ∈ W then (1 : ℝ≥0∞) else 0) *
+        (conn o y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+        ((cluster ω y).encard : ℝ≥0∞) ^ b) ∂μ) =
+        ∑' y, ∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ^ a *
+          ((if y ∈ W then (1 : ℝ≥0∞) else 0) *
+            (conn o y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+            ((cluster ω y).encard : ℝ≥0∞) ^ b) ∂μ := by
+      conv_lhs =>
+        enter [2, ω]
+        rw [← ENNReal.tsum_mul_left]
+      exact lintegral_tsum fun y => ((hA a).mul
+        ((measurable_const.mul (hind o y)).mul (hB y b))).aemeasurable
+    _ ≤ ∑' y, if y ∈ W then 2 * M else 0 := ENNReal.tsum_le_tsum hterm
+    _ = (W.encard : ℝ≥0∞) * (2 * M) := by
+      change (∑' y, W.indicator (fun _ => (2 : ℝ≥0∞) * M) y) = _
+      rw [← tsum_subtype W (fun _ => 2 * M), ENNReal.tsum_set_const]
+
+end PercLib.Percolation.Bond
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Analysis PercLib.Percolation.Bond
+
+/-- The binomial diagram at scale `r` is bounded by the cardinality of its norm ball once
+the `(p+1)`-st moment at every vertex is bounded. -/
+theorem lintegral_i41_binomial_term_le_of_vertex_moments {d : ℕ}
+    {N : Seminorm ℝ (Fin d → ℝ)} (μ : Measure (Config (Fin d → ℤ))) (p ℓ : ℕ)
+    (hℓ : ℓ < p) (M : ℝ≥0∞)
+    (hmom : ∀ y, (∫⁻ ω, ((cluster ω y).encard : ℝ≥0∞) ^ (p + 1) ∂μ) ≤ M) (r : ℝ) :
+    (∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ (ℓ + 1) *
+      (∑' y, (if N (Int.cast ∘ y) ≤ r then 1 else 0) *
+        (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+        ((cluster ω y).encard : ℝ≥0∞) ^ (p - ℓ)) ∂μ) ≤
+      ({y : Fin d → ℤ | N (Int.cast ∘ y) ≤ r}.encard : ℝ≥0∞) * (2 * M) := by
+  apply lintegral_cluster_mul_tsum_compl_pow_le μ 0 {y : Fin d → ℤ | N (Int.cast ∘ y) ≤ r}
+    (ℓ + 1) (p - ℓ) (p + 1) (by omega) M hmom
+
+/-- Closed lattice balls for a model norm are finite. -/
+theorem finite_norm_le_closed {d : ℕ} (N : ModelNorm (Fin d → ℝ)) (R : ℝ) :
+    {z : Fin d → ℤ | N (Int.cast ∘ z) ≤ R}.Finite := by
+  refine ((Set.finite_singleton (0 : Fin d → ℤ)).union
+    (finite_norm_lt N (R + 1))).subset ?_
+  intro z hz
+  by_cases hzero : z = 0
+  · exact Or.inl hzero
+  · exact Or.inr ⟨hzero, hz.trans_lt (lt_add_one R)⟩
+
+/-- Translation invariance makes every cutoff vertex moment equal to the root moment. -/
+theorem lintegral_pow_encard_cluster_eq_root {d : ℕ} {N : ModelNorm (Fin d → ℝ)}
+    {K : ℝ → ℝ} (β : ℝ≥0) (r : ℝ) (p : ℕ) (y : Fin d → ℤ) :
+    (∫⁻ ω, ((cluster ω y).encard : ℝ≥0∞) ^ p
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) =
+    (∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ p
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) := by
+  have hmap : (law (intensityProfile (cutoffKernel (d := d) N K r) β)).map
+      (fun ω : Config (Fin d → ℤ) => Sym2.map (fun x : Fin d → ℤ => x + -y) '' ω) =
+      law (intensityProfile (cutoffKernel (d := d) N K r) β) :=
+    law_cutoffKernel_map_translate (N := N) K r β (-y)
+  have hcl : ∀ ω : Config (Fin d → ℤ),
+      ((cluster (Sym2.map (fun x : Fin d → ℤ => x + -y) '' ω) 0).encard : ℝ≥0∞) =
+        ((cluster ω y).encard : ℝ≥0∞) := by
+    intro ω
+    have h' := encard_cluster_translate (-y) y ω
+    rw [show y + -y = 0 from add_neg_cancel y] at h'
+    rw [h']
+  have hstep : (∫⁻ ω, ((cluster (Sym2.map (fun x : Fin d → ℤ => x + -y) '' ω) 0).encard :
+        ℝ≥0∞) ^ p ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) =
+      (∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ p
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) := by
+    rw [← lintegral_map_shift (law (intensityProfile (cutoffKernel (d := d) N K r) β)) (-y)
+      (fun ω => ((cluster ω 0).encard : ℝ≥0∞) ^ p), hmap]
+  calc
+    (∫⁻ ω, ((cluster ω y).encard : ℝ≥0∞) ^ p
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) =
+        ∫⁻ ω, ((cluster (Sym2.map (fun x : Fin d → ℤ => x + -y) '' ω) 0).encard :
+          ℝ≥0∞) ^ p ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β)) :=
+      lintegral_congr fun ω => by rw [hcl ω]
+    _ = _ := hstep
+
+/-- A root-moment bound is equally a bound at every vertex of the cutoff lattice. -/
+theorem lintegral_pow_encard_cluster_le_of_root_le {d : ℕ} {N : ModelNorm (Fin d → ℝ)}
+    {K : ℝ → ℝ} (β : ℝ≥0) (r : ℝ) (p : ℕ) (y : Fin d → ℤ) (M : ℝ≥0∞)
+    (h : (∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ p
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≤ M) :
+    (∫⁻ ω, ((cluster ω y).encard : ℝ≥0∞) ^ p
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≤ M := by
+  rw [lintegral_pow_encard_cluster_eq_root β r p y]
+  exact h
+
+/-- A uniform root `(p+1)`-moment bounds every term of the binomial diagram, uniformly in
+a cutoff interval, with a finite constant determined by the outer lattice ball. -/
+theorem exists_uniform_i41_diagram_bound_of_root_succ_moment {d : ℕ}
+    {N : ModelNorm (Fin d → ℝ)} {K : ℝ → ℝ} (β : ℝ≥0) (p : ℕ)
+    (M : ℝ≥0∞) (hM : M ≠ ⊤) {u v : ℝ}
+    (hroot : ∀ r ∈ Ioo u v, (∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ (p + 1)
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≤ M) :
+    ∃ D : ℕ → ℝ≥0∞, (∑ ℓ ∈ Finset.range p, D ℓ) ≠ ⊤ ∧
+      ∀ r ∈ Ioo u v, ∀ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ≥0∞) *
+        ∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ (ℓ + 1) *
+          (∑' y, (if N (Int.cast ∘ y) ≤ r then 1 else 0) *
+            (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+            ((cluster ω y).encard : ℝ≥0∞) ^ (p - ℓ))
+          ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β)) ≤ D ℓ := by
+  let B : Set (Fin d → ℤ) := {y | N (Int.cast ∘ y) ≤ v}
+  let D : ℕ → ℝ≥0∞ := fun ℓ => (p.choose ℓ : ℝ≥0∞) * ((B.encard : ℝ≥0∞) * (2 * M))
+  have hBfin : B.Finite := finite_norm_le_closed N v
+  have hBtop : (B.encard : ℝ≥0∞) ≠ ⊤ :=
+    ENat.toENNReal_ne_top.2 hBfin.encard_lt_top.ne
+  refine ⟨D, ?_, ?_⟩
+  · apply ENNReal.sum_ne_top.2
+    intro ℓ _
+    exact ENNReal.mul_ne_top (ENNReal.natCast_ne_top _)
+      (ENNReal.mul_ne_top hBtop (ENNReal.mul_ne_top (by norm_num) hM))
+  · intro r hr ℓ hℓ
+    have hmom : ∀ y : Fin d → ℤ, (∫⁻ ω, ((cluster ω y).encard : ℝ≥0∞) ^ (p + 1)
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≤ M := by
+      intro y
+      exact lintegral_pow_encard_cluster_le_of_root_le β r (p + 1) y M (hroot r hr)
+    have hbound := lintegral_i41_binomial_term_le_of_vertex_moments (N := N.toSeminorm)
+      (law (intensityProfile (cutoffKernel (d := d) N K r) β))
+      p ℓ (Finset.mem_range.mp hℓ) M hmom r
+    have hsub : {y : Fin d → ℤ | N (Int.cast ∘ y) ≤ r} ⊆ B := by
+      intro y hy
+      exact hy.trans hr.2.le
+    calc
+      (p.choose ℓ : ℝ≥0∞) *
+          ∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ (ℓ + 1) *
+            (∑' y, (if N (Int.cast ∘ y) ≤ r then 1 else 0) *
+              (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+              ((cluster ω y).encard : ℝ≥0∞) ^ (p - ℓ))
+            ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β)) ≤
+          (p.choose ℓ : ℝ≥0∞) *
+            (({y : Fin d → ℤ | N (Int.cast ∘ y) ≤ r}.encard : ℝ≥0∞) * (2 * M)) :=
+        mul_le_mul_right hbound _
+      _ ≤ (p.choose ℓ : ℝ≥0∞) * ((B.encard : ℝ≥0∞) * (2 * M)) := by
+        apply mul_le_mul_right
+        apply mul_le_mul_left
+        exact ENat.toENNReal_mono (Set.encard_le_encard hsub)
+      _ = D ℓ := rfl
+
+end PercLib.Models.LongRange
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability
+
+open Classical in
+/-- The cutoff binomial derivative from a uniform finite `(p+1)`-st root-moment bound.
+This supplies every vertex moment needed by the binomial diagram, the diagram dominator and its
+local integrability, and the original root-`p` finiteness. The uncapped flux continuity remains
+an explicit, separate input; sharpness and the all-radius corner claim are not asserted. -/
+theorem hasDerivAt_integral_cutoff_pow_binomial_of_root_succ_moment {d : ℕ}
+    {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p) {R : ℝ}
+    (M : ℝ≥0∞) (hM : M ≠ ⊤)
+    (cw : ℝ → Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ r e, cw r e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K r e : ℝ))))
+    {u v r₀ : ℝ} (hu : 0 < u) (hur : u < r₀) (hrv : r₀ < v) (hvR : v ≤ R)
+    (hcorner : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Ioo u v)
+    (hroot : ∀ r ∈ (Ioo u v ∪ {R} : Set ℝ), (∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ (p + 1)
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≤ M)
+    (hcont : ContinuousOn (fun r => ∑' e, cw r e *
+      ∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) (Ioo u v)) :
+    HasDerivAt (fun r => ∫ ω, (((cluster ω 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β)))
+      ((β : ℝ) * -K' r₀ * ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ) *
+        ∫ ω, (((cluster ω 0).encard : ℝ≥0∞).toReal) ^ (ℓ + 1) *
+          (∑' y, (if N (Int.cast ∘ y) ≤ r₀ then 1 else 0) *
+            (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ)) ω *
+            (((cluster ω y).encard : ℝ≥0∞).toReal) ^ (p - ℓ))
+          ∂(law (intensityProfile (cutoffKernel (d := d) N K r₀) β))) r₀ := by
+  have hrootp : ∀ r ∈ (Ioo u v ∪ {R} : Set ℝ),
+      (∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ p
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≠ ⊤ := by
+    intro r hr
+    refine ne_top_of_le_ne_top (ne_top_of_le_ne_top hM (hroot r hr)) ?_
+    refine lintegral_mono fun ω => ?_
+    have hbase : (1 : ℝ≥0∞) ≤ ((cluster ω 0).encard : ℝ≥0∞) := by
+      exact_mod_cast one_le_encard_cluster ω 0
+    exact pow_le_pow_right₀ hbase (Nat.le_succ p)
+  obtain ⟨D, hDtop, hD⟩ := exists_uniform_i41_diagram_bound_of_root_succ_moment
+    (K := K) β p M hM (fun r hr => hroot r (Set.mem_union_left _ hr))
+  exact hasDerivAt_integral_cutoff_pow_binomial_of_root_moment_of_diagram
+    (K := K) (K' := K') (R := R) (u := u) (v := v) (r₀ := r₀)
+    hKa hK' hK'c β p hp cw hcw hu hur hrv hvR hcorner hrootp D hDtop hD hcont
+
+
+end PercLib.Models.LongRange
