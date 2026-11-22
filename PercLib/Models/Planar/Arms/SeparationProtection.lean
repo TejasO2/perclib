@@ -56,6 +56,11 @@ crossing bounds without any extraction of paths.
 * `lt_sub_of_exploration`: same-colour blocking.
 * `false_of_localConn_of_exploration`: blocking of the other colour.
 * `false_of_le_add_corner_right`, `false_of_le_add_corner_left`: blocking at the top corners.
+* `pow_le_law_compl_crossing_inter_add`, `pow_le_law_dualConfig_notMem_crossing_add`,
+  `pow_le_law_crossing_inter_add`: the circuit events at any centre have probability at least
+  `c 7 ^ 4`.
+* `law_inter_biInter_compl_le`: conditioning on an event of the explored edges, the protection
+  fails at `J` independent scales with probability at most `(1 - β)^J`.
 -/
 
 @[expose] public section
@@ -769,6 +774,19 @@ theorem pow_le_law_dualConfig_notMem_crossing_add (h : CrossingBounds q L c) (z 
   refine h'.trans (MeasureTheory.measure_mono fun ω hω => ?_)
   simp only [mem_preimage, mem_ofPred_eq, hset] at hω
   exact hω
+
+/-- **The open circuit at any centre.** Under crossing bounds up to `L ≥ 2t - 1`, the four boxes
+around the annulus `t ≤ ‖· - z‖∞ ≤ 3t + 1` are all crossed by open edges in their long
+directions with probability at least `c 7 ^ 4`. -/
+theorem pow_le_law_crossing_inter_add (h : CrossingBounds q L c) (z : LatticeSite 2)
+    {t m : ℕ} (hm : 2 * t = m + 1) (hmL : (m : ℕ∞) ≤ L) :
+    c 7 ^ 4 ≤ law q (crossing 0 (z + ![-3 * (t : ℤ), t + 1]) (z + ![3 * (t : ℤ) + 1, 3 * t]) ∩
+      crossing 0 (z + ![-3 * (t : ℤ), -3 * t + 1]) (z + ![3 * (t : ℤ) + 1, -t]) ∩
+      crossing 1 (z + ![(t : ℤ) + 1, -3 * t]) (z + ![3 * (t : ℤ), 3 * t + 1]) ∩
+      crossing 1 (z + ![-3 * (t : ℤ) + 1, -3 * t]) (z + ![-(t : ℤ), 3 * t + 1])) := by
+  have h' := pow_le_law_crossing_inter (h.translate z) hm hmL
+  rw [law_translate_apply] at h'
+  simpa only [preimage_inter, preimage_image_add_crossing] using h'
 
 end Circuits
 
