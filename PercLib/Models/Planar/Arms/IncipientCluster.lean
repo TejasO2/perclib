@@ -8,7 +8,8 @@ New proofs, written on 2026-11-22. No upstream proof is copied.
 Mathematical reference: D. Basu and A. Sapozhnikov, Kesten's incipient infinite cluster and
 quasi-multiplicativity of crossing probabilities, Electron. Commun. Probab. 22 (2017),
 arXiv:1603.06884v2, Section 2 (the decomposition (2.3), the estimates (2.2)-(2.7), and the
-Cauchy property (2.1), (2.8)).
+Cauchy property (2.1), (2.8)); H. Kesten, The incipient infinite cluster in two-dimensional
+percolation, Probab. Theory Related Fields 73 (1986), Theorem 3.
 -/
 module
 
@@ -18,14 +19,15 @@ public import PercLib.Probability.CylinderLimit
 public import PercLib.Probability.RatioContraction
 
 /-!
-# Kesten's incipient infinite cluster on `ℤ²`: the Basu–Sapozhnikov decomposition
+# Kesten's incipient infinite cluster on `ℤ²`
 
-The first half of the proof of Kesten's incipient infinite cluster on `ℤ²` (wiki FM8D) along
-Basu and Sapozhnikov's Section 2: the decomposition of `P(E, z ↔ ∂B_n(z))` along a chain of cuts,
-the estimates (2.2)-(2.7), and the uniform Cauchy property (2.1), (2.8) of the conditional
+Kesten's incipient infinite cluster on `ℤ²` (wiki FM8D) along Basu and Sapozhnikov's Section 2.
+The first part gives the decomposition of `P(E, z ↔ ∂B_n(z))` along a chain of cuts, the
+estimates (2.2)-(2.7), and the uniform Cauchy property (2.1), (2.8) of the conditional
 probabilities `P(A | z ↔ ∂B_n(z))`, uniformly over every profile that opens each edge with
-probability at least `1/2` (on the edges, `p = 1 - e^{-β}` with `β ≥ log 2`). The limits, the law
-`ν` and the uniqueness of the infinite cluster under `ν` are not in this file.
+probability at least `1/2` (on the edges, `p = 1 - e^{-β}` with `β ≥ log 2`). The second part
+gives the two limits, the law `ν` and the uniqueness of the infinite cluster under `ν`
+(`exists_incipientInfiniteCluster`).
 
 Boxes are `B_r(z) = Icc (z - r) (z + r)`, `B_{r-1}(z)` is `Icc (z - r + 1) (z + r - 1)`, and
 `∂B_r(z)` is `boxBoundary (z - r) (z + r)`; only the open edges `ω ∩ (zdGraph 2).edgeSet` are
@@ -63,6 +65,22 @@ read; `z ↔ ∂B_n(z)` is `armEvent z n`.
   of the cuts this gives `exists_abs_toReal_cond_armEvent_sub_le_of_isUpperSet` for increasing
   events, and inclusion–exclusion (`CylinderLimit.lean`) every cylinder event,
   `exists_abs_toReal_cond_armEvent_sub_le`.
+* **The first limit and the law `ν`.** Cauchy sequences converge, at a rate that does not depend
+  on the profile (`exists_tendsto_cond_armEvent`, `exists_abs_toReal_cond_armEvent_sub_toReal_le`),
+  and the limits of the cylinder probabilities are those of a probability law `ν`
+  (`exists_measure_tendsto_cond_armEvent`, from `CylinderLimit.lean`).
+* **The second limit.** The cluster of `z` is infinite exactly when every arm event around `z`
+  holds (`setOf_cluster_infinite_eq_iInter_armEvent`), so for `β > log 2`, where it has positive
+  probability, `P_β(A | |K_z| = ∞)` is the limit of `P_β(A | z ↔ ∂B_n(z))` by continuity from
+  above (`tendsto_cond_armEvent_cond_setOf_cluster_infinite`). Cylinder probabilities are
+  continuous in `β` (`continuousOn_toReal_cond_armEvent`), hence so is the uniform limit
+  (`continuousOn_toReal_of_tendsto_cond_armEvent`), and `β ↓ log 2` gives the second limit
+  (`tendsto_cond_setOf_cluster_infinite_nhdsGT`).
+* **Uniqueness under `ν`.** Every arm event has `ν`-probability one; by (A1), four-strip events
+  around `z` occur `ν`-almost surely at arbitrarily large scales
+  (`ae_exists_mem_fourStrip_of_tendsto`); a four-strip event glues the infinite clusters of all
+  vertices inside it (`cluster_eq_of_mem_fourStrip`), so the cluster of `z` is the only infinite
+  cluster (`measure_setOf_cluster_infinite_forall_eq_eq_one`).
 
 ## Main results
 
@@ -74,6 +92,13 @@ read; `z ↔ ∂B_n(z)` is `armEvent z n`.
 * `PercLib.Models.Planar.exists_law_inter_armEvent_le_add_of_cuts`
 * `PercLib.Models.Planar.exists_abs_toReal_cond_armEvent_sub_le_of_isUpperSet`
 * `PercLib.Models.Planar.exists_abs_toReal_cond_armEvent_sub_le`
+* `PercLib.Models.Planar.setOf_cluster_infinite_eq_iInter_armEvent`
+* `PercLib.Models.Planar.exists_abs_toReal_cond_armEvent_sub_toReal_le`
+* `PercLib.Models.Planar.exists_measure_tendsto_cond_armEvent`
+* `PercLib.Models.Planar.continuousOn_toReal_of_tendsto_cond_armEvent`
+* `PercLib.Models.Planar.tendsto_cond_setOf_cluster_infinite_nhdsGT`
+* `PercLib.Models.Planar.measure_setOf_cluster_infinite_forall_eq_eq_one`
+* `PercLib.Models.Planar.exists_incipientInfiniteCluster`
 -/
 
 @[expose] public section
@@ -2618,5 +2643,182 @@ theorem tendsto_cond_setOf_cluster_infinite_nhdsGT (z : LatticeSite 2)
     ((hc.mono_left (nhdsWithin_mono _ Ioi_subset_Ici_self)).congr' ?_)
   filter_upwards [self_mem_nhdsWithin] with β hβ
   rw [ite_eq_right (ne_of_gt (mem_Ioi.1 hβ))]
+
+/-! ### Uniqueness of the infinite cluster under `ν` -/
+
+/-- **Gluing of infinite clusters across a four-strip event.** On the four-strip event of the
+annulus `2n ≤ ‖v - z‖∞ ≤ 4n`, two vertices of `B_{2n}(z)` whose open clusters are infinite have
+the same open cluster: both clusters cross the annulus and are joined through it. -/
+theorem cluster_eq_of_mem_fourStrip {ω : Config (LatticeSite 2)} {z : LatticeSite 2} {n : ℕ}
+    (hω : ω ∈ fourStrip z n) {x x' : LatticeSite 2}
+    (hx : x ∈ Icc (z - ((2 * n : ℕ) : LatticeSite 2)) (z + ((2 * n : ℕ) : LatticeSite 2)))
+    (hx' : x' ∈ Icc (z - ((2 * n : ℕ) : LatticeSite 2)) (z + ((2 * n : ℕ) : LatticeSite 2)))
+    (hK : (cluster (ω ∩ (zdGraph 2).edgeSet) x).Infinite)
+    (hK' : (cluster (ω ∩ (zdGraph 2).edgeSet) x').Infinite) :
+    cluster (ω ∩ (zdGraph 2).edgeSet) x = cluster (ω ∩ (zdGraph 2).edgeSet) x' := by
+  have hfin := finite_Icc (z - ((4 * n : ℕ) : LatticeSite 2) + 1)
+    (z + ((4 * n : ℕ) : LatticeSite 2) - 1)
+  obtain ⟨y, hy, hyB⟩ := hK.exists_notMem_finite hfin
+  obtain ⟨y', hy', hy'B⟩ := hK'.exists_notMem_finite hfin
+  have hxy : ω ∩ (zdGraph 2).edgeSet ∈ localConn univ x y := by
+    rw [localConn_univ]
+    exact hy
+  have hxy' : ω ∩ (zdGraph 2).edgeSet ∈ localConn univ x' y' := by
+    rw [localConn_univ]
+    exact hy'
+  exact cluster_eq_of_mem_conn (localConn_subset_conn _ x x'
+    (inter_edgeSet_mem_localConn_union_of_mem_fourStrip hω hx hyB hx' hy'B hxy hxy'))
+
+/-- Under a limit `ν` of the conditional laws given `z ↔ ∂B_n(z)`, every arm event around `z` has
+probability one. -/
+theorem measure_armEvent_eq_one_of_tendsto {q : Sym2 (LatticeSite 2) → unitInterval}
+    (hq : ∀ e ∈ (zdGraph 2).edgeSet, (1 / 2 : ℝ) ≤ q e) (z : LatticeSite 2)
+    {ν : Measure (Config (LatticeSite 2))}
+    (hν : ∀ (F : Finset (Sym2 (LatticeSite 2))) (A : Set (Config (LatticeSite 2))),
+      (∀ ω, ω ∈ A ↔ ω ∩ ↑F ∈ A) →
+      Tendsto (fun n => (law q)[A | armEvent z n]) atTop (𝓝 (ν A)))
+    (r : ℕ) : ν (armEvent z r) = 1 := by
+  refine tendsto_nhds_unique (hν _ _ (mem_armEvent_iff_inter_sym2_mem z r)) ?_
+  refine tendsto_const_nhds.congr' ?_
+  filter_upwards [eventually_ge_atTop r] with n hn
+  rw [ProbabilityTheory.cond_apply (measurableSet_armEvent z n),
+    inter_eq_left.2 (armEvent_anti z hn),
+    ENNReal.inv_mul_cancel (law_armEvent_pos hq z n).ne' (measure_ne_top _ _)]
+
+/-- **Four-strip events at arbitrarily large scales** (arms plan §4.2, step 6). Under a limit `ν`
+of the conditional laws given `z ↔ ∂B_n(z)`, for a profile at least `1/2` on the edges, there are
+almost surely four-strip events around `z` at arbitrarily large scales `3^j`: given an
+increasing event, no four-strip event at `M` separated scales has probability at most
+`(1 - c₀)^M` (Basu–Sapozhnikov's (A1) on `ℤ²`). -/
+theorem ae_exists_mem_fourStrip_of_tendsto {q : Sym2 (LatticeSite 2) → unitInterval}
+    (hq : ∀ e ∈ (zdGraph 2).edgeSet, (1 / 2 : ℝ) ≤ q e) (z : LatticeSite 2)
+    {ν : Measure (Config (LatticeSite 2))}
+    (hν : ∀ (F : Finset (Sym2 (LatticeSite 2))) (A : Set (Config (LatticeSite 2))),
+      (∀ ω, ω ∈ A ↔ ω ∩ ↑F ∈ A) →
+      Tendsto (fun n => (law q)[A | armEvent z n]) atTop (𝓝 (ν A))) :
+    ∀ᵐ ω ∂ν, ∀ K : ℕ, ∃ j, K ≤ j ∧ ω ∈ fourStrip z (3 ^ j) := by
+  classical
+  obtain ⟨c₀, hc₀, hbound⟩ := exists_law_inter_biInter_compl_fourStrip_le
+  rw [ae_all_iff]
+  intro K
+  rw [ae_iff]
+  -- no four-strip event at the scales `3^j`, `K ≤ j < K + M`
+  have hD : ∀ M : ℕ, ν (⋂ j ∈ Finset.Ico K (K + M), (fourStrip z (3 ^ j))ᶜ) ≤ (1 - c₀) ^ M := by
+    intro M
+    obtain ⟨N, hN⟩ : ∃ N : ℕ, N = 4 * 3 ^ (K + M) := ⟨_, rfl⟩
+    have hdet : ∀ ω, ω ∈ ⋂ j ∈ Finset.Ico K (K + M), (fourStrip z (3 ^ j))ᶜ ↔
+        ω ∩ ↑(Finset.Icc (z - (N : LatticeSite 2)) (z + N)).sym2 ∈
+          ⋂ j ∈ Finset.Ico K (K + M), (fourStrip z (3 ^ j))ᶜ := by
+      refine mem_iff_inter_sym2_mem_of_determined fun ω ω' h => ?_
+      simp only [mem_iInter, mem_compl_iff]
+      refine forall₂_congr fun j hj => not_congr (mem_fourStrip_iff_of_inter_eq ?_ h)
+      intro v hv
+      obtain ⟨h₁, h₂, h₃, h₄, -⟩ := hv
+      have hj' : j < K + M := (Finset.mem_Ico.1 hj).2
+      have h₅ : 4 * ((3 ^ j : ℕ) : ℤ) ≤ (N : ℤ) := by
+        rw [hN]
+        exact_mod_cast Nat.mul_le_mul_left 4 (Nat.pow_le_pow_right (by norm_num) hj'.le)
+      generalize 3 ^ j = t at h₁ h₂ h₃ h₄ h₅
+      rw [Finset.coe_Icc, mem_Icc_two_iff]
+      simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply]
+      omega
+    refine le_of_tendsto' (hν _ _ hdet) fun n => ?_
+    have hb : law q (armEvent z n ∩ ⋂ j ∈ Finset.Ico K (K + M), (fourStrip z (3 ^ j))ᶜ) ≤
+        (1 - c₀) ^ (Finset.Ico K (K + M)).card * law q (armEvent z n) :=
+      hbound q hq (armEvent z n) (isUpperSet_armEvent z n) (measurableSet_armEvent z n) z
+        (Finset.Ico K (K + M)) (fun j => 3 ^ j) (fun j _ => Nat.one_le_pow _ _ (by norm_num))
+        (fun j _ j' _ hjj' => by
+          have h₁ : 1 ≤ 3 ^ j := Nat.one_le_pow _ _ (by norm_num)
+          calc 2 * 3 ^ j < 3 ^ (j + 1) := by rw [pow_succ]; omega
+            _ ≤ 3 ^ j' := Nat.pow_le_pow_right (by norm_num) hjj')
+    rw [Nat.card_Ico, Nat.add_sub_cancel_left] at hb
+    rw [ProbabilityTheory.cond_apply (measurableSet_armEvent z n)]
+    calc (law q (armEvent z n))⁻¹ *
+          law q (armEvent z n ∩ ⋂ j ∈ Finset.Ico K (K + M), (fourStrip z (3 ^ j))ᶜ)
+        ≤ (law q (armEvent z n))⁻¹ * ((1 - c₀) ^ M * law q (armEvent z n)) := by gcongr
+      _ = (1 - c₀) ^ M := by
+          rw [mul_comm ((1 - c₀) ^ M), ← mul_assoc,
+            ENNReal.inv_mul_cancel (law_armEvent_pos hq z n).ne' (measure_ne_top _ _), one_mul]
+  have hlt : 1 - c₀ < 1 := ENNReal.sub_lt_self ENNReal.one_ne_top one_ne_zero hc₀.ne'
+  refine nonpos_iff_eq_zero.1 (ge_of_tendsto' (ENNReal.tendsto_pow_atTop_nhds_zero_of_lt_one hlt)
+    fun M => (measure_mono fun ω hω => ?_).trans (hD M))
+  simp only [mem_ofPred_eq, not_exists, not_and] at hω
+  simp only [mem_iInter, mem_compl_iff]
+  exact fun j hj => hω j (Finset.mem_Ico.1 hj).1
+
+/-- **Uniqueness of the infinite cluster under the limit law** (Kesten; arms plan §4.2, step 6).
+Under a limit `ν` of the conditional laws given `z ↔ ∂B_n(z)`, for a profile at least `1/2` on the
+edges, the open cluster of `z` is almost surely infinite and is the only infinite open cluster:
+every arm event has `ν`-probability one, and the infinite clusters are glued by the four-strip
+events at arbitrarily large scales. -/
+theorem measure_setOf_cluster_infinite_forall_eq_eq_one
+    {q : Sym2 (LatticeSite 2) → unitInterval}
+    (hq : ∀ e ∈ (zdGraph 2).edgeSet, (1 / 2 : ℝ) ≤ q e) (z : LatticeSite 2)
+    {ν : Measure (Config (LatticeSite 2))} [IsProbabilityMeasure ν]
+    (hν : ∀ (F : Finset (Sym2 (LatticeSite 2))) (A : Set (Config (LatticeSite 2))),
+      (∀ ω, ω ∈ A ↔ ω ∩ ↑F ∈ A) →
+      Tendsto (fun n => (law q)[A | armEvent z n]) atTop (𝓝 (ν A))) :
+    ν {ω | (cluster (ω ∩ (zdGraph 2).edgeSet) z).Infinite ∧
+      ∀ x, (cluster (ω ∩ (zdGraph 2).edgeSet) x).Infinite →
+        cluster (ω ∩ (zdGraph 2).edgeSet) x = cluster (ω ∩ (zdGraph 2).edgeSet) z} = 1 := by
+  have harm : ∀ᵐ ω ∂ν, ∀ r : ℕ, ω ∈ armEvent z (r + 1) := by
+    rw [ae_all_iff]
+    intro r
+    rw [ae_mem_iff_measure_eq (measurableSet_armEvent z (r + 1)).nullMeasurableSet,
+      measure_armEvent_eq_one_of_tendsto hq z hν, measure_univ]
+  set S := {ω : Config (LatticeSite 2) | (cluster (ω ∩ (zdGraph 2).edgeSet) z).Infinite ∧
+      ∀ x, (cluster (ω ∩ (zdGraph 2).edgeSet) x).Infinite →
+        cluster (ω ∩ (zdGraph 2).edgeSet) x = cluster (ω ∩ (zdGraph 2).edgeSet) z} with hS
+  have hae : ∀ᵐ ω ∂ν, ω ∈ S := by
+    filter_upwards [harm, ae_exists_mem_fourStrip_of_tendsto hq z hν] with ω h₁ h₂
+    have hK : (cluster (ω ∩ (zdGraph 2).edgeSet) z).Infinite := by
+      have h := mem_iInter.2 h₁
+      rw [← setOf_cluster_infinite_eq_iInter_armEvent] at h
+      exact h
+    refine ⟨hK, fun x hx => ?_⟩
+    obtain ⟨j, hj, hjω⟩ := h₂ ((x 0 - z 0).natAbs + (x 1 - z 1).natAbs)
+    have hj3 : j < 3 ^ j := Nat.lt_pow_self (by norm_num)
+    have hB : ∀ v : LatticeSite 2, (v 0 - z 0).natAbs + (v 1 - z 1).natAbs ≤ j →
+        v ∈ Icc (z - ((2 * 3 ^ j : ℕ) : LatticeSite 2))
+          (z + ((2 * 3 ^ j : ℕ) : LatticeSite 2)) := by
+      intro v hv
+      generalize 3 ^ j = t at hj3 ⊢
+      rw [mem_Icc_two_iff]
+      simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply]
+      omega
+    exact cluster_eq_of_mem_fourStrip hjω (hB x hj) (hB z (by simp)) hx hK
+  have h₀ : ν Sᶜ = 0 := ae_iff.1 hae
+  exact (measure_congr ((ae_eq_univ (s := S)).2 h₀)).trans measure_univ
+
+/-! ### Kesten's incipient infinite cluster -/
+
+/-- **Kesten's incipient infinite cluster** (wiki FM8D; Kesten 1986, Theorem 3;
+Basu–Sapozhnikov 2017). For nearest-neighbour bond percolation on `ℤ²` there is a probability law
+`ν` such that for every cylinder event `A`,
+`ν(A) = lim_{r → ∞} P_{p_c}(A | 0 ↔ Q_r^c) = lim_{p ↓ p_c} P_p(A | |K_0| = ∞)`, and under `ν` the
+open cluster of `0` is infinite and is the only infinite open cluster. Here `p_c = 1/2` is
+`β_c = log 2` (`rootCriticalIntensity_indicator_edgeSet_eq_log_two`); `intensityProfile J β` is
+`p = 1 - e^{-β}` on the edges and `0` elsewhere, an increasing homeomorphism of the parameter;
+`0 ↔ Q_r^c` is `armEvent 0 (r + 1)` (`mem_armEvent_iff_exists_notMem_conn`). -/
+theorem exists_incipientInfiniteCluster :
+    ∃ ν : Measure (Config (LatticeSite 2)), IsProbabilityMeasure ν ∧
+      (∀ (F : Finset (Sym2 (LatticeSite 2))) (A : Set (Config (LatticeSite 2))),
+        (∀ ω, ω ∈ A ↔ ω ∩ ↑F ∈ A) →
+        Tendsto (fun r : ℕ => (law (intensityProfile ((zdGraph 2).edgeSet.indicator 1)
+            ⟨Real.log 2, (Real.log_pos one_lt_two).le⟩))[|armEvent 0 (r + 1)] A)
+          atTop (𝓝 (ν A)) ∧
+        Tendsto (fun β : ℝ≥0 => (law (intensityProfile ((zdGraph 2).edgeSet.indicator 1)
+            β))[|{ω | (cluster (ω ∩ (zdGraph 2).edgeSet) 0).Infinite}] A)
+          (𝓝[>] ⟨Real.log 2, (Real.log_pos one_lt_two).le⟩) (𝓝 (ν A))) ∧
+      ν {ω | (cluster (ω ∩ (zdGraph 2).edgeSet) 0).Infinite ∧
+        ∀ x, (cluster (ω ∩ (zdGraph 2).edgeSet) x).Infinite →
+          cluster (ω ∩ (zdGraph 2).edgeSet) x = cluster (ω ∩ (zdGraph 2).edgeSet) 0} = 1 := by
+  have hq₀ : ∀ e ∈ (zdGraph 2).edgeSet, (1 / 2 : ℝ) ≤ intensityProfile
+      ((zdGraph 2).edgeSet.indicator 1) ⟨Real.log 2, (Real.log_pos one_lt_two).le⟩ e :=
+    fun e he => half_le_intensityProfile_indicator_edgeSet le_rfl he
+  obtain ⟨ν, hνP, hν⟩ := exists_measure_tendsto_cond_armEvent hq₀ 0
+  refine ⟨ν, hνP, fun F A hA => ⟨(tendsto_add_atTop_iff_nat 1).2 (hν F A hA),
+    tendsto_cond_setOf_cluster_infinite_nhdsGT 0 hA (hν F A hA)⟩,
+    measure_setOf_cluster_infinite_forall_eq_eq_one hq₀ 0 hν⟩
 
 end PercLib.Models.Planar
