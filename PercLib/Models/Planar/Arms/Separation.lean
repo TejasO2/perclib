@@ -15,25 +15,39 @@ module
 public import PercLib.Models.Planar.Arms.ColourInversion
 
 /-!
-# Local separation of crossings: relative duality and the exploration step
+# Local separation of crossings: relative duality and the greedy exploration
 
 Nolin's local separation lemma explores the crossings of a strip greedily from one side: the
 first crossing is the one closest to the left side, the next one is the closest crossing that
 avoids the first, and so on, and the region beyond the explored crossings is fresh. The library
 never conditions on a crossing as a topological object. The explored object is the **dual cluster
-of the left column** of the dual box, with that column wired, in a configuration `ζ` (later a
-configuration in which the crossings already found are removed). This file proves the facts about
-that exploration step, for every box `Icc lo hi` of height at least one and every configuration:
+of the left column** of the dual box, with that column wired, in a configuration `ζ` from which the
+crossings already found are removed. This file proves the deterministic facts about that
+exploration, for every box `Icc lo hi` of height at least one and every configuration, and the
+first probabilistic step of the lemma.
 
 * **Relative duality.** A set of faces of the dual box that contains its left column and avoids
   its right column is a wired boundary arc: the edges of `ℤ²` separating it from the other faces
   of the dual box contain a bottom-top crossing of the box (`mem_crossing_one_of_leftColumn`).
   This is box duality applied to the configuration of those edges.
-* **The explored cluster.** The dual cluster `D` of the left column lies in the dual box and
-  contains the left column; every edge of `ℤ²` separating `D` from another face of the dual box is
-  open in `ζ`; `D` avoids the right column exactly when `ζ` crosses the box from bottom to top,
-  and then the separating edges contain such a crossing; `D` grows when `ζ` shrinks; the event
-  `D = D₀` depends only on the edges whose duals meet `D₀`, and is measurable.
+* **The explored cluster.** The dual cluster of the left column lies in the dual box and contains
+  the left column; every edge of `ℤ²` separating it from another face of the dual box is open in
+  `ζ`; it avoids the right column exactly when `ζ` crosses the box from bottom to top, and then the
+  separating edges contain such a crossing; it grows when `ζ` shrinks; whether it equals a given
+  finite set `D₀` depends only on the edges whose duals meet `D₀`.
+* **Greedy exploration.** Given a rule `Γ` choosing a crossing in the boundary of each admissible
+  explored set (`exists_crossing_choice`), the exploration of a configuration `G` is the sequence
+  of explored clusters `A 0 ⊆ A 1 ⊆ ⋯`, where `A v` is explored in `G` with all edges at vertices
+  of `Γ (A 0), …, Γ (A (v - 1))` removed. It exists and is unique, grows, is determined by the
+  edges whose duals meet its last set, its chosen crossings are disjoint crossings open in `G`,
+  and once an explored cluster reaches the right column every open crossing meets an earlier
+  chosen crossing.
+* **Few crossings** (Nolin, Lemma 15, step (a)). Under crossing bounds, the exploration of the
+  open configuration in a box of width `k n` and height `n + 1` finds at least `u + 1` crossings
+  with probability at most `(1 - c (k + 1))^(u + 1)`.
+
+The configuration `G` is arbitrary, so the same exploration runs on the dual configuration
+(restricted to dual edges crossing edges of the strip, in the box of faces) for dual crossings.
 
 ## Main results
 
@@ -43,9 +57,13 @@ that exploration step, for every box `Icc lo hi` of height at least one and ever
   column exactly when the box is crossed.
 * `mem_of_mem_exploredCluster_of_notMem`: the edges separating the explored cluster from the rest
   of the dual box are open.
-* `exploredCluster_eq_iff_of_agree`: the explored cluster is determined by the edges whose duals
-  meet it.
-* `exploredCluster_anti`: the explored cluster grows when the configuration shrinks.
+* `exploredCluster_eq_iff_of_agree`, `exploredCluster_anti`: determination and monotonicity of the
+  explored cluster.
+* `exists_exploration`, `exploration_unique`, `exploration_mono`, `exploration_iff_of_agree`: the
+  greedy exploration exists, is unique, grows and is determined by the edges meeting it.
+* `forall_mem_of_exploration`: the chosen crossings are open and pairwise disjoint.
+* `exists_mem_support_of_exploration`: maximality of the chosen crossings.
+* `law_exploration_le_pow`: the exploration finds few crossings.
 -/
 
 @[expose] public section
@@ -571,5 +589,59 @@ theorem exists_mem_support_of_exploration (h1 : lo 1 < hi 1) (hle : lo ≤ hi)
   exact this hf hf0
 
 end Greedy
+
+/-! ### Few greedy crossings -/
+
+/-- **The greedy exploration finds few crossings** (Nolin, Lemma 15, first step). In the box of
+width `k n` and height `n + 1`, under crossing bounds, the probability that the greedy exploration
+of the open configuration finds at least `u + 1` crossings (its explored clusters avoid the right
+column of the dual box up to step `u`) is at most `(1 - c (k + 1))^(u + 1)`: the chosen crossings
+are `u + 1` disjoint open crossings. -/
+theorem law_exploration_le_pow {q : Sym2 (LatticeSite 2) → unitInterval} {L : ℕ∞}
+    {c : ℕ → ℝ≥0∞} (h : CrossingBounds q L c) (k : ℕ) {lo hi : LatticeSite 2} {n : ℕ}
+    (hn : 1 ≤ n) (hnL : (n : ℕ∞) ≤ L) (hhi : hi = lo + ![(k : ℤ) * n, n + 1])
+    {c₁ d₁ : Finset (LatticeSite 2) → LatticeSite 2} {Γ : ∀ A, (zdGraph 2).Walk (c₁ A) (d₁ A)}
+    (hΓ : ∀ A : Finset (LatticeSite 2),
+      (∀ y : ℤ, lo 1 ≤ y → y ≤ hi 1 - 1 → (![lo 0 - 1, y] : LatticeSite 2) ∈ A) →
+      (∀ f ∈ A, f 0 ≠ hi 0) →
+      c₁ A ∈ Icc lo hi ∧ c₁ A 1 = lo 1 ∧ d₁ A ∈ Icc lo hi ∧ d₁ A 1 = hi 1 ∧
+        (∀ x ∈ (Γ A).support, x ∈ Icc lo hi) ∧
+        ∀ e ∈ (Γ A).edges, e ∈ (zdGraph 2).edgeSet ∧
+          (∀ f ∈ dualEdge e, f ∈ Icc (![lo 0 - 1, lo 1] : LatticeSite 2) ![hi 0, hi 1 - 1]) ∧
+          (∃ f ∈ dualEdge e, f ∈ A) ∧ ∃ f ∈ dualEdge e, f ∉ A)
+    (u : ℕ) :
+    law q {ω | ∃ A : ℕ → Finset (LatticeSite 2),
+      (∀ v ≤ u, cluster (dualConfig (ω \ {e | ∃ x ∈ e, ∃ w < v, x ∈ (Γ (A w)).support}) ∩
+          {s | ∀ x ∈ s, x ∈ Icc (![lo 0 - 1, lo 1] : LatticeSite 2) ![hi 0, hi 1 - 1]} ∪
+        {s | ∃ y : ℤ, lo 1 ≤ y ∧ y + 1 ≤ hi 1 - 1 ∧
+          s = s(![lo 0 - 1, y], (![lo 0 - 1, y + 1] : LatticeSite 2))}) ![lo 0 - 1, lo 1] =
+            ↑(A v)) ∧
+      ∀ v ≤ u, ∀ f ∈ A v, f 0 ≠ hi 0} ≤ (1 - c (k + 1)) ^ (u + 1) := by
+  subst hhi
+  have h1 : lo 1 < (lo + ![(k : ℤ) * n, n + 1]) 1 := by
+    simp only [Pi.add_apply, Matrix.cons_val_one, Matrix.cons_val_zero]
+    omega
+  refine le_trans (MeasureTheory.measure_mono fun ω hω => ?_)
+    (law_foldl_crossing_one_le_pow h k lo hn hnL (u + 1))
+  obtain ⟨A, hA, hright⟩ := hω
+  have hprop := fun j : Fin (u + 1) =>
+    forall_mem_of_exploration h1 hΓ hA (Nat.lt_succ_iff.1 j.2) (hright j (Nat.lt_succ_iff.1 j.2))
+  have hleft : ∀ j : Fin (u + 1), ∀ y : ℤ, lo 1 ≤ y →
+      y ≤ (lo + ![(k : ℤ) * n, n + 1]) 1 - 1 → (![lo 0 - 1, y] : LatticeSite 2) ∈ A j := by
+    intro j y hy0 hy1
+    have := mem_exploredCluster_of_leftColumn (lo := lo) (hi := lo + ![(k : ℤ) * n, n + 1])
+      (ζ := ω \ {e | ∃ x ∈ e, ∃ w < (j : ℕ), x ∈ (Γ (A w)).support}) rfl y hy0 hy1
+    rw [hA j (Nat.lt_succ_iff.1 j.2)] at this
+    exact this
+  have hdata := fun j : Fin (u + 1) => hΓ (A j) (hleft j) (hright j (Nat.lt_succ_iff.1 j.2))
+  refine mem_foldl_crossing_of_walks (fun j : Fin (u + 1) => Γ (A j)) (fun j => (hdata j).2.1)
+    (fun j => (hdata j).2.2.2.1) (fun j => (hdata j).2.2.2.2.1) (fun j => (hprop j).1) ?_
+  intro j l hjl e hej hel
+  -- an edge shared by two chosen crossings would give them a common vertex
+  obtain ⟨x, y, rfl, -, hx, -⟩ := exists_ne_of_mem_edges (Γ (A j)) hej
+  have hxl : x ∈ (Γ (A l)).support := (Γ (A l)).fst_mem_support_of_mem_edges hel
+  rcases lt_or_gt_of_ne (Fin.val_ne_of_ne hjl) with hlt | hlt
+  · exact (hprop l).2 x hxl j hlt hx
+  · exact (hprop j).2 x hx l hlt hxl
 
 end PercLib.Models.Planar
