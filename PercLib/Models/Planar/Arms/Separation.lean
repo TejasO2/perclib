@@ -65,7 +65,9 @@ The configuration `G` is arbitrary, so the same exploration runs on the dual con
 * `exists_mem_support_of_exploration`: maximality of the chosen crossings.
 * `exists_walk_reroute_of_exploration`: every open crossing can be rerouted, from its own start,
   to the top end of a chosen crossing (the surgery for crossings in distinct clusters).
-* `law_exploration_le_pow`: the exploration finds few crossings.
+* `law_exploration_le_pow`, `law_exploration_dualConfig_le_pow`: the exploration of the open
+  configuration, and of the dual configuration restricted to any set of dual edges, finds few
+  crossings.
 -/
 
 @[expose] public section
@@ -701,6 +703,59 @@ theorem law_exploration_le_pow {q : Sym2 (LatticeSite 2) → unitInterval} {L : 
   have hdata := fun j : Fin (u + 1) => hΓ (A j) (hleft j) (hright j (Nat.lt_succ_iff.1 j.2))
   refine mem_foldl_crossing_of_walks (fun j : Fin (u + 1) => Γ (A j)) (fun j => (hdata j).2.1)
     (fun j => (hdata j).2.2.2.1) (fun j => (hdata j).2.2.2.2.1) (fun j => (hprop j).1) ?_
+  intro j l hjl e hej hel
+  -- an edge shared by two chosen crossings would give them a common vertex
+  obtain ⟨x, y, rfl, -, hx, -⟩ := exists_ne_of_mem_edges (Γ (A j)) hej
+  have hxl : x ∈ (Γ (A l)).support := (Γ (A l)).fst_mem_support_of_mem_edges hel
+  rcases lt_or_gt_of_ne (Fin.val_ne_of_ne hjl) with hlt | hlt
+  · exact (hprop l).2 x hxl j hlt hx
+  · exact (hprop j).2 x hx l hlt hxl
+
+/-- **The greedy exploration finds few dual crossings.** The same bound for the exploration of the
+dual configuration, restricted to any fixed set `S` of dual edges, in the box of faces of width
+`k n` and height `n + 1`: the chosen crossings are `u + 1` disjoint dual-open crossings. -/
+theorem law_exploration_dualConfig_le_pow {q : Sym2 (LatticeSite 2) → unitInterval} {L : ℕ∞}
+    {c : ℕ → ℝ≥0∞} (h : CrossingBounds q L c) (k : ℕ) {lo hi : LatticeSite 2} {n : ℕ}
+    (hn : 1 ≤ n) (hnL : (n : ℕ∞) ≤ L) (hhi : hi = lo + ![(k : ℤ) * n, n + 1])
+    {c₁ d₁ : Finset (LatticeSite 2) → LatticeSite 2} {Γ : ∀ A, (zdGraph 2).Walk (c₁ A) (d₁ A)}
+    (hΓ : ∀ A : Finset (LatticeSite 2),
+      (∀ y : ℤ, lo 1 ≤ y → y ≤ hi 1 - 1 → (![lo 0 - 1, y] : LatticeSite 2) ∈ A) →
+      (∀ f ∈ A, f 0 ≠ hi 0) →
+      c₁ A ∈ Icc lo hi ∧ c₁ A 1 = lo 1 ∧ d₁ A ∈ Icc lo hi ∧ d₁ A 1 = hi 1 ∧
+        (∀ x ∈ (Γ A).support, x ∈ Icc lo hi) ∧
+        ∀ e ∈ (Γ A).edges, e ∈ (zdGraph 2).edgeSet ∧
+          (∀ f ∈ dualEdge e, f ∈ Icc (![lo 0 - 1, lo 1] : LatticeSite 2) ![hi 0, hi 1 - 1]) ∧
+          (∃ f ∈ dualEdge e, f ∈ A) ∧ ∃ f ∈ dualEdge e, f ∉ A)
+    (S : Config (LatticeSite 2)) (u : ℕ) :
+    law q {ω | ∃ A : ℕ → Finset (LatticeSite 2),
+      (∀ v ≤ u, cluster (dualConfig ((dualConfig ω ∩ S) \
+          {e | ∃ x ∈ e, ∃ w < v, x ∈ (Γ (A w)).support}) ∩
+          {s | ∀ x ∈ s, x ∈ Icc (![lo 0 - 1, lo 1] : LatticeSite 2) ![hi 0, hi 1 - 1]} ∪
+        {s | ∃ y : ℤ, lo 1 ≤ y ∧ y + 1 ≤ hi 1 - 1 ∧
+          s = s(![lo 0 - 1, y], (![lo 0 - 1, y + 1] : LatticeSite 2))}) ![lo 0 - 1, lo 1] =
+            ↑(A v)) ∧
+      ∀ v ≤ u, ∀ f ∈ A v, f 0 ≠ hi 0} ≤ (1 - c (k + 1)) ^ (u + 1) := by
+  subst hhi
+  have h1 : lo 1 < (lo + ![(k : ℤ) * n, n + 1]) 1 := by
+    simp only [Pi.add_apply, Matrix.cons_val_one, Matrix.cons_val_zero]
+    omega
+  refine le_trans (MeasureTheory.measure_mono fun ω hω => ?_)
+    (law_foldl_dualConfig_crossing_one_le_pow h k lo hn hnL (u + 1))
+  obtain ⟨A, hA, hright⟩ := hω
+  have hprop := fun j : Fin (u + 1) =>
+    forall_mem_of_exploration h1 hΓ hA (Nat.lt_succ_iff.1 j.2) (hright j (Nat.lt_succ_iff.1 j.2))
+  have hleft : ∀ j : Fin (u + 1), ∀ y : ℤ, lo 1 ≤ y →
+      y ≤ (lo + ![(k : ℤ) * n, n + 1]) 1 - 1 → (![lo 0 - 1, y] : LatticeSite 2) ∈ A j := by
+    intro j y hy0 hy1
+    have := mem_exploredCluster_of_leftColumn (lo := lo) (hi := lo + ![(k : ℤ) * n, n + 1])
+      (ζ := (dualConfig ω ∩ S) \ {e | ∃ x ∈ e, ∃ w < (j : ℕ), x ∈ (Γ (A w)).support}) rfl y hy0
+      hy1
+    rw [hA j (Nat.lt_succ_iff.1 j.2)] at this
+    exact this
+  have hdata := fun j : Fin (u + 1) => hΓ (A j) (hleft j) (hright j (Nat.lt_succ_iff.1 j.2))
+  refine mem_foldl_dualConfig_crossing_of_walks (fun j : Fin (u + 1) => Γ (A j))
+    (fun j => (hdata j).2.1) (fun j => (hdata j).2.2.2.1) (fun j => (hdata j).2.2.2.2.1)
+    (fun j e he => ((hprop j).1 e he).1) ?_
   intro j l hjl e hej hel
   -- an edge shared by two chosen crossings would give them a common vertex
   obtain ⟨x, y, rfl, -, hx, -⟩ := exists_ne_of_mem_edges (Γ (A j)) hej
