@@ -11173,5 +11173,115 @@ theorem continuousOn_pivotal_cutoff_uncapped_of_uniform_cap {N : ModelNorm (Fin 
   obtain ⟨M, hM0, hM⟩ := hrem ε hε
   exact ⟨⟨M, hM0⟩, fun r hr => hM r hr⟩
 
+end PercLib.Models.LongRange
+
+namespace PercLib.Percolation.Bond
+
+variable {V : Type*} [Countable V]
+
+open Classical in
+/-- The real integral of the closed-coordinate truncated extended-nonnegative increment is
+exactly the real closed-coordinate difference, assuming only a.e. finiteness after insertion. -/
+theorem integral_toReal_closed_pivotal (μ : Measure (Config V)) (e : Sym2 V) (o : V)
+    (p : ℕ) (hfin : ∀ᵐ ω ∂μ, ((cluster (insert e ω) o).encard : ℝ≥0∞) ≠ ⊤) :
+    (∫⁻ ω, (if e ∈ ω then (0 : ℝ≥0∞) else
+      (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster ω o).encard : ℝ≥0∞) ^ p)) ∂μ).toReal =
+      ∫ ω, (if e ∈ ω then (0 : ℝ) else
+        (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+          (((cluster ω o).encard : ℝ≥0∞).toReal) ^ p) ∂μ := by
+  have hm : AEMeasurable _ μ :=
+    (PercLib.Models.LongRange.measurable_closed_pivotal_integrand o p e).aemeasurable
+  have hne : ∀ᵐ ω ∂μ, (if e ∈ ω then (0 : ℝ≥0∞) else
+      (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster ω o).encard : ℝ≥0∞) ^ p)) ≠ ⊤ := by
+    filter_upwards [hfin] with ω hω
+    by_cases he : e ∈ ω
+    · simp [he]
+    · rw [ite_eq_right he]
+      exact ne_top_of_le_ne_top (ENNReal.pow_ne_top hω) tsub_le_self
+  rw [← integral_toReal_eq_toReal_lintegral hm hne]
+  apply integral_congr_ae
+  filter_upwards [hfin] with ω hω
+  by_cases he : e ∈ ω
+  · simp [he]
+  · rw [ite_eq_right he, ite_eq_right he]
+    have hs : ω \ {e} = ω := Set.sdiff_singleton_eq_self he
+    have hle : ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ≤
+        ((cluster (insert e ω) o).encard : ℝ≥0∞) :=
+      encard_cluster_sdiff_le_insert_coe ω e o
+    rw [hs] at hle
+    exact PercLib.Models.LongRange.toReal_pow_sub_pow hle hω p
+
+end PercLib.Percolation.Bond
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability
+
+open Classical in
+/-- A finite bound on each binomial diagram term gives the same bound on the weighted pivotal
+flux at that radius. -/
+theorem lintegral_radial_pivotal_le_of_binomial_diagram {d : ℕ}
+    {N : ModelNorm (Fin d → ℝ)} {K : ℝ → ℝ} (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p) (r : ℝ)
+    (hins : ∀ e : Sym2 (Fin d → ℤ), (∫⁻ ω, ((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p
+      ∂(law (intensityProfile (cutoffKernel N K r) β))) ≠ ⊤)
+    (D : ℕ → ℝ≥0∞)
+    (hD : ∀ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ≥0∞) *
+      ∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ (ℓ + 1) *
+        (∑' y, (if N (Int.cast ∘ y) ≤ r then 1 else 0) *
+          (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+          ((cluster ω y).encard : ℝ≥0∞) ^ (p - ℓ))
+        ∂(law (intensityProfile (cutoffKernel N K r) β)) ≤ D ℓ)
+    {u v : ℝ} (hcorner : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Ioo u v)
+    (hr : r ∈ Ioo u v) :
+    (∫⁻ ω, (∑' e : Sym2 (Fin d → ℤ),
+        ((radialKernel N (fun s => if s < r then 1 else 0) e : ℝ≥0) : ℝ≥0∞) *
+          (if e ∈ ω then (0 : ℝ≥0∞) else
+            ((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+              ((cluster ω 0).encard : ℝ≥0∞) ^ p))
+        ∂(law (intensityProfile (cutoffKernel N K r) β))) ≤ ∑ ℓ ∈ Finset.range p, D ℓ := by
+  let μ : Measure (Config (Fin d → ℤ)) := law (intensityProfile (cutoffKernel N K r) β)
+  have hmom : (∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ p ∂μ) ≠ ⊤ :=
+    lintegral_pow_encard_ne_top_of_insert (s(0, 0)) 0 p (hins (s(0, 0)))
+  have hrootfin : μ {ω : Config (Fin d → ℤ) | ((cluster ω 0).encard : ℝ≥0∞) = ⊤} = 0 := by
+    rw [measure_eq_zero_iff_ae_notMem]
+    exact ae_ne_top_of_lintegral_pow_ne_top (measurable_encard_cluster_coe 0) p hp hmom
+  have hENN := i41_enn_of_root_finite (p := p) μ (law_cutoffKernel_map_translate K r β)
+    hrootfin hcorner hr
+  rw [hENN]
+  exact Finset.sum_le_sum fun ℓ hℓ => hD ℓ hℓ
+
+open Classical in
+/-- The per-pair cutoff coefficient is the rate times `toReal` of the radially weighted
+closed-coordinate l integral. -/
+theorem cutoff_weight_mul_integral_eq_rate_mul_closed_toReal {d : ℕ}
+    {N : Seminorm ℝ (Fin d → ℝ)} {K K' : ℝ → ℝ} (p : ℕ) (β : ℝ≥0) (r : ℝ) (o : Fin d → ℤ)
+    (cw : Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ e, cw e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ))))
+    (hfin : ∀ e, ∀ᵐ ω ∂(law (intensityProfile (cutoffKernel N K r) β)),
+      ((cluster (insert e ω) o).encard : ℝ≥0∞) ≠ ⊤)
+    (hint : ∀ e, Integrable (fun ω => (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p)
+      (law (intensityProfile (cutoffKernel N K r) β))) (e : Sym2 (Fin d → ℤ)) :
+    cw e * ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel N K r) β)) =
+      ((β : ℝ) * -K' r) * ((radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+        (∫⁻ ω, (if e ∈ ω then (0 : ℝ≥0∞) else
+          (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+            ((cluster ω o).encard : ℝ≥0∞) ^ p))
+          ∂(law (intensityProfile (cutoffKernel N K r) β))).toReal) := by
+  rcases radialKernel_indicator_eq_zero_or_one N r e with h0 | h1
+  · simp [hcw e, h0]
+  · have hp := cutoff_pivotal_eq_closed_pow (K := K) (K' := K') p β r e o
+      (by rw [h1]; norm_num) (hfin e) (hint e)
+    rw [h1, one_mul] at hp
+    have hclose := integral_toReal_closed_pivotal
+      (law (intensityProfile (cutoffKernel N K r) β)) e o p (hfin e)
+    rw [integral_pivotal_pow_eq_real_sub
+      (law (intensityProfile (cutoffKernel N K r) β)) e o p (hfin e)]
+    rw [← hclose] at hp
+    simpa only [hcw e, h1, one_mul, mul_left_comm, mul_assoc] using hp
 
 end PercLib.Models.LongRange
