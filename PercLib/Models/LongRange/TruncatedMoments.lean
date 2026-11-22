@@ -18,6 +18,8 @@ public import PercLib.Probability.MassTransportTuple
 public import PercLib.Percolation.Bond.MomentDerivativeTruncated
 public import PercLib.Percolation.Bond.Susceptibility
 public import PercLib.Models.HierarchicalCutoff
+public import PercLib.Percolation.Bond.Forest
+public import PercLib.Probability.Cylinder
 public import PercLib.Analysis.DominatedDerivative
 
 /-!
@@ -3179,3 +3181,717 @@ theorem tendsto_tsum_of_l1_dominated {ι : Type*} [Countable ι]
   exact tendsto_sub_nhds_zero_iff.1 hz'
 
 end PercLib.Analysis
+
+/-! ## Uniform moment bounds after a single edge insertion
+
+A per-vertex moment bound controls the moment after inserting an edge. The root
+moment is necessary, as a compiled counterexample shows.
+-/
+
+noncomputable section
+
+open MeasureTheory Set
+open scoped ENNReal NNReal
+
+namespace PercLib.Percolation.Bond
+
+variable {V : Type*}
+
+/-! ### The two-term inequality in `ℝ≥0∞` -/
+
+/-- **`(u + v)^p ≤ 2^(p - 1) (u^p + v^p)` in `ℝ≥0∞`.** The real inequality is
+`add_pow_le`; this is its `ℝ≥0∞` form, valid also for `u = ⊤` or `v = ⊤`, where both sides
+are `⊤` (and for `p = 0`, where both sides are `1` and `2`). -/
+theorem ennreal_add_pow_le (u v : ℝ≥0∞) (p : ℕ) :
+    (u + v) ^ p ≤ 2 ^ (p - 1) * (u ^ p + v ^ p) := by
+  rcases eq_or_ne u ⊤ with hu | hu
+  · subst hu
+    rcases p with _ | k
+    · simp
+    · rw [top_add, Nat.add_sub_cancel, ENNReal.top_pow (Nat.succ_ne_zero k), top_add,
+        ENNReal.mul_top (by simp : ((2 : ℝ≥0∞)) ^ k ≠ 0)]
+  · rcases eq_or_ne v ⊤ with hv | hv
+    · subst hv
+      rcases p with _ | k
+      · simp
+      · rw [add_top, Nat.add_sub_cancel, ENNReal.top_pow (Nat.succ_ne_zero k), add_top,
+          ENNReal.mul_top (by simp : ((2 : ℝ≥0∞)) ^ k ≠ 0)]
+    · have huv : u + v ≠ ⊤ := ENNReal.add_ne_top.2 ⟨hu, hv⟩
+      have hup : u ^ p ≠ ⊤ := ENNReal.pow_ne_top hu
+      have hvp : v ^ p ≠ ⊤ := ENNReal.pow_ne_top hv
+      have htwo : (2 : ℝ≥0∞) ^ (p - 1) ≠ ⊤ := ENNReal.pow_ne_top (by simp)
+      have htwo0 : (2 : ℝ≥0∞) ^ (p - 1) ≠ 0 := by
+        rcases Nat.eq_zero_or_pos p with h | h
+        · subst h; simp
+        · exact pow_ne_zero _ (by simp)
+      rw [← ENNReal.toReal_le_toReal (ENNReal.pow_ne_top huv)
+        (ENNReal.mul_ne_top htwo (ENNReal.add_ne_top.2 ⟨hup, hvp⟩))]
+      simp only [ENNReal.toReal_pow, ENNReal.toReal_add hu hv, ENNReal.toReal_mul,
+        ENNReal.toReal_add hup hvp, ENNReal.toReal_ofNat]
+      exact add_pow_le ENNReal.toReal_nonneg ENNReal.toReal_nonneg p
+
+/-! ### The pointwise pivotal increment of the volume bound -/
+
+/-- **Opening one pair joins at most three clusters, in volume form.**
+`|K_x(ω ∪ {s(a, b)})| ≤ |K_x(ω)| + |K_a(ω)| + |K_b(ω)|` in `ℝ≥0∞`; no finiteness
+hypothesis, an infinite cluster makes both sides `⊤`. -/
+theorem encard_cluster_insert_le_add (ω : Config V) (a b x : V) :
+    ((cluster (insert s(a, b) ω) x).encard : ℝ≥0∞) ≤
+      ((cluster ω x).encard : ℝ≥0∞) + ((cluster ω a).encard : ℝ≥0∞) +
+        ((cluster ω b).encard : ℝ≥0∞) := by
+  have hsub := Set.encard_mono (cluster_insert_subset ω a b x)
+  have hstep : (cluster ω x ∪ cluster ω a ∪ cluster ω b).encard ≤
+      (cluster ω x).encard + (cluster ω a).encard + (cluster ω b).encard := by
+    refine (Set.encard_union_le (s := cluster ω x ∪ cluster ω a) (t := cluster ω b)).trans ?_
+    exact add_le_add (Set.encard_union_le (s := cluster ω x) (t := cluster ω a)) le_rfl
+  calc ((cluster (insert s(a, b) ω) x).encard : ℝ≥0∞)
+      ≤ (((cluster ω x ∪ cluster ω a ∪ cluster ω b).encard : ℕ∞) : ℝ≥0∞) := by
+        exact_mod_cast hsub
+    _ ≤ (((cluster ω x).encard + (cluster ω a).encard + (cluster ω b).encard : ℕ∞) :
+          ℝ≥0∞) := by exact_mod_cast hstep
+    _ = ((cluster ω x).encard : ℝ≥0∞) + ((cluster ω a).encard : ℝ≥0∞) +
+          ((cluster ω b).encard : ℝ≥0∞) := by
+        rw [ENat.toENNReal_add, ENat.toENNReal_add]
+
+/-- **The four-case volume bound for the inserted cluster.** With `p` arbitrary,
+`|K_x(ω ∪ {s(a, b)})|^p ≤ |K_x(ω)|^p + 2^(p - 1) (|K_a(ω)|^p + |K_b(ω)|^p)`.
+
+The cases are the four possible membership patterns of `x` in the clusters of `a` and `b`:
+neither (`x`'s cluster is unchanged, so the bound is `le_add_right`), both (all three clusters
+coincide), and exactly one (the cluster becomes `K_a ∪ K_b`, which is a disjoint union, and
+the two-term inequality applies). No finiteness hypothesis is used: an infinite cluster on
+either side makes both sides `⊤`. -/
+theorem encard_cluster_insert_pow_le (ω : Config V) (a b x : V) (p : ℕ) :
+    ((cluster (insert s(a, b) ω) x).encard : ℝ≥0∞) ^ p ≤
+      ((cluster ω x).encard : ℝ≥0∞) ^ p +
+        2 ^ (p - 1) * (((cluster ω a).encard : ℝ≥0∞) ^ p +
+          ((cluster ω b).encard : ℝ≥0∞) ^ p) := by
+  classical
+  by_cases ha : x ∈ cluster ω a
+  · by_cases hb : x ∈ cluster ω b
+    · rw [cluster_insert_eq_of_mem_of_mem ha hb]
+      exact le_add_right le_rfl
+    · have hxK : cluster ω x = cluster ω a :=
+        (cluster_eq_of_mem_conn ((mem_cluster_iff ω a x).1 ha)).symm
+      have hdisj : Disjoint (cluster ω a) (cluster ω b) := by
+        refine Set.disjoint_left.2 fun z hza hzb => hb ?_
+        have hax : ω ∈ conn x a := by
+          rw [conn_symm]
+          exact (mem_cluster_iff ω a x).1 ha
+        have haz : ω ∈ conn a z := (mem_cluster_iff ω a z).1 hza
+        have h1 : ω ∈ conn x z := conn_trans hax haz
+        have h2 : ω ∈ conn z b := by rwa [mem_cluster_iff, conn_symm] at hzb
+        have hxb : ω ∈ conn x b := conn_trans h1 h2
+        rw [mem_cluster_iff, conn_symm]
+        exact hxb
+      have hunion : cluster (insert s(a, b) ω) x = cluster ω a ∪ cluster ω b :=
+        cluster_insert_of_mem ω a b x (Or.inl ha)
+      rw [hunion, Set.encard_union_eq hdisj, ENat.toENNReal_add, hxK]
+      exact le_add_left (ennreal_add_pow_le _ _ p)
+  · by_cases hb : x ∈ cluster ω b
+    · have hxK : cluster ω x = cluster ω b :=
+        (cluster_eq_of_mem_conn ((mem_cluster_iff ω b x).1 hb)).symm
+      have hdisj : Disjoint (cluster ω a) (cluster ω b) := by
+        refine Set.disjoint_left.2 fun z hza hzb => ha ?_
+        have hbx : ω ∈ conn x b := by
+          rw [conn_symm]
+          exact (mem_cluster_iff ω b x).1 hb
+        have hbz : ω ∈ conn b z := (mem_cluster_iff ω b z).1 hzb
+        have h1 : ω ∈ conn x z := conn_trans hbx hbz
+        have h2 : ω ∈ conn z a := by rwa [mem_cluster_iff, conn_symm] at hza
+        have hxa : ω ∈ conn x a := conn_trans h1 h2
+        rw [mem_cluster_iff, conn_symm]
+        exact hxa
+      have hunion : cluster (insert s(a, b) ω) x = cluster ω a ∪ cluster ω b :=
+        cluster_insert_of_mem ω a b x (Or.inr hb)
+      rw [hunion, Set.encard_union_eq hdisj, ENat.toENNReal_add, hxK]
+      exact (ennreal_add_pow_le _ _ p).trans (le_add_left le_rfl)
+    · rw [PercLib.Models.LongRange.cluster_insert_eq_of_forall_not_mem (ω := ω) (o := x)
+        (e := s(a, b)) ?_]
+      · exact le_add_right le_rfl
+      · intro z hz
+        rw [Sym2.mem_iff] at hz
+        rcases hz with hza | hzb
+        · subst hza
+          exact fun h => ha ((mem_cluster_comm ω x z).1 h)
+        · subst hzb
+          exact fun h => hb ((mem_cluster_comm ω x z).1 h)
+
+/-! ### The real form, under a.e. finiteness of the three clusters -/
+
+/-- **The volume bound in `ℝ`.** The `ℝ`-valued form of `encard_cluster_insert_pow_le`, with
+the explicit finiteness hypotheses that `toReal` needs: the clusters of `x`, `a` and `b` in
+`ω` must have finite `encard`. The insertion itself needs no hypothesis: the bound forces
+`|K_x(ω ∪ {e})|` to be finite as well. -/
+theorem encard_cluster_insert_pow_toReal_le (ω : Config V) (a b x : V) (p : ℕ)
+    (hx : ((cluster ω x).encard : ℝ≥0∞) ≠ ⊤)
+    (ha : ((cluster ω a).encard : ℝ≥0∞) ≠ ⊤)
+    (hb : ((cluster ω b).encard : ℝ≥0∞) ≠ ⊤) :
+    ((cluster (insert s(a, b) ω) x).encard : ℝ≥0∞).toReal ^ p ≤
+      ((cluster ω x).encard : ℝ≥0∞).toReal ^ p +
+        2 ^ (p - 1) * (((cluster ω a).encard : ℝ≥0∞).toReal ^ p +
+          ((cluster ω b).encard : ℝ≥0∞).toReal ^ p) := by
+  rcases Nat.eq_zero_or_pos p with hp | hp
+  · subst hp
+    simp
+  · have hmain := encard_cluster_insert_pow_le ω a b x p
+    have hxp : ((cluster ω x).encard : ℝ≥0∞) ^ p ≠ ⊤ := ENNReal.pow_ne_top hx
+    have hap : ((cluster ω a).encard : ℝ≥0∞) ^ p ≠ ⊤ := ENNReal.pow_ne_top ha
+    have hbp : ((cluster ω b).encard : ℝ≥0∞) ^ p ≠ ⊤ := ENNReal.pow_ne_top hb
+    have hsum : ((cluster ω a).encard : ℝ≥0∞) ^ p + ((cluster ω b).encard : ℝ≥0∞) ^ p
+        ≠ ⊤ := ENNReal.add_ne_top.2 ⟨hap, hbp⟩
+    have htwo : (2 : ℝ≥0∞) ^ (p - 1) ≠ ⊤ := ENNReal.pow_ne_top (by simp)
+    have hRHS : ((cluster ω x).encard : ℝ≥0∞) ^ p +
+        2 ^ (p - 1) * (((cluster ω a).encard : ℝ≥0∞) ^ p +
+          ((cluster ω b).encard : ℝ≥0∞) ^ p) ≠ ⊤ :=
+      ENNReal.add_ne_top.2 ⟨hxp, ENNReal.mul_ne_top htwo hsum⟩
+    have hL : ((cluster (insert s(a, b) ω) x).encard : ℝ≥0∞) ^ p ≠ ⊤ :=
+      ne_top_of_le_ne_top hRHS hmain
+    have hX : ((cluster (insert s(a, b) ω) x).encard : ℝ≥0∞) ≠ ⊤ := by
+      intro h
+      exact hL (by rw [h, ENNReal.top_pow (by omega)])
+    calc ((cluster (insert s(a, b) ω) x).encard : ℝ≥0∞).toReal ^ p
+        = (((cluster (insert s(a, b) ω) x).encard : ℝ≥0∞) ^ p).toReal :=
+          (ENNReal.toReal_pow _ _).symm
+      _ ≤ _ := ENNReal.toReal_mono hRHS hmain
+      _ = ((cluster ω x).encard : ℝ≥0∞).toReal ^ p +
+          2 ^ (p - 1) * (((cluster ω a).encard : ℝ≥0∞).toReal ^ p +
+            ((cluster ω b).encard : ℝ≥0∞).toReal ^ p) := by
+        rw [ENNReal.toReal_add hxp (ENNReal.mul_ne_top htwo hsum), ENNReal.toReal_mul,
+          ENNReal.toReal_add hap hbp]
+        simp only [ENNReal.toReal_pow, ENNReal.toReal_ofNat]
+
+/-! ### The inserted side of the truncation hypotheses -/
+
+/-- **A.e. finiteness of the inserted cluster.** If every per-vertex cluster volume is a.e.
+finite, then so is the cluster volume of `o` after opening any single pair, by the three-cluster
+bound `encard_cluster_insert_le_add`. This is the hypothesis `hfin` of
+`tendsto_tsum_capped_flux` for the inserted side. -/
+theorem ae_ne_top_encard_cluster_insert (μ : Measure (Config V)) (e : Sym2 V) (o : V)
+    (hfin : ∀ y, ∀ᵐ ω ∂μ, ((cluster ω y).encard : ℝ≥0∞) ≠ ⊤) :
+    ∀ᵐ ω ∂μ, ((cluster (insert e ω) o).encard : ℝ≥0∞) ≠ ⊤ := by
+  induction e using Sym2.ind with
+  | _ a b =>
+    filter_upwards [(hfin o), (hfin a), (hfin b)] with ω ho ha hb
+    refine ne_top_of_le_ne_top
+      (ENNReal.add_ne_top.2 ⟨ho, ENNReal.add_ne_top.2 ⟨ha, hb⟩⟩) ?_
+    simpa only [add_assoc] using encard_cluster_insert_le_add ω a b o
+
+/-- **Integrability of the inserted `p`-th moment.** Dominated by the three per-vertex moments
+through `encard_cluster_insert_pow_toReal_le`. This is the hypothesis `hint` of
+`tendsto_tsum_capped_flux` for the inserted side, obtained from the `ω`-side data alone. -/
+theorem integrable_encard_cluster_insert_pow [Countable V] (μ : Measure (Config V))
+    (e : Sym2 V) (o : V) (p : ℕ)
+    (hfin : ∀ y, ∀ᵐ ω ∂μ, ((cluster ω y).encard : ℝ≥0∞) ≠ ⊤)
+    (hint : ∀ y, Integrable (fun ω => ((cluster ω y).encard : ℝ≥0∞).toReal ^ p) μ) :
+    Integrable (fun ω => ((cluster (insert e ω) o).encard : ℝ≥0∞).toReal ^ p) μ := by
+  induction e using Sym2.ind with
+  | _ a b =>
+    refine Integrable.mono' ((hint o).add (((hint a).add (hint b)).const_mul ((2 : ℝ) ^ (p - 1))))
+      ?_ ?_
+    · exact ((ENNReal.measurable_toReal.comp
+        (measurable_encard_cluster_insert_coe (s(a, b)) o)).pow_const p).aestronglyMeasurable
+    · filter_upwards [(hfin o), (hfin a), (hfin b)] with ω ho ha hb
+      rw [Real.norm_of_nonneg (pow_nonneg ENNReal.toReal_nonneg p)]
+      exact encard_cluster_insert_pow_toReal_le ω a b o p ho ha hb
+
+/-! ### The expectation bound -/
+
+/-- **The inserted pivotal moment against the three per-vertex moments.**
+
+For any measure `μ` on bond configurations, root `o`, pair `s(a, b)` and exponent `p`:
+`E|K_o(ω ∪ {s(a, b)})|^p ≤ E|K_o|^p + 2^(p - 1) (E|K_a|^p + E|K_b|^p)`.
+
+The hypotheses are exactly what the real form needs: a.e. finiteness and integrability of the
+three per-vertex moments. No hypothesis on the inserted cluster itself is needed: its moment is
+integrable as a consequence, and that is `integrable_encard_cluster_insert_pow`. -/
+theorem integral_encard_cluster_insert_pow_le [Countable V] (μ : Measure (Config V))
+    (x a b : V) (p : ℕ)
+    (hfx : ∀ᵐ ω ∂μ, ((cluster ω x).encard : ℝ≥0∞) ≠ ⊤)
+    (hfa : ∀ᵐ ω ∂μ, ((cluster ω a).encard : ℝ≥0∞) ≠ ⊤)
+    (hfb : ∀ᵐ ω ∂μ, ((cluster ω b).encard : ℝ≥0∞) ≠ ⊤)
+    (hix : Integrable (fun ω => ((cluster ω x).encard : ℝ≥0∞).toReal ^ p) μ)
+    (hia : Integrable (fun ω => ((cluster ω a).encard : ℝ≥0∞).toReal ^ p) μ)
+    (hib : Integrable (fun ω => ((cluster ω b).encard : ℝ≥0∞).toReal ^ p) μ) :
+    ∫ ω, ((cluster (insert s(a, b) ω) x).encard : ℝ≥0∞).toReal ^ p ∂μ ≤
+      ∫ ω, ((cluster ω x).encard : ℝ≥0∞).toReal ^ p ∂μ +
+        2 ^ (p - 1) * (∫ ω, ((cluster ω a).encard : ℝ≥0∞).toReal ^ p ∂μ +
+          ∫ ω, ((cluster ω b).encard : ℝ≥0∞).toReal ^ p ∂μ) := by
+  have hbound : ∀ᵐ ω ∂μ, ((cluster (insert s(a, b) ω) x).encard : ℝ≥0∞).toReal ^ p ≤
+      ((cluster ω x).encard : ℝ≥0∞).toReal ^ p +
+        2 ^ (p - 1) * (((cluster ω a).encard : ℝ≥0∞).toReal ^ p +
+          ((cluster ω b).encard : ℝ≥0∞).toReal ^ p) := by
+    filter_upwards [hfx, hfa, hfb] with ω ho ha hb
+    exact encard_cluster_insert_pow_toReal_le ω a b x p ho ha hb
+  have hInt : Integrable (fun ω => ((cluster ω x).encard : ℝ≥0∞).toReal ^ p +
+      2 ^ (p - 1) * (((cluster ω a).encard : ℝ≥0∞).toReal ^ p +
+        ((cluster ω b).encard : ℝ≥0∞).toReal ^ p)) μ :=
+    hix.add ((hia.add hib).const_mul ((2 : ℝ) ^ (p - 1)))
+  have hIntNew : Integrable (fun ω =>
+      ((cluster (insert s(a, b) ω) x).encard : ℝ≥0∞).toReal ^ p) μ := by
+    refine Integrable.mono' hInt ?_ ?_
+    · exact ((ENNReal.measurable_toReal.comp
+        (measurable_encard_cluster_insert_coe (s(a, b)) x)).pow_const p).aestronglyMeasurable
+    · filter_upwards [hbound] with ω h
+      rwa [Real.norm_of_nonneg (pow_nonneg ENNReal.toReal_nonneg p)]
+  calc ∫ ω, ((cluster (insert s(a, b) ω) x).encard : ℝ≥0∞).toReal ^ p ∂μ
+      ≤ ∫ ω, (((cluster ω x).encard : ℝ≥0∞).toReal ^ p +
+          2 ^ (p - 1) * (((cluster ω a).encard : ℝ≥0∞).toReal ^ p +
+            ((cluster ω b).encard : ℝ≥0∞).toReal ^ p)) ∂μ :=
+        integral_mono_ae hIntNew hInt hbound
+    _ = ∫ ω, ((cluster ω x).encard : ℝ≥0∞).toReal ^ p ∂μ +
+          2 ^ (p - 1) * (∫ ω, ((cluster ω a).encard : ℝ≥0∞).toReal ^ p ∂μ +
+            ∫ ω, ((cluster ω b).encard : ℝ≥0∞).toReal ^ p ∂μ) := by
+        have e1 : ∫ ω, (((cluster ω x).encard : ℝ≥0∞).toReal ^ p +
+            2 ^ (p - 1) * (((cluster ω a).encard : ℝ≥0∞).toReal ^ p +
+              ((cluster ω b).encard : ℝ≥0∞).toReal ^ p)) ∂μ =
+            ∫ ω, (((cluster ω x).encard : ℝ≥0∞).toReal ^ p) ∂μ +
+              ∫ ω, (2 ^ (p - 1) * (((cluster ω a).encard : ℝ≥0∞).toReal ^ p +
+                ((cluster ω b).encard : ℝ≥0∞).toReal ^ p)) ∂μ :=
+          integral_add hix ((hia.add hib).const_mul ((2 : ℝ) ^ (p - 1)))
+        have e2 : ∫ ω, (2 ^ (p - 1) * (((cluster ω a).encard : ℝ≥0∞).toReal ^ p +
+              ((cluster ω b).encard : ℝ≥0∞).toReal ^ p)) ∂μ =
+            2 ^ (p - 1) * ∫ ω, (((cluster ω a).encard : ℝ≥0∞).toReal ^ p +
+              ((cluster ω b).encard : ℝ≥0∞).toReal ^ p) ∂μ :=
+          integral_const_mul _ _
+        have e3 : ∫ ω, (((cluster ω a).encard : ℝ≥0∞).toReal ^ p +
+              ((cluster ω b).encard : ℝ≥0∞).toReal ^ p) ∂μ =
+            ∫ ω, (((cluster ω a).encard : ℝ≥0∞).toReal ^ p) ∂μ +
+              ∫ ω, (((cluster ω b).encard : ℝ≥0∞).toReal ^ p) ∂μ :=
+          integral_add hia hib
+        rw [e1, e2, e3]
+
+/-- **The uniform inserted-moment bound in `ℝ`.** If every per-vertex `p`-th cluster moment is
+integrable, a.e. finite and bounded by the same `m ≥ 0`, then the `p`-th moment of the cluster of
+`x` after opening any pair is at most `(1 + 2^(p + 1)) m`.
+
+The constant is what the pointwise four-case bound gives: the root term survives with weight `1`
+and the two endpoint terms enter with weight `2^(p - 1) * 2 = 2^p` for `p ≥ 1`. It is uniform in
+the pair, which is what `summable_flux_dominator_of_uniform_moment` needs. -/
+theorem integral_encard_cluster_insert_pow_le_of_uniform [Countable V]
+    (μ : Measure (Config V)) (p : ℕ) {m : ℝ}
+    (hfin : ∀ y, ∀ᵐ ω ∂μ, ((cluster ω y).encard : ℝ≥0∞) ≠ ⊤)
+    (hint : ∀ y, Integrable (fun ω => ((cluster ω y).encard : ℝ≥0∞).toReal ^ p) μ)
+    (hm : 0 ≤ m)
+    (hbd : ∀ y, ∫ ω, ((cluster ω y).encard : ℝ≥0∞).toReal ^ p ∂μ ≤ m)
+    (x a b : V) :
+    ∫ ω, ((cluster (insert s(a, b) ω) x).encard : ℝ≥0∞).toReal ^ p ∂μ ≤
+      (1 + 2 ^ (p + 1)) * m := by
+  have hmain := integral_encard_cluster_insert_pow_le μ x a b p (hfin x) (hfin a) (hfin b)
+    (hint x) (hint a) (hint b)
+  have h2 : (2 : ℝ) ^ (p - 1) * 2 ≤ 2 ^ (p + 1) := by
+    rcases Nat.eq_zero_or_pos p with hp | hp
+    · subst hp
+      norm_num
+    · rw [← pow_succ, Nat.sub_add_cancel hp]
+      exact pow_le_pow_right₀ (by norm_num) (Nat.le_succ p)
+  calc ∫ ω, ((cluster (insert s(a, b) ω) x).encard : ℝ≥0∞).toReal ^ p ∂μ
+      ≤ ∫ ω, ((cluster ω x).encard : ℝ≥0∞).toReal ^ p ∂μ +
+          2 ^ (p - 1) * (∫ ω, ((cluster ω a).encard : ℝ≥0∞).toReal ^ p ∂μ +
+            ∫ ω, ((cluster ω b).encard : ℝ≥0∞).toReal ^ p ∂μ) := hmain
+    _ ≤ m + 2 ^ (p - 1) * (m + m) := by
+        have hc : (0 : ℝ) ≤ 2 ^ (p - 1) := by positivity
+        have hs : ∫ ω, ((cluster ω a).encard : ℝ≥0∞).toReal ^ p ∂μ +
+            ∫ ω, ((cluster ω b).encard : ℝ≥0∞).toReal ^ p ∂μ ≤ m + m := by
+          linarith [hbd a, hbd b]
+        exact add_le_add (hbd x) (mul_le_mul_of_nonneg_left hs hc)
+    _ = m + (2 ^ (p - 1) * 2) * m := by ring
+    _ ≤ m + 2 ^ (p + 1) * m := by
+        have hle := mul_le_mul_of_nonneg_right h2 hm
+        linarith
+    _ = (1 + 2 ^ (p + 1)) * m := by ring
+
+/-- **The uniform inserted-moment bound, pair-indexed.** The `Sym2` form of
+`integral_encard_cluster_insert_pow_le_of_uniform`, i.e. exactly the hypothesis `hbound` of
+`summable_flux_dominator_of_uniform_moment` (and the integrability part of `hint` in
+`tendsto_tsum_capped_flux`), with the explicit uniform per-vertex input. -/
+theorem integral_encard_cluster_insert_pow_le_of_uniform_sym2 [Countable V]
+    (μ : Measure (Config V)) (p : ℕ) {m : ℝ}
+    (hfin : ∀ y, ∀ᵐ ω ∂μ, ((cluster ω y).encard : ℝ≥0∞) ≠ ⊤)
+    (hint : ∀ y, Integrable (fun ω => ((cluster ω y).encard : ℝ≥0∞).toReal ^ p) μ)
+    (hm : 0 ≤ m)
+    (hbd : ∀ y, ∫ ω, ((cluster ω y).encard : ℝ≥0∞).toReal ^ p ∂μ ≤ m)
+    (e : Sym2 V) (o : V) :
+    ∫ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞).toReal ^ p ∂μ ≤ (1 + 2 ^ (p + 1)) * m := by
+  induction e using Sym2.ind with
+  | _ a b => exact integral_encard_cluster_insert_pow_le_of_uniform μ p hfin hint hm hbd o a b
+
+/-! ### The all-pairs dominator from a uniform per-vertex moment bound -/
+
+/-- **The all-pairs flux dominator.** The summability hypothesis `hsum` of
+`abs_tsum_capped_flux_le`, `tendsto_tsum_capped_flux` and `integral_sub_eq_integral_flux_of_cap`,
+from two explicit inputs: a uniform bound `m` on the per-vertex `p`-th cluster moments (with
+a.e. finiteness and integrability), and summability of the derivative weights
+`e ↦ |c r e|`. The two inputs are independent: the weights do not control the moments, and the
+moments do not control the weights. On the cut-off family the weights are finitely supported,
+so `hw` is free there; the moment bound is the sharpness input. -/
+theorem summable_flux_dominator_of_uniform_vertex_moment [Countable V]
+    (p : ℝ → Sym2 V → unitInterval) (c : ℝ → Sym2 V → ℝ) (o : V) (pow : ℕ) (r : ℝ) {m : ℝ}
+    (hfin : ∀ y, ∀ᵐ ω ∂(law (p r)), ((cluster ω y).encard : ℝ≥0∞) ≠ ⊤)
+    (hint : ∀ y, Integrable (fun ω => ((cluster ω y).encard : ℝ≥0∞).toReal ^ pow)
+      (law (p r)))
+    (hm : 0 ≤ m)
+    (hbd : ∀ y, ∫ ω, ((cluster ω y).encard : ℝ≥0∞).toReal ^ pow ∂(law (p r)) ≤ m)
+    (hw : Summable fun e => |c r e|) :
+    Summable fun e => |c r e| *
+      ∫ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞).toReal ^ pow ∂(law (p r)) :=
+  summable_flux_dominator_of_uniform_moment p c o pow r
+    (fun e => integral_encard_cluster_insert_pow_le_of_uniform_sym2 (law (p r)) pow hfin hint hm
+      hbd e o) hw
+
+/-! ### The inserted-side inputs of `tendsto_tsum_capped_flux`, uniformly in the pair -/
+
+/-- **A.e. finiteness of every inserted cluster volume**, from the `ω`-side data alone. This is
+the hypothesis `hfin : ∀ e, ∀ᵐ ω, |K_o(ω ∪ {e})| ≠ ⊤` of `tendsto_tsum_capped_flux`. -/
+theorem ae_ne_top_encard_cluster_insert_forall (μ : Measure (Config V)) (o : V)
+    (hfin : ∀ y, ∀ᵐ ω ∂μ, ((cluster ω y).encard : ℝ≥0∞) ≠ ⊤) :
+    ∀ e : Sym2 V, ∀ᵐ ω ∂μ, ((cluster (insert e ω) o).encard : ℝ≥0∞) ≠ ⊤ :=
+  fun e => ae_ne_top_encard_cluster_insert μ e o hfin
+
+/-- **Integrability of every inserted `p`-th moment**, from the `ω`-side data alone. This is the
+hypothesis `hint : ∀ e, Integrable (fun ω => |K_o(ω ∪ {e})|^p)` of `tendsto_tsum_capped_flux`. -/
+theorem integrable_encard_cluster_insert_pow_forall [Countable V] (μ : Measure (Config V))
+    (o : V) (p : ℕ)
+    (hfin : ∀ y, ∀ᵐ ω ∂μ, ((cluster ω y).encard : ℝ≥0∞) ≠ ⊤)
+    (hint : ∀ y, Integrable (fun ω => ((cluster ω y).encard : ℝ≥0∞).toReal ^ p) μ) :
+    ∀ e : Sym2 V, Integrable (fun ω => ((cluster (insert e ω) o).encard : ℝ≥0∞).toReal ^ p) μ :=
+  fun e => integrable_encard_cluster_insert_pow μ e o p hfin hint
+
+/-! ### Non-vacuity: the zero profile on `ℕ` -/
+
+/-- **Non-vacuity of the uniform input: the zero profile on `ℕ`.**
+
+Under `law 0` every pair is closed almost surely, so every cluster is a single vertex, every
+per-vertex `p`-th moment equals `1`, and the uniform input of
+`integral_encard_cluster_insert_pow_le_of_uniform` holds with `m = 1`. The conclusion of that
+theorem then reads `E|K_o(ω ∪ {s(a, b)})|^p ≤ 1 + 2^(p + 1)`, which is finite and uniform in the
+pair: the hypothesis bundle is satisfiable by an honest bond profile, not only by hypothesis.
+(The true value in this instance is `1` when `o ∉ {a, b}` and `2^p` otherwise, so the constant
+is not sharp but is of the right order.) -/
+theorem integral_encard_cluster_insert_pow_le_zero_profile (pow : ℕ) (o a b : ℕ) :
+    ∫ ω, ((cluster (insert s(a, b) ω) o).encard : ℝ≥0∞).toReal ^ pow
+      ∂(law (fun _ : Sym2 ℕ => (0 : unitInterval))) ≤ 1 + 2 ^ (pow + 1) := by
+  have hae : ∀ᵐ ω ∂(law (fun _ : Sym2 ℕ => (0 : unitInterval))), ω = ∅ := by
+    filter_upwards [ae_config_subset_positive (fun _ : Sym2 ℕ => (0 : unitInterval))] with ω hω
+    exact Set.subset_empty_iff.mp fun e he => (lt_irrefl (0 : ℝ) (hω he))
+  have hfin : ∀ y : ℕ, ∀ᵐ ω ∂(law (fun _ : Sym2 ℕ => (0 : unitInterval))),
+      ((cluster ω y).encard : ℝ≥0∞) ≠ ⊤ := by
+    intro y
+    filter_upwards [hae] with ω h
+    rw [h, cluster_empty, Set.encard_singleton]
+    simp
+  have hint : ∀ y : ℕ, Integrable (fun ω => ((cluster ω y).encard : ℝ≥0∞).toReal ^ pow)
+      (law (fun _ : Sym2 ℕ => (0 : unitInterval))) := by
+    intro y
+    refine (integrable_const (1 : ℝ)).congr ?_
+    filter_upwards [hae] with ω h
+    rw [h, cluster_empty, Set.encard_singleton]
+    simp
+  have hbd : ∀ y : ℕ, ∫ ω, ((cluster ω y).encard : ℝ≥0∞).toReal ^ pow
+      ∂(law (fun _ : Sym2 ℕ => (0 : unitInterval))) ≤ 1 := by
+    intro y
+    have h1 : ∫ ω, ((cluster ω y).encard : ℝ≥0∞).toReal ^ pow
+        ∂(law (fun _ : Sym2 ℕ => (0 : unitInterval))) =
+        ∫ _ : Config ℕ, (1 : ℝ) ∂(law (fun _ : Sym2 ℕ => (0 : unitInterval))) := by
+      refine integral_congr_ae ?_
+      filter_upwards [hae] with ω h
+      rw [h, cluster_empty, Set.encard_singleton]
+      simp
+    rw [h1]
+    simp
+  have := integral_encard_cluster_insert_pow_le_of_uniform
+    (law (fun _ : Sym2 ℕ => (0 : unitInterval))) pow hfin hint zero_le_one hbd o a b
+  simpa using this
+
+/-! ### Loops -/
+
+/-- **Loops are covered without hypotheses.** For a diagonal pair `s(a, a)` the inserted cluster
+is the original one, so the pivotal moment does not move at all. This is the loop case of the
+quantification over all `e : Sym2 V`, which includes the diagonal elements, and it needs no
+finiteness hypothesis. -/
+theorem encard_cluster_insert_diag_pow_eq (ω : Config V) (a x : V) (p : ℕ) :
+    ((cluster (insert s(a, a) ω) x).encard : ℝ≥0∞) ^ p =
+      ((cluster ω x).encard : ℝ≥0∞) ^ p := by
+  rw [cluster_insert_diag]
+
+/-! ### Finite vertex sets: every profile satisfies the uniform input -/
+
+/-- **Non-vacuity on a finite vertex set: the uniform input is free.** If `V` is finite then every
+cluster has at most `Fintype.card V` vertices, so for *every* bond profile and every root the
+per-vertex `p`-th moment is bounded by `(Fintype.card V)^p`. Consequently the inserted pivotal
+moment is bounded by `(1 + 2^(p + 1)) * (Fintype.card V)^p` with no input beyond finiteness of the
+vertex set and normalisation of the measure. This is the finite-volume regime of the finite Russo
+formulas, where the moment bound is not a sharpness statement. -/
+theorem integral_encard_cluster_insert_pow_le_fintype [Fintype V] [Countable V]
+    (μ : Measure (Config V)) [IsProbabilityMeasure μ] (p : ℕ) (o a b : V) :
+    ∫ ω, ((cluster (insert s(a, b) ω) o).encard : ℝ≥0∞).toReal ^ p ∂μ ≤
+      (1 + 2 ^ (p + 1)) * (Fintype.card V : ℝ) ^ p := by
+  have hcard : ∀ (y : V) (ω : Config V),
+      ((cluster ω y).encard : ℝ≥0∞) ≤ ((Fintype.card V : ℕ) : ℝ≥0∞) := by
+    intro y ω
+    have h := Set.encard_mono (Set.subset_univ (cluster ω y))
+    rw [Set.encard_univ, ENat.card_eq_coe_fintype_card] at h
+    exact_mod_cast h
+  have hle : ∀ (y : V) (ω : Config V),
+      ((cluster ω y).encard : ℝ≥0∞).toReal ^ p ≤ (Fintype.card V : ℝ) ^ p := by
+    intro y ω
+    have h4 : ((cluster ω y).encard : ℝ≥0∞).toReal ≤ (Fintype.card V : ℝ) := by
+      have h := ENNReal.toReal_mono (by simp : ((Fintype.card V : ℕ) : ℝ≥0∞) ≠ ⊤) (hcard y ω)
+      simpa using h
+    exact pow_le_pow_left₀ ENNReal.toReal_nonneg h4 p
+  have hfin : ∀ y : V, ∀ᵐ ω ∂μ, ((cluster ω y).encard : ℝ≥0∞) ≠ ⊤ := by
+    intro y
+    exact Filter.Eventually.of_forall fun ω => ne_top_of_le_ne_top (by simp) (hcard y ω)
+  have hint : ∀ y : V, Integrable (fun ω => ((cluster ω y).encard : ℝ≥0∞).toReal ^ p) μ := by
+    intro y
+    refine Integrable.mono' (integrable_const ((Fintype.card V : ℝ) ^ p)) ?_ ?_
+    · exact ((ENNReal.measurable_toReal.comp
+        (Measurable.of_discrete.comp (measurable_encard_cluster (x := y)))).pow_const p
+        ).aestronglyMeasurable
+    · refine Filter.Eventually.of_forall fun ω => ?_
+      rw [Real.norm_of_nonneg (pow_nonneg ENNReal.toReal_nonneg p)]
+      exact hle y ω
+  have hbd : ∀ y : V, ∫ ω, ((cluster ω y).encard : ℝ≥0∞).toReal ^ p ∂μ ≤
+      (Fintype.card V : ℝ) ^ p := by
+    intro y
+    calc ∫ ω, ((cluster ω y).encard : ℝ≥0∞).toReal ^ p ∂μ
+        ≤ ∫ _ : Config V, (Fintype.card V : ℝ) ^ p ∂μ :=
+          integral_mono_ae (hint y) (integrable_const _) (Filter.Eventually.of_forall (hle y))
+      _ = (Fintype.card V : ℝ) ^ p := by simp
+  exact integral_encard_cluster_insert_pow_le_of_uniform μ p hfin hint (by positivity) hbd o a b
+
+/-- **The inserted-side inputs of `integral_sub_eq_integral_flux_of_cap`, in its shape.**
+
+The uncapped transfer `integral_sub_eq_integral_flux_of_cap` asks, for every `r` in an interval
+`(u, v)`, for (i) a.e. finiteness of every inserted cluster at the root, (ii) integrability of
+every inserted `p`-th moment, and (iii) summability of `e ↦ |c r e|` times that moment. This
+theorem produces all three from a uniform per-vertex moment bound and summable weights, so that
+only `hB`, `hD`, `hmeas` (the flux-side inputs) remain explicit in the transfer. -/
+theorem forall_inputs_of_uniform_vertex_moment [Countable V]
+    (p : ℝ → Sym2 V → unitInterval) (c : ℝ → Sym2 V → ℝ) (o : V) (pow : ℕ) {u v m : ℝ}
+    (hm : 0 ≤ m)
+    (hfin : ∀ r ∈ Ioo u v, ∀ y, ∀ᵐ ω ∂(law (p r)), ((cluster ω y).encard : ℝ≥0∞) ≠ ⊤)
+    (hint : ∀ r ∈ Ioo u v, ∀ y, Integrable (fun ω => ((cluster ω y).encard : ℝ≥0∞).toReal ^ pow)
+      (law (p r)))
+    (hbd : ∀ r ∈ Ioo u v, ∀ y, ∫ ω, ((cluster ω y).encard : ℝ≥0∞).toReal ^ pow ∂(law (p r)) ≤ m)
+    (hw : ∀ r ∈ Ioo u v, Summable fun e => |c r e|) :
+    (∀ r ∈ Ioo u v, ∀ e : Sym2 V, ∀ᵐ ω ∂(law (p r)),
+        ((cluster (insert e ω) o).encard : ℝ≥0∞) ≠ ⊤) ∧
+      (∀ r ∈ Ioo u v, ∀ e : Sym2 V, Integrable (fun ω =>
+        ((cluster (insert e ω) o).encard : ℝ≥0∞).toReal ^ pow) (law (p r))) ∧
+      (∀ r ∈ Ioo u v, Summable fun e => |c r e| *
+        ∫ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞).toReal ^ pow ∂(law (p r))) :=
+  ⟨fun r hr => ae_ne_top_encard_cluster_insert_forall (law (p r)) o (hfin r hr),
+   fun r hr => integrable_encard_cluster_insert_pow_forall (law (p r)) o pow (hfin r hr)
+     (hint r hr),
+   fun r hr => summable_flux_dominator_of_uniform_vertex_moment p c o pow r (hfin r hr)
+     (hint r hr) hm (hbd r hr) (hw r hr)⟩
+
+/-- The two-term bound with no root term is false: a path `0-1-2-3` and two isolated
+vertices `10`, `11`. -/
+theorem two_term_bound_false :
+    ∃ (o a b : ℕ) (ω : Config ℕ) (p : ℕ),
+      2 ^ p * (((cluster ω a).encard : ℝ≥0∞).toReal ^ p +
+          ((cluster ω b).encard : ℝ≥0∞).toReal ^ p) <
+        ((cluster (insert s(a, b) ω) o).encard : ℝ≥0∞).toReal ^ p := by
+  have hstep : ∀ (ω : Config ℕ) (y a b : ℕ), cluster ω y = {y} → a ≠ y → b ≠ y →
+      cluster (insert s(a, b) ω) y = {y} := by
+    intro ω y a b h ha hb
+    refine (PercLib.Models.LongRange.cluster_insert_eq_of_forall_not_mem (ω := ω) (o := y)
+      (e := s(a, b)) ?_).trans h
+    intro z hz
+    rw [Sym2.mem_iff] at hz
+    obtain h' | h' := hz
+    · subst h'; rw [h]; simpa using ha
+    · subst h'; rw [h]; simpa using hb
+  have h1 : cluster (∅ : Config ℕ) 0 = {0} := cluster_empty 0
+  have h2 : cluster (insert s(2, 3) (∅ : Config ℕ)) 0 = {0} :=
+    hstep ∅ 0 2 3 (cluster_empty 0) (by norm_num) (by norm_num)
+  have h3 : cluster (insert s(2, 3) (∅ : Config ℕ)) 1 = {1} :=
+    hstep ∅ 1 2 3 (cluster_empty 1) (by norm_num) (by norm_num)
+  have h4 : cluster (insert s(2, 3) (∅ : Config ℕ)) 2 = {2, 3} := by
+    rw [cluster_insert_of_mem _ _ _ 2 (Or.inl (mem_cluster_self _ 2)), cluster_empty,
+      cluster_empty, Set.singleton_union]
+  have h5 : cluster (insert s(1, 2) (insert s(2, 3) (∅ : Config ℕ))) 0 = {0} :=
+    hstep _ 0 1 2 h2 (by norm_num) (by norm_num)
+  have h6 : cluster (insert s(1, 2) (insert s(2, 3) (∅ : Config ℕ))) 1 = {1, 2, 3} := by
+    rw [cluster_insert_of_mem _ _ _ 1 (Or.inl (mem_cluster_self _ 1)), h3, h4,
+      Set.singleton_union]
+  have h7 : cluster (insert s(0, 1) (insert s(1, 2) (insert s(2, 3) (∅ : Config ℕ)))) 0 =
+      {0, 1, 2, 3} := by
+    rw [cluster_insert_of_mem _ _ _ 0 (Or.inl (mem_cluster_self _ 0)), h5, h6,
+      Set.singleton_union]
+  have h8 : cluster (insert s(0, 1) (insert s(1, 2) (insert s(2, 3) (∅ : Config ℕ)))) 10 =
+      {10} := by
+    refine hstep _ 10 0 1 (hstep _ 10 1 2 (hstep _ 10 2 3 (cluster_empty 10) ?_ ?_) ?_ ?_) ?_ ?_
+      <;> norm_num
+  have h9 : cluster (insert s(0, 1) (insert s(1, 2) (insert s(2, 3) (∅ : Config ℕ)))) 11 =
+      {11} := by
+    refine hstep _ 11 0 1 (hstep _ 11 1 2 (hstep _ 11 2 3 (cluster_empty 11) ?_ ?_) ?_ ?_) ?_ ?_
+      <;> norm_num
+  have h10 : cluster (insert s(10, 11)
+      (insert s(0, 1) (insert s(1, 2) (insert s(2, 3) (∅ : Config ℕ))))) 0 = {0, 1, 2, 3} := by
+    refine (PercLib.Models.LongRange.cluster_insert_eq_of_forall_not_mem
+      (ω := insert s(0, 1) (insert s(1, 2) (insert s(2, 3) (∅ : Config ℕ)))) (o := 0)
+      (e := s(10, 11)) ?_).trans h7
+    intro z hz
+    rw [Sym2.mem_iff] at hz
+    obtain h' | h' := hz
+    · subst h'; rw [h7]; simp
+    · subst h'; rw [h7]; simp
+  refine ⟨0, 10, 11, insert s(0, 1) (insert s(1, 2) (insert s(2, 3) (∅ : Config ℕ))), 3, ?_⟩
+  rw [h8, h9, h10]
+  have e4 : (({0, 1, 2, 3} : Set ℕ).encard : ℝ≥0∞) = 4 := by
+    rw [show ({0, 1, 2, 3} : Set ℕ) = insert 0 (insert 1 (insert 2 ({3} : Set ℕ))) from rfl]
+    rw [Set.encard_insert_of_notMem (by simp), Set.encard_insert_of_notMem (by simp),
+      Set.encard_insert_of_notMem (by simp), Set.encard_singleton]
+    norm_num
+  rw [show (({10} : Set ℕ).encard : ℝ≥0∞).toReal = 1 from by simp,
+    show (({11} : Set ℕ).encard : ℝ≥0∞).toReal = 1 from by simp,
+    show (({0, 1, 2, 3} : Set ℕ).encard : ℝ≥0∞).toReal = 4 from by rw [e4]; norm_num]
+  norm_num
+
+
+/-- **The two-term integral bound without a root term is false.** Even for a probability measure,
+here a Dirac mass, the `p`-th moment of the cluster of `o` after opening `s(a, b)` is not bounded
+by `2^p` times the two endpoint moments: `two_term_bound_false` is a configuration where the
+pointwise inequality fails, and a Dirac mass reproduces pointwise values as integrals. -/
+theorem not_integral_two_term_bound :
+    ¬ ∀ (μ : Measure (Config ℕ)) (o a b : ℕ) (p : ℕ),
+        ∫ ω, ((cluster (insert s(a, b) ω) o).encard : ℝ≥0∞).toReal ^ p ∂μ ≤
+          2 ^ p * (∫ ω, ((cluster ω a).encard : ℝ≥0∞).toReal ^ p ∂μ +
+            ∫ ω, ((cluster ω b).encard : ℝ≥0∞).toReal ^ p ∂μ) := by
+  intro h
+  obtain ⟨o, a, b, ω, p, hlt⟩ := two_term_bound_false
+  have h1 := h (Measure.dirac ω) o a b p
+  simp only [integral_dirac] at h1
+  linarith
+
+end PercLib.Percolation.Bond
+
+/-! ## Closed-coordinate Russo normalization
+
+Condition a Bernoulli product law along an edge, distinguishing a bounded observable
+from its limit. This supplies the unordered-pair flux normalization.
+-/
+
+noncomputable section
+
+open MeasureTheory Set Filter Function
+open scoped ENNReal unitInterval
+
+namespace PercLib.Probability
+
+open Classical in
+/-- A bounded measurable integral is affine in one product-Bernoulli coordinate. -/
+theorem integral_prodBernoulli_affine {ι : Type*} (q : ι → unitInterval) (e : ι)
+    (G : Set ι → ℝ) (hG : Measurable G) {m : ℝ} (hGm : ∀ ω, |G ω| ≤ m) :
+    (∫ ω, G ω ∂prodBernoulli q) = (q e : ℝ) * ∫ ω, G ω ∂prodBernoulli (update q e 1) +
+      (1 - (q e : ℝ)) * ∫ ω, G ω ∂prodBernoulli (update q e 0) := by
+  classical
+  have hint : ∀ p : ι → unitInterval, Integrable G (prodBernoulli p) := by
+    intro p
+    exact Integrable.of_bound (C := m) hG.aestronglyMeasurable
+      (Eventually.of_forall fun ω => by simpa only [Real.norm_eq_abs] using hGm ω)
+  have hmix := prodBernoulli_update_eq_smul_add_smul q e (q e)
+  rw [Function.update_eq_self] at hmix
+  rw [hmix]
+  have hμ := (hint (update q e 1)).smul_measure
+    (by simp : ((unitInterval.toNNReal (q e) : ℝ≥0∞)) ≠ ⊤)
+  have hν := (hint (update q e 0)).smul_measure
+    (by simp : ((unitInterval.toNNReal (σ (q e)) : ℝ≥0∞)) ≠ ⊤)
+  calc
+    (∫ ω, G ω ∂(unitInterval.toNNReal (q e) • prodBernoulli (update q e 1) +
+      unitInterval.toNNReal (σ (q e)) • prodBernoulli (update q e 0))) =
+        (∫ ω, G ω ∂unitInterval.toNNReal (q e) • prodBernoulli (update q e 1)) +
+          ∫ ω, G ω ∂unitInterval.toNNReal (σ (q e)) • prodBernoulli (update q e 0) :=
+        integral_add_measure hμ hν
+    _ = _ := by
+      have hsm1 := integral_smul_measure (μ := prodBernoulli (update q e 1)) G
+        ((unitInterval.toNNReal (q e) : ℝ≥0∞))
+      have hsm2 := integral_smul_measure (μ := prodBernoulli (update q e 0)) G
+        ((unitInterval.toNNReal (σ (q e)) : ℝ≥0∞))
+      exact congrArg₂ (fun (x y : ℝ) => x + y) hsm1 hsm2
+
+open Classical in
+/-- One-coordinate Russo, in the closed-coordinate normalization, for a bounded measurable
+observable on an arbitrary (in particular a countably infinite) product space. -/
+theorem one_sub_mul_integral_insert_sub_basic {ι : Type*} (q : ι → unitInterval) (e : ι)
+    (G : Set ι → ℝ) (hG : Measurable G) {m : ℝ} (hGm : ∀ ω, |G ω| ≤ m) :
+    (1 - (q e : ℝ)) * ∫ ω, (G (insert e ω) - G (ω \ {e})) ∂prodBernoulli q =
+      ∫ ω, (if e ∈ ω then 0 else G (insert e ω) - G ω) ∂prodBernoulli q := by
+  classical
+  let Δ : Set ι → ℝ := fun ω => G (insert e ω) - G (ω \ {e})
+  have hΔmeas : Measurable Δ :=
+    (hG.comp (measurable_insert e)).sub (hG.comp (measurable_diff_singleton e))
+  have hΔbound : ∀ ω, |Δ ω| ≤ 2 * m := by
+    intro ω
+    exact (abs_sub _ _).trans (by linarith [hGm (insert e ω), hGm (ω \ {e})])
+  have hint : ∀ p : ι → unitInterval, Integrable G (prodBernoulli p) := by
+    intro p
+    exact Integrable.of_bound (C := m) hG.aestronglyMeasurable
+      (Eventually.of_forall fun ω => by simpa only [Real.norm_eq_abs] using hGm ω)
+  have hΔ_integral : ∀ p : ι → unitInterval, (∫ ω, Δ ω ∂prodBernoulli p) =
+      (∫ ω, G ω ∂prodBernoulli (update p e 1)) -
+        ∫ ω, G ω ∂prodBernoulli (update p e 0) := by
+    intro p
+    have hintInsert : Integrable (fun ω => G (insert e ω)) (prodBernoulli p) := by
+      exact Integrable.of_bound (C := m) (hG.comp (measurable_insert e)).aestronglyMeasurable
+        (Eventually.of_forall fun ω => by simpa only [Real.norm_eq_abs] using hGm (insert e ω))
+    have hintDelete : Integrable (fun ω => G (ω \ {e})) (prodBernoulli p) := by
+      exact Integrable.of_bound (C := m)
+        (hG.comp (measurable_diff_singleton e)).aestronglyMeasurable
+        (Eventually.of_forall fun ω => by simpa only [Real.norm_eq_abs] using hGm (ω \ {e}))
+    rw [integral_sub (f := fun ω => G (insert e ω)) (g := fun ω => G (ω \ {e}))
+      hintInsert hintDelete]
+    congr 1
+    · rw [← prodBernoulli_map_insert, integral_map (measurable_insert e).aemeasurable
+        hG.aestronglyMeasurable]
+    · rw [← prodBernoulli_map_diff_singleton, integral_map
+        (measurable_diff_singleton e).aemeasurable hG.aestronglyMeasurable]
+  let A : Set (Set ι) := {ω | e ∉ ω}
+  have hA : MeasurableSet A := (measurableSet_mem e).compl
+  have hopen0 : prodBernoulli (update q e 0) {ω | e ∈ ω} = 0 := by
+    simp only [prodBernoulli_setOf_mem, Function.update_self]
+    rfl
+  have hclosed1 : prodBernoulli (update q e 1) A = 0 := by
+    have hone : prodBernoulli (update q e 1) {ω | e ∈ ω} = 1 := by
+      simp only [prodBernoulli_setOf_mem, Function.update_self]
+      rfl
+    rw [show A = {ω | e ∈ ω}ᶜ from rfl,
+      measure_compl (measurableSet_mem e) (by simp)]
+    rw [hone]
+    simp
+  have hzero : ∀ᵐ ω ∂prodBernoulli (update q e 1), A.indicator Δ ω = 0 := by
+    have hae : ∀ᵐ ω ∂prodBernoulli (update q e 1), e ∈ ω := mem_ae_iff.1 hclosed1
+    filter_upwards [hae] with ω hω
+    simp [A, Set.indicator, hω]
+  have hfactor : ∀ᵐ ω ∂prodBernoulli (update q e 0), A.indicator Δ ω = Δ ω := by
+    have hae : ∀ᵐ ω ∂prodBernoulli (update q e 0), e ∉ ω :=
+      measure_eq_zero_iff_ae_notMem.1 hopen0
+    filter_upwards [hae] with ω hω
+    simp [A, Set.indicator, hω]
+  have hbind : ∀ ω, A.indicator Δ ω = if e ∈ ω then 0 else G (insert e ω) - G ω := by
+    intro ω
+    by_cases h : e ∈ ω <;> simp [A, Δ, Set.indicator, h]
+  have hm0 : 0 ≤ m := (abs_nonneg (G ∅)).trans (hGm ∅)
+  have hgm : ∀ ω, |A.indicator Δ ω| ≤ 2 * m := by
+    intro ω
+    by_cases h : e ∈ ω
+    · simp [A, Set.indicator, h, hm0]
+    · simp [A, Set.indicator, h, hΔbound ω]
+  have hformula := integral_prodBernoulli_affine q e (A.indicator Δ)
+    (hΔmeas.indicator hA) hgm
+  have hclosed : (∫ ω, A.indicator Δ ω ∂prodBernoulli q) =
+      (1 - (q e : ℝ)) * ∫ ω, Δ ω ∂prodBernoulli (update q e 0) := by
+    rw [hformula, integral_congr_ae hzero, integral_congr_ae hfactor]
+    simp
+  calc (1 - (q e : ℝ)) * ∫ ω, (G (insert e ω) - G (ω \ {e})) ∂prodBernoulli q
+      = (1 - (q e : ℝ)) * ∫ ω, Δ ω ∂prodBernoulli q := rfl
+    _ = (1 - (q e : ℝ)) * ∫ ω, Δ ω ∂prodBernoulli (update q e 0) := by
+        simp only [hΔ_integral, Function.update_idem]
+    _ = ∫ ω, A.indicator Δ ω ∂prodBernoulli q := hclosed.symm
+    _ = ∫ ω, (if e ∈ ω then 0 else G (insert e ω) - G ω) ∂prodBernoulli q := by
+        rw [integral_congr_ae (Eventually.of_forall hbind)]
+
+end PercLib.Probability
