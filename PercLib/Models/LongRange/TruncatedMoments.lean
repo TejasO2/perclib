@@ -12889,3 +12889,116 @@ theorem continuousOn_pivotal_cutoff_uncapped_of_uniform_root_moment {d : ℕ}
     hKa hK' hK'c β p hp o hχ hu e hrem
 
 end PercLib.Models.LongRange
+
+namespace PercLib.Percolation.Bond
+
+open Classical in
+/-- Per-vertex `p`-moments bounded by `M` give the displayed bound on an inserted-cluster
+`p`-moment. -/
+theorem lintegral_pow_encard_cluster_insert_le {V : Type*} [Countable V]
+    (μ : Measure (Config V)) (o a b : V) (p : ℕ) (M : ℝ≥0∞)
+    (ho : (∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ^ p ∂μ) ≤ M)
+    (ha : (∫⁻ ω, ((cluster ω a).encard : ℝ≥0∞) ^ p ∂μ) ≤ M)
+    (hb : (∫⁻ ω, ((cluster ω b).encard : ℝ≥0∞) ^ p ∂μ) ≤ M) :
+    (∫⁻ ω, ((cluster (insert s(a, b) ω) o).encard : ℝ≥0∞) ^ p ∂μ) ≤
+      M + 2 ^ (p - 1) * (M + M) := by
+  have hmo : AEMeasurable (fun ω : Config V => ((cluster ω o).encard : ℝ≥0∞) ^ p) μ :=
+    ((measurable_encard_cluster_toENNReal o).pow_const p).aemeasurable
+  have hma : AEMeasurable (fun ω : Config V => ((cluster ω a).encard : ℝ≥0∞) ^ p) μ :=
+    ((measurable_encard_cluster_toENNReal a).pow_const p).aemeasurable
+  have hmb : AEMeasurable (fun ω : Config V => ((cluster ω b).encard : ℝ≥0∞) ^ p) μ :=
+    ((measurable_encard_cluster_toENNReal b).pow_const p).aemeasurable
+  have hrhs : (∫⁻ ω, (((cluster ω o).encard : ℝ≥0∞) ^ p +
+        2 ^ (p - 1) * (((cluster ω a).encard : ℝ≥0∞) ^ p +
+          ((cluster ω b).encard : ℝ≥0∞) ^ p)) ∂μ) =
+      (∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ^ p ∂μ) +
+        2 ^ (p - 1) * ((∫⁻ ω, ((cluster ω a).encard : ℝ≥0∞) ^ p ∂μ) +
+          ∫⁻ ω, ((cluster ω b).encard : ℝ≥0∞) ^ p ∂μ) := by
+    rw [lintegral_add_left' hmo,
+      lintegral_const_mul'' ((2 : ℝ≥0∞) ^ (p - 1))
+        (f := fun ω => ((cluster ω a).encard : ℝ≥0∞) ^ p +
+          ((cluster ω b).encard : ℝ≥0∞) ^ p) (hma.add hmb),
+      lintegral_add_left' hma]
+  calc
+    (∫⁻ ω, ((cluster (insert s(a, b) ω) o).encard : ℝ≥0∞) ^ p ∂μ) ≤
+        ∫⁻ ω, (((cluster ω o).encard : ℝ≥0∞) ^ p +
+          2 ^ (p - 1) * (((cluster ω a).encard : ℝ≥0∞) ^ p +
+            ((cluster ω b).encard : ℝ≥0∞) ^ p)) ∂μ :=
+      lintegral_mono fun ω => encard_cluster_insert_pow_le ω a b o p
+    _ = (∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ^ p ∂μ) +
+        2 ^ (p - 1) * ((∫⁻ ω, ((cluster ω a).encard : ℝ≥0∞) ^ p ∂μ) +
+          ∫⁻ ω, ((cluster ω b).encard : ℝ≥0∞) ^ p ∂μ) := hrhs
+    _ ≤ M + 2 ^ (p - 1) * (M + M) := by gcongr
+
+/-- The bound holds for every unordered pair. -/
+theorem lintegral_pow_encard_cluster_insert_le_forall {V : Type*} [Countable V]
+    (μ : Measure (Config V)) (o : V) (p : ℕ) (M : ℝ≥0∞)
+    (hmom : ∀ y : V, (∫⁻ ω, ((cluster ω y).encard : ℝ≥0∞) ^ p ∂μ) ≤ M)
+    (e : Sym2 V) :
+    (∫⁻ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p ∂μ) ≤
+      M + 2 ^ (p - 1) * (M + M) := by
+  induction e using Sym2.ind with
+  | _ a b =>
+    exact lintegral_pow_encard_cluster_insert_le μ o a b p M
+      (hmom o) (hmom a) (hmom b)
+
+end PercLib.Percolation.Bond
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability
+
+/-- Uncapped single-pair continuity from a uniform finite per-vertex cluster moment,
+without a separate inserted-moment hypothesis. -/
+theorem continuousOn_pivotal_cutoff_uncapped_of_uniform_vertex_moment {d : ℕ}
+    {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p) (o : Fin d → ℤ) {R : ℝ}
+    (hχ : chi (intensityProfile (cutoffKernel N K R) β) o ≠ ⊤) {u : ℝ} (hu : 0 < u)
+    (e : Sym2 (Fin d → ℤ)) (M : ℝ≥0∞) (hM : M ≠ ⊤)
+    (hmom : ∀ r ∈ Ioo u R, ∀ y : Fin d → ℤ,
+      (∫⁻ ω, ((cluster ω y).encard : ℝ≥0∞) ^ (p + 1)
+        ∂(law (intensityProfile (cutoffKernel N K r) β))) ≤ M) :
+    ContinuousOn (fun r => ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel N K r) β))) (Ioo u R) := by
+  have hMins : M + 2 ^ ((p + 1) - 1) * (M + M) ≠ ⊤ := by
+    exact ENNReal.add_ne_top.2 ⟨hM, ENNReal.mul_ne_top (ENNReal.pow_ne_top (by simp))
+      (ENNReal.add_ne_top.2 ⟨hM, hM⟩)⟩
+  refine continuousOn_pivotal_cutoff_uncapped_of_uniform_root_moment
+    hKa hK' hK'c β p hp o hχ hu e (M + 2 ^ ((p + 1) - 1) * (M + M)) hMins ?_
+  intro r hr
+  exact lintegral_pow_encard_cluster_insert_le_forall
+    (law (intensityProfile (cutoffKernel N K r) β)) o (p + 1) M (hmom r hr) e
+
+
+/-- Single-pair uncapped cutoff continuity from a uniform finite root `(p+1)`-moment.
+This also supplies the outer-scale susceptibility bound. -/
+theorem continuousOn_pivotal_cutoff_uncapped_of_root_succ_moment {d : ℕ}
+    {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p) (o : Fin d → ℤ) {R : ℝ}
+    {u : ℝ} (hu : 0 < u) (e : Sym2 (Fin d → ℤ)) (M : ℝ≥0∞) (hM : M ≠ ⊤)
+    (hroot : ∀ r ∈ (Ioo u R ∪ {R} : Set ℝ), (∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ (p + 1)
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≤ M) :
+    ContinuousOn (fun r => ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel N K r) β))) (Ioo u R) := by
+  have hχ : chi (intensityProfile (cutoffKernel (d := d) N K R) β) o ≠ ⊤ := by
+    have hRoM : (∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ^ (p + 1)
+        ∂(law (intensityProfile (cutoffKernel N K R) β))) ≤ M :=
+      lintegral_pow_encard_cluster_le_of_root_le β R (p + 1) o M
+        (hroot R (Set.mem_union_right _ rfl))
+    apply chi_ne_top_of_lintegral_pow_ne_top _ o p hp
+    refine ne_top_of_le_ne_top (ne_top_of_le_ne_top hM hRoM) ?_
+    refine lintegral_mono fun ω => ?_
+    have hbase : (1 : ℝ≥0∞) ≤ ((cluster ω o).encard : ℝ≥0∞) := by
+      exact_mod_cast one_le_encard_cluster ω o
+    exact pow_le_pow_right₀ hbase (Nat.le_succ p)
+  refine continuousOn_pivotal_cutoff_uncapped_of_uniform_vertex_moment
+    hKa hK' hK'c β p hp o hχ hu e M hM ?_
+  intro r hr y
+  exact lintegral_pow_encard_cluster_le_of_root_le β r (p + 1) y M
+    (hroot r (Set.mem_union_left _ hr))
+
+end PercLib.Models.LongRange
