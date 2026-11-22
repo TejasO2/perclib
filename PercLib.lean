@@ -104,6 +104,7 @@ public import PercLib.Models.FiniteRangeDecay
 public import PercLib.Models.FreeGroupTree
 public import PercLib.Models.HeavySecondMoment
 public import PercLib.Models.Hierarchical
+public import PercLib.Models.Hierarchical.Basic
 public import PercLib.Models.Hierarchical.Defs
 public import PercLib.Models.Hierarchical.Witness
 public import PercLib.Models.HierarchicalAmplification
@@ -120,6 +121,7 @@ public import PercLib.Models.HierarchicalComparison.Defs
 public import PercLib.Models.HierarchicalCutoff
 public import PercLib.Models.HierarchicalEndpoint
 public import PercLib.Models.HierarchicalGeometry
+public import PercLib.Models.HierarchicalPeriodicKernel
 public import PercLib.Models.HierarchicalPointwise
 public import PercLib.Models.HierarchicalPointwiseCritical
 public import PercLib.Models.HierarchicalPowerKernel
@@ -179,6 +181,8 @@ public import PercLib.Models.Tags.Hierarchical
 public import PercLib.Models.Tags.HierarchicalBlockLayers
 public import PercLib.Models.Tags.HierarchicalBoundaryScales
 public import PercLib.Models.Tags.HierarchicalComparison
+public import PercLib.Models.Tags.HierarchicalLattice
+public import PercLib.Models.Tags.HierarchicalPeriodicKernel
 public import PercLib.Models.Tags.HierarchicalRunaway
 public import PercLib.Models.Tags.HierarchicalTriangle
 public import PercLib.Models.Tags.HierarchicalTwoPoint
@@ -407,6 +411,7 @@ public import PercLib.Probability.LaplaceTail
 public import PercLib.Probability.LayerCake
 public import PercLib.Probability.LayerCakeProduct
 public import PercLib.Probability.LongRangeGreenBubble
+public import PercLib.Probability.MagnetizationLowerBound
 public import PercLib.Probability.MassTransport
 public import PercLib.Probability.MassTransportTuple
 public import PercLib.Probability.MixedSpatialMoments
@@ -452,6 +457,7 @@ public import PercLib.Probability.Tags.GhostTransform
 public import PercLib.Probability.Tags.Harris
 public import PercLib.Probability.Tags.HigherCorrelation
 public import PercLib.Probability.Tags.IntegratedLowerTail
+public import PercLib.Probability.Tags.MagnetizationLowerBound
 public import PercLib.Probability.Tags.MassTransport
 public import PercLib.Probability.Tags.MonotoneCoupling
 public import PercLib.Probability.Tags.NearMisses
