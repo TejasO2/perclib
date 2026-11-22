@@ -10499,3 +10499,679 @@ theorem hasDerivAt_integral_cutoff_pow_binomial_of_root_moment {N : ModelNorm (F
     Kd hKdint hKd hmeas hcont
 
 end PercLib.Models.LongRange
+
+
+/-! ### Concrete models and uniform continuity criteria -/
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability MeasureTheory Set
+
+open scoped ENNReal NNReal Topology
+
+variable {d : ℕ}
+
+/-- The sup norm of a nonzero integer displacement is at least one. -/
+theorem one_le_normSeminorm_intCast {z : Fin d → ℤ} (hz : z ≠ 0) :
+    (1 : ℝ) ≤ normSeminorm ℝ (Fin d → ℝ) (Int.cast ∘ z) := by
+  rw [normSeminorm_intCast]
+  exact one_le_norm_of_ne_zero hz
+
+/-- The cutoff kernel of the linear profile `s ↦ -s` vanishes at every scale `r ≤ 1`: no
+integer displacement has sup norm below one, so the profile difference is never positive. -/
+theorem linear_cutoffKernel_eq_zero_of_le_one {r : ℝ} (hr : r ≤ 1) (e : Sym2 (Fin d → ℤ)) :
+    cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => -s) r e = 0 := by
+  induction e using Sym2.ind with
+  | _ x y =>
+    by_cases h : x = y
+    · simp [cutoffKernel_def, h]
+    · rw [cutoffKernel_def, radialKernel_of_ne h]
+      have h1 : (1 : ℝ) ≤ normSeminorm ℝ (Fin d → ℝ) (Int.cast ∘ (x - y)) :=
+        one_le_normSeminorm_intCast (sub_ne_zero.2 h)
+      by_cases hlt : normSeminorm ℝ (Fin d → ℝ) (Int.cast ∘ (x - y)) ≤ r
+      · rw [cutoffProfile_of_le hlt, Real.toNNReal_eq_zero]
+        show -normSeminorm ℝ (Fin d → ℝ) (Int.cast ∘ (x - y)) - -r ≤ 0
+        linarith
+      · rw [cutoffProfile_of_lt (not_le.1 hlt), Real.toNNReal_zero]
+
+/-- The strict radial indicator `1{N (x - y) < r}` of the cutoff derivative vanishes at every
+scale `r ≤ 1`. -/
+theorem linear_radialKernel_indicator_eq_zero_of_le_one {r : ℝ} (hr : r ≤ 1)
+    (e : Sym2 (Fin d → ℤ)) :
+    radialKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => if s < r then 1 else 0) e = 0 := by
+  induction e using Sym2.ind with
+  | _ x y =>
+    by_cases h : x = y
+    · simp [h]
+    · have h1 : (1 : ℝ) ≤ normSeminorm ℝ (Fin d → ℝ) (Int.cast ∘ (x - y)) :=
+        one_le_normSeminorm_intCast (sub_ne_zero.2 h)
+      have h2 : (radialKernel (normSeminorm ℝ (Fin d → ℝ))
+          (fun s => if s < r then 1 else 0) s(x, y) : ℝ) = 0 :=
+        radialKernel_indicator_eq_zero_of_not_lt (by linarith)
+      exact NNReal.coe_eq_zero.1 h2
+
+/-- The derivative weight of the linear profile with `β = 1` and `K' = -1` vanishes at every
+scale `r ≤ 1`, because the strict radial indicator does. -/
+theorem linear_weight_eq_zero {r : ℝ} (hr : r ≤ 1) (e : Sym2 (Fin d → ℤ)) :
+    (radialKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((1 : ℝ) * -((fun _ : ℝ => -1) r) *
+        Real.exp (-(1 : ℝ) *
+          (cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => -s) r e : ℝ))) = 0 := by
+  rw [linear_radialKernel_indicator_eq_zero_of_le_one hr e]
+  simp
+
+/-- On the window the intensity profile of the cut-off linear kernel is the identically zero
+profile: the cutoff kernel vanishes and `1 - exp 0 = 0`. -/
+theorem linear_intensityProfile_eq_zero_of_le_one {r : ℝ} (hr : r ≤ 1) :
+    intensityProfile (cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => -s) r) (1 : ℝ≥0) =
+      fun _ => (0 : unitInterval) := by
+  have hker : cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => -s) r = fun _ => 0 :=
+    funext fun e => linear_cutoffKernel_eq_zero_of_le_one hr e
+  rw [hker]
+  funext e
+  apply Subtype.ext
+  simp [intensityProfile]
+
+/-- Under the identically zero bond profile the configuration is empty almost surely. -/
+theorem ae_eq_empty_zero_profile (d : ℕ) :
+    ∀ᵐ ω ∂(law (fun _ : Sym2 (Fin d → ℤ) => (0 : unitInterval))), ω = ∅ := by
+  filter_upwards [ae_config_subset_positive (fun _ : Sym2 (Fin d → ℤ) => (0 : unitInterval))]
+    with ω hω
+  exact Set.subset_empty_iff.mp fun e he => (lt_irrefl (0 : ℝ) (hω he))
+
+/-- The susceptibility of the cut-off linear profile at scale one is one: the profile vanishes
+off the diagonal, so every cluster is a single vertex. -/
+theorem chi_linear_cutoffKernel_eq_one (o : Fin d → ℤ) :
+    chi (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => -s) 1)
+      (1 : ℝ≥0)) o = 1 := by
+  refine chi_eq_one_of_offDiagonal_zero _ ?_ o
+  intro v w _hwv
+  have hker : cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => -s) 1 s(v, w) = 0 :=
+    linear_cutoffKernel_eq_zero_of_le_one le_rfl s(v, w)
+  apply Subtype.ext
+  simp [intensityProfile, hker]
+
+/-- The volume of the cluster of `o` after inserting one pair into the empty configuration is
+at most three. -/
+theorem encard_cluster_insert_empty_le_three (o a b : Fin d → ℤ) :
+    ((cluster (insert s(a, b) (∅ : Config (Fin d → ℤ))) o).encard : ℝ≥0∞) ≤ 3 := by
+  have h := encard_cluster_insert_le_add (V := Fin d → ℤ) (∅ : Config (Fin d → ℤ)) a b o
+  rw [cluster_empty, cluster_empty, cluster_empty, Set.encard_singleton,
+    Set.encard_singleton, Set.encard_singleton] at h
+  refine h.trans ?_
+  norm_num
+
+/-- Every inserted `p`-th moment is finite on the window: the law is that of the empty bond
+configuration, where inserting one pair produces a configuration with at most one open edge
+and hence a cluster of at most three vertices. -/
+theorem lintegral_pow_encard_cluster_insert_ne_top_linear (p : ℕ) {r : ℝ} (hr : r < 1)
+    (o : Fin d → ℤ) (e : Sym2 (Fin d → ℤ)) :
+    (∫⁻ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p
+      ∂(law (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => -s) r)
+        (1 : ℝ≥0)))) ≠ ⊤ := by
+  rw [linear_intensityProfile_eq_zero_of_le_one hr.le]
+  have hae := ae_eq_empty_zero_profile (d := d)
+  have hbound : (∫⁻ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p
+        ∂(law (fun _ : Sym2 (Fin d → ℤ) => (0 : unitInterval)))) ≤ (3 : ℝ≥0∞) ^ p := by
+    calc (∫⁻ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p
+          ∂(law (fun _ : Sym2 (Fin d → ℤ) => (0 : unitInterval))))
+        ≤ ∫⁻ _ : Config (Fin d → ℤ), (3 : ℝ≥0∞) ^ p
+            ∂(law (fun _ : Sym2 (Fin d → ℤ) => (0 : unitInterval))) := by
+          refine lintegral_mono_ae ?_
+          filter_upwards [hae] with ω hω
+          induction e using Sym2.ind with
+          | _ a b =>
+            rw [hω]
+            exact ENNReal.pow_le_pow_left (encard_cluster_insert_empty_le_three o a b)
+      _ = (3 : ℝ≥0∞) ^ p := by
+          rw [lintegral_const, measure_univ, mul_one]
+  have h3 : (3 : ℝ≥0∞) ^ p ≠ ⊤ := ENNReal.pow_ne_top (by norm_num)
+  exact ne_top_of_le_ne_top h3 hbound
+
+/-- The moment function is identically one on the window: the law is that of the empty bond
+configuration and the cluster of `o` there is the singleton `{o}`. -/
+theorem integral_linear_moment_eq_one (p : ℕ) {r : ℝ} (hr : r ≤ 1) (o : Fin d → ℤ) :
+    ∫ ω, (((cluster ω o).encard : ℝ≥0∞) ^ p).toReal
+      ∂(law (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => -s) r)
+        (1 : ℝ≥0))) = 1 := by
+  rw [linear_intensityProfile_eq_zero_of_le_one hr]
+  have h : ∀ᵐ ω ∂(law (fun _ : Sym2 (Fin d → ℤ) => (0 : unitInterval))),
+      (((cluster ω o).encard : ℝ≥0∞) ^ p).toReal = 1 := by
+    filter_upwards [ae_eq_empty_zero_profile (d := d)] with ω hω
+    rw [hω, cluster_empty, Set.encard_singleton]
+    norm_num
+  calc ∫ ω, (((cluster ω o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (fun _ : Sym2 (Fin d → ℤ) => (0 : unitInterval)))
+      = ∫ _ : Config (Fin d → ℤ), (1 : ℝ)
+          ∂(law (fun _ : Sym2 (Fin d → ℤ) => (0 : unitInterval))) := integral_congr_ae h
+    _ = 1 := by simp
+
+
+/-! ### The instantiation -/
+
+open Classical in
+/-- **The conditional binomial differentiation theorem at an explicit nondegenerate model.**
+
+On the integer lattice with the sup norm, the linear profile `K s = -s` (`K' = -1`), intensity
+`β = 1` and the radius `r₀ = 1/2`, the conclusion of
+`hasDerivAt_integral_cutoff_pow_binomial_of_insert_moments` holds at every outer scale `R ≥ 3/4`
+for which the susceptibility input `hχ` holds at `R`. Every other hypothesis is met by a proof,
+not by a choice of hypothesis: the profile data, the corner condition, the inserted moments, the
+dominator and its interval integrability, the capped measurability and the uncapped continuity
+are all constructed.
+
+The rate `β * -K' r₀ = 1` is nonzero, so the instance is not the degenerate `β = 0` or
+`K' = 0` case. The window `(1/4, 3/4)` contains no norm of an integer displacement, so the
+cutoff kernel and the strict radial indicator both vanish there: the law is the one of the
+identically closed configuration, the inserted moments are those of a single-edge
+configuration, the dominator is the constant zero, and the capped and uncapped flux series
+vanish identically on the window. Of the hypotheses of the conditional theorem only `hχ`
+depends on the outer scale `R`, which is why it is the single remaining argument. -/
+theorem hasDerivAt_integral_linear_cutoff_pow_of_chi (d : ℕ) (p : ℕ) (hp : 1 ≤ p) {R : ℝ}
+    (hR : (3 / 4 : ℝ) ≤ R)
+    (hχ : chi (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => -s) R)
+      (1 : ℝ≥0)) (0 : Fin d → ℤ) ≠ ⊤) :
+    HasDerivAt (fun r : ℝ => ∫ ω, (((cluster ω (0 : Fin d → ℤ)).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => -s) r)
+          (1 : ℝ≥0))))
+      (((1 : ℝ≥0) : ℝ) * -((fun _ : ℝ => -1) (1 / 2)) *
+        ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ) *
+          ∫ ω, (((cluster ω (0 : Fin d → ℤ)).encard : ℝ≥0∞).toReal) ^ (ℓ + 1) *
+            (∑' y : Fin d → ℤ,
+              (if normSeminorm ℝ (Fin d → ℝ) (Int.cast ∘ y) ≤ (1 / 2 : ℝ) then
+                (1 : ℝ) else 0) *
+              (conn (0 : Fin d → ℤ) y)ᶜ.indicator (fun _ => (1 : ℝ)) ω *
+              (((cluster ω y).encard : ℝ≥0∞).toReal) ^ (p - ℓ))
+            ∂(law (intensityProfile
+              (cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => -s) (1 / 2))
+              (1 : ℝ≥0))))
+      (1 / 2) := by
+  let cw : ℝ → Sym2 (Fin d → ℤ) → ℝ := fun r e =>
+    (radialKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((1 : ℝ) * -((fun _ : ℝ => -1) r) *
+        Real.exp (-(1 : ℝ) *
+          (cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => -s) r e : ℝ)))
+  have hcw : ∀ (r : ℝ) (e : Sym2 (Fin d → ℤ)), cw r e =
+      (radialKernel (ModelNorm.ofNorm (Fin d → ℝ)) (fun s => if s < r then 1 else 0) e : ℝ) *
+        (((1 : ℝ≥0) : ℝ) * -((fun _ : ℝ => -1) r) *
+          Real.exp (-(((1 : ℝ≥0) : ℝ)) *
+            (cutoffKernel (ModelNorm.ofNorm (Fin d → ℝ)) (fun s => -s) r e : ℝ))) :=
+    fun _ _ => rfl
+  have hwzero : ∀ r ∈ Ioo (1 / 4 : ℝ) (3 / 4), ∀ e, cw r e = 0 := by
+    intro r hr e
+    exact linear_weight_eq_zero (d := d) (by linarith [hr.2]) e
+  have htsum_zero : ∀ r ∈ Ioo (1 / 4 : ℝ) (3 / 4),
+      ∀ X : Sym2 (Fin d → ℤ) → ℝ, ∑' e, cw r e * X e = 0 := by
+    intro r hr X
+    have hterm : ∀ e, cw r e * X e = 0 := by
+      intro e
+      rw [hwzero r hr e, zero_mul]
+    rw [tsum_congr hterm, tsum_zero]
+  have key := hasDerivAt_integral_cutoff_pow_binomial_of_insert_moments
+    (d := d) (N := ModelNorm.ofNorm (Fin d → ℝ)) (K := fun s => -s) (K' := fun _ => -1)
+    (R := R) (u := (1 / 4 : ℝ)) (v := (3 / 4 : ℝ)) (r₀ := (1 / 2 : ℝ))
+    (by
+      intro a _ b _ hab
+      change -b ≤ -a
+      linarith)
+    (by
+      intro t _
+      exact (hasDerivAt_id t).neg)
+    (continuous_const : Continuous fun _ : ℝ => (-1 : ℝ)).continuousOn
+    (1 : ℝ≥0) p hp
+    (by
+      simp only [ModelNorm.toSeminorm_ofNorm]
+      exact hχ)
+    cw hcw
+    (by norm_num) (by norm_num) (by norm_num) hR
+    (by
+      intro z hz
+      by_cases h : z = 0
+      · subst h
+        have h0 : ModelNorm.ofNorm (Fin d → ℝ) (Int.cast ∘ (0 : Fin d → ℤ)) = 0 := by simp
+        rw [h0] at hz
+        linarith [hz.1]
+      · have h1 : (1 : ℝ) ≤ ModelNorm.ofNorm (Fin d → ℝ) (Int.cast ∘ z) := by
+          simpa using one_le_normSeminorm_intCast (d := d) h
+        linarith [hz.2])
+    (fun r hr e => by
+      have h := lintegral_pow_encard_cluster_insert_ne_top_linear (d := d) p (r := r)
+        (by linarith [hr.2]) (0 : Fin d → ℤ) e
+      simpa only [ModelNorm.toSeminorm_ofNorm] using h)
+    (fun _ => 0)
+    (fun a _ b _ => intervalIntegrable_const)
+    (by
+      intro r hr S
+      refine (Finset.sum_eq_zero ?_).trans_le (le_refl (0 : ℝ))
+      intro e _
+      rw [hwzero r hr e, abs_zero, zero_mul])
+    (fun n => by
+      have h0 : AEStronglyMeasurable (fun _ : ℝ => (0 : ℝ))
+          (volume.restrict (Ioo (1 / 4 : ℝ) (3 / 4))) := aestronglyMeasurable_const
+      refine h0.congr ?_
+      filter_upwards [ae_restrict_mem measurableSet_Ioo] with r hr
+      exact (htsum_zero r hr _).symm)
+    (by
+      have h0 : ContinuousOn (fun _ : ℝ => (0 : ℝ)) (Ioo (1 / 4 : ℝ) (3 / 4)) :=
+        continuousOn_const
+      refine h0.congr ?_
+      intro r hr
+      exact htsum_zero r hr _)
+    (by norm_num)
+  simpa using key
+
+/-- **The instantiation at scale `R = 1`.** The finite-susceptibility input is the only
+scale-dependent hypothesis of `hasDerivAt_integral_linear_cutoff_pow_of_chi`, and at `R = 1`
+it holds because the cutoff kernel vanishes off the diagonal: the susceptibility is one. -/
+theorem hasDerivAt_integral_linear_cutoff_pow (d : ℕ) (p : ℕ) (hp : 1 ≤ p) :
+    HasDerivAt (fun r : ℝ => ∫ ω, (((cluster ω (0 : Fin d → ℤ)).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => -s) r)
+          (1 : ℝ≥0))))
+      (((1 : ℝ≥0) : ℝ) * -((fun _ : ℝ => -1) (1 / 2)) *
+        ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ) *
+          ∫ ω, (((cluster ω (0 : Fin d → ℤ)).encard : ℝ≥0∞).toReal) ^ (ℓ + 1) *
+            (∑' y : Fin d → ℤ,
+              (if normSeminorm ℝ (Fin d → ℝ) (Int.cast ∘ y) ≤ (1 / 2 : ℝ) then
+                (1 : ℝ) else 0) *
+              (conn (0 : Fin d → ℤ) y)ᶜ.indicator (fun _ => (1 : ℝ)) ω *
+              (((cluster ω y).encard : ℝ≥0∞).toReal) ^ (p - ℓ))
+            ∂(law (intensityProfile
+              (cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => -s) (1 / 2))
+              (1 : ℝ≥0))))
+      (1 / 2)  :=
+  hasDerivAt_integral_linear_cutoff_pow_of_chi (R := 1) d p hp (by norm_num) (by
+    rw [chi_linear_cutoffKernel_eq_one (d := d) (0 : Fin d → ℤ)]
+    exact ENNReal.one_ne_top)
+
+/-- **The moment function of the linear model is constant near `r₀`.** On the window the law is
+that of the empty configuration and the cluster of the origin there is a singleton, so the
+moment function equals one and its derivative at `r₀ = 1/2` is zero. -/
+theorem hasDerivAt_integral_linear_cutoff_pow_zero (d : ℕ) (p : ℕ) :
+    HasDerivAt (fun r : ℝ => ∫ ω, (((cluster ω (0 : Fin d → ℤ)).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => -s) r)
+          (1 : ℝ≥0)))) 0 (1 / 2) := by
+  refine HasDerivAt.congr_of_eventuallyEq (hasDerivAt_const (1 / 2 : ℝ) (1 : ℝ)) ?_
+  filter_upwards [Iio_mem_nhds (by norm_num : (1 / 2 : ℝ) < 1)] with r hr
+  exact integral_linear_moment_eq_one (d := d) p hr.le 0
+
+/-- **The binomial sum of the instantiated statement is zero.** The derivative of the moment
+function at `r₀ = 1/2` is unique, and it is zero by the constant-on-a-neighbourhood computation,
+so the value produced by the conditional theorem — the binomial sum weighted by the rate — is
+zero as well. This is the check that the instantiation is consistent: the identity it proves is
+`0 = 0`, at a nonzero rate. -/
+theorem eq_zero_of_hasDerivAt_integral_linear_cutoff_pow (d : ℕ) (p : ℕ) {S : ℝ}
+    (h : HasDerivAt (fun r : ℝ => ∫ ω, (((cluster ω (0 : Fin d → ℤ)).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => -s) r)
+          (1 : ℝ≥0)))) S (1 / 2)) : S = 0 :=
+  h.unique (hasDerivAt_integral_linear_cutoff_pow_zero d p)
+
+
+/-! ### The finite-susceptibility input at an interacting scale -/
+
+/-- On `Fin 1 → ℤ` two functions are equal exactly when their coordinates agree. -/
+theorem fun_fin_one_eq_iff (a b : Fin 1 → ℤ) : a = b ↔ a 0 = b 0 := by
+  refine ⟨fun h => by rw [h], fun h => ?_⟩
+  funext i
+  fin_cases i
+  exact h
+
+/-- The cut-off kernel of the linear profile at scale `3/2` equals `1/2` at every pair whose
+displacement has sup norm exactly one. -/
+theorem linear_cutoffKernel_three_halves_of_natAbs_eq_one {x y : Fin 1 → ℤ} (hxy : x ≠ y)
+    (h : ((x - y) 0).natAbs = 1) :
+    (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) (3 / 2) s(x, y) : ℝ) = 1 / 2 := by
+  rw [cutoffKernel_def, radialKernel_of_ne hxy, normSeminorm_fin_one_intCast, h]
+  rw [cutoffProfile_of_le (by norm_num : ((1 : ℕ) : ℝ) ≤ 3 / 2),
+    Real.coe_toNNReal _ (by norm_num)]
+  norm_num
+
+/-- The cut-off kernel of the linear profile at scale `3/2` vanishes at every pair whose
+displacement has sup norm at least two. -/
+theorem linear_cutoffKernel_three_halves_eq_zero {x y : Fin 1 → ℤ} (hxy : x ≠ y)
+    (h : 2 ≤ ((x - y) 0).natAbs) :
+    cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) (3 / 2) s(x, y) = 0 := by
+  rw [cutoffKernel_def, radialKernel_of_ne hxy, normSeminorm_fin_one_intCast]
+  have hlt : (3 / 2 : ℝ) < ((x - y) 0).natAbs := by
+    have h2 : (2 : ℝ) ≤ ((x - y) 0).natAbs := by exact_mod_cast h
+    linarith
+  rw [cutoffProfile_of_lt hlt, Real.toNNReal_zero]
+
+/-- The open probability at a unit displacement, at scale `3/2` and intensity one. -/
+theorem intensityProfile_linear_three_halves_of_natAbs_eq_one {x y : Fin 1 → ℤ} (hxy : x ≠ y)
+    (h : ((x - y) 0).natAbs = 1) :
+    (unitInterval.toNNReal (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ))
+        (fun s => -s) (3 / 2)) (1 : ℝ≥0) s(x, y)) : ℝ≥0∞) =
+      ENNReal.ofReal (1 - Real.exp (-(1 / 2))) := by
+  rw [← ENNReal.ofReal_coe_nnreal, unitInterval.coe_toNNReal]
+  change ENNReal.ofReal (1 - Real.exp (-(1 : ℝ) *
+      (((cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) (3 / 2) s(x, y)) : ℝ≥0) : ℝ))) =
+    ENNReal.ofReal (1 - Real.exp (-(1 / 2)))
+  rw [linear_cutoffKernel_three_halves_of_natAbs_eq_one hxy h]
+  norm_num
+
+/-- The open probability vanishes at every non-unit displacement, at scale `3/2`. -/
+theorem intensityProfile_linear_three_halves_eq_zero {x y : Fin 1 → ℤ} (hxy : x ≠ y)
+    (h : 2 ≤ ((x - y) 0).natAbs) :
+    (unitInterval.toNNReal (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ))
+        (fun s => -s) (3 / 2)) (1 : ℝ≥0) s(x, y)) : ℝ≥0∞) = 0 := by
+  rw [← ENNReal.ofReal_coe_nnreal, unitInterval.coe_toNNReal]
+  change ENNReal.ofReal (1 - Real.exp (-(1 : ℝ) *
+      (((cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) (3 / 2) s(x, y)) : ℝ≥0) : ℝ))) =
+    0
+  rw [linear_cutoffKernel_three_halves_eq_zero hxy h]
+  simp
+
+/-- **The row sum of the cut-off linear profile at scale `3/2` and intensity one.** The
+one-dimensional lattice has exactly two unit displacements, `±1`, so every row sum equals
+`2 (1 - e^{-1/2})`. -/
+theorem rowSum_linear_three_halves (v : Fin 1 → ℤ) :
+    rowSum (fun e => unitInterval.toENNReal (intensityProfile
+      (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) (3 / 2)) (1 : ℝ≥0) e)) v =
+      2 * ENNReal.ofReal (1 - Real.exp (-(1 / 2))) := by
+  rw [rowSum_toENNReal]
+  have hzero : ∀ w ∉ ({v + fun _ => (1 : ℤ), v - fun _ => (1 : ℤ)} : Finset (Fin 1 → ℤ)),
+      (if w = v then (0 : ℝ≥0∞)
+        else (unitInterval.toNNReal (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ))
+          (fun s => -s) (3 / 2)) (1 : ℝ≥0) s(v, w)) : ℝ≥0∞)) = 0 := by
+    intro w hw
+    simp only [Finset.mem_insert, Finset.mem_singleton, not_or] at hw
+    obtain ⟨hw1, hw2⟩ := hw
+    by_cases hwv : w = v
+    · simp [hwv]
+    · rw [ite_eq_right hwv]
+      have hne0 : (v - w) 0 ≠ 0 := by
+        intro hc
+        refine hwv ((fun_fin_one_eq_iff w v).2 ?_)
+        simp only [Pi.sub_apply] at hc
+        linarith
+      have hne1 : (v - w) 0 ≠ 1 := by
+        intro hc
+        refine hw2 ((fun_fin_one_eq_iff w (v - fun _ => (1 : ℤ))).2 ?_)
+        simp only [Pi.sub_apply] at hc ⊢
+        linarith
+      have hnen1 : (v - w) 0 ≠ -1 := by
+        intro hc
+        refine hw1 ((fun_fin_one_eq_iff w (v + fun _ => (1 : ℤ))).2 ?_)
+        simp only [Pi.sub_apply, Pi.add_apply] at hc ⊢
+        linarith
+      have h2 : 2 ≤ ((v - w) 0).natAbs := by
+        rcases Nat.lt_or_ge ((v - w) 0).natAbs 2 with hlt | hge
+        · have hcases : ((v - w) 0).natAbs = 0 ∨ ((v - w) 0).natAbs = 1 := by omega
+          rcases hcases with hc | hc
+          · exact absurd (Int.natAbs_eq_zero.1 hc) hne0
+          · exfalso
+            have h1 : ((v - w) 0).natAbs = ((1 : ℤ)).natAbs := by rw [hc]; norm_num
+            rcases Int.natAbs_eq_natAbs_iff.mp h1 with hc1 | hc1
+            · exact hne1 hc1
+            · exact hnen1 hc1
+        · exact hge
+      exact intensityProfile_linear_three_halves_eq_zero (fun hv => hwv hv.symm) h2
+  rw [tsum_eq_sum (s := ({v + fun _ => (1 : ℤ), v - fun _ => (1 : ℤ)} : Finset (Fin 1 → ℤ)))
+    (fun w hw => hzero w hw)]
+  have hplus : ((v + fun _ => (1 : ℤ)) : Fin 1 → ℤ) ≠ v := by
+    intro hc
+    have := congrFun hc 0
+    simp only [Pi.add_apply] at this
+    omega
+  have hminus : ((v - fun _ => (1 : ℤ)) : Fin 1 → ℤ) ≠ v := by
+    intro hc
+    have := congrFun hc 0
+    simp only [Pi.sub_apply] at this
+    omega
+  have hne : ((v + fun _ => (1 : ℤ)) : Fin 1 → ℤ) ≠ v - fun _ => (1 : ℤ) := by
+    intro hc
+    have := congrFun hc 0
+    simp only [Pi.add_apply, Pi.sub_apply] at this
+    omega
+  rw [Finset.sum_insert (by simpa using hne), Finset.sum_singleton,
+    ite_eq_right hplus, ite_eq_right hminus]
+  have hstep : ((v - ((v + fun _ => (1 : ℤ)) : Fin 1 → ℤ)) 0).natAbs = 1 := by
+    simp only [Pi.sub_apply, Pi.add_apply]
+    norm_num
+  have hstep' : ((v - ((v - fun _ => (1 : ℤ)) : Fin 1 → ℤ)) 0).natAbs = 1 := by
+    simp only [Pi.sub_apply]
+    norm_num
+  rw [intensityProfile_linear_three_halves_of_natAbs_eq_one (fun hv => hplus hv.symm) hstep,
+    intensityProfile_linear_three_halves_of_natAbs_eq_one (fun hv => hminus hv.symm) hstep']
+  ring
+
+/-- **The susceptibility of the cut-off linear profile at scale `3/2` is finite.** At intensity
+one the model is nearest-neighbour bond percolation on `ℤ` with `q = 1 - e^{-1/2}`: the row sum
+is `2 (1 - e^{-1/2}) < 1` because `e^{-1/2} > 1/2`, so the row-sum criterion applies. -/
+theorem chi_linear_cutoffKernel_three_halves_lt_top (o : Fin 1 → ℤ) :
+    chi (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) (3 / 2))
+      (1 : ℝ≥0)) o < ⊤ := by
+  have h_exp : (1 / 2 : ℝ) < Real.exp (-(1 / 2)) := by
+    have := Real.add_one_lt_exp (x := -(1 / 2)) (by norm_num)
+    linarith
+  have hExp : (2 : ℝ) * (1 - Real.exp (-(1 / 2))) < 1 := by linarith
+  refine chi_lt_top_of_rowSum _ (ENNReal.ofReal (2 * (1 - Real.exp (-(1 / 2)))))
+    (fun v => ?_) ?_ o
+  · rw [rowSum_linear_three_halves]
+    have h2 : (2 : ℝ≥0∞) = ENNReal.ofReal 2 := by simp
+    rw [h2, ← ENNReal.ofReal_mul (by norm_num : (0 : ℝ) ≤ 2)]
+  · rw [ENNReal.ofReal_lt_one]
+    exact hExp
+
+/-- **The instantiation at the interacting scale `R = 3/2`.** All the inputs of the conditional
+binomial theorem hold with the finite-susceptibility hypothesis taken at a scale where the model
+is nearest-neighbour percolation rather than empty. -/
+theorem hasDerivAt_integral_linear_cutoff_pow_three_halves (p : ℕ) (hp : 1 ≤ p) :
+    HasDerivAt (fun r : ℝ => ∫ ω, (((cluster ω (0 : Fin 1 → ℤ)).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) r)
+          (1 : ℝ≥0))))
+      (((1 : ℝ≥0) : ℝ) * -((fun _ : ℝ => -1) (1 / 2)) *
+        ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ) *
+          ∫ ω, (((cluster ω (0 : Fin 1 → ℤ)).encard : ℝ≥0∞).toReal) ^ (ℓ + 1) *
+            (∑' y : Fin 1 → ℤ,
+              (if normSeminorm ℝ (Fin 1 → ℝ) (Int.cast ∘ y) ≤ (1 / 2 : ℝ) then
+                (1 : ℝ) else 0) *
+              (conn (0 : Fin 1 → ℤ) y)ᶜ.indicator (fun _ => (1 : ℝ)) ω *
+              (((cluster ω y).encard : ℝ≥0∞).toReal) ^ (p - ℓ))
+            ∂(law (intensityProfile
+              (cutoffKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => -s) (1 / 2))
+              (1 : ℝ≥0))))
+      (1 / 2)  :=
+  hasDerivAt_integral_linear_cutoff_pow_of_chi (d := 1) (R := 3 / 2) p hp (by norm_num) (by
+    have h := chi_linear_cutoffKernel_three_halves_lt_top (0 : Fin 1 → ℤ)
+    exact ne_of_lt h)
+
+end PercLib.Models.LongRange
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability
+
+variable {d : ℕ} {K K' : ℝ → ℝ}
+
+/-! ### Uniform limits of continuous functions -/
+
+/-- **A uniform limit of continuous functions is continuous.** Stated with an explicit
+`ε`-approximation, which is the form in which the cap passage below produces it. -/
+theorem continuousOn_of_forall_exists_uniform_approx {ι : Type*} {s : Set ℝ} {f : ℝ → ℝ}
+    {g : ι → ℝ → ℝ} (hg : ∀ n, ContinuousOn (g n) s)
+    (happrox : ∀ ε > 0, ∃ n, ∀ x ∈ s, |f x - g n x| ≤ ε) :
+    ContinuousOn f s := by
+  intro x₀ hx₀
+  rw [Metric.continuousWithinAt_iff]
+  intro ε hε
+  obtain ⟨n, hn⟩ := happrox (ε / 3) (by linarith)
+  have hgx : ContinuousWithinAt (g n) s x₀ := hg n x₀ hx₀
+  rw [Metric.continuousWithinAt_iff] at hgx
+  obtain ⟨δ, hδ0, hδ⟩ := hgx (ε / 3) (by linarith)
+  refine ⟨δ, hδ0, fun x hx hxd => ?_⟩
+  have h1 : |f x - g n x| ≤ ε / 3 := hn x hx
+  have h2 : |f x₀ - g n x₀| ≤ ε / 3 := hn x₀ hx₀
+  have h3 : dist (g n x) (g n x₀) < ε / 3 := hδ hx hxd
+  rw [Real.dist_eq] at h3
+  rw [Real.dist_eq]
+  have hkey : f x - f x₀ = (f x - g n x) + (g n x - g n x₀) + (g n x₀ - f x₀) := by ring
+  have hstep : |f x - f x₀| ≤ |f x - g n x| + |g n x - g n x₀| + |g n x₀ - f x₀| := by
+    rw [hkey]
+    exact abs_add_three _ _ _
+  have h2' : |g n x₀ - f x₀| ≤ ε / 3 := by rw [abs_sub_comm]; exact h2
+  linarith
+
+/-! ### The uncapped flux from a uniform-in-the-parameter dominator -/
+
+/-- **Flux continuity from a uniform dominator.** If each summand of the uncapped pivotal flux
+is continuous in the cut-off parameter on `(u, v)`, and one summable function of the pair
+dominates every summand *for every parameter value* in `(u, v)`, then the flux series itself is
+continuous on `(u, v)`.
+
+The hypothesis `hdom` is stronger than the all-pairs dominator of the cap passage, which is
+allowed to depend on the parameter: the constant there may move with `r`, and a series of
+continuous functions has no reason to be continuous under a parameter-dependent bound. -/
+theorem continuousOn_flux_cutoff_of_uniform_dominator {N : ModelNorm (Fin d → ℝ)} (β : ℝ≥0)
+    (p : ℕ) (o : Fin d → ℤ) {u v : ℝ} (cw : ℝ → Sym2 (Fin d → ℤ) → ℝ)
+    {g : Sym2 (Fin d → ℤ) → ℝ} (hg : Summable g)
+    (hpair : ∀ e, ContinuousOn (fun r => cw r e *
+      ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel N K r) β))) (Ioo u v))
+    (hdom : ∀ (e : Sym2 (Fin d → ℤ)) ⦃r : ℝ⦄, r ∈ Ioo u v →
+      |cw r e * ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel N K r) β))| ≤ g e) :
+    ContinuousOn (fun r => ∑' e, cw r e *
+      ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel N K r) β))) (Ioo u v) :=
+  continuousOn_tsum (u := g) (f := fun e r => cw r e *
+      ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel N K r) β)))
+    hpair hg fun e r hr => by rw [Real.norm_eq_abs]; exact hdom e hr
+
+/-! ### The capped flux is continuous -/
+
+/-- **Continuity of the capped pivotal flux in the cut-off parameter.** This is the
+bounded-observable theorem `continuousOn_flux_cutoff` at the cap `n ↦ min M (n ^ p)`, which is
+bounded by `M` and eventually constant; no unbounded observable occurs. -/
+theorem continuousOn_flux_cutoff_capped {N : ModelNorm (Fin d → ℝ)}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p) (o : Fin d → ℤ) {R : ℝ}
+    (hχ : chi (intensityProfile (cutoffKernel N K R) β) o ≠ ⊤) {u v : ℝ} (hu : 0 < u)
+    (hvR : v ≤ R) (hI : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Ioo u v) (M : ℝ) (hM : 0 ≤ M) :
+    ContinuousOn (fun r => ∑' e,
+      ((radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+        ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ)))) *
+      ∫ ω, ((min (ENNReal.ofReal M) (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p)).toReal -
+        (min (ENNReal.ofReal M) (((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)).toReal)
+        ∂(law (intensityProfile (cutoffKernel N K r) β))) (Ioo u v) :=
+  continuousOn_flux_cutoff (F := fun n : ℕ∞ => (min (ENNReal.ofReal M) ((n : ℝ≥0∞) ^ p)).toReal)
+    (m := M) hKa hK' hK'c β (abs_capped_pow_toReal_le p hM) (capped_pow_eventually_const p hp hM)
+    o hχ hu hvR hI
+
+/-- **Continuity of the capped pivotal term of a single pair.** The per-pair form of
+`continuousOn_flux_cutoff_capped`. -/
+theorem continuousOn_pivotal_cutoff_capped {N : ModelNorm (Fin d → ℝ)}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p) (o : Fin d → ℤ) {R : ℝ}
+    (hχ : chi (intensityProfile (cutoffKernel N K R) β) o ≠ ⊤) {u : ℝ} (hu : 0 < u)
+    (e : Sym2 (Fin d → ℤ)) (M : ℝ) (hM : 0 ≤ M) :
+    ContinuousOn (fun r => ∫ ω,
+      ((min (ENNReal.ofReal M) (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p)).toReal -
+        (min (ENNReal.ofReal M) (((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)).toReal)
+        ∂(law (intensityProfile (cutoffKernel N K r) β))) (Ioo u R) :=
+  continuousOn_pivotal_cutoff (F := fun n : ℕ∞ => (min (ENNReal.ofReal M) ((n : ℝ≥0∞) ^ p)).toReal)
+    (m := M) hKa hK' hK'c β (abs_capped_pow_toReal_le p hM) (capped_pow_eventually_const p hp hM)
+    o hχ hu e
+
+/-! ### The uncapped flux from a uniform-in-the-parameter cap approximation -/
+
+/-- **The uncapped flux is continuous once the capped fluxes approximate it uniformly in the
+parameter.** The capped flux is continuous in the parameter by `continuousOn_flux_cutoff_capped`,
+so a uniform-in-`r` approximation by capped fluxes gives the uncapped continuity.
+
+The hypothesis `hcap` is exactly what the pointwise all-pairs dominator of the cap passage does
+*not* supply: the cap error may be finite at every parameter and yet not tend to zero uniformly
+on `(u, v)`. -/
+theorem continuousOn_flux_cutoff_of_uniform_cap {N : ModelNorm (Fin d → ℝ)}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p) (o : Fin d → ℤ) {R : ℝ}
+    (hχ : chi (intensityProfile (cutoffKernel N K R) β) o ≠ ⊤) {u v : ℝ} (hu : 0 < u)
+    (hvR : v ≤ R) (hI : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Ioo u v)
+    (hcap : ∀ ε > 0, ∃ M : ℝ, 0 ≤ M ∧ ∀ r ∈ Ioo u v,
+      |(∑' e, ((radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+          ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ)))) *
+        ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+          ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+          ∂(law (intensityProfile (cutoffKernel N K r) β))) -
+        (∑' e, ((radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+          ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ)))) *
+        ∫ ω, ((min (ENNReal.ofReal M) (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p)).toReal -
+          (min (ENNReal.ofReal M) (((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)).toReal)
+          ∂(law (intensityProfile (cutoffKernel N K r) β)))| ≤ ε) :
+    ContinuousOn (fun r => ∑' e,
+      ((radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+        ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ)))) *
+      ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel N K r) β))) (Ioo u v) := by
+  refine continuousOn_of_forall_exists_uniform_approx (ι := {M : ℝ // 0 ≤ M})
+    (g := fun M r => ∑' e,
+      ((radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+        ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ)))) *
+      ∫ ω, ((min (ENNReal.ofReal M.val) (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p)).toReal -
+        (min (ENNReal.ofReal M.val) (((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)).toReal)
+        ∂(law (intensityProfile (cutoffKernel N K r) β)))
+    (fun M => continuousOn_flux_cutoff_capped hKa hK' hK'c β p hp o hχ hu hvR hI M.val M.2)
+    (fun ε hε => ?_)
+  obtain ⟨M, hM0, hM⟩ := hcap ε hε
+  exact ⟨⟨M, hM0⟩, fun r hr => hM r hr⟩
+
+/-! ### The last fundamental-theorem-of-calculus step with an almost-everywhere limit -/
+
+/-- **The cap passage's last step needs only an a.e. limit, not continuity.** If the moment
+function agrees near `r₀` with `ψ r₀ + ∫_{r₀}^{r} Φ` and `Φ` is strongly measurable near `r₀`
+with an almost sure limit `Φ r₀` there, then the moment function is differentiable at `r₀` with
+derivative `Φ r₀`. This replaces the continuity input of the cap passage by a strictly weaker
+pair of conditions. -/
+theorem hasDerivAt_of_ae_tendsto_flux {ψ Φ : ℝ → ℝ} {r₀ : ℝ}
+    (hident : ψ =ᶠ[𝓝 r₀] fun r => ψ r₀ + ∫ x in r₀..r, Φ x)
+    (hmeas : StronglyMeasurableAtFilter Φ (𝓝 r₀))
+    (hlim : Tendsto Φ (𝓝 r₀ ⊓ ae volume) (𝓝 (Φ r₀))) :
+    HasDerivAt ψ (Φ r₀) r₀ :=
+  ((intervalIntegral.integral_hasDerivAt_of_tendsto_ae_right IntervalIntegrable.refl hmeas hlim)
+    |>.const_add (ψ r₀)).congr_of_eventuallyEq hident
+
+/-- Continuity at a point gives the almost sure limit used in
+`hasDerivAt_of_ae_tendsto_flux`; the converse fails in general. -/
+theorem tendsto_inf_ae_of_continuousAt {f : ℝ → ℝ} {x : ℝ} (h : ContinuousAt f x) :
+    Tendsto f (𝓝 x ⊓ ae volume) (𝓝 (f x)) :=
+  h.mono_left inf_le_left
+
+
+/-- **Per-pair uncapped continuity from a uniform-in-the-parameter cap bound.** The per-pair
+companion of `continuousOn_flux_cutoff_of_uniform_cap`, and the `hpair` input of
+`continuousOn_flux_cutoff_of_uniform_dominator`: the capped term of a pair is continuous
+(`continuousOn_pivotal_cutoff_capped`), so a cap approximation uniform on `(u, R)` gives the
+uncapped term. -/
+theorem continuousOn_pivotal_cutoff_uncapped_of_uniform_cap {N : ModelNorm (Fin d → ℝ)}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p) (o : Fin d → ℤ) {R : ℝ}
+    (hχ : chi (intensityProfile (cutoffKernel N K R) β) o ≠ ⊤) {u : ℝ} (hu : 0 < u)
+    (e : Sym2 (Fin d → ℤ))
+    (hrem : ∀ ε > 0, ∃ M : ℝ, 0 ≤ M ∧ ∀ r ∈ Ioo u R,
+      |(∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+          ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+          ∂(law (intensityProfile (cutoffKernel N K r) β))) -
+        (∫ ω, ((min (ENNReal.ofReal M) (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p)).toReal -
+          (min (ENNReal.ofReal M) (((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)).toReal)
+          ∂(law (intensityProfile (cutoffKernel N K r) β)))| ≤ ε) :
+    ContinuousOn (fun r => ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel N K r) β))) (Ioo u R) := by
+  refine continuousOn_of_forall_exists_uniform_approx (ι := {M : ℝ // 0 ≤ M})
+    (g := fun M r => ∫ ω,
+      ((min (ENNReal.ofReal M.val) (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p)).toReal -
+        (min (ENNReal.ofReal M.val) (((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)).toReal)
+        ∂(law (intensityProfile (cutoffKernel N K r) β)))
+    (fun M => continuousOn_pivotal_cutoff_capped hKa hK' hK'c β p hp o hχ hu e M.val M.2)
+    (fun ε hε => ?_)
+  obtain ⟨M, hM0, hM⟩ := hrem ε hε
+  exact ⟨⟨M, hM0⟩, fun r hr => hM r hr⟩
+
+
+end PercLib.Models.LongRange
