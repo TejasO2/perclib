@@ -13346,3 +13346,178 @@ theorem hasDerivAt_integral_cutoff_pow_binomial_of_root_succ_moment_of_local_tai
       hKa hK' hK'c β p hp 0 M hM cw hcw hu hvR hcorner hroot habs htail)
 
 end PercLib.Models.LongRange
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability
+
+open Classical in
+/-- A uniform finite root `(p+1)`-moment gives pointwise absolute summability of the full
+weighted uncapped cutoff flux. The zero-rate case is treated separately, without inversion. -/
+theorem summable_norm_cutoff_flux_of_root_succ_moment {d : ℕ}
+    {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ} (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p)
+    (M : ℝ≥0∞) (hM : M ≠ ⊤)
+    (cw : ℝ → Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ r e, cw r e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K r e : ℝ))))
+    {u v : ℝ} (hcorner : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Ioo u v)
+    (hroot : ∀ r ∈ Ioo u v, (∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ (p + 1)
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≤ M) :
+    ∀ r ∈ Ioo u v, Summable fun e => ‖cw r e *
+      ∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))‖ := by
+  obtain ⟨D, hDtop, hD⟩ := exists_uniform_i41_diagram_bound_of_root_succ_moment
+    (K := K) β p M hM hroot
+  intro r hr
+  let μ : Measure (Config (Fin d → ℤ)) := law (intensityProfile (cutoffKernel (d := d) N K r) β)
+  have hrootp : (∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ p ∂μ) ≠ ⊤ := by
+    refine ne_top_of_le_ne_top (ne_top_of_le_ne_top hM (hroot r hr)) ?_
+    refine lintegral_mono fun ω => ?_
+    have hbase : (1 : ℝ≥0∞) ≤ ((cluster ω 0).encard : ℝ≥0∞) := by
+      exact_mod_cast one_le_encard_cluster ω 0
+    exact pow_le_pow_right₀ hbase (Nat.le_succ p)
+  have hvmom : ∀ y : Fin d → ℤ, (∫⁻ ω, ((cluster ω y).encard : ℝ≥0∞) ^ p ∂μ) ≠ ⊤ := by
+    intro y
+    exact vertex_moment_ne_top_of_root_moment β r p y hrootp
+  have hins : ∀ e : Sym2 (Fin d → ℤ), (∫⁻ ω, ((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p
+      ∂μ) ≠ ⊤ := by
+    intro e
+    exact insert_moments_of_vertex_moments β p r 0 hvmom e
+  have hKd : ∀ S : Finset (Sym2 (Fin d → ℤ)), ∑ e ∈ S, |cw r e| *
+      |∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal ∂μ| ≤
+      |(β : ℝ) * -K' r| * (∑ ℓ ∈ Finset.range p, D ℓ).toReal := by
+    intro S
+    exact finite_sum_cutoff_pivotal_le_of_binomial_diagram β p hp r cw hcw hins
+      D hDtop (hD r hr) hcorner hr S
+  by_cases hrate : (β : ℝ) * -K' r = 0
+  · have hzero : (fun e : Sym2 (Fin d → ℤ) => ‖cw r e *
+        ∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+          ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal ∂μ‖) = fun _ => 0 := by
+      funext e
+      simp [hcw r e, hrate]
+    rw [hzero]
+    exact summable_zero
+  · have hfin : ∀ e, ∀ᵐ ω ∂μ, ((cluster (insert e ω) 0).encard : ℝ≥0∞) ≠ ⊤ := by
+      intro e
+      exact ae_ne_top_of_lintegral_pow_ne_top (measurable_encard_cluster_insert_coe e 0)
+        p hp (hins e)
+    have hint : ∀ e, Integrable
+        (fun ω => (((cluster (insert e ω) 0).encard : ℝ≥0∞).toReal) ^ p) μ := by
+      intro e
+      exact integrable_toReal_pow_encard_cluster_insert e 0 p (hins e)
+    have hKdReal : ∀ S : Finset (Sym2 (Fin d → ℤ)), ∑ e ∈ S, |cw r e| *
+        |∫ ω, ((((cluster (insert e ω) 0).encard : ℝ≥0∞).toReal) ^ p -
+          (((cluster (ω \ {e}) 0).encard : ℝ≥0∞).toReal) ^ p) ∂μ| ≤
+        |(β : ℝ) * -K' r| * (∑ ℓ ∈ Finset.range p, D ℓ).toReal := by
+      intro S
+      refine le_trans ?_ (hKd S)
+      refine Finset.sum_le_sum fun e _ => ?_
+      rw [integral_pivotal_pow_eq_real_sub μ e 0 p (hfin e)]
+    have hclosed := summable_closed_flux_cutoff_of_insert_moments
+      (N := N.toSeminorm) (K := K) (K' := K') p β r 0 (cw r)
+      (|(β : ℝ) * -K' r| * (∑ ℓ ∈ Finset.range p, D ℓ).toReal)
+      (hcw r) hp hins hKdReal hrate
+    let rate : ℝ := (β : ℝ) * -K' r
+    have hpair : ∀ e : Sym2 (Fin d → ℤ), cw r e *
+        ∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+          ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal ∂μ =
+        rate * ((radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+          ∫ ω, (if e ∈ ω then (0 : ℝ) else
+            (((cluster (insert e ω) 0).encard : ℝ≥0∞).toReal) ^ p -
+              (((cluster ω 0).encard : ℝ≥0∞).toReal) ^ p) ∂μ) := by
+      intro e
+      calc
+        cw r e * ∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+            ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal ∂μ =
+          ((β : ℝ) * -K' r) * ((radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+            (∫⁻ ω, (if e ∈ ω then (0 : ℝ≥0∞) else
+              (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+                ((cluster ω 0).encard : ℝ≥0∞) ^ p)) ∂μ).toReal) :=
+          cutoff_weight_mul_integral_eq_rate_mul_closed_toReal p β r 0 (cw r)
+            (hcw r) hfin hint e
+        _ = _ := by
+          rw [integral_toReal_closed_pivotal μ e 0 p (hfin e)]
+    have hsum := hclosed.1.mul_left rate
+    have hsum' : Summable fun e : Sym2 (Fin d → ℤ) => cw r e *
+        ∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+          ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal ∂μ := by
+      apply hsum.congr
+      intro e
+      exact (hpair e).symm
+    exact hsum'.norm
+
+end PercLib.Models.LongRange
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability
+
+open Classical in
+/-- Higher root moments supply every weighted summand's continuity. The whole pair series is
+then continuous from pointwise absolute summability and a local small-tail estimate. -/
+theorem continuousOn_flux_cutoff_of_root_succ_moment_of_small_tail {d : ℕ}
+    {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p) {R : ℝ}
+    (M : ℝ≥0∞) (hM : M ≠ ⊤)
+    (cw : ℝ → Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ r e, cw r e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K r e : ℝ))))
+    {u v : ℝ} (hu : 0 < u) (hvR : v ≤ R)
+    (hI : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Ioo u v)
+    (hroot : ∀ r ∈ (Ioo u v ∪ {R} : Set ℝ), (∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ (p + 1)
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≤ M)
+    (htail : ∀ r₀ ∈ Ioo u v, ∀ ε > 0, ∃ U ∈ 𝓝 r₀, ∃ F : Finset (Sym2 (Fin d → ℤ)),
+      ∀ r ∈ U ∩ Ioo u v, ∑' e : ↥(F : Set (Sym2 (Fin d → ℤ)))ᶜ,
+        ‖cw r e.1 * ∫ ω, (((cluster (insert e.1 ω) 0).encard : ℝ≥0∞) ^ p -
+          ((cluster (ω \ {e.1}) 0).encard : ℝ≥0∞) ^ p).toReal
+          ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))‖ ≤ ε) :
+    ContinuousOn (fun r => ∑' e, cw r e *
+      ∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) (Ioo u v) := by
+  exact continuousOn_flux_cutoff_of_root_succ_moment_of_local_tail
+    hKa hK' hK'c β p hp 0 M hM cw hcw hu hvR hI hroot
+    (summable_norm_cutoff_flux_of_root_succ_moment β p hp M hM cw hcw hI
+      (fun r hr => hroot r (Set.mem_union_left _ hr))) htail
+
+
+open Classical in
+/-- The cutoff binomial derivative from higher root moments, pointwise absolute
+summability, and a local small-tail estimate. The latter replaces an explicit global continuity
+assumption. Sharpness and the literal all-radius corner claim are not asserted. -/
+theorem hasDerivAt_integral_cutoff_pow_binomial_of_root_succ_moment_of_small_tail {d : ℕ}
+    {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p) {R : ℝ}
+    (M : ℝ≥0∞) (hM : M ≠ ⊤)
+    (cw : ℝ → Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ r e, cw r e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K r e : ℝ))))
+    {u v r₀ : ℝ} (hu : 0 < u) (hur : u < r₀) (hrv : r₀ < v) (hvR : v ≤ R)
+    (hcorner : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Ioo u v)
+    (hroot : ∀ r ∈ (Ioo u v ∪ {R} : Set ℝ), (∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ (p + 1)
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≤ M)
+    (htail : ∀ r₀ ∈ Ioo u v, ∀ ε > 0, ∃ U ∈ 𝓝 r₀, ∃ F : Finset (Sym2 (Fin d → ℤ)),
+      ∀ r ∈ U ∩ Ioo u v, ∑' e : ↥(F : Set (Sym2 (Fin d → ℤ)))ᶜ,
+        ‖cw r e.1 * ∫ ω, (((cluster (insert e.1 ω) 0).encard : ℝ≥0∞) ^ p -
+          ((cluster (ω \ {e.1}) 0).encard : ℝ≥0∞) ^ p).toReal
+          ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))‖ ≤ ε) :
+    HasDerivAt (fun r => ∫ ω, (((cluster ω 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β)))
+      ((β : ℝ) * -K' r₀ * ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ) *
+        ∫ ω, (((cluster ω 0).encard : ℝ≥0∞).toReal) ^ (ℓ + 1) *
+          (∑' y, (if N (Int.cast ∘ y) ≤ r₀ then 1 else 0) *
+            (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ)) ω *
+            (((cluster ω y).encard : ℝ≥0∞).toReal) ^ (p - ℓ))
+          ∂(law (intensityProfile (cutoffKernel (d := d) N K r₀) β))) r₀ := by
+  exact hasDerivAt_integral_cutoff_pow_binomial_of_root_succ_moment
+    (K := K) (K' := K') (R := R) (u := u) (v := v) (r₀ := r₀)
+    hKa hK' hK'c β p hp M hM cw hcw hu hur hrv hvR hcorner hroot
+    (continuousOn_flux_cutoff_of_root_succ_moment_of_small_tail
+      hKa hK' hK'c β p hp M hM cw hcw hu hvR hcorner hroot htail)
+
+
+end PercLib.Models.LongRange
