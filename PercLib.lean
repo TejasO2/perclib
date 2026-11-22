@@ -421,6 +421,7 @@ public import PercLib.Probability.KilledGreen
 public import PercLib.Probability.LaplaceTail
 public import PercLib.Probability.LayerCake
 public import PercLib.Probability.LayerCakeProduct
+public import PercLib.Probability.LazyReturnKernel
 public import PercLib.Probability.LongRangeGreenBubble
 public import PercLib.Probability.MagnetizationLowerBound
 public import PercLib.Probability.MassTransport
@@ -472,6 +473,7 @@ public import PercLib.Probability.Tags.GhostTransform
 public import PercLib.Probability.Tags.Harris
 public import PercLib.Probability.Tags.HigherCorrelation
 public import PercLib.Probability.Tags.IntegratedLowerTail
+public import PercLib.Probability.Tags.LazyReturnKernel
 public import PercLib.Probability.Tags.MagnetizationLowerBound
 public import PercLib.Probability.Tags.MassTransport
 public import PercLib.Probability.Tags.MeanFieldMoments
