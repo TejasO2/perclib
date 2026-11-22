@@ -9603,3 +9603,81 @@ theorem hasDerivAt_integral_cutoff_pow_binomial_of_insert_moments {d : ℕ}
 
 
 end PercLib.Models.LongRange
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Percolation.Bond PercLib.Probability
+
+open Classical in
+/-- A zero cutoff rate makes the entire cutoff pivotal-flux derivative coefficient vanish. -/
+theorem hasDerivAt_of_zero_cutoff_rate {d : ℕ} {N : Seminorm ℝ (Fin d → ℝ)}
+    {K K' : ℝ → ℝ} (β : ℝ≥0) (p : ℕ) (o : Fin d → ℤ) {f : ℝ → ℝ}
+    (cw : Sym2 (Fin d → ℤ) → ℝ) {r : ℝ}
+    (hd : HasDerivAt f (∑' e, cw e * ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+      ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+      ∂(law (intensityProfile (cutoffKernel N K r) β))) r)
+    (hcw : ∀ e, cw e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ))))
+    (hzero : (β : ℝ) * -K' r = 0) :
+    HasDerivAt f 0 r := by
+  have hseries : (∑' e, cw e * ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+      ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+      ∂(law (intensityProfile (cutoffKernel N K r) β))) = 0 := by
+    simp only [hcw, hzero, zero_mul, mul_zero, tsum_zero]
+  exact hd.congr_deriv hseries
+
+
+end PercLib.Models.LongRange
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability
+
+open Classical in
+/-- The cutoff cluster moment has the paper's binomial derivative at the origin, conditional
+on the remaining geometric, moment, measurability and continuity inputs. The per-pair moment
+hypothesis is retained explicitly: this is not a proof of sharpness. -/
+theorem hasDerivAt_integral_cutoff_pow_binomial {d : ℕ}
+    {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p) {R : ℝ}
+    (hχ : chi (intensityProfile (cutoffKernel (d := d) N K R) β) 0 ≠ ⊤)
+    (cw : ℝ → Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ r e, cw r e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K r e : ℝ))))
+    {u v r₀ : ℝ} (hu : 0 < u) (hur : u < r₀) (hrv : r₀ < v) (hvR : v ≤ R)
+    (hcorner : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Ioo u v)
+    (hins : ∀ r ∈ Ioo u v, ∀ e, (∫⁻ ω, ((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≠ ⊤)
+    (Kd : ℝ → ℝ) (hKdint : ∀ a ∈ Ioo u v, ∀ b ∈ Ioo u v, IntervalIntegrable Kd volume a b)
+    (hKd : ∀ r ∈ Ioo u v, ∀ S : Finset (Sym2 (Fin d → ℤ)), ∑ e ∈ S, |cw r e| *
+      |∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))| ≤ Kd r)
+    (hmeas : ∀ n : ℕ, AEStronglyMeasurable (fun r => ∑' e, cw r e *
+      (∫⁻ ω, (min (n : ℝ≥0∞) (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p) -
+        min (n : ℝ≥0∞) (((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p))
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))).toReal)
+      (volume.restrict (Ioo u v)))
+    (hcont : ContinuousOn (fun r => ∑' e, cw r e *
+      ∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) (Ioo u v)) :
+    HasDerivAt (fun r => ∫ ω, (((cluster ω 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β)))
+      ((β : ℝ) * -K' r₀ * ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ) *
+        ∫ ω, (((cluster ω 0).encard : ℝ≥0∞).toReal) ^ (ℓ + 1) *
+          (∑' y, (if N (Int.cast ∘ y) ≤ r₀ then 1 else 0) *
+            (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ)) ω *
+            (((cluster ω y).encard : ℝ≥0∞).toReal) ^ (p - ℓ))
+          ∂(law (intensityProfile (cutoffKernel (d := d) N K r₀) β))) r₀ := by
+  have hd := hasDerivAt_integral_cutoff_pow_of_insert_moments hKa hK' hK'c β p hp 0 hχ cw hcw
+    hu hur hrv hvR hcorner hins Kd hKdint hKd hmeas hcont
+  by_cases hrate : (β : ℝ) * -K' r₀ = 0
+  · have hz := hasDerivAt_of_zero_cutoff_rate (K := K) (K' := K') β p 0
+      (cw r₀) hd (hcw r₀) hrate
+    simpa only [hrate, zero_mul] using hz
+  · exact hasDerivAt_integral_cutoff_pow_binomial_of_insert_moments
+      hKa hK' hK'c β p hp hχ cw hcw hu hur hrv hvR hcorner hins Kd hKdint hKd hmeas hcont hrate
+
+end PercLib.Models.LongRange
