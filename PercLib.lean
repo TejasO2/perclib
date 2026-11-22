@@ -398,6 +398,7 @@ public import PercLib.Probability.FiniteEnergy.Insertion
 public import PercLib.Probability.FiniteExpectation
 public import PercLib.Probability.FirstMoment
 public import PercLib.Probability.GeneratingFunction
+public import PercLib.Probability.GhostBinaryTree
 public import PercLib.Probability.GhostFieldDerivative
 public import PercLib.Probability.GhostTransform
 public import PercLib.Probability.Harris
@@ -452,6 +453,7 @@ public import PercLib.Probability.Tags.Ergodicity
 public import PercLib.Probability.Tags.ExponentialMoments
 public import PercLib.Probability.Tags.FiniteCoordinates
 public import PercLib.Probability.Tags.FourFunctions
+public import PercLib.Probability.Tags.GhostBinaryTree
 public import PercLib.Probability.Tags.GhostFieldDerivative
 public import PercLib.Probability.Tags.GhostTransform
 public import PercLib.Probability.Tags.Harris
