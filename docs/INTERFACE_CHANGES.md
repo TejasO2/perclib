@@ -10,6 +10,14 @@ deprecated alias for one release where that is possible.
 
 ## Merged
 
+### New definitions, 22 Nov round 3 batches (gated at `8fe99e9`, `99b7770`, `28c8877`) (additive; no existing name changed)
+
+- `PercLib.Probability.generationSize` (`p-b-NCWZ`, audit-r18-b); `PercLib.Percolation.Bond.truncatedChi` (`p-c-2DZD`, audit-r18-c).
+- `pairBoundary`, `SeparatesPairs`, `openDegree`, `incidentCount` (`p-d-B2ZL`, audit-r18-d).
+- `ConvexOrder`, `UnifIntegrableAlong` (`Probability/ConvexOrder.lean`, `p-a-MDB8`, audit-r19-a).
+- `PercLib.Models.Site.pathCount`, `restrictedChi`, `interChi` (`p-d-H35T`, audit-r19-b).
+- Lemmas `HierarchicalLattice.ball_eq_block`, `card_setOf_hierDist_le` (audit-r18-a changes).
+
 ### New definitions, 21-22 Nov batches (gated at `28c5f0a` `1f14e57` and `d5dcd74`) (additive; no existing name changed)
 
 - `frontier-trivalent-count` (SO5J; audited APPROVE WITH CHANGES, `audit-r15-frontier-a`, change applied in
@@ -132,11 +140,9 @@ deprecated alias for one release where that is possible.
 Earlier respellings (the `localConn`/`localCluster`/`boundaryFlux`/`IsCut` fold, the header
 and linter migrations) predate this file; see `git log` of the integration branch.
 
-## Announced 22 November 2026 (round 2): new definitions awaiting audit
+## Announced 22 November 2026 (round 3): new definitions awaiting audit
 
-New definitions only (no renames, nothing removed); each merges after a fresh D-35 audit approves it.
+New definitions only (no renames, nothing removed); each merges after a fresh D-35 audit approves it (audit `audit-r19-c`).
 
-- `PercLib.Probability.generationSize` (`Probability/GaltonWatson/Defs.lean`, branch `work/p-b-NCWZ`; audit `audit-r18-b`).
-- `PercLib.Percolation.Bond.truncatedChi` (`Percolation/Bond/TruncatedSusceptibility.lean`, branch `work/p-c-2DZD`; audit `audit-r18-c`).
-- `pairBoundary`, `SeparatesPairs` (`Percolation/Bond/ClosedSeparators/Defs.lean`) and `openDegree`, `incidentCount`
-  (`Percolation/Bond/Degree/Defs.lean`), branch `work/p-d-B2ZL`; audit `audit-r18-d`.
+- `blockCorner` (branch `work/p-a-F2G0`), `PercLib.Analysis.HasLogExponent` (branch `work/p-c-F7SW`), `erdosRenyiWindow` and
+  `homogeneousProfile` (branch `work/p-d-4SZ9`).

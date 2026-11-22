@@ -1,34 +1,37 @@
 # Status
 
-Handoff for the coordinator (LEAD role of D-34). Updated 22 November 2026, ~03:15 UTC, end of coordinator round 2 of 22 Nov.
-Older history: [STATUS_LOG.md](STATUS_LOG.md) (do not read by default); round 1 of 22 Nov is in git history at `cbffb2f`.
+Handoff for the coordinator (LEAD role of D-34). Updated 22 November 2026, ~03:40 UTC, end of coordinator round 3 of 22 Nov.
+Older history: [STATUS_LOG.md](STATUS_LOG.md) (do not read by default); round 2 of 22 Nov is in git history at `cf11c55`.
 A coordinator with no memory resumes from this file, [COORDINATOR.md](COORDINATOR.md) and `/home/user/reports/ACTIVE.md`
 (read it instead of RULINGS.md). Round cap: 60 calls.
 
 ## Tip and gate
 
-- Branch `claude/zen-lovelace-rvlcw2` (both repositories). **Last gated commit `4ca13cb`** (pushed). On top: this
+- Branch `claude/zen-lovelace-rvlcw2` (both repositories). **Last gated commit `28c8877`** (pushed). On top: this
   STATUS/FRONTIER/INTERFACE_CHANGES/tasks commit (docs only). **Next batch: `scripts/integrate.sh <tip> <branches>`.**
-- **Batch A** (log `/home/user/reports/integrate-round18.log`, gate log `.lake/integrate/gate-20261122-024615-1.log`):
-  `scripts/integrate.sh cbffb2f` + 2 branches, both merged, "== gate passed on 831957d": `frontier-three-part-multigraph` @
-  `2d86afa` (L3HA; `audit-r17-batch` A APPROVE), `fix-ci-cancelled-push-run-fix` @ `025be61` (= `dfdcdca` + the audit's one
-  exact edit to `.github/workflows/ci.yml`, applied verbatim with `apply_exact_edits.py`; `audit-r17-batch` B APPROVE WITH CHANGES).
-- **Batch B** (log `integrate-round18b.log`, gate log `.lake/integrate/gate-20261122-025046-1.log`): `scripts/integrate.sh 831957d
-  work/yujin-cutoff-moment-prereqs`, "== gate passed on 4ca13cb", gate: "PROOF-ONLY change ... 4 Lean file(s), no compiled
-  interface change". Fork intake (ruling 24): `yujinhkim:work/yujin-cutoff-moment-prereqs` @ `39f24c2` (7 commits, contains
-  `lrp-I41-mt-updated` @ `e6cf6fe`), merged as a merge commit (authorship kept). Files: `Models/LongRange/{CutoffCorner,
-  MassTransportI41,TruncatedMoments}.lean`, `docs/PORTED_FILES.md`. No tags, no definitions, no `sorry`/axiom; pr-5 changes:
-  rebased onto main (1), PORTED_FILES registered (2), description = our PR (3). Listed in `tasks/areas/long-range.md`.
-- **Kernel replay:** started this round on `4ca13cb` in `/home/user/wt/kreplay-4ca13cb` (`nice -n 15 scripts/kernel_replay.sh 2`,
-  log `/home/user/reports/replay-4ca13cb.log`, 486 modules, ~8 done at 03:10). Last passed: `a747905`. Next coordinator: `tail -2`
-  the log; record pass/fail; if it died (OOM), restart it there. Then remove the worktree.
-- **GitHub (03:00):** `main` = `45309ab`. **PR #8** (integration -> main) open, head now `4ca13cb`, not merged (see For Tom).
-  **PR #9** (`yujinhkim:lrp-I41-mt-updated`) and **PR #10** (`yujinhkim:work/yujin-cutoff-moment-prereqs`) opened by us (ruling 24);
-  both are in the integration branch, so they close as merged when PR #8 merges. Open PR #2 (`tomhutchcroft`, lace) unchanged
-  (`630d985`); `work/hierarchical-two-point-paper` `be2b9df` unchanged. **Actions:** CI on `cbffb2f` in progress at 02:47, then
-  superseded by our pushes (cancellation is fine); Automerge on `main` skipped.
-- **Fork tips seen (ruling 24):** `lrp-I41-mt-updated` `e6cf6fe`, `work/yujin-cutoff-moment-prereqs` `39f24c2` (both merged).
-  A new or moved `work/yujin-*` tip is an intake.
+- Five batches this round, all gated with `scripts/integrate.sh` (logs `/home/user/reports/integrate-round19{,b,c,d,e}.log`):
+  - A `cf11c55` -> **`6afaba2`**: `p-a-XMYD-fix` (= `d488be8` + audit-r18-a's 4 exact edits, verbatim, `8435f18`), `p-a-YY9S` @ `58d97b8`,
+    `p-c-ZDVK` @ `32a2c5e` (audit-r18-a).
+  - B -> **`ddb4e1a`**: fork intake `yujinhkim:work/yujin-cutoff-moment-prereqs` moved `39f24c2` -> `7d8ea3c` (1 commit, 1 file
+    `Models/LongRange/TruncatedMoments.lean`, +1077, no tags/defs); gate "PROOF-ONLY ... no compiled interface change". PR #10 head.
+  - C -> **`8fe99e9`**: `p-b-NCWZ` @ `928297e`, `p-b-26TT` @ `8ac714e`, `frontier-ghost-binary-tree` @ `8fa3f80` (audit-r18-b),
+    `p-c-2DZD` @ `3abe41f`, `p-d-NW8B` @ `022fc7a`, `frontier-susceptibility-level` @ `58fc8b0` (audit-r18-c). All APPROVE.
+  - D -> **`99b7770`**: `p-d-B2ZL` @ `9050fa1`, `frontier-window-mass-moments` @ `f1229cf`, `frontier-marked-volume-moments` @ `1722208`
+    (audit-r18-d), `p-a-MDB8` @ `6d8b6da`, `p-b-TAB8` @ `de04c45`, `p-c-TC6Q` @ `146074c` (audit-r19-a). MDB8 change 1 (move the two
+    defs to a Defs file) **waived** by the coordinator as the auditor allowed (precedent); follow-up for a future cleanup.
+    Three branches dropped: the culprit was `p-d-H35T-fix` (the verbatim edit made `Tags/SummableDegree.lean:44` exceed 100 chars);
+    integrate.sh did not parse "Some required targets logged failures: - <module>" and dropped from the end.
+  - E -> **`28c8877`**: `p-d-H35T-fix` @ `38be95b` (= `bf00634` + audit-r19-b's I24D edit `4d1d650` + line wrap), `frontier-root-visit-tails`
+    @ `a7066a4` (audit-r19-b), `wiki-cc-by-licence` @ `afc72f3` (ruling 23; wiki/docs, no new proof: merged on the gate, no agent audit).
+- **Kernel replay:** the run on `4ca13cb` was OOM-killed at 242/486 (manifest extraction + worker builds). Restarted on `28c8877` in
+  `/home/user/wt/kreplay-28c8877` (`nice -n 15 scripts/kernel_replay.sh 2`, log `/home/user/reports/replay-28c8877.log`, 538 modules).
+  Last passed: `a747905`. Next coordinator: `tail -2` the log; record; restart if dead; remove the worktree when passed.
+  Do not run manifest extraction while it runs if a worker build is also running.
+- **GitHub (03:30):** `main` = `45309ab`. PR #8 (integration -> main) open, head now `28c8877`, not merged (waiting for a kernel replay).
+  PR #9, #10 open (in the integration branch; close as merged with #8). PR #2 (`630d985`) and `work/hierarchical-two-point-paper`
+  (`be2b9df`) unchanged. **Actions:** CI on the integration branch superseded by pushes (fine); CI on PR #10 head `7d8ea3c` is
+  `action_required`: our approve call was refused by the permission layer (see For Tom). Automerge on `main` skipped.
+- **Fork tips seen (ruling 24):** `lrp-I41-mt-updated` `e6cf6fe`, `work/yujin-cutoff-moment-prereqs` `7d8ea3c` (both merged).
 
 Commands (`/home/user/perclib`, `export PATH=$HOME/.elan/bin:$PATH`):
 
@@ -46,64 +49,72 @@ rm -f scripts/__pycache__/frontier.*.pyc; python3 scripts/check_tasks.py
 
 ## Progress (D-35 measure)
 
-Manifest at `4ca13cb`: **373 proved, 1 statement-only, 1,029 unformalised, of 1,403** (+1: L3HA; the fork intake is proof-only
-support with no tags). `docs/FRONTIER.md` regenerated at `4ca13cb`. Tasks: `tree-shape-count` (SO5J) moved to `tasks/done/`;
-**17 open (< 20, restock needed, ruling 19)**. Agents started this round by kind (claims seen): audit 1 (`audit-r18-a` claimed);
-prover self-directed: `frontier-root-visit-tails` (in flight); finished since last round: provers `frontier-ghost-binary-tree`,
-`frontier-susceptibility-level`, `frontier-window-mass-moments`, `frontier-marked-volume-moments`, and launcher hand-overs
-`p-a-XMYD`, `p-a-YY9S`, `p-b-26TT`, `p-b-NCWZ`, `p-c-2DZD`, `p-c-ZDVK`, `p-d-NW8B`, `p-d-B2ZL`; audit `audit-r17-batch`.
-Coordinator: 2 batches, 0 gate failures, ~38 tool calls.
+Manifest at `28c8877`: **409 proved, 1 statement-only, 993 unformalised, of 1,403** (+36 this round; 391 at `8fe99e9`).
+Tagged statements audited and merged this round: 36 tags + 10 definitions (audits r18-a/b/c/d, r19-a/b). `docs/FRONTIER.md`
+regenerated at `28c8877`. Tasks: `schur-product-kernels` (TAB8), `separating-pairs-tag` (GA03) moved to `tasks/done/`;
+**15 open** (restock brief claimed). Agents started this round by kind (claims seen): audit 3 (`audit-r19-a`, `-b`, `-c`),
+tooling 1 (`tasks-restock-r3`); provers self-directed (launcher `p-*` and queue 418-420). Coordinator: 5 batches, 1 gate failure
+(culprit repaired, re-merged), ~48 tool calls.
 
-## Finished, not merged (all interface: tagged statements; merge each on its audit's APPROVE)
+## Finished, not merged (interface: merge each on its audit's APPROVE)
 
 | Audit brief | Branch @ sha (base) | Tags / definitions |
 |---|---|---|
-| `042-audit-r18-a` (claimed) | `p-a-XMYD` @ `d488be8` (`e31bc92`); `p-a-YY9S` @ `58d97b8` (`fd30085`); `p-c-ZDVK` @ `32a2c5e` (`e31bc92`) | XMYD, T6SL, JCRB; YY9S; ZDVK |
-| `043-audit-r18-b` | `p-b-NCWZ` @ `928297e` (`fd30085`); `p-b-26TT` @ `8ac714e` (`c26219e`); `frontier-ghost-binary-tree` @ `8fa3f80` (`d5dcd74`) | def `generationSize`, 8TFY, UKY4, BFM4; 26TT, 7LLO; 4QV6 |
-| `044-audit-r18-c` | `p-c-2DZD` @ `3abe41f` (`fd30085`); `p-d-NW8B` @ `022fc7a` (`c639ada`); `frontier-susceptibility-level` @ `58fc8b0` (`28c5f0a`) | 2DZD, def `truncatedChi` (MTJT); NW8B, 96A2, C2YT; 6JZB |
-| `045-audit-r18-d` | `p-d-B2ZL` @ `9050fa1` (`d5dcd74`); `frontier-window-mass-moments` @ `f1229cf` (`1f14e57`); `frontier-marked-volume-moments` @ `1722208` (`cbffb2f`) | defs `pairBoundary`, `SeparatesPairs`, `openDegree`, `incidentCount`; B2ZL, PMHN, H4OA, GA03; YN7V; 6AEH |
+| `047c-audit-r19-c` (claimed) | `p-a-F2G0` @ `eac1ecd` (`4ca13cb`); `p-c-F7SW` @ `b7f1c9f` (`4ca13cb`); `p-d-4SZ9` @ `6522d39` (`6afaba2`) | def `blockCorner`, F2G0; def `HasLogExponent`, F7SW, PHLF; defs `erdosRenyiWindow`, `homogeneousProfile`, 4SZ9, O0TO, A65C, X9N1 |
+| `047d-audit-r19-d` | `frontier-lazy-return-kernel` @ `d3988df` (`8fe99e9`); `frontier-nonbacktracking-recurrence` @ `1a3f0ed` (`8fe99e9`) | KGNK; 0MK8 + a `Finite` instance |
 
-All bases are on the pushed integration branch. New definitions are announced in `docs/INTERFACE_CHANGES.md` (round 2 entry).
-Launcher branches (`p-*`) may move: merge the audited sha (fresh branch name if the tip moved), never a later tip.
+New definitions announced in `docs/INTERFACE_CHANGES.md` (round 3 entry). `frontier-extinction-fixed-point`: done, nothing to
+write (8TFY already merged). Launcher branches (`p-*`) may move: merge the audited sha, never a later tip.
 Superseded, never merge: `work/frontier-maximal-martingale`, `work/p-a-655W`, `work/p-a-GPDF`, `work/p-b-CUE4`, `work/p-a-EKDO`,
 `work/p-a-EKDO-fix`, `work/p-a-EKDO-fix2`, `work/p-b-AFJX`, `work/frontier-ultrametric-sweep`, `work/frontier-joint-cut-witnesses`,
-`work/frontier-trivalent-count`, `work/fix-ci-cancelled-push-run` (use `-fix`, merged), `work/p-b-5PBL` tip.
+`work/frontier-trivalent-count`, `work/fix-ci-cancelled-push-run`, `work/p-b-5PBL` tip, `work/p-a-XMYD` (use `-fix`, merged),
+`work/p-d-H35T` (use `-fix`, merged).
 
-## In flight (claims without done at 03:10)
+## In flight (claims without done at 03:35)
 
-Prover (self-directed): `frontier-root-visit-tails` (416). Lane B: `audit-r18-a`. Outside-launcher `tag-*` dirs: stale.
+Lane B: `audit-r19-c`, `tasks-restock-r3` (the one wiki/tooling slot). Launcher `tag-*` claims: self-directed provers; their
+hand-overs arrive in `/home/user/reports/audit-requests/` (empty now; handled ones in `audit-requests/done/`).
 
 ## Queue (`/home/user/reports/queue/`)
 
-Startable lane B: `043-audit-r18-b`, `044-audit-r18-c`, `045-audit-r18-d`, `046-wiki-cc-by-licence` (the one wiki/tooling slot:
-ruling 23 licence brief, which ruling 23 puts ahead of other wiki work). Prover (drain only, ruling 21): `418`-`423` (6 unclaimed).
-Held: `HOLD-205/210/220/230/371` (ruling 18b). `HOLD-410` moved to `/home/user/reports/briefs/` (obsolete). `audit-requests/` empty.
+Startable: `047d-audit-r19-d` (lane B); prover drain only (ruling 21): `421`-`423` (3 unclaimed). The queue directory also holds
+every consumed brief (claimed; never delete). Held: `HOLD-205/210/220/230/371` (ruling 18b).
 
 ## Held items
 
 - Port packages (ruling 18b) until Tom reports the long-range agreement. `scout-defs-2` interface packages: not briefed.
+- MDB8 follow-up (non-blocking, audit-r19-a A): move `ConvexOrder`/`UnifIntegrableAlong` to a Defs file; bridge to mathlib
+  `UniformIntegrable`; `ConvexOrder.trans`. XMYD follow-up (audit-r18-a): `HierarchicalLayers.pairLevel` via `level`.
 
 ## For ARCHITECT
 
 - `/home/user/reports/hard/`: empty.
-- Tasks board 17 open (< 20, ruling 19): a restock brief should take the wiki/tooling slot after `wiki-cc-by-licence` merges.
-- The ARCHITECT tooling item "integrate.sh trial merges in a separate worktree" is still open (only culprit detection and the
-  transient-base refusal are in). Queue it after the restock, or accept [recommended: accept for now; the refusal catches it].
-- Prover queue drains (6 left, ruling 21 forbids new prover briefs): provers are self-directed under PROVER-CHARTER, so no action.
+- Tooling (next wiki/tooling slot after `tasks-restock-r3`): integrate.sh culprit detection misses lake's "Some required targets
+  logged failures: - <Module>" list (it dropped two innocent branches this round), and trial merges still run on the main
+  checkout. Recommend one tooling brief covering both.
+- Coordinator worktree cleanup removes clean worktrees whose branch is an ancestor of the tip: this also catches a freshly created,
+  still-empty worker worktree. None was in use this round (checked claims), but restrict cleanup to branches with a done marker.
+- Prover queue: 3 unclaimed left; provers are self-directed under PROVER-CHARTER, so no action.
 
 ## For Tom
 
 - **Pull request #8 to `main` (ruling 22.1):** https://github.com/tomhutchcroft/perclib/compare/main...claude/zen-lovelace-rvlcw2 —
-  gate passed on `4ca13cb` (373 proved); last gate + kernel replay: `a747905` (replay on `4ca13cb` running). Not merged this
-  round: we wait for the kernel replay (ruling 10(1)); last round the merge call was refused by the permission layer. Merging it
-  also closes #9 and #10 as merged.
-- **PR #9 and #10** opened on Yujin Kim's behalf from his fork (ruling 24); proof-only, merged into the integration branch on our gate.
-- **Stray branch:** this round pushed `work/fix-ci-cancelled-push-run-fix` (`025be61`, audited CI fix, now merged) to origin by
-  mistake; deleting it was refused by the remote. Harmless; delete it when convenient.
-- Wiki licence (ruling 23) is briefed (`wiki-cc-by-licence`); not yet in the repository.
-- Issue #1 can be closed (fixed on `main`). Older questions: STATUS_LOG.md "For Tom".
+  gate passed on `28c8877` (409 proved, local verification, not CI); last gate + kernel replay: `a747905` (replay on `28c8877`
+  running). Merging it also closes #9 and #10 as merged.
+- **PR #10 CI** (`yujinhkim:work/yujin-cutoff-moment-prereqs` @ `7d8ea3c`, one Lean file, nothing under `.github/`/`scripts/`/pins):
+  first-run approval needed; our API approve call was refused by the permission layer. Click "Approve and run" if you wish.
+- **Wiki licence CC BY 4.0 (ruling 23) is now in the integration branch** (`wiki-cc-by-licence`; the legal-code file was not
+  fetched, linked instead, as the ruling allows).
+- Stray remote branch `work/fix-ci-cancelled-push-run-fix` (merged); delete when convenient. Issue #1 can be closed.
+- Older questions: STATUS_LOG.md "For Tom".
 
 ## Lessons
+
+- An auditor's verbatim exact edit can break the style linter (line > 100): check `awk 'length>100'` on edited lines (character
+  count, not bytes) before integrating a `-fix` branch.
+- When integrate.sh drops several branches with quick gate failures, read the first gate log's "logged failures" module and
+  re-merge the innocent branches in a new batch.
+- Manifest extraction plus worker builds OOM-killed the kernel replay: run extraction while no replay is running, or accept a restart.
 
 - Something detached HEAD of the main checkout after batch B (reflog: "checkout: moving from claude/zen-lovelace-rvlcw2 to
   HEAD" at `4ca13cb`); check `git status -sb` before committing STATUS, and `git ls-remote` after pushing.
