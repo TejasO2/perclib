@@ -9382,3 +9382,224 @@ theorem insert_moment_ne_top_unit (q : Sym2 Unit → unitInterval) (e : Sym2 Uni
   simp
 
 end PercLib.Models.LongRange
+
+/-! ### Conditional binomial differentiation after realization of the flux bound -/
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability
+
+open Classical in
+/-- Finiteness of the actual extended-nonnegative cutoff flux follows from per-pair inserted
+moments, a uniform pivotal-flux bound, and a nonzero cutoff rate. -/
+theorem lintegral_radial_pivotal_ne_top_of_insert_moments {d : ℕ}
+    {N : Seminorm ℝ (Fin d → ℝ)} {K K' : ℝ → ℝ} (p : ℕ) (β : ℝ≥0) (r : ℝ) (o : Fin d → ℤ)
+    (cw : Sym2 (Fin d → ℤ) → ℝ) (Kd : ℝ)
+    (hcw : ∀ e, cw e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ))))
+    (hp : 1 ≤ p)
+    (hins : ∀ e, (∫⁻ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p
+      ∂(law (intensityProfile (cutoffKernel N K r) β))) ≠ ⊤)
+    (hKd : ∀ S : Finset (Sym2 (Fin d → ℤ)), ∑ e ∈ S, |cw e| *
+      |∫ ω, ((((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+        (((cluster (ω \ {e}) o).encard : ℝ≥0∞).toReal) ^ p)
+        ∂(law (intensityProfile (cutoffKernel N K r) β))| ≤ Kd)
+    (hrate : (β : ℝ) * -K' r ≠ 0) :
+    (∫⁻ ω, (∑' e : Sym2 (Fin d → ℤ),
+        ((radialKernel N (fun s => if s < r then 1 else 0) e : ℝ≥0) : ℝ≥0∞) *
+          (if e ∈ ω then (0 : ℝ≥0∞) else
+            ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+              ((cluster ω o).encard : ℝ≥0∞) ^ p))
+        ∂(law (intensityProfile (cutoffKernel N K r) β))) ≠ ⊤ := by
+  let μ : Measure (Config (Fin d → ℤ)) := law (intensityProfile (cutoffKernel N K r) β)
+  let rk : Sym2 (Fin d → ℤ) → ℝ := fun e =>
+    (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ)
+  let Q : Sym2 (Fin d → ℤ) → ℝ≥0∞ := fun e => ∫⁻ ω,
+    (if e ∈ ω then (0 : ℝ≥0∞) else
+      (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster ω o).encard : ℝ≥0∞) ^ p)) ∂μ
+  have hfin : ∀ e, ∀ᵐ ω ∂μ, ((cluster (insert e ω) o).encard : ℝ≥0∞) ≠ ⊤ := by
+    intro e
+    exact ae_ne_top_of_lintegral_pow_ne_top (measurable_encard_cluster_insert_coe e o)
+      p hp (hins e)
+  have hQfin : ∀ e, Q e ≠ ⊤ := by
+    intro e
+    refine ne_top_of_le_ne_top
+      (lintegral_pivotal_increment_ne_top_of_lintegral_insert_pow_ne_top e o p (hins e)) ?_
+    exact lintegral_mono fun ω => by
+      by_cases he : e ∈ ω
+      · simp [he]
+      · rw [ite_eq_right he, Set.sdiff_singleton_eq_self he]
+  have hQreal : ∀ e, (Q e).toReal = ∫ ω, (if e ∈ ω then (0 : ℝ) else
+      (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+        (((cluster ω o).encard : ℝ≥0∞).toReal) ^ p) ∂μ := by
+    intro e
+    have hm : AEMeasurable _ μ :=
+      (measurable_closed_pivotal_integrand o p e).aemeasurable
+    have hne : ∀ᵐ ω ∂μ, ((if e ∈ ω then (0 : ℝ≥0∞) else
+        (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+          ((cluster ω o).encard : ℝ≥0∞) ^ p)) : ℝ≥0∞) ≠ ⊤ := by
+      filter_upwards [hfin e] with ω hω
+      by_cases he : e ∈ ω
+      · simp [he]
+      · rw [ite_eq_right he]
+        exact ne_top_of_le_ne_top (ENNReal.pow_ne_top hω) tsub_le_self
+    rw [show (Q e).toReal =
+        (∫⁻ ω, (if e ∈ ω then (0 : ℝ≥0∞) else
+          (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+            ((cluster ω o).encard : ℝ≥0∞) ^ p)) ∂μ).toReal from rfl]
+    rw [← integral_toReal_eq_toReal_lintegral hm hne]
+    apply integral_congr_ae
+    filter_upwards [hfin e] with ω hω
+    by_cases he : e ∈ ω
+    · rw [ite_eq_left he, ite_eq_left he]
+      simp
+    · rw [ite_eq_right he, ite_eq_right he]
+      have hs : ω \ {e} = ω := Set.sdiff_singleton_eq_self he
+      have hle : ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ≤
+          ((cluster (insert e ω) o).encard : ℝ≥0∞) :=
+        encard_cluster_sdiff_le_insert_coe ω e o
+      rw [hs] at hle
+      exact toReal_pow_sub_pow hle hω p
+  have hsumm := summable_closed_flux_cutoff_of_insert_moments p β r o cw Kd hcw hp hins hKd hrate
+  have hsummAbs : Summable (fun e => |rk e * ∫ ω, (if e ∈ ω then (0 : ℝ) else
+      (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+        (((cluster ω o).encard : ℝ≥0∞).toReal) ^ p) ∂μ|) := hsumm.1.abs
+  have hrk : ∀ e, 0 ≤ rk e := fun e => by positivity
+  have hbound : ∀ S : Finset (Sym2 (Fin d → ℤ)),
+      ∑ e ∈ S, |rk e| * |(Q e).toReal| ≤ |((β : ℝ) * -K' r)⁻¹| * Kd := by
+    intro S
+    calc ∑ e ∈ S, |rk e| * |(Q e).toReal| =
+        ∑ e ∈ S, |rk e * ∫ ω, (if e ∈ ω then (0 : ℝ) else
+          (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+            (((cluster ω o).encard : ℝ≥0∞).toReal) ^ p) ∂μ| := by
+          apply Finset.sum_congr rfl
+          intro e _
+          rw [hQreal, abs_mul, abs_of_nonneg (hrk e)]
+      _ ≤ ∑' e, |rk e * ∫ ω, (if e ∈ ω then (0 : ℝ) else
+          (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p -
+            (((cluster ω o).encard : ℝ≥0∞).toReal) ^ p) ∂μ| :=
+        hsummAbs.sum_le_tsum S (fun e _ => abs_nonneg _)
+      _ ≤ |((β : ℝ) * -K' r)⁻¹| * Kd := hsumm.2
+  have hout : (∑' e, ENNReal.ofReal (rk e) * Q e) ≠ ⊤ :=
+    tsum_ofReal_mul_ne_top_of_real_bound rk hrk Q hQfin
+      (|((β : ℝ) * -K' r)⁻¹| * Kd) hbound
+  rw [tsum_lintegral_closed_pivotal μ p o (fun e => ENNReal.ofReal (rk e))] at hout
+  simpa only [Q, rk, ENNReal.ofReal_coe_nnreal] using hout
+
+
+end PercLib.Models.LongRange
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability
+
+open Classical in
+/-- The cutoff cluster moment has the paper's binomial derivative at the origin, conditional
+on the remaining geometric, moment, measurability and continuity inputs. The per-pair moment
+hypothesis is retained explicitly: this is not a proof of sharpness. -/
+theorem hasDerivAt_integral_cutoff_pow_binomial_of_insert_moments {d : ℕ}
+    {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p) {R : ℝ}
+    (hχ : chi (intensityProfile (cutoffKernel (d := d) N K R) β) 0 ≠ ⊤)
+    (cw : ℝ → Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ r e, cw r e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K r e : ℝ))))
+    {u v r₀ : ℝ} (hu : 0 < u) (hur : u < r₀) (hrv : r₀ < v) (hvR : v ≤ R)
+    (hcorner : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Ioo u v)
+    (hins : ∀ r ∈ Ioo u v, ∀ e, (∫⁻ ω, ((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≠ ⊤)
+    (Kd : ℝ → ℝ) (hKdint : ∀ a ∈ Ioo u v, ∀ b ∈ Ioo u v, IntervalIntegrable Kd volume a b)
+    (hKd : ∀ r ∈ Ioo u v, ∀ S : Finset (Sym2 (Fin d → ℤ)), ∑ e ∈ S, |cw r e| *
+      |∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))| ≤ Kd r)
+    (hmeas : ∀ n : ℕ, AEStronglyMeasurable (fun r => ∑' e, cw r e *
+      (∫⁻ ω, (min (n : ℝ≥0∞) (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p) -
+        min (n : ℝ≥0∞) (((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p))
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))).toReal)
+      (volume.restrict (Ioo u v)))
+    (hcont : ContinuousOn (fun r => ∑' e, cw r e *
+      ∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) (Ioo u v))
+    (hrate : (β : ℝ) * -K' r₀ ≠ 0) :
+    HasDerivAt (fun r => ∫ ω, (((cluster ω 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β)))
+      ((β : ℝ) * -K' r₀ * ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ) *
+        ∫ ω, (((cluster ω 0).encard : ℝ≥0∞).toReal) ^ (ℓ + 1) *
+          (∑' y, (if N (Int.cast ∘ y) ≤ r₀ then 1 else 0) *
+            (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ)) ω *
+            (((cluster ω y).encard : ℝ≥0∞).toReal) ^ (p - ℓ))
+          ∂(law (intensityProfile (cutoffKernel (d := d) N K r₀) β))) r₀ := by
+  let μ : Measure (Config (Fin d → ℤ)) := law (intensityProfile (cutoffKernel (d := d) N K r₀) β)
+  have hr₀ : r₀ ∈ Ioo u v := ⟨hur, hrv⟩
+  have hfin : ∀ e, ∀ᵐ ω ∂μ, ((cluster (insert e ω) 0).encard : ℝ≥0∞) ≠ ⊤ := by
+    intro e
+    exact ae_ne_top_of_lintegral_pow_ne_top (measurable_encard_cluster_insert_coe e 0)
+      p hp (hins r₀ hr₀ e)
+  have hint : ∀ e, Integrable
+      (fun ω => (((cluster (insert e ω) 0).encard : ℝ≥0∞).toReal) ^ p) μ := by
+    intro e
+    exact integrable_toReal_pow_encard_cluster_insert e 0 p (hins r₀ hr₀ e)
+  have hKdReal : ∀ S : Finset (Sym2 (Fin d → ℤ)), ∑ e ∈ S, |cw r₀ e| *
+      |∫ ω, ((((cluster (insert e ω) 0).encard : ℝ≥0∞).toReal) ^ p -
+        (((cluster (ω \ {e}) 0).encard : ℝ≥0∞).toReal) ^ p) ∂μ| ≤ Kd r₀ := by
+    intro S
+    refine le_trans ?_ (hKd r₀ hr₀ S)
+    refine Finset.sum_le_sum fun e _ => ?_
+    rw [integral_pivotal_pow_eq_real_sub μ e 0 p (hfin e)]
+  have hd := hasDerivAt_integral_cutoff_pow_of_insert_moments hKa hK' hK'c β p hp 0 hχ cw hcw
+    hu hur hrv hvR hcorner hins Kd hKdint hKd hmeas hcont
+  have hd' := hasDerivAt_cutoff_closed_of_pivotal (K := K) (K' := K') p β r₀ 0
+    (cw r₀) (Kd r₀) hd (hcw r₀) hrate hfin hint hKdReal
+  have hmom : (∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ p ∂μ) ≠ ⊤ :=
+    lintegral_pow_encard_ne_top_of_insert (s(0, 0)) 0 p (hins r₀ hr₀ (s(0, 0)))
+  have hrootfin : μ {ω : Config (Fin d → ℤ) | ((cluster ω 0).encard : ℝ≥0∞) = ⊤} = 0 := by
+    rw [measure_eq_zero_iff_ae_notMem]
+    exact ae_ne_top_of_lintegral_pow_ne_top (measurable_encard_cluster_coe 0) p hp hmom
+  have hflux : (∫⁻ ω, (∑' e : Sym2 (Fin d → ℤ),
+        ((radialKernel N (fun s => if s < r₀ then 1 else 0) e : ℝ≥0) : ℝ≥0∞) *
+          (if e ∈ ω then (0 : ℝ≥0∞) else
+            ((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+              ((cluster ω 0).encard : ℝ≥0∞) ^ p)) ∂μ) ≠ ⊤ :=
+    lintegral_radial_pivotal_ne_top_of_insert_moments p β r₀ 0 (cw r₀) (Kd r₀)
+      (hcw r₀) hp (hins r₀ hr₀) hKdReal hrate
+  refine hd'.congr_deriv ?_
+  have hbin : ∫ ω, (∑' e : Sym2 (Fin d → ℤ),
+        ((radialKernel N (fun s => if s < r₀ then 1 else 0) e : ℝ≥0) : ℝ≥0∞) *
+          (if e ∈ ω then (0 : ℝ≥0∞) else
+            ((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+              ((cluster ω 0).encard : ℝ≥0∞) ^ p)).toReal ∂μ =
+      ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ) *
+        ∫ ω, (((cluster ω 0).encard : ℝ≥0∞).toReal) ^ (ℓ + 1) *
+          (∑' y, (if N (Int.cast ∘ y) ≤ r₀ then 1 else 0) *
+            (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ)) ω *
+            (((cluster ω y).encard : ℝ≥0∞).toReal) ^ (p - ℓ)) ∂μ :=
+    i41_real_of_root_finite μ (law_cutoffKernel_map_translate K r₀ β) hrootfin hcorner hr₀ hp hflux
+  calc
+    (β : ℝ) * -K' r₀ * ∫ ω, (∑' e : Sym2 (Fin d → ℤ),
+        (radialKernel N (fun s => if s < r₀ then 1 else 0) e : ℝ) *
+          (if e ∈ ω then (0 : ℝ) else
+            (((cluster (insert e ω) 0).encard : ℝ≥0∞).toReal) ^ p -
+              (((cluster ω 0).encard : ℝ≥0∞).toReal) ^ p)) ∂μ =
+      (β : ℝ) * -K' r₀ * ∫ ω, (∑' e : Sym2 (Fin d → ℤ),
+        ((radialKernel N (fun s => if s < r₀ then 1 else 0) e : ℝ≥0) : ℝ≥0∞) *
+          (if e ∈ ω then (0 : ℝ≥0∞) else
+            ((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+              ((cluster ω 0).encard : ℝ≥0∞) ^ p)).toReal ∂μ := by
+        congr 1
+        exact integral_congr_ae
+          ((ae_toReal_tsum_radialKernel_closed_eq_tsum_real (N := N.toSeminorm) (r := r₀)
+            μ p hfin).mono
+            (fun _ h => h.symm))
+    _ = (β : ℝ) * -K' r₀ * ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ) *
+        ∫ ω, (((cluster ω 0).encard : ℝ≥0∞).toReal) ^ (ℓ + 1) *
+          (∑' y, (if N (Int.cast ∘ y) ≤ r₀ then 1 else 0) *
+            (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ)) ω *
+            (((cluster ω y).encard : ℝ≥0∞).toReal) ^ (p - ℓ)) ∂μ := by
+        rw [hbin]
+
+
+end PercLib.Models.LongRange
