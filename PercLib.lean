@@ -265,6 +265,8 @@ public import PercLib.Percolation.Bond.Multipoint.Sweep
 public import PercLib.Percolation.Bond.Multipoint.Tags.Dilation
 public import PercLib.Percolation.Bond.Multipoint.Tags.JointCutWitness
 public import PercLib.Percolation.Bond.Multipoint.Tags.SmallSets
+public import PercLib.Percolation.Bond.Multipoint.Tags.TrivalentCount
+public import PercLib.Percolation.Bond.Multipoint.TrivalentCount
 public import PercLib.Percolation.Bond.Multipoint.Ultrametric
 public import PercLib.Percolation.Bond.OptimizedClusterTail
 public import PercLib.Percolation.Bond.PathComparison
