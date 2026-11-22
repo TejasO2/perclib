@@ -12,6 +12,7 @@ long-range percolation on the hierarchical lattice*, arXiv:2103.17013v1, Section
 module
 
 public import PercLib.Models.HierarchicalGeometry
+public import PercLib.Models.HierarchicalBlockLayers.Defs
 public import Mathlib.Algebra.DirectSum.Finsupp
 
 /-!
@@ -141,6 +142,11 @@ theorem mem_ball {x z : HierarchicalLattice d L} {n : ℕ} : z ∈ ball x n ↔ 
 
 theorem center_mem_ball (x : HierarchicalLattice d L) (n : ℕ) : x ∈ ball x n := by simp
 
+/-- The ball of radius `L ^ n` about `x` is the level-`n` block of `x`. -/
+theorem ball_eq_block (x : HierarchicalLattice d L) (n : ℕ) :
+    ball x n = HierarchicalLayers.block n x :=
+  rfl
+
 theorem ball_eq_setOf_hierDist_le (hL : 2 ≤ L) (x : HierarchicalLattice d L) (n : ℕ) :
     ball x n = {z | hierDist z x ≤ L ^ n} := by
   ext z
@@ -151,6 +157,12 @@ theorem card_ball [NeZero L] (x : HierarchicalLattice d L) (n : ℕ) :
     Nat.card (ball x n) = L ^ (d * n) := by
   rw [pow_mul, ← _root_.PercLib.Models.card_ball (d := d) (L := L) n]
   exact Nat.card_congr (Equiv.subtypeEquiv (Equiv.subRight x) fun _ => Iff.rfl)
+
+/-- For `L ≥ 2`, the vertices within distance `L ^ n` of `x` number `L ^ (d n)`. -/
+theorem card_setOf_hierDist_le (hL : 2 ≤ L) (x : HierarchicalLattice d L) (n : ℕ) :
+    Nat.card {z : HierarchicalLattice d L | hierDist z x ≤ L ^ n} = L ^ (d * n) := by
+  have : NeZero L := ⟨by omega⟩
+  rw [← ball_eq_setOf_hierDist_le hL, card_ball]
 
 /-- The smallest hierarchical ball `Λ(x, y)` containing `x` and `y`. -/
 def commonBall (x y : HierarchicalLattice d L) : Set (HierarchicalLattice d L) :=

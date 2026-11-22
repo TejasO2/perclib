@@ -60,9 +60,8 @@ theorem hierDist_spec_and_card_ball (hL : 2 ≤ L) :
         ∃ i, x i ≠ y i ∧ (∀ j, x j ≠ y j → j ≤ i) ∧ hierDist x y = L ^ (i + 1)) ∧
       ∀ (x : HierarchicalLattice d L) (n : ℕ),
         Nat.card {z : HierarchicalLattice d L | hierDist z x ≤ L ^ n} = L ^ (d * n) := by
-  have : NeZero L := ⟨by omega⟩
-  refine ⟨hierDist_self, fun x y h => exists_hierDist_eq_pow_of_ne h, fun x n => ?_⟩
-  rw [← ball_eq_setOf_hierDist_le hL, card_ball]
+  exact ⟨hierDist_self, fun x y h => exists_hierDist_eq_pow_of_ne h,
+    card_setOf_hierDist_le hL⟩
 
 /-- **Smallest common hierarchical ball and regularized distance.** Let `L ≥ 2`. For vertices
 `x, y`, `Λ(x, y) = commonBall x y` is the hierarchical ball about `x` of radius
