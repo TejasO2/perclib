@@ -351,6 +351,7 @@ public import PercLib.Probability.RussoIntegral
 public import PercLib.Probability.SizeBias
 public import PercLib.Probability.SizeBiasLimits
 public import PercLib.Probability.SplitCoordinate
+public import PercLib.Probability.SquareRootTrick
 public import PercLib.Probability.Superposition
 public import PercLib.Probability.Tags.Correlation
 public import PercLib.Probability.Tags.CouplingRatio
