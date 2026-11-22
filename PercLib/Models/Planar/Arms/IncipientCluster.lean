@@ -1908,4 +1908,86 @@ theorem exists_chain_of_cuts :
     refine Finset.sum_congr rfl fun x _ => ?_
     rw [ENNReal.toReal_mul, ENNReal.toReal_mul]
 
+/-- **All cuts are linked, up to a small error** (Basu–Sapozhnikov (2.4), summed over the cuts).
+There is `c₀ > 0` such that for every profile at least `1/2` on the edges, every measurable
+increasing event `E`, cuts with radii `1 ≤ a k < c k < b k`, `4^K a k ≤ c k`, `4^K c k ≤ b k`, and
+`n > b k` for `k ≤ S`, `P(E, z ↔ ∂B_n)` is at most `P(E, z ↔ ∂B_n, cuts 0, …, S linked)` plus
+`(S + 1) · 2 (1 - c₀)^K · P(E, z ↔ ∂B_n)`. -/
+theorem exists_law_inter_armEvent_le_add_of_cuts :
+    ∃ c₀ : ℝ≥0∞, 0 < c₀ ∧ ∀ q : Sym2 (LatticeSite 2) → unitInterval,
+      (∀ e ∈ (zdGraph 2).edgeSet, (1 / 2 : ℝ) ≤ q e) →
+      ∀ E : Set (Config (LatticeSite 2)), IsUpperSet E → MeasurableSet E →
+      ∀ (z : LatticeSite 2) (a c b : ℕ → ℕ) (S K n : ℕ), (∀ k, 1 ≤ a k) → (∀ k, a k < c k) →
+      (∀ k, c k < b k) → (∀ k, 4 ^ K * a k ≤ c k) → (∀ k, 4 ^ K * c k ≤ b k) →
+      (∀ k ≤ S, b k < n) →
+        law q (E ∩ armEvent z n) ≤ law q (E ∩ armEvent z n ∩ {ω | ∀ k ≤ S,
+            ∀ x ∈ boxBoundary (z - (a k : LatticeSite 2)) (z + a k),
+              ∀ m ∈ boxBoundary (z - (c k : LatticeSite 2)) (z + c k),
+              ∀ m' ∈ boxBoundary (z - (c k : LatticeSite 2)) (z + c k),
+              ∀ y ∈ boxBoundary (z - (b k : LatticeSite 2)) (z + b k),
+                ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (c k : LatticeSite 2)) (z + c k) \
+                  Icc (z - (a k : LatticeSite 2) + 1) (z + a k - 1)) x m →
+                ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (b k : LatticeSite 2)) (z + b k) \
+                  Icc (z - (c k : LatticeSite 2) + 1) (z + c k - 1)) m' y →
+                ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (b k : LatticeSite 2)) (z + b k) \
+                  Icc (z - (a k : LatticeSite 2) + 1) (z + a k - 1)) x y}) +
+          ((S + 1 : ℕ) : ℝ≥0∞) * (2 * (1 - c₀) ^ K) * law q (E ∩ armEvent z n) := by
+  obtain ⟨c₀, hc₀, herr⟩ := exists_law_inter_armEvent_inter_not_link_le
+  refine ⟨c₀, hc₀, fun q hq E hEu hEm z a c b S K n ha hac hcb hK₁ hK₂ hbn => ?_⟩
+  refine (measure_le_inter_add_sdiff (law q) _ _).trans (add_le_add_right ?_ _)
+  calc law q ((E ∩ armEvent z n) \ {ω | ∀ k ≤ S,
+          ∀ x ∈ boxBoundary (z - (a k : LatticeSite 2)) (z + a k),
+              ∀ m ∈ boxBoundary (z - (c k : LatticeSite 2)) (z + c k),
+              ∀ m' ∈ boxBoundary (z - (c k : LatticeSite 2)) (z + c k),
+              ∀ y ∈ boxBoundary (z - (b k : LatticeSite 2)) (z + b k),
+                ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (c k : LatticeSite 2)) (z + c k) \
+                  Icc (z - (a k : LatticeSite 2) + 1) (z + a k - 1)) x m →
+                ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (b k : LatticeSite 2)) (z + b k) \
+                  Icc (z - (c k : LatticeSite 2) + 1) (z + c k - 1)) m' y →
+                ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (b k : LatticeSite 2)) (z + b k) \
+                  Icc (z - (a k : LatticeSite 2) + 1) (z + a k - 1)) x y}) ≤
+        ∑ k ∈ Finset.range (S + 1), law q (E ∩ armEvent z n ∩ {ω |
+          ¬ ∀ x ∈ boxBoundary (z - (a k : LatticeSite 2)) (z + a k),
+            ∀ m ∈ boxBoundary (z - (c k : LatticeSite 2)) (z + c k),
+            ∀ m' ∈ boxBoundary (z - (c k : LatticeSite 2)) (z + c k),
+            ∀ y ∈ boxBoundary (z - (b k : LatticeSite 2)) (z + b k),
+              ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (c k : LatticeSite 2)) (z + c k) \
+                Icc (z - (a k : LatticeSite 2) + 1) (z + a k - 1)) x m →
+              ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (b k : LatticeSite 2)) (z + b k) \
+                Icc (z - (c k : LatticeSite 2) + 1) (z + c k - 1)) m' y →
+              ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (b k : LatticeSite 2)) (z + b k) \
+                Icc (z - (a k : LatticeSite 2) + 1) (z + a k - 1)) x y}) := by
+        refine (measure_mono ?_).trans (measure_biUnion_finset_le _ _)
+        rintro ω ⟨hω, hG⟩
+        simp only [mem_ofPred_eq] at hG
+        obtain ⟨k, hk'⟩ := Classical.not_forall.1 hG
+        obtain ⟨hk, hl⟩ := Classical.not_imp.1 hk'
+        simp only [mem_iUnion]
+        exact ⟨k, Finset.mem_range.2 (Nat.lt_succ_of_le hk), hω, hl⟩
+    _ ≤ ∑ k ∈ Finset.range (S + 1), 2 * (1 - c₀) ^ K * law q (E ∩ armEvent z n) := by
+        refine Finset.sum_le_sum fun k hk => ?_
+        exact herr q hq E hEu hEm z (a k) (c k) (b k) n K (ha k) (hac k) (hcb k)
+          (hbn k (Nat.lt_succ_iff.1 (Finset.mem_range.1 hk))) (hK₁ k) (hK₂ k)
+    _ = ((S + 1 : ℕ) : ℝ≥0∞) * (2 * (1 - c₀) ^ K) * law q (E ∩ armEvent z n) := by
+        rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+        ring
+
+/-- For a profile at least `1/2` on the edges, `z ↔ ∂B_n(z)` has positive probability. -/
+theorem law_armEvent_pos {q : Sym2 (LatticeSite 2) → unitInterval}
+    (hq : ∀ e ∈ (zdGraph 2).edgeSet, (1 / 2 : ℝ) ≤ q e) (z : LatticeSite 2) (n : ℕ) :
+    0 < law q (armEvent z n) := by
+  obtain ⟨q₀, hq₀, hle⟩ := exists_law_le_of_half_le hq
+  have h₁ := inv_two_pow_le_law_armEvent hq₀ n
+  rw [← law_armEvent_eq_law_armEvent_zero hq₀ z n] at h₁
+  exact lt_of_lt_of_le (ENNReal.pow_pos (ENNReal.inv_pos.2 ENNReal.ofNat_ne_top) n)
+    (h₁.trans (hle _ (measurableSet_armEvent z n) (isUpperSet_armEvent z n)))
+
+/-- The conditional probability given `z ↔ ∂B_n(z)`, as a ratio of real numbers. -/
+theorem toReal_cond_armEvent (q : Sym2 (LatticeSite 2) → unitInterval) (z : LatticeSite 2)
+    (n : ℕ) (A : Set (Config (LatticeSite 2))) :
+    (ProbabilityTheory.cond (law q) (armEvent z n) A).toReal =
+      (law q (A ∩ armEvent z n)).toReal / (law q (armEvent z n)).toReal := by
+  rw [ProbabilityTheory.cond_apply (measurableSet_armEvent z n), ENNReal.toReal_mul,
+    ENNReal.toReal_inv, inter_comm, div_eq_inv_mul]
+
 end PercLib.Models.Planar
