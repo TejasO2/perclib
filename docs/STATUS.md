@@ -105,6 +105,8 @@ Held: `HOLD-205/210/220/230/371` (ruling 18b). `HOLD-410` moved to `/home/user/r
 
 ## Lessons
 
+- Something detached HEAD of the main checkout after batch B (reflog: "checkout: moving from claude/zen-lovelace-rvlcw2 to
+  HEAD" at `4ca13cb`); check `git status -sb` before committing STATUS, and `git ls-remote` after pushing.
 - Push only the integration branch: never `git push origin work/*` (a remote branch delete is then refused).
 - A predecessor may merge and push without writing STATUS: compare `git log` against STATUS before trusting "Finished, not merged".
 - Re-list `done/` after each batch: four branches finished during this round; batches take 4-8 minutes.
