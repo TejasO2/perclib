@@ -2493,4 +2493,130 @@ theorem continuousOn_toReal_cond_armEvent {X : Type*} [TopologicalSpace X]
   exact hnum.continuousOn.div hden.continuousOn fun x hx =>
     (ENNReal.toReal_pos (law_armEvent_pos (hq x hx) z n).ne' (measure_ne_top _ _)).ne'
 
+/-! ### The first limit -/
+
+/-- **The first limit** (Kesten; Basu–Sapozhnikov (2.1) on `ℤ²`). For every profile at least
+`1/2` on the edges, every centre `z` and every cylinder event `A`, `P(A | z ↔ ∂B_n(z))` converges
+as `n → ∞`. -/
+theorem exists_tendsto_cond_armEvent {q : Sym2 (LatticeSite 2) → unitInterval}
+    (hq : ∀ e ∈ (zdGraph 2).edgeSet, (1 / 2 : ℝ) ≤ q e) (z : LatticeSite 2)
+    {F : Finset (Sym2 (LatticeSite 2))} {A : Set (Config (LatticeSite 2))}
+    (hA : ∀ ω, ω ∈ A ↔ ω ∩ ↑F ∈ A) :
+    ∃ l, Tendsto (fun n => (law q)[A | armEvent z n]) atTop (𝓝 l) := by
+  have hc : CauchySeq fun n => ((law q)[A | armEvent z n]).toReal := by
+    refine Metric.cauchySeq_iff'.2 fun ε hε => ?_
+    obtain ⟨n₀, hn₀⟩ := exists_abs_toReal_cond_armEvent_sub_le z F (half_pos hε)
+    refine ⟨n₀, fun n hn => ?_⟩
+    rw [Real.dist_eq]
+    exact (hn₀ q hq A hA n n₀ hn le_rfl).trans_lt (half_lt_self hε)
+  obtain ⟨l, hl⟩ := cauchySeq_tendsto_of_complete hc
+  exact ⟨ENNReal.ofReal l, (ENNReal.tendsto_ofReal hl).congr fun n =>
+    ENNReal.ofReal_toReal (measure_ne_top _ _)⟩
+
+/-- **The first limit is uniform in the profile.** For every centre `z`, every finite set `F` of
+pairs and every `ε > 0` there is `n₀` such that for every profile at least `1/2` on the edges
+(in particular `p = 1 - e^{-β}` on the edges, `β ≥ log 2`) and every event `A` determined by `F`,
+`P(A | z ↔ ∂B_n(z))` lies within `ε` of its limit for all `n ≥ n₀`. -/
+theorem exists_abs_toReal_cond_armEvent_sub_toReal_le (z : LatticeSite 2)
+    (F : Finset (Sym2 (LatticeSite 2))) {ε : ℝ} (hε : 0 < ε) :
+    ∃ n₀ : ℕ, ∀ q : Sym2 (LatticeSite 2) → unitInterval,
+      (∀ e ∈ (zdGraph 2).edgeSet, (1 / 2 : ℝ) ≤ q e) →
+      ∀ A : Set (Config (LatticeSite 2)), (∀ ω, ω ∈ A ↔ ω ∩ ↑F ∈ A) →
+      ∀ l : ℝ≥0∞, Tendsto (fun n => (law q)[A | armEvent z n]) atTop (𝓝 l) →
+      ∀ n, n₀ ≤ n → |((law q)[A | armEvent z n]).toReal - l.toReal| ≤ ε := by
+  obtain ⟨n₀, hn₀⟩ := exists_abs_toReal_cond_armEvent_sub_le z F hε
+  refine ⟨n₀, fun q hq A hA l hl n hn => ?_⟩
+  have hlt : l ≠ ∞ :=
+    ne_top_of_le_ne_top ENNReal.one_ne_top (le_of_tendsto' hl fun m => prob_le_one)
+  have hl' : Tendsto (fun m => ((law q)[A | armEvent z m]).toReal) atTop (𝓝 l.toReal) :=
+    (ENNReal.tendsto_toReal hlt).comp hl
+  refine le_of_tendsto ((tendsto_const_nhds.sub hl').abs) ?_
+  filter_upwards [eventually_ge_atTop n₀] with m hm
+  exact hn₀ q hq A hA n m hn hm
+
+/-! ### The law `ν` -/
+
+/-- **The limit law** (Kesten). For every profile at least `1/2` on the edges and every centre `z`,
+the conditional laws given `z ↔ ∂B_n(z)` converge on every cylinder event to a probability law
+`ν`. -/
+theorem exists_measure_tendsto_cond_armEvent {q : Sym2 (LatticeSite 2) → unitInterval}
+    (hq : ∀ e ∈ (zdGraph 2).edgeSet, (1 / 2 : ℝ) ≤ q e) (z : LatticeSite 2) :
+    ∃ ν : Measure (Config (LatticeSite 2)), IsProbabilityMeasure ν ∧
+      ∀ (F : Finset (Sym2 (LatticeSite 2))) (A : Set (Config (LatticeSite 2))),
+        (∀ ω, ω ∈ A ↔ ω ∩ ↑F ∈ A) →
+        Tendsto (fun n => (law q)[A | armEvent z n]) atTop (𝓝 (ν A)) := by
+  have hP : ∀ n, IsProbabilityMeasure ((law q)[|armEvent z n]) :=
+    fun n => ProbabilityTheory.cond_isProbabilityMeasure (law_armEvent_pos hq z n).ne'
+  exact exists_measure_of_tendsto_cylinder (fun n => (law q)[|armEvent z n])
+    fun F A hA => exists_tendsto_cond_armEvent hq z hA
+
+/-! ### Continuity in the intensity and the second limit -/
+
+/-- **The limit is continuous in the profile.** For a continuous family of profiles that are at
+least `1/2` on the edges on a set `s` and every cylinder event `A`, the limit of
+`P(A | z ↔ ∂B_n(z))` as `n → ∞` is continuous on `s`: by the uniform first limit it is a uniform
+limit of continuous functions. In particular `β ↦ lim_n P_β(A | z ↔ ∂B_n(z))` is continuous on
+`β ≥ log 2` (`continuous_intensityProfile_pi`). -/
+theorem continuousOn_toReal_of_tendsto_cond_armEvent {X : Type*} [TopologicalSpace X]
+    {q : X → Sym2 (LatticeSite 2) → unitInterval} (hqc : Continuous q) {s : Set X}
+    (hq : ∀ x ∈ s, ∀ e ∈ (zdGraph 2).edgeSet, (1 / 2 : ℝ) ≤ q x e) (z : LatticeSite 2)
+    {F : Finset (Sym2 (LatticeSite 2))} {A : Set (Config (LatticeSite 2))}
+    (hA : ∀ ω, ω ∈ A ↔ ω ∩ ↑F ∈ A) {l : X → ℝ≥0∞}
+    (hl : ∀ x ∈ s, Tendsto (fun n => (law (q x))[A | armEvent z n]) atTop (𝓝 (l x))) :
+    ContinuousOn (fun x => (l x).toReal) s := by
+  refine TendstoUniformlyOn.continuousOn
+    (F := fun n x => ((law (q x))[A | armEvent z n]).toReal) ?_
+    (Eventually.of_forall (f := (atTop : Filter ℕ)) fun n =>
+      continuousOn_toReal_cond_armEvent hqc hq z n hA).frequently
+  refine Metric.tendstoUniformlyOn_iff.2 fun ε hε => ?_
+  obtain ⟨n₀, hn₀⟩ := exists_abs_toReal_cond_armEvent_sub_toReal_le z F (half_pos hε)
+  filter_upwards [eventually_ge_atTop n₀] with n hn x hx
+  rw [Real.dist_eq, abs_sub_comm]
+  exact (hn₀ _ (hq x hx) A hA _ (hl x hx) n hn).trans_lt (half_lt_self hε)
+
+/-- **The second limit** (Kesten). For every centre `z` and every cylinder event `A`, if
+`P_{log 2}(A | z ↔ ∂B_n(z)) → l`, then `P_β(A | |K_z| = ∞) → l` as `β ↓ log 2`; here `P_β` is
+nearest-neighbour bond percolation on `ℤ²` at intensity `β` (`p = 1 - e^{-β}` on the edges, `0`
+off them). For `β > log 2`, `P_β(A | |K_z| = ∞)` is the limit of `P_β(A | z ↔ ∂B_n(z))`
+(continuity from above, since `|K_z| = ∞` has positive probability), and the limit is continuous
+in `β ≥ log 2`. -/
+theorem tendsto_cond_setOf_cluster_infinite_nhdsGT (z : LatticeSite 2)
+    {F : Finset (Sym2 (LatticeSite 2))} {A : Set (Config (LatticeSite 2))}
+    (hA : ∀ ω, ω ∈ A ↔ ω ∩ ↑F ∈ A) {l : ℝ≥0∞}
+    (hl : Tendsto (fun n => (law (intensityProfile ((zdGraph 2).edgeSet.indicator 1)
+      ⟨Real.log 2, (Real.log_pos one_lt_two).le⟩))[A | armEvent z n]) atTop (𝓝 l)) :
+    Tendsto (fun β : ℝ≥0 => (law (intensityProfile ((zdGraph 2).edgeSet.indicator 1) β))[A |
+        {ω | (cluster (ω ∩ (zdGraph 2).edgeSet) z).Infinite}])
+      (𝓝[>] ⟨Real.log 2, (Real.log_pos one_lt_two).le⟩) (𝓝 l) := by
+  classical
+  set β₀ : ℝ≥0 := ⟨Real.log 2, (Real.log_pos one_lt_two).le⟩ with hβ₀
+  have hq : ∀ β ∈ Ici β₀, ∀ e ∈ (zdGraph 2).edgeSet,
+      (1 / 2 : ℝ) ≤ intensityProfile ((zdGraph 2).edgeSet.indicator 1) β e :=
+    fun β hβ e he => half_le_intensityProfile_indicator_edgeSet (NNReal.coe_le_coe.2 hβ) he
+  have hAm : MeasurableSet A := measurableSet_of_determined_finset hA
+  have hlt : l ≠ ∞ :=
+    ne_top_of_le_ne_top ENNReal.one_ne_top (le_of_tendsto' hl fun n => prob_le_one)
+  -- the limits for `β ≥ log 2`: `l` at `log 2`, `P_β(A | |K_z| = ∞)` above it
+  have hl' : ∀ β ∈ Ici β₀, Tendsto
+      (fun n => (law (intensityProfile ((zdGraph 2).edgeSet.indicator 1) β))[A | armEvent z n])
+      atTop (𝓝 (if β = β₀ then l else
+        (law (intensityProfile ((zdGraph 2).edgeSet.indicator 1) β))[A |
+          {ω | (cluster (ω ∩ (zdGraph 2).edgeSet) z).Infinite}])) := by
+    intro β hβ
+    by_cases h : β = β₀
+    · rw [ite_eq_left h, h]
+      exact hl
+    · rw [ite_eq_right h]
+      have hβ' : β₀ < β := lt_of_le_of_ne hβ (Ne.symm h)
+      exact tendsto_cond_armEvent_cond_setOf_cluster_infinite _ z
+        (law_setOf_cluster_inter_edgeSet_infinite_pos (NNReal.coe_lt_coe.2 hβ') z).ne' hAm
+  have hc := (continuousOn_toReal_of_tendsto_cond_armEvent
+    (continuous_intensityProfile_pi ((zdGraph 2).edgeSet.indicator 1)) hq z hA hl' β₀
+    self_mem_Ici).tendsto
+  rw [ite_eq_left (rfl : β₀ = β₀)] at hc
+  refine (ENNReal.tendsto_toReal_iff (fun β => measure_ne_top _ _) hlt).1
+    ((hc.mono_left (nhdsWithin_mono _ Ioi_subset_Ici_self)).congr' ?_)
+  filter_upwards [self_mem_nhdsWithin] with β hβ
+  rw [ite_eq_right (ne_of_gt (mem_Ioi.1 hβ))]
+
 end PercLib.Models.Planar
