@@ -53,7 +53,7 @@ boundaries `boxBoundary (z - r) (z + r)`, and only the open nearest-neighbour ed
   (`exists_law_inter_setOf_crossing_clusters_le`; Basu–Sapozhnikov (1.3)-(1.4)). There is
   `c₀ > 0` such that for every profile at least `1/2` on the edges, every increasing event `E`
   and all `N ≥ 1`, `M ≥ 4^k N`, the probability of `E` together with two distinct open crossing
-  clusters of the annulus `B_M(z) \ B_{N-1}(z)` is at most `(1 - c₀)^k P(E)`. The annulus
+  clusters of the annulus `B_M(z) \ B_{N - 1}(z)` is at most `(1 - c₀)^k P(E)`. The annulus
   contains the `k` disjoint four-strip annuli of radii `2 · 4^j N`, `4^{j+1} N`; a four-strip
   event in any of them glues all crossings of the big annulus inside it. The conditional form
   is `exists_cond_setOf_crossing_clusters_le`.
@@ -1036,7 +1036,7 @@ theorem exists_law_inter_biInter_compl_fourStrip_le :
 (1.3)-(1.4) on `ℤ²`). There is `c₀ > 0` such that for every profile opening each edge with
 probability at least `1/2`, every measurable increasing event `E`, every centre `z` and all
 `N ≥ 1`, `k` and `M ≥ 4^k N`, the probability that `E` holds and the annulus
-`A = B_M(z) \ B_{N-1}(z)` has two distinct open crossing clusters (points `a, a'` of `∂B_N(z)`
+`A = B_M(z) \ B_{N - 1}(z)` has two distinct open crossing clusters (points `a, a'` of `∂B_N(z)`
 and `b, b'` of `∂B_M(z)` with `a ↔ b` and `a' ↔ b'` but not `a ↔ a'`, all inside `A`) is at most
 `(1 - c₀)^k P(E)`. -/
 theorem exists_law_inter_setOf_crossing_clusters_le :
@@ -1135,7 +1135,7 @@ theorem exists_law_inter_setOf_crossing_clusters_le :
 /-- **(A1), conditional form** (Basu–Sapozhnikov (1.4) on `ℤ²`). There is `c₀ > 0` such that for
 every profile opening each edge with probability at least `1/2`, every centre `z` and all
 `N ≥ 1`, `k` and `M ≥ 4^k N`, the conditional probability, given that the annulus
-`A = B_M(z) \ B_{N-1}(z)` is crossed (`∂B_N(z) ↔ ∂B_M(z)` inside `A`), that `A` has two distinct
+`A = B_M(z) \ B_{N - 1}(z)` is crossed (`∂B_N(z) ↔ ∂B_M(z)` inside `A`), that `A` has two distinct
 open crossing clusters is at most `(1 - c₀)^k`. -/
 theorem exists_cond_setOf_crossing_clusters_le :
     ∃ c₀ : ℝ≥0∞, 0 < c₀ ∧ ∀ q : Sym2 (LatticeSite 2) → unitInterval,
