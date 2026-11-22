@@ -2150,4 +2150,110 @@ theorem exists_abs_toReal_cond_armEvent_sub_le_of_isUpperSet (z : LatticeSite 2)
         refine add_le_add hbm ((abs_sub_le _ _ _).trans (add_le_add hcontr hbn))
     _ ≤ ε := by linarith
 
+/-- Every finite set of pairs of `ℤ²` lies inside some box around `z`. -/
+theorem exists_forall_mem_Icc_of_finset (z : LatticeSite 2) (F : Finset (Sym2 (LatticeSite 2))) :
+    ∃ N : ℕ, ∀ e ∈ F, ∀ v ∈ e, v ∈ Icc (z - (N : LatticeSite 2)) (z + N) := by
+  classical
+  induction F using Finset.induction_on with
+  | empty => exact ⟨0, by simp⟩
+  | insert e F he ih =>
+    obtain ⟨N, hN⟩ := ih
+    induction e using Sym2.ind with
+    | h u w =>
+      refine ⟨N + (u 0 - z 0).natAbs + (u 1 - z 1).natAbs + (w 0 - z 0).natAbs +
+        (w 1 - z 1).natAbs, fun e' he' v hv => ?_⟩
+      rw [mem_Icc_two_iff]
+      simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply]
+      rcases Finset.mem_insert.1 he' with rfl | he'
+      · rcases Sym2.mem_iff.1 hv with rfl | rfl
+        · omega
+        · omega
+      · have := hN e' he' v hv
+        rw [mem_Icc_two_iff] at this
+        simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply] at this
+        omega
+
+/-- **The uniform Cauchy property** (Basu–Sapozhnikov (2.1) on `ℤ²`; arms plan §4.2, step 5).
+For every centre `z`, every finite set `F` of pairs and every `ε > 0` there is `n₀` such that for
+every profile opening each edge with probability at least `1/2` (in particular
+`p = 1 - e^{-β}` on the edges, `β ≥ log 2`), every event `A` determined by `F` and all
+`m, n ≥ n₀`, `|P(A | z ↔ ∂B_m(z)) - P(A | z ↔ ∂B_n(z))| ≤ ε`. Inclusion–exclusion writes
+`P(A | ·)` as a combination of the probabilities of the all-open events `{S ⊆ ω}`, `S ⊆ F`, with
+coefficients at most `2^{|F|}` in absolute value; these events are increasing. -/
+theorem exists_abs_toReal_cond_armEvent_sub_le (z : LatticeSite 2)
+    (F : Finset (Sym2 (LatticeSite 2))) {ε : ℝ} (hε : 0 < ε) :
+    ∃ n₀ : ℕ, ∀ q : Sym2 (LatticeSite 2) → unitInterval,
+      (∀ e ∈ (zdGraph 2).edgeSet, (1 / 2 : ℝ) ≤ q e) →
+      ∀ A : Set (Config (LatticeSite 2)), (∀ ω, ω ∈ A ↔ ω ∩ ↑F ∈ A) →
+      ∀ m n, n₀ ≤ m → n₀ ≤ n →
+        |(ProbabilityTheory.cond (law q) (armEvent z m) A).toReal -
+          (ProbabilityTheory.cond (law q) (armEvent z n) A).toReal| ≤ ε := by
+  classical
+  obtain ⟨N, hN⟩ := exists_forall_mem_Icc_of_finset z F
+  have h4 : (0 : ℝ) < 4 ^ F.card := by positivity
+  obtain ⟨n₀, hn₀⟩ := exists_abs_toReal_cond_armEvent_sub_le_of_isUpperSet z N (div_pos hε h4)
+  refine ⟨n₀, fun q hq A hA m n hm hn => ?_⟩
+  have : IsProbabilityMeasure (ProbabilityTheory.cond (law q) (armEvent z m)) :=
+    ProbabilityTheory.cond_isProbabilityMeasure (law_armEvent_pos hq z m).ne'
+  have : IsProbabilityMeasure (ProbabilityTheory.cond (law q) (armEvent z n)) :=
+    ProbabilityTheory.cond_isProbabilityMeasure (law_armEvent_pos hq z n).ne'
+  -- the all-open events
+  have hS : ∀ S ∈ F.powerset,
+      |(ProbabilityTheory.cond (law q) (armEvent z m)).real
+          {ω | (S : Set (Sym2 (LatticeSite 2))) ⊆ ω} -
+        (ProbabilityTheory.cond (law q) (armEvent z n)).real
+          {ω | (S : Set (Sym2 (LatticeSite 2))) ⊆ ω}| ≤ ε / 4 ^ F.card := by
+    intro S hS
+    rw [measureReal_def, measureReal_def]
+    refine hn₀ q hq _ (fun ω ω' h hSω => hSω.trans h) (measurableSet_setOf_finset_coe_subset S)
+      ?_ m n hm hn
+    intro ω ω' h
+    have hSQ : (↑S : Set (Sym2 (LatticeSite 2))) ⊆ {e | e ∉ (zdGraph 2).edgeSet ∨
+        ∀ v ∈ e, v ∈ Icc (z - (N : LatticeSite 2)) (z + N)} :=
+      fun e he => Or.inr (hN e (Finset.mem_powerset.1 hS (Finset.mem_coe.1 he)))
+    have h₁ := inter_eq_inter_of_inter_eq_of_subset h hSQ
+    simp only [mem_ofPred_eq]
+    rw [← inter_eq_right, h₁, inter_eq_right]
+  -- the coefficients of inclusion–exclusion
+  have hc : ∀ S ∈ F.powerset, |∑ T ∈ S.powerset, (-1 : ℝ) ^ (S.card - T.card) *
+      A.indicator 1 (T : Set (Sym2 (LatticeSite 2)))| ≤ 2 ^ F.card := by
+    intro S hSF
+    calc |∑ T ∈ S.powerset, (-1 : ℝ) ^ (S.card - T.card) *
+          A.indicator 1 (T : Set (Sym2 (LatticeSite 2)))|
+        ≤ ∑ T ∈ S.powerset, |(-1 : ℝ) ^ (S.card - T.card) *
+          A.indicator 1 (T : Set (Sym2 (LatticeSite 2)))| := Finset.abs_sum_le_sum_abs _ _
+      _ ≤ ∑ T ∈ S.powerset, (1 : ℝ) := Finset.sum_le_sum fun T _ => by
+          rw [abs_mul, abs_pow, abs_neg, abs_one, one_pow, one_mul]
+          by_cases hT : (T : Set (Sym2 (LatticeSite 2))) ∈ A
+          · rw [Set.indicator_of_mem hT]
+            simp
+          · rw [Set.indicator_of_notMem hT]
+            simp
+      _ = 2 ^ S.card := by
+          rw [Finset.sum_const, Finset.card_powerset]
+          simp
+      _ ≤ 2 ^ F.card :=
+          pow_le_pow_right₀ (by norm_num) (Finset.card_le_card (Finset.mem_powerset.1 hSF))
+  rw [← measureReal_def, ← measureReal_def,
+    measureReal_eq_sum_subset_of_determined (ProbabilityTheory.cond (law q) (armEvent z m)) hA,
+    measureReal_eq_sum_subset_of_determined (ProbabilityTheory.cond (law q) (armEvent z n)) hA,
+    ← Finset.sum_sub_distrib]
+  calc _ ≤ ∑ S ∈ F.powerset, |(∑ T ∈ S.powerset, (-1 : ℝ) ^ (S.card - T.card) *
+          A.indicator 1 (T : Set (Sym2 (LatticeSite 2)))) *
+          (ProbabilityTheory.cond (law q) (armEvent z m)).real
+            {ω | (S : Set (Sym2 (LatticeSite 2))) ⊆ ω} -
+        (∑ T ∈ S.powerset, (-1 : ℝ) ^ (S.card - T.card) *
+          A.indicator 1 (T : Set (Sym2 (LatticeSite 2)))) *
+          (ProbabilityTheory.cond (law q) (armEvent z n)).real
+            {ω | (S : Set (Sym2 (LatticeSite 2))) ⊆ ω}| := Finset.abs_sum_le_sum_abs _ _
+    _ ≤ ∑ S ∈ F.powerset, (2 : ℝ) ^ F.card * (ε / 4 ^ F.card) :=
+        Finset.sum_le_sum fun S hSF => by
+          rw [← mul_sub, abs_mul]
+          exact mul_le_mul (hc S hSF) (hS S hSF) (abs_nonneg _) (by positivity)
+    _ = ε := by
+        rw [Finset.sum_const, Finset.card_powerset, nsmul_eq_mul,
+          show (4 : ℝ) ^ F.card = 2 ^ F.card * 2 ^ F.card by rw [← mul_pow]; norm_num]
+        push_cast
+        field_simp
+
 end PercLib.Models.Planar
