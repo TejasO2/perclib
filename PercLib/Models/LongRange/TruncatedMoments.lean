@@ -12431,3 +12431,461 @@ theorem hasDerivAt_integral_cutoff_pow_binomial_of_root_succ_moment_noncorner {d
     (hcont.mono hsub)
 
 end PercLib.Models.LongRange
+
+namespace PercLib.Analysis
+
+open MeasureTheory
+open scoped ENNReal
+
+/-- Real integrals of finite extended-nonnegative functions subtract through truncated
+extended-nonnegative subtraction. -/
+theorem integral_toReal_sub_eq_toReal_lintegral_sub {α : Type*} [MeasurableSpace α]
+    {μ : Measure α} {f g : α → ℝ≥0∞}
+    (hfm : AEMeasurable f μ) (hgm : Measurable g)
+    (hfin : ∀ᵐ x ∂μ, f x < ⊤) (hgf : ∀ᵐ x ∂μ, g x ≤ f x)
+    (hIfin : (∫⁻ x, f x ∂μ) ≠ ⊤) :
+    (∫ x, (f x).toReal ∂μ) - (∫ x, (g x).toReal ∂μ) =
+      (∫⁻ x, f x - g x ∂μ).toReal := by
+  have hgfin : ∀ᵐ x ∂μ, g x < ⊤ := by
+    filter_upwards [hfin, hgf] with x hfx hgx
+    exact hgx.trans_lt hfx
+  have hle : (∫⁻ x, g x ∂μ) ≤ ∫⁻ x, f x ∂μ := lintegral_mono_ae hgf
+  have hIgm : (∫⁻ x, g x ∂μ) ≠ ⊤ := ne_top_of_le_ne_top hIfin hle
+  rw [MeasureTheory.integral_toReal hfm hfin,
+    MeasureTheory.integral_toReal hgm.aemeasurable hgfin,
+    ← ENNReal.toReal_sub_of_le hle hIfin,
+    MeasureTheory.lintegral_sub hgm hIgm hgf]
+
+end PercLib.Analysis
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability MeasureTheory
+open scoped ENNReal NNReal
+
+/-! ### Real cap error -/
+
+theorem sub_min_eq_max (x M : ℝ) : x - min M x = max 0 (x - M) := by
+  rcases le_total x M with h | h
+  · rw [min_eq_right h, sub_self, max_eq_left (a := (0:ℝ)) (b := x - M) (by linarith)]
+  · rw [min_eq_left h, max_eq_right (a := (0:ℝ)) (b := x - M) (by linarith)]
+
+theorem sub_min_mono {x y M : ℝ} (hyx : y ≤ x) : y - min M y ≤ x - min M x := by
+  rw [sub_min_eq_max, sub_min_eq_max]
+  exact max_le_max le_rfl (by linarith)
+
+/-- The excess of `a ^ p` over the cap `N ^ p` is at most `a ^ (p+1) / N`. -/
+theorem pow_sub_min_pow_le_div {a N : ℝ} (ha : 0 ≤ a) (hN : 0 < N) (p : ℕ) :
+    a ^ p - min (N ^ p) (a ^ p) ≤ a ^ (p + 1) / N := by
+  rcases le_total a N with h | h
+  · have h1 : a ^ p ≤ N ^ p := pow_le_pow_left₀ ha h p
+    rw [min_eq_right h1, sub_self]
+    positivity
+  · have h1 : N ^ p ≤ a ^ p := pow_le_pow_left₀ hN.le h p
+    rw [min_eq_left h1]
+    have h2 : a ^ p - N ^ p ≤ a ^ p := by
+      have hNp : (0 : ℝ) ≤ N ^ p := by positivity
+      linarith
+    have h3 : a ^ p ≤ a ^ (p + 1) / N := by
+      rw [le_div_iff₀ hN, pow_succ]
+      exact mul_le_mul_of_nonneg_left h (pow_nonneg ha p)
+    linarith
+
+/-! ### The pointwise cap error of a single pivotal increment -/
+
+/-- **The capped pivotal increment is dominated by the uncapped one.** -/
+theorem pivotal_capped_le_uncapped {V : Type*} (ω : Config V) (e : Sym2 V) (o : V) (p : ℕ)
+    {N : ℝ} (hN : 0 ≤ N) (hfin : ((cluster (insert e ω) o).encard : ℝ≥0∞) < ⊤) :
+    min (ENNReal.ofReal (N ^ p)) ((↑(cluster (insert e ω) o).encard : ℝ≥0∞) ^ p)
+        - min (ENNReal.ofReal (N ^ p)) ((↑(cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)
+      ≤ (↑(cluster (insert e ω) o).encard : ℝ≥0∞) ^ p
+        - (↑(cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p := by
+  classical
+  set A1 : ℝ≥0∞ := ↑(cluster (insert e ω) o).encard with hA1
+  set A0 : ℝ≥0∞ := ↑(cluster (ω \ {e}) o).encard with hA0
+  have hsub_self : ∀ (a b : ℝ≥0∞), a - b ≤ a := fun a b => tsub_le_self
+  have hA0le : A0 ≤ A1 := encard_cluster_sdiff_le_insert_coe ω e o
+  have hA1t : A1 < ⊤ := hfin
+  have h1t : A1 ^ p < ⊤ := ENNReal.pow_lt_top (n := p) hA1t
+  have h0t : A0 ^ p < ⊤ := ENNReal.pow_lt_top (n := p) (lt_of_le_of_lt hA0le hA1t)
+  have hle : A0 ^ p ≤ A1 ^ p := ENNReal.pow_le_pow_left hA0le
+  have hMt : min (ENNReal.ofReal (N ^ p)) (A1 ^ p) < ⊤ :=
+    lt_of_le_of_lt (min_le_left _ _) ENNReal.ofReal_lt_top
+  have hminle : min (ENNReal.ofReal (N ^ p)) (A0 ^ p)
+      ≤ min (ENNReal.ofReal (N ^ p)) (A1 ^ p) := min_le_min_left _ hle
+  have h1 : min (ENNReal.ofReal (N ^ p)) (A1 ^ p)
+        - min (ENNReal.ofReal (N ^ p)) (A0 ^ p) ≠ ⊤ :=
+    ne_top_of_le_ne_top hMt.ne (hsub_self _ _)
+  have h2 : A1 ^ p - A0 ^ p ≠ ⊤ := ne_top_of_le_ne_top h1t.ne (hsub_self _ _)
+  refine (ENNReal.toReal_le_toReal h1 h2).1 ?_
+  rw [ENNReal.toReal_sub_of_le hminle hMt.ne, ENNReal.toReal_sub_of_le hle h1t.ne,
+    ENNReal.toReal_min ENNReal.ofReal_ne_top h0t.ne,
+    ENNReal.toReal_min ENNReal.ofReal_ne_top h1t.ne,
+    ENNReal.toReal_pow, ENNReal.toReal_pow, ENNReal.toReal_ofReal (by positivity : (0:ℝ) ≤ N ^ p)]
+  have hba : A0.toReal ^ p ≤ A1.toReal ^ p := by
+    rw [← ENNReal.toReal_pow, ← ENNReal.toReal_pow]
+    exact ENNReal.toReal_mono h1t.ne hle
+  have hmono := sub_min_mono (M := N ^ p) hba
+  have hb : (0:ℝ) ≤ A0.toReal ^ p - min (N ^ p) (A0.toReal ^ p) := by
+    have hle' := min_le_right (N ^ p) (A0.toReal ^ p)
+    linarith
+  linarith
+
+
+/-- **The signed cap error is at most the excess of the inserted moment over its cap.** -/
+theorem pivotal_error_le_excess {V : Type*} (ω : Config V) (e : Sym2 V) (o : V) (p : ℕ)
+    {N : ℝ} (hN : 0 ≤ N) (hfin : ((cluster (insert e ω) o).encard : ℝ≥0∞) < ⊤) :
+    (((↑(cluster (insert e ω) o).encard : ℝ≥0∞) ^ p
+        - (↑(cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)
+      - (min (ENNReal.ofReal (N ^ p)) ((↑(cluster (insert e ω) o).encard : ℝ≥0∞) ^ p)
+        - min (ENNReal.ofReal (N ^ p)) ((↑(cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)))
+      ≤ (↑(cluster (insert e ω) o).encard : ℝ≥0∞) ^ p
+        - min (ENNReal.ofReal (N ^ p)) ((↑(cluster (insert e ω) o).encard : ℝ≥0∞) ^ p) := by
+  classical
+  set A1 : ℝ≥0∞ := ↑(cluster (insert e ω) o).encard with hA1
+  set A0 : ℝ≥0∞ := ↑(cluster (ω \ {e}) o).encard with hA0
+  have hsub_self : ∀ (a b : ℝ≥0∞), a - b ≤ a := fun a b => tsub_le_self
+  have hA1t : A1 < ⊤ := hfin
+  have h1t : A1 ^ p < ⊤ := ENNReal.pow_lt_top (n := p) hA1t
+  have h0t : A0 ^ p < ⊤ := ENNReal.pow_lt_top (n := p)
+    (lt_of_le_of_lt (encard_cluster_sdiff_le_insert_coe ω e o) hA1t)
+  have hle : A0 ^ p ≤ A1 ^ p := ENNReal.pow_le_pow_left (encard_cluster_sdiff_le_insert_coe ω e o)
+  have hMt : min (ENNReal.ofReal (N ^ p)) (A1 ^ p) < ⊤ :=
+    lt_of_le_of_lt (min_le_left _ _) ENNReal.ofReal_lt_top
+  have hminle : min (ENNReal.ofReal (N ^ p)) (A0 ^ p) ≤ min (ENNReal.ofReal (N ^ p)) (A1 ^ p) :=
+    min_le_min_left _ hle
+  have hcapped : min (ENNReal.ofReal (N ^ p)) (A1 ^ p) - min (ENNReal.ofReal (N ^ p)) (A0 ^ p)
+      ≤ A1 ^ p - A0 ^ p := pivotal_capped_le_uncapped ω e o p hN hfin
+  have h1 : (A1 ^ p - A0 ^ p) - (min (ENNReal.ofReal (N ^ p)) (A1 ^ p)
+      - min (ENNReal.ofReal (N ^ p)) (A0 ^ p)) ≠ ⊤ :=
+    ne_top_of_le_ne_top h1t.ne (le_trans (hsub_self _ _) (hsub_self _ _))
+  have h2 : A1 ^ p - min (ENNReal.ofReal (N ^ p)) (A1 ^ p) ≠ ⊤ :=
+    ne_top_of_le_ne_top h1t.ne (hsub_self _ _)
+  refine (ENNReal.toReal_le_toReal h1 h2).1 ?_
+  rw [ENNReal.toReal_sub_of_le hcapped (ne_top_of_le_ne_top h1t.ne (hsub_self _ _)),
+    ENNReal.toReal_sub_of_le hle h1t.ne,
+    ENNReal.toReal_sub_of_le (min_le_right _ _) h1t.ne,
+    ENNReal.toReal_sub_of_le hminle hMt.ne,
+    ENNReal.toReal_min ENNReal.ofReal_ne_top h1t.ne,
+    ENNReal.toReal_min ENNReal.ofReal_ne_top h0t.ne,
+    ENNReal.toReal_pow, ENNReal.toReal_pow, ENNReal.toReal_ofReal (by positivity : (0:ℝ) ≤ N ^ p)]
+  have hba : A0.toReal ^ p ≤ A1.toReal ^ p := by
+    rw [← ENNReal.toReal_pow, ← ENNReal.toReal_pow]
+    exact ENNReal.toReal_mono h1t.ne hle
+  have hmono := sub_min_mono (M := N ^ p) hba
+  have hb : (0:ℝ) ≤ A0.toReal ^ p - min (N ^ p) (A0.toReal ^ p) := by
+    have hle' := min_le_right (N ^ p) (A0.toReal ^ p)
+    linarith
+  linarith
+
+/-- **The excess of the inserted `p`-th moment over its cap.** -/
+theorem pivotal_excess_le {V : Type*} (ω : Config V) (e : Sym2 V) (o : V) (p : ℕ)
+    {N : ℝ} (hN : 1 ≤ N) (hfin : ((cluster (insert e ω) o).encard : ℝ≥0∞) < ⊤) :
+    (↑(cluster (insert e ω) o).encard : ℝ≥0∞) ^ p
+        - min (ENNReal.ofReal (N ^ p)) ((↑(cluster (insert e ω) o).encard : ℝ≥0∞) ^ p)
+      ≤ ENNReal.ofReal (1 / N) * (↑(cluster (insert e ω) o).encard : ℝ≥0∞) ^ (p + 1) := by
+  classical
+  set A1 : ℝ≥0∞ := ↑(cluster (insert e ω) o).encard with hA1
+  have hsub_self : ∀ (a b : ℝ≥0∞), a - b ≤ a := fun a b => tsub_le_self
+  have hA1t : A1 < ⊤ := hfin
+  have h1t : A1 ^ p < ⊤ := ENNReal.pow_lt_top (n := p) hA1t
+  have h1p : A1 ^ (p + 1) < ⊤ := ENNReal.pow_lt_top (n := p + 1) hA1t
+  have hRt : ENNReal.ofReal (1 / N) * A1 ^ (p + 1) < ⊤ := by
+    have hc : ENNReal.ofReal (1 / N) ≤ 1 := by
+      rw [← ENNReal.ofReal_one]
+      refine ENNReal.ofReal_le_ofReal ?_
+      rw [div_le_one (by linarith : (0:ℝ) < N)]
+      exact hN
+    calc ENNReal.ofReal (1 / N) * A1 ^ (p + 1) ≤ 1 * A1 ^ (p + 1) :=
+          mul_le_mul_of_nonneg_right hc (by positivity)
+      _ = A1 ^ (p + 1) := one_mul _
+      _ < ⊤ := h1p
+  have h1 : A1 ^ p - min (ENNReal.ofReal (N ^ p)) (A1 ^ p) ≠ ⊤ :=
+    ne_top_of_le_ne_top h1t.ne (hsub_self _ _)
+  refine (ENNReal.toReal_le_toReal h1 hRt.ne).1 ?_
+  rw [ENNReal.toReal_sub_of_le (min_le_right _ _) h1t.ne,
+    ENNReal.toReal_min ENNReal.ofReal_ne_top h1t.ne,
+    ENNReal.toReal_pow, ENNReal.toReal_ofReal (by positivity),
+    ENNReal.toReal_mul, ENNReal.toReal_ofReal (by positivity), ENNReal.toReal_pow]
+  have hmain := pow_sub_min_pow_le_div (a := A1.toReal) ENNReal.toReal_nonneg
+    (by linarith : (0:ℝ) < N) p
+  have hrw : A1.toReal ^ (p + 1) / N = 1 / N * A1.toReal ^ (p + 1) := by ring
+  rw [hrw] at hmain
+  exact hmain
+
+
+/-- **The cap error of a single pivotal increment.** -/
+theorem pivotal_cap_error_le {V : Type*} (ω : Config V) (e : Sym2 V) (o : V) (p : ℕ)
+    {N : ℝ} (hN : 1 ≤ N) (hfin : ((cluster (insert e ω) o).encard : ℝ≥0∞) < ⊤) :
+    (((↑(cluster (insert e ω) o).encard : ℝ≥0∞) ^ p
+        - (↑(cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)
+      - (min (ENNReal.ofReal (N ^ p)) ((↑(cluster (insert e ω) o).encard : ℝ≥0∞) ^ p)
+        - min (ENNReal.ofReal (N ^ p)) ((↑(cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)))
+      ≤ ENNReal.ofReal (1 / N) * (↑(cluster (insert e ω) o).encard : ℝ≥0∞) ^ (p + 1) :=
+  (pivotal_error_le_excess ω e o p (by linarith) hfin).trans
+    (pivotal_excess_le ω e o p hN hfin)
+
+/-! ### The cap error of a single pair, at the level of the integral -/
+
+/-- **The signed cap error of a single pivotal increment.** For a finite measure and a pair `e`
+whose inserted cluster has finite `(p+1)`-moment at most `C`, the difference between the pivotal
+`p`-th moment and its cap at `N ^ p` is at most `C / N`. -/
+theorem integral_pivotal_cap_error_le {V : Type*} [Countable V] (μ : Measure (Config V))
+    (e : Sym2 V) (o : V) (p : ℕ) {N C : ℝ} (hN : 1 ≤ N) (hC : 0 ≤ C)
+    (hfin : ∀ᵐ ω ∂μ, ((cluster (insert e ω) o).encard : ℝ≥0∞) < ⊤)
+    (hmom : ∫⁻ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ (p + 1) ∂μ ≤ ENNReal.ofReal C) :
+    |(∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+          ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal ∂μ) -
+        (∫ ω, ((min (ENNReal.ofReal (N ^ p))
+          (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p)).toReal -
+            (min (ENNReal.ofReal (N ^ p)) (((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)).toReal) ∂μ)|
+      ≤ C * (1 / N) := by
+  classical
+  have hsub_self : ∀ (a b : ℝ≥0∞), a - b ≤ a := fun a b => tsub_le_self
+  have hm1 : Measurable fun ω : Config V => ((cluster (insert e ω) o).encard : ℝ≥0∞) :=
+    measurable_encard_cluster_insert_coe e o
+  have hm0 : Measurable fun ω : Config V => ((cluster (ω \ {e}) o).encard : ℝ≥0∞) :=
+    measurable_encard_cluster_sdiff_coe e o
+  have hincr : Measurable fun ω : Config V =>
+      (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p) :=
+    (hm1.pow_const p).sub (hm0.pow_const p)
+  have hincrM : Measurable fun ω : Config V =>
+      (min (ENNReal.ofReal (N ^ p)) (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p) -
+        min (ENNReal.ofReal (N ^ p)) (((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)) :=
+    (measurable_const.min (hm1.pow_const p)).sub (measurable_const.min (hm0.pow_const p))
+  have hone : ∀ ω : Config V, (1 : ℝ≥0∞) ≤ ((cluster (insert e ω) o).encard : ℝ≥0∞) := by
+    intro ω
+    exact_mod_cast one_le_encard_cluster (insert e ω) o
+  have hincrle : ∀ ω : Config V,
+      (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p) ≤
+      ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ (p + 1) := by
+    intro ω
+    refine (hsub_self _ _).trans ?_
+    exact pow_le_pow_right₀ (hone ω) (Nat.le_succ p)
+  have hIntIncr_le : ∫⁻ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p) ∂μ ≤ ENNReal.ofReal C :=
+    (lintegral_mono hincrle).trans hmom
+  have hIntIncr_ne : ∫⁻ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p) ∂μ ≠ ⊤ :=
+    ne_top_of_le_ne_top ENNReal.ofReal_ne_top hIntIncr_le
+  have hcaple : ∀ᵐ ω ∂μ,
+      (min (ENNReal.ofReal (N ^ p)) (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p) -
+        min (ENNReal.ofReal (N ^ p)) (((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)) ≤
+      (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p) := by
+    filter_upwards [hfin] with ω hω
+    exact pivotal_capped_le_uncapped ω e o p (by linarith) hω
+  have herr : ∀ᵐ ω ∂μ,
+      (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p) -
+      (min (ENNReal.ofReal (N ^ p)) (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p) -
+        min (ENNReal.ofReal (N ^ p)) (((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)) ≤
+      ENNReal.ofReal (1 / N) * ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ (p + 1) := by
+    filter_upwards [hfin] with ω hω
+    exact pivotal_cap_error_le ω e o p hN hω
+  have hIntIncrM_le : ∫⁻ ω, (min (ENNReal.ofReal (N ^ p))
+        (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p) -
+      min (ENNReal.ofReal (N ^ p))
+        (((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)) ∂μ ≤
+      ∫⁻ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p) ∂μ := lintegral_mono_ae hcaple
+  have hIntIncrM_ne : ∫⁻ ω, (min (ENNReal.ofReal (N ^ p))
+        (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p) -
+      min (ENNReal.ofReal (N ^ p))
+        (((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)) ∂μ ≠ ⊤ :=
+    ne_top_of_le_ne_top hIntIncr_ne hIntIncrM_le
+  have hQM : ∫ ω, ((min (ENNReal.ofReal (N ^ p))
+          (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p)).toReal -
+        (min (ENNReal.ofReal (N ^ p))
+          (((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)).toReal) ∂μ =
+      (∫⁻ ω, (min (ENNReal.ofReal (N ^ p))
+          (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p) -
+        min (ENNReal.ofReal (N ^ p))
+          (((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)) ∂μ).toReal := by
+    rw [← integral_toReal hincrM.aemeasurable (by
+      filter_upwards with ω
+      exact lt_of_le_of_lt (hsub_self _ _)
+        (lt_of_le_of_lt (min_le_left _ _) ENNReal.ofReal_lt_top))]
+    refine integral_congr_ae ?_
+    filter_upwards [hfin] with ω hω
+    have h0t : ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p < ⊤ :=
+      ENNReal.pow_lt_top (n := p)
+        (lt_of_le_of_lt (encard_cluster_sdiff_le_insert_coe ω e o) hω)
+    have hle : ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p
+        ≤ ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p :=
+      ENNReal.pow_le_pow_left (encard_cluster_sdiff_le_insert_coe ω e o)
+    have hminle : min (ENNReal.ofReal (N ^ p))
+          (((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)
+        ≤ min (ENNReal.ofReal (N ^ p))
+          (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p) :=
+      min_le_min_left _ hle
+    exact (ENNReal.toReal_sub_of_le hminle
+      (lt_of_le_of_lt (min_le_left _ _) ENNReal.ofReal_lt_top).ne).symm
+  have hdiff : (∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+          ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal ∂μ) -
+        (∫ ω, ((min (ENNReal.ofReal (N ^ p))
+              (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p)).toReal -
+            (min (ENNReal.ofReal (N ^ p))
+              (((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)).toReal) ∂μ) =
+      (∫⁻ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+          ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p) -
+        (min (ENNReal.ofReal (N ^ p))
+            (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p) -
+          min (ENNReal.ofReal (N ^ p))
+            (((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)) ∂μ).toReal := by
+    have hcapt : ∀ᵐ ω ∂μ, (min (ENNReal.ofReal (N ^ p))
+        (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p) -
+        min (ENNReal.ofReal (N ^ p))
+          (((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)) < ⊤ := by
+      filter_upwards with ω
+      exact lt_of_le_of_lt (hsub_self _ _)
+        (lt_of_le_of_lt (min_le_left _ _) ENNReal.ofReal_lt_top)
+    have hdiff' := PercLib.Analysis.integral_toReal_sub_eq_toReal_lintegral_sub
+      hincr.aemeasurable hincrM ?_ hcaple hIntIncr_ne
+    · rw [MeasureTheory.integral_toReal hincrM.aemeasurable hcapt] at hdiff'
+      rw [hQM]
+      exact hdiff'
+    · filter_upwards [hfin] with ω hω
+      exact lt_of_le_of_lt (hsub_self _ _) (ENNReal.pow_lt_top (n := p) hω)
+  have hb1 : ∫⁻ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+          ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p) -
+        (min (ENNReal.ofReal (N ^ p)) (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p) -
+          min (ENNReal.ofReal (N ^ p)) (((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)) ∂μ
+      ≤ ∫⁻ ω, ENNReal.ofReal (1 / N) * ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ (p + 1) ∂μ :=
+    lintegral_mono_ae herr
+  have hb2 : ∫⁻ ω, ENNReal.ofReal (1 / N) * ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ (p + 1) ∂μ
+      = ENNReal.ofReal (1 / N) * ∫⁻ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ (p + 1) ∂μ :=
+    lintegral_const_mul _ (hm1.pow_const (p + 1))
+  have hb3 : (∫⁻ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+          ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p) -
+        (min (ENNReal.ofReal (N ^ p)) (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p) -
+          min (ENNReal.ofReal (N ^ p)) (((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)) ∂μ).toReal
+      ≤ (ENNReal.ofReal (1 / N) * ENNReal.ofReal C).toReal := by
+    refine ENNReal.toReal_mono ?_ (hb1.trans (le_of_eq hb2) |>.trans ?_)
+    · rw [← ENNReal.ofReal_mul (div_nonneg zero_le_one (by linarith : (0:ℝ) ≤ N))]
+      exact ENNReal.ofReal_ne_top
+    · exact mul_le_mul_of_nonneg_left hmom zero_le
+  have hfin4 : (ENNReal.ofReal (1 / N) * ENNReal.ofReal C).toReal = C * (1 / N) := by
+    rw [← ENNReal.ofReal_mul (div_nonneg zero_le_one (by linarith : (0:ℝ) ≤ N)),
+      ENNReal.toReal_ofReal (by positivity)]
+    ring
+  have hnn : 0 ≤ (∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+          ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal ∂μ) -
+        (∫ ω, ((min (ENNReal.ofReal (N ^ p))
+          (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p)).toReal -
+            (min (ENNReal.ofReal (N ^ p))
+              (((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)).toReal) ∂μ) := by
+    rw [hdiff]
+    exact ENNReal.toReal_nonneg
+  rw [abs_of_nonneg hnn]
+  exact (le_of_eq hdiff).trans (hb3.trans_eq hfin4)
+
+/-! ### The cap approximation in the form needed by the cap passage -/
+
+/-- **A root-cap choice.** For a moment bound `C` and `ε > 0` there is a root cap `N ≥ 1` whose
+reciprocal times `C` is at most `ε`. -/
+theorem exists_cap_root {C ε : ℝ} (hC : 0 ≤ C) (hε : 0 < ε) :
+    ∃ N : ℝ, 1 ≤ N ∧ C * (1 / N) ≤ ε := by
+  refine ⟨(C + 1) / ε + 1, ?_, ?_⟩
+  · have h0 : (0:ℝ) ≤ (C + 1) / ε := div_nonneg (by linarith) hε.le
+    linarith
+  · have hNpos : (0:ℝ) < (C + 1) / ε + 1 := by
+      have h0 : (0:ℝ) ≤ (C + 1) / ε := div_nonneg (by linarith) hε.le
+      linarith
+    have h1 : 1 / ((C + 1) / ε + 1) ≤ ε / (C + 1) := by
+      rw [div_le_iff₀ hNpos]
+      have hNexp : ε / (C + 1) * ((C + 1) / ε + 1) = 1 + ε / (C + 1) := by
+        field_simp
+      rw [hNexp]
+      have h0 : (0:ℝ) ≤ ε / (C + 1) := by positivity
+      linarith
+    refine (mul_le_mul_of_nonneg_left h1 hC).trans ?_
+    rw [← mul_div_assoc, div_le_iff₀ (by linarith : (0:ℝ) < C + 1)]
+    nlinarith
+
+/-- **The cap error of a single pair from a uniform finite `(p+1)`-moment.** -/
+theorem integral_pivotal_cap_error_le_of_lintegral_le {V : Type*} [Countable V]
+    (μ : Measure (Config V)) (e : Sym2 V) (o : V) (p : ℕ) (M : ℝ≥0∞) (hM : M ≠ ⊤)
+    (hmom : ∫⁻ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ (p + 1) ∂μ ≤ M) {N : ℝ}
+    (hN : 1 ≤ N) :
+    |(∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+          ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal ∂μ) -
+        (∫ ω, ((min (ENNReal.ofReal (N ^ p))
+          (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p)).toReal -
+            (min (ENNReal.ofReal (N ^ p)) (((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)).toReal) ∂μ)|
+      ≤ M.toReal * (1 / N) := by
+  have hmom' : ∫⁻ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ (p + 1) ∂μ
+      ≤ ENNReal.ofReal M.toReal := by
+    rw [ENNReal.ofReal_toReal hM]
+    exact hmom
+  have hfin : ∀ᵐ ω ∂μ, ((cluster (insert e ω) o).encard : ℝ≥0∞) < ⊤ := by
+    have hne : ∫⁻ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ (p + 1) ∂μ ≠ ⊤ :=
+      ne_top_of_le_ne_top hM hmom
+    have hlt := MeasureTheory.ae_lt_top
+      ((measurable_encard_cluster_insert_coe e o).pow_const (p + 1)) hne
+    filter_upwards [hlt] with ω hω
+    rcases lt_or_eq_of_le (le_top : ((cluster (insert e ω) o).encard : ℝ≥0∞) ≤ ⊤) with h | h
+    · exact h
+    · rw [h, ENNReal.top_pow (by omega : p + 1 ≠ 0)] at hω
+      exact absurd hω (lt_irrefl ⊤)
+  exact integral_pivotal_cap_error_le μ e o p hN ENNReal.toReal_nonneg hfin hmom'
+
+/-- **A cap approximation of a single pivotal moment uniform in nothing but the pair.** For a
+measure on configurations, a pair and a finite `(p+1)`-moment bound `M`, every `ε > 0` admits a
+real cap `M' ≥ 0` with the capped pivotal moment within `ε` of the uncapped one. -/
+theorem exists_pivotal_cap_approx {V : Type*} [Countable V] (μ : Measure (Config V))
+    (e : Sym2 V) (o : V) (p : ℕ) (M : ℝ≥0∞) (hM : M ≠ ⊤)
+    (hmom : ∫⁻ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ (p + 1) ∂μ ≤ M)
+    {ε : ℝ} (hε : 0 < ε) :
+    ∃ M' : ℝ, 0 ≤ M' ∧
+      |(∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+            ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal ∂μ) -
+        (∫ ω, ((min (ENNReal.ofReal M') (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p)).toReal -
+            (min (ENNReal.ofReal M') (((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)).toReal) ∂μ)|
+        ≤ ε := by
+  obtain ⟨N, hN1, hNb⟩ := exists_cap_root ENNReal.toReal_nonneg hε
+  exact ⟨N ^ p, by positivity,
+    (integral_pivotal_cap_error_le_of_lintegral_le μ e o p M hM hmom hN1).trans hNb⟩
+
+end PercLib.Models.LongRange
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability MeasureTheory
+open scoped ENNReal NNReal
+
+/-- Uncapped single-pair continuity from a uniform finite higher inserted moment. -/
+theorem continuousOn_pivotal_cutoff_uncapped_of_uniform_root_moment {d : ℕ}
+    {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ}
+    (hKa : AntitoneOn K (Set.Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Set.Ioi 0)) (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p) (o : Fin d → ℤ) {R : ℝ}
+    (hχ : chi (intensityProfile (cutoffKernel N K R) β) o ≠ ⊤) {u : ℝ} (hu : 0 < u)
+    (e : Sym2 (Fin d → ℤ)) (M : ℝ≥0∞) (hM : M ≠ ⊤)
+    (hmom : ∀ r ∈ Set.Ioo u R, ∫⁻ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ (p + 1)
+      ∂(law (intensityProfile (cutoffKernel N K r) β)) ≤ M) :
+    ContinuousOn (fun r => ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel N K r) β))) (Set.Ioo u R) := by
+  have hrem : ∀ ε > 0, ∃ Mcap : ℝ, 0 ≤ Mcap ∧ ∀ r ∈ Set.Ioo u R,
+      |(∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+          ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+          ∂(law (intensityProfile (cutoffKernel N K r) β))) -
+        (∫ ω, ((min (ENNReal.ofReal Mcap)
+            (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p)).toReal -
+          (min (ENNReal.ofReal Mcap)
+            (((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p)).toReal)
+          ∂(law (intensityProfile (cutoffKernel N K r) β)))| ≤ ε := by
+    intro ε hε
+    obtain ⟨N', hN'1, hN'b⟩ := exists_cap_root ENNReal.toReal_nonneg hε
+    refine ⟨N' ^ p, by positivity, ?_⟩
+    intro r hr
+    have hbound := integral_pivotal_cap_error_le_of_lintegral_le
+      (V := Fin d → ℤ) (μ := law (intensityProfile (cutoffKernel N K r) β))
+      (e := e) (o := o) (p := p) (M := M) (N := N') hM (hmom r hr) hN'1
+    exact hbound.trans hN'b
+  exact continuousOn_pivotal_cutoff_uncapped_of_uniform_cap (K := K) (K' := K')
+    hKa hK' hK'c β p hp o hχ hu e hrem
+
+end PercLib.Models.LongRange
