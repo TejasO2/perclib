@@ -15796,3 +15796,836 @@ theorem window_tail_le_of_factorization_of_tau_tail {d : ℕ}
   exact le_trans (mul_le_mul' le_rfl (mul_le_mul' le_rfl hmass)) hεδ
 
 end PercLib.Percolation.Bond
+
+namespace PercLib.Models.LongRange
+
+open MeasureTheory Set Filter
+open scoped ENNReal NNReal Topology
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability
+
+open Classical in
+/-- **Real-norm conversion of the finite-window `ℝ≥0∞` pivotal tail.**
+
+Let `cw` be the cut-off derivative weight of a pair.  Assume the `ℝ≥0∞` window tail of the
+radially truncated pivotal series is at most `B`.  Then the *real-norm* series of weighted pair
+terms whose pairs are not both inside the window `W` is at most `|β J'(r)| * B.toReal`.
+
+The identity behind the conversion is
+`cw e * ∫ (pivotal) = β J'(r) * (radial weight e * ∫⁻ (pivotal))`, so the rate `β J'(r)`
+factors out and is never inverted.  `B` is not required to be finite for the inequality to be
+meaningful, but `B ≠ ⊤` is what makes the `ℝ≥0∞`/`ℝ` cast continuous, and it also gives the
+summability of the real series. -/
+theorem tsum_norm_cutoff_flux_compl_le_of_lintegral_window_tail {d : ℕ}
+    {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ} (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p)
+    (r : ℝ) (o : Fin d → ℤ) (cw : Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ e, cw e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K r e : ℝ))))
+    (W : Finset (Fin d → ℤ)) (B : ℝ≥0∞) (hB : B ≠ ⊤)
+    (hins : ∀ e : Sym2 (Fin d → ℤ),
+      (∫⁻ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≠ ⊤)
+    (hwin : ∫⁻ ω, ∑' e : Sym2 (Fin d → ℤ),
+        ((if e ∈ (W.product W).image (fun q : (Fin d → ℤ) × (Fin d → ℤ) => s(q.1, q.2))
+          then (0 : ℝ≥0∞) else 1) *
+          (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ≥0∞)) *
+          (if e ∈ ω then 0 else (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+            ((cluster ω o).encard : ℝ≥0∞) ^ p))
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β)) ≤ B) :
+    ∑' e : ↥((W.product W).image (fun q : (Fin d → ℤ) × (Fin d → ℤ) => s(q.1, q.2))
+        : Set (Sym2 (Fin d → ℤ)))ᶜ,
+      ‖cw e.1 * ∫ ω, (((cluster (insert e.1 ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e.1}) o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))‖
+      ≤ |(β : ℝ) * -K' r| * B.toReal := by
+  classical
+  let μ : Measure (Config (Fin d → ℤ)) := law (intensityProfile (cutoffKernel (d := d) N K r) β)
+  let F : Finset (Sym2 (Fin d → ℤ)) :=
+    (W.product W).image (fun q : (Fin d → ℤ) × (Fin d → ℤ) => s(q.1, q.2))
+  let rk : Sym2 (Fin d → ℤ) → ℝ≥0∞ :=
+    fun e => (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ≥0∞)
+  let w : Sym2 (Fin d → ℤ) → ℝ≥0∞ := fun e => (if e ∈ F then 0 else 1) * rk e
+  let Q : Sym2 (Fin d → ℤ) → ℝ≥0∞ := fun e => ∫⁻ ω, (if e ∈ ω then 0 else
+    (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p - ((cluster ω o).encard : ℝ≥0∞) ^ p)) ∂μ
+  have hQ : ∀ e, Q e ≠ ⊤ := by
+    intro e
+    refine ne_top_of_le_ne_top
+      (lintegral_pivotal_increment_ne_top_of_lintegral_insert_pow_ne_top e o p (hins e)) ?_
+    refine lintegral_mono fun ω => ?_
+    by_cases he : e ∈ ω
+    · simp [he]
+    · rw [ite_eq_right he, Set.sdiff_singleton_eq_self he]
+  have hfin : ∀ e : Sym2 (Fin d → ℤ), ∀ᵐ ω ∂μ,
+      ((cluster (insert e ω) o).encard : ℝ≥0∞) ≠ ⊤ := by
+    intro e
+    exact ae_ne_top_of_lintegral_pow_ne_top (measurable_encard_cluster_insert_coe e o) p hp
+      (hins e)
+  have hint : ∀ e : Sym2 (Fin d → ℤ), Integrable
+      (fun ω => (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p) μ := by
+    intro e
+    exact integrable_toReal_pow_encard_cluster_insert e o p (hins e)
+  have hrke : ∀ e : Sym2 (Fin d → ℤ),
+      (rk e).toReal = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) := by
+    intro e
+    simp only [rk]
+    simp
+  have hterm : ∀ e : Sym2 (Fin d → ℤ),
+      ‖cw e * ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal ∂μ‖ =
+      |(β : ℝ) * -K' r| * (rk e * Q e).toReal := by
+    intro e
+    have hcoef := cutoff_weight_mul_integral_eq_rate_mul_closed_toReal
+      (K := K) (K' := K') p β r o cw hcw hfin hint e
+    rw [hcoef, Real.norm_eq_abs, abs_mul,
+      abs_of_nonneg (mul_nonneg (radialKernel N _ e).coe_nonneg ENNReal.toReal_nonneg),
+      ENNReal.toReal_mul, hrke e]
+  have hT : (∑' e, w e * Q e) ≤ B := by
+    refine le_trans (le_of_eq ?_) hwin
+    rw [tsum_lintegral_closed_pivotal μ p o w]
+  have hTtop : (∑' e, w e * Q e) ≠ ⊤ := ne_top_of_le_ne_top hB hT
+  have hsubeq : (∑' e : ↥(F : Set (Sym2 (Fin d → ℤ)))ᶜ, w e.1 * Q e.1) =
+      ∑' e, w e * Q e := by
+    have h := ENNReal.sum_add_tsum_compl F (fun e => w e * Q e)
+    have hzero : ∑ e ∈ F, w e * Q e = 0 := by
+      refine Finset.sum_eq_zero fun e he => ?_
+      simp [w, he]
+    rw [hzero, zero_add] at h
+    exact h
+  have hsub : (∑' e : ↥(F : Set (Sym2 (Fin d → ℤ)))ᶜ, w e.1 * Q e.1) ≤ B := by
+    rw [hsubeq]
+    exact hT
+  have hterm' : ∀ e : ↥(F : Set (Sym2 (Fin d → ℤ)))ᶜ,
+      ‖cw e.1 * ∫ ω, (((cluster (insert e.1 ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e.1}) o).encard : ℝ≥0∞) ^ p).toReal ∂μ‖ =
+      |(β : ℝ) * -K' r| * (w e.1 * Q e.1).toReal := by
+    intro e
+    rw [hterm e.1]
+    have hmem : ¬ (e.1 ∈ F) := by
+      have h1 : e.1 ∉ (F : Set (Sym2 (Fin d → ℤ))) := e.2
+      simpa using h1
+    simp only [w]
+    rw [ite_eq_right hmem, one_mul]
+  have hsubt : (∑' e : ↥(F : Set (Sym2 (Fin d → ℤ)))ᶜ, w e.1 * Q e.1) ≠ ⊤ :=
+    ne_top_of_le_ne_top hB hsub
+  have hsummable : Summable fun e : ↥(F : Set (Sym2 (Fin d → ℤ)))ᶜ => (w e.1 * Q e.1).toReal :=
+    ENNReal.summable_toReal hsubt
+  have hbound : ∀ S : Finset ↥(F : Set (Sym2 (Fin d → ℤ)))ᶜ,
+      ∑ e ∈ S, ‖cw e.1 * ∫ ω, (((cluster (insert e.1 ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e.1}) o).encard : ℝ≥0∞) ^ p).toReal ∂μ‖
+      ≤ |(β : ℝ) * -K' r| * B.toReal := by
+    intro S
+    calc ∑ e ∈ S, ‖cw e.1 * ∫ ω, (((cluster (insert e.1 ω) o).encard : ℝ≥0∞) ^ p -
+          ((cluster (ω \ {e.1}) o).encard : ℝ≥0∞) ^ p).toReal ∂μ‖
+        = ∑ e ∈ S, |(β : ℝ) * -K' r| * (w e.1 * Q e.1).toReal :=
+          Finset.sum_congr rfl fun e _ => hterm' e
+      _ = |(β : ℝ) * -K' r| * ∑ e ∈ S, (w e.1 * Q e.1).toReal :=
+          (Finset.mul_sum _ _ _).symm
+      _ ≤ |(β : ℝ) * -K' r| * ∑' e : ↥(F : Set (Sym2 (Fin d → ℤ)))ᶜ,
+            (w e.1 * Q e.1).toReal :=
+          mul_le_mul_of_nonneg_left
+            (hsummable.sum_le_tsum S fun _ _ => ENNReal.toReal_nonneg) (abs_nonneg _)
+      _ = |(β : ℝ) * -K' r| *
+            (∑' e : ↥(F : Set (Sym2 (Fin d → ℤ)))ᶜ, w e.1 * Q e.1).toReal := by
+          have hne : ∀ e : ↥(F : Set (Sym2 (Fin d → ℤ)))ᶜ, w e.1 * Q e.1 ≠ ⊤ := by
+            intro e
+            have hw : w e.1 ≠ ⊤ := by
+              have h1 : (if e.1 ∈ F then (0 : ℝ≥0∞) else 1) ≠ ⊤ := by split_ifs <;> simp
+              have h2 : rk e.1 ≠ ⊤ := by
+                simp only [rk]
+                simp
+              simpa only [w] using ENNReal.mul_ne_top h1 h2
+            exact ENNReal.mul_ne_top hw (hQ e.1)
+          rw [ENNReal.tsum_toReal_eq hne]
+      _ ≤ |(β : ℝ) * -K' r| * B.toReal := by
+          refine mul_le_mul_of_nonneg_left ?_ (abs_nonneg _)
+          exact (ENNReal.toReal_le_toReal hsubt hB).2 hsub
+  exact Real.tsum_le_of_sum_le (fun e => norm_nonneg _) hbound
+
+
+open Classical in
+/-- **The radial indicator on a far pair vanishes.**  This discharges the support hypothesis
+`hcsupp` of `lintegral_window_tail_le_of_factorization` for the concrete weight
+`e ↦ 1{N (e) < r}`, which is `radialKernel` of the indicator profile. -/
+theorem radialKernel_indicator_hcsupp {d : ℕ} {N : Seminorm ℝ (Fin d → ℝ)} {r : ℝ} :
+    ∀ x y : Fin d → ℤ, ¬ (N (Int.cast ∘ (y - x)) < r) →
+      (radialKernel N (fun s => if s < r then 1 else 0) s(x, y) : ℝ≥0∞) = 0 := by
+  intro x y hyx
+  have hsymm : N (Int.cast ∘ (y - x)) = N (Int.cast ∘ (x - y)) := by
+    rw [intCast_comp_sub, intCast_comp_sub, map_sub_rev]
+  have h0 : (radialKernel N (fun s => if s < r then 1 else 0) s(x, y) : ℝ) = 0 :=
+    radialKernel_indicator_eq_zero_of_not_lt (N := N) (r := r) (fun h => hyx (hsymm ▸ h))
+  have h0' : radialKernel N (fun s => if s < r then 1 else 0) s(x, y) = 0 := by
+    exact_mod_cast h0
+  rw [h0']
+  simp
+
+open Classical in
+/-- **The `htail`-shaped small-tail statement at one radius.**
+
+This is `tsum_norm_cutoff_flux_compl_le_of_lintegral_window_tail` with the numeric bound
+renamed.  Its hypothesis `hwin` is *literally* the conclusion of
+`lintegral_window_tail_le_of_factorization` (with `c e = 1{N (e) < r}`), so composing the two
+needs no further conversion.  The conclusion is the `htail` inequality
+`∑' e : ↥Fᶜ, ‖cw r e * ∫ (pivotal)‖ ≤ ε` consumed by
+`continuousOn_flux_cutoff_of_root_succ_moment_of_local_tail`, with the finite pair set
+`F = pairs (W × W)` exhibited. -/
+theorem exists_window_htail_of_lintegral_window_tail {d : ℕ}
+    {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ} (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p)
+    (r : ℝ) (o : Fin d → ℤ) (cw : Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ e, cw e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K r e : ℝ))))
+    (W : Finset (Fin d → ℤ)) (B : ℝ≥0∞) (hB : B ≠ ⊤)
+    (hins : ∀ e : Sym2 (Fin d → ℤ),
+      (∫⁻ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≠ ⊤)
+    (hwin : ∫⁻ ω, ∑' e : Sym2 (Fin d → ℤ),
+        ((if e ∈ (W.product W).image (fun q : (Fin d → ℤ) × (Fin d → ℤ) => s(q.1, q.2))
+          then (0 : ℝ≥0∞) else 1) *
+          (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ≥0∞)) *
+          (if e ∈ ω then 0 else (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+            ((cluster ω o).encard : ℝ≥0∞) ^ p))
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β)) ≤ B)
+    (ε : ℝ) (hε : |(β : ℝ) * -K' r| * B.toReal ≤ ε) :
+    ∑' e : ↥((W.product W).image (fun q : (Fin d → ℤ) × (Fin d → ℤ) => s(q.1, q.2))
+        : Set (Sym2 (Fin d → ℤ)))ᶜ,
+      ‖cw e.1 * ∫ ω, (((cluster (insert e.1 ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e.1}) o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))‖ ≤ ε :=
+  le_trans (tsum_norm_cutoff_flux_compl_le_of_lintegral_window_tail β p hp r o cw hcw W B hB
+    hins hwin) hε
+
+open Classical in
+/-- **The `htail` shape uniformly on a parameter neighbourhood.**
+
+For a family of weights `cw r` and a family of bounds `E r`, if the `ℝ≥0∞` window tail is at most
+`E r` and `|β J'(r)| * (E r).toReal ≤ ε` for every `r ∈ U`, then the real-norm tail is at most
+`ε` for every `r ∈ U`.  Taking `U = U₀ ∩ Ioo u v` with `U₀ ∈ 𝓝 r₀` (and `r₀ ∈ Ioo u v`) turns
+this into the literal `htail` hypothesis of
+`continuousOn_flux_cutoff_of_root_succ_moment_of_local_tail`.
+
+The scalar hypothesis `hε` is where the remaining analysis sits: `E r` is the
+`W`-exterior root-cluster mass at scale `r` multiplied by `2 #S C`, and it is *not* supplied by a
+uniform total mass bound — that is the content of `htail`, and this lemma only converts it. -/
+theorem htail_of_uniform_lintegral_window_tail {d : ℕ}
+    {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ} (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p)
+    (o : Fin d → ℤ) (cw : ℝ → Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ r e, cw r e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K r e : ℝ))))
+    (W : Finset (Fin d → ℤ)) (U : Set ℝ) (ε : ℝ) (E : ℝ → ℝ≥0∞)
+    (hEtop : ∀ r ∈ U, E r ≠ ⊤)
+    (hins : ∀ r ∈ U, ∀ e : Sym2 (Fin d → ℤ),
+      (∫⁻ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≠ ⊤)
+    (hwin : ∀ r ∈ U, ∫⁻ ω, ∑' e : Sym2 (Fin d → ℤ),
+        ((if e ∈ (W.product W).image (fun q : (Fin d → ℤ) × (Fin d → ℤ) => s(q.1, q.2))
+          then (0 : ℝ≥0∞) else 1) *
+          (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ≥0∞)) *
+          (if e ∈ ω then 0 else (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+            ((cluster ω o).encard : ℝ≥0∞) ^ p))
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β)) ≤ E r)
+    (hε : ∀ r ∈ U, |(β : ℝ) * -K' r| * (E r).toReal ≤ ε) :
+    ∀ r ∈ U, ∑' e : ↥((W.product W).image (fun q : (Fin d → ℤ) × (Fin d → ℤ) => s(q.1, q.2))
+        : Set (Sym2 (Fin d → ℤ)))ᶜ,
+      ‖cw r e.1 * ∫ ω, (((cluster (insert e.1 ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e.1}) o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))‖ ≤ ε := by
+  intro r hr
+  exact le_trans (tsum_norm_cutoff_flux_compl_le_of_lintegral_window_tail β p hp r o (cw r)
+    (hcw r) W (E r) (hEtop r hr) (hins r hr) (hwin r hr)) (hε r hr)
+
+open Classical in
+/-- **The zero-rate case.**  When `β J'(r) = 0` the cut-off derivative weight vanishes
+identically, so no bound on the pivotal series is needed and no inverse of the rate appears
+anywhere in this file. -/
+theorem cw_eq_zero_of_rate_eq_zero {d : ℕ} {N : Seminorm ℝ (Fin d → ℝ)} {K K' : ℝ → ℝ}
+    {β : ℝ≥0} {r : ℝ} {cw : Sym2 (Fin d → ℤ) → ℝ}
+    (hcw : ∀ e, cw e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K r e : ℝ))))
+    (h0 : (β : ℝ) * -K' r = 0) (e : Sym2 (Fin d → ℤ)) : cw e = 0 := by
+  rw [hcw e, h0]
+  simp
+
+open Classical in
+/-- **The tail vanishes at zero rate.**  Consequence of `cw_eq_zero_of_rate_eq_zero`: the real
+norm series is identically zero, so the `htail` estimate holds with `ε = 0`. -/
+theorem tsum_norm_cutoff_flux_compl_eq_zero_of_rate_eq_zero {d : ℕ}
+    {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ} (β : ℝ≥0) (p : ℕ) (r : ℝ)
+    (o : Fin d → ℤ) (cw : Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ e, cw e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K r e : ℝ))))
+    (h0 : (β : ℝ) * -K' r = 0) (W : Finset (Fin d → ℤ)) :
+    ∑' e : ↥((W.product W).image (fun q : (Fin d → ℤ) × (Fin d → ℤ) => s(q.1, q.2))
+        : Set (Sym2 (Fin d → ℤ)))ᶜ,
+      ‖cw e.1 * ∫ ω, (((cluster (insert e.1 ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e.1}) o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))‖ = 0 := by
+  refine (tsum_congr fun e => ?_).trans tsum_zero
+  have h : cw e.1 = 0 := cw_eq_zero_of_rate_eq_zero (β := β) (r := r) hcw h0 e.1
+  rw [h]
+  simp
+open Classical in
+/-- **The literal `htail` premise of the derivative interface.**
+
+Given the pointwise `ℝ≥0∞` window bounds `hwin` and the scalar smallness `hε` on
+`U₀ ∩ Ioo u v`, this produces exactly the `htail` hypothesis of
+`continuousOn_flux_cutoff_of_root_succ_moment_of_local_tail`:
+
+`∃ U ∈ 𝓝 r₀, ∃ F, ∀ r ∈ U ∩ Ioo u v, ∑' e : ↥Fᶜ, ‖cw r e * ∫ (pivotal)‖ ≤ ε`
+
+with the finite pair set `F = pairs (W × W)` and `U = U₀ ∩ Ioo u v`.  The neighbourhood
+shrinking is only the interior point `r₀ ∈ Ioo u v`; no uniformity in `r` beyond `hwin`, `hε` is
+asserted. -/
+theorem exists_nhds_window_htail_of_uniform_lintegral_window_tail {d : ℕ}
+    {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ} (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p)
+    (o : Fin d → ℤ) (cw : ℝ → Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ r e, cw r e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K r e : ℝ))))
+    (W : Finset (Fin d → ℤ)) {u v r₀ : ℝ} (hr₀ : r₀ ∈ Ioo u v) (U₀ : Set ℝ)
+    (hU₀ : U₀ ∈ 𝓝 r₀) (ε : ℝ) (E : ℝ → ℝ≥0∞)
+    (hEtop : ∀ r ∈ U₀ ∩ Ioo u v, E r ≠ ⊤)
+    (hins : ∀ r ∈ U₀ ∩ Ioo u v, ∀ e : Sym2 (Fin d → ℤ),
+      (∫⁻ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≠ ⊤)
+    (hwin : ∀ r ∈ U₀ ∩ Ioo u v, ∫⁻ ω, ∑' e : Sym2 (Fin d → ℤ),
+        ((if e ∈ (W.product W).image (fun q : (Fin d → ℤ) × (Fin d → ℤ) => s(q.1, q.2))
+          then (0 : ℝ≥0∞) else 1) *
+          (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ≥0∞)) *
+          (if e ∈ ω then 0 else (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+            ((cluster ω o).encard : ℝ≥0∞) ^ p))
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β)) ≤ E r)
+    (hε : ∀ r ∈ U₀ ∩ Ioo u v, |(β : ℝ) * -K' r| * (E r).toReal ≤ ε) :
+    ∃ U ∈ 𝓝 r₀, ∃ F : Finset (Sym2 (Fin d → ℤ)),
+      ∀ r ∈ U ∩ Ioo u v, ∑' e : ↥(F : Set (Sym2 (Fin d → ℤ)))ᶜ,
+        ‖cw r e.1 * ∫ ω, (((cluster (insert e.1 ω) o).encard : ℝ≥0∞) ^ p -
+          ((cluster (ω \ {e.1}) o).encard : ℝ≥0∞) ^ p).toReal
+          ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))‖ ≤ ε := by
+  refine ⟨U₀ ∩ Ioo u v, Filter.inter_mem hU₀ (isOpen_Ioo.mem_nhds hr₀),
+    (W.product W).image (fun q : (Fin d → ℤ) × (Fin d → ℤ) => s(q.1, q.2)), fun r hr => ?_⟩
+  exact htail_of_uniform_lintegral_window_tail β p hp o cw hcw W (U₀ ∩ Ioo u v) ε E hEtop
+    hins hwin hε r (by simpa using hr)
+
+open Classical in
+/-- **The real-norm tail with the paper's explicit constant.**
+
+`tsum_norm_cutoff_flux_compl_le_of_lintegral_window_tail` with
+`B = 2 #S · ∑_{x ∉ W} C τ_r(x)`, i.e. the bound that `lintegral_window_tail_le_of_factorization`
+supplies from `hfac`.  Feeding the latter lemma's conclusion into `hwin` therefore yields
+
+`∑' e : ↥(pairs (W × W))ᶜ, ‖cw e * ∫ (closed pivotal)‖
+   ≤ |β J'(r)| · (2 #S · ∑_{x ∉ W} C τ_r(x))`,
+
+which is the pair-series form of the paper's `β|J'(r)|` weighted flux.  The extra `hB` is the
+finiteness of that constraint mass: the `W`-exterior root-cluster mass must be finite, and this
+is not a consequence of a uniform total mass bound. -/
+theorem tsum_norm_cutoff_flux_compl_le_of_explicit_window_mass {d : ℕ}
+    {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ} (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p)
+    (r : ℝ) (o : Fin d → ℤ) (cw : Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ e, cw e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K r e : ℝ))))
+    (S : Finset (Fin d → ℤ)) (W : Finset (Fin d → ℤ)) (C : ℝ≥0∞)
+    (hB : 2 * ((S.card : ℝ≥0∞) * ∑' x : Fin d → ℤ,
+        (if x ∈ W then (0 : ℝ≥0∞) else 1) *
+          (C * ∫⁻ ω, (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0)
+            ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β)))) ≠ ⊤)
+    (hins : ∀ e : Sym2 (Fin d → ℤ),
+      (∫⁻ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≠ ⊤)
+    (hwin : ∫⁻ ω, ∑' e : Sym2 (Fin d → ℤ),
+        ((if e ∈ (W.product W).image (fun q : (Fin d → ℤ) × (Fin d → ℤ) => s(q.1, q.2))
+          then (0 : ℝ≥0∞) else 1) *
+          (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ≥0∞)) *
+          (if e ∈ ω then 0 else (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+            ((cluster ω o).encard : ℝ≥0∞) ^ p))
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β)) ≤
+      2 * ((S.card : ℝ≥0∞) * ∑' x : Fin d → ℤ,
+        (if x ∈ W then (0 : ℝ≥0∞) else 1) *
+          (C * ∫⁻ ω, (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0)
+            ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))))) :
+    ∑' e : ↥((W.product W).image (fun q : (Fin d → ℤ) × (Fin d → ℤ) => s(q.1, q.2))
+        : Set (Sym2 (Fin d → ℤ)))ᶜ,
+      ‖cw e.1 * ∫ ω, (((cluster (insert e.1 ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e.1}) o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))‖
+      ≤ |(β : ℝ) * -K' r| * (2 * ((S.card : ℝ≥0∞) * ∑' x : Fin d → ℤ,
+          (if x ∈ W then (0 : ℝ≥0∞) else 1) *
+            (C * ∫⁻ ω, (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0)
+              ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))))).toReal :=
+  tsum_norm_cutoff_flux_compl_le_of_lintegral_window_tail β p hp r o cw hcw W _ hB hins hwin
+
+end PercLib.Models.LongRange
+
+end
+
+namespace PercLib.Percolation.Bond
+
+open Classical in
+/-- **Window tail from fibre-summed crossing hypotheses.**  Same conclusion as
+`lintegral_window_tail_le`, but the per-pair bounds are replaced by the fibre sums over one
+coordinate: `Σ_y (crossing mass)(x,y) ≤ #S * g x` and its transpose.  The pointwise `min`
+factorization implies these (through `tsum_fibre_le`) but not conversely. -/
+theorem lintegral_window_tail_le_of_fibre_factorization {d : ℕ}
+    {_N : PercLib.Analysis.ModelNorm (Fin d → ℝ)} {_r : ℝ}
+    (S : Finset (Fin d → ℤ))
+    (μ : Measure (Config (Fin d → ℤ))) (o : Fin d → ℤ) (p : ℕ)
+    (c : Sym2 (Fin d → ℤ) → ℝ≥0∞)
+    (W : Finset (Fin d → ℤ)) (g : (Fin d → ℤ) → ℝ≥0∞)
+    (hfibx : ∀ x : Fin d → ℤ, ∑' y : Fin d → ℤ, ∫⁻ ω, c (s(x, y)) *
+      ((if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) * (if y ∈ cluster ω o then 0 else 1) *
+        ((((cluster ω o).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+          ((cluster ω o).encard : ℝ≥0∞) ^ p)) ∂μ ≤ (S.card : ℝ≥0∞) * g x)
+    (hfiby : ∀ y : Fin d → ℤ, ∑' x : Fin d → ℤ, ∫⁻ ω, c (s(x, y)) *
+      ((if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) * (if y ∈ cluster ω o then 0 else 1) *
+        ((((cluster ω o).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+          ((cluster ω o).encard : ℝ≥0∞) ^ p)) ∂μ ≤ (S.card : ℝ≥0∞) * g y) :
+    ∫⁻ ω, ∑' e : Sym2 (Fin d → ℤ),
+        ((if e ∈ (W.product W).image (fun q : (Fin d → ℤ) × (Fin d → ℤ) => s(q.1, q.2))
+          then (0 : ℝ≥0∞) else 1) * c e) *
+          (if e ∈ ω then 0 else (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+            ((cluster ω o).encard : ℝ≥0∞) ^ p)) ∂μ
+      ≤ 2 * ((S.card : ℝ≥0∞) * ∑' x : Fin d → ℤ, (if x ∈ W then (0 : ℝ≥0∞) else 1) * g x) := by
+  classical
+  set F : Finset (Sym2 (Fin d → ℤ)) :=
+    (W.product W).image (fun q : (Fin d → ℤ) × (Fin d → ℤ) => s(q.1, q.2)) with hF
+  set X : (Fin d → ℤ) → (Fin d → ℤ) → Config (Fin d → ℤ) → ℝ≥0∞ := fun x y ω =>
+    (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) * (if y ∈ cluster ω o then 0 else 1) *
+      ((((cluster ω o).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+        ((cluster ω o).encard : ℝ≥0∞) ^ p) with hX
+  -- measurability of the crossing integrand
+  have hXm : ∀ x y : Fin d → ℤ, Measurable fun ω : Config (Fin d → ℤ) => X x y ω := by
+    intro x y
+    have h1 : Measurable fun ω : Config (Fin d → ℤ) =>
+        (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) :=
+      Measurable.ite (measurableSet_conn o x) measurable_const measurable_const
+    have h2 : Measurable fun ω : Config (Fin d → ℤ) =>
+        (if y ∈ cluster ω o then (0 : ℝ≥0∞) else 1) :=
+      Measurable.ite (measurableSet_conn o y) measurable_const measurable_const
+    have h3 : Measurable fun ω : Config (Fin d → ℤ) =>
+        ((((cluster ω o).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+          ((cluster ω o).encard : ℝ≥0∞) ^ p) :=
+      ((measurable_encard_cluster_toENNReal o).add
+        (measurable_encard_cluster_toENNReal y)).pow_const p |>.sub
+        ((measurable_encard_cluster_toENNReal o).pow_const p)
+    exact (h1.mul h2).mul h3
+  have hcm : ∀ x y : Fin d → ℤ,
+      AEMeasurable (fun ω : Config (Fin d → ℤ) => c (s(x, y)) * X x y ω) μ :=
+    fun x y => (measurable_const.mul (hXm x y)).aemeasurable
+  -- the pointwise crossing identity
+  have hcross : ∀ ω : Config (Fin d → ℤ),
+      (∑' e : Sym2 (Fin d → ℤ),
+        ((if e ∈ F then (0 : ℝ≥0∞) else 1) * c e) *
+          (if e ∈ ω then 0 else (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+            ((cluster ω o).encard : ℝ≥0∞) ^ p)))
+      = ∑' x : Fin d → ℤ, ∑' y : Fin d → ℤ,
+          X x y ω * ((if s(x, y) ∈ F then (0 : ℝ≥0∞) else 1) * c (s(x, y))) := by
+    intro ω
+    rw [tsum_pivotal_eq_tsum_crossing ω o p
+      (fun e => (if e ∈ F then (0 : ℝ≥0∞) else 1) * c e)]
+    refine tsum_congr fun x => tsum_congr fun y => ?_
+    simp only [hX]
+    ac_rfl
+  -- pairs both of whose endpoints lie in the window are in `F`
+  have hmemF : ∀ x y : Fin d → ℤ, x ∈ W → y ∈ W → s(x, y) ∈ F := by
+    intro x y hxw hyw
+    refine Finset.mem_image.2 ⟨(x, y), Finset.mem_product.2 ⟨hxw, hyw⟩, rfl⟩
+  have hIW : ∀ x y : Fin d → ℤ, (if s(x, y) ∈ F then (0 : ℝ≥0∞) else 1) ≤
+      (if x ∈ W then (0 : ℝ≥0∞) else 1) + (if y ∈ W then (0 : ℝ≥0∞) else 1) := by
+    intro x y
+    by_cases hs : s(x, y) ∈ F
+    · rw [ite_eq_left hs]
+      exact zero_le
+    · rw [ite_eq_right hs]
+      by_cases hxw : x ∈ W
+      · by_cases hyw : y ∈ W
+        · exact absurd (hmemF x y hxw hyw) hs
+        · simp [hxw, hyw]
+      · simp [hxw]
+  -- pointwise: the window-exterior pair mass is charged to the window-exterior vertices
+  have hpt : ∀ ω : Config (Fin d → ℤ),
+      (∑' x : Fin d → ℤ, ∑' y : Fin d → ℤ,
+        X x y ω * ((if s(x, y) ∈ F then (0 : ℝ≥0∞) else 1) * c (s(x, y))))
+      ≤ ∑' x : Fin d → ℤ, ∑' y : Fin d → ℤ,
+          ((if x ∈ W then (0 : ℝ≥0∞) else 1) + (if y ∈ W then (0 : ℝ≥0∞) else 1)) *
+            (c (s(x, y)) * X x y ω) := by
+    intro ω
+    refine ENNReal.tsum_le_tsum fun x => ENNReal.tsum_le_tsum fun y => ?_
+    have h := mul_le_mul (le_refl (X x y ω * c (s(x, y)))) (hIW x y)
+      zero_le zero_le
+    calc X x y ω * ((if s(x, y) ∈ F then (0 : ℝ≥0∞) else 1) * c (s(x, y)))
+        = (X x y ω * c (s(x, y))) * (if s(x, y) ∈ F then (0 : ℝ≥0∞) else 1) := by ac_rfl
+      _ ≤ (X x y ω * c (s(x, y))) *
+            ((if x ∈ W then (0 : ℝ≥0∞) else 1) + (if y ∈ W then (0 : ℝ≥0∞) else 1)) := h
+      _ = ((if x ∈ W then (0 : ℝ≥0∞) else 1) + (if y ∈ W then (0 : ℝ≥0∞) else 1)) *
+            (c (s(x, y)) * X x y ω) := by ac_rfl
+  -- fibre hypothesis, in the second coordinate
+  have hfibY : ∀ x : Fin d → ℤ,
+      ∑' y : Fin d → ℤ, ∫⁻ ω, c (s(x, y)) * X x y ω ∂μ ≤ (S.card : ℝ≥0∞) * g x := hfibx
+  have hfibX : ∀ y : Fin d → ℤ,
+      ∑' x : Fin d → ℤ, ∫⁻ ω, c (s(x, y)) * X x y ω ∂μ ≤ (S.card : ℝ≥0∞) * g y := hfiby
+  have hmeasT : ∀ x : Fin d → ℤ, AEMeasurable
+      (fun ω : Config (Fin d → ℤ) => ∑' y : Fin d → ℤ,
+        ((if x ∈ W then (0 : ℝ≥0∞) else 1) + (if y ∈ W then (0 : ℝ≥0∞) else 1)) *
+          (c (s(x, y)) * X x y ω)) μ := by
+    intro x
+    refine AEMeasurable.tsum fun y => ?_
+    exact (hcm x y).const_mul _
+  calc ∫⁻ ω, ∑' e : Sym2 (Fin d → ℤ),
+        ((if e ∈ F then (0 : ℝ≥0∞) else 1) * c e) *
+          (if e ∈ ω then 0 else (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+            ((cluster ω o).encard : ℝ≥0∞) ^ p)) ∂μ
+      = ∫⁻ ω, ∑' x : Fin d → ℤ, ∑' y : Fin d → ℤ,
+          X x y ω * ((if s(x, y) ∈ F then (0 : ℝ≥0∞) else 1) * c (s(x, y))) ∂μ :=
+        lintegral_congr hcross
+    _ ≤ ∫⁻ ω, ∑' x : Fin d → ℤ, ∑' y : Fin d → ℤ,
+          ((if x ∈ W then (0 : ℝ≥0∞) else 1) + (if y ∈ W then (0 : ℝ≥0∞) else 1)) *
+            (c (s(x, y)) * X x y ω) ∂μ := lintegral_mono hpt
+    _ = ∑' x : Fin d → ℤ, ∑' y : Fin d → ℤ,
+          ((if x ∈ W then (0 : ℝ≥0∞) else 1) + (if y ∈ W then (0 : ℝ≥0∞) else 1)) *
+            ∫⁻ ω, c (s(x, y)) * X x y ω ∂μ := by
+        rw [lintegral_tsum hmeasT]
+        refine tsum_congr fun x => ?_
+        rw [lintegral_tsum (fun y => (hcm x y).const_mul _)]
+        refine tsum_congr fun y => ?_
+        exact lintegral_const_mul _ (measurable_const.mul (hXm x y))
+    _ = (∑' x : Fin d → ℤ, ∑' y : Fin d → ℤ,
+          (if x ∈ W then (0 : ℝ≥0∞) else 1) * ∫⁻ ω, c (s(x, y)) * X x y ω ∂μ)
+        + ∑' x : Fin d → ℤ, ∑' y : Fin d → ℤ,
+          (if y ∈ W then (0 : ℝ≥0∞) else 1) * ∫⁻ ω, c (s(x, y)) * X x y ω ∂μ := by
+        calc ∑' x : Fin d → ℤ, ∑' y : Fin d → ℤ,
+              ((if x ∈ W then (0 : ℝ≥0∞) else 1) + (if y ∈ W then (0 : ℝ≥0∞) else 1)) *
+                ∫⁻ ω, c (s(x, y)) * X x y ω ∂μ
+            = ∑' x : Fin d → ℤ, ∑' y : Fin d → ℤ,
+                ((if x ∈ W then (0 : ℝ≥0∞) else 1) * ∫⁻ ω, c (s(x, y)) * X x y ω ∂μ
+                  + (if y ∈ W then (0 : ℝ≥0∞) else 1) *
+                    ∫⁻ ω, c (s(x, y)) * X x y ω ∂μ) :=
+              tsum_congr fun x => tsum_congr fun y => add_mul _ _ _
+          _ = ∑' x : Fin d → ℤ,
+                ((∑' y : Fin d → ℤ, (if x ∈ W then (0 : ℝ≥0∞) else 1) *
+                    ∫⁻ ω, c (s(x, y)) * X x y ω ∂μ)
+                  + ∑' y : Fin d → ℤ, (if y ∈ W then (0 : ℝ≥0∞) else 1) *
+                    ∫⁻ ω, c (s(x, y)) * X x y ω ∂μ) :=
+              tsum_congr fun x => ENNReal.tsum_add
+          _ = _ := ENNReal.tsum_add
+    _ ≤ (S.card : ℝ≥0∞) * (∑' x : Fin d → ℤ, (if x ∈ W then (0 : ℝ≥0∞) else 1) * g x)
+        + (S.card : ℝ≥0∞) * (∑' y : Fin d → ℤ, (if y ∈ W then (0 : ℝ≥0∞) else 1) * g y) := by
+        refine add_le_add ?_ ?_
+        · calc (∑' x : Fin d → ℤ, ∑' y : Fin d → ℤ,
+              (if x ∈ W then (0 : ℝ≥0∞) else 1) * ∫⁻ ω, c (s(x, y)) * X x y ω ∂μ)
+              = ∑' x : Fin d → ℤ, (if x ∈ W then (0 : ℝ≥0∞) else 1) *
+                  (∑' y : Fin d → ℤ, ∫⁻ ω, c (s(x, y)) * X x y ω ∂μ) := by
+                refine tsum_congr fun x => ?_
+                rw [ENNReal.tsum_mul_left]
+            _ ≤ ∑' x : Fin d → ℤ, (if x ∈ W then (0 : ℝ≥0∞) else 1) * ((S.card : ℝ≥0∞) * g x) := by
+                refine ENNReal.tsum_le_tsum fun x => mul_le_mul' le_rfl (hfibY x)
+            _ = (S.card : ℝ≥0∞) * (∑' x : Fin d → ℤ, (if x ∈ W then (0 : ℝ≥0∞) else 1) * g x) := by
+                rw [← ENNReal.tsum_mul_left]
+                exact tsum_congr fun x => by ac_rfl
+        · calc (∑' x : Fin d → ℤ, ∑' y : Fin d → ℤ,
+              (if y ∈ W then (0 : ℝ≥0∞) else 1) * ∫⁻ ω, c (s(x, y)) * X x y ω ∂μ)
+              = ∑' y : Fin d → ℤ, ∑' x : Fin d → ℤ,
+                  (if y ∈ W then (0 : ℝ≥0∞) else 1) * ∫⁻ ω, c (s(x, y)) * X x y ω ∂μ :=
+                ENNReal.tsum_comm
+            _ = ∑' y : Fin d → ℤ, (if y ∈ W then (0 : ℝ≥0∞) else 1) *
+                  (∑' x : Fin d → ℤ, ∫⁻ ω, c (s(x, y)) * X x y ω ∂μ) := by
+                refine tsum_congr fun y => ?_
+                rw [ENNReal.tsum_mul_left]
+            _ ≤ ∑' y : Fin d → ℤ, (if y ∈ W then (0 : ℝ≥0∞) else 1) * ((S.card : ℝ≥0∞) * g y) := by
+                refine ENNReal.tsum_le_tsum fun y => mul_le_mul' le_rfl (hfibX y)
+            _ = (S.card : ℝ≥0∞) * (∑' y : Fin d → ℤ, (if y ∈ W then (0 : ℝ≥0∞) else 1) * g y) := by
+                rw [← ENNReal.tsum_mul_left]
+                exact tsum_congr fun y => by ac_rfl
+    _ = 2 * ((S.card : ℝ≥0∞) * ∑' x : Fin d → ℤ, (if x ∈ W then (0 : ℝ≥0∞) else 1) * g x) := by
+        rw [← two_mul]
+
+
+open Classical in
+/-- **Pointwise pair bounds imply the fibre bounds** with the same `#S` factor.  This is the
+direction that shows the fibre hypotheses above are implied by the pointwise `min` factorization
+(and hence that the theorem above specialises to `lintegral_window_tail_le_of_factorization`). -/
+theorem fibre_bound_of_pointwise {d : ℕ}
+    {N : PercLib.Analysis.ModelNorm (Fin d → ℝ)} {r : ℝ}
+    (S : Finset (Fin d → ℤ)) (hS : ∀ z, N (Int.cast ∘ z) < r → z ∈ S)
+    (μ : Measure (Config (Fin d → ℤ))) (o : Fin d → ℤ) (p : ℕ)
+    (c : Sym2 (Fin d → ℤ) → ℝ≥0∞)
+    (hcsupp : ∀ x y : Fin d → ℤ, ¬ (N (Int.cast ∘ (y - x)) < r) → c (s(x, y)) = 0)
+    (g : (Fin d → ℤ) → ℝ≥0∞)
+    (hx : ∀ x y : Fin d → ℤ, ∫⁻ ω, c (s(x, y)) *
+      ((if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) * (if y ∈ cluster ω o then 0 else 1) *
+        ((((cluster ω o).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+          ((cluster ω o).encard : ℝ≥0∞) ^ p)) ∂μ ≤ g x) :
+    ∀ x : Fin d → ℤ, ∑' y : Fin d → ℤ, ∫⁻ ω, c (s(x, y)) *
+      ((if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) * (if y ∈ cluster ω o then 0 else 1) *
+        ((((cluster ω o).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+          ((cluster ω o).encard : ℝ≥0∞) ^ p)) ∂μ ≤ (S.card : ℝ≥0∞) * g x := by
+  intro x
+  exact tsum_fibre_le S hS x (fun y => ∫⁻ ω, c (s(x, y)) *
+      ((if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) * (if y ∈ cluster ω o then 0 else 1) *
+        ((((cluster ω o).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+          ((cluster ω o).encard : ℝ≥0∞) ^ p)) ∂μ) (g x)
+    (fun y hy => by simp [hcsupp x y hy]) (fun y => hx x y)
+
+open Classical in
+/-- **Pointwise pair bounds imply the transposed fibre bounds.**  Same as
+`fibre_bound_of_pointwise` but summing over the *first* coordinate; the support hypothesis has to
+be stated in the transposed direction. -/
+theorem fibre_bound_of_pointwise_transposed {d : ℕ}
+    {N : PercLib.Analysis.ModelNorm (Fin d → ℝ)} {r : ℝ}
+    (S : Finset (Fin d → ℤ)) (hS : ∀ z, N (Int.cast ∘ z) < r → z ∈ S)
+    (μ : Measure (Config (Fin d → ℤ))) (o : Fin d → ℤ) (p : ℕ)
+    (c : Sym2 (Fin d → ℤ) → ℝ≥0∞)
+    (hcsuppT : ∀ x y : Fin d → ℤ, ¬ (N (Int.cast ∘ (x - y)) < r) → c (s(x, y)) = 0)
+    (g : (Fin d → ℤ) → ℝ≥0∞)
+    (hy : ∀ x y : Fin d → ℤ, ∫⁻ ω, c (s(x, y)) *
+      ((if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) * (if y ∈ cluster ω o then 0 else 1) *
+        ((((cluster ω o).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+          ((cluster ω o).encard : ℝ≥0∞) ^ p)) ∂μ ≤ g y) :
+    ∀ y : Fin d → ℤ, ∑' x : Fin d → ℤ, ∫⁻ ω, c (s(x, y)) *
+      ((if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) * (if y ∈ cluster ω o then 0 else 1) *
+        ((((cluster ω o).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+          ((cluster ω o).encard : ℝ≥0∞) ^ p)) ∂μ ≤ (S.card : ℝ≥0∞) * g y := by
+  intro y
+  exact tsum_fibre_le S hS y (fun x => ∫⁻ ω, c (s(x, y)) *
+      ((if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) * (if y ∈ cluster ω o then 0 else 1) *
+        ((((cluster ω o).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+          ((cluster ω o).encard : ℝ≥0∞) ^ p)) ∂μ) (g y)
+    (fun x hx => by simp [hcsuppT x y hx]) (fun x => hy x y)
+
+open Classical in
+/-- **The finite-window tail bound from the `min` factorization, via the fibre bounds.**
+
+Same conclusion as `lintegral_window_tail_le_of_factorization`, obtained by first summing
+the pointwise bound over one coordinate, so that only the summed form is used. -/
+theorem lintegral_window_tail_le_of_factorization_via_fibre {d : ℕ}
+    {N : PercLib.Analysis.ModelNorm (Fin d → ℝ)} {r : ℝ}
+    (S : Finset (Fin d → ℤ)) (hS : ∀ z, N (Int.cast ∘ z) < r → z ∈ S)
+    (μ : Measure (Config (Fin d → ℤ))) (o : Fin d → ℤ) (p : ℕ)
+    (c : Sym2 (Fin d → ℤ) → ℝ≥0∞)
+    (hcsupp : ∀ x y : Fin d → ℤ, ¬ (N (Int.cast ∘ (y - x)) < r) → c (s(x, y)) = 0)
+    (W : Finset (Fin d → ℤ)) (C : ℝ≥0∞)
+    (hfac : ∀ x y : Fin d → ℤ,
+      ∫⁻ ω, c (s(x, y)) *
+        ((if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) * (if y ∈ cluster ω o then 0 else 1) *
+          ((((cluster ω o).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+            ((cluster ω o).encard : ℝ≥0∞) ^ p)) ∂μ ≤
+      C * min (∫⁻ ω, (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ)
+        (∫⁻ ω, (if y ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ)) :
+    ∫⁻ ω, ∑' e : Sym2 (Fin d → ℤ),
+        ((if e ∈ (W.product W).image (fun q : (Fin d → ℤ) × (Fin d → ℤ) => s(q.1, q.2))
+          then (0 : ℝ≥0∞) else 1) * c e) *
+          (if e ∈ ω then 0 else (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+            ((cluster ω o).encard : ℝ≥0∞) ^ p)) ∂μ
+      ≤ 2 * ((S.card : ℝ≥0∞) * ∑' x : Fin d → ℤ,
+          (if x ∈ W then (0 : ℝ≥0∞) else 1) *
+            (C * ∫⁻ ω, (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ)) := by
+  refine lintegral_window_tail_le_of_fibre_factorization (_N := N) (_r := r) S μ o p c W
+    (fun x => C * ∫⁻ ω, (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ) ?_ ?_
+  · intro x
+    exact fibre_bound_of_pointwise S hS μ o p c hcsupp
+      (fun x => C * ∫⁻ ω, (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ)
+      (fun x y => le_trans (hfac x y) (mul_le_mul' le_rfl (min_le_left _ _))) x
+  · have hcsuppT : ∀ x y : Fin d → ℤ,
+        ¬ (N (Int.cast ∘ (x - y)) < r) → c (s(x, y)) = 0 := by
+      intro x y hxy
+      refine hcsupp x y ?_
+      have heq : (Int.cast ∘ (y - x) : Fin d → ℝ) = -(Int.cast ∘ (x - y)) := by
+        funext i
+        simp only [Function.comp_apply, Pi.sub_apply, Pi.neg_apply]
+        push_cast
+        ring
+      rw [heq, map_neg_eq_map]
+      exact hxy
+    intro y
+    exact fibre_bound_of_pointwise_transposed S hS μ o p c hcsuppT
+      (fun y => C * ∫⁻ ω, (if y ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ)
+      (fun x y => le_trans (hfac x y) (mul_le_mul' le_rfl (min_le_right _ _))) y
+
+end PercLib.Percolation.Bond
+
+namespace PercLib.Percolation.Bond
+
+variable {V : Type*} [Countable V]
+
+/-- Superadditivity-type inequality for `ℝ≥0`: `r ^ n + 1 ≤ (r + 1) ^ n` for `n ≥ 1`. -/
+theorem one_add_le_pow_one_add (r : ℝ≥0) (k : ℕ) : r ^ (k + 1) + 1 ≤ (r + 1) ^ (k + 1) := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    have hstep : (r + 1) ^ (k + 1 + 1) = (r + 1) ^ (k + 1) * (r + 1) := pow_succ _ _
+    have hmono : (r ^ (k + 1) + 1) * (r + 1) ≤ (r + 1) ^ (k + 1) * (r + 1) :=
+      mul_le_mul_of_nonneg_right ih (by positivity)
+    have hexp : (r ^ (k + 1) + 1) * (r + 1) = r ^ (k + 1 + 1) + r ^ (k + 1) + r + 1 := by
+      rw [pow_succ]
+      ring
+    have hge : r ^ (k + 1 + 1) + 1 ≤ r ^ (k + 1 + 1) + r ^ (k + 1) + r + 1 := by
+      have hX : r ^ (k + 1 + 1) ≤ r ^ (k + 1 + 1) + (r ^ (k + 1) + r) :=
+        le_add_of_nonneg_right (by positivity)
+      have := add_le_add_left hX 1
+      simpa only [add_assoc] using this
+    calc r ^ (k + 1 + 1) + 1 ≤ r ^ (k + 1 + 1) + r ^ (k + 1) + r + 1 := hge
+      _ = (r ^ (k + 1) + 1) * (r + 1) := hexp.symm
+      _ ≤ (r + 1) ^ (k + 1) * (r + 1) := hmono
+      _ = (r + 1) ^ (k + 1 + 1) := hstep.symm
+
+/-- **The crossing increment is at least one on finite clusters.**  If `|K_o| < ∞` and
+`|K_y| ≥ 1` then `(|K_o| + |K_y|) ^ p - |K_o| ^ p ≥ 1` for `p ≥ 1`, in `ℝ≥0∞`. -/
+theorem one_le_crossing_increment (p : ℕ) (hp : 1 ≤ p) {a b : ℝ≥0∞} (ha : a ≠ ⊤) (hb : 1 ≤ b) :
+    1 ≤ (a + b) ^ p - a ^ p := by
+  obtain ⟨k, rfl⟩ : ∃ k, p = k + 1 := Nat.exists_eq_succ_of_ne_zero (by omega)
+  set r : ℝ≥0 := a.toNNReal with hr
+  have har : (r : ℝ≥0∞) = a := ENNReal.coe_toNNReal ha
+  have hb' : a + 1 ≤ a + b := by simpa [add_comm] using add_le_add_left hb a
+  have hR1 : ((r ^ (k + 1) + 1 : ℝ≥0) : ℝ≥0∞) = a ^ (k + 1) + 1 := by
+    push_cast
+    rw [har]
+  have hR2 : (((r + 1) ^ (k + 1) : ℝ≥0) : ℝ≥0∞) = (a + 1) ^ (k + 1) := by
+    push_cast
+    rw [har]
+  have hone : a ^ (k + 1) + 1 ≤ (a + 1) ^ (k + 1) := by
+    rw [← hR1, ← hR2]
+    exact ENNReal.coe_le_coe.2 (one_add_le_pow_one_add r k)
+  have htarget : a ^ (k + 1) + 1 ≤ (a + b) ^ (k + 1) :=
+    le_trans hone (ENNReal.pow_le_pow_left hb')
+  have htop : a ^ (k + 1) ≠ ⊤ := ne_of_lt (ENNReal.pow_lt_top (lt_top_iff_ne_top.2 ha))
+  have hle : a ^ (k + 1) ≤ (a + b) ^ (k + 1) := le_trans (le_add_right le_rfl) htarget
+  rw [ENNReal.le_sub_iff_add_le_right htop hle]
+  simpa [add_comm] using htarget
+
+open Classical in
+/-- **The factorization hypothesis forces two-point comparability.**
+
+Under `hfac` with a pair weight `c`, on the event `{x ∈ K_o, y ∉ K_o}` the crossing increment
+`(|K_o| + |K_y|) ^ p - |K_o| ^ p` is at least `1` whenever `|K_o|` is finite, so `hfac` implies
+
+`c {x,y} * (P(x ∈ K_o) - P(y ∈ K_o)) ≤ C * min (P(x ∈ K_o)) (P(y ∈ K_o))`.
+
+Equivalently: `P(x ∈ K_o) ≤ (1 + C / c {x,y}) * P(y ∈ K_o)` on every pair that carries weight.
+This is a *necessary* condition on the two-point function; it is not a consequence of moment
+bounds, and it is the part of `hfac` that a counterexample would have to attack. -/
+theorem two_point_sub_le_of_factorization {μ : Measure (Config V)} {o : V} {p : ℕ}
+    (hp : 1 ≤ p) (c : Sym2 V → ℝ≥0∞) {C : ℝ≥0∞}
+    (hfin : μ {ω : Config V | ((cluster ω o).encard : ℝ≥0∞) = ⊤} = 0)
+    (hfac : ∀ x y : V, ∫⁻ ω, c (s(x, y)) *
+      ((if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) * (if y ∈ cluster ω o then 0 else 1) *
+        ((((cluster ω o).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+          ((cluster ω o).encard : ℝ≥0∞) ^ p)) ∂μ ≤
+      C * min (∫⁻ ω, (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ)
+        (∫⁻ ω, (if y ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ)) :
+    ∀ x y : V, c (s(x, y)) *
+        ((∫⁻ ω, (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ) -
+         (∫⁻ ω, (if y ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ)) ≤
+      C * min (∫⁻ ω, (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ)
+        (∫⁻ ω, (if y ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ) := by
+  intro x y
+  set Sx : Set (Config V) := {ω | x ∈ cluster ω o} with hSxdef
+  set Sy : Set (Config V) := {ω | y ∈ cluster ω o} with hSydef
+  have hSxm : MeasurableSet Sx := by
+    have h_eq : Sx = conn o x := by
+      ext ω
+      rw [hSxdef]
+      exact mem_cluster_iff ω o x
+    rw [h_eq]
+    exact measurableSet_conn o x
+  have hSym : MeasurableSet Sy := by
+    have h_eq : Sy = conn o y := by
+      ext ω
+      rw [hSydef]
+      exact mem_cluster_iff ω o y
+    rw [h_eq]
+    exact measurableSet_conn o y
+  have hτx : ∫⁻ ω, (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ = μ Sx := by
+    have hfun : (fun ω : Config V => (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0)) =
+        Sx.indicator (fun _ => (1 : ℝ≥0∞)) := by
+      funext ω
+      simp [Set.indicator, hSxdef]
+    rw [hfun, lintegral_indicator_const hSxm (1 : ℝ≥0∞), one_mul]
+  have hτy : ∫⁻ ω, (if y ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ = μ Sy := by
+    have hfun : (fun ω : Config V => (if y ∈ cluster ω o then (1 : ℝ≥0∞) else 0)) =
+        Sy.indicator (fun _ => (1 : ℝ≥0∞)) := by
+      funext ω
+      simp [Set.indicator, hSydef]
+    rw [hfun, lintegral_indicator_const hSym (1 : ℝ≥0∞), one_mul]
+  have hsub : μ Sx ≤ μ (Sx ∩ Syᶜ) + μ Sy := by
+    have hsubs : Sx ⊆ (Sx ∩ Syᶜ) ∪ Sy := by
+      intro ω hω
+      by_cases h : ω ∈ Sy
+      · exact Or.inr h
+      · exact Or.inl ⟨hω, h⟩
+    calc μ Sx ≤ μ ((Sx ∩ Syᶜ) ∪ Sy) := measure_mono hsubs
+      _ ≤ μ (Sx ∩ Syᶜ) + μ Sy := measure_union_le _ _
+  have hkey : μ Sx - μ Sy ≤ μ (Sx ∩ Syᶜ) := by
+    rw [tsub_le_iff_right]
+    exact hsub
+  have hae : ∀ᵐ ω ∂μ, ((cluster ω o).encard : ℝ≥0∞) ≠ ⊤ := by
+    rw [ae_iff]
+    simpa using hfin
+  have hmeasind : Measurable fun ω : Config V =>
+      (Sx ∩ Syᶜ).indicator (fun _ => (1 : ℝ≥0∞)) ω :=
+    measurable_const.indicator (hSxm.inter hSym.compl)
+  have hpt : ∀ᵐ ω ∂μ, c (s(x, y)) * (Sx ∩ Syᶜ).indicator (fun _ => (1 : ℝ≥0∞)) ω ≤
+      c (s(x, y)) * ((if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) *
+        (if y ∈ cluster ω o then 0 else 1) *
+        ((((cluster ω o).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+          ((cluster ω o).encard : ℝ≥0∞) ^ p)) := by
+    filter_upwards [hae] with ω hω
+    refine mul_le_mul_of_nonneg_left ?_ (by positivity)
+    by_cases hx : x ∈ cluster ω o
+    · by_cases hy : y ∈ cluster ω o
+      · have hnot : ω ∉ Sx ∩ Syᶜ := fun h => h.2 (by simpa [hSydef] using hy)
+        simp [Set.indicator, hnot, hx, hy]
+      · have hmem : ω ∈ Sx ∩ Syᶜ := by
+          refine ⟨?_, ?_⟩
+          · simpa [hSxdef] using hx
+          · simpa [hSydef] using hy
+        have hb : (1 : ℝ≥0∞) ≤ ((cluster ω y).encard : ℝ≥0∞) := by
+          have h1 := Set.one_le_encard_iff_nonempty.2
+            (⟨y, mem_cluster_self ω y⟩ : (cluster ω y).Nonempty)
+          exact_mod_cast h1
+        have hinc := one_le_crossing_increment p hp hω hb
+        simp only [Set.indicator_of_mem hmem]
+        simpa [hx, hy] using hinc
+    · have hnot : ω ∉ Sx ∩ Syᶜ := fun h => hx (by simpa [hSxdef] using h.1)
+      simp [Set.indicator, hnot, hx]
+  have hInt : c (s(x, y)) * μ (Sx ∩ Syᶜ) ≤
+      ∫⁻ ω, c (s(x, y)) * (Sx ∩ Syᶜ).indicator (fun _ => (1 : ℝ≥0∞)) ω ∂μ := by
+    rw [lintegral_const_mul _ hmeasind,
+      lintegral_indicator_const (hSxm.inter hSym.compl) (1 : ℝ≥0∞), one_mul]
+  calc c (s(x, y)) * ((∫⁻ ω, (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ) -
+        (∫⁻ ω, (if y ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ))
+      = c (s(x, y)) * (μ Sx - μ Sy) := by rw [hτx, hτy]
+    _ ≤ c (s(x, y)) * μ (Sx ∩ Syᶜ) :=
+        mul_le_mul_of_nonneg_left hkey (by positivity)
+    _ ≤ ∫⁻ ω, c (s(x, y)) * (Sx ∩ Syᶜ).indicator (fun _ => (1 : ℝ≥0∞)) ω ∂μ := hInt
+    _ ≤ ∫⁻ ω, c (s(x, y)) * ((if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) *
+        (if y ∈ cluster ω o then 0 else 1) *
+        ((((cluster ω o).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+          ((cluster ω o).encard : ℝ≥0∞) ^ p)) ∂μ := lintegral_mono_ae hpt
+    _ ≤ C * min (∫⁻ ω, (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ)
+        (∫⁻ ω, (if y ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ) := hfac x y
+
+omit [Countable V] in
+/-- At `p = 1` the crossing increment is the volume of the `y`-cluster, provided the root
+cluster is finite.  This is the case in which `hfac` says precisely that the *two-point*
+crossing mass is bounded by `C` times the smaller of the two connection probabilities. -/
+theorem crossing_increment_eq_of_one {a b : ℝ≥0∞} (ha : a ≠ ⊤) :
+    (a + b) ^ 1 - a ^ 1 = b := by
+  rw [pow_one, pow_one, add_comm]
+  exact ENNReal.add_sub_cancel_right ha
+
+omit [Countable V] in
+open Classical in
+/-- **`hfac` at `p = 1` is a two-point crossing-mass bound.**  On the a.e.-finite root cluster
+the `p = 1` left-hand side of `hfac` is the integral of the crossing indicator times `|K_y|`. -/
+theorem lintegral_crossing_one_eq {μ : Measure (Config V)} {o : V}
+    (c : Sym2 V → ℝ≥0∞) (x y : V)
+    (hfin : μ {ω : Config V | ((cluster ω o).encard : ℝ≥0∞) = ⊤} = 0) :
+    ∫⁻ ω, c (s(x, y)) *
+        ((if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) * (if y ∈ cluster ω o then 0 else 1) *
+          ((((cluster ω o).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ 1 -
+            ((cluster ω o).encard : ℝ≥0∞) ^ 1)) ∂μ =
+      ∫⁻ ω, c (s(x, y)) *
+        ((if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) * (if y ∈ cluster ω o then 0 else 1) *
+          ((cluster ω y).encard : ℝ≥0∞)) ∂μ := by
+  refine lintegral_congr_ae ?_
+  filter_upwards [show ∀ᵐ ω ∂μ, ((cluster ω o).encard : ℝ≥0∞) ≠ ⊤ from by
+    rw [ae_iff]; simpa using hfin] with ω hω
+  rw [crossing_increment_eq_of_one hω]
+
+end PercLib.Percolation.Bond
