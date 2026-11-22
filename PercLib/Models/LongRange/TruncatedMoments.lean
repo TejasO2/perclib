@@ -18,6 +18,7 @@ public import PercLib.Probability.MassTransportTuple
 public import PercLib.Percolation.Bond.MomentDerivativeTruncated
 public import PercLib.Percolation.Bond.Susceptibility
 public import PercLib.Models.HierarchicalCutoff
+public import PercLib.Models.LongRange.CutoffCorner
 public import PercLib.Percolation.Bond.Forest
 public import PercLib.Probability.Cylinder
 public import PercLib.Analysis.DominatedDerivative
@@ -2204,9 +2205,8 @@ omit [Countable V] in
 /-- **A sufficient condition for the all-pairs dominator.** The summability hypothesis `hsum` of
 `abs_tsum_capped_flux_le` and `integral_sub_eq_integral_flux_of_cap` is implied by a
 uniform-in-`e` bound `K` on the single-edge `p`-th moments together with summability of the
-derivative weights `e ↦ |c r e|`. On the cut-off family the weights are finitely supported, so the
-second input is free there; the first is what sharpness of the phase transition has to supply. The
-two inputs are separate: the weights do not control the cluster moments. -/
+derivative weights `e ↦ |c r e|`. That summation is free on a finite vertex set but need not
+converge on an infinite lattice. The moment and weight inputs are kept separate. -/
 theorem summable_flux_dominator_of_uniform_moment (p : ℝ → Sym2 V → unitInterval)
     (c : ℝ → Sym2 V → ℝ) (o : V) (pow : ℕ) (r : ℝ) {K : ℝ}
     (hbound : ∀ e, ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ pow
@@ -3523,8 +3523,9 @@ theorem integral_encard_cluster_insert_pow_le_of_uniform_sym2 [Countable V]
 from two explicit inputs: a uniform bound `m` on the per-vertex `p`-th cluster moments (with
 a.e. finiteness and integrability), and summability of the derivative weights
 `e ↦ |c r e|`. The two inputs are independent: the weights do not control the moments, and the
-moments do not control the weights. On the cut-off family the weights are finitely supported,
-so `hw` is free there; the moment bound is the sharpness input. -/
+moments do not control the weights. On a finite vertex set
+`hw` follows from `Summable.of_finite`; on an infinite lattice the weights can fail to be
+summable. The moment bound remains a separate sharpness input. -/
 theorem summable_flux_dominator_of_uniform_vertex_moment [Countable V]
     (p : ℝ → Sym2 V → unitInterval) (c : ℝ → Sym2 V → ℝ) (o : V) (pow : ℕ) (r : ℝ) {m : ℝ}
     (hfin : ∀ y, ∀ᵐ ω ∂(law (p r)), ((cluster ω y).encard : ℝ≥0∞) ≠ ⊤)
@@ -3895,3 +3896,759 @@ theorem one_sub_mul_integral_insert_sub_basic {ι : Type*} (q : ι → unitInter
         rw [integral_congr_ae (Eventually.of_forall hbind)]
 
 end PercLib.Probability
+
+/-! ## Cutoff supports and dominator bounds
+
+On `ℤ^d`, cutoff support is radial in the displacement vector: the same short displacement
+occurs at infinitely many pairs. Summability of the derivative weight alone therefore is not a
+general bound. Finite vertex dominators are explicit; on infinite lattices the relevant
+additional input is summability of the radially weighted moment diagram.
+-/
+
+noncomputable section
+
+open MeasureTheory Set Filter
+open scoped ENNReal NNReal Topology unitInterval
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability
+
+/-! ### Where the pivotal increment is supported -/
+
+/-- If no endpoint of the pair `e` lies in the cluster of `o`, then forcing `e` open and forcing
+`e` closed give the same cluster of `o`. This is the precise sense in which the pivotal increment
+of `o` is supported on the pairs touching the cluster of `o`; in particular the cluster of `o`
+after inserting `e` is not, in general, the union of the endpoint clusters. -/
+theorem cluster_insert_eq_cluster_sdiff_of_forall_not_mem {V : Type*} {ω : Config V} {o : V}
+    {e : Sym2 V} (he : ∀ x ∈ e, x ∉ cluster ω o) :
+    cluster (insert e ω) o = cluster (ω \ {e}) o := by
+  have hsub : cluster (ω \ {e}) o ⊆ cluster ω o :=
+    cluster_mono (sdiff_subset (s := ω) (t := {e})) o
+  have h1 : cluster (insert e (ω \ {e})) o = cluster (ω \ {e}) o :=
+    cluster_insert_eq_of_forall_not_mem fun x hx hmem => he x hx (hsub hmem)
+  rwa [Set.insert_sdiff_singleton] at h1
+
+/-- The `p`-th pivotal increment of `o` vanishes at every configuration in which the pair `e` does
+not touch the cluster of `o`. -/
+theorem pivotal_encard_pow_sub_eq_zero_of_forall_not_mem {V : Type*} {ω : Config V} {o : V}
+    {e : Sym2 V} {pow : ℕ} (he : ∀ x ∈ e, x ∉ cluster ω o) :
+    ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ pow -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ pow = 0 := by
+  rw [cluster_insert_eq_cluster_sdiff_of_forall_not_mem he, tsub_self]
+
+/-- Monotonicity of the `pow`-th cluster volume under forcing the pair `e` open. -/
+theorem encard_sdiff_pow_le_insert_pow {V : Type*} {ω : Config V} {o : V} {e : Sym2 V}
+    {pow : ℕ} :
+    ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ pow ≤
+      ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ pow := by
+  have hsub : ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ≤
+      ((cluster (insert e ω) o).encard : ℝ≥0∞) := by
+    exact_mod_cast Set.encard_le_encard
+      (cluster_mono ((sdiff_subset (s := ω) (t := {e})).trans (subset_insert e ω)) o)
+  exact pow_le_pow_left₀ (zero_le : (0 : ℝ≥0∞) ≤ _) hsub pow
+
+/-! ### The size of the cut-off derivative weight -/
+
+variable {d : ℕ}
+
+/-- **The derivative weight is bounded by the radial indicator times `β L`.** For `|K' r| ≤ L` the
+weight `c_r(e) = 1{N(e) < r} * β (-K'(r)) * exp (-β J_r(e))` of the cut-off family is at most
+`β L` times the indicator `1{N(e) < r}`; the exponential factor is at most `1` because the cut-off
+kernel is nonnegative and `β ≥ 0`. -/
+theorem abs_radialKernel_indicator_mul_exp_le (N : Seminorm ℝ (Fin d → ℝ)) (β : ℝ≥0)
+    (K K' : ℝ → ℝ) {r L : ℝ} (hL : |K' r| ≤ L) (e : Sym2 (Fin d → ℤ)) :
+    |(radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+        ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ)))| ≤
+      (β : ℝ) * L * (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) := by
+  have hind0 : (0 : ℝ) ≤ (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) :=
+    (radialKernel N (fun s => if s < r then 1 else 0) e).coe_nonneg
+  have hJ : (0 : ℝ) ≤ (cutoffKernel N K r e : ℝ) := (cutoffKernel N K r e).coe_nonneg
+  have hβ : (0 : ℝ) ≤ (β : ℝ) := β.coe_nonneg
+  have hL0 : 0 ≤ L := (abs_nonneg (K' r)).trans hL
+  have hexp1 : Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ)) ≤ 1 := by
+    rw [Real.exp_le_one_iff]
+    exact mul_nonpos_of_nonpos_of_nonneg (neg_nonpos.mpr hβ) hJ
+  have hfac : |(β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ))| ≤
+      (β : ℝ) * L := by
+    rw [abs_mul, abs_mul, abs_neg, abs_of_nonneg hβ, abs_of_pos (Real.exp_pos _)]
+    calc ((β : ℝ) * |K' r|) * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ))
+        ≤ ((β : ℝ) * L) * 1 :=
+          mul_le_mul (mul_le_mul_of_nonneg_left hL hβ) hexp1 (Real.exp_pos _).le
+            (mul_nonneg hβ hL0)
+      _ = (β : ℝ) * L := mul_one _
+  calc |(radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+        ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ)))|
+      = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+        |(β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ))| := by
+        rw [abs_mul, abs_of_nonneg hind0]
+    _ ≤ (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) * ((β : ℝ) * L) :=
+        mul_le_mul_of_nonneg_left hfac hind0
+    _ = (β : ℝ) * L * (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) := by ring
+
+/-- The same bound with the indicator dropped: on `|K' r| ≤ L` every derivative weight of the
+cut-off family is at most `β L`. This is the pointwise bound a finite vertex set needs, where the
+edge set is finite. -/
+theorem abs_radialKernel_indicator_mul_exp_le_const (N : Seminorm ℝ (Fin d → ℝ)) (β : ℝ≥0)
+    (K K' : ℝ → ℝ) {r L : ℝ} (hL : |K' r| ≤ L) (e : Sym2 (Fin d → ℤ)) :
+    |(radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+        ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ)))| ≤ (β : ℝ) * L := by
+  have hβ : (0 : ℝ) ≤ (β : ℝ) := β.coe_nonneg
+  have hL0 : 0 ≤ L := (abs_nonneg (K' r)).trans hL
+  refine (abs_radialKernel_indicator_mul_exp_le N β K K' hL e).trans ?_
+  have hind1 : (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) ≤ 1 := by
+    rcases radialKernel_indicator_eq_zero_or_one N r e with h | h
+    · rw [h]; norm_num
+    · rw [h]
+  calc (β : ℝ) * L * (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ)
+      ≤ (β : ℝ) * L * 1 := mul_le_mul_of_nonneg_left hind1 (mul_nonneg hβ hL0)
+    _ = (β : ℝ) * L := mul_one _
+
+/-- The indicator `1{N (e) < r}` vanishes off the cut-off: for `N (x - y) ≥ r` the weight factor is
+`0`. -/
+theorem radialKernel_indicator_eq_zero_of_not_lt {N : Seminorm ℝ (Fin d → ℝ)} {r : ℝ}
+    {x y : Fin d → ℤ} (h : ¬ N (Int.cast ∘ (x - y)) < r) :
+    (radialKernel N (fun s => if s < r then 1 else 0) s(x, y) : ℝ) = 0 := by
+  by_cases hxy : x = y
+  · subst hxy
+    simp
+  · rw [radialKernel_of_ne hxy]
+    simp [h]
+
+/-- **The finite support of the weight is radial.** The derivative weight is not a finitely
+supported function of the pair on `ℤ^d` — every short difference vector occurs at infinitely many
+positions — but it vanishes at every pair whose difference vector is outside the finite set
+`{z ≠ 0 : N z < r}` of `finite_norm_lt`. This is the exact form in which finite support is
+available in infinite volume. -/
+theorem exists_finset_cutoff_deriv_weight_eq_zero (N : ModelNorm (Fin d → ℝ)) (β : ℝ≥0)
+    (K K' : ℝ → ℝ) (r : ℝ) :
+    ∃ D : Finset (Fin d → ℤ), ∀ z ∉ D, ∀ x : Fin d → ℤ,
+      (radialKernel N (fun s => if s < r then 1 else 0) s(x + z, x) : ℝ) *
+        ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r s(x + z, x) : ℝ))) = 0 := by
+  classical
+  refine ⟨(finite_norm_lt N r).toFinset, fun z hz x => ?_⟩
+  by_cases hz0 : z = 0
+  · subst hz0
+    simp
+  · have hlt : ¬ N (Int.cast ∘ z) < r := fun hc =>
+      hz ((finite_norm_lt N r).mem_toFinset.mpr ⟨hz0, hc⟩)
+    have hsub : (x + z) - x = z := by abel
+    have hne : ¬ N (Int.cast ∘ ((x + z) - x)) < r := by rw [hsub]; exact hlt
+    rw [radialKernel_indicator_eq_zero_of_not_lt (N := N) (x := x + z) (y := x) hne, zero_mul]
+
+
+/-! ### The per-edge pivotal moment bound -/
+
+/-- **The pivotal `p`-th increment is at most the inserted `p`-th moment.** Forcing `e` closed only
+shrinks the cluster of `o`, so the increment is nonnegative and at most the inserted cluster volume
+to the `p`; integrating gives the bound. No independence, no mass transport and no moment input
+beyond the integrability of the inserted moment are used. -/
+theorem abs_integral_pivotal_encard_pow_le {V : Type*} [Countable V] (μ : Measure (Config V))
+    (e : Sym2 V) (o : V) (pow : ℕ)
+    (hfin : ∀ᵐ ω ∂μ, ((cluster (insert e ω) o).encard : ℝ≥0∞) ≠ ⊤)
+    (hint : Integrable (fun ω => (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ pow) μ) :
+    |∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ pow -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ pow).toReal ∂μ| ≤
+      ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ pow ∂μ := by
+  have hle : ∀ᵐ ω ∂μ, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ pow -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ pow).toReal ≤
+      (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ pow := by
+    filter_upwards [hfin] with ω hω
+    have htop : ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ pow ≠ ⊤ := ENNReal.pow_ne_top hω
+    have hmono := ENNReal.toReal_mono htop (tsub_le_self :
+      ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ pow -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ pow ≤
+      ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ pow)
+    rwa [ENNReal.toReal_pow] at hmono
+  have hnonneg : 0 ≤ ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ pow -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ pow).toReal ∂μ :=
+    integral_nonneg fun ω => ENNReal.toReal_nonneg
+  rw [abs_of_nonneg hnonneg]
+  exact integral_mono_of_nonneg (Eventually.of_forall fun ω => ENNReal.toReal_nonneg) hint hle
+
+/-! ### The weight is not summable on the infinite lattice -/
+
+/-- The multiples of a nonzero integer vector are distinct. -/
+theorem nsmul_injective_of_ne_zero {d : ℕ} {z : Fin d → ℤ} (hz : z ≠ 0) :
+    Function.Injective fun n : ℕ => n • z := by
+  have hcoord : ∃ i, z i ≠ 0 := by
+    by_contra h
+    push Not at h
+    exact hz (funext h)
+  obtain ⟨i, hi⟩ := hcoord
+  intro n m h
+  have h2 : ((n : ℤ) * z i) = ((m : ℤ) * z i) := by
+    have h3 := congrFun h i
+    simpa only [Pi.smul_apply, nsmul_eq_mul] using h3
+  have h4 : (n : ℤ) = (m : ℤ) := by
+    refine (mul_right_inj' (a := z i) hi).mp ?_
+    rw [mul_comm (z i) ((n : ℤ)), mul_comm (z i) ((m : ℤ))]
+    exact h2
+  exact_mod_cast h4
+
+/-- The pairs `{n z + z, n z}` are distinct for distinct `n`, when `z ≠ 0`. -/
+theorem injective_pair_succ_nsmul {d : ℕ} {z : Fin d → ℤ} (hz : z ≠ 0) :
+    Function.Injective fun n : ℕ => s(n • z + z, n • z) := by
+  intro n m h
+  rw [Sym2.eq_iff] at h
+  rcases h with ⟨h1, h2⟩ | ⟨h1, h2⟩
+  · exact nsmul_injective_of_ne_zero hz h2
+  · have e1 : (n + 1) • z = m • z := by rw [succ_nsmul]; exact h1
+    have e2 : n • z = (m + 1) • z := by rw [succ_nsmul]; exact h2
+    have h3 := nsmul_injective_of_ne_zero hz e1
+    have h4 := nsmul_injective_of_ne_zero hz e2
+    omega
+
+/-- **The radial indicator is not summable on `ℤ^d`.** Along the pairs `{n z, (n+1) z}` the
+indicator `1{N (e) < r}` is constantly `1`, so as soon as some nonzero lattice point has `N z < r`
+the indicator has infinite `ℓ¹` mass. This is the exact obstruction that keeps
+`summable_flux_dominator_of_uniform_moment` — and hence `abs_tsum_capped_flux_le` with a
+position-independent weight — out of reach on the infinite lattice: the pairs of a fixed short
+length are infinitely many, and no bound that forgets the position of the pair can sum over them.
+The replacement is `dominator_cutoff_of_summable_indicator_moment`, whose hypothesis is about the
+inserted *moments* and not about the weights alone. -/
+theorem not_summable_radialKernel_indicator (N : ModelNorm (Fin d → ℝ)) {r : ℝ}
+    {z : Fin d → ℤ} (hz : z ≠ 0) (hzr : N (Int.cast ∘ z) < r) :
+    ¬ Summable fun e : Sym2 (Fin d → ℤ) =>
+      (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) := by
+  intro hsum
+  have hne : ∀ n : ℕ, n • z + z ≠ n • z := by
+    intro n h
+    refine hz ?_
+    have h' := congrArg (fun t => t - n • z) h
+    simpa using h'
+  have hval : ∀ n : ℕ,
+      (radialKernel N (fun s => if s < r then 1 else 0) (s(n • z + z, n • z)) : ℝ) = 1 := by
+    intro n
+    rw [coe_radialKernel_of_ne (N := N) (K := fun s => if s < r then 1 else 0)
+      (x := n • z + z) (y := n • z) (hne n) (by positivity)]
+    simp [hzr]
+  have hcomp : Summable fun n : ℕ =>
+      (radialKernel N (fun s => if s < r then 1 else 0) (s(n • z + z, n • z)) : ℝ) :=
+    hsum.comp_injective (injective_pair_succ_nsmul hz)
+  rw [show (fun n : ℕ => (radialKernel N (fun s => if s < r then 1 else 0)
+      (s(n • z + z, n • z)) : ℝ)) = fun _ => (1 : ℝ) from funext hval] at hcomp
+  exact absurd (tendsto_nhds_unique hcomp.tendsto_atTop_zero tendsto_const_nhds) (by norm_num)
+
+-- the statement and the value computation both unfold the cut-off kernel at a concrete pair
+/-- **The cut-off derivative weight is not summable on `ℤ^d`.** For `β > 0` and `K' r ≠ 0` the same
+pair family shows that `|c_r(e)|` is a *positive constant* along `e = {n z + z, n z}`: the radial
+indicator is `1` and the cut-off kernel, hence the exponential factor, depends only on the
+difference `z`. So `Summable fun e => |c r e|` — the weight hypothesis of
+`summable_flux_dominator_of_uniform_moment` and of `abs_tsum_capped_flux_le` — fails on the infinite
+lattice whenever the cut-off is not degenerate. This closes that route for infinite volume: the
+unweighted all-pairs series can only be controlled through the inserted moments, as in
+`dominator_cutoff_of_summable_indicator_moment`. -/
+theorem not_summable_cutoff_deriv_weight (N : ModelNorm (Fin d → ℝ)) (β : ℝ≥0)
+    {K K' : ℝ → ℝ} {r : ℝ} {z : Fin d → ℤ} (hz : z ≠ 0) (hzr : N (Int.cast ∘ z) < r)
+    (hβ : 0 < (β : ℝ)) (hK' : K' r ≠ 0) :
+    ¬ Summable fun e : Sym2 (Fin d → ℤ) =>
+      |(radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+        ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ)))| := by
+  intro hsum
+  have hne : ∀ n : ℕ, n • z + z ≠ n • z := by
+    intro n h
+    refine hz ?_
+    have h' := congrArg (fun t => t - n • z) h
+    simpa using h'
+  -- the value of the cut-off kernel at the pair family, which depends only on `z`
+  have hck : ∀ n : ℕ, (cutoffKernel N K r (s(n • z + z, n • z)) : ℝ) =
+      ((cutoffProfile K r (N.toSeminorm (Int.cast ∘ z))).toNNReal : ℝ) := by
+    intro n
+    rw [cutoffKernel, radialKernel_of_ne (x := n • z + z) (y := n • z) (hne n),
+      show (n • z + z) - n • z = z from by abel]
+  have hind : ∀ n : ℕ,
+      (radialKernel N (fun s => if s < r then 1 else 0) (s(n • z + z, n • z)) : ℝ) = 1 := by
+    intro n
+    rw [coe_radialKernel_of_ne (N := N) (K := fun s => if s < r then 1 else 0)
+      (x := n • z + z) (y := n • z) (hne n) (by positivity),
+      show (n • z + z) - n • z = z from by abel]
+    simp [hzr]
+  set δ : ℝ := (β : ℝ) * |K' r| *
+    Real.exp (-(β : ℝ) * ((cutoffProfile K r (N.toSeminorm (Int.cast ∘ z))).toNNReal : ℝ)) with hδ
+  have hδpos : 0 < δ := by
+    have h1 : 0 < |K' r| := abs_pos.mpr hK'
+    have h2 : 0 < Real.exp (-(β : ℝ) *
+      ((cutoffProfile K r (N.toSeminorm (Int.cast ∘ z))).toNNReal : ℝ)) :=
+      Real.exp_pos _
+    rw [hδ]
+    positivity
+  have hval : ∀ n : ℕ,
+      |(radialKernel N (fun s => if s < r then 1 else 0) (s(n • z + z, n • z)) : ℝ) *
+        ((β : ℝ) * -K' r *
+          Real.exp (-(β : ℝ) * (cutoffKernel N K r (s(n • z + z, n • z)) : ℝ)))| = δ := by
+    intro n
+    rw [hind n, hck n, one_mul, abs_mul, abs_mul, abs_neg, abs_of_nonneg β.coe_nonneg,
+      abs_of_pos (Real.exp_pos _), hδ]
+  have hcomp : Summable fun n : ℕ =>
+      |(radialKernel N (fun s => if s < r then 1 else 0) (s(n • z + z, n • z)) : ℝ) *
+        ((β : ℝ) * -K' r *
+          Real.exp (-(β : ℝ) * (cutoffKernel N K r (s(n • z + z, n • z)) : ℝ)))| :=
+    hsum.comp_injective (injective_pair_succ_nsmul hz)
+  rw [show (fun n : ℕ => |(radialKernel N (fun s => if s < r then 1 else 0)
+      (s(n • z + z, n • z)) : ℝ) *
+        ((β : ℝ) * -K' r *
+          Real.exp (-(β : ℝ) * (cutoffKernel N K r (s(n • z + z, n • z)) : ℝ)))|)
+      = fun _ => δ from funext hval] at hcomp
+  exact hδpos.ne' (tendsto_nhds_unique hcomp.tendsto_atTop_zero tendsto_const_nhds).symm
+
+/-! ### The all-pairs dominator on a finite vertex set -/
+
+section Finite
+
+variable {V : Type*} [Countable V] [Fintype V]
+
+/-- **The all-pairs dominator with an explicit constant, finite vertex set.** If every derivative
+weight is bounded by `C` and every inserted `p`-th moment by `K`, then every finite partial sum of
+`|c r e|` times the absolute pivotal `p`-th increment is at most `C K #(Sym2 V)`. This is the
+`hKd` shape of `hasDerivAt_integral_pow_of_cap_flux` with `Kd r = C K #(Sym2 V)`; finiteness of the
+edge set is what makes the constant independent of `S`. -/
+theorem sum_abs_weight_mul_abs_integral_pivotal_le (μ : Measure (Config V)) (c : Sym2 V → ℝ)
+    (o : V) (pow : ℕ) {C K : ℝ} (hC : 0 ≤ C) (hK : 0 ≤ K) (hw : ∀ e, |c e| ≤ C)
+    (hfin : ∀ e, ∀ᵐ ω ∂μ, ((cluster (insert e ω) o).encard : ℝ≥0∞) ≠ ⊤)
+    (hint : ∀ e, Integrable (fun ω => (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ pow) μ)
+    (hbound : ∀ e, ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ pow ∂μ ≤ K)
+    (S : Finset (Sym2 V)) :
+    ∑ e ∈ S, |c e| * |∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ pow -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ pow).toReal ∂μ| ≤
+      C * K * (Fintype.card (Sym2 V) : ℝ) := by
+  have hflux : ∀ e, |∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ pow -
+      ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ pow).toReal ∂μ| ≤ K := fun e =>
+    (abs_integral_pivotal_encard_pow_le μ e o pow (hfin e) (hint e)).trans (hbound e)
+  calc ∑ e ∈ S, |c e| * |∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ pow -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ pow).toReal ∂μ|
+      ≤ ∑ _e ∈ S, C * K := by
+        refine Finset.sum_le_sum fun e _ => ?_
+        exact mul_le_mul (hw e) (hflux e) (abs_nonneg _) hC
+    _ = (S.card : ℝ) * (C * K) := by
+        rw [Finset.sum_const, nsmul_eq_mul]
+    _ ≤ (Fintype.card (Sym2 V) : ℝ) * (C * K) := by
+        refine mul_le_mul_of_nonneg_right ?_ (mul_nonneg hC hK)
+        exact_mod_cast Finset.card_le_univ S
+    _ = C * K * (Fintype.card (Sym2 V) : ℝ) := by ring
+
+omit [Countable V] in
+/-- The constant `Kd` of `sum_abs_weight_mul_abs_integral_pivotal_le` is interval integrable, which
+is the `hKdint` hypothesis of `hasDerivAt_integral_pow_of_cap_flux`. -/
+theorem intervalIntegrable_const_dominator {C K : ℝ} (u v : ℝ) :
+    IntervalIntegrable (fun _ : ℝ => C * K * (Fintype.card (Sym2 V) : ℝ)) volume u v :=
+  intervalIntegrable_const
+
+omit [Countable V] in
+/-- The weighted inserted `p`-th moments are summable on a finite vertex set, with the explicit
+bound `C K #(Sym2 V)`. This is the `hsum` of `abs_tsum_capped_flux_le` under a pointwise weight
+bound, i.e. `Summable fun e => |c r e|` supplied concretely. -/
+theorem tsum_abs_weight_mul_integral_pivotal_le (μ : Measure (Config V)) (c : Sym2 V → ℝ)
+    (o : V) (pow : ℕ) {C K : ℝ} (hC : 0 ≤ C) (hK : 0 ≤ K) (hw : ∀ e, |c e| ≤ C)
+    (hbound : ∀ e, ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ pow ∂μ ≤ K) :
+    ∑' e, |c e| * ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ pow ∂μ ≤
+      C * K * (Fintype.card (Sym2 V) : ℝ) := by
+  have hle : ∀ S : Finset (Sym2 V), ∑ e ∈ S, |c e| *
+      ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ pow ∂μ ≤
+      C * K * (Fintype.card (Sym2 V) : ℝ) := by
+    intro S
+    calc ∑ e ∈ S, |c e| * ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ pow ∂μ
+        ≤ ∑ _e ∈ S, C * K := by
+          refine Finset.sum_le_sum fun e _ => ?_
+          exact mul_le_mul (hw e) (hbound e)
+            (integral_nonneg fun ω => pow_nonneg ENNReal.toReal_nonneg pow) hC
+      _ = (S.card : ℝ) * (C * K) := by rw [Finset.sum_const, nsmul_eq_mul]
+      _ ≤ (Fintype.card (Sym2 V) : ℝ) * (C * K) := by
+          refine mul_le_mul_of_nonneg_right ?_ (mul_nonneg hC hK)
+          exact_mod_cast Finset.card_le_univ S
+      _ = C * K * (Fintype.card (Sym2 V) : ℝ) := by ring
+  exact Real.tsum_le_of_sum_le (fun e => mul_nonneg (abs_nonneg _)
+    (integral_nonneg fun ω => pow_nonneg ENNReal.toReal_nonneg pow)) hle
+
+omit [Countable V] in
+/-- On a finite vertex set no cluster has more than `#V` vertices. -/
+theorem encard_cluster_insert_le_card (e : Sym2 V) (o : V) (ω : Config V) :
+    ((cluster (insert e ω) o).encard : ℝ≥0∞) ≤ (Fintype.card V : ℝ≥0∞) := by
+  have h3 : (cluster (insert e ω) o).encard ≤ (univ : Set V).encard :=
+    Set.encard_le_encard (subset_univ _)
+  rw [Set.encard_univ, ENat.card_eq_coe_natCard, Nat.card_eq_fintype_card] at h3
+  exact_mod_cast h3
+
+omit [Countable V] in
+/-- On a finite vertex set every cluster has at most `#V` vertices, so the inserted `p`-th moment is
+at most `(#V)^p` pointwise. -/
+theorem encard_cluster_insert_toReal_pow_le_card (e : Sym2 V) (o : V) (pow : ℕ)
+    (ω : Config V) :
+    (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ pow ≤ (Fintype.card V : ℝ) ^ pow := by
+  have h2 := encard_cluster_insert_le_card e o ω
+  calc (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ pow
+      ≤ ((Fintype.card V : ℝ≥0∞).toReal) ^ pow :=
+        pow_le_pow_left₀ ENNReal.toReal_nonneg (ENNReal.toReal_mono (by simp) h2) pow
+    _ = (Fintype.card V : ℝ) ^ pow := by rw [ENNReal.toReal_natCast]
+
+omit [Countable V] in
+/-- **The uniform inserted `p`-th moment bound holds automatically on a finite vertex set**, with
+the explicit constant `(#V)^p`. So the finite-volume form of the dominator needs no moment input at
+all. -/
+theorem integral_encard_cluster_pow_le_card (q : Sym2 V → unitInterval) (e : Sym2 V) (o : V)
+    (pow : ℕ) :
+    ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ pow ∂(law q) ≤
+      (Fintype.card V : ℝ) ^ pow := by
+  refine (integral_mono_of_nonneg (Eventually.of_forall fun ω =>
+    pow_nonneg ENNReal.toReal_nonneg pow) (integrable_const ((Fintype.card V : ℝ) ^ pow))
+    (Eventually.of_forall fun ω => encard_cluster_insert_toReal_pow_le_card e o pow ω)).trans
+    (le_of_eq ?_)
+  rw [integral_const, Measure.real, measure_univ]
+  simp
+
+/-- **The dominator and its interval integrability, fully discharged on a finite vertex set.** With
+the weight bound `C`, the automatic moment bound `(#V)^p` and `Kd r = C (#V)^p #(Sym2 V)`, both
+`hKd` and `hKdint` of `hasDerivAt_integral_pow_of_cap_flux` hold at every parameter and every
+interval. -/
+theorem exists_dominator_fintype (p : ℝ → Sym2 V → unitInterval) (c : ℝ → Sym2 V → ℝ) (o : V)
+    (pow : ℕ) {C : ℝ} (hC : 0 ≤ C) (hw : ∀ r e, |c r e| ≤ C) :
+    (∀ r : ℝ, ∀ S : Finset (Sym2 V), ∑ e ∈ S, |c r e| *
+        |∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ pow -
+          ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ pow).toReal ∂(law (p r))| ≤
+        C * (Fintype.card V : ℝ) ^ pow * (Fintype.card (Sym2 V) : ℝ)) ∧
+      (∀ u v : ℝ, IntervalIntegrable
+        (fun _ : ℝ => C * (Fintype.card V : ℝ) ^ pow * (Fintype.card (Sym2 V) : ℝ))
+        volume u v) := by
+  have hK : (0 : ℝ) ≤ (Fintype.card V : ℝ) ^ pow := pow_nonneg (Nat.cast_nonneg _) pow
+  have hfin : ∀ (r : ℝ) (e : Sym2 V), ∀ᵐ ω ∂(law (p r)),
+      ((cluster (insert e ω) o).encard : ℝ≥0∞) ≠ ⊤ :=
+    fun r e => Eventually.of_forall fun ω =>
+      ne_top_of_le_ne_top (by simp) (encard_cluster_insert_le_card e o ω)
+  have hint : ∀ (r : ℝ) (e : Sym2 V), Integrable
+      (fun ω => (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ pow) (law (p r)) := by
+    intro r e
+    refine Integrable.of_bound
+      ((measurable_encard_cluster_insert_coe e o).ennreal_toReal.pow_const pow).aestronglyMeasurable
+      ((Fintype.card V : ℝ) ^ pow) (Eventually.of_forall fun ω => ?_)
+    rw [Real.norm_of_nonneg (pow_nonneg ENNReal.toReal_nonneg pow)]
+    exact encard_cluster_insert_toReal_pow_le_card e o pow ω
+  refine ⟨fun r S => ?_, fun u v => intervalIntegrable_const_dominator u v⟩
+  exact sum_abs_weight_mul_abs_integral_pivotal_le (law (p r)) (c r) o pow hC hK (hw r)
+    (hfin r) (hint r) (fun e => integral_encard_cluster_pow_le_card (p r) e o pow) S
+
+omit [Countable V] in
+/-- **The `hsum` of `abs_tsum_capped_flux_le`, with the weight summability supplied concretely.** On
+a finite vertex set a pointwise weight bound gives `Summable fun e => |c r e|`, hence the weighted
+inserted moments are summable in the shape consumed by `summable_flux_dominator_of_uniform_moment`,
+which is the dominator hypothesis of `abs_tsum_capped_flux_le` and
+`integral_sub_eq_integral_flux_of_cap`, with the explicit value `C K #(Sym2 V)`. On `ℤ^d` this
+route is closed (the weight has infinite `ℓ¹` mass);
+`dominator_cutoff_of_summable_indicator_moment` is the replacement there. -/
+theorem summable_weight_mul_integral_pivotal_of_fintype (p : ℝ → Sym2 V → unitInterval)
+    (c : ℝ → Sym2 V → ℝ) (o : V) (pow : ℕ) (r : ℝ) {C K : ℝ} (hC : 0 ≤ C) (hK : 0 ≤ K)
+    (hw : ∀ e, |c r e| ≤ C)
+    (hbound : ∀ e, ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ pow
+      ∂(law (p r)) ≤ K) :
+    Summable (fun e => |c r e| * ∫ ω,
+        (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ pow ∂(law (p r))) ∧
+      ∑' e, |c r e| * ∫ ω,
+        (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ pow ∂(law (p r)) ≤
+        C * K * (Fintype.card (Sym2 V) : ℝ) := by
+  have hsumm : Summable (fun e => |c r e| * ∫ ω,
+      (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ pow ∂(law (p r))) :=
+    summable_flux_dominator_of_uniform_moment p c o pow r hbound Summable.of_finite
+  exact ⟨hsumm, tsum_abs_weight_mul_integral_pivotal_le (law (p r)) (c r) o pow hC hK (hw)
+    (hbound)⟩
+
+end Finite
+
+/-! ### Non-vacuity -/
+
+/-- Non-vacuity of the finite-volume dominator: on the one-point vertex type every cluster is the
+whole vertex set, so the inserted `p`-th moment is exactly `1` and the bound with `(#V)^p = 1`
+holds. -/
+example (q : Sym2 Unit → unitInterval) (e : Sym2 Unit) (o : Unit) (pow : ℕ) :
+    ∫ ω : Config Unit, (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ pow ∂(law q) ≤ 1 := by
+  have h := integral_encard_cluster_pow_le_card (V := Unit) q e o pow
+  simpa using h
+
+end PercLib.Models.LongRange
+
+/-! ## Closed normalization of the cutoff derivative coefficient
+
+On an active cutoff pair, the derivative coefficient times the endpoint integral equals
+the profile rate times the closed-coordinate integral. The active-pair hypothesis is
+necessary: an inactive radial coefficient vanishes, while an arbitrary bounded observable
+need not.
+-/
+
+noncomputable section
+
+open MeasureTheory Set Filter Function
+open scoped ENNReal NNReal Topology unitInterval
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Percolation.Bond PercLib.Probability
+
+open Classical in
+/-- Exact closed-coordinate form of the cutoff Russo coefficient, for a bounded observable. -/
+theorem cutoff_pivotal_eq_closed {d : ℕ} {N : Seminorm ℝ (Fin d → ℝ)} {K K' : ℝ → ℝ}
+    {F : ℕ∞ → ℝ} {m : ℝ} (hFm : ∀ n, |F n| ≤ m)
+    (β : ℝ≥0) (r : ℝ) (e : Sym2 (Fin d → ℤ)) (o : Fin d → ℤ)
+    (hactive : (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) ≠ 0) :
+    ((radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ)))) *
+        ∫ ω, (F (cluster (insert e ω) o).encard - F (cluster (ω \ {e}) o).encard)
+          ∂(law (intensityProfile (cutoffKernel N K r) β)) =
+      (β : ℝ) * -K' r *
+        ∫ ω, (if e ∈ ω then 0 else F (cluster (insert e ω) o).encard -
+          F (cluster ω o).encard) ∂(law (intensityProfile (cutoffKernel N K r) β)) := by
+  let q := intensityProfile (cutoffKernel N K r) β
+  let G : Config (Fin d → ℤ) → ℝ := fun ω => F (cluster ω o).encard
+  have hG : Measurable G :=
+    (measurable_of_countable F).comp (measurable_encard_cluster o)
+  have hGbd : ∀ ω, |G ω| ≤ m := by intro ω; exact hFm _
+  have hclosed : (1 - (q e : ℝ)) * ∫ ω, (G (insert e ω) - G (ω \ {e})) ∂law q =
+      ∫ ω, (if e ∈ ω then 0 else G (insert e ω) - G ω) ∂law q :=
+    one_sub_mul_integral_insert_sub_basic q e G hG hGbd
+  have hprob : (1 - (q e : ℝ)) =
+      Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ)) := by
+    simp [q, intensityProfile]
+  have hleft : (β : ℝ) * -K' r * (1 - (q e : ℝ)) *
+      ∫ ω, (G (insert e ω) - G (ω \ {e})) ∂law q =
+      (β : ℝ) * -K' r * ∫ ω, (if e ∈ ω then 0 else G (insert e ω) - G ω) ∂law q := by
+    calc (β : ℝ) * -K' r * (1 - (q e : ℝ)) *
+        ∫ ω, (G (insert e ω) - G (ω \ {e})) ∂law q =
+        (β : ℝ) * -K' r * ((1 - (q e : ℝ)) *
+          ∫ ω, (G (insert e ω) - G (ω \ {e})) ∂law q) := by ring
+      _ = _ := by rw [hclosed]
+  change ((radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+    ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ)))) *
+      ∫ ω, (G (insert e ω) - G (ω \ {e})) ∂law q = _
+  have hrad : (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) = 1 :=
+    (radialKernel_indicator_eq_zero_or_one N r e).resolve_left hactive
+  rw [← hprob, hrad, one_mul]
+  simpa only [G, q] using hleft
+
+/-- A zero-seminorm active-pair witness. -/
+example :
+    (radialKernel (0 : Seminorm ℝ (Fin 1 → ℝ))
+      (fun s => if s < (2 : ℝ) then 1 else 0)
+      (s(0, fun _ : Fin 1 => (1 : ℤ))) : ℝ) ≠ 0 := by
+  have hne : (0 : Fin 1 → ℤ) ≠ fun _ : Fin 1 => (1 : ℤ) := by
+    intro h
+    have hi := congrFun h 0
+    norm_num at hi
+  rw [coe_radialKernel_of_ne hne (by positivity)]
+  norm_num
+
+end PercLib.Models.LongRange
+
+/-! ## The radial-indicator moment dominator
+
+Nonnegativity and summability of a radially weighted moment diagram give a dominator
+for the actual pivotal flux, including the inserted-moment and `hKd` formulations.
+The diagram itself and continuity of the uncapped flux remain separate hypotheses.
+-/
+
+noncomputable section
+
+open MeasureTheory Set Filter
+open scoped ENNReal NNReal Topology unitInterval
+
+namespace PercLib.Models.LongRange
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability
+
+/-- If weights are bounded by `C κ` and fluxes by `m`, their total weighted flux is at most
+`C` times the sum of `κ m`, assuming it is finite. -/
+theorem sum_abs_mul_abs_le_tsum {ι : Type*} [Countable ι] {w κ m Q : ι → ℝ} {C : ℝ}
+    (hC : 0 ≤ C) (hκ : ∀ e, 0 ≤ κ e) (hw : ∀ e, |w e| ≤ C * κ e)
+    (hm : ∀ e, 0 ≤ m e) (hQ : ∀ e, |Q e| ≤ m e)
+    (hsum : Summable fun e => κ e * m e) :
+    ∀ S : Finset ι, ∑ e ∈ S, |w e| * |Q e| ≤ C * ∑' e, κ e * m e := by
+  intro S
+  have hstep : ∀ e ∈ S, |w e| * |Q e| ≤ C * (κ e * m e) := by
+    intro e _
+    exact (mul_le_mul (hw e) (hQ e) (abs_nonneg _) (mul_nonneg hC (hκ e))).trans_eq
+      (mul_assoc C (κ e) (m e))
+  calc ∑ e ∈ S, |w e| * |Q e|
+      ≤ ∑ e ∈ S, C * (κ e * m e) := Finset.sum_le_sum hstep
+    _ = C * ∑ e ∈ S, κ e * m e := by rw [Finset.mul_sum]
+    _ ≤ C * ∑' e, κ e * m e := by
+        refine mul_le_mul_of_nonneg_left ?_ hC
+        exact hsum.sum_le_tsum S fun i _ => mul_nonneg (hκ i) (hm i)
+
+/-- The same bound with the cutoff coefficient and radial indicator, under a nonnegative
+per-edge majorant whose indicator-weighted sum converges. -/
+theorem dominator_of_abs_flux_le {d : ℕ} (N : Seminorm ℝ (Fin d → ℝ))
+    (K K' : ℝ → ℝ) (β : ℝ≥0) {r L : ℝ} (hL : |K' r| ≤ L)
+    (cw : Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ e, cw e =
+      (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+        ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ))))
+    {Q m : Sym2 (Fin d → ℤ) → ℝ} (hm : ∀ e, 0 ≤ m e)
+    (hQ : ∀ e, |Q e| ≤ m e)
+    (hsum : Summable fun e =>
+      (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) * m e) :
+    ∀ S : Finset (Sym2 (Fin d → ℤ)), ∑ e ∈ S, |cw e| * |Q e| ≤
+      (β : ℝ) * L * ∑' e,
+        (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) * m e := by
+  refine sum_abs_mul_abs_le_tsum (w := cw) (Q := Q) (m := m)
+    (C := (β : ℝ) * L) ?_ (fun e => ?_) (fun e => ?_) hm hQ hsum
+  · exact mul_nonneg β.coe_nonneg ((abs_nonneg (K' r)).trans hL)
+  · exact (radialKernel N (fun s => if s < r then 1 else 0) e).coe_nonneg
+  · simpa only [hcw] using abs_radialKernel_indicator_mul_exp_le N β K K' hL e
+
+/-- **The radial-indicator weighted moment dominator.** The only convergence input is the
+indicator-weighted sum of nonnegative bounds on the actual per-edge pivotal fluxes. -/
+theorem dominator_cutoff_of_summable_indicator_moment {d : ℕ}
+    (N : Seminorm ℝ (Fin d → ℝ)) (β : ℝ≥0) (K K' : ℝ → ℝ)
+    {r L : ℝ} (hL : |K' r| ≤ L) (cw : Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ e, cw e =
+      (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+        ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ))))
+    (o : Fin d → ℤ) (pow : ℕ)
+    {m : Sym2 (Fin d → ℤ) → ℝ} (hm : ∀ e, 0 ≤ m e)
+    (hflux : ∀ e, |∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ pow -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ pow).toReal
+        ∂(law (intensityProfile (cutoffKernel N K r) β))| ≤ m e)
+    (hsum : Summable fun e =>
+      (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) * m e) :
+    ∀ S : Finset (Sym2 (Fin d → ℤ)), ∑ e ∈ S, |cw e| *
+        |∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ pow -
+          ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ pow).toReal
+          ∂(law (intensityProfile (cutoffKernel N K r) β))| ≤
+      (β : ℝ) * L * ∑' e,
+        (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) * m e :=
+  by
+  exact dominator_of_abs_flux_le N K K' β hL cw hcw hm hflux hsum
+
+/-- The previous result written using the draft's `ModelNorm` binder. -/
+theorem dominator_cutoff_of_summable_indicator_moment_modelNorm {d : ℕ}
+    (N : ModelNorm (Fin d → ℝ)) (β : ℝ≥0) (K K' : ℝ → ℝ)
+    {r L : ℝ} (hL : |K' r| ≤ L) (cw : Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ e, cw e =
+      (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+        ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ))))
+    (o : Fin d → ℤ) (pow : ℕ)
+    {m : Sym2 (Fin d → ℤ) → ℝ} (hm : ∀ e, 0 ≤ m e)
+    (hflux : ∀ e, |∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ pow -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ pow).toReal
+        ∂(law (intensityProfile (cutoffKernel N K r) β))| ≤ m e)
+    (hsum : Summable fun e =>
+      (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) * m e) :
+    ∀ S : Finset (Sym2 (Fin d → ℤ)), ∑ e ∈ S, |cw e| *
+        |∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ pow -
+          ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ pow).toReal
+          ∂(law (intensityProfile (cutoffKernel N K r) β))| ≤
+      (β : ℝ) * L * ∑' e,
+        (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) * m e :=
+  dominator_cutoff_of_summable_indicator_moment N.toSeminorm β K K' hL cw hcw o pow hm
+    hflux hsum
+
+
+
+/-- The indicator-weighted inserted-moment dominator, using integral bounds for the flux. -/
+theorem dominator_cutoff_of_summable_indicator_insertedMoment {d : ℕ}
+    (N : Seminorm ℝ (Fin d → ℝ)) (β : ℝ≥0) (K K' : ℝ → ℝ)
+    {r L : ℝ} (hL : |K' r| ≤ L) (cw : Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ e, cw e =
+      (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+        ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ))))
+    (o : Fin d → ℤ) (pow : ℕ)
+    (hfin : ∀ e, ∀ᵐ ω ∂(law (intensityProfile (cutoffKernel N K r) β)),
+      ((cluster (insert e ω) o).encard : ℝ≥0∞) ≠ ⊤)
+    (hint : ∀ e, Integrable
+      (fun ω => (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ pow)
+      (law (intensityProfile (cutoffKernel N K r) β)))
+    (hsum : Summable fun e =>
+      (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+        ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ pow
+          ∂(law (intensityProfile (cutoffKernel N K r) β))) :
+    ∀ S : Finset (Sym2 (Fin d → ℤ)), ∑ e ∈ S, |cw e| *
+        |∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ pow -
+          ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ pow).toReal
+          ∂(law (intensityProfile (cutoffKernel N K r) β))| ≤
+      (β : ℝ) * L * ∑' e,
+        (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+          ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ pow
+            ∂(law (intensityProfile (cutoffKernel N K r) β)) := by
+  refine dominator_cutoff_of_summable_indicator_moment N β K K' hL cw hcw o pow
+    (fun e => integral_nonneg fun ω => pow_nonneg ENNReal.toReal_nonneg pow) ?_ hsum
+  intro e
+  exact abs_integral_pivotal_encard_pow_le (law (intensityProfile (cutoffKernel N K r) β)) e o
+    pow (hfin e) (hint e)
+
+/-- The literal `hKd` dominator for the cutoff family. -/
+theorem hKd_cutoff_of_summable_indicator_moment {d : ℕ}
+    (N : Seminorm ℝ (Fin d → ℝ)) (β : ℝ≥0) (K K' : ℝ → ℝ)
+    {u v L : ℝ} (hL : ∀ r ∈ Ioo u v, |K' r| ≤ L)
+    (cw : ℝ → Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ r e, cw r e =
+      (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+        ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ))))
+    (o : Fin d → ℤ) (pow : ℕ)
+    {m : ℝ → Sym2 (Fin d → ℤ) → ℝ} (hm : ∀ r e, 0 ≤ m r e)
+    (hflux : ∀ r ∈ Ioo u v, ∀ e, |∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ pow -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ pow).toReal
+        ∂(law (intensityProfile (cutoffKernel N K r) β))| ≤ m r e)
+    (hsum : ∀ r ∈ Ioo u v, Summable fun e =>
+      (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) * m r e) :
+    ∀ r ∈ Ioo u v, ∀ S : Finset (Sym2 (Fin d → ℤ)),
+      ∑ e ∈ S, |cw r e| *
+        |∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ pow -
+          ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ pow).toReal
+          ∂(law (intensityProfile (cutoffKernel N K r) β))| ≤
+      (β : ℝ) * L * ∑' e,
+        (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) * m r e := by
+  intro r hr S
+  exact dominator_cutoff_of_summable_indicator_moment N β K K' (hL r hr) (cw r) (hcw r) o pow (hm r)
+    (fun e => hflux r hr e) (hsum r hr) S
+
+/-- A nonzero, supported example of the diagram bound. -/
+theorem nonvacuous_dominator_of_abs_flux_le {d : ℕ}
+    (N : Seminorm ℝ (Fin d → ℝ)) (K K' : ℝ → ℝ) (β : ℝ≥0)
+    {r L : ℝ} (hL : |K' r| ≤ L) (cw : Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ e, cw e =
+      (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+        ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ))))
+    (e₀ : Sym2 (Fin d → ℤ)) :
+    ∀ S : Finset (Sym2 (Fin d → ℤ)), ∑ e ∈ S, |cw e| * |(if e = e₀ then (1 : ℝ) else 0)| ≤
+      (β : ℝ) * L * ∑' e,
+        (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+            (if e = e₀ then (1 : ℝ) else 0) := by
+  classical
+  refine dominator_of_abs_flux_le N K K' β hL cw hcw (Q := fun e => if e = e₀ then 1 else 0)
+    (fun e => ?_) (fun e => ?_) ?_
+  · split <;> norm_num
+  · rw [abs_of_nonneg (by split <;> norm_num)]
+  · refine summable_of_ne_finset_zero (s := {e₀}) fun b hb => ?_
+    have hb' : b ≠ e₀ := by simpa using hb
+    simp [hb']
+
+/-- A non-diagonal pair at distance `< r` has indicator value one. -/
+theorem radialKernel_indicator_eq_one {d : ℕ} (N : Seminorm ℝ (Fin d → ℝ)) {r : ℝ}
+    {x y : Fin d → ℤ} (hxy : x ≠ y) (hlt : N (Int.cast ∘ (x - y)) < r) :
+    (radialKernel N (fun s => if s < r then 1 else 0) s(x, y) : ℝ) = 1 := by
+  rw [coe_radialKernel_of_ne (N := N) (K := fun s => if s < r then 1 else 0)
+    (x := x) (y := y) hxy (by positivity)]
+  simp [hlt]
+
+/-- Summing a radially weighted single pair. -/
+theorem tsum_single_pair {d : ℕ} (N : Seminorm ℝ (Fin d → ℝ)) (r : ℝ) (e₀ : Sym2 (Fin d → ℤ)) :
+    ∑' e, (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+        (if e = e₀ then (1 : ℝ) else 0) =
+      (radialKernel N (fun s => if s < r then 1 else 0) e₀ : ℝ) := by
+  classical
+  refine (tsum_eq_single (f := fun e =>
+    (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      (if e = e₀ then (1 : ℝ) else 0)) e₀ ?_).trans ?_
+  · intro b hb
+    simp [hb]
+  · simp
+
+/-- The concrete single-edge nonlinear dominator. -/
+theorem nonvacuous_bound_le {d : ℕ} (N : Seminorm ℝ (Fin d → ℝ)) (K K' : ℝ → ℝ)
+    (β : ℝ≥0) {r L : ℝ} (hL : |K' r| ≤ L) (cw : Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ e, cw e =
+      (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+        ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ))))
+    {x y : Fin d → ℤ} (hxy : x ≠ y)
+    (hlt : N (Int.cast ∘ (x - y)) < r) (S : Finset (Sym2 (Fin d → ℤ))) :
+    ∑ e ∈ S, |cw e| * |(if e = s(x, y) then (1 : ℝ) else 0)| ≤
+      (β : ℝ) * L := by
+  refine ((nonvacuous_dominator_of_abs_flux_le N K K' β hL cw hcw s(x, y)) S).trans_eq ?_
+  rw [tsum_single_pair, radialKernel_indicator_eq_one N hxy hlt, mul_one]
+
+end PercLib.Models.LongRange
