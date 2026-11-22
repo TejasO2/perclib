@@ -6,14 +6,15 @@ deprecated alias for one release where that is possible.
 
 ## Announced, not yet merged
 
-- `frontier-trivalent-count` (SO5J; audited APPROVE WITH CHANGES, `audit-r15-frontier-a`, change applied in
-  `work/frontier-trivalent-count-fix` @ `d65cae9`): in new `PercLib/Percolation/Bond/Multipoint/TrivalentCount.lean`:
-  `Vtx`, `embed`, `hat`, `graft`, `prune`, `canonical`. Additive.
+(none)
 
 ## Merged
 
-### New definitions, 21-22 Nov batches (gated at `28c5f0a` and `1f14e57`) (additive; no existing name changed)
+### New definitions, 21-22 Nov batches (gated at `28c5f0a` `1f14e57` and `d5dcd74`) (additive; no existing name changed)
 
+- `frontier-trivalent-count` (SO5J; audited APPROVE WITH CHANGES, `audit-r15-frontier-a`, change applied in
+  `work/frontier-trivalent-count-fix` @ `d65cae9`): in new `PercLib/Percolation/Bond/Multipoint/TrivalentCount.lean`:
+  `Vtx`, `embed`, `hat`, `graft`, `prune`, `canonical`. Additive.
 - `p-a-EKDO` (audited APPROVE with 3 exact edits applied verbatim, `audit-r14-outside-batch`): in new
   `PercLib/Models/HierarchicalComparison/Defs.lean`: `DigitHierarchy` and `DigitHierarchy.offset`, `blockIndex`, `block`,
   `commonLevel`, `childHierarchy`, `translate`; `layerWeight`, `InStrictAncestor`, `InBlockLayer`, `layerKernel`,
