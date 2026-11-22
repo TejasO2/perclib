@@ -41,7 +41,7 @@ theorem lintegral_degree_lt_top_and_ae_finite_neighbors {V : Type*} [Countable V
       ∀ᵐ ω ∂law q, ((openGraph ω).neighborSet v).Finite) ∧
     ((∀ v, rowSum (fun e => unitInterval.toENNReal (q e)) v < ∞) →
       ∀ᵐ ω ∂law q, ∀ v, ((openGraph ω).neighborSet v).Finite) :=
-  ⟨fun v h => ⟨(lintegral_degree q v).trans_lt h, ae_finite_neighbors_of_rowSum_lt_top q v h⟩,
+  ⟨fun v h => ⟨lintegral_degree_lt_top_of_rowSum_lt_top q v h, ae_finite_neighbors_of_rowSum_lt_top q v h⟩,
     ae_all_finite_neighbors_of_rowSum_lt_top q⟩
 
 end PercLib.Percolation.Bond

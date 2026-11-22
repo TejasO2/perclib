@@ -85,6 +85,13 @@ theorem lintegral_degree [Countable V] (q : Sym2 V → unitInterval) (v : V) :
   refine tsum_congr fun w => ?_
   rw [lintegral_indicator_const (measurableSet_adj v w), one_mul, law_adj]
 
+open Classical in
+/-- **Summable incident probabilities give a finite expected degree.** -/
+theorem lintegral_degree_lt_top_of_rowSum_lt_top [Countable V] (q : Sym2 V → unitInterval)
+    (v : V) (h : rowSum (fun e => unitInterval.toENNReal (q e)) v < ∞) :
+    ∫⁻ ω, ({w | (openGraph ω).Adj v w}.encard : ℝ≥0∞) ∂law q < ∞ :=
+  (lintegral_degree q v).trans_lt h
+
 /-- **Markov's inequality for the degree.** -/
 theorem mul_law_le_degree_le [Countable V] (q : Sym2 V → unitInterval) (v : V) (k : ℕ) :
     (k : ℝ≥0∞) * law q {ω | (k : ℕ∞) ≤ {w | (openGraph ω).Adj v w}.encard} ≤
