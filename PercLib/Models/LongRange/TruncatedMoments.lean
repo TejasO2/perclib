@@ -12370,3 +12370,64 @@ theorem tsum_strict_indicator_lt_ball {d : ℕ} (N : Seminorm ℝ (Fin d → ℝ
   exact ENNReal.lt_add_right hS hC
 
 end PercLib.Models.LongRange
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability
+
+/-- If a scale derivative is known at every point to the right and its value has a right limit,
+then that limit is the right derivative. No assertion is made about the left derivative. -/
+theorem hasDerivWithinAt_Ici_of_tendsto_flux {ψ Φ : ℝ → ℝ} {n L : ℝ}
+    (hd : ∀ y, n < y → HasDerivAt ψ (Φ y) y)
+    (hψ : ContinuousWithinAt ψ (Ici n) n)
+    (hΦ : Tendsto Φ (𝓝[>] n) (𝓝 L)) :
+    HasDerivWithinAt ψ L (Ici n) n := by
+  apply hasDerivWithinAt_Ici_of_tendsto_deriv
+    (s := Ioi n)
+    (fun y hy => (hd y hy).differentiableAt.differentiableWithinAt)
+    (hψ.mono Ioi_subset_Ici_self) self_mem_nhdsWithin
+  have hEq : Φ =ᶠ[𝓝[>] n] deriv ψ := by
+    filter_upwards [self_mem_nhdsWithin] with y hy
+    exact ((hd y hy).deriv).symm
+  exact Tendsto.congr' hEq hΦ
+
+open Classical in
+/-- The stronger higher-moment binomial cutoff derivative at every non-corner scale in
+`(0,R)`, without presenting an interval of profile regularity as a literal all-radius claim. -/
+theorem hasDerivAt_integral_cutoff_pow_binomial_of_root_succ_moment_noncorner {d : ℕ}
+    {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p) {R : ℝ}
+    (M : ℝ≥0∞) (hM : M ≠ ⊤)
+    (cw : ℝ → Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ r e, cw r e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K r e : ℝ))))
+    {r₀ : ℝ} (hr₀ : 0 < r₀) (hr₀R : r₀ < R)
+    (hcorner : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ≠ r₀)
+    (hroot : ∀ r ∈ (Ioo 0 R ∪ {R} : Set ℝ), (∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ (p + 1)
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≤ M)
+    (hcont : ContinuousOn (fun r => ∑' e, cw r e *
+      ∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) (Ioo 0 R)) :
+    HasDerivAt (fun r => ∫ ω, (((cluster ω 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β)))
+      ((β : ℝ) * -K' r₀ * ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ) *
+        ∫ ω, (((cluster ω 0).encard : ℝ≥0∞).toReal) ^ (ℓ + 1) *
+          (∑' y, (if N (Int.cast ∘ y) ≤ r₀ then 1 else 0) *
+            (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ)) ω *
+            (((cluster ω y).encard : ℝ≥0∞).toReal) ^ (p - ℓ))
+          ∂(law (intensityProfile (cutoffKernel (d := d) N K r₀) β))) r₀ := by
+  obtain ⟨δ, hδ, hu, hvR, hI⟩ := exists_corner_free hr₀ hr₀R hcorner
+  have hsub : Ioo (r₀ - δ) (r₀ + δ) ⊆ Ioo 0 R :=
+    fun r hr => ⟨hu.trans hr.1, hr.2.trans_le hvR⟩
+  exact hasDerivAt_integral_cutoff_pow_binomial_of_root_succ_moment
+    (K := K) (K' := K') (R := R) (u := r₀ - δ) (v := r₀ + δ) (r₀ := r₀)
+    hKa hK' hK'c β p hp M hM cw hcw hu (by linarith) (by linarith) hvR hI
+    (fun r hr => by
+      rcases hr with hr | hr
+      · exact hroot r (Or.inl (hsub hr))
+      · exact hroot r (Or.inr hr))
+    (hcont.mono hsub)
+
+end PercLib.Models.LongRange
