@@ -13,7 +13,7 @@ Cauchy property (2.1), (2.8)).
 module
 
 public import PercLib.Models.Planar.Arms.ConnectionComparison
-public import PercLib.Models.Planar.Arms.OneArm
+public import PercLib.Models.Planar.Arms.TwoPoint
 public import PercLib.Probability.CylinderLimit
 public import PercLib.Probability.RatioContraction
 
@@ -964,5 +964,289 @@ theorem law_inter_eq_sum_of_cut (q : Sym2 (LatticeSite 2) → unitInterval)
   refine Finset.sum_congr rfl fun x hx => ?_
   rw [hset x hx]
   exact (measurableSet_inter_and_law_inter_eq_mul_of_cut q hac hcb hW hY hR hG hEm hE hHm hH x).2
+
+/-- **(A2) for the middle factors** (Basu–Sapozhnikov (2.7) on `ℤ²`). There is `c ∈ (0, 1]` such
+that for every profile at least `1/2` on the edges, all `m ≥ 1` and `4m < a ≤ c'`, every
+`U ⊆ B_{m-1}(z)`, `R ⊆ B_m(z)`, every `X` outside `B_{a-1}(z)` and every `Y` outside `B_{4m}(z)`,
+the probability that `R ↔ Y` inside `(B_{c'}(z) \ U) \ X` lies between `c f g` and `f g`, where
+`f = P(R ↔ ∂B_{2m}(z) inside B_{2m}(z) \ U)` does not depend on `(X, Y)` and
+`g = P(Y ↔ ∂B_{2m}(z) inside (B_{c'}(z) \ B_{2m-1}(z)) \ X)` does not depend on `(U, R)`. The radii
+`2m` and `4m` are passed as `m₂` and `m₄`. -/
+theorem exists_law_localConn_comparable_of_cut :
+    ∃ c : ℝ≥0∞, 0 < c ∧ c ≤ 1 ∧ ∀ q : Sym2 (LatticeSite 2) → unitInterval,
+      (∀ e ∈ (zdGraph 2).edgeSet, (1 / 2 : ℝ) ≤ q e) →
+      ∀ (z : LatticeSite 2) (m m₂ m₄ a c' : ℕ), 1 ≤ m → m₂ = 2 * m → m₄ = 4 * m → m₄ < a →
+      a ≤ c' → ∀ U R X Y : Set (LatticeSite 2),
+        U ⊆ Icc (z - (m : LatticeSite 2) + 1) (z + m - 1) →
+        R ⊆ Icc (z - (m : LatticeSite 2)) (z + m) →
+        (∀ v ∈ X, v ∉ Icc (z - (a : LatticeSite 2) + 1) (z + a - 1)) →
+        (∀ y ∈ Y, y ∉ Icc (z - (m₄ : LatticeSite 2)) (z + m₄)) →
+        c * law q {ω | ∃ r ∈ R, ∃ w ∈ boxBoundary (z - (m₂ : LatticeSite 2)) (z + m₂),
+              ω ∩ (zdGraph 2).edgeSet ∈
+                localConn (Icc (z - (m₂ : LatticeSite 2)) (z + m₂) ∩ Uᶜ) r w} *
+            law q {ω | ∃ y ∈ Y, ∃ w ∈ boxBoundary (z - (m₂ : LatticeSite 2)) (z + m₂),
+              ω ∩ (zdGraph 2).edgeSet ∈ localConn ((Icc (z - (c' : LatticeSite 2)) (z + c') \
+                Icc (z - (m₂ : LatticeSite 2) + 1) (z + m₂ - 1)) \ X) y w} ≤
+          law q {ω | ∃ r ∈ R, ∃ y ∈ Y, ω ∩ (zdGraph 2).edgeSet ∈ localConn
+            ((Icc (z - (c' : LatticeSite 2)) (z + c') ∩ Uᶜ) \ X) r y} ∧
+        law q {ω | ∃ r ∈ R, ∃ y ∈ Y, ω ∩ (zdGraph 2).edgeSet ∈ localConn
+            ((Icc (z - (c' : LatticeSite 2)) (z + c') ∩ Uᶜ) \ X) r y} ≤
+          law q {ω | ∃ r ∈ R, ∃ w ∈ boxBoundary (z - (m₂ : LatticeSite 2)) (z + m₂),
+              ω ∩ (zdGraph 2).edgeSet ∈
+                localConn (Icc (z - (m₂ : LatticeSite 2)) (z + m₂) ∩ Uᶜ) r w} *
+            law q {ω | ∃ y ∈ Y, ∃ w ∈ boxBoundary (z - (m₂ : LatticeSite 2)) (z + m₂),
+              ω ∩ (zdGraph 2).edgeSet ∈ localConn ((Icc (z - (c' : LatticeSite 2)) (z + c') \
+                Icc (z - (m₂ : LatticeSite 2) + 1) (z + m₂ - 1)) \ X) y w} := by
+  obtain ⟨c, hc, hcq⟩ := exists_law_setOf_localConn_comparable
+  refine ⟨min c 1, lt_min hc one_pos, min_le_right _ _,
+    fun q hq z m m₂ m₄ a c' hm hm₂ hm₄ hma hac' U R X Y hU hR hX hY => ?_⟩
+  subst hm₂ hm₄
+  have hAZ : Icc (z - ((4 * m : ℕ) : LatticeSite 2)) (z + ((4 * m : ℕ) : LatticeSite 2)) \
+      Icc (z - (m : LatticeSite 2) + 1) (z + m - 1) ⊆
+      (Icc (z - (c' : LatticeSite 2)) (z + c') ∩ Uᶜ) \ X := by
+    intro v hv
+    refine ⟨⟨?_, fun hvU => hv.2 (hU hvU)⟩, fun hvX => hX v hvX ?_⟩
+    · have := hv.1
+      rw [mem_Icc_two_iff] at this ⊢
+      simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply] at this ⊢
+      omega
+    · have := hv.1
+      rw [mem_Icc_two_iff] at this ⊢
+      simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply, Pi.one_apply] at this ⊢
+      omega
+  have h := hcq q hq z m hm R Y _ hAZ hR hY
+  have ef : {ω : Config (LatticeSite 2) | ∃ r ∈ R,
+      ∃ w ∈ boxBoundary (z - ((2 * m : ℕ) : LatticeSite 2)) (z + ((2 * m : ℕ) : LatticeSite 2)),
+      ω ∩ (zdGraph 2).edgeSet ∈ localConn ((Icc (z - (c' : LatticeSite 2)) (z + c') ∩ Uᶜ) \ X)
+        r w} = {ω | ∃ r ∈ R,
+      ∃ w ∈ boxBoundary (z - ((2 * m : ℕ) : LatticeSite 2)) (z + ((2 * m : ℕ) : LatticeSite 2)),
+      ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - ((2 * m : ℕ) : LatticeSite 2))
+        (z + ((2 * m : ℕ) : LatticeSite 2)) ∩ Uᶜ) r w} := by
+    ext ω
+    constructor
+    · rintro ⟨r, hr, w, hw, hrw⟩
+      have hr2 : r ∈ Icc (z - ((2 * m : ℕ) : LatticeSite 2))
+          (z + ((2 * m : ℕ) : LatticeSite 2)) := by
+        have := hR hr
+        rw [mem_Icc_two_iff] at this ⊢
+        simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply] at this ⊢
+        omega
+      have hw2 : w ∉ Icc (z - ((2 * m : ℕ) : LatticeSite 2) + 1)
+          (z + ((2 * m : ℕ) : LatticeSite 2) - 1) := by
+        rw [mem_boxBoundary_two_iff] at hw
+        rw [mem_Icc_two_iff]
+        simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply, Pi.one_apply] at hw ⊢
+        omega
+      obtain ⟨w', hw', hrw'⟩ := exists_mem_boxBoundary_mem_localConn_inter hr2 hw2 hrw
+      refine ⟨r, hr, w', hw', localConn_mono_set ?_ _ _ hrw'⟩
+      exact fun v hv => ⟨hv.2, hv.1.1.2⟩
+    · rintro ⟨r, hr, w, hw, hrw⟩
+      refine ⟨r, hr, w, hw, localConn_mono_set ?_ _ _ hrw⟩
+      intro v hv
+      refine ⟨⟨?_, hv.2⟩, fun hvX => hX v hvX ?_⟩
+      · have := hv.1
+        rw [mem_Icc_two_iff] at this ⊢
+        simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply] at this ⊢
+        omega
+      · have := hv.1
+        rw [mem_Icc_two_iff] at this ⊢
+        simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply, Pi.one_apply] at this ⊢
+        omega
+  have eg : {ω : Config (LatticeSite 2) | ∃ y ∈ Y,
+      ∃ w ∈ boxBoundary (z - ((2 * m : ℕ) : LatticeSite 2)) (z + ((2 * m : ℕ) : LatticeSite 2)),
+      ω ∩ (zdGraph 2).edgeSet ∈ localConn ((Icc (z - (c' : LatticeSite 2)) (z + c') ∩ Uᶜ) \ X)
+        y w} = {ω | ∃ y ∈ Y,
+      ∃ w ∈ boxBoundary (z - ((2 * m : ℕ) : LatticeSite 2)) (z + ((2 * m : ℕ) : LatticeSite 2)),
+      ω ∩ (zdGraph 2).edgeSet ∈ localConn ((Icc (z - (c' : LatticeSite 2)) (z + c') \
+        Icc (z - ((2 * m : ℕ) : LatticeSite 2) + 1) (z + ((2 * m : ℕ) : LatticeSite 2) - 1)) \ X)
+        y w} := by
+    ext ω
+    constructor
+    · rintro ⟨y, hy, w, hw, hyw⟩
+      have hy2 : y ∉ Icc (z - ((2 * m : ℕ) : LatticeSite 2) + 1)
+          (z + ((2 * m : ℕ) : LatticeSite 2) - 1) := by
+        have := hY y hy
+        rw [mem_Icc_two_iff] at this ⊢
+        simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply, Pi.one_apply] at this ⊢
+        omega
+      obtain ⟨w', hw', hyw'⟩ :=
+        exists_mem_boxBoundary_mem_localConn_diff hy2 (mem_boxBoundary_iff.1 hw).1 hyw
+      refine ⟨y, hy, w', hw', localConn_mono_set ?_ _ _ hyw'⟩
+      exact fun v hv => ⟨⟨hv.1.1.1, hv.2⟩, hv.1.2⟩
+    · rintro ⟨y, hy, w, hw, hyw⟩
+      refine ⟨y, hy, w, hw, localConn_mono_set ?_ _ _ hyw⟩
+      intro v hv
+      refine ⟨⟨hv.1.1, fun hvU => hv.1.2 ?_⟩, hv.2⟩
+      have := hU hvU
+      rw [mem_Icc_two_iff] at this ⊢
+      simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply, Pi.one_apply] at this ⊢
+      omega
+  rw [ef, eg] at h
+  refine ⟨le_trans ?_ h.1, h.2⟩
+  gcongr
+  exact min_le_left _ _
+
+/-- **A failed link on the arm event gives two crossing clusters.** If `z ↔ ∂B_n(z)` with
+`n > b`, and some crossing of the inner half `B_c \ B_{a-1}` of the annulus of a cut is not joined
+inside the annulus to some crossing of the outer half `B_b \ B_{c-1}`, then one of the two halves
+has two distinct open crossing clusters. -/
+theorem mem_setOf_crossing_clusters_of_mem_armEvent {ω : Config (LatticeSite 2)}
+    {z : LatticeSite 2} {a c b n : ℕ} (ha : 1 ≤ a) (hac : a < c) (hcb : c < b) (hbn : b < n)
+    (harm : ω ∈ armEvent z n)
+    (hlink : ¬ ∀ x ∈ boxBoundary (z - (a : LatticeSite 2)) (z + a),
+      ∀ m ∈ boxBoundary (z - (c : LatticeSite 2)) (z + c),
+      ∀ m' ∈ boxBoundary (z - (c : LatticeSite 2)) (z + c),
+      ∀ y ∈ boxBoundary (z - (b : LatticeSite 2)) (z + b),
+        ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (c : LatticeSite 2)) (z + c) \
+          Icc (z - (a : LatticeSite 2) + 1) (z + a - 1)) x m →
+        ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (b : LatticeSite 2)) (z + b) \
+          Icc (z - (c : LatticeSite 2) + 1) (z + c - 1)) m' y →
+        ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (b : LatticeSite 2)) (z + b) \
+          Icc (z - (a : LatticeSite 2) + 1) (z + a - 1)) x y) :
+    ω ∈ {ω | ∃ x ∈ boxBoundary (z - (a : LatticeSite 2)) (z + a),
+        ∃ x' ∈ boxBoundary (z - (a : LatticeSite 2)) (z + a),
+        ∃ y ∈ boxBoundary (z - (c : LatticeSite 2)) (z + c),
+        ∃ y' ∈ boxBoundary (z - (c : LatticeSite 2)) (z + c),
+          ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (c : LatticeSite 2)) (z + c) \
+            Icc (z - (a : LatticeSite 2) + 1) (z + a - 1)) x y ∧
+          ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (c : LatticeSite 2)) (z + c) \
+            Icc (z - (a : LatticeSite 2) + 1) (z + a - 1)) x' y' ∧
+          ω ∩ (zdGraph 2).edgeSet ∉ localConn (Icc (z - (c : LatticeSite 2)) (z + c) \
+            Icc (z - (a : LatticeSite 2) + 1) (z + a - 1)) x x'} ∨
+    ω ∈ {ω | ∃ x ∈ boxBoundary (z - (c : LatticeSite 2)) (z + c),
+        ∃ x' ∈ boxBoundary (z - (c : LatticeSite 2)) (z + c),
+        ∃ y ∈ boxBoundary (z - (b : LatticeSite 2)) (z + b),
+        ∃ y' ∈ boxBoundary (z - (b : LatticeSite 2)) (z + b),
+          ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (b : LatticeSite 2)) (z + b) \
+            Icc (z - (c : LatticeSite 2) + 1) (z + c - 1)) x y ∧
+          ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (b : LatticeSite 2)) (z + b) \
+            Icc (z - (c : LatticeSite 2) + 1) (z + c - 1)) x' y' ∧
+          ω ∩ (zdGraph 2).edgeSet ∉ localConn (Icc (z - (b : LatticeSite 2)) (z + b) \
+            Icc (z - (c : LatticeSite 2) + 1) (z + c - 1)) x x'} := by
+  by_contra hno
+  rw [not_or] at hno
+  obtain ⟨h₁, h₂⟩ := hno
+  apply hlink
+  rw [mem_armEvent_iff_exists_mem_boxBoundary] at harm
+  obtain ⟨v, hv, hzv⟩ := harm
+  have hzb : z ∈ Icc (z - (b : LatticeSite 2)) (z + b) := by
+    rw [mem_Icc_two_iff]
+    simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply]
+    omega
+  have hvb : v ∉ Icc (z - (b : LatticeSite 2) + 1) (z + b - 1) := by
+    rw [mem_boxBoundary_two_iff] at hv
+    rw [mem_Icc_two_iff]
+    simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply, Pi.one_apply] at hv ⊢
+    omega
+  obtain ⟨b₀, hb₀, hzb₀⟩ := exists_mem_boxBoundary_mem_localConn_inter hzb hvb hzv
+  rw [localConn_comm] at hzb₀
+  have hb₀a : b₀ ∉ Icc (z - (a : LatticeSite 2) + 1) (z + a - 1) := by
+    have := hb₀
+    rw [mem_boxBoundary_two_iff] at this
+    rw [mem_Icc_two_iff]
+    simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply, Pi.one_apply] at this ⊢
+    omega
+  have hza : z ∈ Icc (z - (a : LatticeSite 2)) (z + a) := by
+    rw [mem_Icc_two_iff]
+    simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply]
+    omega
+  obtain ⟨a₀, ha₀, hb₀a₀⟩ := exists_mem_boxBoundary_mem_localConn_diff hb₀a hza hzb₀
+  have hcross : ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (b : LatticeSite 2)) (z + b) \
+      Icc (z - (a : LatticeSite 2) + 1) (z + a - 1)) b₀ a₀ :=
+    by refine localConn_mono_set ?_ _ _ hb₀a₀; exact fun u hu => ⟨hu.1.2, hu.2⟩
+  have ha₀c : a₀ ∈ Icc (z - (c : LatticeSite 2)) (z + c) := by
+    have := ha₀
+    rw [mem_boxBoundary_two_iff] at this
+    rw [mem_Icc_two_iff]
+    simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply] at this ⊢
+    omega
+  have hb₀c : b₀ ∉ Icc (z - (c : LatticeSite 2) + 1) (z + c - 1) := by
+    have := hb₀
+    rw [mem_boxBoundary_two_iff] at this
+    rw [mem_Icc_two_iff]
+    simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply, Pi.one_apply] at this ⊢
+    omega
+  obtain ⟨m₀, hm₀, ha₀m₀⟩ := exists_mem_boxBoundary_mem_localConn_inter ha₀c hb₀c
+    (by rw [localConn_comm]; exact hcross)
+  obtain ⟨m₁, hm₁, hb₀m₁⟩ := exists_mem_boxBoundary_mem_localConn_diff hb₀c ha₀c hcross
+  have hsac : (Icc (z - (b : LatticeSite 2)) (z + b) \
+      Icc (z - (a : LatticeSite 2) + 1) (z + a - 1)) ∩ Icc (z - (c : LatticeSite 2)) (z + c) ⊆
+      Icc (z - (c : LatticeSite 2)) (z + c) \ Icc (z - (a : LatticeSite 2) + 1) (z + a - 1) := by
+    intro u hu
+    simp only [mem_inter_iff, mem_sdiff, mem_Icc_two_iff, Pi.add_apply, Pi.sub_apply,
+      Pi.natCast_apply, Pi.one_apply] at hu ⊢
+    omega
+  have hscb : (Icc (z - (b : LatticeSite 2)) (z + b) \
+      Icc (z - (a : LatticeSite 2) + 1) (z + a - 1)) \
+      Icc (z - (c : LatticeSite 2) + 1) (z + c - 1) ⊆
+      Icc (z - (b : LatticeSite 2)) (z + b) \ Icc (z - (c : LatticeSite 2) + 1) (z + c - 1) := by
+    intro u hu
+    simp only [mem_sdiff, mem_Icc_two_iff, Pi.add_apply, Pi.sub_apply,
+      Pi.natCast_apply, Pi.one_apply] at hu ⊢
+    omega
+  have hac' : Icc (z - (c : LatticeSite 2)) (z + c) \
+      Icc (z - (a : LatticeSite 2) + 1) (z + a - 1) ⊆
+      Icc (z - (b : LatticeSite 2)) (z + b) \ Icc (z - (a : LatticeSite 2) + 1) (z + a - 1) := by
+    intro u hu
+    simp only [mem_sdiff, mem_Icc_two_iff, Pi.add_apply, Pi.sub_apply,
+      Pi.natCast_apply, Pi.one_apply] at hu ⊢
+    omega
+  have hcb' : Icc (z - (b : LatticeSite 2)) (z + b) \
+      Icc (z - (c : LatticeSite 2) + 1) (z + c - 1) ⊆
+      Icc (z - (b : LatticeSite 2)) (z + b) \ Icc (z - (a : LatticeSite 2) + 1) (z + a - 1) := by
+    intro u hu
+    simp only [mem_sdiff, mem_Icc_two_iff, Pi.add_apply, Pi.sub_apply,
+      Pi.natCast_apply, Pi.one_apply] at hu ⊢
+    omega
+  have ha₀m₀' := localConn_mono_set hsac _ _ ha₀m₀
+  have hb₀m₁' := localConn_mono_set hscb _ _ hb₀m₁
+  intro x hx m hm m' hm' y hy hxm hm'y
+  have e₁ : ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (c : LatticeSite 2)) (z + c) \
+      Icc (z - (a : LatticeSite 2) + 1) (z + a - 1)) x a₀ := by
+    by_contra hne
+    exact h₁ ⟨x, hx, a₀, ha₀, m, hm, m₀, hm₀, hxm, ha₀m₀', hne⟩
+  have e₂ : ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (b : LatticeSite 2)) (z + b) \
+      Icc (z - (c : LatticeSite 2) + 1) (z + c - 1)) m' m₁ := by
+    by_contra hne
+    exact h₂ ⟨m', hm', m₁, hm₁, y, hy, b₀, hb₀, hm'y, by rw [localConn_comm]; exact hb₀m₁', hne⟩
+  rw [localConn_comm] at hcross e₂
+  exact localConn_trans (localConn_mono_set hac' _ _ e₁) (localConn_trans hcross
+    (localConn_trans (localConn_mono_set hcb' _ _ hb₀m₁') (localConn_trans
+      (localConn_mono_set hcb' _ _ e₂) (localConn_mono_set hcb' _ _ hm'y))))
+
+/-- **A link fails rarely on the arm event** (Basu–Sapozhnikov (2.2) and the error of (2.4) on
+`ℤ²`). There is `c₀ > 0` such that for every profile at least `1/2` on the edges, every
+measurable increasing event `E`, every cut with radii `1 ≤ a < c < b`, `4^K a ≤ c`, `4^K c ≤ b`,
+and every `n > b`, the probability that `E` holds, `z ↔ ∂B_n(z)`, and the link event of the cut
+fails is at most `2 (1 - c₀)^K` times the probability of `E` with `z ↔ ∂B_n(z)`. -/
+theorem exists_law_inter_armEvent_inter_not_link_le :
+    ∃ c₀ : ℝ≥0∞, 0 < c₀ ∧ ∀ q : Sym2 (LatticeSite 2) → unitInterval,
+      (∀ e ∈ (zdGraph 2).edgeSet, (1 / 2 : ℝ) ≤ q e) →
+      ∀ E : Set (Config (LatticeSite 2)), IsUpperSet E → MeasurableSet E →
+      ∀ (z : LatticeSite 2) (a c b n K : ℕ), 1 ≤ a → a < c → c < b → b < n →
+        4 ^ K * a ≤ c → 4 ^ K * c ≤ b →
+        law q (E ∩ armEvent z n ∩ {ω | ¬ ∀ x ∈ boxBoundary (z - (a : LatticeSite 2)) (z + a),
+          ∀ m ∈ boxBoundary (z - (c : LatticeSite 2)) (z + c),
+          ∀ m' ∈ boxBoundary (z - (c : LatticeSite 2)) (z + c),
+          ∀ y ∈ boxBoundary (z - (b : LatticeSite 2)) (z + b),
+            ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (c : LatticeSite 2)) (z + c) \
+              Icc (z - (a : LatticeSite 2) + 1) (z + a - 1)) x m →
+            ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (b : LatticeSite 2)) (z + b) \
+              Icc (z - (c : LatticeSite 2) + 1) (z + c - 1)) m' y →
+            ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (b : LatticeSite 2)) (z + b) \
+              Icc (z - (a : LatticeSite 2) + 1) (z + a - 1)) x y}) ≤
+          2 * (1 - c₀) ^ K * law q (E ∩ armEvent z n) := by
+  obtain ⟨c₀, hc₀, hcq⟩ := exists_law_inter_setOf_crossing_clusters_le
+  refine ⟨c₀, hc₀, fun q hq E hEu hEm z a c b n K ha hac hcb hbn hK₁ hK₂ => ?_⟩
+  have hu : IsUpperSet (E ∩ armEvent z n) := hEu.inter (isUpperSet_armEvent z n)
+  have hm : MeasurableSet (E ∩ armEvent z n) := hEm.inter (measurableSet_armEvent z n)
+  have h₁ := hcq q hq _ hu hm z a c K ha hK₁
+  have h₂ := hcq q hq _ hu hm z c b K (by omega) hK₂
+  refine le_trans (measure_mono fun ω hω => ?_) ((measure_union_le _ _).trans
+    ((add_le_add h₁ h₂).trans_eq (by ring)))
+  obtain ⟨⟨hE, harm⟩, hl⟩ := hω
+  rcases mem_setOf_crossing_clusters_of_mem_armEvent ha hac hcb hbn harm hl with h | h
+  · exact Or.inl ⟨⟨hE, harm⟩, h⟩
+  · exact Or.inr ⟨⟨hE, harm⟩, h⟩
 
 end PercLib.Models.Planar
