@@ -132,6 +132,7 @@ public import PercLib.Models.Planar.Arms.ConnectionComparison
 public import PercLib.Models.Planar.Arms.Defs
 public import PercLib.Models.Planar.Arms.IncipientCluster
 public import PercLib.Models.Planar.Arms.OneArm
+public import PercLib.Models.Planar.Arms.QuadDuality
 public import PercLib.Models.Planar.Arms.Separator
 public import PercLib.Models.Planar.Arms.ThreePoint
 public import PercLib.Models.Planar.Arms.TwoPoint
