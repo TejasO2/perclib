@@ -63,6 +63,8 @@ The configuration `G` is arbitrary, so the same exploration runs on the dual con
   greedy exploration exists, is unique, grows and is determined by the edges meeting it.
 * `forall_mem_of_exploration`: the chosen crossings are open and pairwise disjoint.
 * `exists_mem_support_of_exploration`: maximality of the chosen crossings.
+* `exists_walk_reroute_of_exploration`: every open crossing can be rerouted, from its own start,
+  to the top end of a chosen crossing (the surgery for crossings in distinct clusters).
 * `law_exploration_le_pow`: the exploration finds few crossings.
 -/
 
@@ -587,6 +589,69 @@ theorem exists_mem_support_of_exploration (h1 : lo 1 < hi 1) (hle : lo ≤ hi)
   have := forall_mem_exploredCluster_ne_of_mem_crossing h1 hle rfl hcross f
   rw [hA u le_rfl] at this
   exact this hf hf0
+
+/-- **Rerouting a crossing to a greedy tip.** Once the explored cluster reaches the right column of
+the dual box, every bottom-top crossing of the box open in `G` can be rerouted to end at the top
+end of one of the chosen crossings: it is followed up to a vertex of a chosen crossing, which is
+then followed to its end. The new walk has the same start, runs inside the two walks, and is open
+in `G`. -/
+theorem exists_walk_reroute_of_exploration (h1 : lo 1 < hi 1) (hle : lo ≤ hi)
+    (hΓ : ∀ A : Finset (LatticeSite 2),
+      (∀ y : ℤ, lo 1 ≤ y → y ≤ hi 1 - 1 → (![lo 0 - 1, y] : LatticeSite 2) ∈ A) →
+      (∀ f ∈ A, f 0 ≠ hi 0) →
+      c A ∈ Icc lo hi ∧ c A 1 = lo 1 ∧ d A ∈ Icc lo hi ∧ d A 1 = hi 1 ∧
+        (∀ x ∈ (Γ A).support, x ∈ Icc lo hi) ∧
+        ∀ e ∈ (Γ A).edges, e ∈ (zdGraph 2).edgeSet ∧
+          (∀ f ∈ dualEdge e, f ∈ Icc (![lo 0 - 1, lo 1] : LatticeSite 2) ![hi 0, hi 1 - 1]) ∧
+          (∃ f ∈ dualEdge e, f ∈ A) ∧ ∃ f ∈ dualEdge e, f ∉ A)
+    {A : ℕ → Finset (LatticeSite 2)} {u : ℕ}
+    (hA : ∀ v ≤ u, cluster (dualConfig (G \ {e | ∃ x ∈ e, ∃ w < v, x ∈ (Γ (A w)).support}) ∩
+        {s | ∀ x ∈ s, x ∈ Icc (![lo 0 - 1, lo 1] : LatticeSite 2) ![hi 0, hi 1 - 1]} ∪
+      {s | ∃ y : ℤ, lo 1 ≤ y ∧ y + 1 ≤ hi 1 - 1 ∧
+        s = s(![lo 0 - 1, y], (![lo 0 - 1, y + 1] : LatticeSite 2))}) ![lo 0 - 1, lo 1] = ↑(A v))
+    (hu : ∃ f ∈ A u, f 0 = hi 0) {a b : LatticeSite 2} (p : (zdGraph 2).Walk a b)
+    (hp : ∀ x ∈ p.support, x ∈ Icc lo hi) (ha : a 1 = lo 1) (hb : b 1 = hi 1)
+    (hpG : ∀ e ∈ p.edges, e ∈ G) :
+    ∃ w < u, (∀ f ∈ A w, f 0 ≠ hi 0) ∧ ∃ p' : (zdGraph 2).Walk a (d (A w)),
+      (∀ x ∈ p'.support, x ∈ p.support ∨ x ∈ (Γ (A w)).support) ∧
+      (∀ x ∈ p'.support, x ∈ Icc lo hi) ∧ ∀ e ∈ p'.edges, e ∈ G := by
+  classical
+  -- the first step at which the explored cluster reaches the right column
+  have hex : ∃ v, v ≤ u ∧ ∃ f ∈ A v, f 0 = hi 0 := ⟨u, le_rfl, hu⟩
+  set u₀ := Nat.find hex with hu₀
+  obtain ⟨hu₀u, hu₀f⟩ := Nat.find_spec hex
+  have hA₀ : ∀ v ≤ u₀, cluster (dualConfig (G \ {e | ∃ x ∈ e, ∃ w < v,
+      x ∈ (Γ (A w)).support}) ∩
+        {s | ∀ x ∈ s, x ∈ Icc (![lo 0 - 1, lo 1] : LatticeSite 2) ![hi 0, hi 1 - 1]} ∪
+      {s | ∃ y : ℤ, lo 1 ≤ y ∧ y + 1 ≤ hi 1 - 1 ∧
+        s = s(![lo 0 - 1, y], (![lo 0 - 1, y + 1] : LatticeSite 2))}) ![lo 0 - 1, lo 1] =
+          ↑(A v) := fun v hv => hA v (hv.trans hu₀u)
+  obtain ⟨x, hxp, w, hw, hxw⟩ := exists_mem_support_of_exploration h1 hle hA₀ hu₀f p hp ha hb hpG
+  have hright : ∀ f ∈ A w, f 0 ≠ hi 0 := by
+    intro f hf hf0
+    exact Nat.find_min hex hw ⟨by omega, f, hf, hf0⟩
+  have hΓG := (forall_mem_of_exploration h1 hΓ hA (by omega) hright).1
+  have hleft : ∀ y : ℤ, lo 1 ≤ y → y ≤ hi 1 - 1 → (![lo 0 - 1, y] : LatticeSite 2) ∈ A w := by
+    intro y hy0 hy1
+    have := mem_exploredCluster_of_leftColumn (lo := lo) (hi := hi)
+      (ζ := G \ {e | ∃ x ∈ e, ∃ w' < w, x ∈ (Γ (A w')).support}) rfl y hy0 hy1
+    rw [hA w (by omega)] at this
+    exact this
+  have hΓS := (hΓ (A w) hleft hright).2.2.2.2.1
+  refine ⟨w, by omega, hright, (p.takeUntil x hxp).append ((Γ (A w)).dropUntil x hxw),
+    fun y hy => ?_, fun y hy => ?_, fun e he => ?_⟩
+  · rw [SimpleGraph.Walk.mem_support_append_iff] at hy
+    rcases hy with hy | hy
+    · exact Or.inl (p.support_takeUntil_subset_support hxp hy)
+    · exact Or.inr ((Γ (A w)).support_dropUntil_subset_support hxw hy)
+  · rw [SimpleGraph.Walk.mem_support_append_iff] at hy
+    rcases hy with hy | hy
+    · exact hp y (p.support_takeUntil_subset_support hxp hy)
+    · exact hΓS y ((Γ (A w)).support_dropUntil_subset_support hxw hy)
+  · rw [SimpleGraph.Walk.edges_append, List.mem_append] at he
+    rcases he with he | he
+    · exact hpG e (p.edges_takeUntil_subset_edges hxp he)
+    · exact hΓG e ((Γ (A w)).edges_dropUntil_subset_edges hxw he)
 
 end Greedy
 
