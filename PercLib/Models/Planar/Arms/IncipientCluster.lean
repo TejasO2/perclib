@@ -20,11 +20,60 @@ public import PercLib.Probability.RatioContraction
 /-!
 # Kesten's incipient infinite cluster on `ℤ²`: the Basu–Sapozhnikov decomposition
 
-Work in progress; see the module docstring of the final version.
+The first half of the proof of Kesten's incipient infinite cluster on `ℤ²` (wiki FM8D) along
+Basu and Sapozhnikov's Section 2: the decomposition of `P(E, z ↔ ∂B_n(z))` along a chain of cuts,
+the estimates (2.2)-(2.7), and the uniform Cauchy property (2.1), (2.8) of the conditional
+probabilities `P(A | z ↔ ∂B_n(z))`, uniformly over every profile that opens each edge with
+probability at least `1/2` (on the edges, `p = 1 - e^{-β}` with `β ≥ log 2`). The limits, the law
+`ν` and the uniqueness of the infinite cluster under `ν` are not in this file.
+
+Boxes are `B_r(z) = Icc (z - r) (z + r)`, `B_{r-1}(z)` is `Icc (z - r + 1) (z + r - 1)`, and
+`∂B_r(z)` is `boxBoundary (z - r) (z + r)`; only the open edges `ω ∩ (zdGraph 2).edgeSet` are
+read; `z ↔ ∂B_n(z)` is `armEvent z n`.
+
+* **Cuts.** A cut has radii `a < c < b`. Its cluster `W` is the set of vertices joined to the
+  middle sphere `∂B_c` inside the annulus `B_b \ B_{a-1}`; its inner port `Y` is the set of points
+  of `B_{a-1}` with an open edge to `W`, its outer port `R` the set of points outside `B_b` with an
+  open edge to `W`. The cut is *linked* when every crossing of `B_c \ B_{a-1}` is joined inside the
+  annulus to every crossing of `B_b \ B_{c-1}`. The cut event `{W = W₀, Y = Y₀, R = R₀}` with the
+  link event is determined by the pairs meeting `W₀` (`cut_eq_of_agree`, `link_iff_of_agree`),
+  through a general fact: connections from a set closed under open pairs are determined by the
+  pairs meeting it (`localConn_iff_of_closed`, `setOf_exists_mem_localConn_eq_of_agree`). In the
+  lemmas `W`, `Y`, `R` are functions of the configuration given by these descriptions.
+* **One cut** (Basu–Sapozhnikov (2.3)). An open path from inside to outside a cut splits at its
+  first visit to `W` (it arrives from `Y`) and its last visit to `W ∪ B_c` (it leaves to `R`)
+  (`exists_mem_localConn_cut_inner`, `exists_mem_localConn_cut_outer`); conversely, on the link
+  event, paths into `Y` and out of `R` are glued through `W` (`mem_localConn_of_cut`). The three
+  pieces are determined by disjoint sets of pairs, so `law_inter_eq_sum_of_cut` writes the
+  probability as a sum, over the values of the cut, of products of three probabilities.
+* **The chain** (Basu–Sapozhnikov (2.5), (2.6)). Iterating over cuts with radii
+  `4 (b_k + 1) + 2 ≤ a_{k+1}` gives `P(E, z ↔ ∂B_n, all cuts linked) = ⟨u', M_0 ⋯ M_{S - 1} w_S⟩`,
+  with matrices `M_k` and weights `u' ≤ u''` that do not depend on `n`
+  (`law_inter_eq_sum_of_cut_of_prev`, `law_inter_armEvent_eq_sum_of_cut`, `exists_chain_of_cuts`).
+* **(2.7).** The middle factor `P(R ↔ Y inside (B_{c'} \ U) \ X)` lies between `c f g` and `f g`,
+  with `f` depending only on the inner cut and `g` only on the outer one
+  (`exists_law_localConn_comparable_of_cut`, from (A2) of `ConnectionComparison.lean`); hence the
+  cross-ratio bound `M x y · M x' y' ≤ κ² M x y' · M x' y` (`exists_crossRatio_of_cuts`).
+* **(2.2), (2.4).** On `z ↔ ∂B_n`, a cut that is not linked has two crossing clusters in one half
+  of its annulus (`mem_setOf_crossing_clusters_of_mem_armEvent`), which has probability at most
+  `(1 - c₀)^K` relative to any increasing event by (A1)
+  (`exists_law_inter_armEvent_inter_not_link_le`, `exists_law_inter_armEvent_le_add_of_cuts`).
+* **The Cauchy property** (Basu–Sapozhnikov (2.1), (2.8)). The ratio contraction of
+  `RatioContraction.lean` bounds the dependence on `n` by `((κ² - 1)/(κ² + 1))^S`; with the errors
+  of the cuts this gives `exists_abs_toReal_cond_armEvent_sub_le_of_isUpperSet` for increasing
+  events, and inclusion–exclusion (`CylinderLimit.lean`) every cylinder event,
+  `exists_abs_toReal_cond_armEvent_sub_le`.
 
 ## Main results
 
-* `PercLib.Models.Planar.mem_localConn_of_cut`
+* `PercLib.Models.Planar.law_inter_eq_sum_of_cut`
+* `PercLib.Models.Planar.exists_law_localConn_comparable_of_cut`
+* `PercLib.Models.Planar.exists_crossRatio_of_cuts`
+* `PercLib.Models.Planar.exists_law_inter_armEvent_inter_not_link_le`
+* `PercLib.Models.Planar.exists_chain_of_cuts`
+* `PercLib.Models.Planar.exists_law_inter_armEvent_le_add_of_cuts`
+* `PercLib.Models.Planar.exists_abs_toReal_cond_armEvent_sub_le_of_isUpperSet`
+* `PercLib.Models.Planar.exists_abs_toReal_cond_armEvent_sub_le`
 -/
 
 @[expose] public section
