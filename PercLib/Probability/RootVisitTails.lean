@@ -35,7 +35,11 @@ and `U_n = E ℓ_n`. No recurrence or reversibility is assumed.
   `o`.
 * `lintegral_visitCount_pow_le`: `E ℓ_n^j ≤ j! U_n^j`.
 * `lintegral_exp_visitCount_le`: `E exp (θ ℓ_n / U_n) ≤ (1 - θ)⁻¹` for `0 ≤ θ < 1`.
-* `measure_visitCount_le_mul_le`: `P(ℓ_n ≤ m) U_n ≤ m`.
+* `measure_visitCount_le_mul_le`: `P(ℓ_n ≤ m) U_n ≤ m`, hence
+  `measureReal_visitCount_le_le_min`: `P(ℓ_n ≤ m) ≤ min 1 (e/(1 - e⁻¹) · m/U_n)`.
+* `integral_exp_visitCount_le`: `E exp (θ ℓ_n / U_n) ≤ 1/(1 - θ)`.
+* `integral_visitCount_rpow_bounds`, `exists_integral_visitCount_rpow_bounds`:
+  `c_p U_n^p ≤ E ℓ_n^p ≤ C_p U_n^p` for `p > -1`, with constants depending only on `p`.
 -/
 
 @[expose] public section
@@ -43,6 +47,8 @@ noncomputable section
 
 open MeasureTheory ProbabilityTheory Finset
 open scoped ENNReal Nat
+
+universe u v
 
 namespace PercLib.Probability
 
@@ -702,5 +708,42 @@ theorem integral_visitCount_rpow_bounds [IsProbabilityMeasure μ] (hm : ∀ k, M
     gcongr
     exact ENNReal.toReal_le_of_le_ofReal hC0 hupp
 
+/-- The exponential upper tail and the linear lower tail of the root visit count. -/
+theorem integral_exp_and_measureReal_visitCount_le [IsProbabilityMeasure μ]
+    (hm : ∀ k, Measurable (Z k)) (hZ : ∀ (n : ℕ) (x : Fin (n + 1) → S), μ {ω | ∀ i : Fin (n + 1)
+        , Z i ω = x i} =
+        (if x 0 = o then 1 else 0) * ∏ i : Fin n, P (x i.castSucc) {x i.succ}) :
+    (∀ (n : ℕ) (θ : ℝ), 0 ≤ θ → θ < 1 →
+      ∫ ω, Real.exp (θ * (((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ)
+          / ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o})) ∂μ ≤ 1 / (1 - θ)) ∧
+    (∀ n m : ℕ, 1 ≤ m →
+      μ.real {ω | (∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0) ≤ m} ≤
+        min 1 (Real.exp 1 / (1 - Real.exp (-1)) * (m / ∑ k ∈ range (n + 1), μ.real {ω | Z k ω
+            = o}))) :=
+  ⟨fun n _ h0 h1 => integral_exp_visitCount_le hm hZ n h0 h1,
+    fun n m _ => measureReal_visitCount_le_le_min hm hZ n m⟩
+
+/-- **Fractional moments with constants depending only on `p`**: for `p > -1` there are
+`c, C > 0` with `c U_n^p ≤ E ℓ_n^p ≤ C U_n^p` for every chain and every `n`. -/
+theorem exists_integral_visitCount_rpow_bounds {p : ℝ} (hp : -1 < p) :
+    ∃ c > 0, ∃ C > 0, ∀ {Ω : Type u} {S : Type v} [MeasurableSpace Ω] [MeasurableSpace S]
+      [DiscreteMeasurableSpace S] [Countable S] [DecidableEq S] (μ : Measure Ω)
+      [IsProbabilityMeasure μ] (P : Kernel S S) (Z : ℕ → Ω → S) (o : S),
+      (∀ k, Measurable (Z k)) → (∀ (n : ℕ) (x : Fin (n + 1) → S), μ {ω | ∀ i : Fin (n + 1)
+          , Z i ω = x i} =
+        (if x 0 = o then 1 else 0) * ∏ i : Fin n, P (x i.castSucc) {x i.succ}) →
+      ∀ n : ℕ, c * (∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ^ p ≤ ∫ ω
+          , ((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ) ^ p ∂μ ∧ ∫ ω
+              , ((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ) ^ p ∂μ ≤ C
+                  * (∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ^ p := by
+  refine ⟨(4 : ℝ) ^ (-|p|) / 2, by positivity,
+    if 0 ≤ p then 1 + (⌈p⌉₊ ! : ℝ) else 1 / (1 + p), ?_, ?_⟩
+  · split_ifs
+    · positivity
+    · exact div_pos one_pos (by linarith)
+  · intro Ω S _ _ _ _ _ μ _ P Z o hm hZ n
+    exact integral_visitCount_rpow_bounds hm hZ hp n
+
 end PercLib.Probability
+
 

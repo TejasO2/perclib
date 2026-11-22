@@ -423,6 +423,7 @@ public import PercLib.Probability.ProdBernoulliIndependence
 public import PercLib.Probability.ProductExpectation
 public import PercLib.Probability.ProfileBK
 public import PercLib.Probability.RevealmentDerivative
+public import PercLib.Probability.RootVisitTails
 public import PercLib.Probability.Russo
 public import PercLib.Probability.RussoCylinder
 public import PercLib.Probability.RussoFinset
@@ -457,6 +458,7 @@ public import PercLib.Probability.Tags.PredictableSwap
 public import PercLib.Probability.Tags.ProductModel
 public import PercLib.Probability.Tags.ProfileContinuity
 public import PercLib.Probability.Tags.RevealmentDerivative
+public import PercLib.Probability.Tags.RootVisitTails
 public import PercLib.Probability.Tags.Russo
 public import PercLib.Probability.Tags.RussoCoordinate
 public import PercLib.Probability.Tags.SectionComparison
