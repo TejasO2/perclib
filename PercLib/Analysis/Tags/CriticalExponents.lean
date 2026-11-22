@@ -11,7 +11,7 @@ module
 
 public import PercLib.Meta.Tag
 public import PercLib.Analysis.LogExponent
-public import PercLib.Analysis.HasLogExponent
+public import PercLib.Analysis.LogExponent.Defs
 
 /-!
 # Critical exponents: correspondence
