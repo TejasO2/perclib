@@ -11,6 +11,7 @@ module
 
 public import PercLib.Meta.Tag
 public import PercLib.Analysis.LogExponent
+public import PercLib.Analysis.HasLogExponent
 
 /-!
 # Critical exponents: correspondence
@@ -21,6 +22,7 @@ Wiki correspondence for the hierarchy of asymptotic notions, from
 ## Main results
 
 * `log_exponent_hierarchy`
+* `asymptotic_comparison_and_log_exponent_conventions`
 -/
 
 @[expose] public section
@@ -68,5 +70,36 @@ theorem log_exponent_hierarchy :
     simp only [Pi.sub_apply, Real.norm_eq_abs, abs_of_nonpos hv] at hb
     have := le_abs_self ((2 + sin x) * x ^ α - c * x ^ α)
     linarith
+
+/-- **Asymptotic equivalence, comparison and logarithmic power exponent.** For eventually
+nonzero `g`, `f ~ g` (mathlib's `IsEquivalent`) iff `f/g → 1`. For eventually positive `f, g`,
+`f ≍ g` (mathlib's `IsTheta`) iff `c g ≤ f ≤ C g` eventually for some `0 < c ≤ C`. The
+logarithmic power exponent `α` (`HasLogExponent atTop f α`) is `log f(x)/log x → α`, and for
+eventually positive `f` it is equivalent to `f(x) = x^{α + o(1)}`. At a parameter tending to
+zero (`HasLogExponent (𝓝[>] 0) f α`) it is `log f(ε)/log ε → α`, equivalently
+`f(ε) = ε^{α + o(1)}`. -/
+@[tag "PHLF"]
+theorem asymptotic_comparison_and_log_exponent_conventions :
+    (∀ f g : ℝ → ℝ, (∀ᶠ x in atTop, g x ≠ 0) →
+      (f ~[atTop] g ↔ Tendsto (f / g) atTop (𝓝 1))) ∧
+    (∀ f g : ℝ → ℝ, (∀ᶠ x in atTop, 0 < f x) → (∀ᶠ x in atTop, 0 < g x) →
+      (f =Θ[atTop] g ↔
+        ∃ c C : ℝ, 0 < c ∧ c ≤ C ∧ ∀ᶠ x in atTop, c * g x ≤ f x ∧ f x ≤ C * g x)) ∧
+    (∀ (f : ℝ → ℝ) (α : ℝ),
+      HasLogExponent atTop f α ↔ Tendsto (fun x => log (f x) / log x) atTop (𝓝 α)) ∧
+    (∀ (f : ℝ → ℝ) (α : ℝ), (∀ᶠ x in atTop, 0 < f x) →
+      (HasLogExponent atTop f α ↔
+        ∃ e : ℝ → ℝ, Tendsto e atTop (𝓝 0) ∧ ∀ᶠ x in atTop, f x = x ^ (α + e x))) ∧
+    (∀ (f : ℝ → ℝ) (α : ℝ),
+      HasLogExponent (𝓝[>] 0) f α ↔ Tendsto (fun ε => log (f ε) / log ε) (𝓝[>] 0) (𝓝 α)) ∧
+    (∀ (f : ℝ → ℝ) (α : ℝ), (∀ᶠ ε in 𝓝[>] 0, 0 < f ε) →
+      (HasLogExponent (𝓝[>] 0) f α ↔
+        ∃ e : ℝ → ℝ, Tendsto e (𝓝[>] 0) (𝓝 0) ∧ ∀ᶠ ε in 𝓝[>] 0, f ε = ε ^ (α + e ε))) :=
+  ⟨fun _ _ hg => isEquivalent_iff_tendsto_one hg,
+    fun _ _ hf hg => isTheta_iff_exists_const_mul_le hf hg,
+    fun _ _ => hasLogExponent_iff,
+    fun _ _ hf => hasLogExponent_atTop_iff_exists_rpow hf,
+    fun _ _ => hasLogExponent_iff,
+    fun _ _ hf => hasLogExponent_nhdsGT_zero_iff_exists_rpow hf⟩
 
 end PercLib.Analysis
