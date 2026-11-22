@@ -7191,3 +7191,130 @@ theorem i41_enn_of_root_finite (μ : Measure (Config (Fin d → ℤ)))
   by_cases hy : ω ∈ conn 0 y <;> simp [Set.indicator_apply, hy]
 
 end PercLib.Models.LongRange
+/-! ### Cutoff normalization and coefficient signs -/
+
+open MeasureTheory Set Filter
+open scoped ENNReal NNReal Topology unitInterval
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Percolation.Bond
+
+/-- **Numeric `p`-th power differences do not need `toReal`.**  For natural `a`, `b` and `p`, the
+truncated `ℝ≥0∞` difference `a^p - b^p` is the cast of the truncated natural difference.  This is
+the `toReal`-free companion of `pow_add_sub_pow_toReal`, and it is what makes the finite
+`ℝ≥0∞` arithmetic of the audit reduce to `ℕ`. -/
+theorem ennreal_pow_sub_pow_natCast (a b p : ℕ) :
+    ((a : ℝ≥0∞) ^ p - (b : ℝ≥0∞) ^ p) = ((a ^ p - b ^ p : ℕ) : ℝ≥0∞) := by
+  rw [← Nat.cast_pow, ← Nat.cast_pow, ← ENNReal.natCast_sub (a ^ p) (b ^ p)]
+
+
+section Corner
+
+/-- The sup seminorm of a one-dimensional integer displacement is the absolute value of its
+coordinate, expressed through `Int.natAbs` so that it is visibly a natural number. -/
+theorem normSeminorm_fin_one_intCast (z : Fin 1 → ℤ) :
+    normSeminorm ℝ (Fin 1 → ℝ) (Int.cast ∘ z) = ((z 0).natAbs : ℝ) := by
+  have h1 : normSeminorm ℝ (Fin 1 → ℝ) (Int.cast ∘ z) = |(((z 0) : ℤ) : ℝ)| := by
+    rw [show normSeminorm ℝ (Fin 1 → ℝ) (Int.cast ∘ z) = ‖(Int.cast ∘ z : Fin 1 → ℝ)‖ from rfl,
+      Pi.norm_def]
+    simp
+  have h2 : |(((z 0) : ℤ) : ℝ)| = ((z 0).natAbs : ℝ) := by
+    rw [← Int.cast_abs, Int.abs_eq_natAbs]
+    simp
+  rw [h1, h2]
+
+/-- **No corner at `r = 3/2`.**  No integer displacement of the one-dimensional lattice has norm
+strictly between `1` and `2`, which is exactly the corner hypothesis of
+`indicator_lt_eq_le`/`radialKernel_indicator_eq_ball_of_ne` at `r = 3/2`. -/
+theorem corner_free_at_three_halves :
+    ∀ z : Fin 1 → ℤ, normSeminorm ℝ (Fin 1 → ℝ) (Int.cast ∘ z) ∉ Set.Ioo (1 : ℝ) 2 := by
+  intro z
+  rw [normSeminorm_fin_one_intCast]
+  have hsplit : (z 0).natAbs = 0 ∨ (z 0).natAbs = 1 ∨ 2 ≤ (z 0).natAbs := by omega
+  rcases hsplit with h | h | h
+  · rw [h]; norm_num
+  · rw [h]; norm_num
+  · intro hc
+    have h2 : (2 : ℝ) ≤ ((z 0).natAbs : ℝ) := by exact_mod_cast h
+    linarith [hc.2]
+
+/-- **The corner reconciliation holds at `r = 3/2`**: the strict indicator of the cutoff
+derivative and the paper's closed ball agree on every integer displacement. -/
+theorem strict_eq_closed_at_three_halves (z : Fin 1 → ℤ) :
+    (if normSeminorm ℝ (Fin 1 → ℝ) (Int.cast ∘ z) < (3 / 2 : ℝ) then (1 : ℝ≥0∞) else 0) =
+      if normSeminorm ℝ (Fin 1 → ℝ) (Int.cast ∘ z) ≤ (3 / 2 : ℝ) then 1 else 0 :=
+  indicator_lt_eq_le _ corner_free_at_three_halves (by norm_num) z
+
+/-- The cutoff radial kernel at `r = 3/2` equals the closed-ball indicator off the diagonal: the
+compiled form of `radialKernel_indicator_eq_ball_of_ne` at a radius that has no corner. -/
+theorem radialKernel_three_halves_eq_ball (x y : Fin 1 → ℤ) (hxy : x ≠ y) :
+    (radialKernel (normSeminorm ℝ (Fin 1 → ℝ)) (fun s => if s < (3 / 2 : ℝ) then 1 else 0)
+        s(x, y) : ℝ) =
+      if normSeminorm ℝ (Fin 1 → ℝ) (Int.cast ∘ (y - x)) ≤ (3 / 2 : ℝ) then 1 else 0 :=
+  radialKernel_indicator_eq_ball_of_ne _ corner_free_at_three_halves (by norm_num) hxy
+
+/-- **The corner hypothesis is not removable.**  At the integer radius `r = 2` the strict
+indicator and the closed ball genuinely differ, at the displacement `2`; hence the corner
+hypothesis in `indicator_lt_eq_le` is a real restriction and not a convenience. -/
+theorem corner_at_two :
+    ¬ ∀ z : Fin 1 → ℤ,
+      (if normSeminorm ℝ (Fin 1 → ℝ) (Int.cast ∘ z) < (2 : ℝ) then (1 : ℝ≥0∞) else 0) =
+        if normSeminorm ℝ (Fin 1 → ℝ) (Int.cast ∘ z) ≤ (2 : ℝ) then 1 else 0 := by
+  intro h
+  have hz := h (fun _ => (2 : ℤ))
+  rw [normSeminorm_fin_one_intCast] at hz
+  norm_num at hz
+
+end Corner
+
+open Classical in
+/-- **The corner hypothesis of `tsum_radialKernel_pivotal_eq_tsum_ball` is inhabited in the
+one-dimensional model.**  At `d = 1`, `u = 1`, `v = 2`, `r = 3/2` the hypothesis holds for every
+configuration, root and exponent, so the strict radial indicator of the cutoff derivative and the
+paper's closed ball agree there.  This is a non-vacuity certificate, not a weakening: the
+hypothesis is genuinely a restriction, since at `r = 2` the two indicators differ. -/
+theorem tsum_radialKernel_pivotal_eq_tsum_ball_at_three_halves (ω : Config (Fin 1 → ℤ))
+    (o : Fin 1 → ℤ) (p : ℕ) :
+    (∑' e : Sym2 (Fin 1 → ℤ),
+        ((radialKernel (normSeminorm ℝ (Fin 1 → ℝ))
+            (fun s => if s < (3 / 2 : ℝ) then 1 else 0) e : ℝ≥0) : ℝ≥0∞) *
+          (if e ∈ ω then (0 : ℝ≥0∞) else
+            (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+              ((cluster ω o).encard : ℝ≥0∞) ^ p))) =
+      ∑' x : Fin 1 → ℤ, ∑' y : Fin 1 → ℤ,
+        (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) *
+          (if normSeminorm ℝ (Fin 1 → ℝ) (Int.cast ∘ (y - x)) ≤ (3 / 2 : ℝ) then
+            (1 : ℝ≥0∞) else 0) *
+          (if y ∈ cluster ω o then 0 else 1) *
+          ((((cluster ω o).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+            ((cluster ω o).encard : ℝ≥0∞) ^ p) :=
+  tsum_radialKernel_pivotal_eq_tsum_ball (d := 1) (N := normSeminorm ℝ (Fin 1 → ℝ))
+    (u := 1) (v := 2) (r := 3 / 2) corner_free_at_three_halves (by norm_num) ω o p
+
+
+end PercLib.Models.LongRange
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Percolation.Bond PercLib.Probability
+
+/-- An antitone profile has nonpositive derivative at every positive differentiable point. -/
+theorem cutoffProfile_deriv_nonpos {K K' : ℝ → ℝ} (hKa : AntitoneOn K (Ioi 0))
+    (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t) {r : ℝ} (hr : 0 < r) : K' r ≤ 0 :=
+  (hK' r hr).hasDerivWithinAt.nonpos_of_antitoneOn (isOpen_Ioi.preperfect r hr) hKa
+
+/-- The cutoff Russo coefficient is nonnegative on every pair. -/
+theorem nonneg_cutoff_deriv_weight {d : ℕ} {N : Seminorm ℝ (Fin d → ℝ)} {K K' : ℝ → ℝ}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (β : ℝ≥0) {r : ℝ} (hr : 0 < r) (cw : Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ e, cw e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ))))
+    (e : Sym2 (Fin d → ℤ)) : 0 ≤ cw e := by
+  rw [hcw e]
+  refine mul_nonneg (radialKernel N _ e).coe_nonneg ?_
+  exact mul_nonneg (mul_nonneg β.coe_nonneg
+    (neg_nonneg.mpr (cutoffProfile_deriv_nonpos hKa hK' hr))) (Real.exp_pos _).le
+
+
+end PercLib.Models.LongRange
