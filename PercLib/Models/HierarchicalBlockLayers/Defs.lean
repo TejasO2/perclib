@@ -33,12 +33,16 @@ vertices first share a block at level `h(y - x)`.
   `J_∞(x,y) = L^s/(L^s - 1) ‖x - y‖^{-s}` with `‖x - y‖ = L^{h(x,y)}`,
   `J_n(x,y) = ∑_{m=h(x,y)}^n L^{-sm}` on pairs of `block n x`, and the constant
   `L^{-sn}/(L^s - 1)` on pairs of `block n x`.
+* `projFibre n y`: the fibre over `y` of the projection `π_n` keeping the coordinates below `n`.
+* `periodicKernel L s n`: the periodic kernel `J_n^per(x,y) = ∑_{π_n z = y} J_∞(x,z)` on the
+  pairs of `block n 0`.
+* `completeKernel n x c`: the constant kernel `c` on the pairs of `block n x`.
 -/
 
 @[expose] public section
 noncomputable section
 
-open scoped NNReal
+open scoped NNReal ENNReal
 
 namespace PercLib.Models.HierarchicalLayers
 
@@ -177,5 +181,114 @@ theorem ancestorKernel_of_not_mem {L s : ℝ} {n : ℕ} {x : ℕ →₀ A} {e : 
     (he : ¬ (¬ e.IsDiag ∧ ∀ v ∈ e, v ∈ block n x)) : ancestorKernel L s n x e = 0 := by
   classical
   rw [ancestorKernel, ite_eq_right_iff.mpr fun h => absurd h he]
+
+/-! ### The periodic block kernel -/
+
+/-- The fibre `{z | π_n z = y}` of the coordinate projection `π_n` that keeps the coordinates
+below `n` and forgets the others. -/
+def projFibre (n : ℕ) (y : ℕ →₀ A) : Set (ℕ →₀ A) := {z | z.filter (· < n) = y}
+
+@[simp] theorem mem_projFibre {n : ℕ} {y z : ℕ →₀ A} :
+    z ∈ projFibre n y ↔ z.filter (· < n) = y := Iff.rfl
+
+/-- A vertex of `block n 0` is fixed by the projection `π_n`. -/
+theorem filter_eq_self_of_mem_block {n : ℕ} {y : ℕ →₀ A} (hy : y ∈ block n 0) :
+    y.filter (· < n) = y := by
+  rw [Finsupp.filter_eq_self_iff]
+  intro i hi
+  have h := mem_block.mp hy
+  rw [sub_zero] at h
+  exact (level_le_iff_support y n).mp h i (Finsupp.mem_support_iff.mpr hi)
+
+/-- The reflection `z ↦ x + y - z` maps the fibre over `y` onto the fibre over `x`. -/
+def projFibreReflect {n : ℕ} {x y : ℕ →₀ A} (hx : x ∈ block n 0) (hy : y ∈ block n 0) :
+    projFibre n y ≃ projFibre n x :=
+  (Equiv.subLeft (x + y)).subtypeEquiv fun z => by
+    simp only [mem_projFibre, Equiv.subLeft_apply, Finsupp.filter_sub, Finsupp.filter_add,
+      filter_eq_self_of_mem_block hx, filter_eq_self_of_mem_block hy]
+    constructor
+    · intro h
+      rw [h]
+      abel
+    · intro h
+      rw [sub_eq_iff_eq_add] at h
+      exact (add_left_cancel h).symm
+
+@[simp] theorem coe_projFibreReflect_apply {n : ℕ} {x y : ℕ →₀ A} (hx : x ∈ block n 0)
+    (hy : y ∈ block n 0) (z : projFibre n y) :
+    (projFibreReflect hx hy z : ℕ →₀ A) = x + y - z := rfl
+
+/-- `J_∞` is invariant under the reflection `z ↦ x + y - z` exchanging `x` and `y`. -/
+theorem exactKernel_mk_add_sub (L s : ℝ) (x y z : ℕ →₀ A) :
+    exactKernel L s s(y, x + y - z) = exactKernel L s s(x, z) := by
+  classical
+  have hl : pairLevel s(y, x + y - z) = pairLevel s(x, z) := by
+    simp only [pairLevel_mk]
+    rw [show x + y - z - y = x - z by abel]
+    exact level_sub_comm z x
+  have hd : s(y, x + y - z).IsDiag ↔ s(x, z).IsDiag := by
+    simp only [Sym2.mk_isDiag_iff]
+    rw [eq_sub_iff_add_eq, add_comm y z, add_left_inj, eq_comm]
+  simp only [exactKernel, hl, hd]
+
+/-- The fibre sums defining the periodic kernel are symmetric in `x, y ∈ block n 0`. -/
+theorem tsum_projFibre_exactKernel_comm (L s : ℝ) {n : ℕ} {x y : ℕ →₀ A}
+    (hx : x ∈ block n 0) (hy : y ∈ block n 0) :
+    ∑' z : projFibre n y, (exactKernel L s s(x, z) : ℝ≥0∞) =
+      ∑' z : projFibre n x, (exactKernel L s s(y, z) : ℝ≥0∞) := by
+  rw [← (projFibreReflect hx hy).tsum_eq]
+  congr 1
+  funext z
+  rw [coe_projFibreReflect_apply, exactKernel_mk_add_sub]
+
+open Classical in
+/-- The periodic kernel `J_n^per(x,y) = ∑_{z : π_n z = y} J_∞(x,z)` on the pairs of distinct
+vertices of `block n 0` (the quotient of the lattice by the coordinates `≥ n`), and `0` on all
+other pairs. The fibre sum is taken in `ℝ≥0∞`; it is finite for the hierarchical lattice. -/
+def periodicKernel (L s : ℝ) (n : ℕ) : Sym2 (ℕ →₀ A) → ℝ≥0 :=
+  Sym2.lift ⟨fun x y => if x ≠ y ∧ x ∈ block n 0 ∧ y ∈ block n 0 then
+      (∑' z : projFibre n y, (exactKernel L s s(x, z) : ℝ≥0∞)).toNNReal else 0, by
+    intro x y
+    by_cases h : x ≠ y ∧ x ∈ block n 0 ∧ y ∈ block n 0
+    · have h' : y ≠ x ∧ y ∈ block n 0 ∧ x ∈ block n 0 := ⟨h.1.symm, h.2.2, h.2.1⟩
+      dsimp only
+      rw [ite_eq_left h, ite_eq_left h', tsum_projFibre_exactKernel_comm L s h.2.1 h.2.2]
+    · have h' : ¬ (y ≠ x ∧ y ∈ block n 0 ∧ x ∈ block n 0) :=
+        fun h' => h ⟨h'.1.symm, h'.2.2, h'.2.1⟩
+      dsimp only
+      rw [ite_eq_right h, ite_eq_right h']⟩
+
+theorem periodicKernel_mk_of_mem {L s : ℝ} {n : ℕ} {x y : ℕ →₀ A} (hxy : x ≠ y)
+    (hx : x ∈ block n 0) (hy : y ∈ block n 0) :
+    periodicKernel L s n s(x, y) =
+      (∑' z : projFibre n y, (exactKernel L s s(x, z) : ℝ≥0∞)).toNNReal := by
+  classical
+  simp only [periodicKernel, Sym2.lift_mk]
+  rw [ite_eq_left ⟨hxy, hx, hy⟩]
+
+theorem periodicKernel_mk_of_not_mem {L s : ℝ} {n : ℕ} {x y : ℕ →₀ A}
+    (h : ¬ (x ≠ y ∧ x ∈ block n 0 ∧ y ∈ block n 0)) : periodicKernel L s n s(x, y) = 0 := by
+  classical
+  simp only [periodicKernel, Sym2.lift_mk]
+  rw [ite_eq_right h]
+
+open Classical in
+/-- The complete-graph kernel with the constant value `c` on the pairs of `block n x`. -/
+def completeKernel (n : ℕ) (x : ℕ →₀ A) (c : ℝ≥0) (e : Sym2 (ℕ →₀ A)) : ℝ≥0 :=
+  if ¬ e.IsDiag ∧ ∀ v ∈ e, v ∈ block n x then c else 0
+
+theorem completeKernel_of_mem {n : ℕ} {x : ℕ →₀ A} {c : ℝ≥0} {e : Sym2 (ℕ →₀ A)}
+    (he : ¬ e.IsDiag ∧ ∀ v ∈ e, v ∈ block n x) : completeKernel n x c e = c := by
+  classical
+  rw [completeKernel, ite_eq_left he]
+
+theorem completeKernel_of_not_mem {n : ℕ} {x : ℕ →₀ A} {c : ℝ≥0} {e : Sym2 (ℕ →₀ A)}
+    (he : ¬ (¬ e.IsDiag ∧ ∀ v ∈ e, v ∈ block n x)) : completeKernel n x c e = 0 := by
+  classical
+  rw [completeKernel, ite_eq_right he]
+
+/-- The ancestor kernel is the complete-graph kernel with value `L^{-sn}/(L^s - 1)`. -/
+theorem ancestorKernel_eq_completeKernel (L s : ℝ) (n : ℕ) (x : ℕ →₀ A) :
+    ancestorKernel L s n x = completeKernel n x (L ^ (-(s * n)) / (L ^ s - 1)).toNNReal := rfl
 
 end PercLib.Models.HierarchicalLayers
