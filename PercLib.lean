@@ -176,6 +176,7 @@ public import PercLib.Models.LongRange.Tags.Susceptibility
 public import PercLib.Models.NonSummable
 public import PercLib.Models.NormalizedSmallIntensity
 public import PercLib.Models.NormalizedSmallIntensityLine
+public import PercLib.Models.PathCount
 public import PercLib.Models.Site.Basic
 public import PercLib.Models.Site.Harris
 public import PercLib.Models.Site.SelfAvoiding
@@ -198,6 +199,7 @@ public import PercLib.Models.Tags.HierarchicalTwoPointConditional
 public import PercLib.Models.Tags.KernelsAndSitePaths
 public import PercLib.Models.Tags.Lattice
 public import PercLib.Models.Tags.Line
+public import PercLib.Models.Tags.PathCount
 public import PercLib.Models.Tags.Site
 public import PercLib.Models.Tags.SmallIntensity
 public import PercLib.Models.Tags.TranslationInvariant
@@ -291,9 +293,11 @@ public import PercLib.Percolation.Bond.Multipoint.TrivalentCount
 public import PercLib.Percolation.Bond.Multipoint.Ultrametric
 public import PercLib.Percolation.Bond.OptimizedClusterTail
 public import PercLib.Percolation.Bond.PathComparison
+public import PercLib.Percolation.Bond.PathCountSusceptibility
 public import PercLib.Percolation.Bond.PathLowerBounds
 public import PercLib.Percolation.Bond.Pivotal
 public import PercLib.Percolation.Bond.ProfileRegularity
+public import PercLib.Percolation.Bond.RestrictedSusceptibility
 public import PercLib.Percolation.Bond.RootGlobalPercolation
 public import PercLib.Percolation.Bond.RootIndependence
 public import PercLib.Percolation.Bond.RowSum
@@ -343,11 +347,14 @@ public import PercLib.Percolation.Bond.Tags.FiniteVolume
 public import PercLib.Percolation.Bond.Tags.FourthMoment
 public import PercLib.Percolation.Bond.Tags.IncreasingEvents
 public import PercLib.Percolation.Bond.Tags.IndependentLayer
+public import PercLib.Percolation.Bond.Tags.LatticePathSusceptibility
 public import PercLib.Percolation.Bond.Tags.MarkedVolumeMoments
 public import PercLib.Percolation.Bond.Tags.OpenDegreeCounts
 public import PercLib.Percolation.Bond.Tags.OptimizedClusterTail
+public import PercLib.Percolation.Bond.Tags.RestrictedSusceptibility
 public import PercLib.Percolation.Bond.Tags.RootGlobalPercolation
 public import PercLib.Percolation.Bond.Tags.SubcriticalBound
+public import PercLib.Percolation.Bond.Tags.SummableDegree
 public import PercLib.Percolation.Bond.Tags.SusceptibilityLevel
 public import PercLib.Percolation.Bond.Tags.Tightness
 public import PercLib.Percolation.Bond.Tags.TreeGraph
