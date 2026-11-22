@@ -306,6 +306,7 @@ public import PercLib.Probability.CouplingRatio
 public import PercLib.Probability.CovarianceRusso
 public import PercLib.Probability.Cylinder
 public import PercLib.Probability.CylinderDisjointOccurrence
+public import PercLib.Probability.CylinderLimit
 public import PercLib.Probability.Defs
 public import PercLib.Probability.DeterminedIndependence
 public import PercLib.Probability.DeterministicModification
@@ -344,6 +345,7 @@ public import PercLib.Probability.ProdBernoulli
 public import PercLib.Probability.ProdBernoulliIndependence
 public import PercLib.Probability.ProductExpectation
 public import PercLib.Probability.ProfileBK
+public import PercLib.Probability.RatioContraction
 public import PercLib.Probability.RevealmentDerivative
 public import PercLib.Probability.Russo
 public import PercLib.Probability.RussoCylinder
