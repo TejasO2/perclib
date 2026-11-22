@@ -11747,3 +11747,236 @@ theorem hasDerivAt_integral_cutoff_pow_binomial_of_root_succ_moment {d : ℕ}
 
 
 end PercLib.Models.LongRange
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability MeasureTheory Set
+
+open scoped ENNReal NNReal Topology
+
+variable {d : ℕ}
+
+/-- **The root moment is finite throughout the zero-cutoff window.** For `r ≤ 1` the linear
+cutoff kernel vanishes identically, so the law is that of the empty configuration and the
+cluster of `o` is the singleton `{o}`; its `p`-th moment is one. -/
+theorem linear_root_moment_ne_top_of_le_one (p : ℕ) {r : ℝ} (hr : r ≤ 1) (o : Fin d → ℤ) :
+    (∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ^ p
+      ∂(law (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => -s) r)
+        (1 : ℝ≥0)))) ≠ ⊤ := by
+  rw [linear_intensityProfile_eq_zero_of_le_one hr]
+  have hae : (fun ω : Config (Fin d → ℤ) => ((cluster ω o).encard : ℝ≥0∞) ^ p)
+      =ᵐ[law (fun _ : Sym2 (Fin d → ℤ) => (0 : unitInterval))] fun _ => (1 : ℝ≥0∞) := by
+    filter_upwards [ae_eq_empty_zero_profile (d := d)] with ω hω
+    rw [hω, cluster_empty, Set.encard_singleton]
+    norm_num
+  rw [lintegral_congr_ae hae, lintegral_const, measure_univ, mul_one]
+  exact ENNReal.one_ne_top
+
+/-- **Every summand of the binomial diagram vanishes on the window.** A site `y` contributing
+to the sum satisfies `N y ≤ r < 1`, hence `y = 0`, and there the connection indicator
+`1{y ∉ K}` is zero because `0` is connected to itself. -/
+theorem linear_diagram_tsum_eq_zero (p ℓ : ℕ) {r : ℝ} (hr : r < 1) (ω : Config (Fin d → ℤ)) :
+    (∑' y : Fin d → ℤ,
+      (if ModelNorm.ofNorm (Fin d → ℝ) (Int.cast ∘ y) ≤ r then (1 : ℝ≥0∞) else 0) *
+        (conn (0 : Fin d → ℤ) y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+        ((cluster ω y).encard : ℝ≥0∞) ^ (p - ℓ)) = 0 := by
+  rw [ENNReal.tsum_eq_zero]
+  intro y
+  by_cases hy : y = 0
+  · subst hy
+    rw [conn_self]
+    simp
+  · have h1 : (1 : ℝ) ≤ ModelNorm.ofNorm (Fin d → ℝ) (Int.cast ∘ y) := by
+      simpa using one_le_normSeminorm_intCast (d := d) hy
+    rw [ite_eq_right (by linarith :
+      ¬ (ModelNorm.ofNorm (Fin d → ℝ) (Int.cast ∘ y) ≤ r))]
+    simp
+
+/-- **Every binomial diagram term has integral zero on the window**, so `D = 0` is a valid
+uniform majorant there. -/
+theorem linear_diagram_integral_eq_zero (p : ℕ) {r : ℝ} (hr : r < 1) (ℓ : ℕ) :
+    (∫⁻ ω, ((cluster ω (0 : Fin d → ℤ)).encard : ℝ≥0∞) ^ (ℓ + 1) *
+        (∑' y : Fin d → ℤ,
+          (if ModelNorm.ofNorm (Fin d → ℝ) (Int.cast ∘ y) ≤ r then (1 : ℝ≥0∞) else 0) *
+            (conn (0 : Fin d → ℤ) y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+            ((cluster ω y).encard : ℝ≥0∞) ^ (p - ℓ))
+        ∂(law (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => -s) r)
+          (1 : ℝ≥0)))) = 0 := by
+  have hfun : (fun ω : Config (Fin d → ℤ) =>
+        ((cluster ω (0 : Fin d → ℤ)).encard : ℝ≥0∞) ^ (ℓ + 1) *
+          (∑' y : Fin d → ℤ,
+            (if ModelNorm.ofNorm (Fin d → ℝ) (Int.cast ∘ y) ≤ r then (1 : ℝ≥0∞) else 0) *
+              (conn (0 : Fin d → ℤ) y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+              ((cluster ω y).encard : ℝ≥0∞) ^ (p - ℓ))) = fun _ => 0 := by
+    funext ω
+    rw [linear_diagram_tsum_eq_zero (d := d) p ℓ hr ω, mul_zero]
+  rw [hfun, lintegral_zero]
+
+/-- The derivative weight vanishes identically on the window, because the strict radial
+indicator `1{N e < r}` does. -/
+theorem linear_cw_eq_zero {r : ℝ} (hr : r ≤ 1) (e : Sym2 (Fin d → ℤ)) :
+    (radialKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((1 : ℝ) * -((fun _ : ℝ => -1) r) *
+        Real.exp (-(1 : ℝ) *
+          (cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => -s) r e : ℝ))) = 0 :=
+  linear_weight_eq_zero hr e
+
+/-- The whole weighted flux series vanishes on the window. -/
+theorem linear_cw_tsum_eq_zero {r : ℝ} (hr : r ≤ 1) (X : Sym2 (Fin d → ℤ) → ℝ) :
+    (∑' e : Sym2 (Fin d → ℤ),
+      ((radialKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => if s < r then 1 else 0) e : ℝ) *
+        ((1 : ℝ) * -((fun _ : ℝ => -1) r) *
+          Real.exp (-(1 : ℝ) *
+            (cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => -s) r e : ℝ)))) * X e) = 0 := by
+  have hterm : ∀ e : Sym2 (Fin d → ℤ),
+      ((radialKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => if s < r then 1 else 0) e : ℝ) *
+        ((1 : ℝ) * -((fun _ : ℝ => -1) r) *
+          Real.exp (-(1 : ℝ) *
+            (cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => -s) r e : ℝ)))) * X e = 0 := by
+    intro e
+    rw [linear_cw_eq_zero hr e, zero_mul]
+  rw [tsum_congr hterm, tsum_zero]
+
+/-- **The rate at `r₀ = 1/2` is one**, so the instantiation has nonzero cutoff rate. -/
+theorem linear_rate_eq_one :
+    ((1 : ℝ≥0) : ℝ) * -((fun _ : ℝ => -1) (1 / 2)) = 1 := by
+  norm_num
+
+/-! ### The instantiation -/
+
+open Classical in
+/-- **The uniform binomial-diagram derivative holds non-vacuously in the linear model.**
+
+With `N` the sup norm on `ℤ^d`, `K s = -s`, `K' = -1`, `β = 1`, `u = 1/4`, `v = 3/4`,
+`r₀ = 1/2` and outer scale `R = 1`, the majorant `D = 0` satisfies every hypothesis of
+`hasDerivAt_integral_cutoff_pow_binomial_of_root_moment_of_diagram`: the root moments are finite
+on the window and at `R` by `linear_root_moment_ne_top_of_le_one`, the diagram terms vanish by
+`linear_diagram_integral_eq_zero`, and the flux series vanishes identically on the window, which
+gives both the dominator and its continuity. The conclusion is the same proposition as the
+existing witness `hasDerivAt_integral_linear_cutoff_pow`. -/
+theorem hasDerivAt_integral_linear_cutoff_pow_diagram (d : ℕ) (p : ℕ) (hp : 1 ≤ p) :
+    HasDerivAt (fun r : ℝ => ∫ ω, (((cluster ω (0 : Fin d → ℤ)).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => -s) r)
+          (1 : ℝ≥0))))
+      (((1 : ℝ≥0) : ℝ) * -((fun _ : ℝ => -1) (1 / 2)) *
+        ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ) *
+          ∫ ω, (((cluster ω (0 : Fin d → ℤ)).encard : ℝ≥0∞).toReal) ^ (ℓ + 1) *
+            (∑' y : Fin d → ℤ,
+              (if normSeminorm ℝ (Fin d → ℝ) (Int.cast ∘ y) ≤ (1 / 2 : ℝ) then
+                (1 : ℝ) else 0) *
+              (conn (0 : Fin d → ℤ) y)ᶜ.indicator (fun _ => (1 : ℝ)) ω *
+              (((cluster ω y).encard : ℝ≥0∞).toReal) ^ (p - ℓ))
+            ∂(law (intensityProfile
+              (cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => -s) (1 / 2))
+              (1 : ℝ≥0))))
+      (1 / 2) := by
+  let cw : ℝ → Sym2 (Fin d → ℤ) → ℝ := fun r e =>
+    (radialKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((1 : ℝ) * -((fun _ : ℝ => -1) r) *
+        Real.exp (-(1 : ℝ) *
+          (cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => -s) r e : ℝ)))
+  have hcw : ∀ (r : ℝ) (e : Sym2 (Fin d → ℤ)), cw r e =
+      (radialKernel (ModelNorm.ofNorm (Fin d → ℝ))
+        (fun s => if s < r then 1 else 0) e : ℝ) *
+        (((1 : ℝ≥0) : ℝ) * -((fun _ : ℝ => -1) r) *
+          Real.exp (-(((1 : ℝ≥0) : ℝ)) *
+            (cutoffKernel (ModelNorm.ofNorm (Fin d → ℝ)) (fun s => -s) r e : ℝ))) :=
+    fun _ _ => rfl
+  have hwzero : ∀ r ∈ Ioo (1 / 4 : ℝ) (3 / 4), ∀ e, cw r e = 0 := by
+    intro r hr e
+    exact linear_cw_eq_zero (d := d) (by linarith [hr.2]) e
+  have htsum_zero : ∀ r ∈ Ioo (1 / 4 : ℝ) (3 / 4),
+      ∀ X : Sym2 (Fin d → ℤ) → ℝ, ∑' e, cw r e * X e = 0 := by
+    intro r hr X
+    have hterm : ∀ e, cw r e * X e = 0 := by
+      intro e
+      rw [hwzero r hr e, zero_mul]
+    rw [tsum_congr hterm, tsum_zero]
+  have key := hasDerivAt_integral_cutoff_pow_binomial_of_root_moment_of_diagram
+    (d := d) (N := ModelNorm.ofNorm (Fin d → ℝ)) (K := fun s => -s) (K' := fun _ => -1)
+    (R := 1) (u := (1 / 4 : ℝ)) (v := (3 / 4 : ℝ)) (r₀ := (1 / 2 : ℝ))
+    (by
+      intro a _ b _ hab
+      change -b ≤ -a
+      linarith)
+    (by
+      intro t _
+      exact (hasDerivAt_id t).neg)
+    (continuous_const : Continuous fun _ : ℝ => (-1 : ℝ)).continuousOn
+    (1 : ℝ≥0) p hp
+    cw hcw
+    (by norm_num) (by norm_num) (by norm_num) (by norm_num)
+    (by
+      intro z hz
+      by_cases h : z = 0
+      · subst h
+        have h0 : ModelNorm.ofNorm (Fin d → ℝ) (Int.cast ∘ (0 : Fin d → ℤ)) = 0 := by simp
+        rw [h0] at hz
+        linarith [hz.1]
+      · have h1 : (1 : ℝ) ≤ ModelNorm.ofNorm (Fin d → ℝ) (Int.cast ∘ z) := by
+          simpa using one_le_normSeminorm_intCast (d := d) h
+        linarith [hz.2])
+    (by
+      intro r hr
+      have hr1 : r ≤ 1 := by
+        rcases hr with hr | hr
+        · exact le_of_lt (by linarith [hr.2])
+        · rw [mem_singleton_iff] at hr
+          rw [hr]
+      exact linear_root_moment_ne_top_of_le_one (d := d) p hr1 0)
+    (fun _ => 0)
+    (by simp)
+    (by
+      intro r hr ℓ _
+      have h := linear_diagram_integral_eq_zero (d := d) p (by linarith [hr.2]) ℓ
+      simp only [ModelNorm.toSeminorm_ofNorm] at h ⊢
+      rw [h]
+      simp)
+    (by
+      have h0 : ContinuousOn (fun _ : ℝ => (0 : ℝ)) (Ioo (1 / 4 : ℝ) (3 / 4)) :=
+        continuousOn_const
+      refine h0.congr ?_
+      intro r hr
+      exact htsum_zero r hr _)
+  simpa using key
+
+/-- **The instantiated conclusion is exactly the existing linear witness.** Both terms are
+proofs of the same proposition, which is the machine-checked form of the statement that the
+diagram interface, applied with `D = 0` on the zero-cutoff window, reproduces the existing
+conclusion at `r₀ = 1/2` with rate one. -/
+example (d : ℕ) (p : ℕ) (hp : 1 ≤ p) :
+    HasDerivAt (fun r : ℝ => ∫ ω, (((cluster ω (0 : Fin d → ℤ)).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => -s) r)
+          (1 : ℝ≥0))))
+      (((1 : ℝ≥0) : ℝ) * -((fun _ : ℝ => -1) (1 / 2)) *
+        ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ) *
+          ∫ ω, (((cluster ω (0 : Fin d → ℤ)).encard : ℝ≥0∞).toReal) ^ (ℓ + 1) *
+            (∑' y : Fin d → ℤ,
+              (if normSeminorm ℝ (Fin d → ℝ) (Int.cast ∘ y) ≤ (1 / 2 : ℝ) then
+                (1 : ℝ) else 0) *
+              (conn (0 : Fin d → ℤ) y)ᶜ.indicator (fun _ => (1 : ℝ)) ω *
+              (((cluster ω y).encard : ℝ≥0∞).toReal) ^ (p - ℓ))
+            ∂(law (intensityProfile
+              (cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => -s) (1 / 2))
+              (1 : ℝ≥0))))
+      (1 / 2) :=
+  hasDerivAt_integral_linear_cutoff_pow d p hp
+
+/-- **The produced derivative value is zero**, consistently with the moment function being
+constant on the window; the nonzero rate multiplies a vanishing binomial sum. -/
+theorem linear_diagram_derivative_value_eq_zero (d : ℕ) (p : ℕ) (hp : 1 ≤ p) :
+    (((1 : ℝ≥0) : ℝ) * -((fun _ : ℝ => -1) (1 / 2)) *
+        ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ) *
+          ∫ ω, (((cluster ω (0 : Fin d → ℤ)).encard : ℝ≥0∞).toReal) ^ (ℓ + 1) *
+            (∑' y : Fin d → ℤ,
+              (if normSeminorm ℝ (Fin d → ℝ) (Int.cast ∘ y) ≤ (1 / 2 : ℝ) then
+                (1 : ℝ) else 0) *
+              (conn (0 : Fin d → ℤ) y)ᶜ.indicator (fun _ => (1 : ℝ)) ω *
+              (((cluster ω y).encard : ℝ≥0∞).toReal) ^ (p - ℓ))
+            ∂(law (intensityProfile
+              (cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => -s) (1 / 2))
+              (1 : ℝ≥0)))) = 0 :=
+  (hasDerivAt_integral_linear_cutoff_pow_diagram d p hp).unique
+    (hasDerivAt_integral_linear_cutoff_pow_zero d p)
+
+end PercLib.Models.LongRange
