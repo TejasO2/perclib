@@ -1622,4 +1622,290 @@ theorem exists_crossRatio_of_cuts :
   exact hsand q hq z (b₁ + 1) (2 * (b₁ + 1)) (4 * (b₁ + 1)) a c (by omega) rfl rfl (by omega)
     hac.le _ _ _ _ hU hx₂ hX hYp
 
+/-- **The Basu–Sapozhnikov chain** ((2.3)-(2.6) on `ℤ²`). There is `κ ≥ 1` such that for every
+profile at least `1/2` on the edges, every sequence of cuts with radii `a k < c k < b k`,
+`1 ≤ a 0`, `4 (b k + 1) + 2 ≤ a (k + 1)`, every `S` and every measurable event `E` of the pairs
+inside `B_{a 0 - 1}(z)` and off the edges, there are finite sets `T k` of cut values, matrices
+`M k` with the cross-ratio bound `M x y · M x' y' ≤ κ² M x y' · M x' y`, and weights `0 ≤ u' ≤ u''`
+such that for every `n > b S` a backward chain `w` (`w k = M k w (k + 1)` for `k < S`,
+`w S ≥ 0`) gives `⟨u', w 0⟩ = P(E, z ↔ ∂B_n(z), cuts 0, …, S linked)` and
+`⟨u'', w 0⟩ = P(z ↔ ∂B_n(z), cuts 0, …, S linked)`. The matrices and weights do not depend on
+`n`. -/
+theorem exists_chain_of_cuts :
+    ∃ κ : ℝ, 1 ≤ κ ∧ ∀ q : Sym2 (LatticeSite 2) → unitInterval,
+      (∀ e ∈ (zdGraph 2).edgeSet, (1 / 2 : ℝ) ≤ q e) →
+      ∀ (z : LatticeSite 2) (a c b : ℕ → ℕ), 1 ≤ a 0 → (∀ k, a k < c k) → (∀ k, c k < b k) →
+      (∀ k, 4 * (b k + 1) + 2 ≤ a (k + 1)) → ∀ (S : ℕ) (E : Set (Config (LatticeSite 2))),
+      MeasurableSet E →
+      (∀ ω ω', ω ∩ {e | e ∉ (zdGraph 2).edgeSet ∨
+          ∀ v ∈ e, v ∈ Icc (z - (a 0 : LatticeSite 2) + 1) (z + a 0 - 1)} =
+        ω' ∩ {e | e ∉ (zdGraph 2).edgeSet ∨
+          ∀ v ∈ e, v ∈ Icc (z - (a 0 : LatticeSite 2) + 1) (z + a 0 - 1)} → (ω ∈ E ↔ ω' ∈ E)) →
+      ∃ (T : ℕ → Finset (Finset (LatticeSite 2) × Finset (LatticeSite 2) ×
+          Finset (LatticeSite 2)))
+        (M : ∀ k, T k → T (k + 1) → ℝ) (u' u'' : T 0 → ℝ),
+        (∀ k x x' y y', M k x y * M k x' y' ≤ κ ^ 2 * (M k x y' * M k x' y)) ∧
+        (∀ x, 0 ≤ u' x) ∧ (∀ x, u' x ≤ u'' x) ∧
+        ∀ n, b S < n → ∃ w : ∀ k, T k → ℝ,
+          (∀ k < S, ∀ x, w k x = ∑ y, M k x y * w (k + 1) y) ∧ (∀ x, 0 ≤ w S x) ∧
+          ∑ x, u' x * w 0 x = (law q (E ∩ armEvent z n ∩ {ω | ∀ k ≤ S,
+            ∀ x ∈ boxBoundary (z - (a k : LatticeSite 2)) (z + a k),
+              ∀ m ∈ boxBoundary (z - (c k : LatticeSite 2)) (z + c k),
+              ∀ m' ∈ boxBoundary (z - (c k : LatticeSite 2)) (z + c k),
+              ∀ y ∈ boxBoundary (z - (b k : LatticeSite 2)) (z + b k),
+                ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (c k : LatticeSite 2)) (z + c k) \
+                  Icc (z - (a k : LatticeSite 2) + 1) (z + a k - 1)) x m →
+                ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (b k : LatticeSite 2)) (z + b k) \
+                  Icc (z - (c k : LatticeSite 2) + 1) (z + c k - 1)) m' y →
+                ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (b k : LatticeSite 2)) (z + b k) \
+                  Icc (z - (a k : LatticeSite 2) + 1) (z + a k - 1)) x y})).toReal ∧
+          ∑ x, u'' x * w 0 x = (law q (armEvent z n ∩ {ω | ∀ k ≤ S,
+            ∀ x ∈ boxBoundary (z - (a k : LatticeSite 2)) (z + a k),
+              ∀ m ∈ boxBoundary (z - (c k : LatticeSite 2)) (z + c k),
+              ∀ m' ∈ boxBoundary (z - (c k : LatticeSite 2)) (z + c k),
+              ∀ y ∈ boxBoundary (z - (b k : LatticeSite 2)) (z + b k),
+                ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (c k : LatticeSite 2)) (z + c k) \
+                  Icc (z - (a k : LatticeSite 2) + 1) (z + a k - 1)) x m →
+                ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (b k : LatticeSite 2)) (z + b k) \
+                  Icc (z - (c k : LatticeSite 2) + 1) (z + c k - 1)) m' y →
+                ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (b k : LatticeSite 2)) (z + b k) \
+                  Icc (z - (a k : LatticeSite 2) + 1) (z + a k - 1)) x y})).toReal := by
+  classical
+  obtain ⟨κ, hκ, hcross⟩ := exists_crossRatio_of_cuts
+  refine ⟨κ, hκ, fun q hq z a c b ha hac hcb hgap S E hEm hE => ?_⟩
+  have hab : ∀ k, a k < b k := fun k => (hac k).trans (hcb k)
+  have hamono : Monotone a := monotone_nat_of_le_succ fun k => by
+    have := hgap k
+    have := hab k
+    omega
+  have hbmono : Monotone b := monotone_nat_of_le_succ fun k => by
+    have := hgap k
+    have := hab (k + 1)
+    omega
+  have hsep : ∀ k j, k < j → b k + 2 ≤ a j := fun k j hkj => by
+    have := hamono (show k + 1 ≤ j from hkj)
+    have := hgap k
+    omega
+  -- the cuts
+  obtain ⟨W, hW⟩ : ∃ W : ℕ → Config (LatticeSite 2) → Set (LatticeSite 2), ∀ k ω v,
+      v ∈ W k ω ↔ ∃ w ∈ boxBoundary (z - (c k : LatticeSite 2)) (z + c k),
+        ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (b k : LatticeSite 2)) (z + b k) \
+          Icc (z - (a k : LatticeSite 2) + 1) (z + a k - 1)) v w :=
+    ⟨fun k ω => {v | ∃ w ∈ boxBoundary (z - (c k : LatticeSite 2)) (z + c k),
+      ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (b k : LatticeSite 2)) (z + b k) \
+        Icc (z - (a k : LatticeSite 2) + 1) (z + a k - 1)) v w}, fun _ _ _ => Iff.rfl⟩
+  obtain ⟨Y, hY⟩ : ∃ Y : ℕ → Config (LatticeSite 2) → Set (LatticeSite 2), ∀ k ω y,
+      y ∈ Y k ω ↔ y ∈ Icc (z - (a k : LatticeSite 2) + 1) (z + a k - 1) ∧
+        ∃ v ∈ W k ω, s(v, y) ∈ ω ∩ (zdGraph 2).edgeSet :=
+    ⟨fun k ω => {y | y ∈ Icc (z - (a k : LatticeSite 2) + 1) (z + a k - 1) ∧
+      ∃ v ∈ W k ω, s(v, y) ∈ ω ∩ (zdGraph 2).edgeSet}, fun _ _ _ => Iff.rfl⟩
+  obtain ⟨R, hR⟩ : ∃ R : ℕ → Config (LatticeSite 2) → Set (LatticeSite 2), ∀ k ω r,
+      r ∈ R k ω ↔ r ∉ Icc (z - (b k : LatticeSite 2)) (z + b k) ∧
+        ∃ v ∈ W k ω, s(v, r) ∈ ω ∩ (zdGraph 2).edgeSet :=
+    ⟨fun k ω => {r | r ∉ Icc (z - (b k : LatticeSite 2)) (z + b k) ∧
+      ∃ v ∈ W k ω, s(v, r) ∈ ω ∩ (zdGraph 2).edgeSet}, fun _ _ _ => Iff.rfl⟩
+  obtain ⟨G, hG⟩ : ∃ G : ℕ → Set (Config (LatticeSite 2)), ∀ k ω, ω ∈ G k ↔
+      ∀ x ∈ boxBoundary (z - (a k : LatticeSite 2)) (z + a k),
+      ∀ m ∈ boxBoundary (z - (c k : LatticeSite 2)) (z + c k),
+      ∀ m' ∈ boxBoundary (z - (c k : LatticeSite 2)) (z + c k),
+      ∀ y ∈ boxBoundary (z - (b k : LatticeSite 2)) (z + b k),
+        ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (c k : LatticeSite 2)) (z + c k) \
+          Icc (z - (a k : LatticeSite 2) + 1) (z + a k - 1)) x m →
+        ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (b k : LatticeSite 2)) (z + b k) \
+          Icc (z - (c k : LatticeSite 2) + 1) (z + c k - 1)) m' y →
+        ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (b k : LatticeSite 2)) (z + b k) \
+          Icc (z - (a k : LatticeSite 2) + 1) (z + a k - 1)) x y :=
+    ⟨fun k => {ω | ∀ x ∈ boxBoundary (z - (a k : LatticeSite 2)) (z + a k),
+      ∀ m ∈ boxBoundary (z - (c k : LatticeSite 2)) (z + c k),
+      ∀ m' ∈ boxBoundary (z - (c k : LatticeSite 2)) (z + c k),
+      ∀ y ∈ boxBoundary (z - (b k : LatticeSite 2)) (z + b k),
+        ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (c k : LatticeSite 2)) (z + c k) \
+          Icc (z - (a k : LatticeSite 2) + 1) (z + a k - 1)) x m →
+        ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (b k : LatticeSite 2)) (z + b k) \
+          Icc (z - (c k : LatticeSite 2) + 1) (z + c k - 1)) m' y →
+        ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (b k : LatticeSite 2)) (z + b k) \
+          Icc (z - (a k : LatticeSite 2) + 1) (z + a k - 1)) x y}, fun _ _ => Iff.rfl⟩
+  obtain ⟨T, hT⟩ : ∃ T : ℕ → Finset (Finset (LatticeSite 2) × Finset (LatticeSite 2) ×
+      Finset (LatticeSite 2)), ∀ k, T k =
+      (Finset.Icc (z - (b k : LatticeSite 2)) (z + b k)).powerset ×ˢ
+        (Finset.Icc (z - (a k : LatticeSite 2)) (z + a k)).powerset ×ˢ
+        (Finset.Icc (z - ((b k + 1 : ℕ) : LatticeSite 2))
+          (z + ((b k + 1 : ℕ) : LatticeSite 2))).powerset := ⟨_, fun _ => rfl⟩
+  obtain ⟨Hk, hHk⟩ : ∃ Hk : ℕ → Set (Config (LatticeSite 2)),
+      ∀ k, Hk k = {ω | ∀ j, k < j → j ≤ S → ω ∈ G j} := ⟨_, fun _ => rfl⟩
+  -- positions
+  have hWpos : ∀ k ω v, v ∈ W k ω → v ∈ Icc (z - (b k : LatticeSite 2)) (z + b k) :=
+    fun k ω v hv => by
+      obtain ⟨_, _, hvA, -, -⟩ := (hW k ω v).1 hv
+      exact hvA.1
+  have hYpos : ∀ k ω y, y ∈ Y k ω → y ∈ Icc (z - (a k : LatticeSite 2)) (z + a k) :=
+    fun k ω y hy => by
+      have := ((hY k ω y).1 hy).1
+      rw [mem_Icc_two_iff] at this ⊢
+      simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply, Pi.one_apply] at this ⊢
+      omega
+  have hRpos : ∀ k ω r, r ∈ R k ω →
+      r ∈ Icc (z - ((b k + 1 : ℕ) : LatticeSite 2)) (z + ((b k + 1 : ℕ) : LatticeSite 2)) :=
+    fun k ω r hr => by
+      obtain ⟨-, v, hv, hvr⟩ := (hR k ω r).1 hr
+      have hvb := hWpos k ω v hv
+      have hadj : (zdGraph 2).Adj v r := hvr.2
+      rw [zdGraph_two_adj_iff] at hadj
+      rw [mem_Icc_two_iff] at hvb ⊢
+      simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply] at hvb ⊢
+      omega
+  have hTpos : ∀ k (x : T k), (↑x.1.1 : Set (LatticeSite 2)) ⊆
+      Icc (z - (b k : LatticeSite 2)) (z + b k) ∧ (↑x.1.2.2 : Set (LatticeSite 2)) ⊆
+      Icc (z - ((b k + 1 : ℕ) : LatticeSite 2)) (z + ((b k + 1 : ℕ) : LatticeSite 2)) := by
+    intro k x
+    obtain ⟨t, hx⟩ := x
+    rw [hT k, Finset.mem_product, Finset.mem_product, Finset.mem_powerset, Finset.mem_powerset,
+      Finset.mem_powerset] at hx
+    refine ⟨?_, ?_⟩
+    · rw [← Finset.coe_Icc]
+      exact Finset.coe_subset.2 hx.1
+    · rw [← Finset.coe_Icc]
+      exact Finset.coe_subset.2 hx.2.2
+  have hTcover : ∀ k ω, ∃ x ∈ T k, W k ω = ↑x.1 ∧ Y k ω = ↑x.2.1 ∧ R k ω = ↑x.2.2 := by
+    intro k ω
+    refine ⟨((Finset.Icc (z - (b k : LatticeSite 2)) (z + b k)).filter (· ∈ W k ω),
+      (Finset.Icc (z - (a k : LatticeSite 2)) (z + a k)).filter (· ∈ Y k ω),
+      (Finset.Icc (z - ((b k + 1 : ℕ) : LatticeSite 2))
+        (z + ((b k + 1 : ℕ) : LatticeSite 2))).filter (· ∈ R k ω)), ?_, ?_, ?_, ?_⟩
+    · rw [hT k, Finset.mem_product, Finset.mem_product, Finset.mem_powerset,
+        Finset.mem_powerset, Finset.mem_powerset]
+      exact ⟨Finset.filter_subset _ _, Finset.filter_subset _ _, Finset.filter_subset _ _⟩
+    · ext v
+      refine ⟨fun hv => Finset.mem_coe.2 (Finset.mem_filter.2
+        ⟨Finset.mem_Icc.2 (hWpos k ω v hv), hv⟩), fun hv => ?_⟩
+      exact (Finset.mem_filter.1 (Finset.mem_coe.1 hv)).2
+    · ext v
+      refine ⟨fun hv => Finset.mem_coe.2 (Finset.mem_filter.2
+        ⟨Finset.mem_Icc.2 (hYpos k ω v hv), hv⟩), fun hv => ?_⟩
+      exact (Finset.mem_filter.1 (Finset.mem_coe.1 hv)).2
+    · ext v
+      refine ⟨fun hv => Finset.mem_coe.2 (Finset.mem_filter.2
+        ⟨Finset.mem_Icc.2 (hRpos k ω v hv), hv⟩), fun hv => ?_⟩
+      exact (Finset.mem_filter.1 (Finset.mem_coe.1 hv)).2
+  -- the later link events
+  have hGm : ∀ k, MeasurableSet (G k) := fun k => by
+    convert measurableSet_setOf_link (z := z) (hac k) (hcb k) using 1
+    ext ω
+    exact hG k ω
+  have hHkm : ∀ k, MeasurableSet (Hk k) := fun k => by
+    rw [hHk k]
+    exact measurableSet_setOfPred.2 (Measurable.forall fun j => measurable_const.imp
+      (measurable_const.imp ((measurableSet_setOfPred (p := fun ω => ω ∈ G j)).1 (hGm j))))
+  have hHkd : ∀ k ω ω', ω ∩ {e | e ∈ (zdGraph 2).edgeSet ∧
+      ∀ v ∈ e, v ∉ Icc (z - (b k : LatticeSite 2)) (z + b k)} =
+      ω' ∩ {e | e ∈ (zdGraph 2).edgeSet ∧
+      ∀ v ∈ e, v ∉ Icc (z - (b k : LatticeSite 2)) (z + b k)} → (ω ∈ Hk k ↔ ω' ∈ Hk k) := by
+    intro k ω ω' h
+    rw [hHk k]
+    simp only [mem_ofPred_eq]
+    refine forall_congr' fun j => forall_congr' fun hkj => forall_congr' fun _ => ?_
+    rw [hG j ω, hG j ω']
+    refine link_iff_of_inter_eq (hac j) (hcb j) (inter_eq_inter_of_inter_eq_of_subset h ?_)
+    rintro e ⟨heL, he⟩
+    refine ⟨heL, fun v hv hvb => (he v hv).2 ?_⟩
+    have := hsep k j hkj
+    rw [mem_Icc_two_iff] at hvb ⊢
+    simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply, Pi.one_apply] at hvb ⊢
+    omega
+  have hHks : ∀ k < S, Hk k = G (k + 1) ∩ Hk (k + 1) := by
+    intro k hk
+    ext ω
+    rw [hHk k, hHk (k + 1)]
+    simp only [mem_ofPred_eq, mem_inter_iff]
+    constructor
+    · intro h
+      exact ⟨h (k + 1) (Nat.lt_succ_self k) hk, fun j hj hjS => h j (by omega) hjS⟩
+    · rintro ⟨h₁, h₂⟩ j hkj hjS
+      rcases (show j = k + 1 ∨ k + 1 < j by omega) with rfl | hj
+      · exact h₁
+      · exact h₂ j hj hjS
+  have hGood : {ω : Config (LatticeSite 2) | ∀ k ≤ S,
+      ∀ x ∈ boxBoundary (z - (a k : LatticeSite 2)) (z + a k),
+        ∀ m ∈ boxBoundary (z - (c k : LatticeSite 2)) (z + c k),
+        ∀ m' ∈ boxBoundary (z - (c k : LatticeSite 2)) (z + c k),
+        ∀ y ∈ boxBoundary (z - (b k : LatticeSite 2)) (z + b k),
+          ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (c k : LatticeSite 2)) (z + c k) \
+            Icc (z - (a k : LatticeSite 2) + 1) (z + a k - 1)) x m →
+          ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (b k : LatticeSite 2)) (z + b k) \
+            Icc (z - (c k : LatticeSite 2) + 1) (z + c k - 1)) m' y →
+          ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (b k : LatticeSite 2)) (z + b k) \
+            Icc (z - (a k : LatticeSite 2) + 1) (z + a k - 1)) x y} = G 0 ∩ Hk 0 := by
+    ext ω
+    rw [hHk 0]
+    simp only [mem_ofPred_eq, mem_inter_iff]
+    constructor
+    · intro h
+      exact ⟨(hG 0 ω).2 (h 0 (Nat.zero_le _)), fun j _ hj => (hG j ω).2 (h j hj)⟩
+    · rintro ⟨h₀, h⟩ k hk
+      rcases Nat.eq_zero_or_pos k with rfl | hk₀
+      · exact (hG 0 ω).1 h₀
+      · exact (hG k ω).1 (h k hk₀ hk)
+  have hfin : ∀ (A B C : Set (Config (LatticeSite 2))), law q A * law q B * law q C ≠ ⊤ :=
+    fun A B C => ENNReal.mul_ne_top (ENNReal.mul_ne_top (measure_ne_top _ _)
+      (measure_ne_top _ _)) (measure_ne_top _ _)
+  refine ⟨T, fun k x y => (law q {ω | ∃ r ∈ (x.1.2.2 : Set (LatticeSite 2)),
+      ∃ v ∈ (y.1.2.1 : Set (LatticeSite 2)),
+      ω ∩ (zdGraph 2).edgeSet ∈ localConn ((Icc (z - (c (k + 1) : LatticeSite 2)) (z + c (k + 1)) ∩
+        (↑x.1.1 ∪ Icc (z - (c k : LatticeSite 2)) (z + c k))ᶜ) \ ↑y.1.1) r v}).toReal *
+      (law q ({ω | W (k + 1) ω = ↑y.1.1 ∧ Y (k + 1) ω = ↑y.1.2.1 ∧ R (k + 1) ω = ↑y.1.2.2} ∩
+        G (k + 1))).toReal,
+    fun x => (law q (E ∩ {ω | ∃ p ∈ ({z} : Set (LatticeSite 2)),
+        ∃ y ∈ (x.1.2.1 : Set (LatticeSite 2)), ω ∩ (zdGraph 2).edgeSet ∈ localConn
+          ((Icc (z - (c 0 : LatticeSite 2)) (z + c 0) ∩ univ) \ ↑x.1.1) p y})).toReal *
+      (law q ({ω | W 0 ω = ↑x.1.1 ∧ Y 0 ω = ↑x.1.2.1 ∧ R 0 ω = ↑x.1.2.2} ∩ G 0)).toReal,
+    fun x => (law q (univ ∩ {ω | ∃ p ∈ ({z} : Set (LatticeSite 2)),
+        ∃ y ∈ (x.1.2.1 : Set (LatticeSite 2)), ω ∩ (zdGraph 2).edgeSet ∈ localConn
+          ((Icc (z - (c 0 : LatticeSite 2)) (z + c 0) ∩ univ) \ ↑x.1.1) p y})).toReal *
+      (law q ({ω | W 0 ω = ↑x.1.1 ∧ Y 0 ω = ↑x.1.2.1 ∧ R 0 ω = ↑x.1.2.2} ∩ G 0)).toReal,
+    fun k x x' y y' => hcross q hq z (c k) (b k) (a (k + 1)) (c (k + 1)) (b (k + 1)) (hcb k).le
+      (hgap k) (hac (k + 1)) (W (k + 1)) (Y (k + 1)) (R (k + 1)) (hW (k + 1)) (hY (k + 1))
+      (G (k + 1)) x.1 x'.1 y.1 y'.1 (hTpos k x).1 (hTpos k x).2 (hTpos k x').1 (hTpos k x').2,
+    fun x => mul_nonneg ENNReal.toReal_nonneg ENNReal.toReal_nonneg,
+    fun x => mul_le_mul_of_nonneg_right (ENNReal.toReal_mono (measure_ne_top _ _)
+      (measure_mono (inter_subset_inter_left _ (subset_univ E)))) ENNReal.toReal_nonneg, ?_⟩
+  intro n hn
+  refine ⟨fun k x => (law q ({ω | ∃ r ∈ (x.1.2.2 : Set (LatticeSite 2)),
+      ∃ w ∈ boxBoundary (z - (n : LatticeSite 2)) (z + n),
+      ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - (n : LatticeSite 2)) (z + n) \
+        (↑x.1.1 ∪ Icc (z - (c k : LatticeSite 2)) (z + c k))) r w} ∩ Hk k)).toReal,
+    ?_, fun _ => ENNReal.toReal_nonneg, ?_, ?_⟩
+  · intro k hk x
+    have hU₀ : (↑x.1.1 ∪ Icc (z - (c k : LatticeSite 2)) (z + c k) : Set (LatticeSite 2)) ⊆
+        Icc (z - (b k : LatticeSite 2)) (z + b k) := by
+      refine union_subset (hTpos k x).1 fun v hv => ?_
+      have := hcb k
+      rw [mem_Icc_two_iff] at hv ⊢
+      simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply] at hv ⊢
+      omega
+    have hstep := law_inter_eq_sum_of_cut_of_prev q (hac (k + 1)) (hcb (k + 1))
+      (lt_of_le_of_lt (hbmono (Nat.succ_le_of_lt hk)) hn) (hsep k (k + 1) (Nat.lt_succ_self k))
+      (hW (k + 1)) (hY (k + 1)) (hR (k + 1)) (hG (k + 1)) (hHkm (k + 1)) (hHkd (k + 1))
+      (T (k + 1)) (hTcover (k + 1)) hU₀ (hTpos k x).2
+    beta_reduce
+    rw [hHks k hk, ← inter_assoc, hstep, ENNReal.toReal_sum fun y _ => hfin _ _ _,
+      ← Finset.sum_coe_sort (T (k + 1))]
+    refine Finset.sum_congr rfl fun y _ => ?_
+    rw [ENNReal.toReal_mul, ENNReal.toReal_mul]
+  · have hstart := law_inter_armEvent_eq_sum_of_cut q ha (hac 0) (hcb 0)
+      (lt_of_le_of_lt (hbmono (Nat.zero_le S)) hn) (hW 0) (hY 0) (hR 0) (hG 0) hEm hE
+      (hHkm 0) (hHkd 0) (T 0) (hTcover 0)
+    rw [hGood, ← inter_assoc, hstart, ENNReal.toReal_sum fun x _ => hfin _ _ _,
+      ← Finset.sum_coe_sort (T 0)]
+    refine Finset.sum_congr rfl fun x _ => ?_
+    rw [ENNReal.toReal_mul, ENNReal.toReal_mul]
+  · have hstart := law_inter_armEvent_eq_sum_of_cut q ha (hac 0) (hcb 0)
+      (lt_of_le_of_lt (hbmono (Nat.zero_le S)) hn) (hW 0) (hY 0) (hR 0) (hG 0)
+      MeasurableSet.univ (fun _ _ _ => iff_of_true (mem_univ _) (mem_univ _))
+      (hHkm 0) (hHkd 0) (T 0) (hTcover 0)
+    rw [univ_inter] at hstart
+    rw [hGood, ← inter_assoc, hstart, ENNReal.toReal_sum fun x _ => hfin _ _ _,
+      ← Finset.sum_coe_sort (T 0)]
+    refine Finset.sum_congr rfl fun x _ => ?_
+    rw [ENNReal.toReal_mul, ENNReal.toReal_mul]
+
 end PercLib.Models.Planar
