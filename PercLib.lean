@@ -93,6 +93,7 @@ public import PercLib.Models.BinaryTreeCatalan
 public import PercLib.Models.BinaryTreeMomentLaw
 public import PercLib.Models.BinaryTreeMoments
 public import PercLib.Models.BoundaryCounterexample
+public import PercLib.Models.CompoundedLattice
 public import PercLib.Models.ConnectiveConstant
 public import PercLib.Models.DecoratedRay
 public import PercLib.Models.DirectionalDecay
@@ -112,6 +113,8 @@ public import PercLib.Models.HierarchicalBlockLayers
 public import PercLib.Models.HierarchicalBlockLayers.Defs
 public import PercLib.Models.HierarchicalBoundaryScales
 public import PercLib.Models.HierarchicalBoundaryScales.Defs
+public import PercLib.Models.HierarchicalComparison
+public import PercLib.Models.HierarchicalComparison.Defs
 public import PercLib.Models.HierarchicalCutoff
 public import PercLib.Models.HierarchicalEndpoint
 public import PercLib.Models.HierarchicalGeometry
@@ -163,12 +166,14 @@ public import PercLib.Models.Site.Harris
 public import PercLib.Models.Site.SelfAvoiding
 public import PercLib.Models.Tags.BinaryTree
 public import PercLib.Models.Tags.Boundary
+public import PercLib.Models.Tags.CompoundedLattice
 public import PercLib.Models.Tags.DirectionalDecay
 public import PercLib.Models.Tags.FiniteRangeDecay
 public import PercLib.Models.Tags.FiniteRangeExit
 public import PercLib.Models.Tags.Hierarchical
 public import PercLib.Models.Tags.HierarchicalBlockLayers
 public import PercLib.Models.Tags.HierarchicalBoundaryScales
+public import PercLib.Models.Tags.HierarchicalComparison
 public import PercLib.Models.Tags.HierarchicalRunaway
 public import PercLib.Models.Tags.HierarchicalTriangle
 public import PercLib.Models.Tags.HierarchicalTwoPoint
@@ -205,6 +210,7 @@ public import PercLib.Percolation.Bond.ClusterMoments
 public import PercLib.Percolation.Bond.ClusterPartition
 public import PercLib.Percolation.Bond.ClusterTails
 public import PercLib.Percolation.Bond.ConnectionKernel
+public import PercLib.Percolation.Bond.ConnectionKernelSingleton
 public import PercLib.Percolation.Bond.ConsistentGeodesics
 public import PercLib.Percolation.Bond.ConvolutionBound
 public import PercLib.Percolation.Bond.CorrelationLength
@@ -282,6 +288,7 @@ public import PercLib.Percolation.Bond.Tags.BoundaryForest
 public import PercLib.Percolation.Bond.Tags.ChemicalMoments
 public import PercLib.Percolation.Bond.Tags.ClusterCorrelation
 public import PercLib.Percolation.Bond.Tags.ConnectionKernel
+public import PercLib.Percolation.Bond.Tags.ConnectionKernelSingleton
 public import PercLib.Percolation.Bond.Tags.ConsistentGeodesics
 public import PercLib.Percolation.Bond.Tags.CoreBoundaryLaws
 public import PercLib.Percolation.Bond.Tags.CoreClosedProducts
