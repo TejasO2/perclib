@@ -688,4 +688,123 @@ theorem false_of_localConn_of_exploration (h1 : lo 1 < hi 1) (hle : lo ≤ hi)
 
 end Greedy
 
+/-! ### Circuits at any centre, and conditioning on the exploration -/
+
+/-- Translating configurations by `-z` carries the crossings of a box to the crossings of the box
+moved by `z`. -/
+theorem preimage_image_add_crossing (z : LatticeSite 2) (i : Fin 2) (lo hi : LatticeSite 2) :
+    (fun ω : Config (LatticeSite 2) => Sym2.map (· + -z) '' ω) ⁻¹' crossing i lo hi =
+      crossing i (z + lo) (z + hi) := by
+  ext ω
+  have e := image_add_mem_crossing_iff (-z) i (z + lo) (z + hi) ω
+  have h₁ : z + lo + -z = lo := by abel
+  have h₂ : z + hi + -z = hi := by abel
+  rw [h₁, h₂] at e
+  exact e
+
+section Circuits
+
+variable {q : Sym2 (LatticeSite 2) → unitInterval} {L : ℕ∞} {c : ℕ → ℝ≥0∞}
+
+/-- **The dual circuit at any centre.** Under crossing bounds up to `L ≥ 2t - 1`, the four strips
+around the annulus `t ≤ ‖· - z‖∞ ≤ 3t` are all uncrossed by open edges in their short directions
+with probability at least `c 7 ^ 4`. -/
+theorem pow_le_law_compl_crossing_inter_add (h : CrossingBounds q L c) (z : LatticeSite 2)
+    {t m : ℕ} (hm : 2 * t = m + 1) (hmL : (m : ℕ∞) ≤ L) :
+    c 7 ^ 4 ≤ law q ((crossing 1 (z + ![-3 * (t : ℤ), t]) (z + ![3 * (t : ℤ), 3 * t]))ᶜ ∩
+      (crossing 1 (z + ![-3 * (t : ℤ), -3 * t]) (z + ![3 * (t : ℤ), -t]))ᶜ ∩
+      (crossing 0 (z + ![(t : ℤ), -3 * t]) (z + ![3 * (t : ℤ), 3 * t]))ᶜ ∩
+      (crossing 0 (z + ![-3 * (t : ℤ), -3 * t]) (z + ![-(t : ℤ), 3 * t]))ᶜ) := by
+  have h' := pow_le_law_compl_crossing_inter (h.translate z) hm hmL
+  rw [law_translate_apply] at h'
+  simpa only [preimage_inter, preimage_compl, preimage_image_add_crossing] using h'
+
+/-- **The open circuit, read on the dual configuration.** Under crossing bounds up to
+`L ≥ 2t - 1`, the four strips of faces around the annulus `t ≤ ‖·‖∞ ≤ 3t` are all uncrossed by
+dual-open edges in their short directions with probability at least `c 7 ^ 4`: the four boxes of
+`pow_le_law_crossing_inter` are crossed by open edges in their long directions. -/
+theorem pow_le_law_dualConfig_notMem_crossing (h : CrossingBounds q L c) {t m : ℕ}
+    (hm : 2 * t = m + 1) (hmL : (m : ℕ∞) ≤ L) :
+    c 7 ^ 4 ≤ law q {ω | dualConfig ω ∉ crossing 1 ![-3 * (t : ℤ), t] ![3 * (t : ℤ), 3 * t] ∧
+      dualConfig ω ∉ crossing 1 ![-3 * (t : ℤ), -3 * t] ![3 * (t : ℤ), -t] ∧
+      dualConfig ω ∉ crossing 0 ![(t : ℤ), -3 * t] ![3 * (t : ℤ), 3 * t] ∧
+      dualConfig ω ∉ crossing 0 ![-3 * (t : ℤ), -3 * t] ![-(t : ℤ), 3 * t]} := by
+  have hle : ∀ x₀ y₀ x₁ y₁ : ℤ, x₀ ≤ x₁ → y₀ ≤ y₁ → (![x₀, y₀] : LatticeSite 2) ≤ ![x₁, y₁] :=
+    fun x₀ y₀ x₁ y₁ hx hy => by
+      rw [Pi.le_def, Fin.forall_fin_two]
+      exact ⟨hx, hy⟩
+  refine le_trans (pow_le_law_crossing_inter h hm hmL) (MeasureTheory.measure_mono fun ω hω => ?_)
+  obtain ⟨⟨⟨hT, hB⟩, hR⟩, hL⟩ := hω
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · have := (mem_crossing_zero_iff_dualConfig_notMem_crossing_one
+      (hle _ _ _ _ (by omega) (by omega)) ω).1 hT
+    simpa only [Matrix.cons_val_zero, Matrix.cons_val_one, add_sub_cancel_right] using this
+  · have := (mem_crossing_zero_iff_dualConfig_notMem_crossing_one
+      (hle _ _ _ _ (by omega) (by omega)) ω).1 hB
+    simpa only [Matrix.cons_val_zero, Matrix.cons_val_one, add_sub_cancel_right] using this
+  · have := (mem_crossing_one_iff_dualConfig_notMem_crossing_zero
+      (hle _ _ _ _ (by omega) (by omega)) ω).1 hR
+    simpa only [Matrix.cons_val_zero, Matrix.cons_val_one, add_sub_cancel_right] using this
+  · have := (mem_crossing_one_iff_dualConfig_notMem_crossing_zero
+      (hle _ _ _ _ (by omega) (by omega)) ω).1 hL
+    simpa only [Matrix.cons_val_zero, Matrix.cons_val_one, add_sub_cancel_right] using this
+
+/-- **The open circuit at any centre, read on the dual configuration.** The translate of
+`pow_le_law_dualConfig_notMem_crossing` to the centre `z`. -/
+theorem pow_le_law_dualConfig_notMem_crossing_add (h : CrossingBounds q L c) (z : LatticeSite 2)
+    {t m : ℕ} (hm : 2 * t = m + 1) (hmL : (m : ℕ∞) ≤ L) :
+    c 7 ^ 4 ≤ law q {ω |
+      dualConfig ω ∉ crossing 1 (z + ![-3 * (t : ℤ), t]) (z + ![3 * (t : ℤ), 3 * t]) ∧
+      dualConfig ω ∉ crossing 1 (z + ![-3 * (t : ℤ), -3 * t]) (z + ![3 * (t : ℤ), -t]) ∧
+      dualConfig ω ∉ crossing 0 (z + ![(t : ℤ), -3 * t]) (z + ![3 * (t : ℤ), 3 * t]) ∧
+      dualConfig ω ∉ crossing 0 (z + ![-3 * (t : ℤ), -3 * t]) (z + ![-(t : ℤ), 3 * t])} := by
+  have h' := pow_le_law_dualConfig_notMem_crossing (h.translate z) hm hmL
+  rw [law_translate_apply] at h'
+  have hset : ∀ (i : Fin 2) (lo hi : LatticeSite 2) (ω : Config (LatticeSite 2)),
+      dualConfig (Sym2.map (· + -z) '' ω) ∈ crossing i lo hi ↔
+        dualConfig ω ∈ crossing i (z + lo) (z + hi) := by
+    intro i lo hi ω
+    rw [dualConfig_image_add, ← preimage_image_add_crossing z i lo hi]
+    rfl
+  refine h'.trans (MeasureTheory.measure_mono fun ω hω => ?_)
+  simp only [mem_preimage, mem_ofPred_eq, hset] at hω
+  exact hω
+
+end Circuits
+
+/-- **Conditioning on an event of the explored edges.** Let `X` be a measurable event determined
+by the pairs in `P`, and `K j`, `j < J`, measurable events determined by the pairs in `Q j`, with
+`P` and the `Q j` pairwise disjoint, each of probability at least `β`. Then `X` occurs while all
+the `K j` fail with probability at most `P(X) (1 - β)^J`. -/
+theorem law_inter_biInter_compl_le {V : Type*} (q : Sym2 V → unitInterval)
+    {X : Set (Config V)} {P : Set (Sym2 V)} {K : ℕ → Set (Config V)} {Q : ℕ → Set (Sym2 V)}
+    {J : ℕ} {β : ℝ≥0∞} (hX : MeasurableSet X)
+    (hXP : ∀ ω ω' : Config V, ω ∩ P = ω' ∩ P → (ω ∈ X ↔ ω' ∈ X))
+    (hKm : ∀ j < J, MeasurableSet (K j))
+    (hKQ : ∀ j, ∀ ω ω' : Config V, ω ∩ Q j = ω' ∩ Q j → (ω ∈ K j ↔ ω' ∈ K j))
+    (hPQ : ∀ j < J, Disjoint P (Q j)) (hQ : Set.PairwiseDisjoint (↑(Finset.range J)) Q)
+    (hβ : ∀ j < J, β ≤ law q (K j)) :
+    law q (X ∩ ⋂ j ∈ Finset.range J, (K j)ᶜ) ≤ law q X * (1 - β) ^ J := by
+  have hYm : MeasurableSet (⋂ j ∈ Finset.range J, (K j)ᶜ) :=
+    Finset.measurableSet_biInter _ fun j hj => (hKm j (Finset.mem_range.1 hj)).compl
+  have hYQ := PercLib.Probability.determined_biInter (Finset.range J) (P := Q)
+    (A := fun j => (K j)ᶜ) (R := ⋃ j ∈ Finset.range J, Q j)
+    (fun j hj => subset_biUnion_of_mem (u := Q) hj) fun j ω ω' h => not_congr (hKQ j ω ω' h)
+  have hdisj : Disjoint P (⋃ j ∈ Finset.range J, Q j) := by
+    rw [Set.disjoint_iUnion₂_right]
+    exact fun j hj => hPQ j (Finset.mem_range.1 hj)
+  have hind := PercLib.Probability.prodBernoulli_inter_of_determined q hdisj hX hYm hXP hYQ
+  have hprod := PercLib.Probability.prodBernoulli_biInter_of_determined q (Finset.range J) hQ
+    (fun j hj => (hKm j (Finset.mem_range.1 hj)).compl) fun j ω ω' h => not_congr (hKQ j ω ω' h)
+  calc law q (X ∩ ⋂ j ∈ Finset.range J, (K j)ᶜ)
+      = law q X * ∏ j ∈ Finset.range J, law q (K j)ᶜ := by
+        unfold law
+        rw [hind, hprod]
+    _ ≤ law q X * ∏ j ∈ Finset.range J, (1 - β) := by
+        refine mul_le_mul_right ?_ _
+        refine Finset.prod_le_prod fun j hj => ?_
+        rw [MeasureTheory.prob_compl_eq_one_sub (hKm j (Finset.mem_range.1 hj))]
+        exact tsub_le_tsub_left (hβ j (Finset.mem_range.1 hj)) 1
+    _ = law q X * (1 - β) ^ J := by rw [Finset.prod_const, Finset.card_range]
+
 end PercLib.Models.Planar
