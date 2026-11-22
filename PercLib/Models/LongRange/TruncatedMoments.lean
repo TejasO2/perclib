@@ -15547,3 +15547,252 @@ theorem exists_window_tail_le {d : ℕ} {N : PercLib.Analysis.ModelNorm (Fin d �
 end Window
 
 end PercLib.Percolation.Bond
+
+namespace PercLib.Percolation.Bond
+
+variable {V : Type*} [Countable V]
+
+/-! ### The vertex mass of the root cluster as a sum over vertices -/
+
+open Classical in
+/-- **Spatial first-moment identity for the cluster volume, for an arbitrary measure.**
+
+`E|K_o| = ∑'_x μ{x ∈ K_o}`, exact in `ℝ≥0∞`: an infinite cluster contributes `⊤` on both
+sides, so no a.e. finiteness of the cluster is assumed.  This is the measure-generic form of
+`chi_eq_tsum_tau` (which is stated for the Bernoulli law only); the window bounds are stated for
+an arbitrary `μ`, so this is the form they consume. -/
+theorem lintegral_encard_cluster_eq_tsum_mass (μ : Measure (Config V)) (o : V) :
+    ∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ∂μ
+      = ∑' x : V, ∫⁻ ω, (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ := by
+  classical
+  have hpt : ∀ ω : Config V, ((cluster ω o).encard : ℝ≥0∞)
+      = ∑' x : V, (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) := by
+    intro ω
+    rw [encard_cluster_eq_tsum]
+    exact tsum_congr fun x => by rw [Set.indicator_apply]; rfl
+  calc ∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ∂μ
+      = ∫⁻ ω, (∑' x : V, (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0)) ∂μ :=
+        lintegral_congr hpt
+    _ = ∑' x : V, ∫⁻ ω, (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ :=
+        lintegral_tsum fun x =>
+          (Measurable.ite (measurableSet_conn o x) measurable_const measurable_const).aemeasurable
+
+/-! ### The first moment is dominated by the top moment -/
+
+/-- A finite `k`-th moment dominates the first moment, in `ℝ≥0∞`, for every `k ≥ 1`. -/
+theorem enat_coe_le_self_pow {a : ℕ∞} {k : ℕ} (hk : 1 ≤ k) :
+    (a : ℝ≥0∞) ≤ (a : ℝ≥0∞) ^ k := by
+  by_cases ha : a = ⊤
+  · rw [ha, ENat.toENNReal_top]
+    have hk0 : k ≠ 0 := by omega
+    simp [hk0]
+  · obtain ⟨n, rfl⟩ := ENat.ne_top_iff_exists.1 ha
+    rw [ENat.toENNReal_coe]
+    cases n with
+    | zero => simp [zero_pow (by omega : k ≠ 0)]
+    | succ m =>
+      have h1 : (1 : ℝ≥0∞) ≤ ((m + 1 : ℕ) : ℝ≥0∞) := by
+        exact_mod_cast Nat.succ_le_succ (Nat.zero_le m)
+      simpa using pow_le_pow_right₀ h1 hk
+
+omit [Countable V] in
+/-- **The root first moment is bounded by the root `(p+1)`-moment.** -/
+theorem lintegral_encard_cluster_le_of_pow_le {μ : Measure (Config V)} {o : V} {p : ℕ}
+    {M : ℝ≥0∞}
+    (h : ∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ^ (p + 1) ∂μ ≤ M) :
+    ∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ∂μ ≤ M :=
+  le_trans (lintegral_mono fun ω => enat_coe_le_self_pow (a := (cluster ω o).encard)
+    (k := p + 1) (by omega)) h
+
+/-! ### The complement mass of the vertex mass function vanishes -/
+
+open Classical in
+/-- **The root-cluster mass outside a growing finite window tends to `0`.**
+
+Only finiteness of the first moment `E|K_o|` is used, never a bound on the total mass: the
+limit is a statement about the *tail* `∑_{x ∉ W}` of the vertex mass function.  This is the
+vertex-mass form that the finite-window edge bounds consume in their right-hand side
+`∑' x, (if x ∈ W then 0 else 1) * g x`. -/
+theorem tendsto_tsum_window_compl_atTop_zero (μ : Measure (Config V)) (o : V)
+    (hχ : ∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ∂μ ≠ ⊤) :
+    Tendsto (fun W : Finset V => ∑' x : V, (if x ∈ W then (0 : ℝ≥0∞) else 1) *
+      ∫⁻ ω, (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ) atTop (𝓝 0) := by
+  classical
+  have hsub : Tendsto (fun W : Finset V => ∑' x : {x : V // x ∉ W},
+      ∫⁻ ω, (if x.1 ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ) atTop (𝓝 0) :=
+    ENNReal.tendsto_tsum_compl_atTop_zero
+      (f := fun x : V => ∫⁻ ω, (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ)
+      (by rw [← lintegral_encard_cluster_eq_tsum_mass]; exact hχ)
+  have hconv : ∀ W : Finset V, (∑' x : {x : V // x ∉ W},
+      ∫⁻ ω, (if x.1 ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ)
+      = ∑' x : V, (if x ∈ W then (0 : ℝ≥0∞) else 1) *
+        ∫⁻ ω, (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ := by
+    intro W
+    set g : V → ℝ≥0∞ :=
+      fun y => ∫⁻ ω, (if y ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ with hg
+    have h1 : (∑' x : {x : V // x ∉ W}, g x)
+        = ∑' x : ↥({x : V | x ∉ W} : Set V), g x := rfl
+    rw [h1, tsum_subtype]
+    refine tsum_congr fun x => ?_
+    by_cases h : x ∈ W <;> simp [h, hg]
+  exact hsub.congr' (Eventually.of_forall hconv)
+
+open Classical in
+/-- **The window tail of the vertex mass is arbitrarily small.** -/
+theorem exists_window_mass_tail_le (μ : Measure (Config V)) (o : V)
+    (hχ : ∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ∂μ ≠ ⊤) {ε : ℝ≥0∞} (hε : 0 < ε) :
+    ∃ W : Finset V, ∑' x : V, (if x ∈ W then (0 : ℝ≥0∞) else 1) *
+      ∫⁻ ω, (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ ≤ ε := by
+  classical
+  have hev : ∀ᶠ W : Finset V in atTop, ∑' x : V, (if x ∈ W then (0 : ℝ≥0∞) else 1) *
+      ∫⁻ ω, (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ < ε :=
+    (tendsto_tsum_window_compl_atTop_zero μ o hχ).eventually (eventually_lt_nhds hε)
+  obtain ⟨W, hW⟩ := hev.exists
+  exact ⟨W, le_of_lt hW⟩
+
+open Classical in
+/-- **Window tail of the vertex mass from a finite root `(p+1)`-moment.** -/
+theorem exists_window_mass_tail_le_of_root_succ_moment (μ : Measure (Config V)) (o : V)
+    (p : ℕ) {M : ℝ≥0∞} (hM : M ≠ ⊤)
+    (hroot : ∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ^ (p + 1) ∂μ ≤ M)
+    {ε : ℝ≥0∞} (hε : 0 < ε) :
+    ∃ W : Finset V, ∑' x : V, (if x ∈ W then (0 : ℝ≥0∞) else 1) *
+      ∫⁻ ω, (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ ≤ ε :=
+  exists_window_mass_tail_le μ o
+    (ne_top_of_le_ne_top hM (lintegral_encard_cluster_le_of_pow_le hroot)) hε
+
+/-! ### Monotonicity of the cut-off kernel in the cut-off radius -/
+
+omit [Countable V] in
+/-- **`r ↦ 1{N(x - y) < r}` is monotone.**  The cut-off radial kernel of the indicator profile
+is increasing in the cut-off radius. -/
+theorem radialKernel_indicator_mono {d : ℕ} {N : Seminorm ℝ (Fin d → ℝ)} {r r' : ℝ}
+    (hrr' : r ≤ r') (e : Sym2 (Fin d → ℤ)) :
+    PercLib.Models.LongRange.radialKernel N (fun s => if s < r then 1 else 0) e ≤
+      PercLib.Models.LongRange.radialKernel N (fun s => if s < r' then 1 else 0) e := by
+  induction e using Sym2.ind with
+  | _ x y =>
+    by_cases hxy : x = y
+    · subst hxy; simp
+    · rw [PercLib.Models.LongRange.radialKernel_of_ne hxy,
+        PercLib.Models.LongRange.radialKernel_of_ne hxy]
+      by_cases h : N (Int.cast ∘ (x - y)) < r
+      · have h' : N (Int.cast ∘ (x - y)) < r' := lt_of_lt_of_le h hrr'
+        simp [h, h']
+      · simp [h]
+
+omit [Countable V] in
+/-- **On a corner-free interval the cut-off indicator is constant in the radius.**
+
+If no lattice difference vector has norm strictly between `u` and `v`, then for `r, r' ∈ (u, v)`
+the two cut-off kernels agree.  This is what makes a finite-window bound stated at one radius
+hold verbatim at every radius of the interval, because the geometry, hence the finite fibre set
+`S`, cannot change inside the interval. -/
+theorem radialKernel_indicator_eq_of_corner {d : ℕ} {N : Seminorm ℝ (Fin d → ℝ)} {u v r r' : ℝ}
+    (hcorner : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Set.Ioo u v) (hr : r ∈ Set.Ioo u v)
+    (hr' : r' ∈ Set.Ioo u v) (e : Sym2 (Fin d → ℤ)) :
+    PercLib.Models.LongRange.radialKernel N (fun s => if s < r then 1 else 0) e =
+      PercLib.Models.LongRange.radialKernel N (fun s => if s < r' then 1 else 0) e := by
+  induction e using Sym2.ind with
+  | _ x y =>
+    by_cases hxy : x = y
+    · subst hxy; simp
+    · rw [PercLib.Models.LongRange.radialKernel_of_ne hxy,
+        PercLib.Models.LongRange.radialKernel_of_ne hxy]
+      have hiff : (N (Int.cast ∘ (x - y)) < r) ↔ (N (Int.cast ∘ (x - y)) < r') := by
+        have hnot := hcorner (x - y)
+        rcases not_and_or.1 hnot with h1 | h1
+        · rw [not_lt] at h1
+          exact ⟨fun _ => lt_of_le_of_lt h1 hr'.1, fun _ => lt_of_le_of_lt h1 hr.1⟩
+        · rw [not_lt] at h1
+          exact ⟨fun hc => absurd hc (not_lt.2 (le_trans hr.2.le h1)),
+            fun hc => absurd hc (not_lt.2 (le_trans hr'.2.le h1))⟩
+      by_cases h : N (Int.cast ∘ (x - y)) < r
+      · have h' : N (Int.cast ∘ (x - y)) < r' := hiff.1 h
+        simp [h, h']
+      · have h' : ¬ (N (Int.cast ∘ (x - y)) < r') := fun hc => h (hiff.2 hc)
+        simp [h, h']
+
+omit [Countable V] in
+/-- **The cut-off kernel converges pointwise to the full kernel as `r → ∞`.** -/
+theorem eventually_radialKernel_indicator_eq_full {d : ℕ} {N : Seminorm ℝ (Fin d → ℝ)}
+    (e : Sym2 (Fin d → ℤ)) :
+    ∀ᶠ r : ℝ in atTop,
+      PercLib.Models.LongRange.radialKernel N (fun s => if s < r then 1 else 0) e =
+        PercLib.Models.LongRange.radialKernel N (fun _ => (1 : ℝ)) e := by
+  induction e using Sym2.ind with
+  | _ x y =>
+    by_cases hxy : x = y
+    · subst hxy; simp
+    · filter_upwards [eventually_gt_atTop (N (Int.cast ∘ (x - y)))] with r hr
+      rw [PercLib.Models.LongRange.radialKernel_of_ne hxy,
+        PercLib.Models.LongRange.radialKernel_of_ne hxy]
+      simp [hr]
+
+/-! ### The two-point form for the Bernoulli law -/
+
+open Classical in
+/-- The vertex mass is the two-point function of the Bernoulli law. -/
+theorem tau_eq_lintegral_cluster_indicator (q : Sym2 V → unitInterval) (o x : V) :
+    tau q o x = ∫⁻ ω, (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂(law q) := by
+  classical
+  rw [tau]
+  exact (lintegral_indicator_one (measurableSet_conn o x)).symm
+
+open Classical in
+/-- **Window tail of the two-point function.** -/
+theorem exists_window_tau_tail_le (q : Sym2 V → unitInterval) (o : V)
+    (hχ : chi q o ≠ ⊤) {ε : ℝ≥0∞} (hε : 0 < ε) :
+    ∃ W : Finset V, ∑' x : V, (if x ∈ W then (0 : ℝ≥0∞) else 1) * tau q o x ≤ ε := by
+  classical
+  obtain ⟨W, hW⟩ := exists_window_mass_tail_le (law q) o (by rwa [chi] at hχ) hε
+  refine ⟨W, le_trans (ENNReal.tsum_le_tsum fun x => ?_) hW⟩
+  rw [tau_eq_lintegral_cluster_indicator]
+
+open Classical in
+/-- **Modular composition: finite-window ENN tail from the factorization hypothesis and a bound
+on the exterior vertex mass.**
+
+The conclusion is the `ℝ≥0∞` form of the small-tail premise: the pivotal mass of pairs not both
+inside the finite window `W` is at most `ε`.  The two numeric inputs are kept separate on purpose
+— `hext` is the exterior vertex mass (supplied elsewhere from the root moment, e.g. by
+`exists_window_mass_tail_le_of_root_succ_moment`) and `hεδ` is the arithmetic choice of `δ`; no
+division is performed here, so no finiteness of `S.card` or `C` is needed.
+
+This is a *finite-window* statement: `W` is a finite set of vertices and the excluded edge set is
+`pairs(W × W)`.  It is not an infinite-lattice statement. -/
+theorem window_tail_le_of_factorization_of_tau_tail {d : ℕ}
+    {N : PercLib.Analysis.ModelNorm (Fin d → ℝ)} {r : ℝ}
+    (S : Finset (Fin d → ℤ)) (hS : ∀ z, N (Int.cast ∘ z) < r → z ∈ S)
+    (μ : Measure (Config (Fin d → ℤ))) (o : Fin d → ℤ) (p : ℕ)
+    (c : Sym2 (Fin d → ℤ) → ℝ≥0∞)
+    (hcsupp : ∀ x y : Fin d → ℤ, ¬ (N (Int.cast ∘ (y - x)) < r) → c (s(x, y)) = 0)
+    (W : Finset (Fin d → ℤ)) (C : ℝ≥0∞)
+    (hfac : ∀ x y : Fin d → ℤ,
+      ∫⁻ ω, c (s(x, y)) *
+        ((if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) * (if y ∈ cluster ω o then 0 else 1) *
+          ((((cluster ω o).encard : ℝ≥0∞) + ((cluster ω y).encard : ℝ≥0∞)) ^ p -
+            ((cluster ω o).encard : ℝ≥0∞) ^ p)) ∂μ ≤
+      C * min (∫⁻ ω, (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ)
+        (∫⁻ ω, (if y ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ))
+    {ε δ : ℝ≥0∞}
+    (hext : ∑' x : Fin d → ℤ, (if x ∈ W then (0 : ℝ≥0∞) else 1) *
+      ∫⁻ ω, (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ ≤ δ)
+    (hεδ : 2 * ((S.card : ℝ≥0∞) * (C * δ)) ≤ ε) :
+    ∫⁻ ω, ∑' e : Sym2 (Fin d → ℤ),
+        ((if e ∈ (W.product W).image (fun q : (Fin d → ℤ) × (Fin d → ℤ) => s(q.1, q.2))
+          then (0 : ℝ≥0∞) else 1) * c e) *
+          (if e ∈ ω then 0 else (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+            ((cluster ω o).encard : ℝ≥0∞) ^ p)) ∂μ ≤ ε := by
+  classical
+  refine le_trans
+    (lintegral_window_tail_le_of_factorization S hS μ o p c hcsupp W C hfac) ?_
+  have hmass : (∑' x : Fin d → ℤ, (if x ∈ W then (0 : ℝ≥0∞) else 1) *
+      (C * ∫⁻ ω, (if x ∈ cluster ω o then (1 : ℝ≥0∞) else 0) ∂μ))
+      ≤ C * δ := by
+    refine le_trans (le_of_eq ?_) (mul_le_mul' le_rfl hext)
+    rw [← ENNReal.tsum_mul_left]
+    exact tsum_congr fun x => mul_left_comm _ _ _
+  exact le_trans (mul_le_mul' le_rfl (mul_le_mul' le_rfl hmass)) hεδ
+
+end PercLib.Percolation.Bond
