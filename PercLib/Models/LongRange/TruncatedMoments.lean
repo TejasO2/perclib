@@ -11284,4 +11284,200 @@ theorem cutoff_weight_mul_integral_eq_rate_mul_closed_toReal {d : ℕ}
     rw [← hclose] at hp
     simpa only [hcw e, h1, one_mul, mul_left_comm, mul_assoc] using hp
 
+open Classical in
+/-- A finite extended-nonnegative closed-coordinate flux controls the absolute cutoff
+pivotal sums, with the absolute cutoff rate as its constant. -/
+theorem finite_sum_cutoff_pivotal_le_toReal_of_lintegral_le {d : ℕ}
+    {N : Seminorm ℝ (Fin d → ℝ)} {K K' : ℝ → ℝ} (p : ℕ) (β : ℝ≥0) (r : ℝ)
+    (o : Fin d → ℤ) (cw : Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ e, cw e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ))))
+    (hp : 1 ≤ p)
+    (hins : ∀ e, (∫⁻ ω, ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p
+      ∂(law (intensityProfile (cutoffKernel N K r) β))) ≠ ⊤)
+    (D : ℝ≥0∞) (hDtop : D ≠ ⊤)
+    (hD : (∫⁻ ω, (∑' e : Sym2 (Fin d → ℤ),
+        ((radialKernel N (fun s => if s < r then 1 else 0) e : ℝ≥0) : ℝ≥0∞) *
+          (if e ∈ ω then (0 : ℝ≥0∞) else
+            ((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+              ((cluster ω o).encard : ℝ≥0∞) ^ p))
+        ∂(law (intensityProfile (cutoffKernel N K r) β))) ≤ D) :
+    ∀ S : Finset (Sym2 (Fin d → ℤ)), ∑ e ∈ S, |cw e| *
+      |∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel N K r) β))| ≤
+      |(β : ℝ) * -K' r| * D.toReal := by
+  let μ : Measure (Config (Fin d → ℤ)) := law (intensityProfile (cutoffKernel N K r) β)
+  let w : Sym2 (Fin d → ℤ) → ℝ≥0∞ := fun e =>
+    (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ≥0)
+  let Q : Sym2 (Fin d → ℤ) → ℝ≥0∞ := fun e => ∫⁻ ω,
+    (if e ∈ ω then (0 : ℝ≥0∞) else
+      (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster ω o).encard : ℝ≥0∞) ^ p)) ∂μ
+  have hfin : ∀ e, ∀ᵐ ω ∂μ, ((cluster (insert e ω) o).encard : ℝ≥0∞) ≠ ⊤ := by
+    intro e
+    exact ae_ne_top_of_lintegral_pow_ne_top (measurable_encard_cluster_insert_coe e o)
+      p hp (hins e)
+  have hint : ∀ e, Integrable
+      (fun ω => (((cluster (insert e ω) o).encard : ℝ≥0∞).toReal) ^ p) μ := by
+    intro e
+    exact integrable_toReal_pow_encard_cluster_insert e o p (hins e)
+  have hQ : ∀ e, Q e ≠ ⊤ := by
+    intro e
+    refine ne_top_of_le_ne_top
+      (lintegral_pivotal_increment_ne_top_of_lintegral_insert_pow_ne_top e o p (hins e)) ?_
+    exact lintegral_mono fun ω => by
+      by_cases he : e ∈ ω
+      · simp [he]
+      · rw [ite_eq_right he, Set.sdiff_singleton_eq_self he]
+  have hT : (∑' e, w e * Q e) ≤ D := by
+    rw [show (∑' e, w e * Q e) = ∫⁻ ω, ∑' e, w e *
+      (if e ∈ ω then (0 : ℝ≥0∞) else
+        (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+          ((cluster ω o).encard : ℝ≥0∞) ^ p)) ∂μ from
+      tsum_lintegral_closed_pivotal μ p o w]
+    exact hD
+  have hTtop : (∑' e, w e * Q e) ≠ ⊤ := ne_top_of_le_ne_top hDtop hT
+  have hsum : Summable (fun e => (w e * Q e).toReal) := ENNReal.summable_toReal hTtop
+  have hbound : ∀ S : Finset (Sym2 (Fin d → ℤ)),
+      ∑ e ∈ S, (w e * Q e).toReal ≤ D.toReal := by
+    intro S
+    calc
+      ∑ e ∈ S, (w e * Q e).toReal ≤ ∑' e, (w e * Q e).toReal :=
+        hsum.sum_le_tsum S (fun _ _ => ENNReal.toReal_nonneg)
+      _ = (∑' e, w e * Q e).toReal :=
+        (ENNReal.tsum_toReal_eq fun e => ENNReal.mul_ne_top ENNReal.coe_ne_top (hQ e)).symm
+      _ ≤ D.toReal := (ENNReal.toReal_le_toReal hTtop hDtop).2 hT
+  intro S
+  calc
+    ∑ e ∈ S, |cw e| *
+        |∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+          ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal ∂μ| =
+        |(β : ℝ) * -K' r| * ∑ e ∈ S, (w e * Q e).toReal := by
+      rw [Finset.mul_sum]
+      apply Finset.sum_congr rfl
+      intro e _
+      have hcoef := cutoff_weight_mul_integral_eq_rate_mul_closed_toReal
+        (K := K) (K' := K') p β r o cw hcw hfin hint e
+      change |cw e| *
+        |∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+          ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal ∂μ| =
+        |(β : ℝ) * -K' r| * (w e * Q e).toReal
+      calc
+        |cw e| * |∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+            ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal ∂μ| =
+            |cw e * ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+              ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal ∂μ| := (abs_mul _ _).symm
+        _ = |((β : ℝ) * -K' r) *
+            ((radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) * (Q e).toReal)| := by
+          rw [hcoef]
+        _ = |(β : ℝ) * -K' r| *
+            ((radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) * (Q e).toReal) := by
+          rw [abs_mul, abs_of_nonneg (mul_nonneg
+            (radialKernel N _ e).coe_nonneg ENNReal.toReal_nonneg)]
+        _ = |(β : ℝ) * -K' r| * (w e * Q e).toReal := by
+          rw [ENNReal.toReal_mul]
+          simp [w]
+    _ ≤ |(β : ℝ) * -K' r| * D.toReal :=
+      mul_le_mul_of_nonneg_left (hbound S) (abs_nonneg _)
+
+open Classical in
+/-- The fused binomial-diagram estimate gives the cutoff dominator used by the derivative
+interface. Keeping its several inputs separate records precisely which analytic and geometric
+estimates remain; this is not an assumption of Lemma I.4.1 itself. -/
+theorem finite_sum_cutoff_pivotal_le_of_binomial_diagram {d : ℕ}
+    {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ} (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p) (r : ℝ)
+    (cw : ℝ → Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ r e, cw r e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ))))
+    (hins : ∀ e : Sym2 (Fin d → ℤ), (∫⁻ ω, ((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p
+      ∂(law (intensityProfile (cutoffKernel N K r) β))) ≠ ⊤)
+    (D : ℕ → ℝ≥0∞) (hDtop : (∑ ℓ ∈ Finset.range p, D ℓ) ≠ ⊤)
+    (hD : ∀ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ≥0∞) *
+      ∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ (ℓ + 1) *
+        (∑' y, (if N (Int.cast ∘ y) ≤ r then 1 else 0) *
+          (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+          ((cluster ω y).encard : ℝ≥0∞) ^ (p - ℓ))
+        ∂(law (intensityProfile (cutoffKernel N K r) β)) ≤ D ℓ)
+    {u v : ℝ} (hcorner : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Ioo u v)
+    (hr : r ∈ Ioo u v) :
+    ∀ S : Finset (Sym2 (Fin d → ℤ)), ∑ e ∈ S, |cw r e| *
+      |∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel N K r) β))| ≤
+      |(β : ℝ) * -K' r| * (∑ ℓ ∈ Finset.range p, D ℓ).toReal := by
+  refine finite_sum_cutoff_pivotal_le_toReal_of_lintegral_le p β r 0 (cw r) (hcw r) hp hins
+    (∑ ℓ ∈ Finset.range p, D ℓ) hDtop ?_
+  exact lintegral_radial_pivotal_le_of_binomial_diagram β p hp r hins D hD hcorner hr
+
+
+open Classical in
+/-- The cutoff binomial derivative from a finite root-cluster moment and a uniform finite
+binomial-diagram bound. The diagram supplies both the dominator and its local integrability;
+the uncapped flux continuity remains an explicit, separate input. This assembly interface keeps
+all those inputs visible rather than introducing a new structure. -/
+theorem hasDerivAt_integral_cutoff_pow_binomial_of_root_moment_of_diagram {d : ℕ}
+    {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p) {R : ℝ}
+    (cw : ℝ → Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ r e, cw r e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K r e : ℝ))))
+    {u v r₀ : ℝ} (hu : 0 < u) (hur : u < r₀) (hrv : r₀ < v) (hvR : v ≤ R)
+    (hcorner : ∀ z : Fin d → ℤ, N (Int.cast ∘ z) ∉ Ioo u v)
+    (hroot : ∀ r ∈ (Ioo u v ∪ {R} : Set ℝ), (∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ p
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≠ ⊤)
+    (D : ℕ → ℝ≥0∞) (hDtop : (∑ ℓ ∈ Finset.range p, D ℓ) ≠ ⊤)
+    (hD : ∀ r ∈ Ioo u v, ∀ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ≥0∞) *
+      ∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ (ℓ + 1) *
+        (∑' y, (if N (Int.cast ∘ y) ≤ r then 1 else 0) *
+          (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ≥0∞)) ω *
+          ((cluster ω y).encard : ℝ≥0∞) ^ (p - ℓ))
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β)) ≤ D ℓ)
+    (hcont : ContinuousOn (fun r => ∑' e, cw r e *
+      ∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) (Ioo u v)) :
+    HasDerivAt (fun r => ∫ ω, (((cluster ω 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β)))
+      ((β : ℝ) * -K' r₀ * ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ) *
+        ∫ ω, (((cluster ω 0).encard : ℝ≥0∞).toReal) ^ (ℓ + 1) *
+          (∑' y, (if N (Int.cast ∘ y) ≤ r₀ then 1 else 0) *
+            (conn 0 y)ᶜ.indicator (fun _ => (1 : ℝ)) ω *
+            (((cluster ω y).encard : ℝ≥0∞).toReal) ^ (p - ℓ))
+          ∂(law (intensityProfile (cutoffKernel (d := d) N K r₀) β))) r₀ := by
+  let Kd : ℝ → ℝ := fun r => |(β : ℝ) * -K' r| * (∑ ℓ ∈ Finset.range p, D ℓ).toReal
+  have hmom : ∀ r ∈ Ioo u v, ∀ y : Fin d → ℤ,
+      (∫⁻ ω, ((cluster ω y).encard : ℝ≥0∞) ^ p
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≠ ⊤ := by
+    intro r hr y
+    exact vertex_moment_ne_top_of_root_moment β r p y (hroot r (Set.mem_union_left _ hr))
+  have hins : ∀ r ∈ Ioo u v, ∀ e : Sym2 (Fin d → ℤ),
+      (∫⁻ ω, ((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≠ ⊤ :=
+    insert_moments_of_vertex_moments_Ioo_modelNorm β p 0 hmom
+  have hχ : chi (intensityProfile (cutoffKernel (d := d) N K R) β) 0 ≠ ⊤ :=
+    chi_ne_top_of_lintegral_pow_ne_top _ 0 p hp (hroot R (Set.mem_union_right _ rfl))
+  have hKdc : ContinuousOn Kd (Ioi 0) := by
+    change ContinuousOn
+      (fun r => |(β : ℝ) * -K' r| * (∑ ℓ ∈ Finset.range p, D ℓ).toReal) (Ioi 0)
+    exact (continuousOn_const.mul hK'c.neg).abs.mul continuousOn_const
+  have hKdint : ∀ a ∈ Ioo u v, ∀ b ∈ Ioo u v, IntervalIntegrable Kd volume a b := by
+    intro a ha b hb
+    apply ContinuousOn.intervalIntegrable (hKdc.mono ?_)
+    intro x hx
+    change x ∈ Icc (min a b) (max a b) at hx
+    have hmin : 0 < min a b := lt_min (hu.trans ha.1) (hu.trans hb.1)
+    exact hmin.trans_le hx.1
+  have hKd : ∀ r ∈ Ioo u v, ∀ S : Finset (Sym2 (Fin d → ℤ)), ∑ e ∈ S, |cw r e| *
+      |∫ ω, (((cluster (insert e ω) 0).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) 0).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))| ≤ Kd r := by
+    intro r hr S
+    exact finite_sum_cutoff_pivotal_le_of_binomial_diagram β p hp r cw hcw (hins r hr)
+      D hDtop (hD r hr) hcorner hr S
+  exact hasDerivAt_integral_cutoff_pow_binomial_of_measurable hKa hK' hK'c β p hp hχ
+    cw hcw hu hur hrv hvR hcorner hins Kd hKdint hKd hcont
+
+
 end PercLib.Models.LongRange
