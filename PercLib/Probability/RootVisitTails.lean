@@ -15,6 +15,9 @@ public import Mathlib.Probability.Kernel.Defs
 public import Mathlib.MeasureTheory.Integral.Lebesgue.Countable
 public import Mathlib.MeasureTheory.Integral.Bochner.Basic
 public import Mathlib.Analysis.SpecificLimits.Basic
+public import Mathlib.Analysis.SpecialFunctions.Pow.Integral
+public import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
+public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 
 /-!
 # Root visit counts of a Markov chain
@@ -330,5 +333,132 @@ theorem measure_visitCount_le_mul_le [IsProbabilityMeasure μ] (hm : ∀ k, Meas
         simp only [e]
         exact_mod_cast card_filter_window_le (fun k => Z k ω = o) n m
     _ = m := by simp
+
+omit [DiscreteMeasurableSpace S] [Countable S] in
+/-- `U_n ≥ 1`, from the visit at time zero. -/
+theorem one_le_sum_measureReal [IsProbabilityMeasure μ]
+    (hZ : ∀ (n : ℕ) (x : Fin (n + 1) → S), μ {ω | ∀ i : Fin (n + 1), Z i ω = x i} =
+        (if x 0 = o then 1 else 0) * ∏ i : Fin n, P (x i.castSucc) {x i.succ}) (n : ℕ) :
+    1 ≤ ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o} := by
+  have h := single_le_sum (f := fun k => μ.real {ω | Z k ω = o})
+    (fun k _ => measureReal_nonneg) (mem_range.2 (Nat.succ_pos n))
+  simpa [measureReal_def, measure_zero_eq_one hZ] using h
+
+omit [MeasurableSpace S] [DiscreteMeasurableSpace S] [Countable S] [DecidableEq S] in
+theorem ofReal_sum_measureReal [IsProbabilityMeasure μ] (n : ℕ) :
+    ENNReal.ofReal (∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) =
+      ∑ k ∈ range (n + 1), μ {ω | Z k ω = o} := by
+  rw [ENNReal.ofReal_sum_of_nonneg fun k _ => measureReal_nonneg]
+  exact sum_congr rfl fun k _ => ofReal_measureReal
+
+/-- `E (ℓ_n / U_n)^j ≤ j!`. -/
+theorem lintegral_ofReal_visitCount_div_pow_le [IsProbabilityMeasure μ]
+    (hm : ∀ k, Measurable (Z k)) (hZ : ∀ (n : ℕ) (x : Fin (n + 1) → S), μ {ω | ∀ i : Fin (n + 1)
+        , Z i ω = x i} =
+        (if x 0 = o then 1 else 0) * ∏ i : Fin n, P (x i.castSucc) {x i.succ}) (n j : ℕ) :
+    ∫⁻ ω, ENNReal.ofReal ((((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ)
+        / ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ^ j) ∂μ ≤ j ! := by
+  have hU : 0 < ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}
+      := one_pos.trans_le (one_le_sum_measureReal hZ n)
+  have hV0 : ENNReal.ofReal (∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ≠ 0 := by simpa using hU
+  have hpt : ∀ ω, ENNReal.ofReal ((((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ)
+      / ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ^ j) =
+      ((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ≥0∞) ^ j *
+        (ENNReal.ofReal (∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ^ j)⁻¹ := by
+    intro ω
+    rw [ENNReal.ofReal_pow (div_nonneg (Nat.cast_nonneg _) hU.le),
+      ENNReal.ofReal_div_of_pos hU, ENNReal.ofReal_natCast, div_eq_mul_inv, mul_pow,
+      ENNReal.inv_pow]
+  simp_rw [hpt]
+  rw [lintegral_mul_const' _ _ (ENNReal.inv_ne_top.2 (pow_ne_zero _ hV0))]
+  calc _ ≤ (j ! : ℝ≥0∞) * ENNReal.ofReal (∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ^ j
+      * (ENNReal.ofReal (∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}) ^ j)⁻¹ := by
+        rw [ofReal_sum_measureReal]
+        gcongr
+        exact lintegral_visitCount_pow_le hm hZ j n
+    _ = j ! := by
+        rw [mul_assoc, ENNReal.mul_inv_cancel (pow_ne_zero _ hV0)
+          (ENNReal.pow_ne_top ENNReal.ofReal_ne_top), mul_one]
+
+/-- **Exponential upper tail**: `E exp (θ ℓ_n / U_n) ≤ (1 - θ)⁻¹` for `0 ≤ θ < 1`. -/
+theorem lintegral_exp_visitCount_le [IsProbabilityMeasure μ] (hm : ∀ k, Measurable (Z k))
+    (hZ : ∀ (n : ℕ) (x : Fin (n + 1) → S), μ {ω | ∀ i : Fin (n + 1), Z i ω = x i} =
+        (if x 0 = o then 1 else 0) * ∏ i : Fin n
+            , P (x i.castSucc) {x i.succ}) (n : ℕ) {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ < 1) :
+    ∫⁻ ω, ENNReal.ofReal (Real.exp (θ * (((∑ k ∈ range (n + 1), if Z k ω
+        = o then 1 else 0 : ℕ) : ℝ) / ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}))) ∂μ
+            ≤ ENNReal.ofReal (1 - θ)⁻¹ := by
+  have hU : 0 < ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}
+      := one_pos.trans_le (one_le_sum_measureReal hZ n)
+  have hX : Measurable fun ω => ((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ)
+      / ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o} :=
+    (measurable_of_countable (fun c : ℕ => (c : ℝ) / ∑ k ∈ range (n + 1), μ.real {ω | Z k ω
+        = o})).comp
+      (measurable_count hm (fun i => i) (n + 1))
+  have h := lintegral_pow_mul_exp (P := μ) hX (fun ω => div_nonneg (Nat.cast_nonneg _) hU.le)
+    hθ0 0
+  simp only [pow_zero, one_mul, zero_add] at h
+  rw [h]
+  calc _ ≤ ∑' k : ℕ, ENNReal.ofReal (θ ^ k / k !) * (k ! : ℝ≥0∞) :=
+        ENNReal.tsum_le_tsum fun k => by
+          gcongr; exact lintegral_ofReal_visitCount_div_pow_le hm hZ n k
+    _ = ∑' k : ℕ, ENNReal.ofReal (θ ^ k) := by
+        congr 1
+        ext k
+        rw [← ENNReal.ofReal_natCast, ← ENNReal.ofReal_mul (by positivity)]
+        congr 1
+        field_simp
+    _ = ENNReal.ofReal (1 - θ)⁻¹ := by
+        rw [← ENNReal.ofReal_tsum_of_nonneg (fun k => pow_nonneg hθ0 k)
+          (summable_geometric_of_lt_one hθ0 hθ1), tsum_geometric_of_lt_one hθ0 hθ1]
+
+/-- **Exponential upper tail**, as a Bochner integral. -/
+theorem integral_exp_visitCount_le [IsProbabilityMeasure μ] (hm : ∀ k, Measurable (Z k))
+    (hZ : ∀ (n : ℕ) (x : Fin (n + 1) → S), μ {ω | ∀ i : Fin (n + 1), Z i ω = x i} =
+        (if x 0 = o then 1 else 0) * ∏ i : Fin n
+            , P (x i.castSucc) {x i.succ}) (n : ℕ) {θ : ℝ} (hθ0 : 0 ≤ θ) (hθ1 : θ < 1) :
+    ∫ ω, Real.exp (θ * (((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ)
+        / ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o})) ∂μ ≤ 1 / (1 - θ) := by
+  have hX : Measurable fun ω => ((∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0 : ℕ) : ℝ)
+      / ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o} :=
+    (measurable_of_countable (fun c : ℕ => (c : ℝ) / ∑ k ∈ range (n + 1), μ.real {ω | Z k ω
+        = o})).comp
+      (measurable_count hm (fun i => i) (n + 1))
+  rw [integral_eq_lintegral_of_nonneg_ae (Filter.Eventually.of_forall fun ω => (Real.exp_pos _).le)
+    (Real.measurable_exp.comp (hX.const_mul θ)).aestronglyMeasurable, one_div]
+  exact ENNReal.toReal_le_of_le_ofReal (inv_nonneg.2 (by linarith))
+    (lintegral_exp_visitCount_le hm hZ n hθ0 hθ1)
+
+/-- **Linear lower tail**: `P(ℓ_n ≤ m) ≤ m / U_n`. -/
+theorem measureReal_visitCount_le_le_div [IsProbabilityMeasure μ] (hm : ∀ k, Measurable (Z k))
+    (hZ : ∀ (n : ℕ) (x : Fin (n + 1) → S), μ {ω | ∀ i : Fin (n + 1), Z i ω = x i} =
+        (if x 0 = o then 1 else 0) * ∏ i : Fin n, P (x i.castSucc) {x i.succ}) (n m : ℕ) :
+    μ.real {ω | (∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0) ≤ m} ≤ m / ∑ k ∈ range (n + 1)
+        , μ.real {ω | Z k ω = o} := by
+  have hU : 0 < ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}
+      := one_pos.trans_le (one_le_sum_measureReal hZ n)
+  rw [le_div_iff₀ hU, measureReal_def]
+  have h := measure_visitCount_le_mul_le hm hZ n m
+  rw [← ofReal_sum_measureReal] at h
+  have := ENNReal.toReal_mono (ENNReal.natCast_ne_top m) h
+  rwa [ENNReal.toReal_mul, ENNReal.toReal_ofReal hU.le, ENNReal.toReal_natCast] at this
+
+/-- The lower tail with the constant `e / (1 - e⁻¹)`. -/
+theorem measureReal_visitCount_le_le_min [IsProbabilityMeasure μ] (hm : ∀ k, Measurable (Z k))
+    (hZ : ∀ (n : ℕ) (x : Fin (n + 1) → S), μ {ω | ∀ i : Fin (n + 1), Z i ω = x i} =
+        (if x 0 = o then 1 else 0) * ∏ i : Fin n, P (x i.castSucc) {x i.succ}) (n m : ℕ) :
+    μ.real {ω | (∑ k ∈ range (n + 1), if Z k ω = o then 1 else 0) ≤ m} ≤
+      min 1 (Real.exp 1 / (1 - Real.exp (-1)) * (m / ∑ k ∈ range (n + 1), μ.real {ω | Z k ω
+          = o})) := by
+  have hU : 0 < ∑ k ∈ range (n + 1), μ.real {ω | Z k ω = o}
+      := one_pos.trans_le (one_le_sum_measureReal hZ n)
+  have he : Real.exp (-1) < 1 := Real.exp_lt_one_iff.2 (by norm_num)
+  have hC : 1 ≤ Real.exp 1 / (1 - Real.exp (-1)) := by
+    rw [le_div_iff₀ (by linarith)]
+    linarith [Real.exp_pos (-1), Real.one_le_exp (zero_le_one : (0 : ℝ) ≤ 1)]
+  refine le_min ?_ ((measureReal_visitCount_le_le_div hm hZ n m).trans
+    (le_mul_of_one_le_left (div_nonneg (Nat.cast_nonneg _) hU.le) hC))
+  rw [measureReal_def]
+  exact ENNReal.toReal_le_of_le_ofReal zero_le_one (by rw [ENNReal.ofReal_one]; exact prob_le_one)
 
 end PercLib.Probability
