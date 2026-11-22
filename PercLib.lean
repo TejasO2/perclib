@@ -214,6 +214,7 @@ public import PercLib.Percolation.Bond.ClusterCorrelation.Inequalities
 public import PercLib.Percolation.Bond.ClusterCorrelation.Restoration
 public import PercLib.Percolation.Bond.ClusterCorrelation.TwoClusterGap
 public import PercLib.Percolation.Bond.ClusterCount
+public import PercLib.Percolation.Bond.ClusterCountInsert
 public import PercLib.Percolation.Bond.ClusterLaw
 public import PercLib.Percolation.Bond.ClusterMoments
 public import PercLib.Percolation.Bond.ClusterPartition
@@ -303,6 +304,7 @@ public import PercLib.Percolation.Bond.SusceptibilityLevel
 public import PercLib.Percolation.Bond.Tags.BoundaryForest
 public import PercLib.Percolation.Bond.Tags.ChemicalMoments
 public import PercLib.Percolation.Bond.Tags.ClusterCorrelation
+public import PercLib.Percolation.Bond.Tags.ClusterCountInsert
 public import PercLib.Percolation.Bond.Tags.ConnectionKernel
 public import PercLib.Percolation.Bond.Tags.ConnectionKernelSingleton
 public import PercLib.Percolation.Bond.Tags.ConsistentGeodesics
@@ -334,6 +336,7 @@ public import PercLib.Percolation.Bond.Tags.SubcriticalBound
 public import PercLib.Percolation.Bond.Tags.SusceptibilityLevel
 public import PercLib.Percolation.Bond.Tags.Tightness
 public import PercLib.Percolation.Bond.Tags.TreeGraph
+public import PercLib.Percolation.Bond.Tags.TriangleComparison
 public import PercLib.Percolation.Bond.Tags.WindowAndCorrelation
 public import PercLib.Percolation.Bond.ThetaSemicontinuity
 public import PercLib.Percolation.Bond.Tightness.BKStep
@@ -351,7 +354,9 @@ public import PercLib.Percolation.Bond.TreeCounting
 public import PercLib.Percolation.Bond.TreeGraph.BranchPoint
 public import PercLib.Percolation.Bond.TreeGraph.Defs
 public import PercLib.Percolation.Bond.TreeGraph.Moments
+public import PercLib.Percolation.Bond.TriangleComparison
 public import PercLib.Percolation.Bond.TriangleDecay
+public import PercLib.Percolation.Bond.TruncatedSusceptibility
 public import PercLib.Percolation.Bond.UniformVolumeTail
 public import PercLib.Percolation.Bond.VolumeTails
 public import PercLib.Percolation.Bond.WalkSum
@@ -361,6 +366,7 @@ public import PercLib.Percolation.Bond.WiredDerivativeFormula
 public import PercLib.Percolation.Bond.Wiring.BoundaryLaw
 public import PercLib.Percolation.Bond.Wiring.Collapse
 public import PercLib.Percolation.Bond.ZeroOne
+public import PercLib.Probability.AdaptiveHarris
 public import PercLib.Probability.BKEndpoints
 public import PercLib.Probability.BKLowDensity
 public import PercLib.Probability.BernoulliDivergence
@@ -399,6 +405,8 @@ public import PercLib.Probability.FiniteContinuity
 public import PercLib.Probability.FiniteEnergy.Insertion
 public import PercLib.Probability.FiniteExpectation
 public import PercLib.Probability.FirstMoment
+public import PercLib.Probability.GaltonWatson
+public import PercLib.Probability.GaltonWatson.Defs
 public import PercLib.Probability.GeneratingFunction
 public import PercLib.Probability.GhostBinaryTree
 public import PercLib.Probability.GhostFieldDerivative
@@ -417,6 +425,7 @@ public import PercLib.Probability.LongRangeGreenBubble
 public import PercLib.Probability.MagnetizationLowerBound
 public import PercLib.Probability.MassTransport
 public import PercLib.Probability.MassTransportTuple
+public import PercLib.Probability.MeanFieldMoments
 public import PercLib.Probability.MixedSpatialMoments
 public import PercLib.Probability.Mixing
 public import PercLib.Probability.MomentConvergence
@@ -444,6 +453,7 @@ public import PercLib.Probability.SizeBias.ClusterMeasure
 public import PercLib.Probability.SizeBiasLimits
 public import PercLib.Probability.SplitCoordinate
 public import PercLib.Probability.Superposition
+public import PercLib.Probability.Tags.AdaptiveHarris
 public import PercLib.Probability.Tags.BranchingRandomWalkMoment
 public import PercLib.Probability.Tags.ConvexComparison
 public import PercLib.Probability.Tags.Correlation
@@ -455,6 +465,7 @@ public import PercLib.Probability.Tags.Ergodicity
 public import PercLib.Probability.Tags.ExponentialMoments
 public import PercLib.Probability.Tags.FiniteCoordinates
 public import PercLib.Probability.Tags.FourFunctions
+public import PercLib.Probability.Tags.GaltonWatson
 public import PercLib.Probability.Tags.GhostBinaryTree
 public import PercLib.Probability.Tags.GhostFieldDerivative
 public import PercLib.Probability.Tags.GhostTransform
@@ -463,6 +474,7 @@ public import PercLib.Probability.Tags.HigherCorrelation
 public import PercLib.Probability.Tags.IntegratedLowerTail
 public import PercLib.Probability.Tags.MagnetizationLowerBound
 public import PercLib.Probability.Tags.MassTransport
+public import PercLib.Probability.Tags.MeanFieldMoments
 public import PercLib.Probability.Tags.MonotoneCoupling
 public import PercLib.Probability.Tags.NearMisses
 public import PercLib.Probability.Tags.PoissonTail
