@@ -129,6 +129,7 @@ public import PercLib.Models.NonSummable
 public import PercLib.Models.NormalizedSmallIntensity
 public import PercLib.Models.NormalizedSmallIntensityLine
 public import PercLib.Models.Planar.Arms.Defs
+public import PercLib.Models.Planar.Arms.OneArm
 public import PercLib.Models.Planar.Arms.Separator
 public import PercLib.Models.Planar.CriticalProbability
 public import PercLib.Models.Planar.CrossingSymmetry
