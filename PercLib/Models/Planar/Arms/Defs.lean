@@ -7,11 +7,13 @@ Authors: PercLib contributors
 New definitions and proofs, written on 2026-11-21 and 2026-11-22. No upstream code is copied.
 Mathematical references: H. Duminil-Copin, Introduction to Bernoulli percolation, lecture notes,
 7 October 2018, Section 4, Corollary 4.7 (one-arm bounds, pp. 23-24); P. Nolin, Near-critical
-percolation in two dimensions, Electron. J. Probab. 13 (2008), paper no. 55, Sections 3.1 and
-4.1 (crossing bounds below the characteristic length and arm events, pp. 1570-1573).
+percolation in two dimensions, Electron. J. Probab. 13 (2008), paper no. 55, Sections 3.1,
+4.1-4.3 and 4.6 (crossing bounds below the characteristic length, arm events, landing sequences
+and half-plane arm events, pp. 1570-1576 and 1586).
 -/
 module
 
+public import Mathlib.Order.Circular.ZMod
 public import Mathlib.Topology.Instances.Int
 public import Mathlib.Topology.MetricSpace.Pseudo.Pi
 public import PercLib.Models.Planar.Defs
@@ -51,6 +53,32 @@ nearest-neighbour pairs are read.
   `k`, every `k n × n` box of `ℤ²` with `1 ≤ n ≤ L`, in either orientation and at any position,
   is crossed in its long direction by open edges and by dual-open edges with probability at
   least `c k > 0`. It is the hypothesis under which arm estimates hold uniformly in the law.
+* **Crossing walks.** `p.IsCrossing S T`, for a walk `p` of any graph, says that `p` starts in
+  `S` and never returns to it, and stays in `T` up to its last vertex, which is outside `T`.
+* **Arms.** An open arm `IsOpenArm ω z r lo hi γ` is a walk of `ℤ²` along edges open in `ω`
+  crossing from `B_r(z) = z + [-r, r]²` out of the interior of the box `Icc lo hi`: it leaves
+  `B_r(z)` at its first step and stops on first reaching the boundary of `Icc lo hi`. A dual arm
+  `IsDualArm ω z r lo hi γ` is a walk of faces (the dual vertex `f` is the unit square with
+  lower-left corner `f`) along dual edges open in `dualConfig ω`, from a face touching `B_r(z)`,
+  never touching it again, through faces of `Icc lo hi` up to its last face, which is outside
+  the box. `IsArm ω c …` is the open arm for `c = true` and the dual arm for `c = false`.
+* **Disjoint families.** `ArmsDisjoint σ γ`: two open arms share no vertex except possibly
+  their first, two dual arms share no face.
+* **Positions.** In the doubled lattice (a point `v` becomes `2v`, a face its centre `2f + 1`,
+  an edge its midpoint), `innerPos z r c γ` is the position of the first edge of an open arm or
+  the first face of a dual arm on the box `2z + [-(2r + 1), 2r + 1]²`, and `landingPos lo hi c γ`
+  the position of the last vertex of an open arm or of the boundary edge crossed by the last
+  dual edge of a dual arm on the box `Icc (2 lo) (2 hi)`. Both colours land on one cycle.
+* **Multi-arm events.** `multiArmEventTo σ z r lo hi J I`: a disjoint family of arms with
+  colours `σ`, inner positions in the windows `J`, landing positions in the windows `I`, landing
+  in counterclockwise order (`sbtw` for every increasing triple). `multiArmEventIn σ z r R J I`
+  is the centred case, `multiArmEvent σ z r R` the event `A_σ(r, R)` without windows. The
+  half-plane events `halfArmEventTo`, `halfArmEventIn`, `halfArmEvent` keep the arms in
+  `{v | z 1 ≤ v 1}` and order them from the right end: their landing positions increase.
+* **Landing data.** `IsLanding η θ`: `j` windows `[θ i, θ i + η]` of the circle `[0, 1)` in
+  counterclockwise order, separated by gaps of length at least `η` (Nolin's separated landing
+  sequences). `window P θ η i` is the set of positions of a cycle of perimeter `P` in the
+  window `i`.
 
 Boxes stay `Set.Icc lo hi`, with `(r : LatticeSite d)` the constant vector `r`;
 `Site.closedBall_eq_Icc` identifies the box `x + [-r, r]^d` with the closed ball of the sup
@@ -63,6 +91,15 @@ metric.
 * `PercLib.Models.Planar.boxBoundary`
 * `PercLib.Models.Planar.perimeterPos`
 * `PercLib.Models.Planar.CrossingBounds`
+* `SimpleGraph.Walk.IsCrossing`
+* `PercLib.Models.Planar.IsOpenArm`, `PercLib.Models.Planar.IsDualArm`,
+  `PercLib.Models.Planar.IsArm`, `PercLib.Models.Planar.ArmsDisjoint`
+* `PercLib.Models.Planar.innerPos`, `PercLib.Models.Planar.landingPos`
+* `PercLib.Models.Planar.multiArmEventTo`, `PercLib.Models.Planar.multiArmEventIn`,
+  `PercLib.Models.Planar.multiArmEvent`
+* `PercLib.Models.Planar.halfArmEventTo`, `PercLib.Models.Planar.halfArmEventIn`,
+  `PercLib.Models.Planar.halfArmEvent`
+* `PercLib.Models.Planar.IsLanding`, `PercLib.Models.Planar.window`
 
 ## Main results
 
@@ -95,6 +132,39 @@ metric.
   inside any `T ⊇ S`.
 * `Site.closedBall_eq_Icc`, `Site.apply_le_apply_add_one_of_adj`: sup-metric balls of `ℤ^d` are
   boxes, and a nearest-neighbour step moves each coordinate by at most one.
+* `IsOpenArm.start_mem_boxBoundary`, `IsOpenArm.end_mem_boxBoundary`, `IsOpenArm.mem_Icc`,
+  `IsOpenArm.eq_start_of_mem`, `IsOpenArm.eq_end_of_mem_boxBoundary`: an open arm starts on the
+  boundary of `B_r(z)`, lies in the outer box and meets `B_r(z)` and the boundary of the outer
+  box only at its ends; `IsDualArm.start_mem_boxBoundary`, `IsDualArm.end_mem_boxBoundary`,
+  `IsDualArm.mem_Icc` are the dual forms, and `IsDualArm.exists_mem_edgeSet_of_mem_edges`: a dual
+  arm crosses only closed edges with both ends in the outer box.
+* `mem_multiArmEventTo_iff`, `multiArmEventTo_mono` (windows), `measurableSet_multiArmEventTo`,
+  `mem_multiArmEventTo_iff_of_agree` and `mem_multiArmEventTo_iff_of_inter_eq` (determined by
+  the edges of the outer box with an end outside `B_r(z)`), `image_add_mem_multiArmEventTo_iff`
+  (translation), `empty_notMem_multiArmEventTo`, `univ_notMem_multiArmEventTo`, and the same for
+  the half-plane events; `halfArmEventTo_subset_multiArmEventTo`.
+* `multiArmEvent_true_eq_armEvent`: one open arm from the centre is the one-arm event.
+* `dualConfig_dualConfig`, `isOpenArm_dualConfig_iff`, `isDualArm_dualConfig_iff`: colour
+  inversion; the dual of the dual configuration is the configuration translated by `(-1, -1)`.
+* `innerPos_map_add`, `landingPos_map_add`, `landingPos_true`, `perimeterPos_two_smul`.
+* `IsLanding.disjoint_window`, `nonempty_window`, `isLanding_div` (landing data exist for every
+  number of arms).
+
+## Implementation notes
+
+* Positions live on the doubled lattice, so that open and dual arms land on one cycle: an open
+  arm landing at `v` has position `2 · perimeterPos lo hi v`, a dual arm crossing the boundary
+  edge from `x` to the next point `y` has position `2 · perimeterPos lo hi x + 1`. The inner
+  positions use the box of half-integer radius `r + 1/2` between `B_r(z)` and the faces around
+  it, which every arm crosses at its first step; for `r = 0` they record the first edge or face
+  of each arm at `z`.
+* Dual arms run from the faces touching `B_r(z)` (for `r = 0` the four faces at `z`) to the first
+  face outside the outer box. Every dual edge they use crosses an edge with both ends in the
+  outer box, the dual paths of quad duality.
+* Arms of one family share no vertex or face, except that open arms may share their first vertex
+  (all open arms from `z` when `r = 0`); an open arm and a dual arm never cross.
+* The counterclockwise order of a family is stated by triples, with mathlib's strict cyclic
+  betweenness `sbtw` on `ℤ` (`Int.sbtw_iff`), as the order-invariance theorems are.
 -/
 
 @[expose] public section
@@ -983,6 +1053,108 @@ theorem crossingBounds_zero (q : Sym2 (LatticeSite 2) → unitInterval) {c : ℕ
     have : n ≤ 0 := by exact_mod_cast hn0
     omega
 
+end PercLib.Models.Planar
+
+/-! ### Walks crossing from one set out of another -/
+
+namespace SimpleGraph.Walk
+
+variable {V V' : Type*} {G : SimpleGraph V} {G' : SimpleGraph V'}
+
+/-- A walk **crosses from `S` out of `T`**: it starts in `S` and never returns to `S`, and it
+stays in `T` up to its last vertex, which lies outside `T`. For a box `S` inside a box `T` it is
+a crossing of the annulus between them, stopped when it first leaves `T`. -/
+structure IsCrossing (S T : Set V) {u v : V} (p : G.Walk u v) : Prop where
+  /-- The walk starts in `S`. -/
+  start_mem : u ∈ S
+  /-- After its first vertex the walk avoids `S`. -/
+  notMem_of_mem_tail : ∀ w ∈ p.support.tail, w ∉ S
+  /-- The walk ends outside `T`. -/
+  end_notMem : v ∉ T
+  /-- Before its last vertex the walk stays in `T`. -/
+  mem_of_mem_dropLast : ∀ w ∈ p.support.dropLast, w ∈ T
+
+variable {S T : Set V} {u v : V} {p : G.Walk u v}
+
+/-- A walk of length zero crosses from `S` out of `T` when its vertex is in `S` and not in
+`T`. -/
+@[simp]
+theorem isCrossing_nil_iff : (nil : G.Walk u u).IsCrossing S T ↔ u ∈ S ∧ u ∉ T :=
+  ⟨fun h => ⟨h.start_mem, h.end_notMem⟩, fun h => ⟨h.1, by simp, h.2, by simp⟩⟩
+
+/-- A crossing from a set out of a set containing it has at least one step. -/
+theorem IsCrossing.not_nil (h : p.IsCrossing S T) (hST : S ⊆ T) : ¬p.Nil := fun hp => by
+  obtain rfl := hp.eq
+  exact h.end_notMem (hST h.start_mem)
+
+/-- The second vertex of a crossing is outside `S`. -/
+theorem IsCrossing.snd_notMem (h : p.IsCrossing S T) (hp : ¬p.Nil) : p.snd ∉ S :=
+  h.notMem_of_mem_tail _ (snd_mem_tail_support hp)
+
+/-- The last vertex but one of a crossing is in `T`. -/
+theorem IsCrossing.penultimate_mem (h : p.IsCrossing S T) (hp : ¬p.Nil) : p.penultimate ∈ T :=
+  h.mem_of_mem_dropLast _ (penultimate_mem_dropLast_support hp)
+
+/-- Every vertex of a crossing other than its first is outside `S`. -/
+theorem IsCrossing.eq_start_of_mem (h : p.IsCrossing S T) {w : V} (hw : w ∈ p.support)
+    (hwS : w ∈ S) : w = u := by
+  rcases (mem_support_iff p).1 hw with hw | hw
+  · exact hw
+  · exact absurd hwS (h.notMem_of_mem_tail w hw)
+
+/-- Every vertex of a crossing other than its last is in `T`. -/
+theorem IsCrossing.eq_end_of_notMem (h : p.IsCrossing S T) {w : V} (hw : w ∈ p.support)
+    (hwT : w ∉ T) : w = v := by
+  rw [← dropLast_support_concat p, List.mem_append, List.mem_singleton] at hw
+  rcases hw with hw | hw
+  · exact absurd (h.mem_of_mem_dropLast w hw) hwT
+  · exact hw
+
+/-- **Images.** An injective homomorphism of graphs carries the crossings from `S` out of `T` to
+the crossings from the image of `S` out of the image of `T`. -/
+theorem isCrossing_map_iff {f : G →g G'} (hf : Function.Injective f) :
+    (p.map f).IsCrossing (f '' S) (f '' T) ↔ p.IsCrossing S T := by
+  have hmem : ∀ (w : V) (X : Set V), f w ∈ f '' X ↔ w ∈ X := fun w X => hf.mem_set_image
+  constructor
+  · intro h
+    refine ⟨(hmem _ _).1 h.start_mem, fun w hw => ?_, fun hv => h.end_notMem ((hmem _ _).2 hv),
+      fun w hw => (hmem _ _).1 (h.mem_of_mem_dropLast _ ?_)⟩
+    · rw [← hmem]
+      refine h.notMem_of_mem_tail _ ?_
+      rw [support_map, ← List.map_tail]
+      exact List.mem_map_of_mem hw
+    · rw [support_map, ← List.map_dropLast]
+      exact List.mem_map_of_mem hw
+  · intro h
+    refine ⟨(hmem _ _).2 h.start_mem, fun w hw => ?_, fun hv => h.end_notMem ((hmem _ _).1 hv),
+      fun w hw => ?_⟩
+    · rw [support_map, ← List.map_tail] at hw
+      obtain ⟨w', hw', rfl⟩ := List.mem_map.1 hw
+      rw [hmem]
+      exact h.notMem_of_mem_tail w' hw'
+    · rw [support_map, ← List.map_dropLast] at hw
+      obtain ⟨w', hw', rfl⟩ := List.mem_map.1 hw
+      exact (hmem _ _).2 (h.mem_of_mem_dropLast w' hw')
+
+end SimpleGraph.Walk
+
+namespace PercLib.Models.Planar
+
+/-! ### Boundaries of boxes and nearest-neighbour steps -/
+
+/-- A point of a box of `ℤ^d` with a neighbour outside the box lies on its boundary. -/
+theorem mem_boxBoundary_of_adj {d : ℕ} {lo hi u v : LatticeSite d} (h : (zdGraph d).Adj u v)
+    (hu : u ∈ Icc lo hi) (hv : v ∉ Icc lo hi) : u ∈ boxBoundary lo hi := by
+  refine ⟨hu, ?_⟩
+  simp only [mem_Icc, Pi.le_def, not_and_or, not_forall, not_le] at hu hv
+  rcases hv with ⟨i, hi⟩ | ⟨i, hi⟩
+  · have := apply_le_apply_add_one_of_adj h.symm i
+    have := hu.1 i
+    exact ⟨i, Or.inl (by omega)⟩
+  · have := apply_le_apply_add_one_of_adj h i
+    have := hu.2 i
+    exact ⟨i, Or.inr (by omega)⟩
+
 /-! ### Faces of boxes and of dual edges -/
 
 section Faces
@@ -1024,6 +1196,1133 @@ theorem mem_Icc_of_mem_dualEdge {e : Sym2 (LatticeSite 2)} (he : e ∈ (zdGraph 
     rw [Sym2.mem_iff, eq_vec_two_iff, eq_vec_two_iff] at hx
     omega
 
+/-! ### Arms -/
+
+section Arms
+
+variable {ω : Config (LatticeSite 2)} {z : LatticeSite 2} {r : ℕ} {lo hi : LatticeSite 2}
+
+/-- An **open arm** of `ω` from `B_r(z)` to the boundary of the box `Icc lo hi`: a walk of `ℤ²`
+along edges open in `ω` that starts in the box `B_r(z) = z + [-r, r]²` and never returns to it,
+and stays in the interior `Icc (lo + 1) (hi - 1)` of the outer box up to its last vertex, which
+is outside the interior. When `B_r(z)` lies in the interior, the arm starts on the boundary of
+`B_r(z)`, lies in `Icc lo hi`, and meets the boundary of `Icc lo hi` exactly at its last vertex
+(`IsOpenArm.start_mem_boxBoundary`, `IsOpenArm.mem_Icc`, `IsOpenArm.end_mem_boxBoundary`). For
+`r = 0` the box `B_0(z)` is the vertex `z`. -/
+structure IsOpenArm (ω : Config (LatticeSite 2)) (z : LatticeSite 2) (r : ℕ)
+    (lo hi : LatticeSite 2) {a b : LatticeSite 2} (γ : (zdGraph 2).Walk a b) : Prop where
+  /-- The walk crosses from `B_r(z)` out of the interior of the outer box. -/
+  isCrossing : γ.IsCrossing (Icc (z - r) (z + r)) (Icc (lo + 1) (hi - 1))
+  /-- Its edges are open. -/
+  mem_of_mem_edges : ∀ e ∈ γ.edges, e ∈ ω
+
+/-- A **dual arm** of `ω` from `B_r(z)` to the boundary of the box `Icc lo hi`: a walk of faces
+(the dual vertex `f` standing for the unit square with lower-left corner `f`) along dual edges
+open in `dualConfig ω`, that starts at a face touching `B_r(z)` (a face of
+`Icc (z - r - 1) (z + r)`) and never touches `B_r(z)` again, and runs through faces of the outer
+box (faces of `Icc lo (hi - 1)`) up to its last face, which is outside the outer box. Its last
+dual edge crosses an edge of the boundary of `Icc lo hi`; every dual edge it uses crosses an edge
+with both ends in `Icc lo hi`, as in quad duality. For `r = 0` the first face is one of the four
+faces at `z`. -/
+structure IsDualArm (ω : Config (LatticeSite 2)) (z : LatticeSite 2) (r : ℕ)
+    (lo hi : LatticeSite 2) {f g : LatticeSite 2} (γ : (zdGraph 2).Walk f g) : Prop where
+  /-- The walk of faces crosses from the faces touching `B_r(z)` out of the faces of the outer
+  box. -/
+  isCrossing : γ.IsCrossing (Icc (z - r - 1) (z + r)) (Icc lo (hi - 1))
+  /-- Its dual edges are open. -/
+  mem_of_mem_edges : ∀ e ∈ γ.edges, e ∈ dualConfig ω
+
+/-- An **arm of colour `c`**: an open arm when `c = true`, a dual arm when `c = false`. -/
+def IsArm (ω : Config (LatticeSite 2)) (c : Bool) (z : LatticeSite 2) (r : ℕ)
+    (lo hi : LatticeSite 2) {a b : LatticeSite 2} (γ : (zdGraph 2).Walk a b) : Prop :=
+  cond c (IsOpenArm ω z r lo hi γ) (IsDualArm ω z r lo hi γ)
+
+section ArmsAPI
+
+variable {a b : LatticeSite 2} {γ : (zdGraph 2).Walk a b}
+
+@[simp]
+theorem isArm_true : IsArm ω true z r lo hi γ ↔ IsOpenArm ω z r lo hi γ :=
+  Iff.rfl
+
+@[simp]
+theorem isArm_false : IsArm ω false z r lo hi γ ↔ IsDualArm ω z r lo hi γ :=
+  Iff.rfl
+
+theorem isOpenArm_iff : IsOpenArm ω z r lo hi γ ↔
+    γ.IsCrossing (Icc (z - r) (z + r)) (Icc (lo + 1) (hi - 1)) ∧ ∀ e ∈ γ.edges, e ∈ ω :=
+  ⟨fun h => ⟨h.1, h.2⟩, fun h => ⟨h.1, h.2⟩⟩
+
+theorem isDualArm_iff : IsDualArm ω z r lo hi γ ↔
+    γ.IsCrossing (Icc (z - r - 1) (z + r)) (Icc lo (hi - 1)) ∧
+      ∀ e ∈ γ.edges, e ∈ dualConfig ω :=
+  ⟨fun h => ⟨h.1, h.2⟩, fun h => ⟨h.1, h.2⟩⟩
+
+/-- The box `B_r(z)` lies in the interior of `Icc lo hi` exactly when the faces touching it are
+faces of `Icc lo hi`. -/
+theorem Icc_sub_one_subset_iff :
+    Icc (z - r - 1) (z + r) ⊆ Icc lo (hi - 1) ↔ Icc (z - r) (z + r) ⊆ Icc (lo + 1) (hi - 1) := by
+  have hne₁ : z - r - 1 ≤ z + r := fun i => by
+    simp only [Pi.sub_apply, Pi.add_apply, Pi.natCast_apply, Pi.one_apply]
+    omega
+  have hne₂ : z - r ≤ z + r := fun i => by
+    simp only [Pi.sub_apply, Pi.add_apply, Pi.natCast_apply]
+    omega
+  rw [Icc_subset_Icc_iff hne₁, Icc_subset_Icc_iff hne₂]
+  simp only [Pi.le_def, Pi.sub_apply, Pi.add_apply, Pi.natCast_apply, Pi.one_apply]
+  constructor
+  · rintro ⟨h₁, h₂⟩
+    exact ⟨fun i => by have := h₁ i; omega, fun i => h₂ i⟩
+  · rintro ⟨h₁, h₂⟩
+    exact ⟨fun i => by have := h₁ i; omega, fun i => h₂ i⟩
+
+/-- A neighbour of a point of the interior `Icc (lo + 1) (hi - 1)` lies in `Icc lo hi`. -/
+theorem mem_Icc_of_adj_of_mem_Icc_sub_one {u v : LatticeSite 2}
+    (huv : (zdGraph 2).Adj u v) (hu : u ∈ Icc (lo + 1) (hi - 1)) : v ∈ Icc lo hi := by
+  have h₀ := apply_le_apply_add_one_of_adj huv
+  have h₁ := apply_le_apply_add_one_of_adj huv.symm
+  rw [mem_Icc_two_iff] at hu ⊢
+  have a0 := h₀ 0
+  have a1 := h₀ 1
+  have b0 := h₁ 0
+  have b1 := h₁ 1
+  simp only [Pi.add_apply, Pi.sub_apply, Pi.one_apply] at hu
+  omega
+
+namespace IsOpenArm
+
+variable (h : IsOpenArm ω z r lo hi γ)
+include h
+
+/-- An open arm meets `B_r(z)` only at its first vertex. -/
+theorem eq_start_of_mem {v : LatticeSite 2} (hv : v ∈ γ.support)
+    (hvB : v ∈ Icc (z - r) (z + r)) : v = a :=
+  h.isCrossing.eq_start_of_mem hv hvB
+
+/-- An open arm meets the boundary of the outer box only at its last vertex. -/
+theorem eq_end_of_mem_boxBoundary {v : LatticeSite 2} (hv : v ∈ γ.support)
+    (hvO : v ∈ boxBoundary lo hi) : v = b := by
+  refine h.isCrossing.eq_end_of_notMem hv fun hv' => ?_
+  rw [boxBoundary_eq_Icc_diff_Icc] at hvO
+  exact hvO.2 hv'
+
+/-- An open arm from a box inside the interior of the outer box has at least one step. -/
+theorem not_nil (hB : Icc (z - r) (z + r) ⊆ Icc (lo + 1) (hi - 1)) : ¬γ.Nil :=
+  h.isCrossing.not_nil hB
+
+/-- An open arm with at least one step starts on the boundary of `B_r(z)`. -/
+theorem start_mem_boxBoundary (hγ : ¬γ.Nil) :
+    a ∈ boxBoundary (z - r : LatticeSite 2) (z + r) :=
+  mem_boxBoundary_of_adj (SimpleGraph.Walk.adj_snd hγ) h.isCrossing.start_mem
+    (h.isCrossing.snd_notMem hγ)
+
+/-- An open arm with at least one step ends on the boundary of the outer box. -/
+theorem end_mem_boxBoundary (hγ : ¬γ.Nil) : b ∈ boxBoundary lo hi := by
+  rw [boxBoundary_eq_Icc_diff_Icc]
+  exact ⟨mem_Icc_of_adj_of_mem_Icc_sub_one (SimpleGraph.Walk.adj_penultimate hγ)
+    (h.isCrossing.penultimate_mem hγ), h.isCrossing.end_notMem⟩
+
+/-- An open arm with at least one step lies in the outer box. -/
+theorem mem_Icc (hγ : ¬γ.Nil) {v : LatticeSite 2} (hv : v ∈ γ.support) : v ∈ Icc lo hi := by
+  by_cases hvb : v = b
+  · rw [hvb]
+    exact boxBoundary_subset_Icc _ _ (h.end_mem_boxBoundary hγ)
+  · have hv' : v ∈ Icc (lo + 1) (hi - 1) := by
+      by_contra hc
+      exact hvb (h.isCrossing.eq_end_of_notMem hv hc)
+    rw [mem_Icc_two_iff] at hv' ⊢
+    simp only [Pi.add_apply, Pi.sub_apply, Pi.one_apply] at hv'
+    omega
+
+/-- Each edge of an open arm has both ends in the outer box and an end outside `B_r(z)`. -/
+theorem exists_notMem_of_mem_edges {e : Sym2 (LatticeSite 2)} (he : e ∈ γ.edges) :
+    (∀ v ∈ e, v ∈ Icc lo hi) ∧ ∃ v ∈ e, v ∉ Icc (z - r) (z + r) := by
+  unfold SimpleGraph.Walk.edges at he
+  obtain ⟨δ, hδ, rfl⟩ := List.mem_map.1 he
+  have hfst : δ.fst ∈ Icc (lo + 1) (hi - 1) := h.isCrossing.mem_of_mem_dropLast _ (by
+    rw [← SimpleGraph.Walk.map_fst_darts]
+    exact List.mem_map_of_mem hδ)
+  have hsnd : δ.snd ∉ Icc (z - r) (z + r) := h.isCrossing.notMem_of_mem_tail _ (by
+    rw [← SimpleGraph.Walk.map_snd_darts]
+    exact List.mem_map_of_mem hδ)
+  have hfst' : δ.fst ∈ Icc lo hi := by
+    rw [mem_Icc_two_iff] at hfst ⊢
+    simp only [Pi.add_apply, Pi.sub_apply, Pi.one_apply] at hfst
+    omega
+  have hsnd' : δ.snd ∈ Icc lo hi := mem_Icc_of_adj_of_mem_Icc_sub_one δ.adj hfst
+  refine ⟨fun v hv => ?_, δ.snd, by simp [SimpleGraph.Dart.edge], hsnd⟩
+  rw [SimpleGraph.Dart.edge, Sym2.mem_iff] at hv
+  rcases hv with rfl | rfl
+  · exact hfst'
+  · exact hsnd'
+
+end IsOpenArm
+
+namespace IsDualArm
+
+variable (h : IsDualArm ω z r lo hi γ)
+include h
+
+/-- A dual arm touches `B_r(z)` only at its first face. -/
+theorem eq_start_of_mem {f : LatticeSite 2} (hf : f ∈ γ.support)
+    (hfB : f ∈ Icc (z - r - 1) (z + r)) : f = a :=
+  h.isCrossing.eq_start_of_mem hf hfB
+
+/-- A dual arm leaves the faces of the outer box only at its last face. -/
+theorem eq_end_of_notMem {f : LatticeSite 2} (hf : f ∈ γ.support)
+    (hfO : f ∉ Icc lo (hi - 1)) : f = b :=
+  h.isCrossing.eq_end_of_notMem hf hfO
+
+/-- A dual arm from a box inside the interior of the outer box has at least one step. -/
+theorem not_nil (hB : Icc (z - r) (z + r) ⊆ Icc (lo + 1) (hi - 1)) : ¬γ.Nil :=
+  h.isCrossing.not_nil (Icc_sub_one_subset_iff.2 hB)
+
+/-- A dual arm with at least one step starts at a face touching `B_r(z)` but not inside it. -/
+theorem start_mem_boxBoundary (hγ : ¬γ.Nil) :
+    a ∈ boxBoundary (z - r - 1 : LatticeSite 2) (z + r) :=
+  mem_boxBoundary_of_adj (SimpleGraph.Walk.adj_snd hγ) h.isCrossing.start_mem
+    (h.isCrossing.snd_notMem hγ)
+
+/-- A dual arm with at least one step ends at a face outside the outer box with an edge on its
+boundary. -/
+theorem end_mem_boxBoundary (hγ : ¬γ.Nil) : b ∈ boxBoundary (lo - 1) hi := by
+  have hpen := h.isCrossing.penultimate_mem hγ
+  have hadj := SimpleGraph.Walk.adj_penultimate hγ
+  have hb := h.isCrossing.end_notMem
+  have h₀ := apply_le_apply_add_one_of_adj hadj
+  have h₁ := apply_le_apply_add_one_of_adj hadj.symm
+  rw [boxBoundary_eq_Icc_diff_Icc, mem_sdiff]
+  rw [mem_Icc_two_iff] at hpen hb ⊢
+  rw [mem_Icc_two_iff]
+  have a0 := h₀ 0
+  have a1 := h₀ 1
+  have b0 := h₁ 0
+  have b1 := h₁ 1
+  simp only [Pi.add_apply, Pi.sub_apply, Pi.one_apply, sub_add_cancel] at hpen hb ⊢
+  omega
+
+/-- A dual arm with at least one step runs through faces touching the outer box. -/
+theorem mem_Icc (hγ : ¬γ.Nil) {f : LatticeSite 2} (hf : f ∈ γ.support) :
+    f ∈ Icc (lo - 1) hi := by
+  by_cases hfb : f = b
+  · rw [hfb]
+    exact boxBoundary_subset_Icc _ _ (h.end_mem_boxBoundary hγ)
+  · have hf' : f ∈ Icc lo (hi - 1) := by
+      by_contra hc
+      exact hfb (h.isCrossing.eq_end_of_notMem hf hc)
+    rw [mem_Icc_two_iff] at hf' ⊢
+    simp only [Pi.sub_apply, Pi.one_apply] at hf' ⊢
+    omega
+
+/-- **Dual arms cross only edges of the outer box.** Each dual edge of a dual arm is the dual of
+a closed edge of `ℤ²` with both ends in the outer box `Icc lo hi` and no end in `B_r(z)`. So a
+dual arm is a dual-open path for the dual configuration restricted to the edges of the box, as
+in quad duality. -/
+theorem exists_mem_edgeSet_of_mem_edges {E : Sym2 (LatticeSite 2)} (hE : E ∈ γ.edges) :
+    ∃ e ∈ (zdGraph 2).edgeSet, e ∉ ω ∧ dualEdge e = E ∧ (∀ v ∈ e, v ∈ Icc lo hi) ∧
+      ∀ v ∈ e, v ∉ Icc (z - r) (z + r) := by
+  obtain ⟨e, he, heω, rfl⟩ := (mem_dualConfig_iff' ω E).1 (h.mem_of_mem_edges E hE)
+  unfold SimpleGraph.Walk.edges at hE
+  obtain ⟨δ, hδ, hδe⟩ := List.mem_map.1 hE
+  have hfst : δ.fst ∈ Icc lo (hi - 1) := h.isCrossing.mem_of_mem_dropLast _ (by
+    rw [← SimpleGraph.Walk.map_fst_darts]
+    exact List.mem_map_of_mem hδ)
+  have hsnd : δ.snd ∉ Icc (z - r - 1) (z + r) := h.isCrossing.notMem_of_mem_tail _ (by
+    rw [← SimpleGraph.Walk.map_snd_darts]
+    exact List.mem_map_of_mem hδ)
+  have hfst' : δ.fst ∈ dualEdge e := by
+    rw [← hδe, SimpleGraph.Dart.edge]
+    exact Sym2.mem_mk_left _ _
+  have hsnd' : δ.snd ∈ dualEdge e := by
+    rw [← hδe, SimpleGraph.Dart.edge]
+    exact Sym2.mem_mk_right _ _
+  refine ⟨e, he, heω, rfl, fun v hv => ?_, fun v hv hvB => ?_⟩
+  · exact mem_Icc_of_mem_Icc_sub_one hfst (mem_Icc_of_mem_dualEdge he hv hfst')
+  · exact hsnd (mem_Icc_sub_one_of_mem_Icc hvB (mem_Icc_of_mem_dualEdge he hv hsnd'))
+
+end IsDualArm
+
+/-! #### Determination by the annulus -/
+
+/-- **Determination.** An open arm of `ω` is an open arm of every `ω'` that agrees with `ω` on
+the edges of the outer box with an end outside `B_r(z)`. -/
+theorem IsOpenArm.of_agree {ω' : Config (LatticeSite 2)} (h : IsOpenArm ω z r lo hi γ)
+    (hω : ∀ e ∈ (zdGraph 2).edgeSet, (∀ v ∈ e, v ∈ Icc lo hi) →
+      (∃ v ∈ e, v ∉ Icc (z - r) (z + r)) → (e ∈ ω ↔ e ∈ ω')) :
+    IsOpenArm ω' z r lo hi γ := by
+  refine ⟨h.isCrossing, fun e he => ?_⟩
+  obtain ⟨h₁, h₂⟩ := h.exists_notMem_of_mem_edges he
+  exact (hω e (γ.edges_subset_edgeSet he) h₁ h₂).1 (h.mem_of_mem_edges e he)
+
+/-- **Determination.** A dual arm of `ω` is a dual arm of every `ω'` that agrees with `ω` on
+the edges of the outer box with an end outside `B_r(z)`. -/
+theorem IsDualArm.of_agree {ω' : Config (LatticeSite 2)} (h : IsDualArm ω z r lo hi γ)
+    (hω : ∀ e ∈ (zdGraph 2).edgeSet, (∀ v ∈ e, v ∈ Icc lo hi) →
+      (∃ v ∈ e, v ∉ Icc (z - r) (z + r)) → (e ∈ ω ↔ e ∈ ω')) :
+    IsDualArm ω' z r lo hi γ := by
+  refine ⟨h.isCrossing, fun E hE => ?_⟩
+  obtain ⟨e, he, heω, rfl, h₁, h₂⟩ := h.exists_mem_edgeSet_of_mem_edges hE
+  have hne : ∃ v ∈ e, v ∉ Icc (z - r) (z + r) := by
+    induction e using Sym2.ind with
+    | h x y => exact ⟨x, Sym2.mem_mk_left x y, h₂ x (Sym2.mem_mk_left x y)⟩
+  rw [dualEdge_mem_dualConfig_iff he, ← hω e he h₁ hne]
+  exact heω
+
+/-- **Determination.** An arm of `ω` is an arm of every `ω'` that agrees with `ω` on the edges
+of the outer box with an end outside `B_r(z)`. -/
+theorem IsArm.of_agree {ω' : Config (LatticeSite 2)} {c : Bool} (h : IsArm ω c z r lo hi γ)
+    (hω : ∀ e ∈ (zdGraph 2).edgeSet, (∀ v ∈ e, v ∈ Icc lo hi) →
+      (∃ v ∈ e, v ∉ Icc (z - r) (z + r)) → (e ∈ ω ↔ e ∈ ω')) :
+    IsArm ω' c z r lo hi γ := by
+  cases c
+  · exact IsDualArm.of_agree h hω
+  · exact IsOpenArm.of_agree h hω
+
+/-! #### Translation -/
+
+/-- **Translation.** Translating the configuration, the walk and the boxes by `c` carries arms to
+arms. Here `f` is the translation by `c`, as a homomorphism of `ℤ²`. -/
+theorem IsArm.map_add {col : Bool} {f : zdGraph 2 →g zdGraph 2} {c : LatticeSite 2}
+    (hf : ∀ x, f x = x + c) (h : IsArm ω col z r lo hi γ) :
+    IsArm (Sym2.map (· + c) '' ω) col (z + c) r (lo + c) (hi + c) (γ.map f) := by
+  have hf' : (⇑f : LatticeSite 2 → LatticeSite 2) = (· + c) := funext hf
+  have hinj : Function.Injective f := by
+    rw [hf']
+    exact add_left_injective c
+  have himage : ∀ p q : LatticeSite 2, ⇑f '' Icc p q = Icc (p + c) (q + c) := fun p q => by
+    rw [hf', image_add_const_Icc]
+  have hedges : ∀ (ω₀ : Config (LatticeSite 2)), (∀ e ∈ γ.edges, e ∈ ω₀) →
+      ∀ e ∈ (γ.map f).edges, e ∈ Sym2.map (· + c) '' ω₀ := by
+    intro ω₀ h₀ e he
+    rw [SimpleGraph.Walk.edges_map] at he
+    obtain ⟨e₀, he₀, rfl⟩ := List.mem_map.1 he
+    rw [hf']
+    exact ⟨e₀, h₀ e₀ he₀, rfl⟩
+  cases col
+  · refine ⟨?_, ?_⟩
+    · have := (SimpleGraph.Walk.isCrossing_map_iff hinj).2 h.isCrossing
+      rwa [himage, himage, show z - r - 1 + c = z + c - r - 1 by abel,
+        show z + r + c = z + c + r by abel, show hi - 1 + c = hi + c - 1 by abel] at this
+    · rw [dualConfig_image_add]
+      exact hedges _ h.mem_of_mem_edges
+  · refine ⟨?_, ?_⟩
+    · have := (SimpleGraph.Walk.isCrossing_map_iff hinj).2 h.isCrossing
+      rwa [himage, himage, show z - r + c = z + c - r by abel,
+        show z + r + c = z + c + r by abel, show lo + 1 + c = lo + c + 1 by abel,
+        show hi - 1 + c = hi + c - 1 by abel] at this
+    · exact hedges _ h.mem_of_mem_edges
+
+end ArmsAPI
+
+end Arms
+
+/-! ### Disjoint families of arms -/
+
+/-- A family of arms with colours `σ` is **disjoint** when two open arms share no vertex except
+possibly their first one and two dual arms share no face. (An open arm and a dual arm of one
+configuration never cross: an open edge is not crossed by an open dual edge.) For `r = 0` the
+open arms all start at the centre. -/
+def ArmsDisjoint {j : ℕ} (σ : Fin j → Bool) {a b : Fin j → LatticeSite 2}
+    (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)) : Prop :=
+  (∀ i k, i ≠ k → σ i = true → σ k = true → ∀ v ∈ (γ i).support.tail, v ∉ (γ k).support) ∧
+    ∀ i k, i ≠ k → σ i = false → σ k = false → ∀ v ∈ (γ i).support, v ∉ (γ k).support
+
+/-- **Images.** An injective map of `ℤ²` keeps a family of arms disjoint. -/
+theorem ArmsDisjoint.map {j : ℕ} {σ : Fin j → Bool} {a b : Fin j → LatticeSite 2}
+    {γ : ∀ i, (zdGraph 2).Walk (a i) (b i)} (h : ArmsDisjoint σ γ) {f : zdGraph 2 →g zdGraph 2}
+    (hf : Function.Injective f) : ArmsDisjoint σ fun i => (γ i).map f := by
+  refine ⟨fun i k hik hi hk v hv hv' => ?_, fun i k hik hi hk v hv hv' => ?_⟩
+  · rw [SimpleGraph.Walk.support_map, ← List.map_tail] at hv
+    rw [SimpleGraph.Walk.support_map] at hv'
+    obtain ⟨w, hw, rfl⟩ := List.mem_map.1 hv
+    obtain ⟨w', hw', hww'⟩ := List.mem_map.1 hv'
+    rw [hf hww'] at hw'
+    exact h.1 i k hik hi hk w hw hw'
+  · rw [SimpleGraph.Walk.support_map] at hv hv'
+    obtain ⟨w, hw, rfl⟩ := List.mem_map.1 hv
+    obtain ⟨w', hw', hww'⟩ := List.mem_map.1 hv'
+    rw [hf hww'] at hw'
+    exact h.2 i k hik hi hk w hw hw'
+
+/-- A family of at most one arm is disjoint. -/
+theorem armsDisjoint_of_subsingleton {j : ℕ} (hj : j ≤ 1) (σ : Fin j → Bool)
+    {a b : Fin j → LatticeSite 2} (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)) : ArmsDisjoint σ γ :=
+  ⟨fun i k hik => absurd (Fin.ext (by omega)) hik, fun i k hik => absurd (Fin.ext (by omega)) hik⟩
+
+/-! ### Positions of arms on the doubled lattice -/
+
+/-- The **inner position** of an arm of colour `c` from `B_r(z)`: in the doubled lattice, where
+the point `v` of `ℤ²` becomes `2v`, the face `f` becomes its centre `2f + (1, 1)` and an edge
+becomes its midpoint (the sum of its ends), the perimeter position on the boundary of the box
+`2z + [-(2r + 1), 2r + 1]²` of the midpoint of the first edge of an open arm, or of the centre of
+the first face of a dual arm. Open and dual arms leaving `B_r(z)` pass there, between the
+doubled box `2 B_r(z)` and the doubled faces around it, so the positions of the arms of a family
+lie on one cycle (of perimeter `16 r + 8`). -/
+def innerPos (z : LatticeSite 2) (r : ℕ) (c : Bool) {a b : LatticeSite 2}
+    (γ : (zdGraph 2).Walk a b) : ℤ :=
+  perimeterPos (2 • z - ((2 * r + 1 : ℕ) : LatticeSite 2))
+    (2 • z + ((2 * r + 1 : ℕ) : LatticeSite 2)) (cond c (a + γ.snd) (2 • a + 1))
+
+/-- The **landing position** of an arm of colour `c` on the boundary of `Icc lo hi`: in the
+doubled lattice, the perimeter position on the boundary of `Icc (2 lo) (2 hi)` of twice the last
+vertex of an open arm, or of the midpoint of the boundary edge crossed by the last dual edge of a
+dual arm (the sum of its last two faces plus `(1, 1)`). The positions of the arms of a family lie
+on one cycle (of perimeter `4 (hi₀ - lo₀) + 4 (hi₁ - lo₁)`); an open arm landing at `v` has
+position `2 · perimeterPos lo hi v`, and a dual arm crossing the boundary edge `{x, y}` has
+position `2 · perimeterPos lo hi x + 1` when `y` follows `x` counterclockwise. -/
+def landingPos (lo hi : LatticeSite 2) (c : Bool) {a b : LatticeSite 2}
+    (γ : (zdGraph 2).Walk a b) : ℤ :=
+  perimeterPos (2 • lo) (2 • hi) (cond c (2 • b) (γ.penultimate + b + 1))
+
+section Positions
+
+variable {a b : LatticeSite 2} (γ : (zdGraph 2).Walk a b)
+
+@[simp]
+theorem innerPos_true (z : LatticeSite 2) (r : ℕ) :
+    innerPos z r true γ = perimeterPos (2 • z - ((2 * r + 1 : ℕ) : LatticeSite 2))
+      (2 • z + ((2 * r + 1 : ℕ) : LatticeSite 2)) (a + γ.snd) :=
+  rfl
+
+@[simp]
+theorem innerPos_false (z : LatticeSite 2) (r : ℕ) :
+    innerPos z r false γ = perimeterPos (2 • z - ((2 * r + 1 : ℕ) : LatticeSite 2))
+      (2 • z + ((2 * r + 1 : ℕ) : LatticeSite 2)) (2 • a + 1) :=
+  rfl
+
+/-- **Doubling.** Doubling a box and a point doubles its perimeter position. -/
+@[simp]
+theorem perimeterPos_two_smul (lo hi v : LatticeSite 2) :
+    perimeterPos (2 • lo) (2 • hi) (2 • v) = 2 * perimeterPos lo hi v := by
+  unfold perimeterPos
+  simp only [Pi.smul_apply, nsmul_eq_mul, Nat.cast_ofNat]
+  split_ifs <;> omega
+
+/-- An open arm landing at `b` has landing position `2 · perimeterPos lo hi b`. -/
+@[simp]
+theorem landingPos_true (lo hi : LatticeSite 2) :
+    landingPos lo hi true γ = 2 * perimeterPos lo hi b :=
+  perimeterPos_two_smul lo hi b
+
+@[simp]
+theorem landingPos_false (lo hi : LatticeSite 2) :
+    landingPos lo hi false γ = perimeterPos (2 • lo) (2 • hi) (γ.penultimate + b + 1) :=
+  rfl
+
+/-- **Translation.** Translating a walk and the centre by `c` keeps the inner position. -/
+theorem innerPos_map_add {f : zdGraph 2 →g zdGraph 2} {c : LatticeSite 2} (hf : ∀ x, f x = x + c)
+    (z : LatticeSite 2) (r : ℕ) (col : Bool) :
+    innerPos (z + c) r col (γ.map f) = innerPos z r col γ := by
+  have hsnd : (γ.map f).snd = γ.snd + c := by
+    rw [SimpleGraph.Walk.snd, SimpleGraph.Walk.getVert_map, hf]
+  have e₁ : 2 • (z + c) - ((2 * r + 1 : ℕ) : LatticeSite 2) =
+      2 • z - ((2 * r + 1 : ℕ) : LatticeSite 2) + 2 • c := by
+    rw [smul_add]
+    abel
+  have e₂ : 2 • (z + c) + ((2 * r + 1 : ℕ) : LatticeSite 2) =
+      2 • z + ((2 * r + 1 : ℕ) : LatticeSite 2) + 2 • c := by
+    rw [smul_add]
+    abel
+  cases col
+  · rw [innerPos_false, innerPos_false, e₁, e₂, hf, show 2 • (a + c) + 1 = 2 • a + 1 + 2 • c by
+      rw [smul_add]
+      abel, perimeterPos_add]
+  · rw [innerPos_true, innerPos_true, e₁, e₂, hsnd, hf, show a + c + (γ.snd + c) =
+      a + γ.snd + 2 • c by rw [two_smul]; abel, perimeterPos_add]
+
+/-- **Translation.** Translating a walk and the box by `c` keeps the landing position. -/
+theorem landingPos_map_add {f : zdGraph 2 →g zdGraph 2} {c : LatticeSite 2}
+    (hf : ∀ x, f x = x + c) (lo hi : LatticeSite 2) (col : Bool) :
+    landingPos (lo + c) (hi + c) col (γ.map f) = landingPos lo hi col γ := by
+  have hpen : (γ.map f).penultimate = γ.penultimate + c := by
+    rw [SimpleGraph.Walk.penultimate, SimpleGraph.Walk.getVert_map, SimpleGraph.Walk.length_map,
+      hf]
+  cases col
+  · rw [landingPos_false, landingPos_false, hpen, hf, smul_add, smul_add,
+      show γ.penultimate + c + (b + c) + 1 = γ.penultimate + b + 1 + 2 • c by
+        rw [two_smul]; abel, perimeterPos_add]
+  · rw [landingPos_true, landingPos_true, hf, perimeterPos_add]
+
+end Positions
+
+
+/-! ### Colour inversion -/
+
+/-- **The dual of the dual configuration** is the configuration translated by `(-1, -1)`, on the
+edges of `ℤ²`: the dual of the dual lattice is `ℤ²` shifted by twice half a lattice step
+(`dualEdge_dualEdge`). -/
+theorem dualConfig_dualConfig (ω : Config (LatticeSite 2)) :
+    dualConfig (dualConfig ω) = Sym2.map (· - 1) '' (ω ∩ (zdGraph 2).edgeSet) := by
+  have hback : ∀ e : Sym2 (LatticeSite 2), Sym2.map (· - 1) (Sym2.map (· + 1) e) = e := by
+    intro e
+    have h : ((fun v : LatticeSite 2 => v - 1) ∘ fun v => v + 1) = id := by
+      funext v
+      simp
+    rw [Sym2.map_map, h, Sym2.map_id, id]
+  ext E
+  rw [mem_dualConfig_iff']
+  constructor
+  · rintro ⟨e, he, heω, rfl⟩
+    have hg : Sym2.map (· + 1) (dualEdge e) ∈ ω := by
+      by_contra hc
+      exact heω ((mem_dualConfig_iff ω e).2 ⟨he, hc⟩)
+    exact ⟨_, ⟨hg, map_add_mem_edgeSet 1 (dualEdge_mem_edgeSet he)⟩, hback _⟩
+  · rintro ⟨g, ⟨hgω, hg⟩, rfl⟩
+    refine ⟨dualEdge g, dualEdge_mem_edgeSet hg, fun h => ?_, dualEdge_dualEdge hg⟩
+    have := ((mem_dualConfig_iff ω _).1 h).2
+    rw [map_add_one_dualEdge_dualEdge hg] at this
+    exact this hgω
+
+section ColourInversion
+
+variable {ω : Config (LatticeSite 2)} {z : LatticeSite 2} {r : ℕ} {lo hi : LatticeSite 2}
+  {a b : LatticeSite 2} {γ : (zdGraph 2).Walk a b}
+
+/-- **Colour inversion for open arms.** The open arms of the dual configuration are the walks of
+faces with dual edges open in `dualConfig ω` that cross from `B_r(z)` out of the interior of the
+outer box (read as boxes of faces). -/
+theorem isOpenArm_dualConfig_iff : IsOpenArm (dualConfig ω) z r lo hi γ ↔
+    γ.IsCrossing (Icc (z - r) (z + r)) (Icc (lo + 1) (hi - 1)) ∧
+      ∀ e ∈ γ.edges, e ∈ dualConfig ω :=
+  isOpenArm_iff
+
+/-- **Colour inversion for dual arms.** A walk `γ` of faces is a dual arm of the dual
+configuration exactly when its translate by `(1, 1)` is a walk of `ℤ²` along edges open in `ω`
+crossing from the box `Icc (z - r) (z + r + 1)` out of the box `Icc (lo + 1) hi`: the boxes of
+an open arm of `ω`, moved by half a lattice step towards `(1, 1)` at their upper corners. Here
+`f` is the translation by `(1, 1)`. -/
+theorem isDualArm_dualConfig_iff {f : zdGraph 2 →g zdGraph 2} (hf : ∀ x, f x = x + 1) :
+    IsDualArm (dualConfig ω) z r lo hi γ ↔
+      (γ.map f).IsCrossing (Icc (z - r) (z + r + 1)) (Icc (lo + 1) hi) ∧
+        ∀ e ∈ (γ.map f).edges, e ∈ ω := by
+  have hf' : (⇑f : LatticeSite 2 → LatticeSite 2) = (· + 1) := funext hf
+  have hinj : Function.Injective f := by
+    rw [hf']
+    exact add_left_injective 1
+  have himage : ∀ p q : LatticeSite 2, ⇑f '' Icc p q = Icc (p + 1) (q + 1) := fun p q => by
+    rw [hf', image_add_const_Icc]
+  have hcross : γ.IsCrossing (Icc (z - r - 1) (z + r)) (Icc lo (hi - 1)) ↔
+      (γ.map f).IsCrossing (Icc (z - r) (z + r + 1)) (Icc (lo + 1) hi) := by
+    rw [← SimpleGraph.Walk.isCrossing_map_iff hinj, himage, himage, sub_add_cancel,
+      sub_add_cancel]
+  have hedge : ∀ e ∈ γ.edges, (e ∈ dualConfig (dualConfig ω) ↔ Sym2.map (· + 1) e ∈ ω) := by
+    intro e he
+    have heE := γ.edges_subset_edgeSet he
+    rw [dualConfig_dualConfig]
+    constructor
+    · rintro ⟨g, ⟨hgω, -⟩, rfl⟩
+      have h : ((fun v : LatticeSite 2 => v + 1) ∘ fun v => v - 1) = id := by
+        funext v
+        simp
+      rwa [Sym2.map_map, h, Sym2.map_id, id]
+    · intro h
+      refine ⟨_, ⟨h, map_add_mem_edgeSet 1 heE⟩, ?_⟩
+      have h' : ((fun v : LatticeSite 2 => v - 1) ∘ fun v => v + 1) = id := by
+        funext v
+        simp
+      rw [Sym2.map_map, h', Sym2.map_id, id]
+  rw [isDualArm_iff, hcross]
+  refine and_congr_right fun _ => ?_
+  rw [SimpleGraph.Walk.edges_map, hf']
+  constructor
+  · intro h e he
+    obtain ⟨e₀, he₀, rfl⟩ := List.mem_map.1 he
+    exact (hedge e₀ he₀).1 (h e₀ he₀)
+  · intro h e he
+    exact (hedge e he).2 (h _ (List.mem_map_of_mem he))
+
+end ColourInversion
+
+/-! ### Multi-arm events -/
+
+/-- The **`j`-arm event with colours `σ` and windows**, from `B_r(z)` to the boundary of the
+box `Icc lo hi`: there is a disjoint family of `j` arms (`ArmsDisjoint`), arm `i` open when
+`σ i = true` and dual when `σ i = false`, the inner position of arm `i` in the window `J i` and
+its landing position in the window `I i`, landing in counterclockwise order: for `i < k < l`
+the landing positions of the arms `i`, `k`, `l` are in strict cyclic order (`sbtw`, for the
+circular order of `ℤ`). Positions are perimeter positions on the doubled lattice (`innerPos`,
+`landingPos`). -/
+def multiArmEventTo {j : ℕ} (σ : Fin j → Bool) (z : LatticeSite 2) (r : ℕ)
+    (lo hi : LatticeSite 2) (J I : Fin j → Set ℤ) : Set (Config (LatticeSite 2)) :=
+  {ω | ∃ (a b : Fin j → LatticeSite 2) (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+    (∀ i, IsArm ω (σ i) z r lo hi (γ i)) ∧ ArmsDisjoint σ γ ∧
+    (∀ i, innerPos z r (σ i) (γ i) ∈ J i ∧ landingPos lo hi (σ i) (γ i) ∈ I i) ∧
+    ∀ i k l, i < k → k < l → sbtw (landingPos lo hi (σ i) (γ i))
+      (landingPos lo hi (σ k) (γ k)) (landingPos lo hi (σ l) (γ l))}
+
+/-- The `j`-arm event with colours `σ` and windows in the annulus between `B_r(z)` and
+`B_R(z)`. -/
+abbrev multiArmEventIn {j : ℕ} (σ : Fin j → Bool) (z : LatticeSite 2) (r R : ℕ)
+    (J I : Fin j → Set ℤ) : Set (Config (LatticeSite 2)) :=
+  multiArmEventTo σ z r (z - R) (z + R) J I
+
+/-- The **`j`-arm event** `A_σ(r, R)` at `z`: `j` disjoint arms of colours `σ` in
+counterclockwise order, from `B_r(z)` to the boundary of `B_R(z)`. -/
+abbrev multiArmEvent {j : ℕ} (σ : Fin j → Bool) (z : LatticeSite 2) (r R : ℕ) :
+    Set (Config (LatticeSite 2)) :=
+  multiArmEventIn σ z r R (fun _ => univ) (fun _ => univ)
+
+/-- The **half-plane `j`-arm event with colours `σ` and windows**, from `B_r(z)` to the boundary
+of the box `Icc lo hi`, in the upper half-plane `{v | z 1 ≤ v 1}` through `z`: as
+`multiArmEventTo`, with every arm in the half-plane (the vertices of an open arm, the lower-left
+corners of the faces of a dual arm) and the landing positions increasing with `i`. For a box
+reaching below the line, so that `lo 1 < z 1`, the part of its boundary in the half-plane runs
+counterclockwise from its right end to its left end, and the arms are ordered from the right
+end. -/
+def halfArmEventTo {j : ℕ} (σ : Fin j → Bool) (z : LatticeSite 2) (r : ℕ)
+    (lo hi : LatticeSite 2) (J I : Fin j → Set ℤ) : Set (Config (LatticeSite 2)) :=
+  {ω | ∃ (a b : Fin j → LatticeSite 2) (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+    (∀ i, IsArm ω (σ i) z r lo hi (γ i)) ∧ ArmsDisjoint σ γ ∧
+    (∀ i, ∀ v ∈ (γ i).support, z 1 ≤ v 1) ∧
+    (∀ i, innerPos z r (σ i) (γ i) ∈ J i ∧ landingPos lo hi (σ i) (γ i) ∈ I i) ∧
+    StrictMono fun i => landingPos lo hi (σ i) (γ i)}
+
+/-- The half-plane `j`-arm event with colours `σ` and windows in the half-annulus between
+`B_r(z)` and `B_R(z)`. -/
+abbrev halfArmEventIn {j : ℕ} (σ : Fin j → Bool) (z : LatticeSite 2) (r R : ℕ)
+    (J I : Fin j → Set ℤ) : Set (Config (LatticeSite 2)) :=
+  halfArmEventTo σ z r (z - R) (z + R) J I
+
+/-- The **half-plane `j`-arm event** at `z`: `j` disjoint arms of colours `σ` in the upper
+half-plane through `z`, from `B_r(z)` to the boundary of `B_R(z)`, ordered from the right. -/
+abbrev halfArmEvent {j : ℕ} (σ : Fin j → Bool) (z : LatticeSite 2) (r R : ℕ) :
+    Set (Config (LatticeSite 2)) :=
+  halfArmEventIn σ z r R (fun _ => univ) (fun _ => univ)
+
+section Events
+
+variable {j : ℕ} {σ : Fin j → Bool} {z : LatticeSite 2} {r : ℕ} {lo hi : LatticeSite 2}
+  {J I : Fin j → Set ℤ} {ω : Config (LatticeSite 2)}
+
+theorem mem_multiArmEventTo_iff : ω ∈ multiArmEventTo σ z r lo hi J I ↔
+    ∃ (a b : Fin j → LatticeSite 2) (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+      (∀ i, IsArm ω (σ i) z r lo hi (γ i)) ∧ ArmsDisjoint σ γ ∧
+      (∀ i, innerPos z r (σ i) (γ i) ∈ J i ∧ landingPos lo hi (σ i) (γ i) ∈ I i) ∧
+      ∀ i k l, i < k → k < l → sbtw (landingPos lo hi (σ i) (γ i))
+        (landingPos lo hi (σ k) (γ k)) (landingPos lo hi (σ l) (γ l)) :=
+  Iff.rfl
+
+theorem mem_multiArmEvent_iff {R : ℕ} : ω ∈ multiArmEvent σ z r R ↔
+    ∃ (a b : Fin j → LatticeSite 2) (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+      (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
+      ∀ i k l, i < k → k < l → sbtw (landingPos (z - R) (z + R) (σ i) (γ i))
+        (landingPos (z - R) (z + R) (σ k) (γ k)) (landingPos (z - R) (z + R) (σ l) (γ l)) := by
+  constructor
+  · rintro ⟨a, b, γ, hγ, hd, -, ho⟩
+    exact ⟨a, b, γ, hγ, hd, ho⟩
+  · rintro ⟨a, b, γ, hγ, hd, ho⟩
+    exact ⟨a, b, γ, hγ, hd, fun _ => ⟨mem_univ _, mem_univ _⟩, ho⟩
+
+theorem mem_halfArmEvent_iff {R : ℕ} : ω ∈ halfArmEvent σ z r R ↔
+    ∃ (a b : Fin j → LatticeSite 2) (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+      (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
+      (∀ i, ∀ v ∈ (γ i).support, z 1 ≤ v 1) ∧
+      StrictMono fun i => landingPos (z - R) (z + R) (σ i) (γ i) := by
+  constructor
+  · rintro ⟨a, b, γ, hγ, hd, hH, -, ho⟩
+    exact ⟨a, b, γ, hγ, hd, hH, ho⟩
+  · rintro ⟨a, b, γ, hγ, hd, hH, ho⟩
+    exact ⟨a, b, γ, hγ, hd, hH, fun _ => ⟨mem_univ _, mem_univ _⟩, ho⟩
+
+theorem mem_halfArmEventTo_iff : ω ∈ halfArmEventTo σ z r lo hi J I ↔
+    ∃ (a b : Fin j → LatticeSite 2) (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+      (∀ i, IsArm ω (σ i) z r lo hi (γ i)) ∧ ArmsDisjoint σ γ ∧
+      (∀ i, ∀ v ∈ (γ i).support, z 1 ≤ v 1) ∧
+      (∀ i, innerPos z r (σ i) (γ i) ∈ J i ∧ landingPos lo hi (σ i) (γ i) ∈ I i) ∧
+      StrictMono fun i => landingPos lo hi (σ i) (γ i) :=
+  Iff.rfl
+
+/-- **Monotonicity in the windows.** -/
+theorem multiArmEventTo_mono {J' I' : Fin j → Set ℤ} (hJ : ∀ i, J i ⊆ J' i)
+    (hI : ∀ i, I i ⊆ I' i) : multiArmEventTo σ z r lo hi J I ⊆ multiArmEventTo σ z r lo hi J' I' :=
+  fun _ ⟨a, b, γ, hγ, hd, hw, ho⟩ =>
+    ⟨a, b, γ, hγ, hd, fun i => ⟨hJ i (hw i).1, hI i (hw i).2⟩, ho⟩
+
+/-- **Monotonicity in the windows.** -/
+theorem halfArmEventTo_mono {J' I' : Fin j → Set ℤ} (hJ : ∀ i, J i ⊆ J' i)
+    (hI : ∀ i, I i ⊆ I' i) : halfArmEventTo σ z r lo hi J I ⊆ halfArmEventTo σ z r lo hi J' I' :=
+  fun _ ⟨a, b, γ, hγ, hd, hH, hw, ho⟩ =>
+    ⟨a, b, γ, hγ, hd, hH, fun i => ⟨hJ i (hw i).1, hI i (hw i).2⟩, ho⟩
+
+/-- Arms landing in windows are arms. -/
+theorem multiArmEventIn_subset_multiArmEvent {R : ℕ} :
+    multiArmEventIn σ z r R J I ⊆ multiArmEvent σ z r R :=
+  multiArmEventTo_mono (fun _ => subset_univ _) fun _ => subset_univ _
+
+/-- Arms landing in windows are arms. -/
+theorem halfArmEventIn_subset_halfArmEvent {R : ℕ} :
+    halfArmEventIn σ z r R J I ⊆ halfArmEvent σ z r R :=
+  halfArmEventTo_mono (fun _ => subset_univ _) fun _ => subset_univ _
+
+/-- **Half-plane arms are arms.** Arms in the half-plane landing in increasing order land in
+counterclockwise order. -/
+theorem halfArmEventTo_subset_multiArmEventTo :
+    halfArmEventTo σ z r lo hi J I ⊆ multiArmEventTo σ z r lo hi J I :=
+  fun _ ⟨a, b, γ, hγ, hd, _, hw, ho⟩ =>
+    ⟨a, b, γ, hγ, hd, hw, fun _ _ _ hik hkl => Int.sbtw_iff.2 (Or.inl ⟨ho hik, ho hkl⟩)⟩
+
+/-- **Measurability.** The configurations for which a walk is an arm form a measurable set. -/
+theorem measurableSet_setOf_isArm (c : Bool) (z : LatticeSite 2) (r : ℕ) (lo hi : LatticeSite 2)
+    {a b : LatticeSite 2} (γ : (zdGraph 2).Walk a b) :
+    MeasurableSet {ω | IsArm ω c z r lo hi γ} := by
+  have hl : ∀ l : List (Sym2 (LatticeSite 2)),
+      MeasurableSet {ω : Config (LatticeSite 2) | ∀ e ∈ l, e ∈ ω} := by
+    intro l
+    induction l with
+    | nil => simp
+    | cons e l ih =>
+      simp only [List.mem_cons, forall_eq_or_imp, ofPred_and]
+      exact (measurableSet_setOfPred.2 (measurable_set_mem e)).inter ih
+  cases c
+  · have h : {ω | IsArm ω false z r lo hi γ} =
+        {_ω | γ.IsCrossing (Icc (z - r - 1) (z + r)) (Icc lo (hi - 1))} ∩
+          dualConfig ⁻¹' {ω | ∀ e ∈ γ.edges, e ∈ ω} := by
+      ext ω
+      simp only [isArm_false, isDualArm_iff, mem_inter_iff, mem_preimage, mem_ofPred_eq]
+    rw [h]
+    exact (MeasurableSet.const _).inter (measurable_dualConfig (hl _))
+  · have h : {ω | IsArm ω true z r lo hi γ} =
+        {_ω | γ.IsCrossing (Icc (z - r) (z + r)) (Icc (lo + 1) (hi - 1))} ∩
+          {ω | ∀ e ∈ γ.edges, e ∈ ω} := by
+      ext ω
+      simp only [isArm_true, isOpenArm_iff, mem_inter_iff, mem_ofPred_eq]
+    rw [h]
+    exact (MeasurableSet.const _).inter (hl _)
+
+/-- **Measurability.** The multi-arm event is a countable union of cylinder events. -/
+theorem measurableSet_multiArmEventTo (σ : Fin j → Bool) (z : LatticeSite 2) (r : ℕ)
+    (lo hi : LatticeSite 2) (J I : Fin j → Set ℤ) :
+    MeasurableSet (multiArmEventTo σ z r lo hi J I) := by
+  have : ∀ u v : LatticeSite 2, Countable ((zdGraph 2).Walk u v) := fun _ _ =>
+    SimpleGraph.Walk.support_injective.countable
+  refine measurableSet_setOfPred.2 (Measurable.exists fun a => Measurable.exists fun b =>
+    Measurable.exists fun γ => ?_)
+  exact (Measurable.forall fun i =>
+    measurableSet_setOfPred.1 (measurableSet_setOf_isArm _ z r lo hi (γ i))).and measurable_const
+
+/-- **Measurability.** -/
+theorem measurableSet_multiArmEvent (σ : Fin j → Bool) (z : LatticeSite 2) (r R : ℕ) :
+    MeasurableSet (multiArmEvent σ z r R) :=
+  measurableSet_multiArmEventTo σ z r _ _ _ _
+
+/-- **Measurability.** The half-plane multi-arm event is a countable union of cylinder
+events. -/
+theorem measurableSet_halfArmEventTo (σ : Fin j → Bool) (z : LatticeSite 2) (r : ℕ)
+    (lo hi : LatticeSite 2) (J I : Fin j → Set ℤ) :
+    MeasurableSet (halfArmEventTo σ z r lo hi J I) := by
+  have : ∀ u v : LatticeSite 2, Countable ((zdGraph 2).Walk u v) := fun _ _ =>
+    SimpleGraph.Walk.support_injective.countable
+  refine measurableSet_setOfPred.2 (Measurable.exists fun a => Measurable.exists fun b =>
+    Measurable.exists fun γ => ?_)
+  exact (Measurable.forall fun i =>
+    measurableSet_setOfPred.1 (measurableSet_setOf_isArm _ z r lo hi (γ i))).and measurable_const
+
+/-- **Measurability.** -/
+theorem measurableSet_halfArmEvent (σ : Fin j → Bool) (z : LatticeSite 2) (r R : ℕ) :
+    MeasurableSet (halfArmEvent σ z r R) :=
+  measurableSet_halfArmEventTo σ z r _ _ _ _
+
+/-- **Determination by the annulus.** The multi-arm event is determined by the edges of the outer
+box with an end outside `B_r(z)`: its open arms use only such edges, and its dual arms cross only
+such edges. In particular it is determined by the edges with both ends in the annulus
+`Icc lo hi \ Icc (z - r + 1) (z + r - 1)` (`mem_multiArmEventTo_iff_of_inter_eq`). -/
+theorem mem_multiArmEventTo_iff_of_agree {ω' : Config (LatticeSite 2)}
+    (hω : ∀ e ∈ (zdGraph 2).edgeSet, (∀ v ∈ e, v ∈ Icc lo hi) →
+      (∃ v ∈ e, v ∉ Icc (z - r) (z + r)) → (e ∈ ω ↔ e ∈ ω')) :
+    ω ∈ multiArmEventTo σ z r lo hi J I ↔ ω' ∈ multiArmEventTo σ z r lo hi J I := by
+  constructor
+  · rintro ⟨a, b, γ, hγ, hd, hw, ho⟩
+    exact ⟨a, b, γ, fun i => (hγ i).of_agree hω, hd, hw, ho⟩
+  · rintro ⟨a, b, γ, hγ, hd, hw, ho⟩
+    exact ⟨a, b, γ, fun i => (hγ i).of_agree fun e he h₁ h₂ => (hω e he h₁ h₂).symm, hd, hw, ho⟩
+
+/-- **Determination by the annulus.** The half-plane multi-arm event is determined by the edges of
+the outer box with an end outside `B_r(z)`. -/
+theorem mem_halfArmEventTo_iff_of_agree {ω' : Config (LatticeSite 2)}
+    (hω : ∀ e ∈ (zdGraph 2).edgeSet, (∀ v ∈ e, v ∈ Icc lo hi) →
+      (∃ v ∈ e, v ∉ Icc (z - r) (z + r)) → (e ∈ ω ↔ e ∈ ω')) :
+    ω ∈ halfArmEventTo σ z r lo hi J I ↔ ω' ∈ halfArmEventTo σ z r lo hi J I := by
+  constructor
+  · rintro ⟨a, b, γ, hγ, hd, hH, hw, ho⟩
+    exact ⟨a, b, γ, fun i => (hγ i).of_agree hω, hd, hH, hw, ho⟩
+  · rintro ⟨a, b, γ, hγ, hd, hH, hw, ho⟩
+    exact ⟨a, b, γ, fun i => (hγ i).of_agree fun e he h₁ h₂ => (hω e he h₁ h₂).symm, hd, hH,
+      hw, ho⟩
+
+/-- An edge with both ends in `Icc lo hi` and an end outside `B_r(z)` has both ends in the
+annulus `Icc lo hi \ Icc (z - r + 1) (z + r - 1)`. -/
+theorem mem_annulus_of_mem_edgeSet {e : Sym2 (LatticeSite 2)} (he : e ∈ (zdGraph 2).edgeSet)
+    (h₁ : ∀ v ∈ e, v ∈ Icc lo hi) (h₂ : ∃ v ∈ e, v ∉ Icc (z - r) (z + r)) :
+    ∀ v ∈ e, v ∈ Icc lo hi \ Icc (z - r + 1) (z + r - 1) := by
+  induction e using Sym2.ind with
+  | h x y =>
+    have hxy : (zdGraph 2).Adj x y := he
+    have hx₀ := apply_le_apply_add_one_of_adj hxy
+    have hy₀ := apply_le_apply_add_one_of_adj hxy.symm
+    obtain ⟨w, hw, hwB⟩ := h₂
+    have hx := h₁ x (Sym2.mem_mk_left x y)
+    have hy := h₁ y (Sym2.mem_mk_right x y)
+    intro v hv
+    refine ⟨h₁ v hv, fun hvB => hwB ?_⟩
+    rw [mem_Icc_two_iff] at hvB ⊢
+    simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply, Pi.one_apply] at hvB ⊢
+    have a0 := hx₀ 0
+    have a1 := hx₀ 1
+    have b0 := hy₀ 0
+    have b1 := hy₀ 1
+    rcases Sym2.mem_iff.1 hv with rfl | rfl <;> rcases Sym2.mem_iff.1 hw with rfl | rfl <;> omega
+
+/-- **Determination by the annulus.** The multi-arm event is determined by the pairs inside any
+set containing the annulus `Icc lo hi \ Icc (z - r + 1) (z + r - 1)`. -/
+theorem mem_multiArmEventTo_iff_of_inter_eq {T : Set (LatticeSite 2)}
+    (hT : Icc lo hi \ Icc (z - r + 1) (z + r - 1) ⊆ T) {ω' : Config (LatticeSite 2)}
+    (h : ω ∩ {e | ∀ v ∈ e, v ∈ T} = ω' ∩ {e | ∀ v ∈ e, v ∈ T}) :
+    ω ∈ multiArmEventTo σ z r lo hi J I ↔ ω' ∈ multiArmEventTo σ z r lo hi J I := by
+  refine mem_multiArmEventTo_iff_of_agree fun e he h₁ h₂ => ?_
+  have heT : e ∈ {e : Sym2 (LatticeSite 2) | ∀ v ∈ e, v ∈ T} := fun v hv =>
+    hT (mem_annulus_of_mem_edgeSet he h₁ h₂ v hv)
+  have hmem := congrArg (e ∈ ·) h
+  simp only [eq_iff_iff, mem_inter_iff] at hmem
+  exact ⟨fun h' => (hmem.1 ⟨h', heT⟩).1, fun h' => (hmem.2 ⟨h', heT⟩).1⟩
+
+/-- **Translation**, one direction. -/
+theorem image_add_mem_multiArmEventTo (c : LatticeSite 2)
+    (h : ω ∈ multiArmEventTo σ z r lo hi J I) :
+    Sym2.map (· + c) '' ω ∈ multiArmEventTo σ (z + c) r (lo + c) (hi + c) J I := by
+  obtain ⟨a, b, γ, hγ, hd, hw, ho⟩ := h
+  let f : zdGraph 2 →g zdGraph 2 := ⟨(· + c), fun {x y} hxy =>
+    (zdGraph_adj_iff_of_sub fun i => by simp only [Pi.add_apply, add_sub_add_right_eq_sub]).2 hxy⟩
+  have hf : ∀ x, f x = x + c := fun _ => rfl
+  refine ⟨fun i => f (a i), fun i => f (b i), fun i => (γ i).map f, fun i => (hγ i).map_add hf,
+    hd.map (add_left_injective c), fun i => ?_, fun i k l hik hkl => ?_⟩
+  · rw [innerPos_map_add _ hf, landingPos_map_add _ hf]
+    exact hw i
+  · simp only [landingPos_map_add _ hf]
+    exact ho i k l hik hkl
+
+/-- Translating by `c` and back by `-c` gives the configuration back. -/
+theorem image_add_neg_image_add (c : LatticeSite 2) (ω : Config (LatticeSite 2)) :
+    Sym2.map (· + -c) '' (Sym2.map (· + c) '' ω) = ω := by
+  rw [image_image]
+  have h : ∀ e : Sym2 (LatticeSite 2), Sym2.map (· + -c) (Sym2.map (· + c) e) = e := by
+    intro e
+    have h' : ((fun v : LatticeSite 2 => v + -c) ∘ fun v => v + c) = id := by
+      funext v
+      simp
+    rw [Sym2.map_map, h', Sym2.map_id, id]
+  simp only [h, image_id']
+
+/-- **Translation.** Translating the configuration by `c` carries the multi-arm event at `z` with
+outer box `Icc lo hi` to the event at `z + c` with outer box `Icc (lo + c) (hi + c)`. -/
+theorem image_add_mem_multiArmEventTo_iff (c : LatticeSite 2) :
+    Sym2.map (· + c) '' ω ∈ multiArmEventTo σ (z + c) r (lo + c) (hi + c) J I ↔
+      ω ∈ multiArmEventTo σ z r lo hi J I := by
+  refine ⟨fun h => ?_, image_add_mem_multiArmEventTo c⟩
+  have := image_add_mem_multiArmEventTo (-c) h
+  rwa [image_add_neg_image_add, add_neg_cancel_right, add_neg_cancel_right,
+    add_neg_cancel_right] at this
+
+/-- **Translation.** -/
+theorem image_add_mem_multiArmEvent_iff (c : LatticeSite 2) {R : ℕ} :
+    Sym2.map (· + c) '' ω ∈ multiArmEvent σ (z + c) r R ↔ ω ∈ multiArmEvent σ z r R := by
+  have := image_add_mem_multiArmEventTo_iff (σ := σ) (z := z) (r := r) (lo := z - R)
+    (hi := z + R) (J := fun _ => univ) (I := fun _ => univ) (ω := ω) c
+  rwa [show z - (R : LatticeSite 2) + c = z + c - R by abel,
+    show z + (R : LatticeSite 2) + c = z + c + R by abel] at this
+
+/-- **Translation**, one direction. -/
+theorem image_add_mem_halfArmEventTo (c : LatticeSite 2)
+    (h : ω ∈ halfArmEventTo σ z r lo hi J I) :
+    Sym2.map (· + c) '' ω ∈ halfArmEventTo σ (z + c) r (lo + c) (hi + c) J I := by
+  obtain ⟨a, b, γ, hγ, hd, hH, hw, ho⟩ := h
+  let f : zdGraph 2 →g zdGraph 2 := ⟨(· + c), fun {x y} hxy =>
+    (zdGraph_adj_iff_of_sub fun i => by simp only [Pi.add_apply, add_sub_add_right_eq_sub]).2 hxy⟩
+  have hf : ∀ x, f x = x + c := fun _ => rfl
+  refine ⟨fun i => f (a i), fun i => f (b i), fun i => (γ i).map f, fun i => (hγ i).map_add hf,
+    hd.map (add_left_injective c), fun i v hv => ?_, fun i => ?_, ?_⟩
+  · rw [SimpleGraph.Walk.support_map] at hv
+    obtain ⟨w, hw', rfl⟩ := List.mem_map.1 hv
+    simp only [hf, Pi.add_apply, add_le_add_iff_right]
+    exact hH i w hw'
+  · rw [innerPos_map_add _ hf, landingPos_map_add _ hf]
+    exact hw i
+  · simp only [landingPos_map_add _ hf]
+    exact ho
+
+/-- **Translation.** Translating the configuration by `c` carries the half-plane multi-arm event
+at `z` with outer box `Icc lo hi` to the event at `z + c` with outer box `Icc (lo + c) (hi + c)`. -/
+theorem image_add_mem_halfArmEventTo_iff (c : LatticeSite 2) :
+    Sym2.map (· + c) '' ω ∈ halfArmEventTo σ (z + c) r (lo + c) (hi + c) J I ↔
+      ω ∈ halfArmEventTo σ z r lo hi J I := by
+  refine ⟨fun h => ?_, image_add_mem_halfArmEventTo c⟩
+  have := image_add_mem_halfArmEventTo (-c) h
+  rwa [image_add_neg_image_add, add_neg_cancel_right, add_neg_cancel_right,
+    add_neg_cancel_right] at this
+
+/-- **Without open edges** there is no open arm from a box inside the interior of the outer
+box. -/
+theorem empty_notMem_multiArmEventTo (hB : Icc (z - r) (z + r) ⊆ Icc (lo + 1) (hi - 1))
+    (hσ : ∃ i, σ i = true) : (∅ : Config (LatticeSite 2)) ∉ multiArmEventTo σ z r lo hi J I := by
+  rintro ⟨a, b, γ, hγ, -⟩
+  obtain ⟨i, hi⟩ := hσ
+  have h := hγ i
+  rw [hi, isArm_true] at h
+  exact h.mem_of_mem_edges _ (SimpleGraph.Walk.mk_start_snd_mem_edges (h.not_nil hB))
+
+/-- **With every edge open** there is no dual arm from a box inside the interior of the outer
+box. -/
+theorem univ_notMem_multiArmEventTo (hB : Icc (z - r) (z + r) ⊆ Icc (lo + 1) (hi - 1))
+    (hσ : ∃ i, σ i = false) :
+    (univ : Config (LatticeSite 2)) ∉ multiArmEventTo σ z r lo hi J I := by
+  rintro ⟨a, b, γ, hγ, -⟩
+  obtain ⟨i, hi⟩ := hσ
+  have h := hγ i
+  rw [hi, isArm_false] at h
+  have := h.mem_of_mem_edges _ (SimpleGraph.Walk.mk_start_snd_mem_edges (h.not_nil hB))
+  rw [dualConfig_univ] at this
+  exact this
+
+end Events
+
+/-! ### The one-arm event as a multi-arm event -/
+
+/-- **The one-arm event is the multi-arm event with one open arm from the centre.** -/
+theorem multiArmEvent_true_eq_armEvent (z : LatticeSite 2) (R : ℕ) :
+    multiArmEvent ![true] z 0 R = armEvent z R := by
+  ext ω
+  rcases Nat.eq_zero_or_pos R with rfl | hR
+  · rw [armEvent_zero]
+    simp only [mem_univ, iff_true]
+    refine ⟨fun _ => z, fun _ => z, fun _ => SimpleGraph.Walk.nil, fun i => ?_,
+      armsDisjoint_of_subsingleton le_rfl _ _, fun _ => ⟨mem_univ _, mem_univ _⟩,
+      fun i k l hik => absurd hik (by omega)⟩
+    rw [Fin.fin_one_eq_zero i]
+    refine ⟨SimpleGraph.Walk.isCrossing_nil_iff.2 ⟨by simp, fun h => ?_⟩, by simp⟩
+    have h₁ := h.1 0
+    have h₂ := h.2 0
+    simp only [Pi.add_apply, Pi.sub_apply, Nat.cast_zero, Pi.zero_apply, Pi.one_apply] at h₁ h₂
+    omega
+  have hzS : z ∈ Icc (z - R + 1) (z + R - 1) := by
+    simp only [mem_Icc, Pi.le_def, Pi.add_apply, Pi.sub_apply, Pi.natCast_apply, Pi.one_apply]
+    exact ⟨fun i => by omega, fun i => by omega⟩
+  have hB : Icc (z - ((0 : ℕ) : LatticeSite 2)) (z + ((0 : ℕ) : LatticeSite 2)) ⊆
+      Icc (z - R + 1) (z + R - 1) := by
+    simp only [Nat.cast_zero, sub_zero, add_zero, Icc_self, singleton_subset_iff]
+    exact hzS
+  constructor
+  · rintro ⟨a, b, γ, hγ, -, -, -⟩
+    have h : IsOpenArm ω z 0 (z - R) (z + R) (γ 0) := hγ 0
+    have hnil := h.not_nil hB
+    have ha : a 0 = z := by
+      have := h.isCrossing.start_mem
+      simpa only [Nat.cast_zero, sub_zero, add_zero, Icc_self, mem_singleton_iff] using this
+    rw [mem_armEvent_iff_exists_mem_boxBoundary]
+    refine ⟨b 0, h.end_mem_boxBoundary hnil, ?_⟩
+    have hsupp : ∀ v ∈ (γ 0).support, v ∈ Icc (z - R) (z + R) := fun v hv => h.mem_Icc hnil hv
+    have hedges : ∀ e ∈ (γ 0).edges, e ∈ (openGraph (ω ∩ (zdGraph 2).edgeSet)).edgeSet := by
+      intro e he
+      have heE := (γ 0).edges_subset_edgeSet he
+      rw [openGraph, SimpleGraph.edgeSet_fromEdgeSet]
+      exact ⟨⟨h.mem_of_mem_edges e he, heE⟩, SimpleGraph.not_isDiag_of_mem_edgeSet _ heE⟩
+    have hc : ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc (z - R) (z + R)) (a 0) (b 0) :=
+      ⟨hsupp _ (γ 0).start_mem_support, hsupp _ (γ 0).end_mem_support,
+        ⟨((γ 0).transfer _ hedges).induce _ (by rwa [SimpleGraph.Walk.support_transfer])⟩⟩
+    rwa [ha] at hc
+  · intro hω
+    obtain ⟨v, hv, hc⟩ := mem_armEvent_iff_exists_mem_boxBoundary.1 hω
+    have hvS : v ∉ Icc (z - R + 1) (z + R - 1) := by
+      rw [boxBoundary_eq_Icc_diff_Icc] at hv
+      exact hv.2
+    obtain ⟨y, hy, w, hw, ⟨q⟩, hyw⟩ :=
+      exists_first_exit _ hzS hvS (localConn_subset_conn _ z v hc)
+    classical
+    -- the walk to `y` inside the interior, as a path of `ℤ²`
+    set q₁ := q.map (SimpleGraph.Embedding.induce (Icc (z - R + 1) (z + R - 1))).toHom
+      with hq₁
+    have hq₁S : ∀ u ∈ q₁.support, u ∈ Icc (z - R + 1) (z + R - 1) := by
+      intro u hu
+      rw [hq₁, SimpleGraph.Walk.support_map] at hu
+      obtain ⟨u', -, rfl⟩ := List.mem_map.1 hu
+      exact u'.2
+    have hq₂E : ∀ e ∈ q₁.bypass.edges, e ∈ (zdGraph 2).edgeSet := by
+      intro e he
+      have := q₁.bypass.edges_subset_edgeSet he
+      rw [openGraph, SimpleGraph.edgeSet_fromEdgeSet] at this
+      exact this.1.2
+    set p := q₁.bypass.transfer (zdGraph 2) hq₂E with hp
+    have hpS : ∀ u ∈ p.support, u ∈ Icc (z - R + 1) (z + R - 1) := by
+      intro u hu
+      rw [hp, SimpleGraph.Walk.support_transfer] at hu
+      exact hq₁S u (SimpleGraph.Walk.support_bypass_subset_support _ hu)
+    have hpω : ∀ e ∈ p.edges, e ∈ ω := by
+      intro e he
+      rw [hp, SimpleGraph.Walk.edges_transfer] at he
+      have := q₁.bypass.edges_subset_edgeSet he
+      rw [openGraph, SimpleGraph.edgeSet_fromEdgeSet] at this
+      exact this.1.1
+    have hpath : p.support.Nodup := by
+      rw [hp, SimpleGraph.Walk.support_transfer]
+      exact (SimpleGraph.Walk.bypass_isPath q₁).support_nodup
+    have hadj : (zdGraph 2).Adj y w := hyw.2
+    set γ₀ := p.append (SimpleGraph.Adj.toWalk hadj) with hγ₀
+    have hγ₀ : IsOpenArm ω z 0 (z - R) (z + R) γ₀ := by
+      refine ⟨⟨by simp, fun u hu => ?_, ?_, fun u hu => ?_⟩, fun e he => ?_⟩
+      · rw [hγ₀, SimpleGraph.Walk.tail_support_append, List.mem_append] at hu
+        simp only [Nat.cast_zero, sub_zero, add_zero, Icc_self, mem_singleton_iff]
+        rcases hu with hu | hu
+        · rintro rfl
+          rw [← p.cons_tail_support] at hpath
+          exact (List.nodup_cons.1 hpath).1 hu
+        · change u ∈ [w] at hu
+          rw [List.mem_singleton] at hu
+          rintro rfl
+          exact hw (hu ▸ hzS)
+      · exact hw
+      · rw [hγ₀, SimpleGraph.Walk.support_append] at hu
+        change u ∈ (p.support ++ [w]).dropLast at hu
+        rw [List.dropLast_concat] at hu
+        exact hpS u hu
+      · rw [hγ₀, SimpleGraph.Walk.edges_append, List.mem_append] at he
+        rcases he with he | he
+        · exact hpω e he
+        · change e ∈ [s(y, w)] at he
+          rw [List.mem_singleton] at he
+          rw [he]
+          exact hyw.1
+    refine ⟨fun _ => z, fun _ => w, fun _ => γ₀, fun i => ?_,
+      armsDisjoint_of_subsingleton le_rfl _ _, fun _ => ⟨mem_univ _, mem_univ _⟩,
+      fun i k l hik => absurd hik (by omega)⟩
+    rw [Fin.fin_one_eq_zero i]
+    exact hγ₀
+
+/-! ### Landing data -/
+
+/-- **Landing data** for `j` arms: `j` windows `[θ i, θ i + η]` of the circle `[0, 1)`, measured in
+fractions of a turn, of length `η > 0`, inside `[0, 1]`, in counterclockwise order, with a gap of
+at least `η` between consecutive windows, also between the last and the first around the circle.
+These are Nolin's `η`-separated landing sequences, with windows of length exactly `η`. -/
+structure IsLanding {j : ℕ} (η : ℚ) (θ : Fin j → ℚ) : Prop where
+  /-- The windows have positive length. -/
+  pos : 0 < η
+  /-- The windows start in `[0, 1)`. -/
+  nonneg : ∀ i, 0 ≤ θ i
+  /-- The windows end by `1`. -/
+  add_le_one : ∀ i, θ i + η ≤ 1
+  /-- Consecutive windows are separated by a gap of length at least `η`. -/
+  add_two_mul_le : ∀ i k, i < k → θ i + 2 * η ≤ θ k
+  /-- The last and the first windows are separated by a gap of length at least `η` around the
+  circle. -/
+  add_two_mul_le_add_one : ∀ i k, θ i + 2 * η ≤ θ k + 1
+
+/-- The **windows** of landing data on a cycle of perimeter `P`: the positions `p` with
+`θ i ≤ p / P ≤ θ i + η`. For the landing positions of arms to the boundary of `B_R(z)` the
+perimeter is `16 R`, for their inner positions on `B_r(z)` it is `16 r + 8` (positions on the
+doubled lattice). -/
+def window {j : ℕ} (P : ℕ) (θ : Fin j → ℚ) (η : ℚ) (i : Fin j) : Set ℤ :=
+  {p | θ i * P ≤ p ∧ (p : ℚ) ≤ (θ i + η) * P}
+
+section Landing
+
+variable {j : ℕ} {P : ℕ} {θ : Fin j → ℚ} {η : ℚ}
+
+theorem mem_window_iff {i : Fin j} {p : ℤ} :
+    p ∈ window P θ η i ↔ θ i * P ≤ p ∧ (p : ℚ) ≤ (θ i + η) * P :=
+  Iff.rfl
+
+/-- **Monotonicity.** Windows grow with their length. -/
+theorem window_mono {η' : ℚ} (h : η ≤ η') (i : Fin j) : window P θ η i ⊆ window P θ η' i :=
+  fun p hp => ⟨hp.1, hp.2.trans (by gcongr)⟩
+
+/-- Windows of landing data lie in `[0, P]`. -/
+theorem IsLanding.mem_Icc_of_mem_window (h : IsLanding η θ) {i : Fin j} {p : ℤ}
+    (hp : p ∈ window P θ η i) : p ∈ Icc 0 (P : ℤ) := by
+  have h₁ : (0 : ℚ) ≤ θ i * P := mul_nonneg (h.nonneg i) (Nat.cast_nonneg P)
+  have h₂ : (θ i + η) * P ≤ P := by
+    have := h.add_le_one i
+    nlinarith [(Nat.cast_nonneg P : (0 : ℚ) ≤ P)]
+  constructor
+  · exact_mod_cast h₁.trans hp.1
+  · exact_mod_cast hp.2.trans h₂
+
+/-- **Disjointness.** On a cycle of positive perimeter the windows of landing data are pairwise
+disjoint. -/
+theorem IsLanding.disjoint_window (h : IsLanding η θ) (hP : 0 < P) {i k : Fin j} (hik : i ≠ k) :
+    Disjoint (window P θ η i) (window P θ η k) := by
+  have hP' : (0 : ℚ) < P := by exact_mod_cast hP
+  rw [Set.disjoint_left]
+  rintro p ⟨hi₁, hi₂⟩ ⟨hk₁, hk₂⟩
+  rcases lt_or_gt_of_ne hik with hlt | hlt
+  · have := h.add_two_mul_le i k hlt
+    have hη := h.pos
+    nlinarith
+  · have := h.add_two_mul_le k i hlt
+    have hη := h.pos
+    nlinarith
+
+/-- A window that is long enough on its cycle contains a position. -/
+theorem nonempty_window (hP : 1 ≤ η * P) (i : Fin j) : (window P θ η i).Nonempty := by
+  refine ⟨⌈θ i * P⌉, Int.le_ceil _, ?_⟩
+  have := Int.ceil_lt_add_one (θ i * P)
+  linarith
+
+/-- **Landing data exist** for every number of arms: the windows `[i/j, i/j + 1/(4j)]`. -/
+theorem isLanding_div (hj : 0 < j) : IsLanding (1 / (4 * j)) fun i : Fin j => (i : ℚ) / j := by
+  have hj' : (0 : ℚ) < j := by exact_mod_cast hj
+  refine ⟨by positivity, fun i => by positivity, fun i => ?_, fun i k hik => ?_, fun i k => ?_⟩
+  · have hi : ((i : ℕ) : ℚ) + 1 ≤ j := by exact_mod_cast i.2
+    rw [div_add_div _ _ hj'.ne' (by positivity), div_le_one (by positivity)]
+    nlinarith
+  · have hik' : ((i : ℕ) : ℚ) + 1 ≤ k := by exact_mod_cast hik
+    have e : ((i : ℕ) : ℚ) / j + 2 * (1 / (4 * j)) = (((i : ℕ) : ℚ) + 1 / 2) / j := by
+      field_simp
+      ring
+    rw [e, div_le_div_iff_of_pos_right hj']
+    linarith
+  · have hi : ((i : ℕ) : ℚ) + 1 ≤ j := by exact_mod_cast i.2
+    have hk : (0 : ℚ) ≤ (k : ℕ) := Nat.cast_nonneg _
+    have e : ((i : ℕ) : ℚ) / j + 2 * (1 / (4 * j)) = (((i : ℕ) : ℚ) + 1 / 2) / j := by
+      field_simp
+      ring
+    have e' : ((k : ℕ) : ℚ) / j + 1 = (((k : ℕ) : ℚ) + j) / j := by
+      field_simp
+    rw [e, e', div_le_div_iff_of_pos_right hj']
+    linarith
+
+end Landing
+
+
+/-! ### Arms of one step -/
+
+section OneStep
+
+variable {ω : Config (LatticeSite 2)} {z : LatticeSite 2} {r : ℕ} {lo hi u v : LatticeSite 2}
+
+/-- **The trivial case.** A single open edge from `B_r(z)` to the outside of the interior of the
+outer box is an open arm. -/
+theorem isOpenArm_toWalk_iff (h : (zdGraph 2).Adj u v) : IsOpenArm ω z r lo hi h.toWalk ↔
+    u ∈ Icc (z - r) (z + r) ∧ v ∉ Icc (z - r) (z + r) ∧ v ∉ Icc (lo + 1) (hi - 1) ∧
+      u ∈ Icc (lo + 1) (hi - 1) ∧ s(u, v) ∈ ω := by
+  simp only [isOpenArm_iff, SimpleGraph.Adj.edges_toWalk]
+  constructor
+  · rintro ⟨⟨h₁, h₂, h₃, h₄⟩, h₅⟩
+    exact ⟨h₁, h₂ v (by simp), h₃, h₄ u (by simp), h₅ _ (by simp)⟩
+  · rintro ⟨h₁, h₂, h₃, h₄, h₅⟩
+    exact ⟨⟨h₁, by simpa using h₂, h₃, by simpa using h₄⟩, by simpa using h₅⟩
+
+/-- **The trivial case.** A single dual-open dual edge from a face touching `B_r(z)` to a face
+outside the outer box, from a face of the outer box, is a dual arm. -/
+theorem isDualArm_toWalk_iff (h : (zdGraph 2).Adj u v) : IsDualArm ω z r lo hi h.toWalk ↔
+    u ∈ Icc (z - r - 1) (z + r) ∧ v ∉ Icc (z - r - 1) (z + r) ∧ v ∉ Icc lo (hi - 1) ∧
+      u ∈ Icc lo (hi - 1) ∧ s(u, v) ∈ dualConfig ω := by
+  simp only [isDualArm_iff, SimpleGraph.Adj.edges_toWalk]
+  constructor
+  · rintro ⟨⟨h₁, h₂, h₃, h₄⟩, h₅⟩
+    exact ⟨h₁, h₂ v (by simp), h₃, h₄ u (by simp), h₅ _ (by simp)⟩
+  · rintro ⟨h₁, h₂, h₃, h₄, h₅⟩
+    exact ⟨⟨h₁, by simpa using h₂, h₃, by simpa using h₄⟩, by simpa using h₅⟩
+
+end OneStep
+
 /-! ### Non-vacuity -/
 
 /-- With no open edge there is no arm of radius one in `ℤ²`. -/
@@ -1058,5 +2357,263 @@ example : perimeterPos 0 1 ![0, 0] = 0 ∧ perimeterPos 0 1 ![1, 0] = 1 ∧
 scale need the Russo–Seymour–Welsh bounds and are proved with them. -/
 example (q : Sym2 (LatticeSite 2) → unitInterval) : CrossingBounds q 0 fun _ => 1 :=
   crossingBounds_zero q fun _ => one_pos
+
+/-! ### Non-vacuity of the multi-arm events -/
+
+/-- With every edge open there is an open arm from a vertex. -/
+example : (univ : Config (LatticeSite 2)) ∈ multiArmEvent ![true] 0 0 1 := by
+  rw [multiArmEvent_true_eq_armEvent]
+  exact univ_mem_armEvent 0 1
+
+/-- With no open edge there is no open arm. -/
+example : (∅ : Config (LatticeSite 2)) ∉ multiArmEvent ![true] 0 0 1 :=
+  empty_notMem_multiArmEventTo (by simp) ⟨0, rfl⟩
+
+/-- With every edge open there is no dual arm. -/
+example : (univ : Config (LatticeSite 2)) ∉ multiArmEvent ![false] 0 0 1 :=
+  univ_notMem_multiArmEventTo (by simp) ⟨0, rfl⟩
+
+/-- With no open edge there is a dual arm from a vertex: from the face `[0, 1]²` to the face on
+its right, across the closed edge `{(1, 0), (1, 1)}`. -/
+example : (∅ : Config (LatticeSite 2)) ∈ multiArmEvent ![false] 0 0 1 := by
+  have hadj : (zdGraph 2).Adj ![0, 0] ![1, 0] := by
+    rw [zdGraph_two_adj_iff]
+    simp
+  refine ⟨fun _ => ![0, 0], fun _ => ![1, 0], fun _ => hadj.toWalk, fun i => ?_,
+    armsDisjoint_of_subsingleton le_rfl _ _, fun _ => ⟨mem_univ _, mem_univ _⟩,
+    fun i k l hik => absurd hik (by omega)⟩
+  rw [Fin.fin_one_eq_zero i]
+  refine (isDualArm_toWalk_iff hadj).2 ⟨?_, ?_, ?_, ?_, ?_⟩
+  · simp [mem_Icc_two_iff, -mem_Icc]
+  · simp [mem_Icc_two_iff, -mem_Icc]
+  · simp [mem_Icc_two_iff, -mem_Icc]
+  · simp [mem_Icc_two_iff, -mem_Icc]
+  · rw [dualConfig_empty]
+    exact hadj
+
+
+/-- **Five arms from a vertex**, with the colours open, dual, open, open, dual of the five-arm
+exponent: the open edges from the origin downwards, to the right and upwards, and the dual edges
+downwards from the two faces below the origin, which cross the closed edges
+`{(0, -1), (1, -1)}` and `{(-1, -1), (0, -1)}`. -/
+example : ({s(0, ![0, -1]), s(0, ![1, 0]), s(0, ![0, 1])} : Config (LatticeSite 2)) ∈
+    multiArmEvent ![true, false, true, true, false] 0 0 1 := by
+  set ω₅ : Config (LatticeSite 2) := {s(0, ![0, -1]), s(0, ![1, 0]), s(0, ![0, 1])} with hω₅
+  set a : Fin 5 → LatticeSite 2 := ![0, ![0, -1], 0, 0, ![-1, -1]] with ha
+  set b : Fin 5 → LatticeSite 2 := ![![0, -1], ![0, -2], ![1, 0], ![0, 1], ![-1, -2]] with hb
+  have hadj : ∀ i, (zdGraph 2).Adj (a i) (b i) := by
+    intro i
+    rw [zdGraph_two_adj_iff]
+    fin_cases i <;> simp [a, b]
+  have hd₁ : s(![0, -1], ![0, -2]) ∈ dualConfig ω₅ := by
+    rw [show s(![0, -1], ![0, -2]) = dualEdge s(![0, -1], ![0 + 1, -1]) by
+      rw [dualEdge_horizontal, Sym2.eq_swap]
+      norm_num, dualEdge_mem_dualConfig_iff (horizontal_mem_edgeSet 0 (-1))]
+    simp [ω₅, funext_iff, Fin.forall_fin_two]
+  have hd₄ : s(![-1, -1], ![-1, -2]) ∈ dualConfig ω₅ := by
+    rw [show s(![-1, -1], ![-1, -2]) = dualEdge s(![-1, -1], ![-1 + 1, -1]) by
+      rw [dualEdge_horizontal, Sym2.eq_swap]
+      norm_num, dualEdge_mem_dualConfig_iff (horizontal_mem_edgeSet (-1) (-1))]
+    simp [ω₅, funext_iff, Fin.forall_fin_two]
+  refine (mem_multiArmEvent_iff (R := 1)).2 ⟨a, b, fun i => (hadj i).toWalk, fun i => ?_, ⟨?_, ?_⟩,
+    ?_⟩
+  · fin_cases i
+    · refine (isOpenArm_toWalk_iff _).2 ⟨?_, ?_, ?_, ?_, ?_⟩ <;>
+        simp [ω₅, a, b, -mem_Icc]
+    · exact (isDualArm_toWalk_iff _).2 ⟨by simp [a, mem_Icc_two_iff, -mem_Icc],
+        by simp [b, mem_Icc_two_iff, -mem_Icc], by simp [b, mem_Icc_two_iff, -mem_Icc],
+        by simp [a, mem_Icc_two_iff, -mem_Icc], hd₁⟩
+    · refine (isOpenArm_toWalk_iff _).2 ⟨?_, ?_, ?_, ?_, ?_⟩ <;>
+        simp [ω₅, a, b, -mem_Icc]
+    · refine (isOpenArm_toWalk_iff _).2 ⟨?_, ?_, ?_, ?_, ?_⟩ <;>
+        simp [ω₅, a, b, -mem_Icc]
+    · exact (isDualArm_toWalk_iff _).2 ⟨by simp [a, mem_Icc_two_iff, -mem_Icc],
+        by simp [b, mem_Icc_two_iff, -mem_Icc], by simp [b, mem_Icc_two_iff, -mem_Icc],
+        by simp [a, mem_Icc_two_iff, -mem_Icc], hd₄⟩
+  · have key : ∀ i k : Fin 5, i ≠ k → ![true, false, true, true, false] i = true →
+        ![true, false, true, true, false] k = true → ∀ v ∈ [a i, b i].tail, v ∉ [a k, b k] := by
+      decide
+    intro i k hik hi hk v hv hv'
+    rw [SimpleGraph.Adj.support_toWalk] at hv hv'
+    exact key i k hik hi hk v hv hv'
+  · have key : ∀ i k : Fin 5, i ≠ k → ![true, false, true, true, false] i = false →
+        ![true, false, true, true, false] k = false → ∀ v ∈ [a i, b i], v ∉ [a k, b k] := by
+      decide
+    intro i k hik hi hk v hv hv'
+    rw [SimpleGraph.Adj.support_toWalk] at hv hv'
+    exact key i k hik hi hk v hv hv'
+  · have hpos : ∀ i, landingPos (0 - ((1 : ℕ) : LatticeSite 2)) (0 + ((1 : ℕ) : LatticeSite 2))
+        (![true, false, true, true, false] i) (hadj i).toWalk = ![2, 3, 6, 10, 1] i := by
+      intro i
+      have hpen : ((hadj i).toWalk).penultimate = a i := rfl
+      simp only [landingPos, hpen]
+      fin_cases i <;> simp [a, b, perimeterPos, Matrix.vecHead, Matrix.vecTail]
+    intro i k l hik hkl
+    rw [hpos, hpos, hpos, Int.sbtw_iff]
+    revert i k l
+    decide
+
+/-- **Four alternating arms from a vertex** (open, dual, open, dual): the open edges from the
+origin downwards and to the right, the dual edge downwards from the face below-right of the
+origin and the dual edge upwards from the face above-right of it. -/
+example : ({s(0, ![0, -1]), s(0, ![1, 0])} : Config (LatticeSite 2)) ∈
+    multiArmEvent ![true, false, true, false] 0 0 1 := by
+  set ω₄ : Config (LatticeSite 2) := {s(0, ![0, -1]), s(0, ![1, 0])} with hω₄
+  set a : Fin 4 → LatticeSite 2 := ![0, ![0, -1], 0, ![0, 0]] with ha
+  set b : Fin 4 → LatticeSite 2 := ![![0, -1], ![0, -2], ![1, 0], ![0, 1]] with hb
+  have hadj : ∀ i, (zdGraph 2).Adj (a i) (b i) := by
+    intro i
+    rw [zdGraph_two_adj_iff]
+    fin_cases i <;> simp [a, b]
+  have hd₁ : s(![0, -1], ![0, -2]) ∈ dualConfig ω₄ := by
+    rw [show s(![0, -1], ![0, -2]) = dualEdge s(![0, -1], ![0 + 1, -1]) by
+      rw [dualEdge_horizontal, Sym2.eq_swap]
+      norm_num, dualEdge_mem_dualConfig_iff (horizontal_mem_edgeSet 0 (-1))]
+    simp [ω₄, funext_iff, Fin.forall_fin_two]
+  have hd₃ : s(![0, 0], ![0, 1]) ∈ dualConfig ω₄ := by
+    rw [show s(![0, 0], ![0, 1]) = dualEdge s(![0, 1], ![0 + 1, 1]) by
+      rw [dualEdge_horizontal]
+      norm_num, dualEdge_mem_dualConfig_iff (horizontal_mem_edgeSet 0 1)]
+    simp [ω₄, funext_iff, Fin.forall_fin_two]
+  refine (mem_multiArmEvent_iff (R := 1)).2 ⟨a, b, fun i => (hadj i).toWalk, fun i => ?_, ⟨?_, ?_⟩,
+    ?_⟩
+  · fin_cases i
+    · refine (isOpenArm_toWalk_iff _).2 ⟨?_, ?_, ?_, ?_, ?_⟩ <;>
+        simp [ω₄, a, b, -mem_Icc]
+    · exact (isDualArm_toWalk_iff _).2 ⟨by simp [a, mem_Icc_two_iff, -mem_Icc],
+        by simp [b, mem_Icc_two_iff, -mem_Icc], by simp [b, mem_Icc_two_iff, -mem_Icc],
+        by simp [a, mem_Icc_two_iff, -mem_Icc], hd₁⟩
+    · refine (isOpenArm_toWalk_iff _).2 ⟨?_, ?_, ?_, ?_, ?_⟩ <;>
+        simp [ω₄, a, b, -mem_Icc]
+    · exact (isDualArm_toWalk_iff _).2 ⟨by simp [a, mem_Icc_two_iff, -mem_Icc],
+        by simp [b, mem_Icc_two_iff, -mem_Icc], by simp [b, mem_Icc_two_iff, -mem_Icc],
+        by simp [a, mem_Icc_two_iff, -mem_Icc], hd₃⟩
+  · have key : ∀ i k : Fin 4, i ≠ k → ![true, false, true, false] i = true →
+        ![true, false, true, false] k = true → ∀ v ∈ [a i, b i].tail, v ∉ [a k, b k] := by
+      decide
+    intro i k hik hi hk v hv hv'
+    rw [SimpleGraph.Adj.support_toWalk] at hv hv'
+    exact key i k hik hi hk v hv hv'
+  · have key : ∀ i k : Fin 4, i ≠ k → ![true, false, true, false] i = false →
+        ![true, false, true, false] k = false → ∀ v ∈ [a i, b i], v ∉ [a k, b k] := by
+      decide
+    intro i k hik hi hk v hv hv'
+    rw [SimpleGraph.Adj.support_toWalk] at hv hv'
+    exact key i k hik hi hk v hv hv'
+  · have hpos : ∀ i, landingPos (0 - ((1 : ℕ) : LatticeSite 2)) (0 + ((1 : ℕ) : LatticeSite 2))
+        (![true, false, true, false] i) (hadj i).toWalk = ![2, 3, 6, 9] i := by
+      intro i
+      have hpen : ((hadj i).toWalk).penultimate = a i := rfl
+      simp only [landingPos, hpen]
+      fin_cases i <;> simp [a, b, perimeterPos, Matrix.vecHead, Matrix.vecTail]
+    intro i k l hik hkl
+    rw [hpos, hpos, hpos, Int.sbtw_iff]
+    revert i k l
+    decide
+
+/-- **Three arms from a boundary vertex in the half-plane** (open, dual, open): the open edges from
+the origin to the right and to the left, and the dual edge upwards from the face above-right of
+the origin, ordered counterclockwise from the right. -/
+example : ({s(0, ![1, 0]), s(0, ![-1, 0])} : Config (LatticeSite 2)) ∈
+    halfArmEvent ![true, false, true] 0 0 1 := by
+  set ω₃ : Config (LatticeSite 2) := {s(0, ![1, 0]), s(0, ![-1, 0])} with hω₃
+  set a : Fin 3 → LatticeSite 2 := ![0, ![0, 0], 0] with ha
+  set b : Fin 3 → LatticeSite 2 := ![![1, 0], ![0, 1], ![-1, 0]] with hb
+  have hadj : ∀ i, (zdGraph 2).Adj (a i) (b i) := by
+    intro i
+    rw [zdGraph_two_adj_iff]
+    fin_cases i <;> simp [a, b]
+  have hd₁ : s(![0, 0], ![0, 1]) ∈ dualConfig ω₃ := by
+    rw [show s(![0, 0], ![0, 1]) = dualEdge s(![0, 1], ![0 + 1, 1]) by
+      rw [dualEdge_horizontal]
+      norm_num, dualEdge_mem_dualConfig_iff (horizontal_mem_edgeSet 0 1)]
+    simp [ω₃, funext_iff, Fin.forall_fin_two]
+  refine (mem_halfArmEvent_iff (R := 1)).2 ⟨a, b, fun i => (hadj i).toWalk, fun i => ?_, ⟨?_, ?_⟩,
+    fun i v hv => ?_, ?_⟩
+  · fin_cases i
+    · refine (isOpenArm_toWalk_iff _).2 ⟨?_, ?_, ?_, ?_, ?_⟩ <;>
+        simp [ω₃, a, b, -mem_Icc]
+    · exact (isDualArm_toWalk_iff _).2 ⟨by simp [a, mem_Icc_two_iff, -mem_Icc],
+        by simp [b, mem_Icc_two_iff, -mem_Icc], by simp [b, mem_Icc_two_iff, -mem_Icc],
+        by simp [a, mem_Icc_two_iff, -mem_Icc], hd₁⟩
+    · refine (isOpenArm_toWalk_iff _).2 ⟨?_, ?_, ?_, ?_, ?_⟩ <;>
+        simp [ω₃, a, b, -mem_Icc]
+  · have key : ∀ i k : Fin 3, i ≠ k → ![true, false, true] i = true →
+        ![true, false, true] k = true → ∀ v ∈ [a i, b i].tail, v ∉ [a k, b k] := by
+      decide
+    intro i k hik hi hk v hv hv'
+    rw [SimpleGraph.Adj.support_toWalk] at hv hv'
+    exact key i k hik hi hk v hv hv'
+  · have key : ∀ i k : Fin 3, i ≠ k → ![true, false, true] i = false →
+        ![true, false, true] k = false → ∀ v ∈ [a i, b i], v ∉ [a k, b k] := by
+      decide
+    intro i k hik hi hk v hv hv'
+    rw [SimpleGraph.Adj.support_toWalk] at hv hv'
+    exact key i k hik hi hk v hv hv'
+  · have key : ∀ i : Fin 3, ∀ v ∈ [a i, b i], (0 : LatticeSite 2) 1 ≤ v 1 := by
+      decide
+    rw [SimpleGraph.Adj.support_toWalk] at hv
+    exact key i v hv
+  · have hpos : ∀ i, landingPos (0 - ((1 : ℕ) : LatticeSite 2)) (0 + ((1 : ℕ) : LatticeSite 2))
+        (![true, false, true] i) (hadj i).toWalk = ![6, 9, 14] i := by
+      intro i
+      have hpen : ((hadj i).toWalk).penultimate = a i := rfl
+      simp only [landingPos, hpen]
+      fin_cases i <;> simp [a, b, perimeterPos, Matrix.vecHead, Matrix.vecTail]
+    intro i k hik
+    simp only [hpos]
+    revert i k
+    decide
+
+/-- **Two arms from a boundary vertex in the half-plane** (open, dual). -/
+example : ({s(0, ![1, 0])} : Config (LatticeSite 2)) ∈ halfArmEvent ![true, false] 0 0 1 := by
+  set a : Fin 2 → LatticeSite 2 := ![0, ![0, 0]] with ha
+  set b : Fin 2 → LatticeSite 2 := ![![1, 0], ![0, 1]] with hb
+  have hadj : ∀ i, (zdGraph 2).Adj (a i) (b i) := by
+    intro i
+    rw [zdGraph_two_adj_iff]
+    fin_cases i <;> simp [a, b]
+  have hd₁ : s(![0, 0], ![0, 1]) ∈ dualConfig {s(0, ![1, 0])} := by
+    rw [show s(![0, 0], ![0, 1]) = dualEdge s(![0, 1], ![0 + 1, 1]) by
+      rw [dualEdge_horizontal]
+      norm_num, dualEdge_mem_dualConfig_iff (horizontal_mem_edgeSet 0 1)]
+    simp [funext_iff, Fin.forall_fin_two]
+  refine (mem_halfArmEvent_iff (R := 1)).2 ⟨a, b, fun i => (hadj i).toWalk, fun i => ?_, ⟨?_, ?_⟩,
+    fun i v hv => ?_, ?_⟩
+  · fin_cases i
+    · refine (isOpenArm_toWalk_iff _).2 ⟨?_, ?_, ?_, ?_, ?_⟩ <;>
+        simp [a, b, -mem_Icc]
+    · exact (isDualArm_toWalk_iff _).2 ⟨by simp [a, mem_Icc_two_iff, -mem_Icc],
+        by simp [b, mem_Icc_two_iff, -mem_Icc], by simp [b, mem_Icc_two_iff, -mem_Icc],
+        by simp [a, mem_Icc_two_iff, -mem_Icc], hd₁⟩
+  · intro i k hik hi hk
+    fin_cases i <;> fin_cases k <;> simp_all
+  · intro i k hik hi hk
+    fin_cases i <;> fin_cases k <;> simp_all
+  · have key : ∀ i : Fin 2, ∀ v ∈ [a i, b i], (0 : LatticeSite 2) 1 ≤ v 1 := by
+      decide
+    rw [SimpleGraph.Adj.support_toWalk] at hv
+    exact key i v hv
+  · have hpos : ∀ i, landingPos (0 - ((1 : ℕ) : LatticeSite 2)) (0 + ((1 : ℕ) : LatticeSite 2))
+        (![true, false] i) (hadj i).toWalk = ![6, 9] i := by
+      intro i
+      have hpen : ((hadj i).toWalk).penultimate = a i := rfl
+      simp only [landingPos, hpen]
+      fin_cases i <;> simp [a, b, perimeterPos, Matrix.vecHead, Matrix.vecTail]
+    intro i k hik
+    simp only [hpos]
+    revert i k
+    decide
+
+/-- Landing data for five arms: windows of length `1/20` starting at `0, 1/5, …, 4/5`. -/
+example : IsLanding (1 / 20) fun i : Fin 5 => (i : ℚ) / 5 := by
+  have := isLanding_div (j := 5) (by norm_num)
+  norm_num at this ⊢
+  exact this
+
+/-- On the boundary of `B_5(z)` (doubled perimeter `80`) the windows of length `1/20` contain
+positions. -/
+example : (window 80 (fun i : Fin 5 => (i : ℚ) / 5) (1 / 20) 2).Nonempty :=
+  nonempty_window (by norm_num) 2
 
 end PercLib.Models.Planar
