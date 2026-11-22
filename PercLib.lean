@@ -140,6 +140,7 @@ public import PercLib.Models.LongRange.PowerLaw
 public import PercLib.Models.LongRange.QuantileMoments
 public import PercLib.Models.LongRange.RootIndependence
 public import PercLib.Models.LongRange.SoftCutoff
+public import PercLib.Models.LongRange.TruncatedMoments
 public import PercLib.Models.LongRange.Tags.BranchingRandomWalk
 public import PercLib.Models.LongRange.Tags.CutsAndRows
 public import PercLib.Models.LongRange.Tags.DisplacementKernels
