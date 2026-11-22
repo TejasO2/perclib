@@ -361,6 +361,7 @@ public import PercLib.Probability.ChiSquareMoments
 public import PercLib.Probability.ClosedProduct
 public import PercLib.Probability.Concentration
 public import PercLib.Probability.ConditionalCorrelation
+public import PercLib.Probability.ConvexComparison
 public import PercLib.Probability.Coordinate
 public import PercLib.Probability.CountableBK
 public import PercLib.Probability.CountableSuperposition
@@ -431,6 +432,7 @@ public import PercLib.Probability.SizeBiasLimits
 public import PercLib.Probability.SplitCoordinate
 public import PercLib.Probability.Superposition
 public import PercLib.Probability.Tags.BranchingRandomWalkMoment
+public import PercLib.Probability.Tags.ConvexComparison
 public import PercLib.Probability.Tags.Correlation
 public import PercLib.Probability.Tags.CouplingRatio
 public import PercLib.Probability.Tags.DiscreteEntropy
