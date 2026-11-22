@@ -13002,3 +13002,151 @@ theorem continuousOn_pivotal_cutoff_uncapped_of_root_succ_moment {d : ℕ}
     (hroot r (Set.mem_union_left _ hr))
 
 end PercLib.Models.LongRange
+
+open Filter
+open scoped Topology
+
+namespace PercLib.Analysis
+
+/-! ### Tails of summable families -/
+
+/-- **The tail of a summable nonnegative family is uniformly small.** For a summable nonnegative
+real family on an index type and every `ε > 0` there is a finite set `F` with
+`∑' e ∉ F, g e ≤ ε`. -/
+theorem exists_finset_tsum_compl_le {ι : Type*} {g : ι → ℝ} (hsum : Summable g)
+    (_hg : ∀ e, 0 ≤ g e) {ε : ℝ} (hε : 0 < ε) :
+    ∃ F : Finset ι, ∑' e : ↥(F : Set ι)ᶜ, g e.1 ≤ ε := by
+  have ht : Tendsto (fun F : Finset ι => ∑' e : ↥(F : Set ι)ᶜ, g e.1) atTop (𝓝 0) := by
+    have h0 : Tendsto (fun F : Finset ι => (∑' e, g e) - ∑ e ∈ F, g e) atTop
+        (𝓝 ((∑' e, g e) - ∑' e, g e)) := tendsto_const_nhds.sub hsum.hasSum
+    have h1 : Tendsto (fun F : Finset ι => ∑' e : ↥(F : Set ι)ᶜ, g e.1) atTop
+        (𝓝 ((∑' e, g e) - ∑' e, g e)) := by
+      refine h0.congr fun F => ?_
+      have := hsum.sum_add_tsum_compl (s := F)
+      rw [← this]
+      ring
+    simpa using h1
+  obtain ⟨F, hF⟩ := (ht.eventually (isOpen_Iio.mem_nhds hε)).exists
+  exact ⟨F, le_of_lt hF⟩
+
+/-! ### The finite-core / small-tail criterion -/
+
+/-- **Continuity of a series from a uniform-in-a-neighbourhood tail estimate.**
+
+Let `f : ι → ℝ → ℝ` be a family of functions continuous on a set `s` of parameters, absolutely
+summable at every point of `s`, and suppose that at every point `x₀ ∈ s` and for every `ε > 0`
+there are a neighbourhood `U` of `x₀` and a *finite* set `F` of indices such that on `U ∩ s` the
+whole complement of `F` carries at most `ε` of total mass. Then `x ↦ ∑' e, f e x` is continuous
+on `s`.
+
+The finite set `F` and the neighbourhood `U` are produced point by point, so this is strictly
+weaker than domination by one summable function on all of `s` (`continuousOn_tsum`). -/
+theorem continuousOn_tsum_of_uniform_tail {ι : Type*} {s : Set ℝ} {f : ι → ℝ → ℝ}
+    (hcont : ∀ e, ContinuousOn (f e) s)
+    (habs : ∀ x ∈ s, Summable fun e => ‖f e x‖)
+    (htail : ∀ x₀ ∈ s, ∀ ε > 0, ∃ U ∈ 𝓝 x₀, ∃ F : Finset ι,
+      ∀ x ∈ U ∩ s, ∑' e : ↥(F : Set ι)ᶜ, ‖f e.1 x‖ ≤ ε) :
+    ContinuousOn (fun x => ∑' e, f e x) s := by
+  intro x₀ hx₀
+  rw [Metric.continuousWithinAt_iff]
+  intro ε hε
+  obtain ⟨U, hU, F, hF⟩ := htail x₀ hx₀ (ε / 3) (by linarith)
+  obtain ⟨ρ, hρ0, hρU⟩ := Metric.mem_nhds_iff.1 hU
+  have hcontF : ContinuousWithinAt (fun x => ∑ e ∈ F, f e x) s x₀ :=
+    tendsto_finsetSum F fun e _ => hcont e x₀ hx₀
+  rw [Metric.continuousWithinAt_iff] at hcontF
+  obtain ⟨δ, hδ0, hδ⟩ := hcontF (ε / 3) (by linarith)
+  refine ⟨min δ ρ, lt_min hδ0 hρ0, fun x hx hxd => ?_⟩
+  have hxδ : dist x x₀ < δ := lt_of_lt_of_le hxd (min_le_left _ _)
+  have hxU : x ∈ U := hρU (lt_of_lt_of_le hxd (min_le_right _ _))
+  have hx₀U : x₀ ∈ U := mem_of_mem_nhds hU
+  -- the series at `x` and at `x₀` split into a finite core and a tail
+  have hsplitx : (∑' e, f e x) = (∑ e ∈ F, f e x) + ∑' e : ↥(F : Set ι)ᶜ, f e.1 x :=
+    (((habs x hx).of_norm).sum_add_tsum_compl (s := F)).symm
+  have hsplit₀ : (∑' e, f e x₀) = (∑ e ∈ F, f e x₀) + ∑' e : ↥(F : Set ι)ᶜ, f e.1 x₀ :=
+    (((habs x₀ hx₀).of_norm).sum_add_tsum_compl (s := F)).symm
+  have htailx : ‖∑' e : ↥(F : Set ι)ᶜ, f e.1 x‖ ≤ ε / 3 :=
+    (norm_tsum_le_tsum_norm ((habs x hx).subtype ((F : Set ι)ᶜ))).trans (hF x ⟨hxU, hx⟩)
+  have htail₀ : ‖∑' e : ↥(F : Set ι)ᶜ, f e.1 x₀‖ ≤ ε / 3 :=
+    (norm_tsum_le_tsum_norm ((habs x₀ hx₀).subtype ((F : Set ι)ᶜ))).trans
+      (hF x₀ ⟨hx₀U, hx₀⟩)
+  have hcore : ‖(∑ e ∈ F, f e x) - (∑ e ∈ F, f e x₀)‖ < ε / 3 := by
+    have h := hδ hx hxδ
+    rw [Real.dist_eq] at h
+    rwa [Real.norm_eq_abs]
+  have hkey : (∑' e, f e x) - (∑' e, f e x₀) =
+      ((∑ e ∈ F, f e x) - (∑ e ∈ F, f e x₀)) +
+        ((∑' e : ↥(F : Set ι)ᶜ, f e.1 x) - (∑' e : ↥(F : Set ι)ᶜ, f e.1 x₀)) := by
+    rw [hsplitx, hsplit₀]; ring
+  rw [Real.dist_eq, hkey]
+  have h1 : ‖(∑' e : ↥(F : Set ι)ᶜ, f e.1 x) - (∑' e : ↥(F : Set ι)ᶜ, f e.1 x₀)‖ ≤
+      ε / 3 + ε / 3 := (norm_sub_le _ _).trans (add_le_add htailx htail₀)
+  calc |((∑ e ∈ F, f e x) - (∑ e ∈ F, f e x₀)) +
+        ((∑' e : ↥(F : Set ι)ᶜ, f e.1 x) - (∑' e : ↥(F : Set ι)ᶜ, f e.1 x₀))|
+      = ‖((∑ e ∈ F, f e x) - (∑ e ∈ F, f e x₀)) +
+          ((∑' e : ↥(F : Set ι)ᶜ, f e.1 x) - (∑' e : ↥(F : Set ι)ᶜ, f e.1 x₀))‖ :=
+        (Real.norm_eq_abs _).symm
+    _ ≤ ‖(∑ e ∈ F, f e x) - (∑ e ∈ F, f e x₀)‖ +
+          ‖(∑' e : ↥(F : Set ι)ᶜ, f e.1 x) - (∑' e : ↥(F : Set ι)ᶜ, f e.1 x₀)‖ := norm_add_le _ _
+    _ < ε := by linarith
+
+/-- **Continuity from a dominator that may depend on the point.** If every point of the parameter
+set has a neighbourhood on which the family is dominated by one fixed summable function, then the
+series of the family is continuous there. The dominator may therefore change with the point, as it
+does when the all-pairs moment bound moves with the cut-off parameter. -/
+theorem continuousOn_tsum_of_local_dominator {ι : Type*} {s : Set ℝ} {f : ι → ℝ → ℝ}
+    (hcont : ∀ e, ContinuousOn (f e) s)
+    (hloc : ∀ x₀ ∈ s, ∃ U ∈ 𝓝 x₀, ∃ g : ι → ℝ, Summable g ∧
+      ∀ e, ∀ x ∈ U ∩ s, ‖f e x‖ ≤ g e) :
+    ContinuousOn (fun x => ∑' e, f e x) s := by
+  refine continuousOn_tsum_of_uniform_tail hcont (fun x hx => ?_) (fun x₀ hx₀ ε hε => ?_)
+  · obtain ⟨U, hU, g, hg, hb⟩ := hloc x hx
+    exact hg.of_nonneg_of_le (fun e => norm_nonneg _) (fun e => hb e x ⟨mem_of_mem_nhds hU, hx⟩)
+  · obtain ⟨U, hU, g, hg, hb⟩ := hloc x₀ hx₀
+    have hg0 : ∀ e, 0 ≤ g e := fun e => (norm_nonneg _).trans (hb e x₀ ⟨mem_of_mem_nhds hU, hx₀⟩)
+    obtain ⟨F, hF⟩ := exists_finset_tsum_compl_le hg hg0 hε
+    refine ⟨U, hU, F, fun x hx => ?_⟩
+    have hf' : Summable fun e : ↥((F : Set ι)ᶜ) => ‖f (e : ι) x‖ :=
+      (hg.of_nonneg_of_le (fun e => norm_nonneg _) (fun e => hb e x ⟨hx.1, hx.2⟩)).subtype
+        ((F : Set ι)ᶜ)
+    have hcomp := Summable.tsum_le_tsum (f := fun e : ↥((F : Set ι)ᶜ) => ‖f (e : ι) x‖)
+      (g := fun e : ↥((F : Set ι)ᶜ) => g (e : ι)) (fun e => hb (e : ι) x ⟨hx.1, hx.2⟩)
+      hf' (hg.subtype ((F : Set ι)ᶜ))
+    exact hcomp.trans hF
+
+/-! ### The sublinear power estimate -/
+
+/-- **The sublinear power estimate, on the correct side.** For `0 < q ≤ 1` and
+`0 < δ ≤ P` one has `P ^ q ≤ δ ^ (q - 1) * P`: the `q`-th power of a *large* quantity is bounded by
+a negative power of the threshold times the quantity itself. Nothing of the kind holds for `P ≤ δ`,
+where `δ ^ (q - 1) * P ≤ P ^ q` instead; see `not_rpow_le_rpow_sub_one_mul`. -/
+theorem rpow_le_rpow_sub_one_mul {q P δ : ℝ} (hδ : 0 < δ) (hPδ : δ ≤ P) (hq1 : q ≤ 1) :
+    P ^ q ≤ δ ^ (q - 1) * P := by
+  have hP : 0 < P := lt_of_lt_of_le hδ hPδ
+  have h1q : (0 : ℝ) ≤ 1 - q := by linarith
+  have hstep : δ ^ (1 - q) ≤ P ^ (1 - q) := Real.rpow_le_rpow hδ.le hPδ h1q
+  have hexp : δ ^ (q - 1) = (δ ^ (1 - q))⁻¹ := by
+    rw [show q - 1 = -(1 - q) by ring, Real.rpow_neg hδ.le]
+  have hexpP : P ^ (q - 1) = (P ^ (1 - q))⁻¹ := by
+    rw [show q - 1 = -(1 - q) by ring, Real.rpow_neg hP.le]
+  have hpow : P ^ q = P ^ (q - 1) * P := by
+    rw [← Real.rpow_add_one hP.ne']
+    congr 1
+    ring
+  rw [hpow, hexp, hexpP]
+  exact mul_le_mul_of_nonneg_right
+    ((inv_le_inv₀ (Real.rpow_pos_of_pos hP _) (Real.rpow_pos_of_pos hδ _)).mpr hstep) hP.le
+
+/-- The sublinear power estimate fails on the other side of the threshold: with `q = 1/2`,
+`δ = 4` and `P = 1 ≤ δ` the bound `P ^ q ≤ δ ^ (q - 1) * P` would read `1 ≤ 1/2`. -/
+theorem not_rpow_le_rpow_sub_one_mul :
+    ¬ ((1 : ℝ) ^ ((1 : ℝ) / 2) ≤ (4 : ℝ) ^ ((1 : ℝ) / 2 - 1) * 1) := by
+  have h4 : (4 : ℝ) ^ ((1 : ℝ) / 2) = 2 := by
+    rw [← Real.sqrt_eq_rpow, show (4 : ℝ) = 2 ^ 2 by norm_num, Real.sqrt_sq (by norm_num)]
+  have hexp : (4 : ℝ) ^ ((1 : ℝ) / 2 - 1) = ((4 : ℝ) ^ ((1 : ℝ) / 2))⁻¹ := by
+    rw [show (1 : ℝ) / 2 - 1 = -((1 : ℝ) / 2) by ring,
+      Real.rpow_neg (by norm_num : (0 : ℝ) ≤ 4)]
+  rw [hexp, h4, Real.one_rpow]
+  norm_num
+
+end PercLib.Analysis
