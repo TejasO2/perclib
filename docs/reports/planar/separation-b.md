@@ -133,6 +133,11 @@ The rerouted family is returned as `γ' : ∀ i, Σ y, (zdGraph 2).Walk (a i) y`
 
 ## Design for the rest of A2 (A2c)
 
+**Update (A2c-1, `separation-c.md`).** Items 3–5 were replaced by absence events in the fresh
+part (no path extraction for separation); item 6 (fences) is proved as
+`exists_fence_of_exploration`; items 1, 2 and the probability bounds of item 7 are proved. Two
+problems with the draft target statement are recorded there (fence clause; small `N`).
+
 The target statement is unchanged (`separation-a.md`, "Target statement"). Members of the given
 family of colour `X` go through `exists_reroute_of_exploration` for the exploration of colour `X`,
 so the new family lands at greedy tips. It remains to show that, with probability `≥ 1 - δ`, all
