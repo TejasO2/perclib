@@ -13826,3 +13826,484 @@ theorem localTail_ennreal_of_real_tail {ι : Type*} {s : Set ℝ} {f : ι → �
   exact ENNReal.ofReal_le_ofReal (hF x hx)
 
 end PercLib.Analysis
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability
+
+/-! ### The strict indicator from the right -/
+
+/-- From the right of `n` the strict indicator `1 (s < r)` converges to the closed-ball value
+`1 (s ≤ n)`.  This is the single scalar fact behind the corner. -/
+theorem tendsto_indicator_lt_nhdsGT_le {s n : ℝ} :
+    Tendsto (fun r : ℝ => (if s < r then (1 : ℝ) else 0)) (𝓝[>] n)
+      (𝓝 (if s ≤ n then (1 : ℝ) else 0)) := by
+  by_cases h : s ≤ n
+  · rw [ite_eq_left h]
+    refine tendsto_const_nhds.congr' ?_
+    filter_upwards [self_mem_nhdsWithin] with r hr
+    exact (ite_eq_left (lt_of_le_of_lt h hr)).symm
+  · rw [ite_eq_right h]
+    have hs : n < s := not_le.1 h
+    have hmem : Iio s ∈ 𝓝[>] n :=
+      nhdsWithin_le_nhds (isOpen_Iio.mem_nhds hs)
+    refine tendsto_const_nhds.congr' ?_
+    filter_upwards [hmem] with r hr
+    exact (ite_eq_right (not_lt.2 hr.le)).symm
+
+/-- The same statement for the radial kernel of a single unordered pair: from the right, the
+strict radial weight `1 (N z < r)` converges to the closed-ball weight `1 (N z ≤ n)`.  On the
+diagonal both sides are `0`. -/
+theorem tendsto_coe_radialKernel_indicator_nhdsGT {d : ℕ} {N : Seminorm ℝ (Fin d → ℝ)}
+    (n : ℝ) (e : Sym2 (Fin d → ℤ)) :
+    Tendsto (fun r : ℝ => (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ))
+      (𝓝[>] n) (𝓝 (radialKernel N (fun s => if s ≤ n then 1 else 0) e : ℝ)) := by
+  induction e using Sym2.ind with
+  | _ x y =>
+    by_cases hxy : x = y
+    · subst hxy
+      simp only [radialKernel_diag, NNReal.coe_zero]
+      exact tendsto_const_nhds
+    · have h1 : ∀ r : ℝ,
+          (radialKernel N (fun s => if s < r then 1 else 0) s(x, y) : ℝ) =
+            if N (Int.cast ∘ (x - y)) < r then 1 else 0 := by
+        intro r
+        rw [coe_radialKernel_of_ne (K := fun s => if s < r then 1 else 0) hxy
+          (by split <;> norm_num)]
+      have h2 : (radialKernel N (fun s => if s ≤ n then 1 else 0) s(x, y) : ℝ) =
+          if N (Int.cast ∘ (x - y)) ≤ n then 1 else 0 := by
+        rw [coe_radialKernel_of_ne (K := fun s => if s ≤ n then 1 else 0) hxy
+          (by split <;> norm_num)]
+      simp only [h1, h2]
+      exact tendsto_indicator_lt_nhdsGT_le
+
+/-! ### Right continuity of the cut-off kernel in the scale -/
+
+/-- For a profile that is continuous and decreasing on `(0, ∞)` and a positive scale, the
+cut-off kernel of every unordered pair is right-continuous in the scale at that scale. -/
+theorem tendsto_coe_cutoffKernel {d : ℕ} {N : ModelNorm (Fin d → ℝ)} {K : ℝ → ℝ}
+    (hKa : AntitoneOn K (Ioi 0)) (hKc : ContinuousOn K (Ioi 0))
+    {n : ℝ} (hn : 0 < n) (e : Sym2 (Fin d → ℤ)) :
+    Tendsto (fun r : ℝ => (cutoffKernel N K r e : ℝ)) (𝓝[>] n)
+      (𝓝 (cutoffKernel N K n e : ℝ)) := by
+  induction e using Sym2.ind with
+  | _ x y =>
+    by_cases hxy : x = y
+    · subst hxy
+      simp only [cutoffKernel_def, radialKernel_diag, NNReal.coe_zero]
+      exact tendsto_const_nhds
+    · rw [coe_cutoffKernel_eq_max hKa hn hxy]
+      have hKca : ContinuousAt K n := hKc.continuousAt (isOpen_Ioi.mem_nhds hn)
+      have hKr : Tendsto K (𝓝[>] n) (𝓝 (K n)) := hKca.mono_left nhdsWithin_le_nhds
+      have hlim : Tendsto (fun r : ℝ => max (K (N (Int.cast ∘ (x - y))) - K r) 0) (𝓝[>] n)
+          (𝓝 (max (K (N (Int.cast ∘ (x - y))) - K n) 0)) :=
+        (tendsto_const_nhds.sub hKr).max tendsto_const_nhds
+      have hmem : Ioi (0 : ℝ) ∈ 𝓝[>] n := nhdsWithin_le_nhds (isOpen_Ioi.mem_nhds hn)
+      refine Tendsto.congr' ?_ hlim
+      filter_upwards [hmem] with r hr
+      exact (coe_cutoffKernel_eq_max hKa hr hxy).symm
+
+end PercLib.Models.LongRange
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability
+
+/-! ### Right continuity of the full derivative weight -/
+
+/-- The derivative weight of a cut-off pair is right-continuous in the scale, and its right limit
+is the same expression with the **closed-ball** radial factor `1 (N z ≤ n)`.  Off the diagonal the
+strict and closed radial factors differ only at `r = n` itself; on the diagonal both vanish. -/
+theorem tendsto_cutoff_coeff_nhdsGT {d : ℕ} {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) {n : ℝ} (hn : 0 < n)
+    (e : Sym2 (Fin d → ℤ)) :
+    Tendsto (fun r : ℝ => (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ))))
+      (𝓝[>] n)
+      (𝓝 ((radialKernel N (fun s => if s ≤ n then 1 else 0) e : ℝ) *
+        ((β : ℝ) * -K' n * Real.exp (-(β : ℝ) * (cutoffKernel N K n e : ℝ))))) := by
+  have hKc : ContinuousOn K (Ioi 0) := fun t ht => (hK' t ht).continuousAt.continuousWithinAt
+  have hK'ca : ContinuousAt K' n := hK'c.continuousAt (isOpen_Ioi.mem_nhds hn)
+  have hK'r : Tendsto K' (𝓝[>] n) (𝓝 (K' n)) := hK'ca.mono_left nhdsWithin_le_nhds
+  have hrate : Tendsto (fun r : ℝ => (β : ℝ) * -K' r) (𝓝[>] n)
+      (𝓝 ((β : ℝ) * -K' n)) := hK'r.neg.const_mul (β : ℝ)
+  have hexp : Tendsto (fun r : ℝ => Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ)))
+      (𝓝[>] n) (𝓝 (Real.exp (-(β : ℝ) * (cutoffKernel N K n e : ℝ)))) :=
+    (Real.continuous_exp.tendsto _).comp
+      ((tendsto_coe_cutoffKernel hKa hKc hn e).const_mul (-(β : ℝ)))
+  exact (tendsto_coe_radialKernel_indicator_nhdsGT n e).mul (hrate.mul hexp)
+
+/-! ### The aggregate right limit of the pivotal flux -/
+
+/-- **The aggregate right limit of the cut-off pivotal flux at a corner.**
+
+If every weighted pivotality `cw r e * pivotal r e` converges to its value at `n` along `𝓝[>] n`
+and, on a right-neighbourhood of `n`, the whole family is bounded in norm by one summable
+`bound`, then Tannery's theorem gives the right limit of the *entire* pair series, and that limit
+carries the closed-ball radial factor.
+
+This is the passage the moment derivative at a lattice norm needs.  The uniform one-sided
+dominator `hbd` is the remaining premise: it is not inferred from pointwise finiteness. -/
+theorem tendsto_tsum_flux_nhdsGT_of_dominated {d : ℕ} {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) {n : ℝ} (hn : 0 < n)
+    (f : ℝ → Sym2 (Fin d → ℤ) → ℝ)
+    (hf : ∀ r e, f r e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K r e : ℝ))))
+    (Piv : ℝ → Sym2 (Fin d → ℤ) → ℝ)
+    (hPiv : ∀ e, Tendsto (fun r => Piv r e) (𝓝[>] n) (𝓝 (Piv n e)))
+    (bound : Sym2 (Fin d → ℤ) → ℝ) (hbound : Summable bound)
+    (hbd : ∀ᶠ r in 𝓝[>] n, ∀ e, ‖f r e * Piv r e‖ ≤ bound e) :
+    Tendsto (fun r => ∑' e, f r e * Piv r e) (𝓝[>] n)
+      (𝓝 (∑' e, (radialKernel N (fun s => if s ≤ n then 1 else 0) e : ℝ) *
+        ((β : ℝ) * -K' n * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K n e : ℝ))) *
+        Piv n e)) := by
+  have hlim : ∀ e : Sym2 (Fin d → ℤ), Tendsto (fun r : ℝ => f r e * Piv r e) (𝓝[>] n)
+      (𝓝 ((radialKernel N (fun s => if s ≤ n then 1 else 0) e : ℝ) *
+        ((β : ℝ) * -K' n * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K n e : ℝ))) *
+        Piv n e)) := by
+    intro e
+    have h1 : Tendsto (fun r : ℝ => f r e) (𝓝[>] n)
+        (𝓝 ((radialKernel N (fun s => if s ≤ n then 1 else 0) e : ℝ) *
+          ((β : ℝ) * -K' n * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K n e : ℝ))))) := by
+      simp only [hf]
+      exact tendsto_cutoff_coeff_nhdsGT hKa hK' hK'c β hn e
+    exact h1.mul (hPiv e)
+  exact tendsto_tsum_of_dominated_convergence hbound hlim hbd
+
+/-! ### Discharging the per-pair pivotality limit from a uniform root moment -/
+
+/-- A uniform finite root `(p+1)`-st moment on a window that *contains* `n` in its interior gives
+continuity in the scale of every uncapped single-pair pivotality at `n`, hence the per-pair
+convergence hypothesis of `tendsto_tsum_flux_nhdsGT_of_dominated`. -/
+theorem continuousAt_pivotal_cutoff_uncapped_of_root_succ_moment {d : ℕ}
+    {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p) (o : Fin d → ℤ) {R u n : ℝ}
+    (hu : 0 < u) (hun : u < n) (hnR : n < R) (M : ℝ≥0∞) (hM : M ≠ ⊤)
+    (hroot : ∀ r ∈ (Ioo u R ∪ {R} : Set ℝ), (∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ (p + 1)
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≤ M)
+    (e : Sym2 (Fin d → ℤ)) :
+    Tendsto (fun r : ℝ => ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel N K r) β))) (𝓝[>] n)
+      (𝓝 (∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel N K n) β)))) := by
+  have hcont : ContinuousOn (fun r : ℝ => ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel N K r) β))) (Ioo u R) :=
+    continuousOn_pivotal_cutoff_uncapped_of_root_succ_moment
+      hKa hK' hK'c β p hp o hu e M hM hroot
+  have hmem : Ioo u R ∈ 𝓝 n := isOpen_Ioo.mem_nhds ⟨hun, hnR⟩
+  exact ((hcont.continuousAt hmem).mono_left nhdsWithin_le_nhds)
+
+end PercLib.Models.LongRange
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability
+
+/-- **The right limit of the actual cut-off pivotal flux at a lattice norm.**
+
+Uniform finite root `(p+1)`-st moments on a window containing `n` in its interior supply every
+single-pair pivotality limit, so the aggregate right limit of
+`r ↦ Σ'_e cw r e * pivotal r e` is the same series with the **closed-ball** radial factor.  The
+only premise that is neither a moment bound nor a continuity statement is `hbd`: a summable
+dominator for the whole weighted pair series, uniformly on one side of `n`.  That uniform
+one-sided domination is *not* derived here — pointwise finiteness of the flux does not give it. -/
+theorem tendsto_tsum_cutoff_pivotal_flux_nhdsGT_of_root_succ_moment {d : ℕ}
+    {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) (p : ℕ) (hp : 1 ≤ p) (o : Fin d → ℤ)
+    {R u n : ℝ} (hu : 0 < u) (hun : u < n) (hnR : n < R) (M : ℝ≥0∞) (hM : M ≠ ⊤)
+    (hroot : ∀ r ∈ (Ioo u R ∪ {R} : Set ℝ), (∫⁻ ω, ((cluster ω 0).encard : ℝ≥0∞) ^ (p + 1)
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) ≤ M)
+    (cw : ℝ → Sym2 (Fin d → ℤ) → ℝ)
+    (hcw : ∀ r e, cw r e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K r e : ℝ))))
+    (bound : Sym2 (Fin d → ℤ) → ℝ) (hbound : Summable bound)
+    (hbd : ∀ᶠ r in 𝓝[>] n, ∀ e, ‖cw r e *
+      ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))‖ ≤ bound e) :
+    Tendsto (fun r => ∑' e, cw r e *
+      ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+        ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) (𝓝[>] n)
+      (𝓝 (∑' e, (radialKernel N (fun s => if s ≤ n then 1 else 0) e : ℝ) *
+        ((β : ℝ) * -K' n * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K n e : ℝ))) *
+        ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+          ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+          ∂(law (intensityProfile (cutoffKernel (d := d) N K n) β)))) := by
+  have hPiv : ∀ e : Sym2 (Fin d → ℤ), Tendsto (fun r : ℝ =>
+        ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+          ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+          ∂(law (intensityProfile (cutoffKernel N K r) β))) (𝓝[>] n)
+      (𝓝 (∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+          ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+          ∂(law (intensityProfile (cutoffKernel N K n) β)))) :=
+    fun e => continuousAt_pivotal_cutoff_uncapped_of_root_succ_moment
+      hKa hK' hK'c β p hp o hu hun hnR M hM hroot e
+  exact tendsto_tsum_flux_nhdsGT_of_dominated (n := n) (hn := hu.trans hun)
+    hKa hK' hK'c β cw hcw
+    (fun r e => ∫ ω, (((cluster (insert e ω) o).encard : ℝ≥0∞) ^ p -
+      ((cluster (ω \ {e}) o).encard : ℝ≥0∞) ^ p).toReal
+      ∂(law (intensityProfile (cutoffKernel (d := d) N K r) β))) hPiv bound hbound hbd
+
+end PercLib.Models.LongRange
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability
+
+/-! ### The strict side: the left limit
+
+From the left the strict radial weight `1 (N z < r)` returns to its own value `1 (N z < n)`: it
+does *not* pick up the exact-norm shell.  Together with the right-limit results above this pins
+the jump of the flux at a lattice norm to exactly that shell. -/
+
+/-- From the left the strict indicator is left-continuous: `1 (s < r) → 1 (s < n)` alone
+`𝓝[<] n`. -/
+theorem tendsto_indicator_lt_nhdsLT_lt {s n : ℝ} :
+    Tendsto (fun r : ℝ => (if s < r then (1 : ℝ) else 0)) (𝓝[<] n)
+      (𝓝 (if s < n then (1 : ℝ) else 0)) := by
+  by_cases h : s < n
+  · rw [ite_eq_left h]
+    have hmem : Ioi s ∈ 𝓝[<] n := nhdsWithin_le_nhds (isOpen_Ioi.mem_nhds h)
+    refine tendsto_const_nhds.congr' ?_
+    filter_upwards [hmem] with r hr
+    exact (ite_eq_left hr).symm
+  · rw [ite_eq_right h]
+    refine tendsto_const_nhds.congr' ?_
+    filter_upwards [self_mem_nhdsWithin] with r hr
+    exact (ite_eq_right (not_lt.2 (hr.le.trans (not_lt.1 h)))).symm
+
+/-- The radial kernel of a single unordered pair is left-continuous in the scale, with the strict
+weight `1 (N z < n)` as its left limit. -/
+theorem tendsto_coe_radialKernel_indicator_nhdsLT {d : ℕ} {N : Seminorm ℝ (Fin d → ℝ)}
+    (n : ℝ) (e : Sym2 (Fin d → ℤ)) :
+    Tendsto (fun r : ℝ => (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ))
+      (𝓝[<] n) (𝓝 (radialKernel N (fun s => if s < n then 1 else 0) e : ℝ)) := by
+  induction e using Sym2.ind with
+  | _ x y =>
+    by_cases hxy : x = y
+    · subst hxy
+      simp only [radialKernel_diag, NNReal.coe_zero]
+      exact tendsto_const_nhds
+    · have h1 : ∀ r : ℝ,
+          (radialKernel N (fun s => if s < r then 1 else 0) s(x, y) : ℝ) =
+            if N (Int.cast ∘ (x - y)) < r then 1 else 0 := by
+        intro r
+        rw [coe_radialKernel_of_ne (K := fun s => if s < r then 1 else 0) hxy
+          (by split <;> norm_num)]
+      simp only [h1]
+      exact tendsto_indicator_lt_nhdsLT_lt
+
+/-- Right continuity of the cut-off kernel in the scale, for any filter refining the
+neighbourhood filter of the scale.  This is the form needed on both sides of a corner. -/
+theorem tendsto_coe_cutoffKernel_of_le {d : ℕ} {N : ModelNorm (Fin d → ℝ)} {K : ℝ → ℝ}
+    (hKa : AntitoneOn K (Ioi 0)) (hKc : ContinuousOn K (Ioi 0)) {n : ℝ} (hn : 0 < n)
+    {l : Filter ℝ} (hl : l ≤ 𝓝 n) (e : Sym2 (Fin d → ℤ)) :
+    Tendsto (fun r : ℝ => (cutoffKernel N K r e : ℝ)) l (𝓝 (cutoffKernel N K n e : ℝ)) := by
+  induction e using Sym2.ind with
+  | _ x y =>
+    by_cases hxy : x = y
+    · subst hxy
+      simp only [cutoffKernel_def, radialKernel_diag, NNReal.coe_zero]
+      exact tendsto_const_nhds
+    · rw [coe_cutoffKernel_eq_max hKa hn hxy]
+      have hKca : ContinuousAt K n := hKc.continuousAt (isOpen_Ioi.mem_nhds hn)
+      have hKr : Tendsto K l (𝓝 (K n)) := hKca.mono_left hl
+      have hlim : Tendsto (fun r : ℝ => max (K (N (Int.cast ∘ (x - y))) - K r) 0) l
+          (𝓝 (max (K (N (Int.cast ∘ (x - y))) - K n) 0)) :=
+        (tendsto_const_nhds.sub hKr).max tendsto_const_nhds
+      have hmem : Ioi (0 : ℝ) ∈ l := hl (isOpen_Ioi.mem_nhds hn)
+      refine Tendsto.congr' ?_ hlim
+      filter_upwards [hmem] with r hr
+      exact (coe_cutoffKernel_eq_max hKa hr hxy).symm
+
+/-- The rate-and-exponential factor of the derivative weight converges to its value at `n` along
+any filter refining `𝓝 n`. -/
+theorem tendsto_cutoff_rate_exp_of_le {d : ℕ} {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) {n : ℝ} (hn : 0 < n)
+    {l : Filter ℝ} (hl : l ≤ 𝓝 n) (e : Sym2 (Fin d → ℤ)) :
+    Tendsto (fun r : ℝ => (β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ)))
+      l (𝓝 ((β : ℝ) * -K' n * Real.exp (-(β : ℝ) * (cutoffKernel N K n e : ℝ)))) := by
+  have hKc : ContinuousOn K (Ioi 0) := fun t ht => (hK' t ht).continuousAt.continuousWithinAt
+  have hK'ca : ContinuousAt K' n := hK'c.continuousAt (isOpen_Ioi.mem_nhds hn)
+  have hrate : Tendsto (fun r : ℝ => (β : ℝ) * -K' r) l (𝓝 ((β : ℝ) * -K' n)) :=
+    (hK'ca.mono_left hl).neg.const_mul (β : ℝ)
+  have hexp : Tendsto (fun r : ℝ => Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ))) l
+      (𝓝 (Real.exp (-(β : ℝ) * (cutoffKernel N K n e : ℝ)))) :=
+    (Real.continuous_exp.tendsto _).comp
+      ((tendsto_coe_cutoffKernel_of_le hKa hKc hn hl e).const_mul (-(β : ℝ)))
+  exact hrate.mul hexp
+
+/-- The derivative weight of a cut-off pair is left-continuous in the scale: from the left its
+limit is its own value at `n`, with the strict radial factor. -/
+theorem tendsto_cutoff_coeff_nhdsLT {d : ℕ} {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) {n : ℝ} (hn : 0 < n)
+    (e : Sym2 (Fin d → ℤ)) :
+    Tendsto (fun r : ℝ => (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel N K r e : ℝ))))
+      (𝓝[<] n)
+      (𝓝 ((radialKernel N (fun s => if s < n then 1 else 0) e : ℝ) *
+        ((β : ℝ) * -K' n * Real.exp (-(β : ℝ) * (cutoffKernel N K n e : ℝ))))) :=
+  (tendsto_coe_radialKernel_indicator_nhdsLT n e).mul
+    (tendsto_cutoff_rate_exp_of_le hKa hK' hK'c β hn nhdsWithin_le_nhds e)
+
+/-- **The aggregate left limit of the cut-off pivotal flux at a corner.**  From the left the whole
+series converges to its own value at `n`: no exact-norm shell is added.  The dominator needed here
+is one-sided too. -/
+theorem tendsto_tsum_flux_nhdsLT_of_dominated {d : ℕ} {N : ModelNorm (Fin d → ℝ)} {K K' : ℝ → ℝ}
+    (hKa : AntitoneOn K (Ioi 0)) (hK' : ∀ t, 0 < t → HasDerivAt K (K' t) t)
+    (hK'c : ContinuousOn K' (Ioi 0)) (β : ℝ≥0) {n : ℝ} (hn : 0 < n)
+    (f : ℝ → Sym2 (Fin d → ℤ) → ℝ)
+    (hf : ∀ r e, f r e = (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K r e : ℝ))))
+    (Piv : ℝ → Sym2 (Fin d → ℤ) → ℝ)
+    (hPiv : ∀ e, Tendsto (fun r => Piv r e) (𝓝[<] n) (𝓝 (Piv n e)))
+    (bound : Sym2 (Fin d → ℤ) → ℝ) (hbound : Summable bound)
+    (hbd : ∀ᶠ r in 𝓝[<] n, ∀ e, ‖f r e * Piv r e‖ ≤ bound e) :
+    Tendsto (fun r => ∑' e, f r e * Piv r e) (𝓝[<] n) (𝓝 (∑' e, f n e * Piv n e)) := by
+  have hlim : ∀ e : Sym2 (Fin d → ℤ), Tendsto (fun r : ℝ => f r e * Piv r e) (𝓝[<] n)
+      (𝓝 (f n e * Piv n e)) := by
+    intro e
+    simp only [hf]
+    have h1 : Tendsto (fun r : ℝ => (radialKernel N (fun s => if s < r then 1 else 0) e : ℝ) *
+        ((β : ℝ) * -K' r * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K r e : ℝ))))
+        (𝓝[<] n)
+        (𝓝 ((radialKernel N (fun s => if s < n then 1 else 0) e : ℝ) *
+          ((β : ℝ) * -K' n * Real.exp (-(β : ℝ) * (cutoffKernel (d := d) N K n e : ℝ))))) :=
+      tendsto_cutoff_coeff_nhdsLT hKa hK' hK'c β hn e
+    exact h1.mul (hPiv e)
+  exact tendsto_tsum_of_dominated_convergence hbound hlim hbd
+
+/-! ### The two-sided obstruction -/
+
+/-- If a function has different one-sided limits at `n`, it has no limit at `n`.  Applied to the
+cut-off flux at a lattice norm this is the exact corner obstruction: the right limit carries the
+closed ball, the left limit the strict ball, and the two differ by the exact-norm shell. -/
+theorem not_exists_tendsto_of_nhdsGT_nhdsLT_ne {Φ : ℝ → ℝ} {n L₁ L₂ : ℝ}
+    (h₁ : Tendsto Φ (𝓝[>] n) (𝓝 L₁)) (h₂ : Tendsto Φ (𝓝[<] n) (𝓝 L₂)) (hne : L₁ ≠ L₂) :
+    ¬ ∃ L, Tendsto Φ (𝓝 n) (𝓝 L) := by
+  rintro ⟨L, hL⟩
+  have hL₁ : L₁ = L := tendsto_nhds_unique h₁ (hL.mono_left nhdsWithin_le_nhds)
+  have hL₂ : L₂ = L := tendsto_nhds_unique h₂ (hL.mono_left nhdsWithin_le_nhds)
+  exact hne (hL₁.trans hL₂.symm)
+
+end PercLib.Models.LongRange
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability
+
+/-! ### The exact-norm shell as the exact corner gap -/
+
+/-- Pointwise, the closed-ball radial weight is the strict weight plus the weight of the
+displacements of norm exactly `n`.  On the diagonal all three vanish. -/
+theorem coe_radialKernel_closed_eq_strict_add_exact {d : ℕ} {N : Seminorm ℝ (Fin d → ℝ)}
+    (n : ℝ) (e : Sym2 (Fin d → ℤ)) :
+    (radialKernel N (fun s => if s ≤ n then 1 else 0) e : ℝ) =
+      (radialKernel N (fun s => if s < n then 1 else 0) e : ℝ) +
+        (radialKernel N (fun s => if s = n then 1 else 0) e : ℝ) := by
+  induction e using Sym2.ind with
+  | _ x y =>
+    by_cases hxy : x = y
+    · subst hxy
+      simp
+    · have h1 : (radialKernel N (fun s => if s ≤ n then 1 else 0) s(x, y) : ℝ) =
+          if N (Int.cast ∘ (x - y)) ≤ n then 1 else 0 := by
+        rw [coe_radialKernel_of_ne (K := fun s => if s ≤ n then 1 else 0) hxy
+          (by split <;> norm_num)]
+      have h2 : (radialKernel N (fun s => if s < n then 1 else 0) s(x, y) : ℝ) =
+          if N (Int.cast ∘ (x - y)) < n then 1 else 0 := by
+        rw [coe_radialKernel_of_ne (K := fun s => if s < n then 1 else 0) hxy
+          (by split <;> norm_num)]
+      have h3 : (radialKernel N (fun s => if s = n then 1 else 0) s(x, y) : ℝ) =
+          if N (Int.cast ∘ (x - y)) = n then 1 else 0 := by
+        rw [coe_radialKernel_of_ne (K := fun s => if s = n then 1 else 0) hxy
+          (by split <;> norm_num)]
+      rw [h1, h2, h3]
+      rcases lt_trichotomy (N (Int.cast ∘ (x - y))) n with h | h | h
+      · rw [ite_eq_left h.le, ite_eq_left h, ite_eq_right (ne_of_lt h)]
+        ring
+      · rw [ite_eq_left h.le, ite_eq_right (not_lt.2 h.ge), ite_eq_left h]
+        ring
+      · rw [ite_eq_right (not_le.2 h), ite_eq_right (not_lt.2 h.le),
+          ite_eq_right (ne_of_gt h)]
+        ring
+
+/-- Since the strict and exact weights are nonnegative, the strict weight alone is bounded by the
+closed-ball weight. -/
+theorem coe_radialKernel_strict_le_closed {d : ℕ} {N : Seminorm ℝ (Fin d → ℝ)}
+    (n : ℝ) (e : Sym2 (Fin d → ℤ)) :
+    (radialKernel N (fun s => if s < n then 1 else 0) e : ℝ) ≤
+      (radialKernel N (fun s => if s ≤ n then 1 else 0) e : ℝ) := by
+  have hid := coe_radialKernel_closed_eq_strict_add_exact (N := N) n e
+  have hex : (0 : ℝ) ≤ (radialKernel N (fun s => if s = n then 1 else 0) e : ℝ) :=
+    NNReal.coe_nonneg _
+  rw [hid]
+  linarith
+
+/-- `‖a * c * g‖ = a * |c| * |g|` for `a ≥ 0`, the form in which the weighted summands are
+compared. -/
+theorem norm_mul_abs_mul_abs {a c g : ℝ} (ha : 0 ≤ a) :
+    ‖a * c * g‖ = a * |c| * |g| := by
+  rw [Real.norm_eq_abs, abs_mul, abs_mul, abs_of_nonneg ha]
+
+/-- Replacing the strict radial weight by the closed-ball weight can only increase the norm of a
+weighted summand. -/
+theorem norm_mul_radialKernel_strict_le_closed {d : ℕ} {N : Seminorm ℝ (Fin d → ℝ)}
+    {n : ℝ} (e : Sym2 (Fin d → ℤ)) (c g : ℝ) :
+    ‖(radialKernel N (fun s => if s < n then 1 else 0) e : ℝ) * c * g‖ ≤
+      ‖(radialKernel N (fun s => if s ≤ n then 1 else 0) e : ℝ) * c * g‖ := by
+  have hstr : (0 : ℝ) ≤ (radialKernel N (fun s => if s < n then 1 else 0) e : ℝ) :=
+    NNReal.coe_nonneg _
+  have hle := coe_radialKernel_strict_le_closed (N := N) n e
+  rw [norm_mul_abs_mul_abs hstr, norm_mul_abs_mul_abs (hstr.trans hle)]
+  exact mul_le_mul_of_nonneg_right
+    (mul_le_mul_of_nonneg_right hle (abs_nonneg c)) (abs_nonneg g)
+
+/-- **The right limit of the flux is the left limit plus the exact-norm shell.**  If the
+closed-ball weighted series is absolutely summable at the corner, the closed-ball sum splits into
+the strict sum plus the sum over the displacements of norm exactly `n`.  Combining this with the
+one-sided limit theorems above gives `L₊ = L₋ + (exact-norm shell)`, so a non-vanishing shell is
+exactly the obstruction to a two-sided limit of the flux at a lattice norm. -/
+theorem tsum_radialKernel_closed_eq_strict_add_exact {d : ℕ} {N : Seminorm ℝ (Fin d → ℝ)}
+    {n c : ℝ} (g : Sym2 (Fin d → ℤ) → ℝ)
+    (hsum : Summable fun e =>
+      ‖(radialKernel N (fun s => if s ≤ n then 1 else 0) e : ℝ) * c * g e‖) :
+    (∑' e, (radialKernel N (fun s => if s ≤ n then 1 else 0) e : ℝ) * c * g e) =
+      (∑' e, (radialKernel N (fun s => if s < n then 1 else 0) e : ℝ) * c * g e) +
+        ∑' e, (radialKernel N (fun s => if s = n then 1 else 0) e : ℝ) * c * g e := by
+  have hstrict : Summable fun e =>
+      ‖(radialKernel N (fun s => if s < n then 1 else 0) e : ℝ) * c * g e‖ :=
+    Summable.of_nonneg_of_le (fun e => norm_nonneg _)
+      (fun e => norm_mul_radialKernel_strict_le_closed e c (g e)) hsum
+  have hexact : Summable fun e =>
+      ‖(radialKernel N (fun s => if s = n then 1 else 0) e : ℝ) * c * g e‖ := by
+    have hid := coe_radialKernel_closed_eq_strict_add_exact (N := N) n
+    refine Summable.of_nonneg_of_le (fun e => norm_nonneg _) (fun e => ?_) hsum
+    have hstr : (0 : ℝ) ≤ (radialKernel N (fun s => if s < n then 1 else 0) e : ℝ) :=
+      NNReal.coe_nonneg _
+    have hcl : (0 : ℝ) ≤ (radialKernel N (fun s => if s ≤ n then 1 else 0) e : ℝ) :=
+      NNReal.coe_nonneg _
+    have hle : (radialKernel N (fun s => if s = n then 1 else 0) e : ℝ) ≤
+        (radialKernel N (fun s => if s ≤ n then 1 else 0) e : ℝ) := by
+      have hh := hid e
+      linarith
+    rw [norm_mul_abs_mul_abs (NNReal.coe_nonneg _), norm_mul_abs_mul_abs hcl]
+    exact mul_le_mul_of_nonneg_right
+      (mul_le_mul_of_nonneg_right hle (abs_nonneg c)) (abs_nonneg (g e))
+  rw [← Summable.tsum_add hstrict.of_norm hexact.of_norm]
+  refine tsum_congr fun e => ?_
+  have hid := coe_radialKernel_closed_eq_strict_add_exact (N := N) n e
+  rw [hid]
+  ring
+
+end PercLib.Models.LongRange
