@@ -257,9 +257,11 @@ public import PercLib.Percolation.Bond.MomentDerivatives
 public import PercLib.Percolation.Bond.Multipoint.Defs
 public import PercLib.Percolation.Bond.Multipoint.Dilation
 public import PercLib.Percolation.Bond.Multipoint.Geometry
+public import PercLib.Percolation.Bond.Multipoint.JointCutWitness
 public import PercLib.Percolation.Bond.Multipoint.ShapeCount
 public import PercLib.Percolation.Bond.Multipoint.Sweep
 public import PercLib.Percolation.Bond.Multipoint.Tags.Dilation
+public import PercLib.Percolation.Bond.Multipoint.Tags.JointCutWitness
 public import PercLib.Percolation.Bond.Multipoint.Tags.SmallSets
 public import PercLib.Percolation.Bond.Multipoint.Ultrametric
 public import PercLib.Percolation.Bond.OptimizedClusterTail
