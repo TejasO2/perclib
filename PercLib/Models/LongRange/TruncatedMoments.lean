@@ -14307,3 +14307,122 @@ theorem tsum_radialKernel_closed_eq_strict_add_exact {d : ℕ} {N : Seminorm ℝ
   ring
 
 end PercLib.Models.LongRange
+
+namespace PercLib.Models.LongRange
+
+open PercLib.Analysis PercLib.Percolation.Bond PercLib.Probability MeasureTheory Set
+open scoped ENNReal NNReal Topology
+
+variable {d : ℕ}
+
+/-- **The root moment of the linear model equals one on the window.** For `r <= 1` the cut-off
+kernel vanishes identically, so the configuration is empty almost surely and the cluster of `o`
+is the singleton `{o}`. -/
+theorem lintegral_pow_encard_cluster_linear_eq_one (n : ℕ) {r : ℝ} (hr : r ≤ 1)
+    (o : Fin d → ℤ) :
+    (∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) ^ n
+      ∂(law (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => -s) r)
+        (1 : ℝ≥0)))) = 1 := by
+  rw [linear_intensityProfile_eq_zero_of_le_one hr]
+  have hae : (fun ω : Config (Fin d → ℤ) => ((cluster ω o).encard : ℝ≥0∞) ^ n)
+      =ᵐ[law (fun _ : Sym2 (Fin d → ℤ) => (0 : unitInterval))] fun _ => (1 : ℝ≥0∞) := by
+    filter_upwards [ae_eq_empty_zero_profile (d := d)] with ω hω
+    rw [hω, cluster_empty, Set.encard_singleton]
+    norm_num
+  rw [lintegral_congr_ae hae, lintegral_const, measure_univ, mul_one]
+
+
+theorem hasDerivAt_integral_linear_cutoff_pow_small_tail (p : ℕ) (hp : 1 ≤ p) :
+    HasDerivAt (fun r : ℝ => ∫ ω, (((cluster ω (0 : Fin d → ℤ)).encard : ℝ≥0∞) ^ p).toReal
+        ∂(law (intensityProfile (cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => -s) r)
+          (1 : ℝ≥0))))
+      (((1 : ℝ≥0) : ℝ) * -((fun _ : ℝ => -1) (1 / 2)) *
+        ∑ ℓ ∈ Finset.range p, (p.choose ℓ : ℝ) *
+          ∫ ω, (((cluster ω (0 : Fin d → ℤ)).encard : ℝ≥0∞).toReal) ^ (ℓ + 1) *
+            (∑' y : Fin d → ℤ,
+              (if normSeminorm ℝ (Fin d → ℝ) (Int.cast ∘ y) ≤ (1 / 2 : ℝ) then
+                (1 : ℝ) else 0) *
+              (conn (0 : Fin d → ℤ) y)ᶜ.indicator (fun _ => (1 : ℝ)) ω *
+              (((cluster ω y).encard : ℝ≥0∞).toReal) ^ (p - ℓ))
+            ∂(law (intensityProfile
+              (cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => -s) (1 / 2))
+              (1 : ℝ≥0))))
+      (1 / 2) := by
+  let cw : ℝ → Sym2 (Fin d → ℤ) → ℝ := fun r e =>
+    (radialKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => if s < r then 1 else 0) e : ℝ) *
+      ((1 : ℝ) * -((fun _ : ℝ => -1) r) *
+        Real.exp (-(1 : ℝ) *
+          (cutoffKernel (normSeminorm ℝ (Fin d → ℝ)) (fun s => -s) r e : ℝ)))
+  have hcw : ∀ (r : ℝ) (e : Sym2 (Fin d → ℤ)), cw r e =
+      (radialKernel (ModelNorm.ofNorm (Fin d → ℝ))
+        (fun s => if s < r then 1 else 0) e : ℝ) *
+        (((1 : ℝ≥0) : ℝ) * -((fun _ : ℝ => -1) r) *
+          Real.exp (-(((1 : ℝ≥0) : ℝ)) *
+            (cutoffKernel (ModelNorm.ofNorm (Fin d → ℝ)) (fun s => -s) r e : ℝ))) :=
+    fun _ _ => rfl
+  have hwzero : ∀ r ∈ Ioo (1 / 4 : ℝ) (3 / 4), ∀ e, cw r e = 0 := by
+    intro r hr e
+    exact linear_cw_eq_zero (d := d) (by linarith [hr.2]) e
+  have hcorner : ∀ z : Fin d → ℤ,
+      ModelNorm.ofNorm (Fin d → ℝ) (Int.cast ∘ z) ∉ Ioo (1 / 4 : ℝ) (3 / 4) := by
+    intro z hz
+    by_cases h : z = 0
+    · subst h
+      have h0 : ModelNorm.ofNorm (Fin d → ℝ) (Int.cast ∘ (0 : Fin d → ℤ)) = 0 := by simp
+      rw [h0] at hz
+      linarith [hz.1]
+    · have h1 : (1 : ℝ) ≤ ModelNorm.ofNorm (Fin d → ℝ) (Int.cast ∘ z) := by
+        simpa using one_le_normSeminorm_intCast (d := d) h
+      linarith [hz.2]
+  have hroot : ∀ r ∈ (Ioo (1 / 4 : ℝ) (3 / 4) ∪ {1} : Set ℝ),
+      (∫⁻ ω, ((cluster ω (0 : Fin d → ℤ)).encard : ℝ≥0∞) ^ (p + 1)
+        ∂(law (intensityProfile (cutoffKernel (d := d) (ModelNorm.ofNorm (Fin d → ℝ))
+          (fun s => -s) r) (1 : ℝ≥0)))) ≤ 1 := by
+    intro r hr
+    have hr1 : r ≤ 1 := by
+      rcases hr with hr | hr
+      · exact le_of_lt (by linarith [hr.2])
+      · rw [mem_singleton_iff] at hr
+        rw [hr]
+    have h := lintegral_pow_encard_cluster_linear_eq_one (d := d) (p + 1) hr1
+      (0 : Fin d → ℤ)
+    simp only [ModelNorm.toSeminorm_ofNorm] at h ⊢
+    rw [h]
+  have htail : ∀ r₀ ∈ Ioo (1 / 4 : ℝ) (3 / 4), ∀ ε > 0, ∃ U ∈ 𝓝 r₀,
+      ∃ F : Finset (Sym2 (Fin d → ℤ)), ∀ r ∈ U ∩ Ioo (1 / 4 : ℝ) (3 / 4),
+        ∑' e : ↥(F : Set (Sym2 (Fin d → ℤ)))ᶜ, ‖cw r e.1 *
+          ∫ ω, (((cluster (insert e.1 ω) (0 : Fin d → ℤ)).encard : ℝ≥0∞) ^ p -
+            ((cluster (ω \ {e.1}) (0 : Fin d → ℤ)).encard : ℝ≥0∞) ^ p).toReal
+            ∂(law (intensityProfile (cutoffKernel (d := d) (ModelNorm.ofNorm (Fin d → ℝ))
+              (fun s => -s) r) (1 : ℝ≥0)))‖ ≤ ε := by
+    intro r₀ _hr₀ ε hε
+    refine ⟨univ, Filter.univ_mem, ∅, ?_⟩
+    intro r hr
+    have hzero : ∀ e : ↥((∅ : Finset (Sym2 (Fin d → ℤ))) : Set (Sym2 (Fin d → ℤ)))ᶜ,
+        ‖cw r e.1 *
+          ∫ ω, (((cluster (insert e.1 ω) (0 : Fin d → ℤ)).encard : ℝ≥0∞) ^ p -
+            ((cluster (ω \ {e.1}) (0 : Fin d → ℤ)).encard : ℝ≥0∞) ^ p).toReal
+            ∂(law (intensityProfile (cutoffKernel (d := d) (ModelNorm.ofNorm (Fin d → ℝ))
+              (fun s => -s) r) (1 : ℝ≥0)))‖ = 0 := by
+      intro e
+      rw [hwzero r hr.2 e.1, zero_mul, norm_zero]
+    rw [tsum_congr hzero, tsum_zero]
+    exact hε.le
+  have key := hasDerivAt_integral_cutoff_pow_binomial_of_root_succ_moment_of_small_tail
+    (d := d) (N := ModelNorm.ofNorm (Fin d → ℝ)) (K := fun s => -s) (K' := fun _ => -1)
+    (R := 1) (u := (1 / 4 : ℝ)) (v := (3 / 4 : ℝ)) (r₀ := (1 / 2 : ℝ))
+    (by
+      intro a _ b _ hab
+      change -b ≤ -a
+      linarith)
+    (by
+      intro t _
+      exact (hasDerivAt_id t).neg)
+    (continuous_const : Continuous fun _ : ℝ => (-1 : ℝ)).continuousOn
+    (1 : ℝ≥0) p hp (1 : ℝ≥0∞) ENNReal.one_ne_top cw hcw
+    (by norm_num) (by norm_num) (by norm_num) (by norm_num)
+    hcorner hroot htail
+  simpa using key
+
+
+end PercLib.Models.LongRange
