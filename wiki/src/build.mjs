@@ -293,7 +293,7 @@ export function aboutPage(info, evidence, counts) {
     section(
       "licence",
       "Licence",
-      "<p>The Lean code and the tooling that builds this site are licensed under the Apache License, Version 2.0. The wiki prose is © Tom Hutchcroft, all rights reserved for now: it is published for reading only. Mathematics is typeset with KaTeX (MIT licence).</p>",
+      `<p>The Lean code and the tooling that builds this site are licensed under the Apache License, Version 2.0. The wiki prose is © Tom Hutchcroft and the PercLib contributors, licensed under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0)</a>; see <a href="${repositoryUrl}/blob/main/wiki/NOTICE">NOTICE</a>. Statements quoted from published papers remain their authors'. Suggested attribution: “PercLib wiki, T. Hutchcroft and contributors, https://tomhutchcroft.github.io/perclib/, CC BY 4.0”. Mathematics is typeset with KaTeX (MIT licence).</p>`,
     ) +
     section(
       "build",
