@@ -199,26 +199,6 @@ section Faces
 
 variable {d : ℕ}
 
-/-- A corner `x` of a face `f` of the box `Icc lo hi`, the face `f` read as a dual vertex in the
-box `Icc lo (hi - 1)` of the faces of the box, lies in the box. -/
-theorem mem_Icc_of_mem_Icc_sub_one {lo hi f x : LatticeSite d} (hf : f ∈ Icc lo (hi - 1))
-    (hx : x ∈ Icc f (f + 1)) : x ∈ Icc lo hi :=
-  ⟨hf.1.trans hx.1, fun i => by
-    have h₁ : x i ≤ f i + 1 := hx.2 i
-    have h₂ : f i ≤ hi i - 1 := hf.2 i
-    change x i ≤ hi i
-    omega⟩
-
-/-- A face with a corner in the box `Icc lo hi` lies in the box `Icc (lo - 1) hi` of the faces
-touching it. -/
-theorem mem_Icc_sub_one_of_mem_Icc {lo hi f x : LatticeSite d} (hx : x ∈ Icc lo hi)
-    (hxf : x ∈ Icc f (f + 1)) : f ∈ Icc (lo - 1) hi :=
-  ⟨fun i => by
-    have h₁ : lo i ≤ x i := hx.1 i
-    have h₂ : x i ≤ f i + 1 := hxf.2 i
-    change lo i - 1 ≤ f i
-    omega, fun i => (hxf.1 i).trans (hx.2 i)⟩
-
 /-- A point of the box `Icc lo hi` that is a corner of a face outside `Icc lo (hi - 1)` (a face
 not inside the box) lies on the boundary of the box. -/
 theorem mem_boxBoundary_of_notMem_Icc {lo hi f x : LatticeSite d} (hx : x ∈ Icc lo hi)
@@ -1015,19 +995,6 @@ theorem ite_mem_eq_sum_ite_dualEdge {E : Sym2 (LatticeSite 2)} (hE : E ∈ (zdGr
       ite_eq_right (k _ (Sym2.mem_mk_left _ _)), ite_eq_right (k _ (Sym2.mem_mk_left _ _)),
       ite_eq_right (k _ (Sym2.mem_mk_right _ _))]
     norm_num
-
-/-- The ends of an edge are corners of both faces of its dual edge. -/
-theorem mem_Icc_of_mem_dualEdge {e : Sym2 (LatticeSite 2)} (he : e ∈ (zdGraph 2).edgeSet)
-    {x h : LatticeSite 2} (hx : x ∈ e) (hh : h ∈ dualEdge e) : x ∈ Icc h (h + 1) := by
-  rw [mem_Icc_two_iff]
-  simp only [Pi.add_apply, Pi.one_apply]
-  obtain ⟨a, b, rfl | rfl⟩ := (mem_edgeSet_zdGraph_two_iff e).1 he
-  · rw [dualEdge_horizontal, Sym2.mem_iff, eq_vec_two_iff, eq_vec_two_iff] at hh
-    rw [Sym2.mem_iff, eq_vec_two_iff, eq_vec_two_iff] at hx
-    omega
-  · rw [dualEdge_vertical, Sym2.mem_iff, eq_vec_two_iff, eq_vec_two_iff] at hh
-    rw [Sym2.mem_iff, eq_vec_two_iff, eq_vec_two_iff] at hx
-    omega
 
 section Outer
 
