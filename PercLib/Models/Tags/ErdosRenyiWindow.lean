@@ -10,7 +10,7 @@ All mathematical inputs are proved in the imported modules.
 module
 
 public import PercLib.Meta.Tag
-public import PercLib.Models.ErdosRenyi.Window
+public import PercLib.Models.ErdosRenyi.Defs
 
 /-!
 # Erdős–Rényi critical-window scale: correspondence
