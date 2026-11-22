@@ -11,6 +11,9 @@ deprecated alias for one release where that is possible.
   `commonLevel`, `childHierarchy`, `translate`; `layerWeight`, `InStrictAncestor`, `InBlockLayer`, `layerKernel`,
   `blockLayerKernel`, `ancestorKernel`, `restrictedKernel`, `expectedBlockMax`, `blockScale`, `blockPairSum`,
   `IsGoodBlock`, `IsAncestrallyGood`. Additive; no existing name changed.
+- `frontier-dfs-pivot` (KRU2; audited APPROVE, `audit-r15-frontier-a`, sha `263cc67`): in new
+  `PercLib/Combinatorics/DFSPivot.lean` (namespace `PercLib.DFS`): `visitList`, `visit`, `coinOrder`, `coinRun`, `flipCoin`.
+  Additive; placement outside a `Defs.lean` file noted by the auditor as non-blocking.
 
 ### Stopped priority exploration (`priorityExploration`)
 
