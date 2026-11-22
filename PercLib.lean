@@ -261,6 +261,7 @@ public import PercLib.Percolation.Bond.IntrinsicRenewal
 public import PercLib.Percolation.Bond.LocalConnectivity
 public import PercLib.Percolation.Bond.LocalConvergence
 public import PercLib.Percolation.Bond.LocalFiniteness
+public import PercLib.Percolation.Bond.MarkedVolumeMoments
 public import PercLib.Percolation.Bond.MomentDerivativeBound
 public import PercLib.Percolation.Bond.MomentDerivativeTruncated
 public import PercLib.Percolation.Bond.MomentDerivatives
@@ -330,6 +331,7 @@ public import PercLib.Percolation.Bond.Tags.FiniteTriangle
 public import PercLib.Percolation.Bond.Tags.FiniteVolume
 public import PercLib.Percolation.Bond.Tags.FourthMoment
 public import PercLib.Percolation.Bond.Tags.IndependentLayer
+public import PercLib.Percolation.Bond.Tags.MarkedVolumeMoments
 public import PercLib.Percolation.Bond.Tags.OptimizedClusterTail
 public import PercLib.Percolation.Bond.Tags.RootGlobalPercolation
 public import PercLib.Percolation.Bond.Tags.SubcriticalBound
