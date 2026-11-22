@@ -242,7 +242,9 @@ narrowed.
   twice), and mixed colours only enter through interlacing.
 * The exploration is stated for any configuration and any box, not the strip: rule 5.
 * Step (a) is stated for the exploration itself (A1b's tail is about disjoint occurrence), in the
-  box `Icc lo (lo + ![k n, n + 1])` of A1b; the strip `[0, 4N] × [0, N]` is `k = 4`, `n = N - 1`.
+  box `Icc lo (lo + ![k n, n + 1])` of A1b. The strip `[0, 4N] × [0, N]` is not of that form; its
+  disjoint vertical crossings are disjoint vertical crossings of the wider box with `k = 5`,
+  `n = N - 1` (`N ≥ 5`), or the strip of the final statement can itself be taken of that form.
 
 ## Not done here
 
