@@ -16,7 +16,7 @@ public import PercLib.Probability.PredictableSwap
 public import Mathlib.MeasureTheory.Measure.WithDensity
 
 /-!
-# Adaptive Harris inequality
+# Adaptive Harris and BK inequalities
 
 Let `X, Y` be independent with law `μ = prodBernoulli p` on a finite set `E`, read by a
 decision tree of depth `n` which, before revealing the pair `(X e, Y e)` of a freshly queried
@@ -29,6 +29,11 @@ the steps before step `k`, the coordinate queried at step `k` is fresh whenever 
 so the fibre does not depend on it, and unsharing it can only lower the probability: this is
 a two-point covariance inequality in that coordinate.
 
+The same induction gives the adaptive BK inequality: the probability that there are witnesses
+for `A` in `X` and for `B` in `H` whose overlap avoids `S` is at most `μ(A) μ(B)`. Unsharing one
+coordinate can only raise that probability, by a four-case comparison of which witnesses may use
+the coordinate.
+
 ## Main results
 
 * `measure_inter_add_measure_inter_le`: for `P₀ ⊆ P₁` and `Q₀ ⊆ Q₁`,
@@ -37,9 +42,16 @@ a two-point covariance inequality in that coordinate.
   does not depend on `e`, does not decrease `P(X ∈ A, H ∈ B)`.
 * `answers_eq_of_agree`: the event that the first `k` revealed pairs equal a given history
   depends only on the coordinates that history queries.
-* `prodBernoulli_prod_hybrid_le_of_step`: the same monotonicity for the sharing decision of
-  one step of a predictable sharing tree.
+* `prodBernoulli_prod_apply_eq_sum_bool`: the pair law split at the two bits of one
+  coordinate.
+* `prodBernoulli_prod_sharedWitness_insert_le`: unsharing one coordinate `e`, on an event that
+  does not depend on `e`, does not decrease the probability of witnesses for `A` in `X` and for
+  `B` in `H` overlapping only off `S`.
+* `prodBernoulli_prod_le_of_step`, `prodBernoulli_prod_le_of_sharingTree`: for any family of
+  events with the one-coordinate monotonicity, sharing along a predictable sharing tree does
+  not decrease the probability.
 * `prodBernoulli_mul_le_prod_hybrid`: the adaptive Harris inequality.
+* `prodBernoulli_prod_sharedWitness_le_mul`: the adaptive BK inequality.
 -/
 
 @[expose] public section
@@ -66,6 +78,39 @@ namespace PercLib.Probability
 
 variable {E : Type*}
 
+/-- **Splitting the pair law at one coordinate.** For `ν = μ ⊗ μ` with `μ = prodBernoulli p`,
+`ν(T)` is the sum over the four values of the two bits at `e` of their weights times the
+probability of `T` after setting those two bits. -/
+theorem prodBernoulli_prod_apply_eq_sum_bool [Fintype E] (p : E → unitInterval) (e : E)
+    (T : Set (Set E × Set E)) :
+    (prodBernoulli p).prod (prodBernoulli p) T = ∑ i : Bool, ∑ j : Bool,
+      ((if i then unitInterval.toNNReal (p e) else unitInterval.toNNReal (σ (p e)) : ℝ≥0) :
+          ℝ≥0∞) *
+        ((if j then unitInterval.toNNReal (p e) else unitInterval.toNNReal (σ (p e)) : ℝ≥0) :
+          ℝ≥0∞) *
+        (prodBernoulli p).prod (prodBernoulli p)
+          (Prod.map (fun x => if i then insert e x else x \ {e})
+            (fun y => if j then insert e y else y \ {e}) ⁻¹' T) := by
+  classical
+  set μ := prodBernoulli p with hμdef
+  set f : Bool → Set E → Set E := fun b x => if b then insert e x else x \ {e} with hfdef
+  set w : Bool → ℝ≥0 := fun b =>
+    if b then unitInterval.toNNReal (p e) else unitInterval.toNNReal (σ (p e)) with hwdef
+  have hfm : ∀ b, Measurable (f b) := fun b => measurable_of_countable _
+  have hμ : μ = w true • μ.map (f true) + w false • μ.map (f false) := by
+    have h := prodBernoulli_eq_smul_add_smul p e
+    rw [← prodBernoulli_map_insert, ← prodBernoulli_map_diff_singleton] at h
+    exact h
+  have hmeas : MeasurableSet T := (Set.to_countable T).measurableSet
+  change μ.prod μ T = ∑ i : Bool, ∑ j : Bool, (w i : ℝ≥0∞) * w j *
+    μ.prod μ (Prod.map (f i) (f j) ⁻¹' T)
+  conv_lhs => rw [hμ]
+  simp only [Measure.add_prod, Measure.prod_add, Measure.prod_smul_left,
+    Measure.prod_smul_right, Measure.map_prod_map _ _ (hfm _) (hfm _), Measure.add_apply,
+    Measure.smul_apply, Measure.map_apply (measurable_of_countable _) hmeas, Fintype.sum_bool,
+    ENNReal.smul_def, smul_eq_mul]
+  ring
+
 /-- **Sharing one more coordinate.** Let `C` be an event of the pair `(X, Y)` that does not
 depend on the two bits at `e`, and let `e ∉ S₀`. If `A, B` are both increasing or both
 decreasing, adding `e` to the shared set does not decrease `P(C, X ∈ A, X ∩ S ∪ Y \ S ∈ B)`. -/
@@ -85,22 +130,9 @@ theorem prodBernoulli_prod_hybrid_le_insert [Fintype E] (p : E → unitInterval)
   set f : Bool → Set E → Set E := fun b x => if b then insert e x else x \ {e} with hfdef
   set w : Bool → ℝ≥0 := fun b =>
     if b then unitInterval.toNNReal (p e) else unitInterval.toNNReal (σ (p e)) with hwdef
-  have hfm : ∀ b, Measurable (f b) := fun b => measurable_of_countable _
-  have hμ : μ = w true • μ.map (f true) + w false • μ.map (f false) := by
-    have h := prodBernoulli_eq_smul_add_smul p e
-    rw [← prodBernoulli_map_insert, ← prodBernoulli_map_diff_singleton] at h
-    exact h
   have hdec : ∀ T : Set (Set E × Set E), ν T = ∑ i : Bool, ∑ j : Bool,
-      (w i : ℝ≥0∞) * w j * ν (Prod.map (f i) (f j) ⁻¹' T) := by
-    intro T
-    have hmeas : MeasurableSet T := (Set.to_countable T).measurableSet
-    rw [hνdef]
-    conv_lhs => rw [hμ]
-    simp only [Measure.add_prod, Measure.prod_add, Measure.prod_smul_left,
-      Measure.prod_smul_right, Measure.map_prod_map _ _ (hfm _) (hfm _), Measure.add_apply,
-      Measure.smul_apply, Measure.map_apply (measurable_of_countable _) hmeas, Fintype.sum_bool,
-      ENNReal.smul_def, smul_eq_mul]
-    ring
+      (w i : ℝ≥0∞) * w j * ν (Prod.map (f i) (f j) ⁻¹' T) := fun T =>
+    prodBernoulli_prod_apply_eq_sum_bool p e T
   have hagree : ∀ i j (ω : Set E × Set E) a, a ≠ e →
       (a ∈ ω.1 ↔ a ∈ f i ω.1) ∧ (a ∈ ω.2 ↔ a ∈ f j ω.2) := by
     intro i j ω a ha
@@ -167,6 +199,159 @@ theorem prodBernoulli_prod_hybrid_le_insert [Fintype E] (p : E → unitInterval)
           w true * w false * (ν (P true ∩ Q true) + ν (P false ∩ Q false)) := by gcongr
     _ = _ := by ring
 
+/-- **Unsharing one more coordinate, for witnesses.** Let `C` be an event of the pair `(X, Y)`
+that does not depend on the two bits at `e`, and let `e ∉ S₀`. Consider the event that there are
+witnesses `I ⊆ X` for `A` and `J ⊆ X ∩ S ∪ Y \ S` for `B` (every configuration containing the
+witness lies in the event) with `I ∩ J` disjoint from `S`. Removing `e` from the shared set
+`insert e S₀` does not decrease its probability on `C`. -/
+theorem prodBernoulli_prod_sharedWitness_insert_le [Fintype E] (p : E → unitInterval) (e : E)
+    {C : Set (Set E × Set E)}
+    (hC : ∀ x y x' y' : Set E, (∀ a, a ≠ e → (a ∈ x ↔ a ∈ x') ∧ (a ∈ y ↔ a ∈ y')) →
+      (x, y) ∈ C → (x', y') ∈ C)
+    {S₀ : Set E} (he : e ∉ S₀) (A B : Set (Set E)) :
+    (prodBernoulli p).prod (prodBernoulli p)
+        (C ∩ {ω | ∃ I₁ J : Set E, I₁ ⊆ ω.1 ∧ (∀ z, I₁ ⊆ z → z ∈ A) ∧
+          J ⊆ ω.1 ∩ insert e S₀ ∪ ω.2 \ insert e S₀ ∧ (∀ z, J ⊆ z → z ∈ B) ∧
+          I₁ ∩ J ⊆ (insert e S₀)ᶜ}) ≤
+      (prodBernoulli p).prod (prodBernoulli p)
+        (C ∩ {ω | ∃ I₁ J : Set E, I₁ ⊆ ω.1 ∧ (∀ z, I₁ ⊆ z → z ∈ A) ∧
+          J ⊆ ω.1 ∩ S₀ ∪ ω.2 \ S₀ ∧ (∀ z, J ⊆ z → z ∈ B) ∧ I₁ ∩ J ⊆ S₀ᶜ}) := by
+  classical
+  set ν := (prodBernoulli p).prod (prodBernoulli p) with hνdef
+  set f : Bool → Set E → Set E := fun b x => if b then insert e x else x \ {e} with hfdef
+  set w : Bool → ℝ≥0 := fun b =>
+    if b then unitInterval.toNNReal (p e) else unitInterval.toNNReal (σ (p e)) with hwdef
+  have hdec : ∀ T : Set (Set E × Set E), ν T = ∑ i : Bool, ∑ j : Bool,
+      (w i : ℝ≥0∞) * w j * ν (Prod.map (f i) (f j) ⁻¹' T) := fun T =>
+    prodBernoulli_prod_apply_eq_sum_bool p e T
+  have hagree : ∀ i j (ω : Set E × Set E) a, a ≠ e →
+      (a ∈ ω.1 ↔ a ∈ f i ω.1) ∧ (a ∈ ω.2 ↔ a ∈ f j ω.2) := by
+    intro i j ω a ha
+    cases i <;> cases j <;> simp [f, ha]
+  have hc : ∀ i j (ω : Set E × Set E), Prod.map (f i) (f j) ω ∈ C ↔ ω ∈ C := by
+    intro i j ω
+    constructor
+    · exact hC _ _ ω.1 ω.2 fun a ha =>
+        ⟨(hagree i j ω a ha).1.symm, (hagree i j ω a ha).2.symm⟩
+    · exact hC ω.1 ω.2 _ _ (hagree i j ω)
+  have hH0 : ∀ i j (x y : Set E), f i x ∩ S₀ ∪ f j y \ S₀ = f j (x ∩ S₀ ∪ y \ S₀) := by
+    intro i j x y
+    ext a
+    by_cases ha : a = e
+    · subst ha
+      cases i <;> cases j <;> simp [f, he]
+    · cases i <;> cases j <;> simp [f, ha]
+  have hH1 : ∀ i j (x y : Set E),
+      f i x ∩ insert e S₀ ∪ f j y \ insert e S₀ = f i (x ∩ S₀ ∪ y \ S₀) := by
+    intro i j x y
+    ext a
+    by_cases ha : a = e
+    · subst ha
+      cases i <;> cases j <;> simp [f, he]
+    · cases i <;> cases j <;> simp [f, ha]
+  set K : Bool → Bool → Set (Set E × Set E) := fun a b => C ∩ {ω | ∃ I₁ J : Set E,
+    I₁ ⊆ f a ω.1 ∧ (∀ z, I₁ ⊆ z → z ∈ A) ∧ J ⊆ f b (ω.1 ∩ S₀ ∪ ω.2 \ S₀) ∧
+      (∀ z, J ⊆ z → z ∈ B) ∧ I₁ ∩ J ⊆ S₀ᶜ} with hKdef
+  set L : Bool → Set (Set E × Set E) := fun a => C ∩ {ω | ∃ I₁ J : Set E,
+    I₁ ⊆ f a ω.1 ∧ (∀ z, I₁ ⊆ z → z ∈ A) ∧ J ⊆ f a (ω.1 ∩ S₀ ∪ ω.2 \ S₀) ∧
+      (∀ z, J ⊆ z → z ∈ B) ∧ I₁ ∩ J ⊆ (insert e S₀)ᶜ} with hLdef
+  have hpre0 : ∀ i j, Prod.map (f i) (f j) ⁻¹' (C ∩ {ω | ∃ I₁ J : Set E, I₁ ⊆ ω.1 ∧
+      (∀ z, I₁ ⊆ z → z ∈ A) ∧ J ⊆ ω.1 ∩ S₀ ∪ ω.2 \ S₀ ∧ (∀ z, J ⊆ z → z ∈ B) ∧
+        I₁ ∩ J ⊆ S₀ᶜ}) = K i j := by
+    intro i j
+    ext ω
+    simp only [mem_preimage, mem_inter_iff, mem_ofPred_eq, hc, Prod.map_fst, Prod.map_snd, hH0,
+      K]
+  have hpre1 : ∀ i j, Prod.map (f i) (f j) ⁻¹' (C ∩ {ω | ∃ I₁ J : Set E, I₁ ⊆ ω.1 ∧
+      (∀ z, I₁ ⊆ z → z ∈ A) ∧ J ⊆ ω.1 ∩ insert e S₀ ∪ ω.2 \ insert e S₀ ∧
+        (∀ z, J ⊆ z → z ∈ B) ∧ I₁ ∩ J ⊆ (insert e S₀)ᶜ}) = L i := by
+    intro i j
+    ext ω
+    simp only [mem_preimage, mem_inter_iff, mem_ofPred_eq, hc, Prod.map_fst, Prod.map_snd, hH1,
+      L]
+  have hft : ∀ x : Set E, f false x = x \ {e} := fun x => rfl
+  have htt : ∀ x : Set E, f true x = insert e x := fun x => rfl
+  have hL0 : L false = K false false := by
+    ext ω
+    simp only [L, K, mem_inter_iff, mem_ofPred_eq, hft]
+    refine and_congr_right fun _ => exists_congr fun I₁ => exists_congr fun J => ?_
+    refine and_congr_right fun hI => and_congr_right fun _ => and_congr_right fun _ =>
+      and_congr_right fun _ => ?_
+    have heI : e ∉ I₁ := fun h => (hI h).2 rfl
+    constructor
+    · exact fun h a ha => fun hs => h ha (mem_insert_of_mem _ hs)
+    · intro h a ha hs
+      rcases hs with rfl | hs
+      · exact heI ha.1
+      · exact h ha hs
+  have hL1 : L true = K true false ∪ K false true := by
+    ext ω
+    simp only [L, K, mem_inter_iff, mem_union, mem_ofPred_eq, hft, htt]
+    constructor
+    · rintro ⟨hω, I₁, J, hI, hA, hJ, hB, hIJ⟩
+      have hS₀ : I₁ ∩ J ⊆ S₀ᶜ := fun a ha hs => hIJ ha (mem_insert_of_mem _ hs)
+      by_cases heJ : e ∈ J
+      · have heI : e ∉ I₁ := fun h => hIJ ⟨h, heJ⟩ (mem_insert _ _)
+        refine Or.inr ⟨hω, I₁, J, fun a ha => ⟨?_, ?_⟩, hA, hJ, hB, hS₀⟩
+        · rcases hI ha with rfl | h
+          · exact absurd ha heI
+          · exact h
+        · rintro rfl
+          exact heI ha
+      · refine Or.inl ⟨hω, I₁, J, hI, hA, fun a ha => ⟨?_, ?_⟩, hB, hS₀⟩
+        · rcases hJ ha with rfl | h
+          · exact absurd ha heJ
+          · exact h
+        · rintro rfl
+          exact heJ ha
+    · rintro (⟨hω, I₁, J, hI, hA, hJ, hB, hIJ⟩ | ⟨hω, I₁, J, hI, hA, hJ, hB, hIJ⟩)
+      · refine ⟨hω, I₁, J, hI, hA, fun a ha => mem_insert_of_mem _ (hJ ha).1, hB, ?_⟩
+        intro a ha hs
+        rcases hs with rfl | hs
+        · exact (hJ ha.2).2 rfl
+        · exact hIJ ha hs
+      · refine ⟨hω, I₁, J, fun a ha => mem_insert_of_mem _ (hI ha).1, hA, hJ, hB, ?_⟩
+        intro a ha hs
+        rcases hs with rfl | hs
+        · exact (hI ha.1).2 rfl
+        · exact hIJ ha hs
+  have hfsub : ∀ x, f false x ⊆ f true x := fun x => by
+    simp only [f]
+    exact sdiff_subset.trans (subset_insert _ _)
+  have hKmono : ∀ a b a' b', (a = true ∨ a = a') → (b = true ∨ b = b') →
+      K a' b' ⊆ K a b := by
+    rintro a b a' b' ha hb ω ⟨hω, I₁, J, hI, hA, hJ, hB, hIJ⟩
+    refine ⟨hω, I₁, J, ?_, hA, ?_, hB, hIJ⟩
+    · rcases ha with rfl | rfl
+      · cases a' <;> [exact hI.trans (hfsub _); exact hI]
+      · exact hI
+    · rcases hb with rfl | rfl
+      · cases b' <;> [exact hJ.trans (hfsub _); exact hJ]
+      · exact hJ
+  have hmeasK : MeasurableSet (K false true) := (Set.to_countable _).measurableSet
+  have key : ν (K true false ∪ K false true) + ν (K false false) ≤
+      ν (K true false) + ν (K false true) := by
+    rw [← measure_union_add_inter _ hmeasK]
+    gcongr
+    exact subset_inter (hKmono _ _ _ _ (Or.inl rfl) (Or.inr rfl))
+      (hKmono _ _ _ _ (Or.inr rfl) (Or.inl rfl))
+  have hU : K true false ∪ K false true ⊆ K true true :=
+    union_subset (hKmono _ _ _ _ (Or.inl rfl) (Or.inl rfl))
+      (hKmono _ _ _ _ (Or.inl rfl) (Or.inl rfl))
+  rw [hdec, hdec]
+  simp only [hpre0, hpre1, hL0, hL1, Fintype.sum_bool]
+  calc (w true : ℝ≥0∞) * w true * ν (K true false ∪ K false true) +
+        w true * w false * ν (K true false ∪ K false true) +
+        (w false * w true * ν (K false false) + w false * w false * ν (K false false))
+      = w true * w true * ν (K true false ∪ K false true) +
+          w false * w false * ν (K false false) +
+          w true * w false * (ν (K true false ∪ K false true) + ν (K false false)) := by ring
+    _ ≤ w true * w true * ν (K true true) + w false * w false * ν (K false false) +
+          w true * w false * (ν (K true false) + ν (K false true)) := by
+        gcongr _ * ?_ + _ + _ * ?_
+        exact measure_mono hU
+    _ = _ := by ring
+
 section Tree
 
 variable {n : ℕ} (next : (k : Fin n) → (Fin k.val → Bool × Bool) → E)
@@ -213,10 +398,18 @@ theorem answers_eq_of_agree
   · rw [(hrun ω' j).2, (hrun ω j).2, hω', hωj]
     exact ha2.symm
 
-/-- **Unsharing one step.** Let `S₀` and `S₁` be the sets shared by a predictable sharing tree
-strictly before step `k` and up to step `k`. If `A, B` are both increasing or both decreasing,
-then `P(X ∈ A, X ∩ S₀ ∪ Y \ S₀ ∈ B) ≤ P(X ∈ A, X ∩ S₁ ∪ Y \ S₁ ∈ B)`. -/
-theorem prodBernoulli_prod_hybrid_le_of_step [Fintype E] (p : E → unitInterval)
+/-- **Unsharing one step, for any event family.** Let `F S` be events of the pair `(X, Y)`
+indexed by a shared set `S`, such that on every event `C` not depending on the two bits at a
+coordinate `e ∉ S₀`, adding `e` to `S₀` does not decrease `P(C ∩ F S₀)`. Let `S₀` and `S₁` be
+the sets shared by a predictable sharing tree strictly before step `k` and up to step `k`. Then
+`P(F S₀) ≤ P(F S₁)`. -/
+theorem prodBernoulli_prod_le_of_step [Fintype E] (p : E → unitInterval)
+    (F : Set E → Set (Set E × Set E))
+    (hF : ∀ (e : E) (S₀ : Set E) (C : Set (Set E × Set E)),
+      (∀ x y x' y' : Set E, (∀ a, a ≠ e → (a ∈ x ↔ a ∈ x') ∧ (a ∈ y ↔ a ∈ y')) →
+        (x, y) ∈ C → (x', y') ∈ C) → e ∉ S₀ →
+      (prodBernoulli p).prod (prodBernoulli p) (C ∩ F S₀) ≤
+        (prodBernoulli p).prod (prodBernoulli p) (C ∩ F (insert e S₀)))
     (hrun : ∀ ω k,
       ((answers ω k).1 = true ↔
         next k (fun j => answers ω ⟨j.val, j.isLt.trans k.isLt⟩) ∈ ω.1) ∧
@@ -232,12 +425,9 @@ theorem prodBernoulli_prod_hybrid_le_of_step [Fintype E] (p : E → unitInterval
         next j (fun i => answers ω ⟨i.val, i.isLt.trans j.isLt⟩) = e)
     (hS₁ : ∀ ω e, e ∈ S₁ ω ↔ ∃ j : Fin n, j ≤ k ∧
       share j (fun i => answers ω ⟨i.val, i.isLt.trans j.isLt⟩) = true ∧
-        next j (fun i => answers ω ⟨i.val, i.isLt.trans j.isLt⟩) = e)
-    {A B : Set (Set E)}
-    (hAB : (IsUpperSet A ∧ IsUpperSet B) ∨ (IsLowerSet A ∧ IsLowerSet B)) :
-    (prodBernoulli p).prod (prodBernoulli p) {ω | ω.1 ∈ A ∧ ω.1 ∩ S₀ ω ∪ ω.2 \ S₀ ω ∈ B} ≤
-      (prodBernoulli p).prod (prodBernoulli p)
-        {ω | ω.1 ∈ A ∧ ω.1 ∩ S₁ ω ∪ ω.2 \ S₁ ω ∈ B} := by
+        next j (fun i => answers ω ⟨i.val, i.isLt.trans j.isLt⟩) = e) :
+    (prodBernoulli p).prod (prodBernoulli p) {ω | ω ∈ F (S₀ ω)} ≤
+      (prodBernoulli p).prod (prodBernoulli p) {ω | ω ∈ F (S₁ ω)} := by
   classical
   set ν := (prodBernoulli p).prod (prodBernoulli p) with hν
   set g : Set E × Set E → (Fin k.val → Bool × Bool) :=
@@ -288,17 +478,19 @@ theorem prodBernoulli_prod_hybrid_le_of_step [Fintype E] (p : E → unitInterval
       · exact ⟨j, hj.le, hs⟩
       · exact ⟨k, le_rfl, by rw [hk]; exact hs⟩
   have hT : ∀ (S : Set E × Set E → Set E) (S' : Set E), (∀ ω ∈ g ⁻¹' {h}, S ω = S') →
-      {ω | ω.1 ∈ A ∧ ω.1 ∩ S ω ∪ ω.2 \ S ω ∈ B} ∩ g ⁻¹' {h} =
-        g ⁻¹' {h} ∩ {ω | ω.1 ∈ A ∧ ω.1 ∩ S' ∪ ω.2 \ S' ∈ B} := by
+      {ω | ω ∈ F (S ω)} ∩ g ⁻¹' {h} = g ⁻¹' {h} ∩ F S' := by
     intro S S' hS
     ext ω
     constructor
     · rintro ⟨h1, h2⟩
-      rw [mem_ofPred_eq, hS ω h2] at h1
-      exact ⟨h2, h1⟩
+      refine ⟨h2, ?_⟩
+      rw [← hS ω h2]
+      exact h1
     · rintro ⟨h2, h1⟩
-      rw [mem_ofPred_eq, ← hS ω h2] at h1
-      exact ⟨h1, h2⟩
+      refine ⟨?_, h2⟩
+      change ω ∈ F (S ω)
+      rw [hS ω h2]
+      exact h1
   rw [hT S₀ S₀' h₀, hT S₁ _ h₁]
   cases hsk : share k h
   · simp
@@ -306,7 +498,7 @@ theorem prodBernoulli_prod_hybrid_le_of_step [Fintype E] (p : E → unitInterval
     rcases (g ⁻¹' {h}).eq_empty_or_nonempty with hempty | ⟨ω₀, hω₀⟩
     · simp [hempty]
     have hk0 : (fun i : Fin k.val => answers ω₀ ⟨i.val, i.isLt.trans k.isLt⟩) = h := hω₀
-    refine prodBernoulli_prod_hybrid_le_insert p (next k h) ?_ ?_ hAB
+    refine hF (next k h) S₀' _ ?_ ?_
     · intro x y x' y' hxy hmem
       refine answers_eq_of_agree next answers hrun k h hmem fun j hj => ?_
       have hne : next j (fun i => h ⟨i.val, i.isLt.trans hj⟩) ≠ next k h := by
@@ -317,6 +509,60 @@ theorem prodBernoulli_prod_hybrid_le_of_step [Fintype E] (p : E → unitInterval
       have := hfresh (answers ω₀) k (by rw [hk0]; exact hsk) j hj
       rw [hk0, hhist ω₀ hω₀ j hj] at this
       exact this hn
+
+/-- **Removing all sharing, for any event family.** Let `F S` be events of the pair `(X, Y)`
+indexed by a shared set `S` such that, on every event not depending on the two bits at a
+coordinate `e ∉ S₀`, adding `e` to `S₀` does not decrease the probability. For a predictable
+sharing tree with shared set `S`, `P(F ∅) ≤ P(F S)`. -/
+theorem prodBernoulli_prod_le_of_sharingTree [Fintype E] (p : E → unitInterval)
+    (F : Set E → Set (Set E × Set E))
+    (hF : ∀ (e : E) (S₀ : Set E) (C : Set (Set E × Set E)),
+      (∀ x y x' y' : Set E, (∀ a, a ≠ e → (a ∈ x ↔ a ∈ x') ∧ (a ∈ y ↔ a ∈ y')) →
+        (x, y) ∈ C → (x', y') ∈ C) → e ∉ S₀ →
+      (prodBernoulli p).prod (prodBernoulli p) (C ∩ F S₀) ≤
+        (prodBernoulli p).prod (prodBernoulli p) (C ∩ F (insert e S₀)))
+    (hrun : ∀ ω k,
+      ((answers ω k).1 = true ↔
+        next k (fun j => answers ω ⟨j.val, j.isLt.trans k.isLt⟩) ∈ ω.1) ∧
+      ((answers ω k).2 = true ↔
+        next k (fun j => answers ω ⟨j.val, j.isLt.trans k.isLt⟩) ∈ ω.2))
+    (hfresh : ∀ (h : Fin n → Bool × Bool) (k : Fin n),
+      share k (fun j => h ⟨j.val, j.isLt.trans k.isLt⟩) = true → ∀ j : Fin n, j < k →
+        next j (fun i => h ⟨i.val, i.isLt.trans j.isLt⟩) ≠
+          next k (fun i => h ⟨i.val, i.isLt.trans k.isLt⟩))
+    (S : Set E × Set E → Set E)
+    (hS : ∀ ω e, e ∈ S ω ↔ ∃ k,
+      share k (fun j => answers ω ⟨j.val, j.isLt.trans k.isLt⟩) = true ∧
+        next k (fun j => answers ω ⟨j.val, j.isLt.trans k.isLt⟩) = e) :
+    (prodBernoulli p).prod (prodBernoulli p) (F ∅) ≤
+      (prodBernoulli p).prod (prodBernoulli p) {ω | ω ∈ F (S ω)} := by
+  classical
+  set T : ℕ → Set E × Set E → Set E := fun m ω => {e | ∃ j : Fin n, j.val < m ∧
+      share j (fun i => answers ω ⟨i.val, i.isLt.trans j.isLt⟩) = true ∧
+        next j (fun i => answers ω ⟨i.val, i.isLt.trans j.isLt⟩) = e} with hTdef
+  have hT0 : ∀ ω, T 0 ω = ∅ := fun ω => by
+    ext e
+    simp [T]
+  have hTn : ∀ ω, T n ω = S ω := fun ω => by
+    ext e
+    rw [hS]
+    simp only [T, mem_ofPred_eq]
+    exact exists_congr fun j => by simp [j.isLt]
+  have hmono : ∀ m ≤ n, (prodBernoulli p).prod (prodBernoulli p) {ω | ω ∈ F (T 0 ω)} ≤
+        (prodBernoulli p).prod (prodBernoulli p) {ω | ω ∈ F (T m ω)} := by
+    intro m
+    induction m with
+    | zero => exact fun _ => le_rfl
+    | succ m ih =>
+      intro hm
+      refine (ih (by omega)).trans ?_
+      exact prodBernoulli_prod_le_of_step next share answers p F hF hrun hfresh ⟨m, hm⟩
+        (T m) (T (m + 1)) (fun ω e => Iff.rfl)
+        (fun ω e => exists_congr fun j => and_congr_left'
+          (by rw [Fin.le_iff_val_le_val]; exact Nat.lt_succ_iff))
+  have h := hmono n le_rfl
+  simp only [hT0, hTn] at h
+  exact h
 
 /-- **Adaptive Harris inequality.** Let `E` be finite, `μ = prodBernoulli p`, and let
 `ω = (X, Y)` have law `μ ⊗ μ`, read by a predictable sharing tree (`next`, `share`, `answers`)
@@ -340,38 +586,68 @@ theorem prodBernoulli_mul_le_prod_hybrid [Fintype E] (p : E → unitInterval)
     (hAB : (IsUpperSet A ∧ IsUpperSet B) ∨ (IsLowerSet A ∧ IsLowerSet B)) :
     prodBernoulli p A * prodBernoulli p B ≤
       (prodBernoulli p).prod (prodBernoulli p) {ω | ω.1 ∈ A ∧ ω.1 ∩ S ω ∪ ω.2 \ S ω ∈ B} := by
-  classical
-  set T : ℕ → Set E × Set E → Set E := fun m ω => {e | ∃ j : Fin n, j.val < m ∧
-      share j (fun i => answers ω ⟨i.val, i.isLt.trans j.isLt⟩) = true ∧
-        next j (fun i => answers ω ⟨i.val, i.isLt.trans j.isLt⟩) = e} with hTdef
-  have hT0 : ∀ ω, T 0 ω = ∅ := fun ω => by
-    ext e
-    simp [T]
-  have hTn : ∀ ω, T n ω = S ω := fun ω => by
-    ext e
-    rw [hS]
-    simp only [T, mem_ofPred_eq]
-    exact exists_congr fun j => by simp [j.isLt]
-  have hmono : ∀ m ≤ n, (prodBernoulli p).prod (prodBernoulli p)
-      {ω | ω.1 ∈ A ∧ ω.1 ∩ T 0 ω ∪ ω.2 \ T 0 ω ∈ B} ≤
-        (prodBernoulli p).prod (prodBernoulli p)
-          {ω | ω.1 ∈ A ∧ ω.1 ∩ T m ω ∪ ω.2 \ T m ω ∈ B} := by
-    intro m
-    induction m with
-    | zero => exact fun _ => le_rfl
-    | succ m ih =>
-      intro hm
-      refine (ih (by omega)).trans ?_
-      exact prodBernoulli_prod_hybrid_le_of_step next share answers p hrun hfresh ⟨m, hm⟩
-        (T m) (T (m + 1)) (fun ω e => Iff.rfl)
-        (fun ω e => exists_congr fun j => and_congr_left'
-          (by rw [Fin.le_iff_val_le_val]; exact Nat.lt_succ_iff))
-        hAB
-  have h := hmono n le_rfl
-  simp only [hT0, hTn, inter_empty, empty_union, sdiff_empty] at h
+  have h := prodBernoulli_prod_le_of_sharingTree next share answers p
+    (fun S₀ => {ω | ω.1 ∈ A ∧ ω.1 ∩ S₀ ∪ ω.2 \ S₀ ∈ B})
+    (fun e S₀ C hC he => prodBernoulli_prod_hybrid_le_insert p e hC he hAB) hrun hfresh S hS
+  simp only [inter_empty, empty_union, sdiff_empty] at h
   refine le_of_eq_of_le ?_ h
   rw [← Measure.prod_prod]
   rfl
+
+/-- **Adaptive BK inequality.** Let `E` be finite, `μ = prodBernoulli p`, and let `ω = (X, Y)`
+have law `μ ⊗ μ`, read by a predictable sharing tree (`next`, `share`, `answers`) with shared set
+`S` as in `prodBernoulli_prod_map_predictableSwap`. Let `H = X ∩ S ∪ Y \ S`. The probability
+that there are witnesses `I ⊆ X` for `A` and `J ⊆ H` for `B` (every configuration containing
+the witness lies in the event) with `I ∩ J` disjoint from `S` is at most `μ(A) μ(B)`. -/
+theorem prodBernoulli_prod_sharedWitness_le_mul [Fintype E] (p : E → unitInterval)
+    (hrun : ∀ ω k,
+      ((answers ω k).1 = true ↔
+        next k (fun j => answers ω ⟨j.val, j.isLt.trans k.isLt⟩) ∈ ω.1) ∧
+      ((answers ω k).2 = true ↔
+        next k (fun j => answers ω ⟨j.val, j.isLt.trans k.isLt⟩) ∈ ω.2))
+    (hfresh : ∀ (h : Fin n → Bool × Bool) (k : Fin n),
+      share k (fun j => h ⟨j.val, j.isLt.trans k.isLt⟩) = true → ∀ j : Fin n, j < k →
+        next j (fun i => h ⟨i.val, i.isLt.trans j.isLt⟩) ≠
+          next k (fun i => h ⟨i.val, i.isLt.trans k.isLt⟩))
+    (S : Set E × Set E → Set E)
+    (hS : ∀ ω e, e ∈ S ω ↔ ∃ k,
+      share k (fun j => answers ω ⟨j.val, j.isLt.trans k.isLt⟩) = true ∧
+        next k (fun j => answers ω ⟨j.val, j.isLt.trans k.isLt⟩) = e)
+    (A B : Set (Set E)) :
+    (prodBernoulli p).prod (prodBernoulli p)
+        {ω | ∃ I₁ J : Set E, I₁ ⊆ ω.1 ∧ (∀ z, I₁ ⊆ z → z ∈ A) ∧
+          J ⊆ ω.1 ∩ S ω ∪ ω.2 \ S ω ∧ (∀ z, J ⊆ z → z ∈ B) ∧ I₁ ∩ J ⊆ (S ω)ᶜ} ≤
+      prodBernoulli p A * prodBernoulli p B := by
+  classical
+  set ν := (prodBernoulli p).prod (prodBernoulli p) with hνdef
+  set K : Set E → Set (Set E × Set E) := fun S₀ => {ω | ∃ I₁ J : Set E, I₁ ⊆ ω.1 ∧
+    (∀ z, I₁ ⊆ z → z ∈ A) ∧ J ⊆ ω.1 ∩ S₀ ∪ ω.2 \ S₀ ∧ (∀ z, J ⊆ z → z ∈ B) ∧ I₁ ∩ J ⊆ S₀ᶜ}
+    with hKdef
+  have hmeas : ∀ T : Set (Set E × Set E), MeasurableSet T := fun T =>
+    (Set.to_countable T).measurableSet
+  have hF : ∀ (e : E) (S₀ : Set E) (C : Set (Set E × Set E)),
+      (∀ x y x' y' : Set E, (∀ a, a ≠ e → (a ∈ x ↔ a ∈ x') ∧ (a ∈ y ↔ a ∈ y')) →
+        (x, y) ∈ C → (x', y') ∈ C) → e ∉ S₀ →
+      ν (C ∩ (K S₀)ᶜ) ≤ ν (C ∩ (K (insert e S₀))ᶜ) := by
+    intro e S₀ C hC he
+    have h := prodBernoulli_prod_sharedWitness_insert_le p e hC he A B
+    have h₀ := measure_inter_add_sdiff (μ := ν) C (hmeas (K S₀))
+    have h₁ := measure_inter_add_sdiff (μ := ν) C (hmeas (K (insert e S₀)))
+    rw [← sdiff_eq, ← sdiff_eq,
+      ENNReal.eq_sub_of_add_eq (measure_ne_top ν _) ((add_comm _ _).trans h₀),
+      ENNReal.eq_sub_of_add_eq (measure_ne_top ν _) ((add_comm _ _).trans h₁)]
+    exact tsub_le_tsub_left h _
+  have h := prodBernoulli_prod_le_of_sharingTree next share answers p (fun S₀ => (K S₀)ᶜ) hF
+    hrun hfresh S hS
+  change ν (K ∅)ᶜ ≤ ν {ω | ω ∈ K (S ω)}ᶜ at h
+  rw [prob_compl_eq_one_sub (hmeas _), prob_compl_eq_one_sub (hmeas _),
+    ENNReal.sub_le_sub_iff_left prob_le_one ENNReal.one_ne_top] at h
+  refine h.trans ?_
+  rw [← Measure.prod_prod]
+  refine measure_mono ?_
+  rintro ω ⟨I₁, J, hI, hA, hJ, hB, -⟩
+  simp only [inter_empty, empty_union, sdiff_empty] at hJ
+  exact ⟨hA _ hI, hB _ hJ⟩
 
 end Tree
 
