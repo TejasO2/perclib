@@ -131,6 +131,7 @@ public import PercLib.Models.NormalizedSmallIntensityLine
 public import PercLib.Models.Planar.Arms.ConnectionComparison
 public import PercLib.Models.Planar.Arms.Defs
 public import PercLib.Models.Planar.Arms.IncipientCluster
+public import PercLib.Models.Planar.Arms.Interlacing
 public import PercLib.Models.Planar.Arms.OneArm
 public import PercLib.Models.Planar.Arms.QuadDuality
 public import PercLib.Models.Planar.Arms.Separator
