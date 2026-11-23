@@ -1068,10 +1068,10 @@ theorem separable_of_forall {ω : Config (LatticeSite 2)} {lo hi lo₂ hi₂ : L
 
 /-! ### Nolin's local separation lemma -/
 
-/-- **Local separation in a strip, any of the two geometries.** For every `δ > 0` there are `η > 0`
-and `N₀` such that, uniformly over the laws with crossing bounds `c` up to `L`, for `N₀ ≤ N ≤ L`
-and `k ∈ {0, 1}`, with probability at least `1 - δ` the following holds for the open box
-`Icc lo hi = [lo₀, lo₀ + 4N] × [lo₁, lo₁ + N]` and the box of faces
+/-- **Local separation in a strip, any of the two geometries.** For every `δ > 0` there are
+`0 < η ≤ 1` and `N₀` such that, uniformly over the laws with crossing bounds `c` up to `L`, for
+`N₀ ≤ N ≤ L` and `k ∈ {0, 1}`, with probability at least `1 - δ` the following holds for the open
+box `Icc lo hi = [lo₀, lo₀ + 4N] × [lo₁, lo₁ + N]` and the box of faces
 `Icc lo₂ hi₂ = [lo₀ - k, hi₀ - 1 + k] × [lo₁ - 1, hi₁]`. Every family of crossings from bottom to
 top, each open (an open walk in `Icc lo hi` from its bottom row to its top row) or dual (a walk of
 faces of `Icc lo₂ hi₂` from its bottom row to its top row along dual-open dual edges crossing edges
@@ -1085,7 +1085,7 @@ The boxes enter as variables with their defining equations (eleven hypotheses in
 the two instances, `exists_law_separable_ge` (`k = 0`) and `exists_law_separable_ge_arm` (`k = 1`),
 are read off without rewriting the event. -/
 theorem exists_law_separable_ge_aux (c : ℕ → ℝ≥0∞) {δ : ℝ≥0∞} (hδ : 0 < δ) :
-    ∃ η : ℝ, 0 < η ∧ ∃ N₀ : ℕ, ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
+    ∃ η : ℝ, 0 < η ∧ η ≤ 1 ∧ ∃ N₀ : ℕ, ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
       CrossingBounds q L c → ∀ N : ℕ, N₀ ≤ N → (N : ℕ∞) ≤ L →
       ∀ (k : ℤ) (lo hi lo₂ hi₂ elo ehi : LatticeSite 2), 0 ≤ k → k ≤ 1 →
       hi = ![lo 0 + 4 * N, lo 1 + N] → lo₂ = ![lo 0 - k, lo 1 - 1] → hi₂ = ![hi 0 - 1 + k, hi 1] →
@@ -1122,7 +1122,7 @@ theorem exists_law_separable_ge_aux (c : ℕ → ℝ≥0∞) {δ : ℝ≥0∞} (
                 (b' i + (⌊Real.sqrt η * N⌋₊ : LatticeSite 2))) x l} := by
   by_cases hc : 0 < c 6 ∧ 0 < c 7
   swap
-  · exact ⟨1, one_pos, 0, fun q L h => absurd ⟨h.pos 6, h.pos 7⟩ hc⟩
+  · exact ⟨1, one_pos, le_rfl, 0, fun q L h => absurd ⟨h.pos 6, h.pos 7⟩ hc⟩
   obtain ⟨hc6, hc7⟩ := hc
   -- the number of steps of the explorations and the number of scales
   have hr₁ : 1 - c 6 < 1 := ENNReal.sub_lt_self ENNReal.one_ne_top one_ne_zero hc6.ne'
@@ -1136,7 +1136,11 @@ theorem exists_law_separable_ge_aux (c : ℕ → ℝ≥0∞) {δ : ℝ≥0∞} (
     ENNReal.div_pos_iff.2 ⟨hδ2.ne', ENNReal.natCast_ne_top _⟩
   obtain ⟨J, hJ⟩ := Filter.eventually_atTop.1
     ((ENNReal.tendsto_pow_atTop_nhds_zero_of_lt_one hr₂).eventually (gt_mem_nhds hε))
-  refine ⟨(1 / ((16 * 8 ^ J : ℕ) : ℝ)) ^ 2, by positivity, (16 * 8 ^ J) ^ 2,
+  have hD1 : (1 : ℝ) ≤ ((16 * 8 ^ J : ℕ) : ℝ) := by
+    have : 1 ≤ 16 * 8 ^ J := Nat.one_le_iff_ne_zero.2 (by positivity)
+    exact_mod_cast this
+  refine ⟨(1 / ((16 * 8 ^ J : ℕ) : ℝ)) ^ 2, by positivity,
+    pow_le_one₀ (by positivity) (div_le_one_of_le₀ hD1 (by positivity)), (16 * 8 ^ J) ^ 2,
     fun q L h N hN hNL k lo hi lo₂ hi₂ elo ehi hk hk1 hhi hlo₂ hhi₂ helo hehi => ?_⟩
   subst helo hehi
   -- the coordinates of the boxes
@@ -1406,7 +1410,7 @@ theorem exists_law_separable_ge (c : ℕ → ℝ≥0∞) {δ : ℝ≥0∞} (hδ 
             cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
               (Icc (b' i - (⌊Real.sqrt η * N⌋₊ : LatticeSite 2))
                 (b' i + (⌊Real.sqrt η * N⌋₊ : LatticeSite 2))) x l} := by
-  obtain ⟨η, hη, N₀, hsep⟩ := exists_law_separable_ge_aux c hδ
+  obtain ⟨η, hη, -, N₀, hsep⟩ := exists_law_separable_ge_aux c hδ
   refine ⟨η, hη, N₀, fun q L h N hN hNL => (hsep q L h N hN hNL 0 0 ![4 * (N : ℤ), N] ![0, -1]
     ![4 * (N : ℤ) - 1, N] 0 ![4 * (N : ℤ), N] le_rfl zero_le_one
     (eq_vec_two_iff.2 ⟨by simp, by simp⟩) (eq_vec_two_iff.2 ⟨by simp, by simp⟩)
@@ -1472,7 +1476,7 @@ theorem exists_law_separable_ge_arm (c : ℕ → ℝ≥0∞) {δ : ℝ≥0∞} (
             cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
               (Icc (b' i - (⌊Real.sqrt η * N⌋₊ : LatticeSite 2))
                 (b' i + (⌊Real.sqrt η * N⌋₊ : LatticeSite 2))) x l} := by
-  obtain ⟨η, hη, N₀, hsep⟩ := exists_law_separable_ge_aux c hδ
+  obtain ⟨η, hη, -, N₀, hsep⟩ := exists_law_separable_ge_aux c hδ
   refine ⟨η, hη, N₀, fun q L h N hN hNL => (hsep q L h N hN hNL 1 ![1, 0] ![4 * (N : ℤ) + 1, N]
     ![0, -1] ![4 * (N : ℤ) + 1, N] 0 ![4 * (N : ℤ) + 2, N] zero_le_one le_rfl
     (eq_vec_two_iff.2 ⟨by simp only [Matrix.cons_val_zero]; ring, by simp⟩)
