@@ -10,6 +10,10 @@ problems were found** in the draft target of `separation-a.md`; they are recorde
 counterexample and a proposed faithful statement. The user should confirm the statement before
 A2c-2 proves it.
 
+**Update (A2c-2, `separation-d.md`).** The user approved both corrections on 2026-11-22, and
+`exists_law_separable_ge` is proved in the proposed form (`Arms/SeparationLemma.lean`). A2 is
+finished.
+
 New files, both proof-only (no definition, no tag, no `…Input`; `Arms/Defs.lean` and
 `Planar/Defs.lean` unchanged); everything uses only `propext`, `Classical.choice`, `Quot.sound`:
 
