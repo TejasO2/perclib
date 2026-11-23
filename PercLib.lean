@@ -131,6 +131,7 @@ public import PercLib.Models.NormalizedSmallIntensityLine
 public import PercLib.Models.Planar.Arms.ColourInversion
 public import PercLib.Models.Planar.Arms.ConnectionComparison
 public import PercLib.Models.Planar.Arms.Defs
+public import PercLib.Models.Planar.Arms.HalfPlaneExponents
 public import PercLib.Models.Planar.Arms.IncipientCluster
 public import PercLib.Models.Planar.Arms.Interlacing
 public import PercLib.Models.Planar.Arms.MultiArmBasics
