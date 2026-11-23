@@ -80,6 +80,25 @@ theorem mem_dropLast_support_of_ne {u v w : V} {p : G.Walk u v} (hw : w ∈ p.su
   rw [← p.dropLast_support_concat, List.mem_append, List.mem_singleton] at hw
   exact hw.resolve_right h
 
+omit [DecidableEq V] in
+/-- A vertex of the support of the first part of an appended walk, other than its last entry, is
+in the support of the appended walk without its last entry. -/
+theorem mem_dropLast_support_append_left {u v w x : V} {p : G.Walk u v} (q : G.Walk v w)
+    (hx : x ∈ p.support.dropLast) : x ∈ (p.append q).support.dropLast := by
+  rw [support_append]
+  by_cases hq : q.support.tail = []
+  · rwa [hq, List.append_nil]
+  · rw [List.dropLast_append_of_ne_nil hq]
+    exact List.mem_append_left _ (List.dropLast_subset _ hx)
+
+/-- A vertex of the support of the part of a walk before one of its vertices, other than its last
+entry, is in the support of the walk without its last entry. -/
+theorem mem_dropLast_support_of_mem_dropLast_takeUntil {u v w x : V} {p : G.Walk u v}
+    (hw : w ∈ p.support) (hx : x ∈ (p.takeUntil w hw).support.dropLast) :
+    x ∈ p.support.dropLast := by
+  rw [← p.take_spec hw]
+  exact mem_dropLast_support_append_left _ hx
+
 end SimpleGraph.Walk
 
 namespace PercLib.Models.Planar
@@ -571,13 +590,17 @@ theorem exists_reroute_aux (h1 : lo 1 < hi 1) (hle : lo ≤ hi)
         (∀ i ∈ S, ∀ j ∈ S, a i 0 < a j 0 → w i < w j) ∧
         (∀ i ∈ S, (∀ j ∈ S, a j 0 ≤ a i 0) →
           ∀ x ∈ (P i).2.2.support, x ≠ (P i).2.1 → ∀ w' < W, x ∉ (Γ (A w')).support) ∧
+        (∀ i ∈ S, ∀ x ∈ (P i).2.2.support, x ≠ (P i).2.1 → ∀ w' < w i,
+          x ∉ (Γ (A w')).support) ∧
+        (∀ i ∈ S, ∀ x ∈ (P i).2.2.support, x ≠ (P i).2.1 → x ∈ (γ i).support.dropLast) ∧
         ∀ i ∈ S, ∀ j ∈ S, i ≠ j → ∀ x, x ∈ (P i).2.2.support ∨ x ∈ (R i).2.2.support →
           x ∉ (P j).2.2.support ∧ x ∉ (R j).2.2.support := by
   classical
   induction S using Finset.induction_on_max_value (fun i => a i 0) with
   | empty =>
     intro _ _ _ _ _ W _ _ _
-    refine ⟨fun _ => 0, fun _ => ⟨0, 0, .nil⟩, fun _ => ⟨0, 0, .nil⟩, ?_, ?_, ?_, ?_⟩ <;> simp
+    refine ⟨fun _ => 0, fun _ => ⟨0, 0, .nil⟩, fun _ => ⟨0, 0, .nil⟩, ?_, ?_, ?_, ?_, ?_, ?_⟩ <;>
+      simp
   | insert r S hrS hmax ih =>
     intro hS ha hb hG hdisj W hWu hadm hmeet
     have hS' : ∀ i ∈ S, i ∈ insert r S := fun i hi => Finset.mem_insert_of_mem hi
@@ -623,6 +646,12 @@ theorem exists_reroute_aux (h1 : lo 1 < hi 1) (hle : lo ≤ hi)
       fun y hy hyh w' hw' hyw => hq₀ y
         (SimpleGraph.Walk.mem_dropLast_support_of_ne (q₀.support_bypass_subset_support hy) hyh)
         ⟨w', hw', hyw⟩
+    have hqrdrop : ∀ y ∈ qr.support, y ≠ h₀ → y ∈ (γ r).support.dropLast := fun y hy hyh => by
+      have hy₀ : y ∈ q₀.support.dropLast :=
+        SimpleGraph.Walk.mem_dropLast_support_of_ne (q₀.support_bypass_subset_support hy) hyh
+      have hy₁ := SimpleGraph.Walk.mem_dropLast_support_append_left s₀ hy₀
+      rw [hqs] at hy₁
+      exact SimpleGraph.Walk.mem_dropLast_support_of_mem_dropLast_takeUntil hx hy₁
     have hrrΓ : ∀ y ∈ rr.support, y ∈ (Γ (A wr)).support := fun y hy =>
       (Γ (A wr)).support_dropUntil_subset_support hhr
         (((Γ (A wr)).dropUntil h₀ hhr).support_bypass_subset_support hy)
@@ -631,7 +660,8 @@ theorem exists_reroute_aux (h1 : lo 1 < hi 1) (hle : lo ≤ hi)
         (((Γ (A wr)).dropUntil h₀ hhr).edges_bypass_subset_edges he)
     have hqrS : ∀ y ∈ qr.support, y ∈ Icc lo hi := fun y hy => hS r hr y (hqrγ y hy)
     -- the other members meet a chosen crossing of index `< wr`: cut them first
-    obtain ⟨w, P, R, hPR, hmono, hfirst, hdisj'⟩ := ih (fun i hi => hS i (hS' i hi))
+    obtain ⟨w, P, R, hPR, hmono, hfirst, hfirst', hdrop, hdisj'⟩ :=
+      ih (fun i hi => hS i (hS' i hi))
       (fun i hi => ha i (hS' i hi)) (fun i hi => hb i (hS' i hi)) (fun i hi => hG i (hS' i hi))
       (fun i hi j hj => hdisj i (hS' i hi) j (hS' j hj)) wr (by omega)
       (fun w' hw' => hadm w' (by omega)) fun k hk =>
@@ -729,7 +759,7 @@ theorem exists_reroute_aux (h1 : lo 1 < hi 1) (hle : lo ≤ hi)
     have hRk : ∀ k ∈ S, Function.update R r ⟨h₀, d (A wr), rr⟩ k = R k := fun k hk =>
       Function.update_of_ne (hrne k hk) _ _
     refine ⟨Function.update w r wr, Function.update P r ⟨a r, h₀, qr⟩,
-      Function.update R r ⟨h₀, d (A wr), rr⟩, ?_, ?_, ?_, ?_⟩
+      Function.update R r ⟨h₀, d (A wr), rr⟩, ?_, ?_, ?_, ?_, ?_, ?_⟩
     · intro i hi
       rcases Finset.mem_insert.1 hi with rfl | hi'
       · rw [hwr', hPr, hRr]
@@ -752,6 +782,18 @@ theorem exists_reroute_aux (h1 : lo 1 < hi 1) (hle : lo ≤ hi)
       · rw [hPr]
         exact hqrfirst
       · exact absurd (himax r hr) (not_le.2 (hlt i hi'))
+    · intro i hi
+      rcases Finset.mem_insert.1 hi with rfl | hi'
+      · rw [hPr, hwr']
+        exact fun y hy hyh w' hw' => hqrfirst y hy hyh w' (by omega)
+      · rw [hPk i hi', hwk i hi']
+        exact hfirst' i hi'
+    · intro i hi
+      rcases Finset.mem_insert.1 hi with rfl | hi'
+      · rw [hPr]
+        exact hqrdrop
+      · rw [hPk i hi']
+        exact hdrop i hi'
     · intro i hi j hj hij y hy
       rcases Finset.mem_insert.1 hi with rfl | hi' <;>
         rcases Finset.mem_insert.1 hj with rfl | hj'
@@ -806,7 +848,10 @@ theorem exists_reroute_of_exploration (h1 : lo 1 < hi 1) (hle : lo ≤ hi)
       (∀ i ∈ S, ∀ x ∈ (γ' i).2.support, x ∈ (γ i).support ∨ x ∈ (Γ (A (w i))).support) ∧
       (∀ i ∈ S, ∀ e ∈ (γ' i).2.edges, e ∈ G) ∧
       (∀ i ∈ S, ∀ x ∈ (γ' i).2.support, x ∈ Icc lo hi) ∧
-      ∀ i ∈ S, ∀ j ∈ S, i ≠ j → ∀ x ∈ (γ' i).2.support, x ∉ (γ' j).2.support := by
+      (∀ i ∈ S, ∀ j ∈ S, i ≠ j → ∀ x ∈ (γ' i).2.support, x ∉ (γ' j).2.support) ∧
+      (∀ i ∈ S, ∀ x ∈ (γ' i).2.support,
+        x ∈ (γ i).support.dropLast ∨ x ∈ (Γ (A (w i))).support) ∧
+      ∀ i ∈ S, ∀ e ∈ (γ' i).2.edges, ∀ y ∈ e, ∀ w' < w i, y ∉ (Γ (A w')).support := by
   classical
   -- the first step at which the explored cluster reaches the right column
   have hex : ∃ v, v ≤ u ∧ ∃ f ∈ A v, f 0 = hi 0 := ⟨u, le_rfl, hu⟩
@@ -814,7 +859,8 @@ theorem exists_reroute_of_exploration (h1 : lo 1 < hi 1) (hle : lo ≤ hi)
   have hA₀ := fun v (hv : v ≤ Nat.find hex) => hA v (hv.trans hu₀u)
   have hadm : ∀ w < Nat.find hex, ∀ f ∈ A w, f 0 ≠ hi 0 := fun w hw f hf hf0 =>
     Nat.find_min hex hw ⟨by omega, f, hf, hf0⟩
-  obtain ⟨w, P, R, hPR, hmono, -, hdisj'⟩ := exists_reroute_aux h1 hle hΓ hA γ S hγ ha hb hγG
+  obtain ⟨w, P, R, hPR, hmono, -, hfirst', hdrop, hdisj'⟩ :=
+    exists_reroute_aux h1 hle hΓ hA γ S hγ ha hb hγG
     hdisj (Nat.find hex) (by omega) hadm fun i hi =>
       exists_mem_support_of_exploration h1 hle hA₀ hu₀f (γ i) (hγ i hi) (ha i hi) (hb i hi)
         (hγG i hi)
@@ -853,7 +899,8 @@ theorem exists_reroute_of_exploration (h1 : lo 1 < hi 1) (hle : lo ≤ hi)
     exact ⟨(forall_mem_of_exploration h1 hΓ hA hwi (hadm _ (hPR i hi).1)).1, hS''⟩
   refine ⟨w, γ', fun i hi => ⟨by have := (hPR i hi).1; omega, hadm _ (hPR i hi).1,
     (hγ'S i hi).1⟩, hmono, hwd, fun i hi x hx => ?_, fun i hi e he => ?_,
-    fun i hi x hx => ?_, fun i hi j hj hij x hx hx' => ?_⟩
+    fun i hi x hx => ?_, fun i hi j hj hij x hx hx' => ?_, fun i hi x hx => ?_,
+    fun i hi e he y hy w' hw' => ?_⟩
   · obtain ⟨-, -, -, -, -, -, hPγ, -, hRΓ, -⟩ := hPR i hi
     rcases ((hγ'S i hi).2.1 x).1 hx with h | h
     · exact Or.inl (hPγ x h)
@@ -870,6 +917,27 @@ theorem exists_reroute_of_exploration (h1 : lo 1 < hi 1) (hle : lo ≤ hi)
     rcases ((hγ'S j hj).2.1 x).1 hx' with h | h
     · exact h₁.1 h
     · exact h₁.2 h
+  · obtain ⟨-, -, hP2, -, -, -, -, -, hRΓ, -⟩ := hPR i hi
+    rcases ((hγ'S i hi).2.1 x).1 hx with h | h
+    · by_cases hxc : x = (P i).2.1
+      · refine Or.inr (hRΓ x ?_)
+        rw [hxc, hP2]
+        exact (R i).2.2.start_mem_support
+      · exact Or.inl (hdrop i hi x h hxc)
+    · exact Or.inr (hRΓ x h)
+  · obtain ⟨hwi, -, hP2, -, -, -, -, -, hRΓ, -⟩ := hPR i hi
+    have hwiu : w i ≤ u := by omega
+    have hΓdis := (forall_mem_of_exploration h1 hΓ hA hwiu (hadm _ hwi)).2
+    have hRst : (P i).2.1 ∈ (Γ (A (w i))).support := by
+      rw [hP2]
+      exact hRΓ _ (R i).2.2.start_mem_support
+    rcases (hγ'S i hi).2.2 e he with h | h
+    · have hyP := mem_support_of_mem_edge _ h hy
+      by_cases hyc : y = (P i).2.1
+      · rw [hyc]
+        exact hΓdis _ hRst w' hw'
+      · exact hfirst' i hi y hyP hyc w' hw'
+    · exact hΓdis y (hRΓ y (mem_support_of_mem_edge _ h hy)) w' hw'
 
 end Greedy
 
