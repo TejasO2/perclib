@@ -17,7 +17,10 @@ A3b-0 session (§10) proved it: Lemma 15 in the arm box, `exists_law_separable_g
 crossings meeting the top row only at their ends (`exists_law_separable_ge` unchanged). The resumed
 A3b-1 session (§11) did items 1 and 3 of §5: Lemma 15 on the four sides of `B_R(z)` at any centre
 (`exists_law_separable_ge_sides`) and the outer separation step for colour sequences without packs
-(`exists_separating_event`, `exists_law_multiArmEvent_inter_not_separated_le`). Next: A3b-2 (items 4
+(`exists_separating_event`, `exists_law_multiArmEvent_inter_not_separated_le`). On the user's
+decision of 2026-11-23 ("Yes, new Defs file") the separated event of the outer step became a
+definition, `outerSeparatedArmEvent`, in the new interface module `Arms/Separation/Defs.lean` (§12);
+the outer step is restated with it, with definitionally equal statements. Next: A3b-2 (items 4
 and 5). Nothing in `Arms/Defs.lean` or `Planar/Defs.lean` was changed. Local commits only, nothing
 pushed.
 
@@ -906,7 +909,8 @@ iteration) will restate it in at least four more statements, with the inner vari
 annulus) beside it. **Proposal (the user's call; not done):** a definition, e.g.
 `separatedArmEvent σ z r R η N : Set (Config (LatticeSite 2))` with its API (membership lemma,
 monotonicity in `η`… only where true, measurability), in `Arms/Defs.lean` through a small interface
-PR. The user decided "inline" on 2026-11-22; this package kept it inline.
+PR. The user decided "inline" on 2026-11-22; this package kept it inline. **Done on the user's word
+of 2026-11-23, in a new file instead of `Arms/Defs.lean`: §12.**
 
 ### 11.6 Errata and observations
 
@@ -958,3 +962,224 @@ PR. The user decided "inline" on 2026-11-22; this package kept it inline.
 * The large set-builder events were generated from one template, so the four sides, the determination
   lemma and the side steps match by definitional unfolding (`![a, b] 1 ≡ b`, `let` bodies). Module
   builds: `SeparationSides` about 10 s, `OuterSeparation` about 15 s.
+
+## 12. The separated event (definition)
+
+On the user's decision of 2026-11-23 ("Yes, new Defs file"), the separated event of the outer step
+(§11.2's inline `SEPARATED`) is now a definition, in the new module
+`PercLib/Models/Planar/Arms/Separation/Defs.lean` (596 lines: 3 definitions, 16 theorems, 2
+examples), which imports only `Arms/Defs.lean`. `Arms/Defs.lean` and `Planar/Defs.lean` (open
+interface PRs #11 and #12) are unchanged. Commits:
+
+* `2332e20` **move** (no new mathematics): `dualConfig_inter_eq_of_inter_eq` moves from
+  `Arms/QuasiMultiplicativity.lean` (A3a, proof file) to the new module, which needs it for the
+  determination lemma; same name and statement; its proof uses `dualEdgeEquiv.right_inv` instead of
+  `dualEdge_map_add_one_dualEdge` (a proof file); `QuasiMultiplicativity.lean` imports the new module.
+* `4b8801a` **interface**: the three definitions and their API (below), two non-vacuity examples.
+* `d125d04` **proof-only**: `OuterSeparation.lean` restated with the definitions (below).
+* this note's commit (docs only).
+
+Gate: `scripts/gate.sh main` **passed on `d125d04`** (axiom audit 10199 constants; the expected
+interface NOTICE, no other notice; 5.8 min). This note's commit changes only `docs/`.
+
+### 12.1 Design
+
+Three levels, so that a single arm's fence, a family's separation and the event can each be named
+in later statements:
+
+```lean
+def HasOuterFence (ω : Config (LatticeSite 2)) (c : Bool) (z : LatticeSite 2) (R M K : ℕ)
+    {a b : LatticeSite 2} (γ : (zdGraph 2).Walk a b) : Prop :=
+  ∃ x ∈ γ.support, ∃ u v : LatticeSite 2,
+    cond c ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
+      (Icc (b - (M : LatticeSite 2)) (b + (M : LatticeSite 2))) x u ∧
+    ((b 1 = z 1 + R ∧ u 0 = b 0 - K ∧ v 0 = b 0 + K ∧
+        cond c ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
+          (Icc ![b 0 - K, b 1] ![b 0 + K, b 1 + M]) u v) ∨
+      (b 0 = z 0 + R ∧ u 1 = b 1 - K ∧ v 1 = b 1 + K ∧ … (Icc ![b 0, b 1 - K] ![b 0 + M, b 1 + K]) u v) ∨
+      (b 1 = z 1 - R - cond c 0 1 ∧ u 0 = b 0 - K ∧ v 0 = b 0 + K ∧
+        … (Icc ![b 0 - K, b 1 - M] ![b 0 + K, b 1]) u v) ∨
+      (b 0 = z 0 - R - cond c 0 1 ∧ u 1 = b 1 - K ∧ v 1 = b 1 + K ∧
+        … (Icc ![b 0 - M, b 1 - K] ![b 0, b 1 + K]) u v))
+
+def ArmsOuterSeparated (ω : Config (LatticeSite 2)) {j : ℕ} (σ : Fin j → Bool)
+    (z : LatticeSite 2) (R : ℕ) (s : ℝ) (M K : ℕ) {a b : Fin j → LatticeSite 2}
+    (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)) : Prop :=
+  (∀ i k, i ≠ k → s ≤ |((landingPos (z - R) (z + R) (σ i) (γ i) -
+      landingPos (z - R) (z + R) (σ k) (γ k) : ℤ) : ℝ)|) ∧
+    (∀ i (m : ℕ), s ≤ |((landingPos (z - R) (z + R) (σ i) (γ i) - 4 * m * R : ℤ) : ℝ)|) ∧
+    ∀ i, HasOuterFence ω (σ i) z R M K (γ i)
+
+def outerSeparatedArmEvent {j : ℕ} (σ : Fin j → Bool) (z : LatticeSite 2) (r R : ℕ) (s : ℝ)
+    (M K : ℕ) : Set (Config (LatticeSite 2)) :=
+  {ω | ∃ (a b : Fin j → LatticeSite 2) (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+    (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
+    (∀ i k l, i < k → k < l → sbtw (landingPos …) (landingPos …) (landingPos …)) ∧
+    ArmsOuterSeparated ω σ z R s M K γ}
+```
+
+(`…` in the fence: the same `cond c ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn` as in the
+first case.)
+
+* **Parameters `s : ℝ`, `M K : ℕ`, not `η` and `N`.** Nolin's outer step uses `s = 4 √η N`,
+  `M = ⌊√η N⌋`, `K = ⌊η N⌋` (`R = 2N + 1`). Taking the derived quantities keeps square roots and
+  integer parts out of the definition, gives monotonicity in `s` and `M`, and lets the same notion
+  serve other scales (the gluing may want other fence sizes; Theorem 11's scale iteration uses
+  several `N`). `s` is real because Nolin's separation is real; positions are integers cast to `ℝ`.
+* **Equal to the inline event by `Iff.rfl`.** At `s = 4 * Real.sqrt η * N`,
+  `M = ⌊Real.sqrt η * N⌋₊`, `K = ⌊η * N⌋₊`, the event unfolds to exactly §11.2's `SEPARATED` (same
+  conjunctions, same casts, same bound structure). Checked with a standalone file (`lake env lean`)
+  whose `example : (inline SEPARATED, copied from the statement) ↔ ω ∈ outerSeparatedArmEvent … :=
+  Iff.rfl` elaborates. `mem_outerSeparatedArmEvent_iff` is the same equality, written out, as an API
+  lemma.
+* **The outer step, restated** (`d125d04`): `exists_separating_event` concludes
+  `∀ r < N, ∀ ω ∈ multiArmEvent σ z r R ∩ G, ω ∈ outerSeparatedArmEvent σ z r R (4 * Real.sqrt η * N)
+  ⌊Real.sqrt η * N⌋₊ ⌊η * N⌋₊`, and `exists_law_multiArmEvent_inter_not_separated_le` bounds
+  `law q (multiArmEvent σ z r R \ outerSeparatedArmEvent σ z r R (4 * Real.sqrt η * N) ⌊Real.sqrt η * N⌋₊ ⌊η * N⌋₊)`.
+  Hypotheses and quantifiers unchanged. A second standalone file proves each **old** statement text,
+  copied from the file before the refactor, by the **new** theorem applied to its arguments: the
+  statements are definitionally equal, nothing weakened. Inside the proof, the step `hnew` now states
+  each new arm's fence with `HasOuterFence`. The file shrank from 2087 to 2009 lines.
+* **The fence is a connection inside its box between its two ends**, not a crossing in the strict
+  sense (it may meet the end columns elsewhere), exactly as the inline clause had it; that is what the
+  gluing uses (§11.4).
+* **Centred boxes only.** The corner clause `4 m R` assumes the square box `B_R(z)`; non-centred outer
+  boxes (§5 item 7) would need the corners of `Icc lo hi`, which have no uniform formula. Nolin's
+  separated events are centred.
+
+### 12.2 API (all in `Arms/Separation/Defs.lean`)
+
+* Membership: `mem_outerSeparatedArmEvent_iff` (`Iff.rfl`, written out in full).
+* `outerSeparatedArmEvent_subset_multiArmEvent`: separated arms are arms.
+* Monotonicity, only where true: `HasOuterFence.mono` (depth `M ≤ M'`: the fence box and the box
+  about the end only grow), `ArmsOuterSeparated.mono` and `outerSeparatedArmEvent_mono` (`s' ≤ s`,
+  `M ≤ M'`). **Not monotone in `K`**: the fence must run exactly between the columns `b₀ ∓ K` (top
+  side), and the first end of a fence of a wider box need not be joined to the arm inside the box of
+  radius `M` about `b`.
+* Trivial case: `outerSeparatedArmEvent_fin_zero` (`@[simp]`, `j = 0`: the event is `univ`).
+* Measurability: `measurableSet_setOf_hasOuterFence`, `measurableSet_outerSeparatedArmEvent`
+  (countable unions over walks, `measurableSet_localConn`, `measurable_dualConfig`).
+* Determination: `cond_inter_edgeSet_mem_localConn_iff_of_inter_eq` (a connection of colour `c` inside
+  `Icc lo hi` is determined by the pairs in any `T ⊇ Icc lo (hi + 1)`), `hasOuterFence_iff_of_inter_eq`
+  (a fence at `b` is determined by `T ⊇ Icc (b - (M + K)) (b + (M + K + 1))`),
+  `mem_outerSeparatedArmEvent_iff_of_inter_eq` (for `r < R`, the event is determined by
+  `T ⊇ B_{R + M + K + 1}(z)`; for `r ≥ R` arms of length zero can sit anywhere in `B_r(z)`), with the
+  helper `IsArm.end_mem_Icc` (an arm from a box inside the interior of `Icc lo hi` ends in
+  `Icc (lo - 1) hi`) and the moved `dualConfig_inter_eq_of_inter_eq`.
+* Translation: `HasOuterFence.map_add`, `image_add_mem_outerSeparatedArmEvent`,
+  `image_add_mem_outerSeparatedArmEvent_iff` (`Sym2.map (· + c) '' ω` at `z + c` iff `ω` at `z`).
+* Non-vacuity (two `example`s): with every edge open, the open arm from `0` to `(1, 0)` is separated
+  for `s = 2`, `M = K = 1` (landing position `6`, corners `4`, `8`; fence from `(1, -1)` to `(1, 1)` in
+  `[1, 2] × [-1, 1]`); the empty configuration is not in that event.
+
+Not included (not needed now, and each would be a guess): colour inversion, rotations, an `_of_agree`
+form (the `_of_inter_eq` form is what `prodBernoulli_inter_of_determined` takes).
+
+### 12.3 How A3b-2 and A3b-3 use it
+
+* **A3b-2 (gluing, §5 items 4–5).** The input is `ω ∈ outerSeparatedArmEvent σ z r R (4√ηN) M K` with
+  `M = ⌊√η N⌋₊`, `K = ⌊η N⌋₊`, i.e. arms `γ` with `ArmsOuterSeparated ω σ z R (4√ηN) M K γ`; per-arm
+  lemmas (the fence connection of §9.4, the corridor crossing of §11.4) take `HasOuterFence ω c z R M K γ`
+  as a hypothesis instead of the 20-line clause. Measurability and determination by
+  `B_{R + M + K + 1}(z)` are available for the conditioning; "Harris for a mixed order" is still to be
+  proved in `Probability/` (§3.3).
+* **A3b-3 (Theorem 11).** The scale iteration uses `exists_separating_event` at scales `N_k` (event
+  form, §11.4) with `outerSeparatedArmEvent` at each scale; `outerSeparatedArmEvent_mono` compares
+  separations. Separation at both ends of one family is
+  `∃ a b γ, arms ∧ ArmsDisjoint σ γ ∧ order ∧ ArmsOuterSeparated ω σ z R s M K γ ∧ ArmsInnerSeparated …`
+  once the inner predicate exists (§12.4); about five lines, so it can be stated inline or added as a
+  definition beside the others.
+
+### 12.4 The inner variant: intended shape, not defined
+
+The inner variant (arms separated at `∂B_r(z)`, fences inside `B_r(z)` at the first vertex or face
+`a` of each arm, separation of `innerPos`) is **not defined in this package**. Its intended shape, the
+mirror of the outer one:
+
+```lean
+HasInnerFence ω c z r M K γ :=   -- γ : Walk a b
+  ∃ x ∈ γ.support, ∃ u v, G ∩ E ∈ localConn (Icc (a - M) (a + M)) x u ∧
+    ((a 1 = z 1 + r ∧ u 0 = a 0 - K ∧ v 0 = a 0 + K ∧ G ∩ E ∈ localConn (Icc ![a 0 - K, a 1 - M] ![a 0 + K, a 1]) u v) ∨
+     (a 0 = z 0 + r ∧ u 1 = a 1 - K ∧ v 1 = a 1 + K ∧ … (Icc ![a 0 - M, a 1 - K] ![a 0, a 1 + K]) u v) ∨
+     (a 1 = z 1 - r - cond c 0 1 ∧ u 0 = a 0 - K ∧ v 0 = a 0 + K ∧ … (Icc ![a 0 - K, a 1] ![a 0 + K, a 1 + M]) u v) ∨
+     (a 0 = z 0 - r - cond c 0 1 ∧ u 1 = a 1 - K ∧ v 1 = a 1 + K ∧ … (Icc ![a 0, a 1 - K] ![a 0 + M, a 1 + K]) u v))
+ArmsInnerSeparated ω σ z r s M K γ :=
+  (∀ i k, i ≠ k → s ≤ |innerPos z r (σ i) (γ i) - innerPos z r (σ k) (γ k)|) ∧
+  (∀ i (m : ℕ), s ≤ |innerPos z r (σ i) (γ i) - m * (4 * r + 2)|) ∧ ∀ i, HasInnerFence ω (σ i) z r M K (γ i)
+```
+
+(`G = cond c ω (dualConfig ω)`, `E` the edges of `ℤ²`; `innerPos` lives on the doubled box
+`2z ± (2r + 1)`, of perimeter `16 r + 8` with corners at the multiples of `4 r + 2`.) **Why not now:**
+a half-unit choice that only A3b-3's inner strip lemma can settle. A dual arm starts at a face *outside*
+`B_r(z)` touching it (top side: face row `z₁ + r`), while reflecting Lemma 15's arm box through the top
+side of `B_r(z)` (vertex rows `y ↦ 2(z₁ + r) - y`, hence face rows `f₁ ↦ 2(z₁ + r) - 1 - f₁`) puts the end face of a
+rerouted dual crossing one row *inside* (`z₁ + r - 1`). Either the dual fence box is anchored one row
+in, or the reversed crossing is extended by one face; this is the kind of half-unit mismatch that
+blocked A3b-1 (§9.2). The three-level design makes the inner predicates an **addition** beside the
+outer ones (a small additive interface change in the same file, nothing outer changes); defining them
+now would fix the half-unit before it is proved. Design question for the user (§12.5).
+
+### 12.5 For the interface PR
+
+To be stacked after #12 (it imports only `Arms/Defs.lean`); it would contain
+`PercLib/Models/Planar/Arms/Separation/Defs.lean` and its line in `PercLib.lean`. The deletion of
+`dualConfig_inter_eq_of_inter_eq` from `QuasiMultiplicativity.lean` (`2332e20`) belongs to that proof
+file's own PR, since `QuasiMultiplicativity.lean` is not upstream. Declarations: the definitions
+`HasOuterFence`, `ArmsOuterSeparated`, `outerSeparatedArmEvent`; the theorems
+`dualConfig_inter_eq_of_inter_eq`, `cond_inter_edgeSet_mem_localConn_iff_of_inter_eq`,
+`IsArm.end_mem_Icc`, `mem_outerSeparatedArmEvent_iff`, `outerSeparatedArmEvent_subset_multiArmEvent`,
+`outerSeparatedArmEvent_fin_zero`, `HasOuterFence.mono`, `ArmsOuterSeparated.mono`,
+`outerSeparatedArmEvent_mono`, `measurableSet_setOf_hasOuterFence`,
+`measurableSet_outerSeparatedArmEvent`, `hasOuterFence_iff_of_inter_eq`,
+`mem_outerSeparatedArmEvent_iff_of_inter_eq`, `HasOuterFence.map_add`,
+`image_add_mem_outerSeparatedArmEvent`, `image_add_mem_outerSeparatedArmEvent_iff`; two examples. No
+tag, no `…Input`. Questions a reviewer will ask:
+
+1. Right notion? A fence is a connection between the two ends inside its box, not a strict crossing;
+   separation is real (`s : ℝ`) on integer positions; corners only for the centred box.
+2. Duplicates? None found (search below); the inline event of `OuterSeparation.lean` is replaced.
+3. Placement of three general lemmas: `dualConfig_inter_eq_of_inter_eq` belongs in `Planar/Defs.lean`,
+   `IsArm.end_mem_Icc` and `cond_inter_edgeSet_mem_localConn_iff_of_inter_eq` in `Arms/Defs.lean`; both
+   files are frozen under #11/#12, so they sit here and can move after those merge.
+4. Names: `HasOuterFence`, `ArmsOuterSeparated`, `outerSeparatedArmEvent` (outer, leaving room for the
+   inner and two-sided versions); `outerSeparatedArmEvent_fin_zero` for the case `j = 0`.
+5. Missing API: no monotonicity in `K` (false), no `_of_agree` form, no colour inversion or rotation.
+
+### 12.6 Search
+
+* PercLib, for an existing notion: `rg -i "separated|fence"` over `PercLib/`: only the inline event and
+  the per-side lemmas of `OuterSeparation.lean`, and Lemma 15's strip events (`SeparationLemma.lean`,
+  `SeparationSides.lean`, a different, per-strip notion). No definition to reuse.
+* PercLib, API used: `inter_mem_localConn_iff_of_inter_eq`, `localConn_mono_set`,
+  `measurableSet_localConn`, `measurable_dualConfig`, `measurableSet_setOf_isArm`, `IsArm.of_agree`,
+  `IsArm.map_add`, `landingPos_map_add`, `ArmsDisjoint.map`, `armsDisjoint_of_subsingleton`,
+  `image_add_neg_image_add`, `image_add_inter_edgeSet_mem_localConn_iff`, `dualConfig_image_add`,
+  `IsOpenArm.end_mem_boxBoundary`, `IsDualArm.end_mem_boxBoundary`, `IsOpenArm.not_nil`,
+  `IsDualArm.not_nil`, `boxBoundary_subset_Icc`, `edgeSet_mem_localConn_Icc`, `isOpenArm_toWalk_iff`,
+  `landingPos_true`, `perimeterPos_of_right`, `empty_notMem_multiArmEventTo`, `mem_multiArmEvent_iff`,
+  `mem_Icc_two_iff`, `mem_Icc_of_mem_dualEdge`, `mem_dualConfig_iff`, `dualEdgeEquiv`. Found in proof
+  files and not imported (so that the module needs no proof file): `dualConfig_inter_eq_of_inter_eq`
+  (moved), `dualEdge_map_add_one_dualEdge` (replaced by `dualEdgeEquiv.right_inv`),
+  `Icc_subset_Icc_add_one_sub_one`, `IsArm.end_mem_sides`, `IsArm.penultimate_mem` (two-line facts,
+  proved inline). `measurableSet_of_determined_finite` (`CrossEdge.lean`) not needed.
+* Mathlib: `Set.image_add_right`, `Set.Icc_subset_Icc`, `Set.Icc_subset_Icc_left`,
+  `Fin.forall_fin_two`, `Fin.elim0`, `Measurable.exists`, `Measurable.forall`, `Measurable.and`,
+  `Measurable.or`, `measurableSet_setOfPred`, `SimpleGraph.Walk.support_injective`,
+  `SimpleGraph.Walk.support_map`, `SimpleGraph.Walk.end_mem_support`, `List.mem_map_of_mem`, `le_abs`,
+  `Bool.cond_true`, `Matrix.cons_val_zero`, `Matrix.cons_val_one`.
+
+### 12.7 Lessons
+
+* `awk 'length > 100'` counts bytes on macOS; Unicode-heavy Lean lines look too long. Count characters
+  (Python) or trust the `longLine` linter.
+* `Matrix.cons_val_one` turns `![a, b] 1` into `![b] 0`; add `Matrix.cons_val_zero`.
+* `fun_prop` does not see through `cond true ω (dualConfig ω)` after `cases c`; give the function
+  explicitly (`(by fun_prop : Measurable fun ω => ω ∩ E)`), `exact` accepts it up to defeq.
+* `simp` rewrites `![1, 0] - ↑1` by `Matrix.cons_sub` into `vecHead`/`vecTail` of the constant vector;
+  add `Matrix.vecHead`, `Matrix.vecTail` to the simp set.
+* Anonymous constructors and `rcases` see through `Set` membership and through `Prop` definitions, so
+  the old proofs closed the new statements unchanged (only `hnew` was shortened).
+* Statement equivalence is cheap to check: a standalone file importing the module, with the old
+  statement text and the new theorem as its proof, `lake env lean` (about 1.5–2 min, mostly loading).
+* The new module's builds: about 15 s; the move rebuilt `QuasiMultiplicativity`, `SeparationSides`,
+  `HalfPlaneExponents`, `OuterSeparation` in 87 s.
