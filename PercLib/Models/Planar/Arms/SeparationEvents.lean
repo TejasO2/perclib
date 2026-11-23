@@ -1102,4 +1102,491 @@ theorem law_forall_notMem_dualConfig_union_le (h : CrossingBounds q L c) (z : La
 
 end Scales
 
+/-! ### From the protection events to the blocking hypotheses -/
+
+section Unpack
+
+variable {ω : Config (LatticeSite 2)} {E : Set (Sym2 (LatticeSite 2))} (z : LatticeSite 2) (s : ℕ)
+
+/-- **Same colour, open.** The fresh open strips at `z` uncrossed give the hypotheses of
+`lt_sub_of_exploration`. -/
+theorem notMem_crossing_sdiff_of_inter (B : Set (Sym2 (LatticeSite 2)))
+    (h : ω ∩ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+      z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+      z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+      (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨ z 1 + s ≤ x 1 + 2)}} \
+        (E ∩ (zdGraph 2).edgeSet)) ∉
+      crossing 1 (z + ![-3 * (s : ℤ), -3 * s]) (z + ![3 * (s : ℤ), -s]) ∧
+    ω ∩ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+      z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+      z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+      (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨ z 1 + s ≤ x 1 + 2)}} \
+        (E ∩ (zdGraph 2).edgeSet)) ∉
+      crossing 0 (z + ![(s : ℤ), -3 * s]) (z + ![3 * (s : ℤ), 3 * s]) ∧
+    ω ∩ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+      z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+      z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+      (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨ z 1 + s ≤ x 1 + 2)}} \
+        (E ∩ (zdGraph 2).edgeSet)) ∉
+      crossing 0 (z + ![-3 * (s : ℤ), -3 * s]) (z + ![-(s : ℤ), 3 * s])) :
+    (ω \ E) ∩ B ∉
+      crossing 1 (z + ![-3 * (s : ℤ), -3 * s]) (z + ![3 * (s : ℤ), -s]) ∧
+    (ω \ E) ∩ B ∉
+      crossing 0 (z + ![(s : ℤ), -3 * s]) (z + ![3 * (s : ℤ), 3 * s]) ∧
+    (ω \ E) ∩ B ∉
+      crossing 0 (z + ![-3 * (s : ℤ), -3 * s]) (z + ![-(s : ℤ), 3 * s]) := by
+  have hR : ∀ lo' hi' : LatticeSite 2, (∀ x ∈ Icc lo' hi', z 0 - 3 * s ≤ x 0 ∧
+      x 0 ≤ z 0 + 3 * s ∧ z 1 - 3 * s ≤ x 1 ∧ x 1 ≤ z 1 + 3 * s ∧
+      (x 0 ≤ z 0 - s ∨ z 0 + s ≤ x 0 ∨ x 1 ≤ z 1 - s ∨ z 1 + s ≤ x 1)) →
+      ∀ x ∈ Icc lo' hi', x ∈ {x : LatticeSite 2 |
+        z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+        z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+        (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨ z 1 + s ≤ x 1 + 2)} :=
+    fun lo' hi' h x hx => by
+      have := h x hx
+      simp only [mem_ofPred_eq]
+      omega
+  have hRf : ∀ lo' hi' : LatticeSite 2, (∀ x ∈ Icc lo' hi', z 0 - 3 * s - 1 ≤ x 0 ∧
+      x 0 ≤ z 0 + 3 * s + 1 ∧ z 1 - 3 * s - 1 ≤ x 1 ∧ x 1 ≤ z 1 + 3 * s + 1 ∧
+      (x 0 ≤ z 0 - s + 1 ∨ z 0 + s - 1 ≤ x 0 ∨ x 1 ≤ z 1 - s + 1 ∨ z 1 + s - 1 ≤ x 1)) →
+      ∀ f ∈ Icc lo' hi', ∀ x : LatticeSite 2, f 0 ≤ x 0 → x 0 ≤ f 0 + 1 → f 1 ≤ x 1 →
+        x 1 ≤ f 1 + 1 → x ∈ {x : LatticeSite 2 |
+        z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+        z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+        (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨ z 1 + s ≤ x 1 + 2)} :=
+    fun lo' hi' h f hf x h₁ h₂ h₃ h₄ => by
+      have := h f hf
+      simp only [mem_ofPred_eq]
+      omega
+  have hbox : ∀ a b a' b' : ℤ, ∀ x ∈ Icc (z + ![a, b]) (z + ![a', b']),
+      z 0 + a ≤ x 0 ∧ x 0 ≤ z 0 + a' ∧ z 1 + b ≤ x 1 ∧ x 1 ≤ z 1 + b' := fun a b a' b' x hx => by
+    have := mem_Icc_two_iff.1 hx
+    simpa only [Pi.add_apply, Matrix.cons_val_zero, Matrix.cons_val_one] using this
+  have key : ∀ lo' hi' : LatticeSite 2, (∀ x ∈ Icc lo' hi', z 0 - 3 * s ≤ x 0 ∧
+      x 0 ≤ z 0 + 3 * s ∧ z 1 - 3 * s ≤ x 1 ∧ x 1 ≤ z 1 + 3 * s ∧
+      (x 0 ≤ z 0 - s ∨ z 0 + s ≤ x 0 ∨ x 1 ≤ z 1 - s ∨ z 1 + s ≤ x 1)) →
+      (ω \ E) ∩ B ∩ {e | ∀ x ∈ e, x ∈ Icc lo' hi'} ⊆ ω ∩ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+        z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+        z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+        (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨ z 1 + s ≤ x 1 + 2)}} \
+        (E ∩ (zdGraph 2).edgeSet)) := by
+    rintro lo' hi' hX e ⟨⟨⟨heω, heE⟩, -⟩, heX⟩
+    exact ⟨heω, fun x hx => hR lo' hi' hX x (heX x hx), fun he => heE he.1⟩
+  refine ⟨notMem_crossing_of_inter_subset (key _ _ fun x hx => ?_) h.1,
+    notMem_crossing_of_inter_subset (key _ _ fun x hx => ?_) h.2.1,
+    notMem_crossing_of_inter_subset (key _ _ fun x hx => ?_) h.2.2⟩ <;>
+  · have := hbox _ _ _ _ x hx
+    omega
+
+/-- **Other colour, open exploration.** The fresh dual strips at `z` uncrossed give the hypotheses
+of `false_of_localConn_of_exploration`. -/
+theorem notMem_crossing_dualConfig_union_of (B : Set (Sym2 (LatticeSite 2)))
+    (h : dualConfig (ω ∪ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+      z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+      z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+      (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨
+        z 1 + s ≤ x 1 + 2)}} \
+      (E ∩ (zdGraph 2).edgeSet))ᶜ) ∉
+      crossing 1 (z + ![-3 * (s : ℤ), -3 * s]) (z + ![3 * (s : ℤ), -s]) ∧
+    dualConfig (ω ∪ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+      z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+      z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+      (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨
+        z 1 + s ≤ x 1 + 2)}} \
+      (E ∩ (zdGraph 2).edgeSet))ᶜ) ∉
+      crossing 0 (z + ![(s : ℤ), -3 * s]) (z + ![3 * (s : ℤ), 3 * s]) ∧
+    dualConfig (ω ∪ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+      z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+      z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+      (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨
+        z 1 + s ≤ x 1 + 2)}} \
+      (E ∩ (zdGraph 2).edgeSet))ᶜ) ∉
+      crossing 0 (z + ![-3 * (s : ℤ), -3 * s]) (z + ![-(s : ℤ), 3 * s])) :
+    dualConfig (ω ∪ E) ∩ B ∉
+      crossing 1 (z + ![-3 * (s : ℤ), -3 * s]) (z + ![3 * (s : ℤ), -s]) ∧
+    dualConfig (ω ∪ E) ∩ B ∉
+      crossing 0 (z + ![(s : ℤ), -3 * s]) (z + ![3 * (s : ℤ), 3 * s]) ∧
+    dualConfig (ω ∪ E) ∩ B ∉
+      crossing 0 (z + ![-3 * (s : ℤ), -3 * s]) (z + ![-(s : ℤ), 3 * s]) := by
+  have hbox : ∀ a b a' b' : ℤ, ∀ x ∈ Icc (z + ![a, b]) (z + ![a', b']),
+      z 0 + a ≤ x 0 ∧ x 0 ≤ z 0 + a' ∧ z 1 + b ≤ x 1 ∧ x 1 ≤ z 1 + b' := fun a b a' b' x hx => by
+    have := mem_Icc_two_iff.1 hx
+    simpa only [Pi.add_apply, Matrix.cons_val_zero, Matrix.cons_val_one] using this
+  have key : ∀ lo' hi' : LatticeSite 2, (∀ x ∈ Icc lo' hi', z 0 - 3 * s ≤ x 0 ∧
+      x 0 ≤ z 0 + 3 * s ∧ z 1 - 3 * s ≤ x 1 ∧ x 1 ≤ z 1 + 3 * s ∧
+      (x 0 ≤ z 0 - s ∨ z 0 + s ≤ x 0 ∨ x 1 ≤ z 1 - s ∨ z 1 + s ≤ x 1)) →
+      dualConfig (ω ∪ E) ∩ B ∩ {e | ∀ x ∈ e, x ∈ Icc lo' hi'} ⊆
+        dualConfig (ω ∪ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+          z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+          z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+          (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨
+            z 1 + s ≤ x 1 + 2)}} \
+          (E ∩ (zdGraph 2).edgeSet))ᶜ) := fun lo' hi' hX =>
+    dualConfig_union_inter_subset (fun f hf x h₁ h₂ h₃ h₄ => by
+      have := hX f hf
+      simp only [mem_ofPred_eq]
+      omega) B
+  refine ⟨notMem_crossing_of_inter_subset (key _ _ fun x hx => ?_) h.1,
+    notMem_crossing_of_inter_subset (key _ _ fun x hx => ?_) h.2.1,
+    notMem_crossing_of_inter_subset (key _ _ fun x hx => ?_) h.2.2⟩ <;>
+  · have := hbox _ _ _ _ x hx
+    omega
+
+/-- **Fence, open exploration.** The fresh open circuit at `z` gives the hypotheses of
+`exists_fence_of_exploration`. -/
+theorem mem_crossing_union_of
+    (h : ω ∪ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+      z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+      z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+      (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨
+        z 1 + s ≤ x 1 + 2)}} \
+      (E ∩ (zdGraph 2).edgeSet))ᶜ ∈
+      crossing 0 (z + ![-3 * (s : ℤ), s + 1]) (z + ![3 * (s : ℤ) + 1, 3 * s]) ∧
+    ω ∪ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+      z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+      z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+      (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨
+        z 1 + s ≤ x 1 + 2)}} \
+      (E ∩ (zdGraph 2).edgeSet))ᶜ ∈
+      crossing 0 (z + ![-3 * (s : ℤ), -3 * s + 1]) (z + ![3 * (s : ℤ) + 1, -s]) ∧
+    ω ∪ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+      z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+      z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+      (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨
+        z 1 + s ≤ x 1 + 2)}} \
+      (E ∩ (zdGraph 2).edgeSet))ᶜ ∈
+      crossing 1 (z + ![(s : ℤ) + 1, -3 * s]) (z + ![3 * (s : ℤ), 3 * s + 1]) ∧
+    ω ∪ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+      z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+      z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+      (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨
+        z 1 + s ≤ x 1 + 2)}} \
+      (E ∩ (zdGraph 2).edgeSet))ᶜ ∈
+      crossing 1 (z + ![-3 * (s : ℤ) + 1, -3 * s]) (z + ![-(s : ℤ), 3 * s + 1])) :
+    ω ∪ E ∈
+      crossing 0 (z + ![-3 * (s : ℤ), s + 1]) (z + ![3 * (s : ℤ) + 1, 3 * s]) ∧
+    ω ∪ E ∈
+      crossing 0 (z + ![-3 * (s : ℤ), -3 * s + 1]) (z + ![3 * (s : ℤ) + 1, -s]) ∧
+    ω ∪ E ∈
+      crossing 1 (z + ![(s : ℤ) + 1, -3 * s]) (z + ![3 * (s : ℤ), 3 * s + 1]) ∧
+    ω ∪ E ∈
+      crossing 1 (z + ![-3 * (s : ℤ) + 1, -3 * s]) (z + ![-(s : ℤ), 3 * s + 1]) := by
+  have hbox : ∀ a b a' b' : ℤ, ∀ x ∈ Icc (z + ![a, b]) (z + ![a', b']),
+      z 0 + a ≤ x 0 ∧ x 0 ≤ z 0 + a' ∧ z 1 + b ≤ x 1 ∧ x 1 ≤ z 1 + b' := fun a b a' b' x hx => by
+    have := mem_Icc_two_iff.1 hx
+    simpa only [Pi.add_apply, Matrix.cons_val_zero, Matrix.cons_val_one] using this
+  have key : ∀ lo' hi' : LatticeSite 2, (∀ x ∈ Icc lo' hi', z 0 - 3 * s ≤ x 0 ∧
+      x 0 ≤ z 0 + 3 * s + 1 ∧ z 1 - 3 * s ≤ x 1 ∧ x 1 ≤ z 1 + 3 * s + 1 ∧
+      (x 0 ≤ z 0 - s ∨ z 0 + s + 1 ≤ x 0 ∨ x 1 ≤ z 1 - s ∨ z 1 + s + 1 ≤ x 1)) →
+      (ω ∪ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+          z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+          z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+          (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨
+            z 1 + s ≤ x 1 + 2)}} \
+          (E ∩ (zdGraph 2).edgeSet))ᶜ) ∩ {e | ∀ x ∈ e, x ∈ Icc lo' hi'} ⊆ ω ∪ E := by
+    rintro lo' hi' hX e ⟨he | he, heX⟩
+    · exact Or.inl he
+    · right
+      by_contra hE
+      refine he ⟨fun x hx => ?_, fun h' => hE h'.1⟩
+      have := hX x (heX x hx)
+      simp only [mem_ofPred_eq]
+      omega
+  refine ⟨mem_crossing_of_inter_subset (key _ _ fun x hx => ?_) h.1,
+    mem_crossing_of_inter_subset (key _ _ fun x hx => ?_) h.2.1,
+    mem_crossing_of_inter_subset (key _ _ fun x hx => ?_) h.2.2.1,
+    mem_crossing_of_inter_subset (key _ _ fun x hx => ?_) h.2.2.2⟩ <;>
+  · have := hbox _ _ _ _ x hx
+    omega
+
+/-- **Same colour, dual exploration.** The fresh dual strips at `z` uncrossed give the hypotheses
+of `lt_sub_of_exploration` for the exploration of the dual configuration. -/
+theorem notMem_crossing_dualConfig_sdiff_of (B : Set (Sym2 (LatticeSite 2)))
+    (h : dualConfig (ω ∪ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+      z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+      z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+      (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨
+        z 1 + s ≤ x 1 + 2)}} \
+      (fun p => Sym2.map (· + 1) (dualEdge p)) '' (E ∩ (zdGraph 2).edgeSet))ᶜ) ∉
+      crossing 1 (z + ![-3 * (s : ℤ), -3 * s]) (z + ![3 * (s : ℤ), -s]) ∧
+    dualConfig (ω ∪ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+      z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+      z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+      (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨
+        z 1 + s ≤ x 1 + 2)}} \
+      (fun p => Sym2.map (· + 1) (dualEdge p)) '' (E ∩ (zdGraph 2).edgeSet))ᶜ) ∉
+      crossing 0 (z + ![(s : ℤ), -3 * s]) (z + ![3 * (s : ℤ), 3 * s]) ∧
+    dualConfig (ω ∪ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+      z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+      z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+      (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨
+        z 1 + s ≤ x 1 + 2)}} \
+      (fun p => Sym2.map (· + 1) (dualEdge p)) '' (E ∩ (zdGraph 2).edgeSet))ᶜ) ∉
+      crossing 0 (z + ![-3 * (s : ℤ), -3 * s]) (z + ![-(s : ℤ), 3 * s])) :
+    (dualConfig ω \ E) ∩ B ∉
+      crossing 1 (z + ![-3 * (s : ℤ), -3 * s]) (z + ![3 * (s : ℤ), -s]) ∧
+    (dualConfig ω \ E) ∩ B ∉
+      crossing 0 (z + ![(s : ℤ), -3 * s]) (z + ![3 * (s : ℤ), 3 * s]) ∧
+    (dualConfig ω \ E) ∩ B ∉
+      crossing 0 (z + ![-3 * (s : ℤ), -3 * s]) (z + ![-(s : ℤ), 3 * s]) := by
+  have hbox : ∀ a b a' b' : ℤ, ∀ x ∈ Icc (z + ![a, b]) (z + ![a', b']),
+      z 0 + a ≤ x 0 ∧ x 0 ≤ z 0 + a' ∧ z 1 + b ≤ x 1 ∧ x 1 ≤ z 1 + b' := fun a b a' b' x hx => by
+    have := mem_Icc_two_iff.1 hx
+    simpa only [Pi.add_apply, Matrix.cons_val_zero, Matrix.cons_val_one] using this
+  have key : ∀ lo' hi' : LatticeSite 2, (∀ x ∈ Icc lo' hi', z 0 - 3 * s ≤ x 0 ∧
+      x 0 ≤ z 0 + 3 * s ∧ z 1 - 3 * s ≤ x 1 ∧ x 1 ≤ z 1 + 3 * s ∧
+      (x 0 ≤ z 0 - s ∨ z 0 + s ≤ x 0 ∨ x 1 ≤ z 1 - s ∨ z 1 + s ≤ x 1)) →
+      (dualConfig ω \ E) ∩ B ∩ {e | ∀ x ∈ e, x ∈ Icc lo' hi'} ⊆
+        dualConfig (ω ∪ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+          z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+          z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+          (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨
+            z 1 + s ≤ x 1 + 2)}} \
+          (fun p => Sym2.map (· + 1) (dualEdge p)) '' (E ∩ (zdGraph 2).edgeSet))ᶜ) :=
+    fun lo' hi' hX =>
+    dualConfig_sdiff_inter_subset (fun f hf x h₁ h₂ h₃ h₄ => by
+      have := hX f hf
+      simp only [mem_ofPred_eq]
+      omega) B
+  refine ⟨notMem_crossing_of_inter_subset (key _ _ fun x hx => ?_) h.1,
+    notMem_crossing_of_inter_subset (key _ _ fun x hx => ?_) h.2.1,
+    notMem_crossing_of_inter_subset (key _ _ fun x hx => ?_) h.2.2⟩ <;>
+  · have := hbox _ _ _ _ x hx
+    omega
+
+/-- **Fence, dual exploration.** The fresh dual circuit of faces at `z` gives the hypotheses of
+`exists_fence_of_exploration` for the exploration of the dual configuration. -/
+theorem mem_crossing_dualConfig_union_of
+    (h : dualConfig (ω ∩ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+      z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+      z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+      (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨
+        z 1 + s ≤ x 1 + 2)}} \
+      (fun p => Sym2.map (· + 1) (dualEdge p)) '' (E ∩ (zdGraph 2).edgeSet))) ∈
+      crossing 0 (z + ![-3 * (s : ℤ), s + 1]) (z + ![3 * (s : ℤ) + 1, 3 * s]) ∧
+    dualConfig (ω ∩ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+      z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+      z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+      (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨
+        z 1 + s ≤ x 1 + 2)}} \
+      (fun p => Sym2.map (· + 1) (dualEdge p)) '' (E ∩ (zdGraph 2).edgeSet))) ∈
+      crossing 0 (z + ![-3 * (s : ℤ), -3 * s + 1]) (z + ![3 * (s : ℤ) + 1, -s]) ∧
+    dualConfig (ω ∩ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+      z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+      z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+      (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨
+        z 1 + s ≤ x 1 + 2)}} \
+      (fun p => Sym2.map (· + 1) (dualEdge p)) '' (E ∩ (zdGraph 2).edgeSet))) ∈
+      crossing 1 (z + ![(s : ℤ) + 1, -3 * s]) (z + ![3 * (s : ℤ), 3 * s + 1]) ∧
+    dualConfig (ω ∩ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+      z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+      z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+      (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨
+        z 1 + s ≤ x 1 + 2)}} \
+      (fun p => Sym2.map (· + 1) (dualEdge p)) '' (E ∩ (zdGraph 2).edgeSet))) ∈
+      crossing 1 (z + ![-3 * (s : ℤ) + 1, -3 * s]) (z + ![-(s : ℤ), 3 * s + 1])) :
+    dualConfig ω ∪ E ∈
+      crossing 0 (z + ![-3 * (s : ℤ), s + 1]) (z + ![3 * (s : ℤ) + 1, 3 * s]) ∧
+    dualConfig ω ∪ E ∈
+      crossing 0 (z + ![-3 * (s : ℤ), -3 * s + 1]) (z + ![3 * (s : ℤ) + 1, -s]) ∧
+    dualConfig ω ∪ E ∈
+      crossing 1 (z + ![(s : ℤ) + 1, -3 * s]) (z + ![3 * (s : ℤ), 3 * s + 1]) ∧
+    dualConfig ω ∪ E ∈
+      crossing 1 (z + ![-3 * (s : ℤ) + 1, -3 * s]) (z + ![-(s : ℤ), 3 * s + 1]) := by
+  have hbox : ∀ a b a' b' : ℤ, ∀ x ∈ Icc (z + ![a, b]) (z + ![a', b']),
+      z 0 + a ≤ x 0 ∧ x 0 ≤ z 0 + a' ∧ z 1 + b ≤ x 1 ∧ x 1 ≤ z 1 + b' := fun a b a' b' x hx => by
+    have := mem_Icc_two_iff.1 hx
+    simpa only [Pi.add_apply, Matrix.cons_val_zero, Matrix.cons_val_one] using this
+  have key : ∀ lo' hi' : LatticeSite 2, (∀ x ∈ Icc lo' hi', z 0 - 3 * s ≤ x 0 ∧
+      x 0 ≤ z 0 + 3 * s + 1 ∧ z 1 - 3 * s ≤ x 1 ∧ x 1 ≤ z 1 + 3 * s + 1 ∧
+      (x 0 ≤ z 0 - s ∨ z 0 + s + 1 ≤ x 0 ∨ x 1 ≤ z 1 - s ∨ z 1 + s + 1 ≤ x 1)) →
+      dualConfig (ω ∩ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+          z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+          z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+          (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨
+            z 1 + s ≤ x 1 + 2)}} \
+          (fun p => Sym2.map (· + 1) (dualEdge p)) '' (E ∩ (zdGraph 2).edgeSet))) ∩
+        {e | ∀ x ∈ e, x ∈ Icc lo' hi'} ⊆ dualConfig ω ∪ E :=
+    fun lo' hi' hX => dualConfig_inter_inter_subset (fun f hf x h₁ h₂ h₃ h₄ => by
+      have := hX f hf
+      simp only [mem_ofPred_eq]
+      omega)
+  refine ⟨mem_crossing_of_inter_subset (key _ _ fun x hx => ?_) h.1,
+    mem_crossing_of_inter_subset (key _ _ fun x hx => ?_) h.2.1,
+    mem_crossing_of_inter_subset (key _ _ fun x hx => ?_) h.2.2.1,
+    mem_crossing_of_inter_subset (key _ _ fun x hx => ?_) h.2.2.2⟩ <;>
+  · have := hbox _ _ _ _ x hx
+    omega
+
+/-- **Corner, open.** The open strips at `z` uncrossed by the pairs of the annulus give the
+hypotheses of `false_of_le_add_corner_right` and `false_of_le_add_corner_left`. -/
+theorem notMem_crossing_inter_of (B : Set (Sym2 (LatticeSite 2)))
+    (h : ω ∩ {e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+      z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+      z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+      (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨
+        z 1 + s ≤ x 1 + 2)}} ∉
+      crossing 1 (z + ![-3 * (s : ℤ), -3 * s]) (z + ![3 * (s : ℤ), -s]) ∧
+    ω ∩ {e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+      z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+      z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+      (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨
+        z 1 + s ≤ x 1 + 2)}} ∉
+      crossing 0 (z + ![(s : ℤ), -3 * s]) (z + ![3 * (s : ℤ), 3 * s]) ∧
+    ω ∩ {e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+      z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+      z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+      (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨
+        z 1 + s ≤ x 1 + 2)}} ∉
+      crossing 0 (z + ![-3 * (s : ℤ), -3 * s]) (z + ![-(s : ℤ), 3 * s])) :
+    ω ∩ B ∉
+      crossing 1 (z + ![-3 * (s : ℤ), -3 * s]) (z + ![3 * (s : ℤ), -s]) ∧
+    ω ∩ B ∉
+      crossing 0 (z + ![(s : ℤ), -3 * s]) (z + ![3 * (s : ℤ), 3 * s]) ∧
+    ω ∩ B ∉
+      crossing 0 (z + ![-3 * (s : ℤ), -3 * s]) (z + ![-(s : ℤ), 3 * s]) := by
+  have hbox : ∀ a b a' b' : ℤ, ∀ x ∈ Icc (z + ![a, b]) (z + ![a', b']),
+      z 0 + a ≤ x 0 ∧ x 0 ≤ z 0 + a' ∧ z 1 + b ≤ x 1 ∧ x 1 ≤ z 1 + b' := fun a b a' b' x hx => by
+    have := mem_Icc_two_iff.1 hx
+    simpa only [Pi.add_apply, Matrix.cons_val_zero, Matrix.cons_val_one] using this
+  have key : ∀ lo' hi' : LatticeSite 2, (∀ x ∈ Icc lo' hi', z 0 - 3 * s ≤ x 0 ∧
+      x 0 ≤ z 0 + 3 * s ∧ z 1 - 3 * s ≤ x 1 ∧ x 1 ≤ z 1 + 3 * s ∧
+      (x 0 ≤ z 0 - s ∨ z 0 + s ≤ x 0 ∨ x 1 ≤ z 1 - s ∨ z 1 + s ≤ x 1)) →
+      ω ∩ B ∩ {e | ∀ x ∈ e, x ∈ Icc lo' hi'} ⊆ ω ∩ {e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+          z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+          z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+          (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨
+            z 1 + s ≤ x 1 + 2)}} := by
+    rintro lo' hi' hX e ⟨⟨heω, -⟩, heX⟩
+    refine ⟨heω, fun x hx => ?_⟩
+    have := hX x (heX x hx)
+    simp only [mem_ofPred_eq]
+    omega
+  refine ⟨notMem_crossing_of_inter_subset (key _ _ fun x hx => ?_) h.1,
+    notMem_crossing_of_inter_subset (key _ _ fun x hx => ?_) h.2.1,
+    notMem_crossing_of_inter_subset (key _ _ fun x hx => ?_) h.2.2⟩ <;>
+  · have := hbox _ _ _ _ x hx
+    omega
+
+/-- **Corner, dual.** The dual strips at `z` uncrossed, with the pairs outside the annulus open,
+give the corner hypotheses for the exploration of the dual configuration. -/
+theorem notMem_crossing_dualConfig_inter_of (B : Set (Sym2 (LatticeSite 2)))
+    (h : dualConfig (ω ∪ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+      z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+      z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+      (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨
+        z 1 + s ≤ x 1 + 2)}})ᶜ) ∉
+      crossing 1 (z + ![-3 * (s : ℤ), -3 * s]) (z + ![3 * (s : ℤ), -s]) ∧
+    dualConfig (ω ∪ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+      z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+      z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+      (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨
+        z 1 + s ≤ x 1 + 2)}})ᶜ) ∉
+      crossing 0 (z + ![(s : ℤ), -3 * s]) (z + ![3 * (s : ℤ), 3 * s]) ∧
+    dualConfig (ω ∪ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+      z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+      z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+      (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨
+        z 1 + s ≤ x 1 + 2)}})ᶜ) ∉
+      crossing 0 (z + ![-3 * (s : ℤ), -3 * s]) (z + ![-(s : ℤ), 3 * s])) :
+    dualConfig ω ∩ B ∉
+      crossing 1 (z + ![-3 * (s : ℤ), -3 * s]) (z + ![3 * (s : ℤ), -s]) ∧
+    dualConfig ω ∩ B ∉
+      crossing 0 (z + ![(s : ℤ), -3 * s]) (z + ![3 * (s : ℤ), 3 * s]) ∧
+    dualConfig ω ∩ B ∉
+      crossing 0 (z + ![-3 * (s : ℤ), -3 * s]) (z + ![-(s : ℤ), 3 * s]) := by
+  have hbox : ∀ a b a' b' : ℤ, ∀ x ∈ Icc (z + ![a, b]) (z + ![a', b']),
+      z 0 + a ≤ x 0 ∧ x 0 ≤ z 0 + a' ∧ z 1 + b ≤ x 1 ∧ x 1 ≤ z 1 + b' := fun a b a' b' x hx => by
+    have := mem_Icc_two_iff.1 hx
+    simpa only [Pi.add_apply, Matrix.cons_val_zero, Matrix.cons_val_one] using this
+  have key : ∀ lo' hi' : LatticeSite 2, (∀ x ∈ Icc lo' hi', z 0 - 3 * s ≤ x 0 ∧
+      x 0 ≤ z 0 + 3 * s ∧ z 1 - 3 * s ≤ x 1 ∧ x 1 ≤ z 1 + 3 * s ∧
+      (x 0 ≤ z 0 - s ∨ z 0 + s ≤ x 0 ∨ x 1 ≤ z 1 - s ∨ z 1 + s ≤ x 1)) →
+      dualConfig ω ∩ B ∩ {e | ∀ x ∈ e, x ∈ Icc lo' hi'} ⊆
+        dualConfig (ω ∪ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+          z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+          z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+          (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨
+            z 1 + s ≤ x 1 + 2)}})ᶜ) := by
+    intro lo' hi' hX
+    have := dualConfig_sdiff_inter_subset (ω := ω) (E := ∅) (R := {x : LatticeSite 2 |
+      z 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s + 2) ∧
+      z 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s + 2) ∧
+      (x 0 + s ≤ z 0 + 2 ∨ z 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ z 1 + 2 ∨
+        z 1 + s ≤ x 1 + 2)})
+      (S := Icc lo' hi') (fun f hf x h₁ h₂ h₃ h₄ => by
+        have := hX f hf
+        simp only [mem_ofPred_eq]
+        omega) B
+    simpa only [sdiff_empty, empty_inter, image_empty] using this
+  refine ⟨notMem_crossing_of_inter_subset (key _ _ fun x hx => ?_) h.1,
+    notMem_crossing_of_inter_subset (key _ _ fun x hx => ?_) h.2.1,
+    notMem_crossing_of_inter_subset (key _ _ fun x hx => ?_) h.2.2⟩ <;>
+  · have := hbox _ _ _ _ x hx
+    omega
+
+/-- **Other colour, dual exploration.** The fresh open strips at `y + (1, 1)` uncrossed give the
+hypotheses of `false_of_localConn_of_exploration` at `y` for the exploration of the dual
+configuration, whose dual configuration is `ω` moved by `(-1, -1)`. -/
+theorem notMem_crossing_dualConfig_dualConfig_union_of (y : LatticeSite 2)
+    (B : Set (Sym2 (LatticeSite 2)))
+    (h : ω ∩ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+      (y + 1) 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ (y + 1) 0 + (3 * s + 2) ∧
+      (y + 1) 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ (y + 1) 1 + (3 * s + 2) ∧
+      (x 0 + s ≤ (y + 1) 0 + 2 ∨ (y + 1) 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ (y + 1) 1 + 2 ∨
+        (y + 1) 1 + s ≤ x 1 + 2)}} \
+      (fun p => Sym2.map (· + 1) (dualEdge p)) '' (E ∩ (zdGraph 2).edgeSet)) ∉
+      crossing 1 ((y + 1) + ![-3 * (s : ℤ), -3 * s]) ((y + 1) + ![3 * (s : ℤ), -s]) ∧
+    ω ∩ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+      (y + 1) 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ (y + 1) 0 + (3 * s + 2) ∧
+      (y + 1) 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ (y + 1) 1 + (3 * s + 2) ∧
+      (x 0 + s ≤ (y + 1) 0 + 2 ∨ (y + 1) 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ (y + 1) 1 + 2 ∨
+        (y + 1) 1 + s ≤ x 1 + 2)}} \
+      (fun p => Sym2.map (· + 1) (dualEdge p)) '' (E ∩ (zdGraph 2).edgeSet)) ∉
+      crossing 0 ((y + 1) + ![(s : ℤ), -3 * s]) ((y + 1) + ![3 * (s : ℤ), 3 * s]) ∧
+    ω ∩ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+      (y + 1) 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ (y + 1) 0 + (3 * s + 2) ∧
+      (y + 1) 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ (y + 1) 1 + (3 * s + 2) ∧
+      (x 0 + s ≤ (y + 1) 0 + 2 ∨ (y + 1) 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ (y + 1) 1 + 2 ∨
+        (y + 1) 1 + s ≤ x 1 + 2)}} \
+      (fun p => Sym2.map (· + 1) (dualEdge p)) '' (E ∩ (zdGraph 2).edgeSet)) ∉
+      crossing 0 ((y + 1) + ![-3 * (s : ℤ), -3 * s]) ((y + 1) + ![-(s : ℤ), 3 * s])) :
+    dualConfig (dualConfig ω ∪ E) ∩ B ∉
+      crossing 1 (y + ![-3 * (s : ℤ), -3 * s]) (y + ![3 * (s : ℤ), -s]) ∧
+    dualConfig (dualConfig ω ∪ E) ∩ B ∉
+      crossing 0 (y + ![(s : ℤ), -3 * s]) (y + ![3 * (s : ℤ), 3 * s]) ∧
+    dualConfig (dualConfig ω ∪ E) ∩ B ∉
+      crossing 0 (y + ![-3 * (s : ℤ), -3 * s]) (y + ![-(s : ℤ), 3 * s]) := by
+  have hbox : ∀ a b a' b' : ℤ, ∀ x ∈ Icc (y + 1 + ![a, b]) (y + 1 + ![a', b']),
+      y 0 + 1 + a ≤ x 0 ∧ x 0 ≤ y 0 + 1 + a' ∧ y 1 + 1 + b ≤ x 1 ∧ x 1 ≤ y 1 + 1 + b' :=
+    fun a b a' b' x hx => by
+      have := mem_Icc_two_iff.1 hx
+      simpa only [Pi.add_apply, Pi.one_apply, Matrix.cons_val_zero, Matrix.cons_val_one] using this
+  have key : ∀ (i : Fin 2) (a b a' b' : ℤ), (∀ x ∈ Icc (y + 1 + ![a, b]) (y + 1 + ![a', b']),
+      x ∈ {x : LatticeSite 2 |
+          (y + 1) 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ (y + 1) 0 + (3 * s + 2) ∧
+          (y + 1) 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ (y + 1) 1 + (3 * s + 2) ∧
+          (x 0 + s ≤ (y + 1) 0 + 2 ∨ (y + 1) 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ (y + 1) 1 + 2 ∨
+            (y + 1) 1 + s ≤ x 1 + 2)}) →
+      ω ∩ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+          (y + 1) 0 - (3 * s + 2) ≤ x 0 ∧ x 0 ≤ (y + 1) 0 + (3 * s + 2) ∧
+          (y + 1) 1 - (3 * s + 2) ≤ x 1 ∧ x 1 ≤ (y + 1) 1 + (3 * s + 2) ∧
+          (x 0 + s ≤ (y + 1) 0 + 2 ∨ (y + 1) 0 + s ≤ x 0 + 2 ∨ x 1 + s ≤ (y + 1) 1 + 2 ∨
+            (y + 1) 1 + s ≤ x 1 + 2)}} \
+          (fun p => Sym2.map (· + 1) (dualEdge p)) '' (E ∩ (zdGraph 2).edgeSet)) ∉
+        crossing i (y + 1 + ![a, b]) (y + 1 + ![a', b']) →
+      dualConfig (dualConfig ω ∪ E) ∩ B ∉ crossing i (y + ![a, b]) (y + ![a', b']) := by
+    intro i a b a' b' hX hn hζ
+    refine hn (mem_crossing_of_inter_subset (fun e ⟨he, heX⟩ =>
+      image_dualConfig_union_inter_subset B ⟨he, fun x hx => hX x (heX x hx)⟩) ?_)
+    have := (image_add_mem_crossing_iff 1 i _ _ _).2 hζ
+    rwa [add_right_comm y ![a, b] 1, add_right_comm y ![a', b'] 1] at this
+  refine ⟨key 1 _ _ _ _ (fun x hx => ?_) h.1, key 0 _ _ _ _ (fun x hx => ?_) h.2.1,
+    key 0 _ _ _ _ (fun x hx => ?_) h.2.2⟩ <;>
+  · have := hbox _ _ _ _ x hx
+    simp only [mem_ofPred_eq, Pi.add_apply, Pi.one_apply]
+    omega
+
+end Unpack
+
 end PercLib.Models.Planar
