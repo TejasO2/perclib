@@ -12,6 +12,7 @@ outer boundary with Lemma 15 on strips along the sides).
 module
 
 public import PercLib.Models.Planar.Arms.Sectors
+public import PercLib.Models.Planar.Arms.Separation.Defs
 public import PercLib.Models.Planar.Arms.SeparationSides
 public import PercLib.Percolation.Bond.CrossEdge
 
@@ -35,8 +36,9 @@ positions and away from the corners.
 
 The intersection of the four strip events is an event of probability at least `1 - δ`, determined
 by the edges of the annulus `B_{2R}(z) \ B_N(z)`, on which the arms of every `j`-arm event from
-`B_r(z)`, `r < N`, can be separated (`exists_separating_event`; the separated event is written out
-in the statement). The `j`-arm event to the boundary of `B_N(z)` depends only on edges inside
+`B_r(z)`, `r < N`, can be separated (`exists_separating_event`; the separated event is
+`outerSeparatedArmEvent` with separation `4 √η N` and fences of length `2 ⌊η N⌋` and depth
+`⌊√η N⌋`). The `j`-arm event to the boundary of `B_N(z)` depends only on edges inside
 `B_N(z)`, so the two are independent, which gives the outer step
 `P(A(r, R), not separated) ≤ δ P(A(r, N))` (`exists_law_multiArmEvent_inter_not_separated_le`).
 
@@ -1585,13 +1587,14 @@ there are `0 < η ≤ 1` and `N₀` such that, uniformly over the laws with cros
 `L`, for `R = 2N + 1` and `N₀ ≤ N ≤ L`, there is an event `G` of probability at least `1 - δ`,
 determined by the edges with both ends in the annulus `B_{2R}(z) \ B_N(z)`, such that for every
 `r < N`, on the `j`-arm event from `B_r(z)` to the boundary of `B_R(z)` and `G`, the arms can be
-chosen separated: there is a disjoint family of arms of colours `σ` from `B_r(z)` to the boundary of
-`B_R(z)`, landing in counterclockwise order, whose landing positions are at least `4 √η N` apart and
-at least `4 √η N` from the doubled corners `4 m R`, and each of which carries a fence outside
-`B_R(z)` next to its end `b` (its last vertex, resp. face): a crossing of its colour, from one long
-side to the other, of the box of size `2 ⌊η N⌋ × ⌊√η N⌋` on the side where it lands, centred at `b`
-along the side, whose first end is joined in its colour to a vertex of the arm inside the ball of
-radius `⌊√η N⌋` around `b`. The four cases of the fence are the top, right, bottom and left sides.
+chosen separated (`outerSeparatedArmEvent` with `s = 4 √η N`, `M = ⌊√η N⌋`, `K = ⌊η N⌋`): there is
+a disjoint family of arms of colours `σ` from `B_r(z)` to the boundary of `B_R(z)`, landing in
+counterclockwise order, whose landing positions are at least `4 √η N` apart and at least `4 √η N`
+from the doubled corners `4 m R`, and each of which carries a fence outside `B_R(z)` next to its end
+`b` (its last vertex, resp. face): a path of its colour across the box of length `2 ⌊η N⌋` along the
+side where it lands and depth `⌊√η N⌋`, centred at `b` along the side, whose first end is joined in
+its colour to a vertex of the arm inside the ball of radius `⌊√η N⌋` around `b`
+(`HasOuterFence`).
 
 The event `G` is the intersection of the four strip events of Lemma 15 along the sides
 (`exists_law_separable_ge_top`, read on the other sides by `separable_right_of_top`, ...); on it the
@@ -1610,38 +1613,8 @@ theorem exists_separating_event {j : ℕ} (σ : Fin j → Bool)
             v ∈ Icc (z - ((2 * R : ℕ) : LatticeSite 2)) (z + ((2 * R : ℕ) : LatticeSite 2)) \
               Icc (z - (N : LatticeSite 2)) (z + N)} → (ω ∈ G ↔ ω' ∈ G)) ∧
         1 - δ ≤ law q G ∧ ∀ r < N, ∀ ω ∈ multiArmEvent σ z r R ∩ G,
-        ∃ (a b : Fin j → LatticeSite 2)
-          (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
-        (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
-        (∀ i k l, i < k → k < l → sbtw (landingPos (z - R) (z + R) (σ i) (γ i))
-          (landingPos (z - R) (z + R) (σ k) (γ k)) (landingPos (z - R) (z + R) (σ l) (γ l))) ∧
-        (∀ i k, i ≠ k → 4 * Real.sqrt η * N ≤
-          |((landingPos (z - R) (z + R) (σ i) (γ i) -
-            landingPos (z - R) (z + R) (σ k) (γ k) : ℤ) : ℝ)|) ∧
-        (∀ i (m : ℕ), 4 * Real.sqrt η * N ≤
-          |((landingPos (z - R) (z + R) (σ i) (γ i) - 4 * m * R : ℤ) : ℝ)|) ∧
-        ∀ i, ∃ x ∈ (γ i).support, ∃ l r' : LatticeSite 2,
-          cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
-            (Icc (b i - (⌊Real.sqrt η * N⌋₊ : LatticeSite 2))
-              (b i + (⌊Real.sqrt η * N⌋₊ : LatticeSite 2))) x l ∧
-          ((b i 1 = z 1 + R ∧ l 0 = b i 0 - ⌊η * N⌋₊ ∧ r' 0 = b i 0 + ⌊η * N⌋₊ ∧
-              cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
-                (Icc ![b i 0 - ⌊η * N⌋₊, b i 1]
-                  ![b i 0 + ⌊η * N⌋₊, b i 1 + ⌊Real.sqrt η * N⌋₊]) l r') ∨
-            (b i 0 = z 0 + R ∧ l 1 = b i 1 - ⌊η * N⌋₊ ∧ r' 1 = b i 1 + ⌊η * N⌋₊ ∧
-              cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
-                (Icc ![b i 0, b i 1 - ⌊η * N⌋₊]
-                  ![b i 0 + ⌊Real.sqrt η * N⌋₊, b i 1 + ⌊η * N⌋₊]) l r') ∨
-            (b i 1 = z 1 - R - cond (σ i) 0 1 ∧ l 0 = b i 0 - ⌊η * N⌋₊ ∧
-              r' 0 = b i 0 + ⌊η * N⌋₊ ∧
-              cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
-                (Icc ![b i 0 - ⌊η * N⌋₊, b i 1 - ⌊Real.sqrt η * N⌋₊]
-                  ![b i 0 + ⌊η * N⌋₊, b i 1]) l r') ∨
-            (b i 0 = z 0 - R - cond (σ i) 0 1 ∧ l 1 = b i 1 - ⌊η * N⌋₊ ∧
-              r' 1 = b i 1 + ⌊η * N⌋₊ ∧
-              cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
-                (Icc ![b i 0 - ⌊Real.sqrt η * N⌋₊, b i 1 - ⌊η * N⌋₊]
-                  ![b i 0, b i 1 + ⌊η * N⌋₊]) l r')) := by
+          ω ∈ outerSeparatedArmEvent σ z r R (4 * Real.sqrt η * N) ⌊Real.sqrt η * N⌋₊
+            ⌊η * N⌋₊ := by
   classical
   have hδ4 : 0 < δ / 4 := ENNReal.div_pos_iff.2 ⟨hδ.ne', ENNReal.ofNat_ne_top⟩
   obtain ⟨η, hη, hη1, N₀, htop⟩ := exists_law_separable_ge_top c hδ4
@@ -1907,28 +1880,7 @@ theorem exists_separating_event {j : ℕ} (σ : Fin j → Bool)
   have hnew : ∀ i, ∃ (b' : LatticeSite 2) (Γ : (zdGraph 2).Walk (a i) b'),
       IsArm ω (σ i) z r (z - R) (z + R) Γ ∧ innerPos z r (σ i) Γ = innerPos z r (σ i) (γ i) ∧
       landingPos (z - R) (z + R) (σ i) Γ = Λ i ∧
-      ∃ x ∈ Γ.support, ∃ l r' : LatticeSite 2,
-        cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
-          (Icc (b' - (⌊Real.sqrt η * N⌋₊ : LatticeSite 2))
-            (b' + (⌊Real.sqrt η * N⌋₊ : LatticeSite 2))) x l ∧
-        ((b' 1 = z 1 + R ∧ l 0 = b' 0 - ⌊η * N⌋₊ ∧ r' 0 = b' 0 + ⌊η * N⌋₊ ∧
-            cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
-              (Icc ![b' 0 - ⌊η * N⌋₊, b' 1]
-                ![b' 0 + ⌊η * N⌋₊, b' 1 + ⌊Real.sqrt η * N⌋₊]) l r') ∨
-          (b' 0 = z 0 + R ∧ l 1 = b' 1 - ⌊η * N⌋₊ ∧ r' 1 = b' 1 + ⌊η * N⌋₊ ∧
-            cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
-              (Icc ![b' 0, b' 1 - ⌊η * N⌋₊]
-                ![b' 0 + ⌊Real.sqrt η * N⌋₊, b' 1 + ⌊η * N⌋₊]) l r') ∨
-          (b' 1 = z 1 - R - cond (σ i) 0 1 ∧ l 0 = b' 0 - ⌊η * N⌋₊ ∧
-            r' 0 = b' 0 + ⌊η * N⌋₊ ∧
-            cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
-              (Icc ![b' 0 - ⌊η * N⌋₊, b' 1 - ⌊Real.sqrt η * N⌋₊]
-                ![b' 0 + ⌊η * N⌋₊, b' 1]) l r') ∨
-          (b' 0 = z 0 - R - cond (σ i) 0 1 ∧ l 1 = b' 1 - ⌊η * N⌋₊ ∧
-            r' 1 = b' 1 + ⌊η * N⌋₊ ∧
-            cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
-              (Icc ![b' 0 - ⌊Real.sqrt η * N⌋₊, b' 1 - ⌊η * N⌋₊]
-                ![b' 0, b' 1 + ⌊η * N⌋₊]) l r')) := by
+      HasOuterFence ω (σ i) z R ⌊Real.sqrt η * N⌋₊ ⌊η * N⌋₊ Γ := by
     intro i
     rcases hcase i with ⟨h1, -, hΛi⟩ | ⟨h1, -, hΛi⟩ | ⟨h1, -, hΛi⟩ | ⟨h1, -, hΛi⟩
     · obtain ⟨b', Γ, hΓ, hin, hL, x, hx, l, r', hxl, hfen⟩ := ht1 i h1
@@ -2014,48 +1966,18 @@ theorem exists_separating_event {j : ℕ} (σ : Fin j → Bool)
 /-- **Separation of arms at the outer boundary of an annulus** (the outer step of Nolin's proof of
 Theorem 11, for colour sequences without packs). Under the hypotheses of `exists_separating_event`,
 for `r < N`: the probability that the `j`-arm event from `B_r(z)` to the boundary of `B_R(z)`,
-`R = 2N + 1`, occurs but the arms cannot be chosen separated (in the sense written out there) is at
-most `δ` times the probability of the `j`-arm event from `B_r(z)` to the boundary of `B_N(z)`. The
-separating event of `exists_separating_event` depends only on edges outside `B_N(z)`, the `j`-arm
-event to the boundary of `B_N(z)` only on edges inside, and the latter contains the `j`-arm event
-to the boundary of `B_R(z)`. -/
+`R = 2N + 1`, occurs but the arms cannot be chosen separated (`outerSeparatedArmEvent`, with the
+parameters of `exists_separating_event`) is at most `δ` times the probability of the `j`-arm event
+from `B_r(z)` to the boundary of `B_N(z)`. The separating event of `exists_separating_event`
+depends only on edges outside `B_N(z)`, the `j`-arm event to the boundary of `B_N(z)` only on edges
+inside, and the latter contains the `j`-arm event to the boundary of `B_R(z)`. -/
 theorem exists_law_multiArmEvent_inter_not_separated_le {j : ℕ} (σ : Fin j → Bool)
     (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) (c : ℕ → ℝ≥0∞) {δ : ℝ≥0∞} (hδ : 0 < δ) :
     ∃ η : ℝ, 0 < η ∧ η ≤ 1 ∧ ∃ N₀ : ℕ, ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
       CrossingBounds q L c → ∀ (z : LatticeSite 2) (r N R : ℕ), R = 2 * N + 1 → N₀ ≤ N →
       r < N → (N : ℕ∞) ≤ L →
-      law q (multiArmEvent σ z r R ∩ {ω | ¬∃ (a b : Fin j → LatticeSite 2)
-          (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
-        (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
-        (∀ i k l, i < k → k < l → sbtw (landingPos (z - R) (z + R) (σ i) (γ i))
-          (landingPos (z - R) (z + R) (σ k) (γ k)) (landingPos (z - R) (z + R) (σ l) (γ l))) ∧
-        (∀ i k, i ≠ k → 4 * Real.sqrt η * N ≤
-          |((landingPos (z - R) (z + R) (σ i) (γ i) -
-            landingPos (z - R) (z + R) (σ k) (γ k) : ℤ) : ℝ)|) ∧
-        (∀ i (m : ℕ), 4 * Real.sqrt η * N ≤
-          |((landingPos (z - R) (z + R) (σ i) (γ i) - 4 * m * R : ℤ) : ℝ)|) ∧
-        ∀ i, ∃ x ∈ (γ i).support, ∃ l r' : LatticeSite 2,
-          cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
-            (Icc (b i - (⌊Real.sqrt η * N⌋₊ : LatticeSite 2))
-              (b i + (⌊Real.sqrt η * N⌋₊ : LatticeSite 2))) x l ∧
-          ((b i 1 = z 1 + R ∧ l 0 = b i 0 - ⌊η * N⌋₊ ∧ r' 0 = b i 0 + ⌊η * N⌋₊ ∧
-              cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
-                (Icc ![b i 0 - ⌊η * N⌋₊, b i 1]
-                  ![b i 0 + ⌊η * N⌋₊, b i 1 + ⌊Real.sqrt η * N⌋₊]) l r') ∨
-            (b i 0 = z 0 + R ∧ l 1 = b i 1 - ⌊η * N⌋₊ ∧ r' 1 = b i 1 + ⌊η * N⌋₊ ∧
-              cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
-                (Icc ![b i 0, b i 1 - ⌊η * N⌋₊]
-                  ![b i 0 + ⌊Real.sqrt η * N⌋₊, b i 1 + ⌊η * N⌋₊]) l r') ∨
-            (b i 1 = z 1 - R - cond (σ i) 0 1 ∧ l 0 = b i 0 - ⌊η * N⌋₊ ∧
-              r' 0 = b i 0 + ⌊η * N⌋₊ ∧
-              cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
-                (Icc ![b i 0 - ⌊η * N⌋₊, b i 1 - ⌊Real.sqrt η * N⌋₊]
-                  ![b i 0 + ⌊η * N⌋₊, b i 1]) l r') ∨
-            (b i 0 = z 0 - R - cond (σ i) 0 1 ∧ l 1 = b i 1 - ⌊η * N⌋₊ ∧
-              r' 1 = b i 1 + ⌊η * N⌋₊ ∧
-              cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
-                (Icc ![b i 0 - ⌊Real.sqrt η * N⌋₊, b i 1 - ⌊η * N⌋₊]
-                  ![b i 0, b i 1 + ⌊η * N⌋₊]) l r'))}) ≤
+      law q (multiArmEvent σ z r R \
+          outerSeparatedArmEvent σ z r R (4 * Real.sqrt η * N) ⌊Real.sqrt η * N⌋₊ ⌊η * N⌋₊) ≤
         δ * law q (multiArmEvent σ z r N) := by
   obtain ⟨η, hη, hη1, N₀, hG⟩ := exists_separating_event σ hσ c hδ
   refine ⟨η, hη, hη1, N₀, fun q L h z r N R hR hN hr hNL => ?_⟩
