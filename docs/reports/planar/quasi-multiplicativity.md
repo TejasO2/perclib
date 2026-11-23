@@ -12,9 +12,11 @@ every plan statement at small scales, and found two problems in the route. The u
 them are recorded in "Decisions (user, 2026-11-22)" below. On 2026-11-23 the user resumed A3 for
 colour sequences without packs ("Decisions (user, 2026-11-23)"). The A3b-1 session (§9) proved item 2
 of §5 (sectors and the barrier) and found that items 1 and 3 cannot use Lemma 15 as stated: its
-strip does not fit the arms of an annulus by half a lattice unit. A fix is proposed in §9.3 and needs
-the user's word. Nothing in `Arms/Defs.lean` or `Planar/Defs.lean` was changed. Local commits only,
-nothing pushed.
+strip does not fit the arms of an annulus by half a lattice unit. A fix was proposed in §9.3; the
+A3b-0 session (§10) proved it: Lemma 15 in the arm box, `exists_law_separable_ge_arm`, with the new
+crossings meeting the top row only at their ends (`exists_law_separable_ge` unchanged). Items 1 and 3
+of §5 are next (A3b-1 resumed). Nothing in `Arms/Defs.lean` or `Planar/Defs.lean` was changed. Local
+commits only, nothing pushed.
 
 ## Decisions (user, 2026-11-22)
 
@@ -281,8 +283,8 @@ Found while reading §4 for this package (arXiv numbering):
 
 ## 5. What remains: A3b and later
 
-In order (A3 resumed on 2026-11-23 without packs; after A3b-1, item 2 is done and items 1 and 3
-wait for the fix of §9.3):
+In order (A3 resumed on 2026-11-23 without packs; after A3b-1, item 2 is done; after A3b-0 (§10)
+the arm-box form of Lemma 15 is proved, and items 1 and 3 can use it):
 
 1. **Lemma 15 on the four sides of an annulus** at any centre: transport with `translate`, `swap`,
    `reflect` and `law_comp_sym2Map_apply`; read the event back (walks by `SimpleGraph.Walk.map`,
@@ -542,3 +544,189 @@ Lemma 15 through the three symmetries, since item 5 needs them in that form anyw
   `ArmsDisjoint` of the triple by `fin_cases t <;> fin_cases u` (nine goals).
 * Split an arm at a vertex with `rw [← SimpleGraph.Walk.take_spec (γ i) hv] at h`; to rewrite only
   one side of a goal, `conv_rhs => rw [← SimpleGraph.Walk.take_spec …]`.
+
+## 10. A3b-0 (2026-11-23): Lemma 15 in the arm box
+
+The fix of §9.3, run as a proof-only helper package with the coordinator's approval. **Done:** the
+arm-box form of Lemma 15, `exists_law_separable_ge_arm`, with the extra conclusion that the new
+crossings meet the top row only at their ends; `exists_law_separable_ge` keeps its statement and
+docstring byte for byte and is now read off the same general theorem. **Not done:** item 1 of §5
+(the transport to the four sides of `B_R(z)` at any centre); it is left to the resumed A3b-1 (§10.5).
+No definition, no tag, no `…Input`; `Planar/Defs.lean` and `Arms/Defs.lean` unchanged. Lean commit
+`d6c9df7` (`SeparationLemma.lean`, `SeparationSurgery.lean`); `#print axioms`: `propext`,
+`Classical.choice`, `Quot.sound`. Gate: `scripts/gate.sh main` **passed on `d6c9df7`** (axiom audit 9847
+constants; the expected interface NOTICE from `Arms/Defs.lean`, no other notice; 4.8 min). This
+note's commit changes only `docs/`.
+
+### 10.1 The statement proved
+
+`PercLib/Models/Planar/Arms/SeparationLemma.lean`, after `exists_law_separable_ge`:
+
+```lean
+theorem exists_law_separable_ge_arm (c : ℕ → ℝ≥0∞) {δ : ℝ≥0∞} (hδ : 0 < δ) :
+    ∃ η : ℝ, 0 < η ∧ ∃ N₀ : ℕ, ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
+      CrossingBounds q L c → ∀ N : ℕ, N₀ ≤ N → (N : ℕ∞) ≤ L →
+      1 - δ ≤ law q {ω | ∀ (m : ℕ) (σ : Fin m → Bool) (a b : Fin m → LatticeSite 2)
+        (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, cond (σ i)
+          (a i 1 = 0 ∧ b i 1 = N ∧
+            (∀ x ∈ (γ i).support, x ∈ Icc (![1, 0] : LatticeSite 2) ![4 * (N : ℤ) + 1, N]) ∧
+            ∀ e ∈ (γ i).edges, e ∈ ω)
+          (a i 1 = -1 ∧ b i 1 = N ∧
+            (∀ x ∈ (γ i).support, x ∈ Icc (![0, -1] : LatticeSite 2) ![4 * (N : ℤ) + 1, N]) ∧
+            ∀ e ∈ (γ i).edges, e ∈ dualConfig ω ∩ dualEdge '' {e | e ∈ (zdGraph 2).edgeSet ∧
+              ∀ x ∈ e, x ∈ Icc (0 : LatticeSite 2) ![4 * (N : ℤ) + 2, N]})) →
+        (∀ i j, i ≠ j → σ i = σ j → ∀ x ∈ (γ i).support, x ∉ (γ j).support) →
+        ∃ (b' : Fin m → LatticeSite 2) (γ' : ∀ i, (zdGraph 2).Walk (a i) (b' i)),
+          (∀ i, cond (σ i) (… the same two clauses for b', γ' …)) ∧
+          (∀ i j, i ≠ j → σ i = σ j → ∀ x ∈ (γ' i).support, x ∉ (γ' j).support) ∧
+          (∀ i, ∀ x ∈ (γ' i).support.dropLast, x 1 ≠ N) ∧          -- top row only at the end
+          (∀ i j, i ≠ j → 4 * Real.sqrt η * N ≤
+            |((2 * b' i 0 + cond (σ i) 0 1 : ℤ) : ℝ) - ((2 * b' j 0 + cond (σ j) 0 1 : ℤ) : ℝ)|) ∧
+          (∀ i, 4 * Real.sqrt η * N ≤ ((2 * b' i 0 + cond (σ i) 0 1 : ℤ) : ℝ) ∧
+            4 * Real.sqrt η * N ≤ 8 * N + 4 - ((2 * b' i 0 + cond (σ i) 0 1 : ℤ) : ℝ)) ∧
+          ∀ i, ∃ x ∈ (γ' i).support, ∃ l r : LatticeSite 2,   -- the fence, as in Lemma 15
+            l 0 = b' i 0 - ⌊η * N⌋₊ ∧ r 0 = b' i 0 + ⌊η * N⌋₊ ∧
+            cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
+              (Icc ![b' i 0 - ⌊η * N⌋₊, N] ![b' i 0 + ⌊η * N⌋₊, N + ⌊Real.sqrt η * N⌋₊]) l r ∧
+            cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
+              (Icc (b' i - (⌊Real.sqrt η * N⌋₊ : LatticeSite 2))
+                (b' i + (⌊Real.sqrt η * N⌋₊ : LatticeSite 2))) x l}
+```
+
+Same quantifier shape as `exists_law_separable_ge` (`η` and `N₀` before the law, `N₀ ≤ N ≤ L`),
+same constants (`η = 1/D²`, `N₀ = D²`, `D = 16 · 8^J`). The top-row clause is stated with
+`support.dropLast`, so the end is not visited twice either; this is what `IsCrossing` asks of an
+arm. The corners are measured from the ends `0` and `8N + 4` of the doubled top side of the arm box
+(the proof gives at least that from the open box's ends as well).
+
+Both forms are instances of `exists_law_separable_ge_aux`: the same statement for the open box
+`Icc lo hi`, `hi = ![lo 0 + 4N, lo 1 + N]`, the box of faces `lo₂ = ![lo 0 - k, lo 1 - 1]`,
+`hi₂ = ![hi 0 - 1 + k, hi 1]`, crossed edges in `Icc elo ehi` with `elo = ![lo 0 - k, lo 1]`,
+`ehi = ![hi 0 + k, hi 1]`, `0 ≤ k ≤ 1`, corners from `2 elo₀` and `2 ehi₀`, plus the top-row clause.
+The boxes are variables with defining equations (eleven hypotheses, reason in the docstring), so
+that each instance is read off by definitional unfolding (`![a, b] 1` is `b`, `(0 : LatticeSite 2) 1`
+is `0`) and only the corner clause needs a cast rewrite. `k = 0`, `lo = 0` gives
+`exists_law_separable_ge`; `k = 1`, `lo = ![1, 0]` gives `exists_law_separable_ge_arm`.
+
+### 10.2 The coordinates, checked against `IsOpenArm` / `IsDualArm`
+
+§9.3's coordinates are right; nothing had to be corrected. Take `R = 2N + 1` and
+`z = (2N + 1, -N - 1)`, so `Icc (z - R) (z + R) = [0, 4N + 2] × [-3N - 2, N]` and its top side is the
+row `N`.
+
+| | arm of `B_R(z)` (`Arms/Defs.lean`) | strip of `exists_law_separable_ge_arm` |
+|---|---|---|
+| open, before the last vertex | `Icc (lo + 1) (hi - 1) = [1, 4N + 1] × [-3N - 1, N - 1]` | `[1, 4N + 1] × [0, N]`, row `N` only at the end |
+| open, last vertex on the top side | `(x, N)`, `1 ≤ x ≤ 4N + 1` (one step from the interior) | `b' i = (x, N)`, `x ∈ [1, 4N + 1]` |
+| dual, faces before the last | `Icc lo (hi - 1) = [0, 4N + 1] × [-3N - 2, N - 1]` | `[0, 4N + 1] × [-1, N]`, row `N` only at the end |
+| dual, last face on the top side | `(x, N)`, `0 ≤ x ≤ 4N + 1` | `b' i = (x, N)`, `x ∈ [0, 4N + 1]` |
+| dual edges | cross edges with both ends in `Icc lo hi` | cross edges of `[0, 4N + 2] × [0, N]` |
+| doubled top-side column (`landingPos`) | open `2x` (from `2 • b`), dual `2x + 1` (from `penultimate + b + 1 = (2x + 1, 2N)`) | `2 b' i 0 + cond (σ i) 0 1` |
+| ends of the doubled top side | `2 (z₀ - R) = 0`, `2 (z₀ + R) = 8N + 4` | `0`, `8N + 4` |
+
+**Input.** The final crossing of an open arm landing on the top side (its part after its last
+visit to the row `0`) starts on the row `0`, stays in the rows `1 … N - 1` and the columns
+`1 … 4N + 1`, and ends at `(x, N)`: a crossing of the open strip. The final crossing of a dual arm
+landing there (after its last visit to the face row `-1`) is a walk of faces of `[0, 4N + 1] × [-1, N]`
+meeting the row `-1` only at its start and the row `N` only at its end, so by
+`mem_image_dualEdge_of_mem_edges` (with its box `[0, 4N + 2] × [0, N]`) its dual edges cross edges of
+`[0, 4N + 2] × [0, N]`. Both need the arm to reach the strip's bottom row, which holds when
+`B_r(z)` (rows `≤ -N - 1 + r`) lies below it.
+
+**Output.** A rerouted open crossing lies in `[1, 4N + 1] × [0, N - 1]` before its end, inside the
+interior of the arm box; a rerouted dual crossing lies in the faces `[0, 4N + 1] × [-1, N - 1]`
+before its end, inside the faces of the arm box; its last face `(x, N)` is outside. So the arm up to
+the start of its final crossing, followed by the rerouted crossing, is again an arm of `B_R(z)` with
+the old inner position, as soon as the strip does not touch `B_r(z)` (open: `r ≤ N`; faces touching
+`B_r(z)`: rows `≤ -N - 1 + r < -1` needs `r < N`). This is exactly what `ArmsDisjoint.of_innerPos_eq`
+and `sbtw_landingPos_of_innerPos_eq` (§9.1) take.
+
+### 10.3 What changed in A2's lemmas (all plain generalisations; every caller adapted)
+
+* `exists_reroute_of_exploration` (`SeparationSurgery.lean`): one more conjunct, last: every vertex
+  of a new walk before its last entry is a vertex of the member before its last entry, or a vertex
+  of the chosen crossing other than its tip. Proof: the new walk is `P.append R` with `P`, `R` paths
+  (`exists_reroute_aux`), `support_append_eq_support_dropLast_append`, and a path's end is not in
+  `support.dropLast` (`dropLast_support_concat`, `List.nodup_append`).
+* `exists_reroute_fence_of_exploration`: one more conjunct, before the fence:
+  `∀ i ∈ S, ∀ x ∈ (γ' i).2.support.dropLast, x 1 ≠ hi 1` (members are first cut at their first
+  top-row vertex, chosen crossings meet the top row only at their tips).
+* `add_lt_of_exploration_of_dualConfig`: the dual path may lie in the faces
+  `[lo₀ - 1, hi₀] × [lo₁ - 1, hi₁]` (was `[lo₀, hi₀ - 1] × [lo₁ - 1, hi₁]`): a weaker hypothesis. After
+  trimming the two end rows the path lies in `[lo₀ - 1, hi₀] × [lo₁, hi₁ - 1]`, which is what
+  `false_of_localConn_of_exploration` already accepted.
+* `separable_of_forall`: new `{k : ℤ} (hk : 0 ≤ k) (hk1 : k ≤ 1)`, box relation
+  `hlo₂ : lo₂ = ![lo 0 - k, lo 1 - 1]`, `hhi₂ : hi₂ = ![hi 0 - 1 + k, hi 1]` (was `k = 0`); crossed
+  edges in `Icc ![lo 0 - k, lo 1] ![hi 0 + k, hi 1]` (was `Icc lo hi`); corners from `2 (lo₀ - k)` and
+  `2 (hi₀ + k)` (was `2 lo₀`, `2 hi₀`); one more conjunct (top row only at the ends), before the fence.
+  The other-colour protection of a dual tip (`add_lt_of_exploration_dualConfig`) already accepted open
+  walks in `[lo₂₀, hi₂₀ + 1] × [lo₂₁ + 1, hi₂₁] ⊇ Icc lo hi`; the corner and same-colour lemmas are
+  per box and unchanged.
+* `exists_law_separable_ge`: proof replaced by the instance `k = 0` of the new
+  `exists_law_separable_ge_aux` (the old proof, with the boxes as variables); statement unchanged.
+* Unchanged: `mem_image_dualEdge_of_mem_edges` (already general in its box; called with
+  `![lo 0 - k, lo 1]`, `![hi 0 + k, hi 1]`), `false_of_localConn_of_exploration`, `exists_walk_trim`,
+  `lt_tip_of_corner`, `lt_abs_sub_of_exploration`, `exists_fence_of_le`, all of `SeparationEvents.lean`
+  (the step-(a) bounds `law_exploration_le_pow_of_le` / `…_dualConfig_…` take the open box with
+  `n = N - 1` and the box of faces with `n = N`, width at most `5n` for `N ≥ 5`).
+
+Callers: the changed lemmas are used only inside `SeparationLemma.lean`; `QuasiMultiplicativity.lean`
+mentions `exists_law_separable_ge` only in its module docstring.
+
+### 10.4 Search
+
+* Mathlib: `SimpleGraph.Walk.support_append_eq_support_dropLast_append`,
+  `SimpleGraph.Walk.dropLast_support_concat`, `SimpleGraph.Walk.support_ne_nil`,
+  `SimpleGraph.Walk.support_copy`, `List.dropLast_append_of_ne_nil`, `List.nodup_append`,
+  `SimpleGraph.Walk.IsPath.support_nodup`. Searched and not found: "the end of a path is not in
+  `support.dropLast`" (two lines inline).
+* PercLib: the A2 lemmas above, `eq_vec_two_iff`, `mem_Icc_two_iff`; for §10.5:
+  `measurableSet_of_determined_finite` (`Percolation/Bond/CrossEdge.lean:66`),
+  `measurableSet_of_determined_finset` (`Probability/CylinderLimit.lean:137`),
+  `dualConfig_image_add` (`Arms/Defs.lean`), `dualConfig_image_swap` (`CrossingSymmetry.lean`),
+  `dualConfig_image_reflect`, `law_comp_sym2Map_apply`, `CrossingBounds.swap`, `CrossingBounds.reflect`
+  (`QuasiMultiplicativity.lean`), `innerPos_append` (`MultiArmBasics.lean`).
+
+### 10.5 For the resumed A3b-1 (items 1 and 3 of §5)
+
+1. **Item 1, the transport (not done here).** Top side of `B_R(z)`, `R = 2N + 1`, any `z`: translate
+   `exists_law_separable_ge_arm` by `z - (2N + 1, -N - 1)` (`dualConfig_image_add`, translation
+   invariance of `CrossingBounds`). The other three sides by quarter turns (`CrossingBounds.swap` and
+   `.reflect`, `dualConfig_image_swap`, `dualConfig_image_reflect`, `law_comp_sym2Map_apply`); faces are
+   labelled by their lower-left corners, so a reflection moves faces by one unit
+   (`dualConfig_image_reflect`). Write the four results in their own coordinates (recommended in §9.3):
+   for example the strip of the right side should be `[z₀ + R - N, z₀ + R] × [z₁ - R + 1, z₁ + R - 1]`
+   for open crossings (left to right) and the faces `[z₀ + R - N - 1, z₀ + R] × [z₁ - R, z₁ + R - 1]`
+   (not yet checked in Lean).
+2. **Measurability of the strip event.** The theorem bounds `law q S` from below for the
+   set-builder `S`; the outer step needs `S` (or its complement) measurable and independent of
+   `multiArmEvent σ z r R'`. `S` depends on `ω` only through edges with both ends in
+   `[-M, 4N + 2 + M] × [0, N + M]`, `M = ⌊√η N⌋ < N` (open walks in the open box, dual edges crossing
+   edges of `[0, 4N + 2] × [0, N]`, fence connections in the boxes and balls at the row `N`). Prove
+   `ω ∩ W = ω' ∩ W → (ω ∈ S ↔ ω' ∈ S)` and use `measurableSet_of_determined_finite`. In the arm box,
+   `B_{R'}(z)` has rows `≤ -N - 1 + R'`, below the row `0` for `R' ≤ N`: independence by disjoint edge
+   sets. (The proof's bad set is measurable, but the statement does not expose it; the old
+   `exists_law_separable_ge` has the same shape.)
+3. **Item 3** as in §9.3, with the inputs of §10.2: for `r < N`, the final crossing of each arm in the
+   strip of its side is a crossing of that strip; the rerouted crossing extends the arm's beginning
+   to an arm with the old inner position (`innerPos_append`, top-row clause); then
+   `ArmsDisjoint.of_innerPos_eq` and `sbtw_landingPos_of_innerPos_eq`. Tips on one side are
+   `4 √η N` apart and `4 √η N` from that side's corners, so tips on different sides are at least
+   `8 √η N` apart in landing positions. The draft statement of §9.3
+   (`exists_law_multiArmEvent_inter_not_separated_le`, `r + 3 ≤ N`, inner radius `N - 2`) fits these
+   coordinates.
+
+### 10.6 Lessons
+
+* The whole package compiled at the first build of each module (`SeparationSurgery` 7 s; the chain
+  `SeparationProtection` → `SeparationLemma` 25 s).
+* A general probability theorem with its boxes as universally quantified variables plus defining
+  equations (`hi = ![…]`, `lo₂ = ![…]`, …) gives instances by plain application: the event of the
+  instance matches by definitional unfolding (`![a, b] 1 ≡ b`, `(0 : LatticeSite 2) 1 ≡ 0`), and the
+  equations close with `eq_vec_two_iff.2 ⟨by simp, by simp⟩` (`ring` after
+  `simp only [Matrix.cons_val_zero]` for `4N + 1 = 1 + 4N`). `subst` the equations of boxes that
+  appear only as `Icc elo ehi`; keep the others as variables with coordinate facts for `omega`.
+* The new walk of the surgery is `((P i).2.2.append ((R i).2.2.copy …)).copy …`: unfold `γ'` with
+  `rw [hγ']; dsimp only; rw [dite_eq_left hi, support_copy, support_append_eq_support_dropLast_append,
+  support_copy, List.dropLast_append_of_ne_nil (support_ne_nil _)]`.
