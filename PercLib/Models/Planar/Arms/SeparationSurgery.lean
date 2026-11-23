@@ -821,7 +821,10 @@ reaches the right column of the dual box, every finite family `S` of pairwise di
 crossings of the box open in `G` can be rerouted: each member `i` is replaced by a walk from its
 own start to the top end `d (A (w i))` of an admissible chosen crossing, running inside the member
 and that chosen crossing, open in `G`; the indices `w i` increase from left to right (so they are
-distinct), and the new walks are pairwise disjoint. -/
+distinct), and the new walks are pairwise disjoint. Moreover each new walk is open after the
+removals of its step (its edges have no end on a chosen crossing of smaller index), and its
+vertices and edges come from the chosen crossing or from the member, in which case the vertex is
+not the last one of the member. -/
 theorem exists_reroute_of_exploration (h1 : lo 1 < hi 1) (hle : lo ≤ hi)
     (hΓ : ∀ A : Finset (LatticeSite 2),
       (∀ y : ℤ, lo 1 ≤ y → y ≤ hi 1 - 1 → (![lo 0 - 1, y] : LatticeSite 2) ∈ A) →
@@ -851,7 +854,8 @@ theorem exists_reroute_of_exploration (h1 : lo 1 < hi 1) (hle : lo ≤ hi)
       (∀ i ∈ S, ∀ j ∈ S, i ≠ j → ∀ x ∈ (γ' i).2.support, x ∉ (γ' j).2.support) ∧
       (∀ i ∈ S, ∀ x ∈ (γ' i).2.support,
         x ∈ (γ i).support.dropLast ∨ x ∈ (Γ (A (w i))).support) ∧
-      ∀ i ∈ S, ∀ e ∈ (γ' i).2.edges, ∀ y ∈ e, ∀ w' < w i, y ∉ (Γ (A w')).support := by
+      (∀ i ∈ S, ∀ e ∈ (γ' i).2.edges, ∀ y ∈ e, ∀ w' < w i, y ∉ (Γ (A w')).support) ∧
+      ∀ i ∈ S, ∀ e ∈ (γ' i).2.edges, e ∈ (γ i).edges ∨ e ∈ (Γ (A (w i))).edges := by
   classical
   -- the first step at which the explored cluster reaches the right column
   have hex : ∃ v, v ≤ u ∧ ∃ f ∈ A v, f 0 = hi 0 := ⟨u, le_rfl, hu⟩
@@ -900,7 +904,7 @@ theorem exists_reroute_of_exploration (h1 : lo 1 < hi 1) (hle : lo ≤ hi)
   refine ⟨w, γ', fun i hi => ⟨by have := (hPR i hi).1; omega, hadm _ (hPR i hi).1,
     (hγ'S i hi).1⟩, hmono, hwd, fun i hi x hx => ?_, fun i hi e he => ?_,
     fun i hi x hx => ?_, fun i hi j hj hij x hx hx' => ?_, fun i hi x hx => ?_,
-    fun i hi e he y hy w' hw' => ?_⟩
+    fun i hi e he y hy w' hw' => ?_, fun i hi e he => ?_⟩
   · obtain ⟨-, -, -, -, -, -, hPγ, -, hRΓ, -⟩ := hPR i hi
     rcases ((hγ'S i hi).2.1 x).1 hx with h | h
     · exact Or.inl (hPγ x h)
@@ -938,6 +942,10 @@ theorem exists_reroute_of_exploration (h1 : lo 1 < hi 1) (hle : lo ≤ hi)
         exact hΓdis _ hRst w' hw'
       · exact hfirst' i hi y hyP hyc w' hw'
     · exact hΓdis y (hRΓ y (mem_support_of_mem_edge _ h hy)) w' hw'
+  · obtain ⟨-, -, -, -, -, -, -, hPE, -, hRE⟩ := hPR i hi
+    rcases (hγ'S i hi).2.2 e he with h | h
+    · exact Or.inl (hPE e h)
+    · exact Or.inr (hRE e h)
 
 end Greedy
 

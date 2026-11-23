@@ -140,6 +140,7 @@ public import PercLib.Models.Planar.Arms.QuadDuality
 public import PercLib.Models.Planar.Arms.Separation
 public import PercLib.Models.Planar.Arms.SeparationEvents
 public import PercLib.Models.Planar.Arms.SeparationFence
+public import PercLib.Models.Planar.Arms.SeparationLemma
 public import PercLib.Models.Planar.Arms.SeparationProtection
 public import PercLib.Models.Planar.Arms.SeparationSurgery
 public import PercLib.Models.Planar.Arms.Separator
