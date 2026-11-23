@@ -519,4 +519,454 @@ theorem mem_image_dualEdge_of_mem_edges {lo hi a b : LatticeSite 2} (p : (zdGrap
   rw [mem_Icc_two_iff]
   omega
 
+/-! ### The deterministic part of the lemma -/
+
+/-- **Local separation, deterministic part.** Let `ω` be a configuration such that the
+greedy explorations of `ω` in the box `Icc lo hi` and of `dualConfig ω` in the box of faces
+`Icc lo₂ hi₂ = [lo₀, hi₀ - 1] × [lo₁ - 1, hi₁]` reach the right column within `T` steps, every
+admissible greedy tip up to step `T` is protected at some scale `s ≥ s₀` against later greedy tips
+of its colour and against walks of the other colour, and carries a fence annulus at some scale `t`
+with `K ≤ 3t`, `3t + 1 ≤ M ≤ s₀`, and the four top corners are protected at some scale `s ≥ s₀`.
+Then every family of disjoint crossings of `Icc lo hi`, open or dual, is rerouted to a family with
+the same colours and starts whose ends, in doubled positions, are more than `2 s₀` apart and more
+than `2 s₀` from the two sides, each with a fence in the box `[z₀ - K, z₀ + K] × [hi₁, hi₁ + M]`
+above its end `z`, arm-joined inside the ball of radius `M` around `z`. -/
+theorem separable_of_forall {ω : Config (LatticeSite 2)} {lo hi lo₂ hi₂ : LatticeSite 2}
+    (hlo₂ : lo₂ = ![lo 0, lo 1 - 1]) (hhi₂ : hi₂ = ![hi 0 - 1, hi 1]) (h1 : lo 1 + 1 < hi 1)
+    (h0 : lo 0 < hi 0) {T s₀ K M : ℕ} (hs₀ : 1 ≤ s₀) (hMs : M ≤ s₀)
+    {c₁ d₁ : Finset (LatticeSite 2) → LatticeSite 2} {Γ₁ : ∀ A, (zdGraph 2).Walk (c₁ A) (d₁ A)}
+    (hΓ₁ : ∀ A : Finset (LatticeSite 2),
+      (∀ y : ℤ, lo 1 ≤ y → y ≤ hi 1 - 1 → (![lo 0 - 1, y] : LatticeSite 2) ∈ A) →
+      (∀ f ∈ A, f 0 ≠ hi 0) →
+      (c₁ A ∈ Icc lo hi ∧ c₁ A 1 = lo 1 ∧ d₁ A ∈ Icc lo hi ∧ d₁ A 1 = hi 1 ∧
+        (∀ x ∈ (Γ₁ A).support, x ∈ Icc lo hi) ∧
+        ∀ e ∈ (Γ₁ A).edges, e ∈ (zdGraph 2).edgeSet ∧
+          (∀ f ∈ dualEdge e, f ∈ Icc (![lo 0 - 1, lo 1] : LatticeSite 2) ![hi 0, hi 1 - 1]) ∧
+          (∃ f ∈ dualEdge e, f ∈ A) ∧ ∃ f ∈ dualEdge e, f ∉ A) ∧
+      (Γ₁ A).IsPath ∧ (∀ x ∈ (Γ₁ A).support, x 1 = lo 1 → x = c₁ A) ∧
+        ∀ x ∈ (Γ₁ A).support, x 1 = hi 1 → x = d₁ A)
+    {c₂ d₂ : Finset (LatticeSite 2) → LatticeSite 2} {Γ₂ : ∀ A, (zdGraph 2).Walk (c₂ A) (d₂ A)}
+    (hΓ₂ : ∀ A : Finset (LatticeSite 2),
+      (∀ y : ℤ, lo₂ 1 ≤ y → y ≤ hi₂ 1 - 1 → (![lo₂ 0 - 1, y] : LatticeSite 2) ∈ A) →
+      (∀ f ∈ A, f 0 ≠ hi₂ 0) →
+      (c₂ A ∈ Icc lo₂ hi₂ ∧ c₂ A 1 = lo₂ 1 ∧ d₂ A ∈ Icc lo₂ hi₂ ∧ d₂ A 1 = hi₂ 1 ∧
+        (∀ x ∈ (Γ₂ A).support, x ∈ Icc lo₂ hi₂) ∧
+        ∀ e ∈ (Γ₂ A).edges, e ∈ (zdGraph 2).edgeSet ∧
+          (∀ f ∈ dualEdge e, f ∈ Icc (![lo₂ 0 - 1, lo₂ 1] : LatticeSite 2) ![hi₂ 0, hi₂ 1 - 1]) ∧
+          (∃ f ∈ dualEdge e, f ∈ A) ∧ ∃ f ∈ dualEdge e, f ∉ A) ∧
+      (Γ₂ A).IsPath ∧ (∀ x ∈ (Γ₂ A).support, x 1 = lo₂ 1 → x = c₂ A) ∧
+        ∀ x ∈ (Γ₂ A).support, x 1 = hi₂ 1 → x = d₂ A)
+    (hO : ∀ A : ℕ → Finset (LatticeSite 2),
+      (∀ w ≤ T, cluster (dualConfig (ω \
+          {e | ∃ x ∈ e, ∃ w' < w, x ∈ (Γ₁ (A w')).support}) ∩
+          {s | ∀ x ∈ s, x ∈ Icc (![lo 0 - 1, lo 1] : LatticeSite 2) ![hi 0, hi 1 - 1]} ∪
+        {s | ∃ y : ℤ, lo 1 ≤ y ∧ y + 1 ≤ hi 1 - 1 ∧
+          s = s(![lo 0 - 1, y], (![lo 0 - 1, y + 1] : LatticeSite 2))}) ![lo 0 - 1, lo 1] =
+            ↑(A w)) →
+      ∃ v ≤ T, ∃ f ∈ A v, f 0 = hi 0)
+    (hD : ∀ A : ℕ → Finset (LatticeSite 2),
+      (∀ w ≤ T, cluster (dualConfig (dualConfig ω \
+          {e | ∃ x ∈ e, ∃ w' < w, x ∈ (Γ₂ (A w')).support}) ∩
+          {s | ∀ x ∈ s, x ∈ Icc (![lo₂ 0 - 1, lo₂ 1] : LatticeSite 2) ![hi₂ 0, hi₂ 1 - 1]} ∪
+        {s | ∃ y : ℤ, lo₂ 1 ≤ y ∧ y + 1 ≤ hi₂ 1 - 1 ∧
+          s = s(![lo₂ 0 - 1, y], (![lo₂ 0 - 1, y + 1] : LatticeSite 2))}) ![lo₂ 0 - 1, lo₂ 1] =
+            ↑(A w)) →
+      ∃ v ≤ T, ∃ f ∈ A v, f 0 = hi₂ 0)
+    (hOs : ∀ v ≤ T, ∀ A : ℕ → Finset (LatticeSite 2),
+      (∀ w ≤ v, cluster (dualConfig (ω \
+          {e | ∃ x ∈ e, ∃ w' < w, x ∈ (Γ₁ (A w')).support}) ∩
+          {s | ∀ x ∈ s, x ∈ Icc (![lo 0 - 1, lo 1] : LatticeSite 2) ![hi 0, hi 1 - 1]} ∪
+        {s | ∃ y : ℤ, lo 1 ≤ y ∧ y + 1 ≤ hi 1 - 1 ∧
+          s = s(![lo 0 - 1, y], (![lo 0 - 1, y + 1] : LatticeSite 2))}) ![lo 0 - 1, lo 1] =
+            ↑(A w)) →
+      (∀ f ∈ A v, f 0 ≠ hi 0) → ∃ s : ℕ, s₀ ≤ s ∧ lo 1 + 3 * s ≤ hi 1 - 1 ∧
+      (ω \ {e | ∃ f ∈ dualEdge e, f ∈ A v}) ∩ {e | ∀ x ∈ e, x ∈ Icc lo hi} ∉
+        crossing 1 (d₁ (A v) + ![-3 * (s : ℤ), -3 * s])
+          (d₁ (A v) + ![3 * (s : ℤ), -s]) ∧
+      (ω \ {e | ∃ f ∈ dualEdge e, f ∈ A v}) ∩ {e | ∀ x ∈ e, x ∈ Icc lo hi} ∉
+        crossing 0 (d₁ (A v) + ![(s : ℤ), -3 * s])
+          (d₁ (A v) + ![3 * (s : ℤ), 3 * s]) ∧
+      (ω \ {e | ∃ f ∈ dualEdge e, f ∈ A v}) ∩ {e | ∀ x ∈ e, x ∈ Icc lo hi} ∉
+        crossing 0 (d₁ (A v) + ![-3 * (s : ℤ), -3 * s])
+          (d₁ (A v) + ![-(s : ℤ), 3 * s]))
+    (hOo : ∀ v ≤ T, ∀ A : ℕ → Finset (LatticeSite 2),
+      (∀ w ≤ v, cluster (dualConfig (ω \
+          {e | ∃ x ∈ e, ∃ w' < w, x ∈ (Γ₁ (A w')).support}) ∩
+          {s | ∀ x ∈ s, x ∈ Icc (![lo 0 - 1, lo 1] : LatticeSite 2) ![hi 0, hi 1 - 1]} ∪
+        {s | ∃ y : ℤ, lo 1 ≤ y ∧ y + 1 ≤ hi 1 - 1 ∧
+          s = s(![lo 0 - 1, y], (![lo 0 - 1, y + 1] : LatticeSite 2))}) ![lo 0 - 1, lo 1] =
+            ↑(A w)) →
+      (∀ f ∈ A v, f 0 ≠ hi 0) → ∃ s : ℕ, s₀ ≤ s ∧ lo 1 + 3 * s ≤ hi 1 - 1 ∧
+      dualConfig (ω ∪ {e | ∃ f ∈ dualEdge e, f ∈ A v}) ∩
+        {e | ∀ x ∈ e, x ∈ Icc (![lo 0 - 1, lo 1] : LatticeSite 2) ![hi 0, hi 1 - 1]} ∉
+        crossing 1 (![d₁ (A v) 0, hi 1 - 1] + ![-3 * (s : ℤ), -3 * s])
+          (![d₁ (A v) 0, hi 1 - 1] + ![3 * (s : ℤ), -s]) ∧
+      dualConfig (ω ∪ {e | ∃ f ∈ dualEdge e, f ∈ A v}) ∩
+        {e | ∀ x ∈ e, x ∈ Icc (![lo 0 - 1, lo 1] : LatticeSite 2) ![hi 0, hi 1 - 1]} ∉
+        crossing 0 (![d₁ (A v) 0, hi 1 - 1] + ![(s : ℤ), -3 * s])
+          (![d₁ (A v) 0, hi 1 - 1] + ![3 * (s : ℤ), 3 * s]) ∧
+      dualConfig (ω ∪ {e | ∃ f ∈ dualEdge e, f ∈ A v}) ∩
+        {e | ∀ x ∈ e, x ∈ Icc (![lo 0 - 1, lo 1] : LatticeSite 2) ![hi 0, hi 1 - 1]} ∉
+        crossing 0 (![d₁ (A v) 0, hi 1 - 1] + ![-3 * (s : ℤ), -3 * s])
+          (![d₁ (A v) 0, hi 1 - 1] + ![-(s : ℤ), 3 * s]))
+    (hOf : ∀ v ≤ T, ∀ A : ℕ → Finset (LatticeSite 2),
+      (∀ w ≤ v, cluster (dualConfig (ω \
+          {e | ∃ x ∈ e, ∃ w' < w, x ∈ (Γ₁ (A w')).support}) ∩
+          {s | ∀ x ∈ s, x ∈ Icc (![lo 0 - 1, lo 1] : LatticeSite 2) ![hi 0, hi 1 - 1]} ∪
+        {s | ∃ y : ℤ, lo 1 ≤ y ∧ y + 1 ≤ hi 1 - 1 ∧
+          s = s(![lo 0 - 1, y], (![lo 0 - 1, y + 1] : LatticeSite 2))}) ![lo 0 - 1, lo 1] =
+            ↑(A w)) →
+      (∀ f ∈ A v, f 0 ≠ hi 0) → ∃ t : ℕ, 1 ≤ t ∧ K ≤ 3 * t ∧ 3 * t + 1 ≤ M ∧ lo 1 + 3 * t ≤ hi 1 ∧
+      ω ∪ {e | ∃ f ∈ dualEdge e, f ∈ A v} ∈
+        crossing 0 (d₁ (A v) + ![-3 * (t : ℤ), t + 1]) (d₁ (A v) + ![3 * (t : ℤ) + 1, 3 * t]) ∧
+      ω ∪ {e | ∃ f ∈ dualEdge e, f ∈ A v} ∈
+        crossing 0 (d₁ (A v) + ![-3 * (t : ℤ), -3 * t + 1]) (d₁ (A v) + ![3 * (t : ℤ) + 1, -t]) ∧
+      ω ∪ {e | ∃ f ∈ dualEdge e, f ∈ A v} ∈
+        crossing 1 (d₁ (A v) + ![(t : ℤ) + 1, -3 * t]) (d₁ (A v) + ![3 * (t : ℤ), 3 * t + 1]) ∧
+      ω ∪ {e | ∃ f ∈ dualEdge e, f ∈ A v} ∈
+        crossing 1 (d₁ (A v) + ![-3 * (t : ℤ) + 1, -3 * t]) (d₁ (A v) + ![-(t : ℤ), 3 * t + 1]))
+    (hDs : ∀ v ≤ T, ∀ A : ℕ → Finset (LatticeSite 2),
+      (∀ w ≤ v, cluster (dualConfig (dualConfig ω \
+          {e | ∃ x ∈ e, ∃ w' < w, x ∈ (Γ₂ (A w')).support}) ∩
+          {s | ∀ x ∈ s, x ∈ Icc (![lo₂ 0 - 1, lo₂ 1] : LatticeSite 2) ![hi₂ 0, hi₂ 1 - 1]} ∪
+        {s | ∃ y : ℤ, lo₂ 1 ≤ y ∧ y + 1 ≤ hi₂ 1 - 1 ∧
+          s = s(![lo₂ 0 - 1, y], (![lo₂ 0 - 1, y + 1] : LatticeSite 2))}) ![lo₂ 0 - 1, lo₂ 1] =
+            ↑(A w)) →
+      (∀ f ∈ A v, f 0 ≠ hi₂ 0) → ∃ s : ℕ, s₀ ≤ s ∧ lo₂ 1 + 3 * s ≤ hi₂ 1 - 1 ∧
+      (dualConfig ω \ {e | ∃ f ∈ dualEdge e, f ∈ A v}) ∩ {e | ∀ x ∈ e, x ∈ Icc lo₂ hi₂} ∉
+        crossing 1 (d₂ (A v) + ![-3 * (s : ℤ), -3 * s])
+          (d₂ (A v) + ![3 * (s : ℤ), -s]) ∧
+      (dualConfig ω \ {e | ∃ f ∈ dualEdge e, f ∈ A v}) ∩ {e | ∀ x ∈ e, x ∈ Icc lo₂ hi₂} ∉
+        crossing 0 (d₂ (A v) + ![(s : ℤ), -3 * s])
+          (d₂ (A v) + ![3 * (s : ℤ), 3 * s]) ∧
+      (dualConfig ω \ {e | ∃ f ∈ dualEdge e, f ∈ A v}) ∩ {e | ∀ x ∈ e, x ∈ Icc lo₂ hi₂} ∉
+        crossing 0 (d₂ (A v) + ![-3 * (s : ℤ), -3 * s])
+          (d₂ (A v) + ![-(s : ℤ), 3 * s]))
+    (hDo : ∀ v ≤ T, ∀ A : ℕ → Finset (LatticeSite 2),
+      (∀ w ≤ v, cluster (dualConfig (dualConfig ω \
+          {e | ∃ x ∈ e, ∃ w' < w, x ∈ (Γ₂ (A w')).support}) ∩
+          {s | ∀ x ∈ s, x ∈ Icc (![lo₂ 0 - 1, lo₂ 1] : LatticeSite 2) ![hi₂ 0, hi₂ 1 - 1]} ∪
+        {s | ∃ y : ℤ, lo₂ 1 ≤ y ∧ y + 1 ≤ hi₂ 1 - 1 ∧
+          s = s(![lo₂ 0 - 1, y], (![lo₂ 0 - 1, y + 1] : LatticeSite 2))}) ![lo₂ 0 - 1, lo₂ 1] =
+            ↑(A w)) →
+      (∀ f ∈ A v, f 0 ≠ hi₂ 0) → ∃ s : ℕ, s₀ ≤ s ∧ lo₂ 1 + 3 * s ≤ hi₂ 1 - 1 ∧
+      dualConfig (dualConfig ω ∪ {e | ∃ f ∈ dualEdge e, f ∈ A v}) ∩
+        {e | ∀ x ∈ e, x ∈ Icc (![lo₂ 0 - 1, lo₂ 1] : LatticeSite 2) ![hi₂ 0, hi₂ 1 - 1]} ∉
+        crossing 1 (![d₂ (A v) 0, hi₂ 1 - 1] + ![-3 * (s : ℤ), -3 * s])
+          (![d₂ (A v) 0, hi₂ 1 - 1] + ![3 * (s : ℤ), -s]) ∧
+      dualConfig (dualConfig ω ∪ {e | ∃ f ∈ dualEdge e, f ∈ A v}) ∩
+        {e | ∀ x ∈ e, x ∈ Icc (![lo₂ 0 - 1, lo₂ 1] : LatticeSite 2) ![hi₂ 0, hi₂ 1 - 1]} ∉
+        crossing 0 (![d₂ (A v) 0, hi₂ 1 - 1] + ![(s : ℤ), -3 * s])
+          (![d₂ (A v) 0, hi₂ 1 - 1] + ![3 * (s : ℤ), 3 * s]) ∧
+      dualConfig (dualConfig ω ∪ {e | ∃ f ∈ dualEdge e, f ∈ A v}) ∩
+        {e | ∀ x ∈ e, x ∈ Icc (![lo₂ 0 - 1, lo₂ 1] : LatticeSite 2) ![hi₂ 0, hi₂ 1 - 1]} ∉
+        crossing 0 (![d₂ (A v) 0, hi₂ 1 - 1] + ![-3 * (s : ℤ), -3 * s])
+          (![d₂ (A v) 0, hi₂ 1 - 1] + ![-(s : ℤ), 3 * s]))
+    (hDf : ∀ v ≤ T, ∀ A : ℕ → Finset (LatticeSite 2),
+      (∀ w ≤ v, cluster (dualConfig (dualConfig ω \
+          {e | ∃ x ∈ e, ∃ w' < w, x ∈ (Γ₂ (A w')).support}) ∩
+          {s | ∀ x ∈ s, x ∈ Icc (![lo₂ 0 - 1, lo₂ 1] : LatticeSite 2) ![hi₂ 0, hi₂ 1 - 1]} ∪
+        {s | ∃ y : ℤ, lo₂ 1 ≤ y ∧ y + 1 ≤ hi₂ 1 - 1 ∧
+          s = s(![lo₂ 0 - 1, y], (![lo₂ 0 - 1, y + 1] : LatticeSite 2))}) ![lo₂ 0 - 1, lo₂ 1] =
+            ↑(A w)) →
+      (∀ f ∈ A v, f 0 ≠ hi₂ 0) → ∃ t : ℕ, 1 ≤ t ∧ K ≤ 3 * t ∧ 3 * t + 1 ≤ M ∧
+      lo₂ 1 + 3 * t ≤ hi₂ 1 ∧
+      dualConfig ω ∪ {e | ∃ f ∈ dualEdge e, f ∈ A v} ∈
+        crossing 0 (d₂ (A v) + ![-3 * (t : ℤ), t + 1]) (d₂ (A v) + ![3 * (t : ℤ) + 1, 3 * t]) ∧
+      dualConfig ω ∪ {e | ∃ f ∈ dualEdge e, f ∈ A v} ∈
+        crossing 0 (d₂ (A v) + ![-3 * (t : ℤ), -3 * t + 1]) (d₂ (A v) + ![3 * (t : ℤ) + 1, -t]) ∧
+      dualConfig ω ∪ {e | ∃ f ∈ dualEdge e, f ∈ A v} ∈
+        crossing 1 (d₂ (A v) + ![(t : ℤ) + 1, -3 * t]) (d₂ (A v) + ![3 * (t : ℤ), 3 * t + 1]) ∧
+      dualConfig ω ∪ {e | ∃ f ∈ dualEdge e, f ∈ A v} ∈
+        crossing 1 (d₂ (A v) + ![-3 * (t : ℤ) + 1, -3 * t]) (d₂ (A v) + ![-(t : ℤ), 3 * t + 1]))
+    (hOR : ∃ s : ℕ, s₀ ≤ s ∧ lo 1 + 3 * s ≤ hi 1 ∧
+      ω ∩ {e | ∀ x ∈ e, x ∈ Icc lo hi} ∉
+        crossing 1 (![hi 0, hi 1] + ![-3 * (s : ℤ), -3 * s])
+          (![hi 0, hi 1] + ![3 * (s : ℤ), -s]) ∧
+      ω ∩ {e | ∀ x ∈ e, x ∈ Icc lo hi} ∉
+        crossing 0 (![hi 0, hi 1] + ![-3 * (s : ℤ), -3 * s])
+          (![hi 0, hi 1] + ![-(s : ℤ), 3 * s]))
+    (hOL : ∃ s : ℕ, s₀ ≤ s ∧ lo 1 + 3 * s ≤ hi 1 ∧
+      ω ∩ {e | ∀ x ∈ e, x ∈ Icc lo hi} ∉
+        crossing 1 (![lo 0, hi 1] + ![-3 * (s : ℤ), -3 * s])
+          (![lo 0, hi 1] + ![3 * (s : ℤ), -s]) ∧
+      ω ∩ {e | ∀ x ∈ e, x ∈ Icc lo hi} ∉
+        crossing 0 (![lo 0, hi 1] + ![(s : ℤ), -3 * s])
+          (![lo 0, hi 1] + ![3 * (s : ℤ), 3 * s]))
+    (hDR : ∃ s : ℕ, s₀ ≤ s ∧ lo₂ 1 + 3 * s ≤ hi₂ 1 ∧
+      dualConfig ω ∩ {e | ∀ x ∈ e, x ∈ Icc lo₂ hi₂} ∉
+        crossing 1 (![hi₂ 0, hi₂ 1] + ![-3 * (s : ℤ), -3 * s])
+          (![hi₂ 0, hi₂ 1] + ![3 * (s : ℤ), -s]) ∧
+      dualConfig ω ∩ {e | ∀ x ∈ e, x ∈ Icc lo₂ hi₂} ∉
+        crossing 0 (![hi₂ 0, hi₂ 1] + ![-3 * (s : ℤ), -3 * s])
+          (![hi₂ 0, hi₂ 1] + ![-(s : ℤ), 3 * s]))
+    (hDL : ∃ s : ℕ, s₀ ≤ s ∧ lo₂ 1 + 3 * s ≤ hi₂ 1 ∧
+      dualConfig ω ∩ {e | ∀ x ∈ e, x ∈ Icc lo₂ hi₂} ∉
+        crossing 1 (![lo₂ 0, hi₂ 1] + ![-3 * (s : ℤ), -3 * s])
+          (![lo₂ 0, hi₂ 1] + ![3 * (s : ℤ), -s]) ∧
+      dualConfig ω ∩ {e | ∀ x ∈ e, x ∈ Icc lo₂ hi₂} ∉
+        crossing 0 (![lo₂ 0, hi₂ 1] + ![(s : ℤ), -3 * s])
+          (![lo₂ 0, hi₂ 1] + ![3 * (s : ℤ), 3 * s])) :
+    ∀ (m : ℕ) (σ : Fin m → Bool) (a b : Fin m → LatticeSite 2)
+      (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+      (∀ i, cond (σ i)
+        (a i 1 = lo 1 ∧ b i 1 = hi 1 ∧ (∀ x ∈ (γ i).support, x ∈ Icc lo hi) ∧
+          ∀ e ∈ (γ i).edges, e ∈ ω)
+        (a i 1 = lo₂ 1 ∧ b i 1 = hi₂ 1 ∧ (∀ x ∈ (γ i).support, x ∈ Icc lo₂ hi₂) ∧
+          ∀ e ∈ (γ i).edges, e ∈ dualConfig ω ∩
+            dualEdge '' {e | e ∈ (zdGraph 2).edgeSet ∧ ∀ x ∈ e, x ∈ Icc lo hi})) →
+      (∀ i j, i ≠ j → σ i = σ j → ∀ x ∈ (γ i).support, x ∉ (γ j).support) →
+      ∃ (b' : Fin m → LatticeSite 2) (γ' : ∀ i, (zdGraph 2).Walk (a i) (b' i)),
+        (∀ i, cond (σ i)
+          (a i 1 = lo 1 ∧ b' i 1 = hi 1 ∧ (∀ x ∈ (γ' i).support, x ∈ Icc lo hi) ∧
+            ∀ e ∈ (γ' i).edges, e ∈ ω)
+          (a i 1 = lo₂ 1 ∧ b' i 1 = hi₂ 1 ∧ (∀ x ∈ (γ' i).support, x ∈ Icc lo₂ hi₂) ∧
+            ∀ e ∈ (γ' i).edges, e ∈ dualConfig ω ∩
+              dualEdge '' {e | e ∈ (zdGraph 2).edgeSet ∧ ∀ x ∈ e, x ∈ Icc lo hi})) ∧
+        (∀ i j, i ≠ j → σ i = σ j → ∀ x ∈ (γ' i).support, x ∉ (γ' j).support) ∧
+        (∀ i j, i ≠ j → 2 * (s₀ : ℤ) <
+          |(2 * b' i 0 + cond (σ i) 0 1) - (2 * b' j 0 + cond (σ j) 0 1)|) ∧
+        (∀ i, 2 * (s₀ : ℤ) < 2 * b' i 0 + cond (σ i) 0 1 - 2 * lo 0 ∧
+          2 * (s₀ : ℤ) < 2 * hi 0 - (2 * b' i 0 + cond (σ i) 0 1)) ∧
+        ∀ i, ∃ x ∈ (γ' i).support, ∃ l r : LatticeSite 2, l 0 = b' i 0 - K ∧ r 0 = b' i 0 + K ∧
+          cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈
+            localConn (Icc ![b' i 0 - K, hi 1] ![b' i 0 + K, hi 1 + M]) l r ∧
+          cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈
+            localConn (Icc (b' i - (M : LatticeSite 2)) (b' i + (M : LatticeSite 2))) x l := by
+  intro m σ a b γ hcr hdisj
+  classical
+  have hl₂0 : lo₂ 0 = lo 0 := by rw [hlo₂]; rfl
+  have hl₂1 : lo₂ 1 = lo 1 - 1 := by rw [hlo₂]; rfl
+  have hh₂0 : hi₂ 0 = hi 0 - 1 := by rw [hhi₂]; rfl
+  have hh₂1 : hi₂ 1 = hi 1 := by rw [hhi₂]; rfl
+  have hle : lo ≤ hi := by
+    rw [Pi.le_def, Fin.forall_fin_two]
+    exact ⟨h0.le, by omega⟩
+  have hle₂ : lo₂ ≤ hi₂ := by
+    rw [Pi.le_def, Fin.forall_fin_two, hl₂0, hl₂1, hh₂0, hh₂1]
+    omega
+  have h1' : lo 1 < hi 1 := by omega
+  have h1₂ : lo₂ 1 < hi₂ 1 := by
+    rw [hl₂1, hh₂1]
+    omega
+  have hΓ₁' := fun A' h₁ h₂ => (hΓ₁ A' h₁ h₂).1
+  have hΓ₂' := fun A' h₁ h₂ => (hΓ₂ A' h₁ h₂).1
+  -- the two explorations, up to the first step where they reach the right column
+  obtain ⟨A₁, hA₁⟩ := exists_exploration h1' (hle 0) ω Γ₁ T
+  obtain ⟨A₂, hA₂⟩ := exists_exploration h1₂ (hle₂ 0) (dualConfig ω) Γ₂ T
+  obtain ⟨u₁, hu₁T, hu₁⟩ := hO A₁ hA₁
+  obtain ⟨u₂, hu₂T, hu₂⟩ := hD A₂ hA₂
+  have hA₁u := fun w (hw : w ≤ u₁) => hA₁ w (hw.trans hu₁T)
+  have hA₂u := fun w (hw : w ≤ u₂) => hA₂ w (hw.trans hu₂T)
+  -- the greedy tips are away from the corners
+  have hc₁ := fun v (hv : v ≤ u₁) (hvr : ∀ f ∈ A₁ v, f 0 ≠ hi 0) =>
+    lt_tip_of_corner h1' hΓ₁' hA₁u hs₀ hOR hOL hv hvr
+  have hc₂ := fun v (hv : v ≤ u₂) (hvr : ∀ f ∈ A₂ v, f 0 ≠ hi₂ 0) =>
+    lt_tip_of_corner h1₂ hΓ₂' hA₂u hs₀ hDR hDL hv hvr
+  -- the members of each colour
+  have hcr₁ : ∀ i, σ i = true → a i 1 = lo 1 ∧ b i 1 = hi 1 ∧
+      (∀ x ∈ (γ i).support, x ∈ Icc lo hi) ∧ ∀ e ∈ (γ i).edges, e ∈ ω := fun i hσ => by
+    have := hcr i
+    rw [hσ] at this
+    exact this
+  have hcr₂ : ∀ i, σ i = false → a i 1 = lo₂ 1 ∧ b i 1 = hi₂ 1 ∧
+      (∀ x ∈ (γ i).support, x ∈ Icc lo₂ hi₂) ∧ ∀ e ∈ (γ i).edges, e ∈ dualConfig ω ∩
+        dualEdge '' {e | e ∈ (zdGraph 2).edgeSet ∧ ∀ x ∈ e, x ∈ Icc lo hi} := fun i hσ => by
+    have := hcr i
+    rw [hσ] at this
+    exact this
+  have hS₁ : ∀ i, i ∈ Finset.univ.filter (fun i => σ i = true) ↔ σ i = true := fun i => by
+    simp
+  have hS₂ : ∀ i, i ∈ Finset.univ.filter (fun i => σ i = false) ↔ σ i = false := fun i => by
+    simp
+  -- rerouting each colour, with fences
+  obtain ⟨w₁, γ₁, hw₁, hwd₁, hbox₁, hG₁, -, hdisj₁, hfen₁⟩ :=
+    exists_reroute_fence_of_exploration h1' hle hΓ₁ hA₁u hu₁ (K := K) (M := M)
+      (fun v hv hvr => by
+        obtain ⟨t, ht, hKt, htM, hy, hT, hB, hR, hL⟩ :=
+          hOf v (by omega) A₁ (fun w hw => hA₁ w (le_trans hw (by omega))) hvr
+        have := hc₁ v hv.le hvr
+        exact ⟨t, ht, hKt, htM, by omega, by omega, hy, hT, hB, hR, hL⟩)
+      (Finset.univ.filter fun i => σ i = true) γ
+      (fun i hi => (hcr₁ i ((hS₁ i).1 hi)).2.2.1) (fun i hi => (hcr₁ i ((hS₁ i).1 hi)).1)
+      (fun i hi => (hcr₁ i ((hS₁ i).1 hi)).2.1) (fun i hi => (hcr₁ i ((hS₁ i).1 hi)).2.2.2)
+      (fun i hi j hj hij => hdisj i j hij (((hS₁ i).1 hi).trans ((hS₁ j).1 hj).symm))
+  obtain ⟨w₂, γ₂, hw₂, hwd₂, hbox₂, hG₂, hedge₂, hdisj₂, hfen₂⟩ :=
+    exists_reroute_fence_of_exploration h1₂ hle₂ hΓ₂ hA₂u hu₂ (K := K) (M := M)
+      (fun v hv hvr => by
+        obtain ⟨t, ht, hKt, htM, hy, hT, hB, hR, hL⟩ :=
+          hDf v (by omega) A₂ (fun w hw => hA₂ w (le_trans hw (by omega))) hvr
+        have := hc₂ v hv.le hvr
+        exact ⟨t, ht, hKt, htM, by omega, by omega, hy, hT, hB, hR, hL⟩)
+      (Finset.univ.filter fun i => σ i = false) γ
+      (fun i hi => (hcr₂ i ((hS₂ i).1 hi)).2.2.1) (fun i hi => (hcr₂ i ((hS₂ i).1 hi)).1)
+      (fun i hi => (hcr₂ i ((hS₂ i).1 hi)).2.1)
+      (fun i hi e he => ((hcr₂ i ((hS₂ i).1 hi)).2.2.2 e he).1)
+      (fun i hi j hj hij => hdisj i j hij (((hS₂ i).1 hi).trans ((hS₂ j).1 hj).symm))
+  -- data of the greedy crossings at the tips
+  have hdat₁ : ∀ i, σ i = true → w₁ i < u₁ ∧ (∀ f ∈ A₁ (w₁ i), f 0 ≠ hi 0) ∧
+      (γ₁ i).1 = d₁ (A₁ (w₁ i)) ∧ d₁ (A₁ (w₁ i)) 1 = hi 1 := fun i hσ => by
+    obtain ⟨hwu, hadm, hend⟩ := hw₁ i ((hS₁ i).2 hσ)
+    exact ⟨hwu, hadm, hend,
+      (hΓ₁' (A₁ (w₁ i)) (mem_leftColumn_of_exploration hA₁u hwu.le) hadm).2.2.2.1⟩
+  have hdat₂ : ∀ i, σ i = false → w₂ i < u₂ ∧ (∀ f ∈ A₂ (w₂ i), f 0 ≠ hi₂ 0) ∧
+      (γ₂ i).1 = d₂ (A₂ (w₂ i)) ∧ d₂ (A₂ (w₂ i)) 1 = hi₂ 1 := fun i hσ => by
+    obtain ⟨hwu, hadm, hend⟩ := hw₂ i ((hS₂ i).2 hσ)
+    exact ⟨hwu, hadm, hend,
+      (hΓ₂' (A₂ (w₂ i)) (mem_leftColumn_of_exploration hA₂u hwu.le) hadm).2.2.2.1⟩
+  -- separation of tips of the same colour
+  have hsep₁ : ∀ i j, σ i = true → σ j = true → i ≠ j →
+      (s₀ : ℤ) < |(γ₁ i).1 0 - (γ₁ j).1 0| := by
+    intro i j hσi hσj hij
+    obtain ⟨hwi, hai, hei, -⟩ := hdat₁ i hσi
+    obtain ⟨hwj, haj, hej, -⟩ := hdat₁ j hσj
+    rw [hei, hej]
+    refine lt_abs_sub_of_exploration h1' hle hΓ₁ hA₁u hs₀ (fun v hv hvr => ?_)
+      (hwd₁ i ((hS₁ i).2 hσi) j ((hS₁ j).2 hσj) hij) hwi.le hwj.le hai haj
+    obtain ⟨s, hs, hs3, hB, hR, hL⟩ :=
+      hOs v (by omega) A₁ (fun w hw => hA₁ w (le_trans hw (by omega))) hvr
+    exact ⟨s, hs, by omega, hB, hR, hL⟩
+  have hsep₂ : ∀ i j, σ i = false → σ j = false → i ≠ j →
+      (s₀ : ℤ) < |(γ₂ i).1 0 - (γ₂ j).1 0| := by
+    intro i j hσi hσj hij
+    obtain ⟨hwi, hai, hei, -⟩ := hdat₂ i hσi
+    obtain ⟨hwj, haj, hej, -⟩ := hdat₂ j hσj
+    rw [hei, hej]
+    refine lt_abs_sub_of_exploration h1₂ hle₂ hΓ₂ hA₂u hs₀ (fun v hv hvr => ?_)
+      (hwd₂ i ((hS₂ i).2 hσi) j ((hS₂ j).2 hσj) hij) hwi.le hwj.le hai haj
+    obtain ⟨s, hs, hs3, hB, hR, hL⟩ :=
+      hDs v (by omega) A₂ (fun w hw => hA₂ w (le_trans hw (by omega))) hvr
+    exact ⟨s, hs, by omega, hB, hR, hL⟩
+  -- separation of tips of different colours
+  have hmix : ∀ i j, σ i = true → σ j = false →
+      2 * (s₀ : ℤ) + 1 < |2 * (γ₁ i).1 0 - (2 * (γ₂ j).1 0 + 1)| := by
+    intro i j hσi hσj
+    obtain ⟨hwi, hai, hei, hdi⟩ := hdat₁ i hσi
+    obtain ⟨hwj, haj, hej, hdj⟩ := hdat₂ j hσj
+    rw [hei, hej]
+    obtain ⟨⟨-, hcj1, -, -, hSj, -⟩, hPj, hbotj, htopj⟩ :=
+      hΓ₂ (A₂ (w₂ j)) (mem_leftColumn_of_exploration hA₂u hwj.le) haj
+    obtain ⟨⟨-, hci1, -, -, hSi, -⟩, -, -, -⟩ :=
+      hΓ₁ (A₁ (w₁ i)) (mem_leftColumn_of_exploration hA₁u hwi.le) hai
+    by_cases hzf : d₁ (A₁ (w₁ i)) 0 ≤ d₂ (A₂ (w₂ j)) 0
+    · obtain ⟨s, hs, hs3, hB, hR, hL⟩ :=
+        hOo (w₁ i) (by omega) A₁ (fun w hw => hA₁ w (le_trans hw (by omega))) hai
+      have := add_lt_of_exploration_of_dualConfig h1' hle hΓ₁ hA₁u hwi.le hai (by omega) hs3
+        hB hR hL (Γ₂ (A₂ (w₂ j))) hPj (fun x hx => by rw [← hlo₂, ← hhi₂]; exact hSj x hx)
+        (by rw [hcj1, hl₂1]) (by rw [hdj, hh₂1]) (fun x hx h => hbotj x hx (by rw [hl₂1]; exact h))
+        (fun x hx h => htopj x hx (by rw [hh₂1]; exact h))
+        (forall_mem_of_exploration h1₂ hΓ₂' hA₂u hwj.le haj).1 hzf
+      rw [lt_abs]
+      right
+      omega
+    · obtain ⟨s, hs, hs3, hB, hR, hL⟩ :=
+        hDo (w₂ j) (by omega) A₂ (fun w hw => hA₂ w (le_trans hw (by omega))) haj
+      have := add_lt_of_exploration_dualConfig h1₂ hle₂ hΓ₂ hA₂u hwj.le haj (by omega) hs3
+        hB hR hL (Γ₁ (A₁ (w₁ i))) (fun x hx => by
+          have := mem_Icc_two_iff.1 (hSi x hx)
+          rw [mem_Icc_two_iff]
+          simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
+          omega)
+        (by omega) (by rw [hdi, hh₂1])
+        (forall_mem_of_exploration h1' hΓ₁' hA₁u hwi.le hai).1 (by omega)
+      rw [lt_abs]
+      left
+      omega
+  -- the new family
+  set Γ'' : ∀ i, Σ y : LatticeSite 2, (zdGraph 2).Walk (a i) y :=
+    fun i => cond (σ i) (γ₁ i) (γ₂ i) with hΓ''
+  have hΓt : ∀ i, σ i = true → Γ'' i = γ₁ i := fun i hσ => by
+    change cond (σ i) (γ₁ i) (γ₂ i) = γ₁ i
+    rw [hσ]
+    rfl
+  have hΓf : ∀ i, σ i = false → Γ'' i = γ₂ i := fun i hσ => by
+    change cond (σ i) (γ₁ i) (γ₂ i) = γ₂ i
+    rw [hσ]
+    rfl
+  refine ⟨fun i => (Γ'' i).1, fun i => (Γ'' i).2, fun i => ?_, fun i j hij hσij x hx hx' => ?_,
+    fun i j hij => ?_, fun i => ?_, fun i => ?_⟩
+  · -- crossings of the right colour
+    cases hσ : σ i
+    · obtain ⟨hwi, hai, hei, hdi⟩ := hdat₂ i hσ
+      have hiS := (hS₂ i).2 hσ
+      change a i 1 = lo₂ 1 ∧ (Γ'' i).1 1 = hi₂ 1 ∧ (∀ x ∈ (Γ'' i).2.support, x ∈ Icc lo₂ hi₂) ∧
+        ∀ e ∈ (Γ'' i).2.edges, e ∈ dualConfig ω ∩
+          dualEdge '' {e | e ∈ (zdGraph 2).edgeSet ∧ ∀ x ∈ e, x ∈ Icc lo hi}
+      rw [hΓf i hσ]
+      refine ⟨(hcr₂ i hσ).1, by rw [hei, hdi], hbox₂ i hiS, fun e he => ⟨hG₂ i hiS e he, ?_⟩⟩
+      rcases hedge₂ i hiS e he with h | h
+      · exact ((hcr₂ i hσ).2.2.2 e h).2
+      · obtain ⟨⟨-, hc1, -, -, hS, -⟩, -, hbot, htop⟩ :=
+          hΓ₂ (A₂ (w₂ i)) (mem_leftColumn_of_exploration hA₂u hwi.le) hai
+        exact mem_image_dualEdge_of_mem_edges _ (fun x hx => by rw [← hlo₂, ← hhi₂]; exact hS x hx)
+          (fun x hx h => hbot x hx (by rw [hl₂1]; exact h))
+          (fun x hx h => htop x hx (by rw [hh₂1]; exact h)) h
+    · obtain ⟨-, -, hei, hdi⟩ := hdat₁ i hσ
+      have hiS := (hS₁ i).2 hσ
+      change a i 1 = lo 1 ∧ (Γ'' i).1 1 = hi 1 ∧ (∀ x ∈ (Γ'' i).2.support, x ∈ Icc lo hi) ∧
+        ∀ e ∈ (Γ'' i).2.edges, e ∈ ω
+      rw [hΓt i hσ]
+      exact ⟨(hcr₁ i hσ).1, by rw [hei, hdi], hbox₁ i hiS, hG₁ i hiS⟩
+  · -- disjointness within each colour
+    change x ∈ (Γ'' i).2.support at hx
+    change x ∈ (Γ'' j).2.support at hx'
+    cases hσ : σ i
+    · have hσj : σ j = false := hσij ▸ hσ
+      rw [hΓf i hσ] at hx
+      rw [hΓf j hσj] at hx'
+      exact hdisj₂ i ((hS₂ i).2 hσ) j ((hS₂ j).2 hσj) hij x hx hx'
+    · have hσj : σ j = true := hσij ▸ hσ
+      rw [hΓt i hσ] at hx
+      rw [hΓt j hσj] at hx'
+      exact hdisj₁ i ((hS₁ i).2 hσ) j ((hS₁ j).2 hσj) hij x hx hx'
+  · -- separation
+    change 2 * (s₀ : ℤ) < |(2 * (Γ'' i).1 0 + cond (σ i) 0 1) - (2 * (Γ'' j).1 0 + cond (σ j) 0 1)|
+    cases hσi : σ i <;> cases hσj : σ j
+    · rw [hΓf i hσi, hΓf j hσj]
+      have := hsep₂ i j hσi hσj hij
+      simp only [Bool.cond_false]
+      rw [lt_abs] at this ⊢
+      omega
+    · rw [hΓf i hσi, hΓt j hσj]
+      have := hmix j i hσj hσi
+      simp only [Bool.cond_false, Bool.cond_true]
+      rw [lt_abs] at this ⊢
+      omega
+    · rw [hΓt i hσi, hΓf j hσj]
+      have := hmix i j hσi hσj
+      simp only [Bool.cond_false, Bool.cond_true]
+      rw [lt_abs] at this ⊢
+      omega
+    · rw [hΓt i hσi, hΓt j hσj]
+      have := hsep₁ i j hσi hσj hij
+      simp only [Bool.cond_true]
+      rw [lt_abs] at this ⊢
+      omega
+  · -- away from the corners
+    change 2 * (s₀ : ℤ) < 2 * (Γ'' i).1 0 + cond (σ i) 0 1 - 2 * lo 0 ∧
+      2 * (s₀ : ℤ) < 2 * hi 0 - (2 * (Γ'' i).1 0 + cond (σ i) 0 1)
+    cases hσ : σ i
+    · obtain ⟨hwi, hai, hei, -⟩ := hdat₂ i hσ
+      have := hc₂ (w₂ i) hwi.le hai
+      rw [hΓf i hσ, hei]
+      simp only [Bool.cond_false]
+      omega
+    · obtain ⟨hwi, hai, hei, -⟩ := hdat₁ i hσ
+      have := hc₁ (w₁ i) hwi.le hai
+      rw [hΓt i hσ, hei]
+      simp only [Bool.cond_true]
+      omega
+  · -- fences
+    change ∃ x ∈ (Γ'' i).2.support, ∃ l r : LatticeSite 2, l 0 = (Γ'' i).1 0 - K ∧
+      r 0 = (Γ'' i).1 0 + K ∧
+      cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈
+        localConn (Icc ![(Γ'' i).1 0 - K, hi 1] ![(Γ'' i).1 0 + K, hi 1 + M]) l r ∧
+      cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈
+        localConn (Icc ((Γ'' i).1 - (M : LatticeSite 2)) ((Γ'' i).1 + (M : LatticeSite 2))) x l
+    cases hσ : σ i
+    · rw [hΓf i hσ, ← hh₂1]
+      exact hfen₂ i ((hS₂ i).2 hσ)
+    · rw [hΓt i hσ]
+      exact hfen₁ i ((hS₁ i).2 hσ)
+
 end PercLib.Models.Planar
