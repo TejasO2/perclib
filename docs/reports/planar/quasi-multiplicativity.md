@@ -14,9 +14,12 @@ colour sequences without packs ("Decisions (user, 2026-11-23)"). The A3b-1 sessi
 of §5 (sectors and the barrier) and found that items 1 and 3 cannot use Lemma 15 as stated: its
 strip does not fit the arms of an annulus by half a lattice unit. A fix was proposed in §9.3; the
 A3b-0 session (§10) proved it: Lemma 15 in the arm box, `exists_law_separable_ge_arm`, with the new
-crossings meeting the top row only at their ends (`exists_law_separable_ge` unchanged). Items 1 and 3
-of §5 are next (A3b-1 resumed). Nothing in `Arms/Defs.lean` or `Planar/Defs.lean` was changed. Local
-commits only, nothing pushed.
+crossings meeting the top row only at their ends (`exists_law_separable_ge` unchanged). The resumed
+A3b-1 session (§11) did items 1 and 3 of §5: Lemma 15 on the four sides of `B_R(z)` at any centre
+(`exists_law_separable_ge_sides`) and the outer separation step for colour sequences without packs
+(`exists_separating_event`, `exists_law_multiArmEvent_inter_not_separated_le`). Next: A3b-2 (items 4
+and 5). Nothing in `Arms/Defs.lean` or `Planar/Defs.lean` was changed. Local commits only, nothing
+pushed.
 
 ## Decisions (user, 2026-11-22)
 
@@ -284,7 +287,8 @@ Found while reading §4 for this package (arXiv numbering):
 ## 5. What remains: A3b and later
 
 In order (A3 resumed on 2026-11-23 without packs; after A3b-1, item 2 is done; after A3b-0 (§10)
-the arm-box form of Lemma 15 is proved, and items 1 and 3 can use it):
+the arm-box form of Lemma 15 is proved; after the resumed A3b-1 (§11), items 1 and 3 are done, with
+an inner radius `N` in place of `R/2` in item 3):
 
 1. **Lemma 15 on the four sides of an annulus** at any centre: transport with `translate`, `swap`,
    `reflect` and `law_comp_sym2Map_apply`; read the event back (walks by `SimpleGraph.Walk.map`,
@@ -730,3 +734,227 @@ mentions `exists_law_separable_ge` only in its module docstring.
 * The new walk of the surgery is `((P i).2.2.append ((R i).2.2.copy …)).copy …`: unfold `γ'` with
   `rw [hγ']; dsimp only; rw [dite_eq_left hi, support_copy, support_append_eq_support_dropLast_append,
   support_copy, List.dropLast_append_of_ne_nil (support_ne_nil _)]`.
+
+## 11. A3b-1 resumed (2026-11-23): Lemma 15 on the four sides; the outer separation step
+
+Items 1 and 3 of §5, on top of A3b-0 (§10). **Both are done.** Proof-only: no definition, no tag, no
+`…Input`; `Planar/Defs.lean` and `Arms/Defs.lean` unchanged. Two new modules, imported from
+`PercLib.lean`: `Arms/SeparationSides.lean` (item 1, 8 theorems) and `Arms/OuterSeparation.lean`
+(item 3, 22 theorems); one helper strengthened in `Arms/SeparationLemma.lean` (§11.3). Lean commit
+`a2df0f1`; `#print axioms` of the main results: `propext`, `Classical.choice`, `Quot.sound`. Gate:
+`scripts/gate.sh main` **passed on `a2df0f1`** (axiom audit 10135 constants; the expected interface
+NOTICE from `Arms/Defs.lean`, no other notice; about 5 min). This note's commit changes only `docs/`.
+
+### 11.1 Item 1: Lemma 15 on the four sides of `B_R(z)`
+
+`SeparationSides.lean`. `R = 2N + 1`, any centre `z`, `M = ⌊√η N⌋`, `K = ⌊η N⌋`.
+
+* `exists_law_separable_ge_top`: `∃ η, 0 < η ∧ η ≤ 1 ∧ ∃ N₀, ∀ q L, CrossingBounds q L c → ∀ z N R,
+  R = 2N + 1 → N₀ ≤ N → N ≤ L → 1 - δ ≤ law q {ω | …}`, the event of `exists_law_separable_ge_arm`
+  moved to the top side of `B_R(z)` (it is the `k = 1` instance of `exists_law_separable_ge_aux` at
+  `lo = (z₀ - R + 1, z₁ + R - N)`, so no translation is needed), for **families indexed by any finite
+  type** (`∀ (ι : Type) [Finite ι]`, reindexed from `Fin m` inside the proof), so that it applies to
+  the subfamily of arms landing on one side.
+* `mem_separable_top_of_inter_eq`: if `M ≤ N` and `ω`, `ω'` agree on the edges with both ends in
+  `[z₀ - R - M - K, z₀ + R + M + K] × [z₁ + R - N, z₁ + R + M + 1]`, then `ω` is in the top-side event
+  iff `ω'` is (stated as an implication; used both ways).
+* `separable_right_of_top`, `separable_bottom_of_top`, `separable_left_of_top`: if the configuration
+  moved by the swap `(x, y) ↦ (y, x)`, the reflection `(x, y) ↦ (x, -y)`, resp. the quarter turn
+  `(x, y) ↦ (y, -x)` has the top-side property at the moved centre `zf` (given by its coordinates,
+  `hzf0`, `hzf1`), then the configuration has the side property, written in the coordinates of the
+  side. Open crossings are moved by the map, dual crossings by the map of faces (the same for the
+  swap; `(x, y) ↦ (x, -1 - y)` and `(x, y) ↦ (y, -1 - x)` for the other two, from
+  `dualConfig_image_reflect`).
+* `exists_law_separable_ge_sides`: one `η`, one `N₀` for the four sides: `1 - δ ≤ law q E_top ∧
+  1 - δ ≤ law q E_right ∧ 1 - δ ≤ law q E_bottom ∧ 1 - δ ≤ law q E_left` (laws through
+  `CrossingBounds.swap`, `.reflect`, `.swap.reflect` and `law_comp_sym2Map_apply`).
+* helpers `image_sym2Map_inter_edgeSet`, `inter_edgeSet_mem_localConn_of_image` (connections through
+  an automorphism of `ℤ²`, a wrapper of `localConn_of_image`).
+
+The four events in their own coordinates (open crossings / dual crossings of faces / crossed edges;
+`d` is the doubled coordinate of the end along the side, `cond c 0 1` the dual half-step):
+
+| side | open strip | faces | crossed edges in | end | `d` | corners | fence box (`b'` the end) |
+|---|---|---|---|---|---|---|---|
+| top | `[z₀-R+1, z₀+R-1] × [z₁+R-N, z₁+R]` | `[z₀-R, z₀+R-1] × [z₁+R-N-1, z₁+R]` | `[z₀-R, z₀+R] × [z₁+R-N, z₁+R]` | row `z₁+R` | `2b'₀+[dual]` | `2(z₀∓R)` | `[b'₀-K, b'₀+K] × [z₁+R, z₁+R+M]`, left to right |
+| right | `[z₀+R-N, z₀+R] × [z₁-R+1, z₁+R-1]` | `[z₀+R-N-1, z₀+R] × [z₁-R, z₁+R-1]` | `[z₀+R-N, z₀+R] × [z₁-R, z₁+R]` | column `z₀+R` | `2b'₁+[dual]` | `2(z₁∓R)` | `[b'₀, b'₀+M] × [b'₁-K, b'₁+K]`, bottom to top |
+| bottom | `[z₀-R+1, z₀+R-1] × [z₁-R, z₁-R+N]` | `[z₀-R, z₀+R-1] × [z₁-R-1, z₁-R+N]` | `[z₀-R, z₀+R] × [z₁-R, z₁-R+N]` | row `z₁-R` (open), `z₁-R-1` (dual) | `2b'₀+[dual]` | `2(z₀∓R)` | `[b'₀-K, b'₀+K] × [b'₁-M, b'₁]`, left to right |
+| left | `[z₀-R, z₀-R+N] × [z₁-R+1, z₁+R-1]` | `[z₀-R-1, z₀-R+N] × [z₁-R, z₁+R-1]` | `[z₀-R, z₀-R+N] × [z₁-R, z₁+R]` | column `z₀-R` (open), `z₀-R-1` (dual) | `2b'₁+[dual]` | `2(z₁∓R)` | `[b'₀-M, b'₀] × [b'₁-K, b'₁+K]`, bottom to top |
+
+Starts: the inner row (column) of the strip: `z₁+R-N` / `z₁+R-N-1` (top, open / dual), `z₀+R-N` /
+`z₀+R-N-1` (right), `z₁-R+N` (bottom, both colours), `z₀-R+N` (left, both colours). The new crossings
+meet the outer row (column) only at their ends: `x 1 ≠ z₁ + R` (top, as in Lemma 15), `x 0 ≠ b' i 0`
+(right, left), `x 1 ≠ b' i 1` (bottom). The ball of the fence is `Icc (b' - M) (b' + M)` on every side.
+
+### 11.2 Item 3: the outer separation step
+
+`OuterSeparation.lean`. Two forms, both for `σ` with `hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)`
+and `0 < δ`:
+
+```lean
+theorem exists_separating_event … :
+    ∃ η : ℝ, 0 < η ∧ η ≤ 1 ∧ ∃ N₀ : ℕ, ∀ q L, CrossingBounds q L c → ∀ (z : LatticeSite 2) (N R : ℕ),
+      R = 2 * N + 1 → N₀ ≤ N → (N : ℕ∞) ≤ L → ∃ G : Set (Config (LatticeSite 2)), MeasurableSet G ∧
+        (∀ ω ω', ω ∩ {e | ∀ v ∈ e, v ∈ Icc (z - 2R) (z + 2R) \ Icc (z - N) (z + N)} = ω' ∩ {…} →
+          (ω ∈ G ↔ ω' ∈ G)) ∧
+        1 - δ ≤ law q G ∧ ∀ r < N, ∀ ω ∈ multiArmEvent σ z r R ∩ G, SEPARATED(ω)
+
+theorem exists_law_multiArmEvent_inter_not_separated_le … :
+    ∃ η : ℝ, 0 < η ∧ η ≤ 1 ∧ ∃ N₀ : ℕ, ∀ q L, CrossingBounds q L c → ∀ (z : LatticeSite 2) (r N R : ℕ),
+      R = 2 * N + 1 → N₀ ≤ N → r < N → (N : ℕ∞) ≤ L →
+      law q (multiArmEvent σ z r R ∩ {ω | ¬ SEPARATED(ω)}) ≤ δ * law q (multiArmEvent σ z r N)
+```
+
+with `SEPARATED(ω)` written inline (`L i` short for `landingPos (z - R) (z + R) (σ i) (γ i)`):
+
+```lean
+∃ (a b : Fin j → LatticeSite 2) (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+  (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
+  (∀ i k l, i < k → k < l → sbtw (L i) (L k) (L l)) ∧
+  (∀ i k, i ≠ k → 4 * √η * N ≤ |L i - L k|) ∧
+  (∀ i (m : ℕ), 4 * √η * N ≤ |L i - 4 * m * R|) ∧
+  ∀ i, ∃ x ∈ (γ i).support, ∃ l r',
+    G_i ∩ E ∈ localConn (Icc (b i - M) (b i + M)) x l ∧
+    ((b i 1 = z 1 + R ∧ l 0 = b i 0 - K ∧ r' 0 = b i 0 + K ∧
+        G_i ∩ E ∈ localConn (Icc ![b i 0 - K, b i 1] ![b i 0 + K, b i 1 + M]) l r') ∨
+     (b i 0 = z 0 + R ∧ l 1 = b i 1 - K ∧ r' 1 = b i 1 + K ∧
+        G_i ∩ E ∈ localConn (Icc ![b i 0, b i 1 - K] ![b i 0 + M, b i 1 + K]) l r') ∨
+     (b i 1 = z 1 - R - cond (σ i) 0 1 ∧ l 0 = b i 0 - K ∧ r' 0 = b i 0 + K ∧
+        G_i ∩ E ∈ localConn (Icc ![b i 0 - K, b i 1 - M] ![b i 0 + K, b i 1]) l r') ∨
+     (b i 0 = z 0 - R - cond (σ i) 0 1 ∧ l 1 = b i 1 - K ∧ r' 1 = b i 1 + K ∧
+        G_i ∩ E ∈ localConn (Icc ![b i 0 - M, b i 1 - K] ![b i 0, b i 1 + K]) l r'))
+```
+
+(`G_i = cond (σ i) ω (dualConfig ω)`, `E` the edges of `ℤ²`, real casts as in the file). `G` is the
+intersection of the four side events, moved to the frames (top event of `exists_law_separable_ge_top`
+at `z`, at `(z₁, z₀)` for the swapped configuration, at `(z₀, -z₁)` for the reflected one, at
+`(z₁, -z₀)` for the turned one). Proof of the inclusion: on each side, `IsArm.exists_append_eq_*` cuts
+every arm landing there at its last vertex (face) on the inner row of the strip; the final pieces are
+crossings of the strip in the sense of the side event; the side event reroutes them;
+`IsArm.append_right` glues each first piece to its rerouted crossing (an arm with the old start and
+first step, so the old inner position by `innerPos_append`); `IsArm.landingPos_eq_of_*` turns the
+doubled end coordinates into landing positions (top `8R + 2(z₀+R) - d`, right `4R + d - 2(z₁-R)`,
+bottom `d - 2(z₀-R)`, left `12R + 2(z₁+R) - d`), so the side's separation and corner bounds give
+landing positions `4 √η N` apart inside `[4nR + 4 √η N, 4(n+1)R - 4 √η N]` for the side index `n`;
+arms on different sides are then `≥ 8 √η N` apart. Every arm lands on exactly one side
+(`IsArm.end_mem_sides`). Disjointness and order: `ArmsDisjoint.of_innerPos_eq`,
+`sbtw_landingPos_of_innerPos_eq` (A3b-1's barrier), applied once to the whole new family, so the
+overlaps of the strips at the corners and the arms of the other sides need no separate argument, as
+§9.1 predicted. Probability: `G` depends only on edges with both ends in `B_{2R}(z) \ B_N(z)` (each
+frame box lies there since `M, K ≤ N`), `multiArmEvent σ z r N` only on edges inside `B_N(z)`
+(`mem_multiArmEventTo_iff_of_inter_eq`), so `prodBernoulli_inter_of_determined` applies; and
+`multiArmEvent σ z r R ⊆ multiArmEvent σ z r N` for `r < N` (`multiArmEvent_subset_of_le`).
+
+**The independence of §9.3 holds as set up** (stop condition not triggered), with a larger inner box:
+inner radius `N` instead of `N - 2`.
+
+### 11.3 Deviations
+
+1. **Inner radius `N`, hypothesis `r < N`** (draft of §9.3: `N - 2` and `r + 3 ≤ N`). Both are weaker
+   hypotheses / a stronger bound: the strips start at the row `z₁ + N + 1` (faces `z₁ + N`) and the
+   fence balls stay above it once `⌊√η N⌋ ≤ N`.
+2. **`δ`, not `4δ`**: Lemma 15 is applied with `δ / 4`.
+3. **`η ≤ 1` is exposed** in both statements and in `exists_law_separable_ge_top`/`_sides`; for it,
+   `exists_law_separable_ge_aux` (the A3b-0 helper) now also returns `η ≤ 1` (its `η = 1/D²`). The
+   statements of `exists_law_separable_ge` (the approved Lemma 15) and `exists_law_separable_ge_arm`
+   are unchanged; their proofs drop the new conjunct. Without `η ≤ 1` the fence balls
+   (`⌊√η N⌋` around the ends) could reach into `B_N(z)` and the independence would fail.
+4. **Event form added** (`exists_separating_event`): the inclusion `A(r, R) ∩ G ⊆ SEPARATED` with
+   `G` determined by the annulus `B_{2R}(z) \ B_N(z)` and independent of `r`. The probability bound is
+   its corollary. A3b-3 will need the event form (§11.4).
+5. **Families of crossings indexed by any finite type** in item 1 (Lemma 15 itself has `Fin m`).
+6. **Corners stated for all `m : ℕ`** (`|L i - 4mR| ≥ 4 √η N`) and separation with the linear `|·|`;
+   together they give the cyclic separation (all positions lie in `[4 √η N, 16R - 4 √η N]`).
+7. The transports use **linear maps at moved centres** (swap, reflection, quarter turn) rather than
+   translations plus rotations about `z`: the top-side event is already available at any centre.
+
+### 11.4 How A3b-2 and A3b-3 use it
+
+* **§9.4's fence connection (A3b-2, item 5).** It needs, for each arm `i` with end `b i`: a vertex
+  `x` of the arm joined to the fence's first end `l` inside `Icc (b i - M) (b i + M)` (given), the
+  fence itself as a crossing of the box on the side of `b i` (given, with the side equation), and that
+  a point `e` of `∂B_R(z)` within sup-distance `M` of `b i` lands strictly between the neighbours of
+  `i`. Given: neighbours land at least `4 √η N` from `L i` (separation) and `L i` is at least
+  `4 √η N` from every corner, i.e. `2 √η N` in perimeter units, so `e` is on the same side as `b i`
+  (`M ≤ √η N < 2 √η N`) and lands within `2M + 1` (doubled) of `L i`, strictly less than `4 √η N`
+  once `√η N > 1/2`. **A3b-2 should take `N₀' = max N₀ ⌈1/√η⌉ + 1`** (the statements hold for all
+  `N ≥ N₀`); `N₀` is not exposed as `≥ 1/η`. The rest of §9.4 is as written there: the connection
+  can leave `B_R(z)`; the sector lemma `sbtw_landingPos_iff_of_innerPos_eq` applies to `γ k` followed
+  by the connection back to its last entry point.
+* **Corridors (A3b-2, item 5).** The fence of an end on the top side is a left-right crossing of
+  `[b₀ - K, b₀ + K] × [z₁ + R, z₁ + R + M]`; a corridor of width `< 2K` going up from `b` and longer
+  than `M` is crossed by it (the top case; the other sides by the side's box). The ends are
+  `≥ 8 √η N` apart in landing positions across sides and `≥ 4 √η N` on a side, so the corridors of
+  width `2K ≤ 2 η N ≤ 2 √η N` fit. Conditioning: `SEPARATED` is not monotone; "Harris for a mixed
+  order" (item 4) is still needed for the gluing, as recorded in §3.3.
+* **Theorem 11 (A3b-3, item 6), outer half.** The event form is what the scale iteration needs:
+  `G_k` at scales `R_k = 2N_k + 1` are determined by the annuli `B_{2R_k}(z) \ B_{N_k}(z)`, which are
+  pairwise disjoint when `N_k ≥ 4 N_{k+1} + 3` (e.g. `N_{k+1} = ⌊N_k / 8⌋`), so the events
+  `G_k` (and the arm event inside the smallest box) are jointly independent
+  (`prodBernoulli_biInter_of_determined`). The usual argument (the arms are separated at the first
+  good scale from outside; failing at `k` scales costs `δ^k`; extending separated arms outwards by
+  the gluing costs a factor per scale) is A3b-3's; the inner half needs strips near `∂B_r(z)`
+  (arms crossing outwards), a different geometry, which the read-back lemmas of item 1 can transport
+  once the inner strip event is stated (one side, then the three symmetries).
+
+### 11.5 Proposal: a definition for the separated event
+
+`SEPARATED` is about 40 lines. It is written twice in `OuterSeparation.lean` (once with the arms as
+an existential, once negated inside the set-builder) and its fence clause once more inside the proof
+(`hnew`). A3b-2 (input of the gluing) and A3b-3 (Theorem 11: outer and inner separation, the scale
+iteration) will restate it in at least four more statements, with the inner variant (fences inside the
+annulus) beside it. **Proposal (the user's call; not done):** a definition, e.g.
+`separatedArmEvent σ z r R η N : Set (Config (LatticeSite 2))` with its API (membership lemma,
+monotonicity in `η`… only where true, measurability), in `Arms/Defs.lean` through a small interface
+PR. The user decided "inline" on 2026-11-22; this package kept it inline.
+
+### 11.6 Errata and observations
+
+* No new errata in the source. The draft constants of §9.3 were conservative (inner radius
+  `N - 2`, `r + 3 ≤ N`); `N` and `r < N` suffice.
+* Lemma 15 as stated has no upper bound on `η`; for the independence one needs `⌊√η N⌋ ≤ N`, hence
+  §11.3 item 3.
+
+### 11.7 Search
+
+* Mathlib: `Set.Finite.prod`, `Set.Finite.image`, `Set.Finite.subset`, `Set.sym2` and
+  `Set.mem_sym2_iff_subset` (no finiteness lemma for `Set.sym2` found; added
+  `finite_setOf_forall_mem`), `Sym2.mem_map`, `Sym2.map_map`, `Sym2.out_fst_mem`,
+  `Finite.exists_equiv_fin`, `Equiv.symm_apply_apply`, `RelIso.apply_symm_apply`,
+  `RelIso.symm_comp_self`, `RelIso.self_comp_symm`, `prob_compl_eq_one_sub`, `Nat.floor_le_of_le`,
+  `Real.sqrt_le_one`, `ENNReal.mul_div_le`, `SimpleGraph.Walk.mem_support_iff`,
+  `end_mem_tail_support`, `adj_snd`, `adj_penultimate`, `support_map`, `edges_map`, `support_copy`,
+  `edges_copy`, `mem_support_append_iff`, `List.map_dropLast`, `List.dropLast_subset`,
+  `dite_eq_left`, `ite_eq_left`, `ite_eq_right`.
+* PercLib: `exists_law_separable_ge_aux`, `exists_law_separable_ge_arm`, `dualConfig_image_swap`,
+  `dualConfig_image_reflect`, `dualEdge_map_swap`, `dualEdge_map_reflect`, `map_swap_mem_edgeSet_iff`,
+  `map_reflect_mem_edgeSet_iff`, `map_swap_map_swap`, `map_reflect_map_reflect`, `exists_iso_swap`,
+  `exists_iso_reflect_one`, `CrossingBounds.swap`, `CrossingBounds.reflect`, `law_comp_sym2Map_apply`,
+  `localConn_of_image`, `mem_image_sym2Map_iff`, `image_sym2Map_refl`,
+  `inter_mem_localConn_iff_of_inter_eq`, `dualConfig_inter_eq_of_inter_eq`,
+  `mem_image_dualEdge_of_mem_edges` (bottom-top only; generalised to every orientation as
+  `mem_image_dualEdge_of_forall_mem_edges`), `le_of_mem_map_add_one_dualEdge`, `exists_ne_of_mem_edges`,
+  `IsCrossing.exists_append_eq_isCrossing_of_subset`, `IsCrossing.append_of_append` (needs the second
+  crossing to start in `S`; added `IsCrossing.append_right`), `innerPos_append`, `landingPos_true`,
+  `landingPos_false`, `IsArm.not_nil`, `ArmsDisjoint.of_innerPos_eq`, `sbtw_landingPos_of_innerPos_eq`,
+  `mem_multiArmEventTo_iff_of_inter_eq`, `multiArmEvent_subset_of_le`,
+  `prodBernoulli_inter_of_determined`, `measurableSet_of_determined_finite`. Not found (added):
+  Lemma 15 on the other sides, determination of its event, connections through automorphisms of `ℤ²`,
+  finiteness of the pairs inside a finite set, determination through a bijection, replacing the end of
+  a crossing or of an arm, landing positions side by side, the side of the landing.
+
+### 11.8 Lessons
+
+* `Sym2.mk` is curried in this mathlib: `fun p : V × V => Sym2.mk p` is ill-typed and showed up only as
+  a confusing `Set.Finite ?m` mismatch; write `s(p.1, p.2)`.
+* `cases σ i` fails (motive not type correct) as soon as a hypothesis or the goal contains a walk whose
+  type depends on `σ i` (walks mapped by a colour-dependent map); prove `cond c A B → c = true → A`
+  and `(c = true → A) → (c = false → B) → cond c A B` locally and use them instead.
+* `first | (exfalso; omega) | exact …` works; an alternative `exact absurd h (by norm_num)` does not
+  (the nested `by` is elaborated after `first` commits, leaving "unsolved goals").
+* Give `(z := z) (zf := …)` explicitly when equations proved by `rfl` could unify the wrong variables.
+* Deprecated here: `dif_pos` (use `dite_eq_left`), `mem_diff`, `diff_subset` (`mem_sdiff`,
+  `sdiff_subset`), `cond_true`, `cond_false` (`Bool.cond_true`, `Bool.cond_false`).
+* The large set-builder events were generated from one template, so the four sides, the determination
+  lemma and the side steps match by definitional unfolding (`![a, b] 1 ≡ b`, `let` bodies). Module
+  builds: `SeparationSides` about 10 s, `OuterSeparation` about 15 s.
