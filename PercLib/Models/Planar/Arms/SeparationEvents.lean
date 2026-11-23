@@ -40,7 +40,8 @@ box narrower than the boxes of the crossing bounds (`law_exploration_le_pow_of_l
 
 ## Main results
 
-* `MeasureTheory.measure_iUnion_inter_le`: summing conditional bounds over a countable partition.
+* `MeasureTheory.measure_iUnion_inter_le`: summing conditional bounds over a countable partition;
+  `MeasureTheory.one_sub_le_measure_of_forall_notMem`: the complement of a small event.
 * `measurableSet_exploration`, `exploration_iff_of_inter_eq`: the exploration event is measurable
   and determined by the pairs meeting its last set.
 * `law_exploration_forall_notMem_le`: protection at `J` scales fails with probability at most
@@ -50,6 +51,17 @@ box narrower than the boxes of the crossing bounds (`law_exploration_le_pow_of_l
 * `pow_le_law_inter_notMem_crossing_add`, `pow_le_law_dualConfig_union_notMem_crossing_add`,
   `pow_le_law_union_mem_crossing_add`, `pow_le_law_dualConfig_inter_mem_crossing_add`: the four
   forms of protection events have probability at least `c 7 ^ 4`.
+* `law_exploration_forall_notMem_inter_le`, `law_exploration_forall_notMem_dualConfig_union_le`,
+  `law_exploration_forall_notMem_union_le`, `law_exploration_forall_notMem_dualConfig_inter_le`:
+  the four forms fail at all scales `s j` (growing by a factor `8`) around a point attached to the
+  last explored set with probability at most `(1 - c 7 ^ 4)^J`; `law_forall_notMem_inter_le`,
+  `law_forall_notMem_dualConfig_union_le`: the same at a fixed centre (the corners).
+* `notMem_crossing_sdiff_of_inter`, `notMem_crossing_dualConfig_union_of`,
+  `mem_crossing_union_of`, `notMem_crossing_dualConfig_sdiff_of`,
+  `notMem_crossing_dualConfig_dualConfig_union_of`, `mem_crossing_dualConfig_union_of`,
+  `notMem_crossing_inter_of`, `notMem_crossing_dualConfig_inter_of`: each protection event gives
+  the hypotheses of the blocking and fence lemmas of `SeparationProtection.lean` and
+  `SeparationFence.lean`.
 -/
 
 @[expose] public section

@@ -31,14 +31,24 @@ with high probability every greedy tip is protected: no greedy tip of the same c
 crossing of the other colour lands close to it on its right, and it carries a fence; the two top
 corners are protected too. Separation of tips of different colours uses the protection of the
 left one against the other colour, applied to the greedy crossing of the right one, trimmed
-(`exists_walk_trim`) or translated (`exists_walk_map_sub_one`) into the dual box of the left one's
+(`exists_walk_trim`) or translated by `(-1, -1)` into the dual box of the left one's
 exploration.
+
+The constants: `T` steps of the explorations, `J` scales, `D = 16 · 8^J`, `η = 1 / D²`,
+`N₀ = D²`; with `M = ⌊N / D⌋ = ⌊√η N⌋` and `K = ⌊N / D²⌋ = ⌊η N⌋`, the separation and corner
+scales are `2 (M + 1) 8^j` and the fence scales `(K + 1) 8^j`, `j < J`. The lemma fails for small
+`N` (the corners cannot be protected), so the statement has `N₀ ≤ N`.
 
 ## Main results
 
 * `exists_fence_of_le`: a fence of the fence lemma gives a fence in a narrower box.
 * `exists_reroute_fence_of_exploration`: a family of crossings of one colour is rerouted to greedy
   tips, each with a fence.
+* `exists_walk_trim`, `add_lt_of_exploration_of_dualConfig`, `add_lt_of_exploration_dualConfig`:
+  separation of tips of different colours.
+* `lt_tip_of_corner`, `lt_abs_sub_of_exploration`: greedy tips away from the corners and from each
+  other.
+* `separable_of_forall`: the deterministic part of the lemma.
 * `exists_law_separable_ge`: **Nolin's local separation lemma.**
 -/
 
