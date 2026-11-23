@@ -7,10 +7,24 @@ numbering is one lower in places (journal Theorem 11 = arXiv Theorem 10, journal
 Lemma 12, journal Lemma 15 = arXiv Lemma 14, journal Propositions 16, 17 = arXiv Propositions 15,
 16; the gluing of the plan's "Proposition 12" is arXiv Proposition 11, items 1–3).
 
-**Status: A3 is not finished.** This session proved the foundations listed below (A3a), checked
-every plan statement at small scales, and found two problems in the route that need decisions
-before the main theorems can be proved. Nothing in `Arms/Defs.lean` or `Planar/Defs.lean` was
-changed. Local commits only, nothing pushed.
+**Status: A3 is not finished, and is paused by the user at A3a.** This session proved the
+foundations listed below (A3a), checked every plan statement at small scales, and found two problems
+in the route. The user's decisions on them are recorded in "Decisions (user, 2026-11-22)" below:
+the small-scale fixes are approved, A3b is paused because of the pack gap, and the separated event
+will be written inline. Nothing in `Arms/Defs.lean` or `Planar/Defs.lean` was changed. Local commits
+only, nothing pushed.
+
+## Decisions (user, 2026-11-22)
+
+1. **Small radii (§2): approved** ("Approve both"). Theorem 11, quasi-multiplicativity,
+   extendability and the a priori lower bound get `∃ r₀ : ℕ`, chosen after `σ`, the landing data and
+   `c`, before `q`, `L`, `z` and the radii, with `r₀ ≤ r` (`r₀ ≤ r₁` for quasi-multiplicativity).
+   Extendability is stated in Nolin's direction: `law (A (2r) R) ≤ C * law (A r R)` with `r₀ ≤ r`
+   (together with the outer half `law (A r R) ≤ C * law (A r (2R))`).
+2. **Packs (§3.2): "Stop A3 for now".** A3 stays at A3a until the user has looked at the pack gap.
+   A3b and the routes (A), (B), (C) are not started. U2 (`OCOOC`) is blocked on this.
+3. **Separated event (§3.3): inline.** No new definition; the event is written out in the statements
+   that need it when A3b resumes.
 
 ## 1. What is proved (A3a)
 
@@ -88,8 +102,9 @@ ratio, and the case `n₂ ≤ 8 n₁` of quasi-multiplicativity will use it.
 ## 2. The plan statements at small scales
 
 Every plan statement of §2.4 was checked for small scales. Four of them fail there. The fixes below
-only exclude small or degenerate scales, the same kind as the approved `N₀` of Lemma 15. **None of
-the corrected forms is proved yet; all are pending the user's approval.**
+only exclude small or degenerate scales, the same kind as the approved `N₀` of Lemma 15. **The
+fixes are approved by the user (2026-11-22, decision 1); none of the corrected forms is proved
+yet** (A3 is paused).
 
 ### 2.1 Theorem 11 (separation, landing form): false for small `r`
 
@@ -112,7 +127,7 @@ wrong parity (open arms have odd inner positions and even landing positions, dua
 opposite). Even with nonempty windows, a law with crossing bounds may forbid single edges (see
 2.2), so small windows can be emptied by the law.
 
-**Fix (pending approval):** `∃ C, C ≠ ⊤ ∧ ∃ r₀ : ℕ, ∀ q L, … → ∀ z r R, r₀ ≤ r → 2 * r ≤ R → …`,
+**Fix (approved):** `∃ C, C ≠ ⊤ ∧ ∃ r₀ : ℕ, ∀ q L, … → ∀ z r R, r₀ ≤ r → 2 * r ≤ R → …`,
 with `r₀` chosen after `σ, η, θ, θ', c`, before `q, L, z, r, R`.
 
 ### 2.2 Quasi-multiplicativity, lower half: false for small `r₁`
@@ -135,7 +150,7 @@ same with columns. Dual crossings: `q ≤ 1/2` everywhere and dual crossings are
 **Upper half at equal radii** (already in `MultiArmBasics.lean`'s implementation notes): with twelve
 open arms, `A(1, 1) = ∅` and `A(1, 3) ∋ univ`, so the upper half fails at `r₁ = r₂ = 1`.
 
-**Fix (pending approval):** `∃ C, C ≠ ⊤ ∧ ∃ r₀ : ℕ, ∀ q L, … → ∀ z r₁ r₂ r₃, r₀ ≤ r₁ → r₁ ≤ r₂ →
+**Fix (approved):** `∃ C, C ≠ ⊤ ∧ ∃ r₀ : ℕ, ∀ q L, … → ∀ z r₁ r₂ r₃, r₀ ≤ r₁ → r₁ ≤ r₂ →
 r₂ ≤ r₃ → (r₃ : ℕ∞) ≤ L → upper ∧ lower`. With `r₀ ≥ j` both halves survive equal radii: for
 `r ≥ j`, `A(r, r) = univ` (arms of length zero at consecutive positions down the left side of
 `B_r(z)`: open arms at its vertices, positions `12r + 2(z₁ + r - y)`; dual arms at the faces just
@@ -147,12 +162,11 @@ upper half for `r₁ < r₂ < r₃` is A1's `law_multiArmEvent_le_mul` (with `C 
 Plan: `law (A r R) ≤ C * law (A r (2R)) ∧ law (A r R) ≤ C * law (A (2r) R)`.
 
 * **First conjunct, counterexample:** the profile of 2.2 with four open arms gives
-  `law (A z 0 1) = 1/16 > 0 = law (A z 0 2)`. **Fix (pending approval):** `∃ r₀`, `r₀ ≤ r` (or
-  `r₀ ≤ R`).
+  `law (A z 0 1) = 1/16 > 0 = law (A z 0 2)`. **Fix (approved):** `∃ r₀`, `r₀ ≤ r`.
 * **Second conjunct:** `A(r, R) ⊆ A(2r, R)` for `2r < R` (`multiArmEvent_subset_of_le`), so it holds
   with `C = 1`; it is the trivial direction. Nolin's Prop. 16 (arXiv Prop. 15) has
-  `P(A(n/2, N)) ≍ P(A(n, N))`, whose content is `law (A (2r) R) ≤ C * law (A r R)`. **Proposed:**
-  state this direction (with `r₀ ≤ r`), keep the plan's as a remark. Pending approval.
+  `P(A(n/2, N)) ≍ P(A(n, N))`, whose content is `law (A (2r) R) ≤ C * law (A r R)`. **Approved:**
+  this direction is stated (with `r₀ ≤ r`); the plan's form is a remark.
 
 ### 2.4 The other statements
 
@@ -161,7 +175,7 @@ Plan: `law (A r R) ≤ C * law (A r (2R)) ∧ law (A r R) ≤ C * law (A (2r) R)
   proved here has `4j ≤ r`.
 * **Half-plane and non-centred versions** inherit the same `r₀`.
 
-## 3. Two problems in the route (decisions needed)
+## 3. Two problems in the route (decided: A3 paused, separated event inline)
 
 ### 3.1 Other arms in the separation strip: fine for colour sequences without packs
 
@@ -252,7 +266,8 @@ Found while reading §4 for this package (arXiv numbering):
 
 ## 5. What remains: A3b and later
 
-In order, once the decisions of §2 and §3 are made:
+In order, when the user resumes A3 (paused at A3a; decisions 1 and 3 made, the pack route of §3.2
+still open):
 
 1. **Lemma 15 on the four sides of an annulus** at any centre: transport with `translate`, `swap`,
    `reflect` and `law_comp_sym2Map_apply`; read the event back (walks by `SimpleGraph.Walk.map`,
