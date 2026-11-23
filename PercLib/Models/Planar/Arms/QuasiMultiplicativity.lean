@@ -42,8 +42,9 @@ annulus of bounded aspect ratio.
   gaps of the same width and arranged from right to left, the corridor crossings are independent
   (they read disjoint sets of edges; the dual crossing of a box of faces reads only the edges with
   both ends in the box enlarged by one), and together they give the `j`-arm event, in
-  counterclockwise order. So under crossing bounds the `j`-arm event from `B_r(z)` to the boundary
-  of `B_R(z)` has probability bounded below uniformly when `4j ≤ r < R ≤ K r`.
+  counterclockwise order, and its half-plane version (the corridors lie above `z`, and the landing
+  positions increase from right to left). So under crossing bounds both events from `B_r(z)` to
+  the boundary of `B_R(z)` have probability bounded below uniformly when `4j ≤ r < R ≤ K r`.
 
 ## Main results
 
@@ -58,8 +59,10 @@ annulus of bounded aspect ratio.
   landing position.
 * `dualConfig_inter_eq_of_inter_eq`: the dual edges between faces of a box are determined by the
   edges of the box enlarged by one.
-* `exists_pos_le_law_multiArmEvent`: the a priori lower bound for one annulus of bounded aspect
-  ratio, uniformly under crossing bounds, for `4j ≤ r < R ≤ K r`.
+* `exists_pos_le_law_multiArmEvent`, `exists_pos_le_law_halfArmEvent` (both from
+  `exists_pos_le_law_multiArmEvent_inter_halfArmEvent`): the a priori lower bound for one annulus
+  of bounded aspect ratio, in the plane and in the half-plane, uniformly under crossing bounds, for
+  `4j ≤ r < R ≤ K r`.
 -/
 
 @[expose] public section
@@ -382,15 +385,15 @@ theorem exists_isCrossing_of_mem_crossing_one {ζ : Config (LatticeSite 2)}
 /-- **An arm of either colour in a vertical corridor.** Let the corridor `[x, x + w] × [z₁ + r,
 z₁ + R]` stand on the top side of `B_r(z)`, with `r < R`. A bottom-top crossing of it of colour
 `col` (open edges for an open arm, dual-open edges of the box of faces for a dual arm) contains an
-arm of colour `col` from `B_r(z)` to the boundary of `B_R(z)`, inside the corridor, landing on the
-top side of `B_R(z)` at a position between `8R + 2(z₀ + R - x - w) - 1` and
-`8R + 2(z₀ + R - x)`. -/
+arm of colour `col` from `B_r(z)` to the boundary of `B_R(z)`, inside the corridor (so above the
+top side of `B_r(z)`), landing on the top side of `B_R(z)` at a position between
+`8R + 2(z₀ + R - x - w) - 1` and `8R + 2(z₀ + R - x)`. -/
 theorem exists_isArm_of_mem_corridor {ω : Config (LatticeSite 2)} {z : LatticeSite 2} {r R : ℕ}
     {x w : ℤ} (col : Bool) (hx : z 0 - r ≤ x) (hxw : x + w ≤ z 0 + r) (hrR : r < R)
     (h : ω ∈ cond col (crossing 1 ![x, z 1 + r] ![x + w, z 1 + R])
       (dualConfig ⁻¹' crossing 1 ![x, z 1 + r] ![x + w, z 1 + R])) :
     ∃ (a b : LatticeSite 2) (γ : (zdGraph 2).Walk a b), IsArm ω col z r (z - R) (z + R) γ ∧
-      (∀ v ∈ γ.support, x ≤ v 0 ∧ v 0 ≤ x + w) ∧
+      (∀ v ∈ γ.support, x ≤ v 0 ∧ v 0 ≤ x + w ∧ z 1 + r ≤ v 1) ∧
       8 * (R : ℤ) + 2 * (z 0 + R - x - w) - 1 ≤ landingPos (z - R) (z + R) col γ ∧
       landingPos (z - R) (z + R) col γ ≤ 8 * (R : ℤ) + 2 * (z 0 + R - x) := by
   have hR : (0 : ℤ) < R := by omega
@@ -510,17 +513,19 @@ theorem dualConfig_inter_eq_of_inter_eq {lo hi : LatticeSite 2} {ω ω' : Config
   · rintro ⟨⟨hf, hω⟩, hfg⟩
     exact ⟨⟨hf, fun h' => hω ((key f hf hfg).1 h')⟩, hfg⟩
 
-/-- **Arms across an annulus of bounded aspect ratio.** For every colour sequence `σ` of `j`
-arms and every ratio `K`, there is `c₀ > 0` such that, uniformly over laws with crossing bounds
-`c` up to `L`, the `j`-arm event from `B_r(z)` to the boundary of `B_R(z)` has probability at least
-`c₀` when `4j ≤ r < R ≤ K r` and `R ≤ L`. The arms are crossings of `j` vertical corridors of
+/-- **Arms across an annulus of bounded aspect ratio, in the plane and in the half-plane.** For
+every colour sequence `σ` of `j` arms and every ratio `K`, there is `c₀ > 0` such that, uniformly
+over laws with crossing bounds `c` up to `L`, the `j`-arm event from `B_r(z)` to the boundary of
+`B_R(z)` and its half-plane version occur together with probability at least `c₀` when
+`4j ≤ r < R ≤ K r` and `R ≤ L`. The arms are crossings of `j` vertical corridors of
 width `w = ⌊r / 2j⌋` standing on the top side of `B_r(z)`, separated by gaps of width `w`, arranged
 from right to left so that they land in counterclockwise order; the corridors read disjoint sets
 of edges, so their crossing events are independent, each of probability at least `c (4jK)`. -/
-theorem exists_pos_le_law_multiArmEvent {j : ℕ} (σ : Fin j → Bool) (c : ℕ → ℝ≥0∞) (K : ℕ) :
+theorem exists_pos_le_law_multiArmEvent_inter_halfArmEvent {j : ℕ} (σ : Fin j → Bool)
+    (c : ℕ → ℝ≥0∞) (K : ℕ) :
     ∃ c₀ : ℝ≥0∞, 0 < c₀ ∧ ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
       CrossingBounds q L c → ∀ (z : LatticeSite 2) (r R : ℕ), 4 * j ≤ r → r < R → R ≤ K * r →
-        (R : ℕ∞) ≤ L → c₀ ≤ law q (multiArmEvent σ z r R) := by
+        (R : ℕ∞) ≤ L → c₀ ≤ law q (multiArmEvent σ z r R ∩ halfArmEvent σ z r R) := by
   by_cases hc : 0 < c (4 * j * K)
   swap
   · exact ⟨1, one_pos, fun q L hCB => absurd (hCB.pos _) hc⟩
@@ -560,7 +565,7 @@ theorem exists_pos_le_law_multiArmEvent {j : ℕ} (σ : Fin j → Bool) (c : ℕ
     simp only [hx]
     nlinarith
   -- the corridor events give the arms
-  have hsub : (⋂ i, E i) ⊆ multiArmEvent σ z r R := by
+  have hsub : (⋂ i, E i) ⊆ multiArmEvent σ z r R ∩ halfArmEvent σ z r R := by
     intro ω hω
     rw [mem_iInter] at hω
     choose a b γ hγ hsupp hpos₁ hpos₂ using fun i =>
@@ -574,9 +579,9 @@ theorem exists_pos_le_law_multiArmEvent {j : ℕ} (σ : Fin j → Bool) (c : ℕ
         omega
       · have := hsep k i h
         omega
-    refine ⟨a, b, γ, hγ, ⟨fun i k hik _ _ v hv => hcol i k hik v (List.mem_of_mem_tail hv),
-      fun i k hik _ _ v hv => hcol i k hik v hv⟩, fun _ => ⟨mem_univ _, mem_univ _⟩,
-      fun i k l hik hkl => ?_⟩
+    have hdisj : ArmsDisjoint σ γ :=
+      ⟨fun i k hik _ _ v hv => hcol i k hik v (List.mem_of_mem_tail hv),
+        fun i k hik _ _ v hv => hcol i k hik v hv⟩
     have hlt : ∀ i k : Fin j, i < k → landingPos (z - R) (z + R) (σ i) (γ i) <
         landingPos (z - R) (z + R) (σ k) (γ k) := by
       intro i k hik
@@ -584,7 +589,12 @@ theorem exists_pos_le_law_multiArmEvent {j : ℕ} (σ : Fin j → Bool) (c : ℕ
       have h₂ := hpos₁ k
       have := hsep i k hik
       omega
-    exact Int.sbtw_iff.2 (Or.inl ⟨hlt i k hik, hlt k l hkl⟩)
+    refine ⟨⟨a, b, γ, hγ, hdisj, fun _ => ⟨mem_univ _, mem_univ _⟩,
+      fun i k l hik hkl => Int.sbtw_iff.2 (Or.inl ⟨hlt i k hik, hlt k l hkl⟩)⟩,
+      ⟨a, b, γ, hγ, hdisj, fun i v hv => ?_, fun _ => ⟨mem_univ _, mem_univ _⟩,
+      fun i k hik => hlt i k hik⟩⟩
+    have := (hsupp i v hv).2.2
+    omega
   -- independence of the corridor events
   set P : Fin j → Set (Sym2 (LatticeSite 2)) := fun i =>
     {e | ∀ v ∈ e, v ∈ Icc (lo i) (hi i + 1)} with hP
@@ -651,6 +661,29 @@ theorem exists_pos_le_law_multiArmEvent {j : ℕ} (σ : Fin j → Bool) (c : ℕ
         rw [Finset.prod_const, Finset.card_univ, Fintype.card_fin]
     _ ≤ ∏ i, law q (E i) := Finset.prod_le_prod fun i _ => hle i
     _ = law q (⋂ i, E i) := hind.symm
-    _ ≤ law q (multiArmEvent σ z r R) := measure_mono hsub
+    _ ≤ law q (multiArmEvent σ z r R ∩ halfArmEvent σ z r R) := measure_mono hsub
+
+/-- **Arms across an annulus of bounded aspect ratio** (the a priori lower bound at one scale):
+under crossing bounds the `j`-arm event from `B_r(z)` to the boundary of `B_R(z)` has probability
+bounded below uniformly when `4j ≤ r < R ≤ K r` and `R ≤ L`. -/
+theorem exists_pos_le_law_multiArmEvent {j : ℕ} (σ : Fin j → Bool) (c : ℕ → ℝ≥0∞) (K : ℕ) :
+    ∃ c₀ : ℝ≥0∞, 0 < c₀ ∧ ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
+      CrossingBounds q L c → ∀ (z : LatticeSite 2) (r R : ℕ), 4 * j ≤ r → r < R → R ≤ K * r →
+        (R : ℕ∞) ≤ L → c₀ ≤ law q (multiArmEvent σ z r R) := by
+  obtain ⟨c₀, hc₀, h⟩ := exists_pos_le_law_multiArmEvent_inter_halfArmEvent σ c K
+  exact ⟨c₀, hc₀, fun q L hCB z r R hjr hrR hRK hRL =>
+    (h q L hCB z r R hjr hrR hRK hRL).trans (measure_mono inter_subset_left)⟩
+
+/-- **Half-plane arms across a half-annulus of bounded aspect ratio** (the a priori lower bound at
+one scale in the half-plane): under crossing bounds the half-plane `j`-arm event from `B_r(z)` to
+the boundary of `B_R(z)` has probability bounded below uniformly when `4j ≤ r < R ≤ K r` and
+`R ≤ L`. -/
+theorem exists_pos_le_law_halfArmEvent {j : ℕ} (σ : Fin j → Bool) (c : ℕ → ℝ≥0∞) (K : ℕ) :
+    ∃ c₀ : ℝ≥0∞, 0 < c₀ ∧ ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
+      CrossingBounds q L c → ∀ (z : LatticeSite 2) (r R : ℕ), 4 * j ≤ r → r < R → R ≤ K * r →
+        (R : ℕ∞) ≤ L → c₀ ≤ law q (halfArmEvent σ z r R) := by
+  obtain ⟨c₀, hc₀, h⟩ := exists_pos_le_law_multiArmEvent_inter_halfArmEvent σ c K
+  exact ⟨c₀, hc₀, fun q L hCB z r R hjr hrR hRK hRL =>
+    (h q L hCB z r R hjr hrR hRK hRL).trans (measure_mono inter_subset_right)⟩
 
 end PercLib.Models.Planar
