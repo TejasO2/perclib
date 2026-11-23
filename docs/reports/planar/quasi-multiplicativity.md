@@ -7,12 +7,14 @@ numbering is one lower in places (journal Theorem 11 = arXiv Theorem 10, journal
 Lemma 12, journal Lemma 15 = arXiv Lemma 14, journal Propositions 16, 17 = arXiv Propositions 15,
 16; the gluing of the plan's "Proposition 12" is arXiv Proposition 11, items 1–3).
 
-**Status: A3 is not finished, and is paused by the user at A3a.** This session proved the
-foundations listed below (A3a), checked every plan statement at small scales, and found two problems
-in the route. The user's decisions on them are recorded in "Decisions (user, 2026-11-22)" below:
-the small-scale fixes are approved, A3b is paused because of the pack gap, and the separated event
-will be written inline. Nothing in `Arms/Defs.lean` or `Planar/Defs.lean` was changed. Local commits
-only, nothing pushed.
+**Status: A3 is not finished.** The A3a session proved the foundations listed below, checked
+every plan statement at small scales, and found two problems in the route. The user's decisions on
+them are recorded in "Decisions (user, 2026-11-22)" below. On 2026-11-23 the user resumed A3 for
+colour sequences without packs ("Decisions (user, 2026-11-23)"). The A3b-1 session (§9) proved item 2
+of §5 (sectors and the barrier) and found that items 1 and 3 cannot use Lemma 15 as stated: its
+strip does not fit the arms of an annulus by half a lattice unit. A fix is proposed in §9.3 and needs
+the user's word. Nothing in `Arms/Defs.lean` or `Planar/Defs.lean` was changed. Local commits only,
+nothing pushed.
 
 ## Decisions (user, 2026-11-22)
 
@@ -25,6 +27,19 @@ only, nothing pushed.
    A3b and the routes (A), (B), (C) are not started. U2 (`OCOOC`) is blocked on this.
 3. **Separated event (§3.3): inline.** No new definition; the event is written out in the statements
    that need it when A3b resumes.
+
+## Decisions (user, 2026-11-23)
+
+1. **A3 resumes, without packs: "Yes, A3b then U1b".** Route (A) of §3.2: Theorem 11,
+   quasi-multiplicativity and extendability carry the hypothesis
+   `hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)` (no two cyclically consecutive arms of the same colour;
+   the disjunct `j ≤ 1` is needed because for `j = 1` the second one fails). A separate read-only
+   analysis checked that the barrier argument of §3.1 is sound for such sequences; a route for packs
+   (a "first-pivot" rerouting) was proposed there and is **not** approved. The user was told that this
+   delays only the five-arm upper bound of U2; U1, Stage 3 and the lower bounds of U2 use sequences
+   without packs.
+2. **Order of packages:** A3b-1 (items 1–3 of §5), A3b-2 (items 4–5), A3b-3 (item 6), A3b-4 (item 7),
+   then U1b with the plan's colours `![true, false, true]`. One package per session.
 
 ## 1. What is proved (A3a)
 
@@ -266,15 +281,16 @@ Found while reading §4 for this package (arXiv numbering):
 
 ## 5. What remains: A3b and later
 
-In order, when the user resumes A3 (paused at A3a; decisions 1 and 3 made, the pack route of §3.2
-still open):
+In order (A3 resumed on 2026-11-23 without packs; after A3b-1, item 2 is done and items 1 and 3
+wait for the fix of §9.3):
 
 1. **Lemma 15 on the four sides of an annulus** at any centre: transport with `translate`, `swap`,
    `reflect` and `law_comp_sym2Map_apply`; read the event back (walks by `SimpleGraph.Walk.map`,
    duals by `dualConfig_image_add`, `dualConfig_image_swap`, `dualConfig_image_reflect`).
 2. **Barrier lemma** (pack-free): a walk of one colour joining two arms of that colour of a disjoint
    family is impossible when arms of the other colour separate them (from
-   `sbtw_innerPos_iff_sbtw_landingPos`).
+   `sbtw_innerPos_iff_sbtw_landingPos`). **Done in A3b-1** (§9.1), in a stronger form: every family of arms
+   with the old inner positions is disjoint and in the old order.
 3. **Outer separation step**: `A(r, R) ∩ (good events of the four sides at scale R/2) ⊆` the
    separated event at `∂B_R`; with independence of the outer annulus,
    `law (A r R) ≤ law (separated) + 4δ · law (A r (R/2))`.
@@ -327,3 +343,202 @@ for packs.
   (`Finset.prod_le_prod`, one explicit argument for ordered monoids).
 * `landingPos_true` and `landingPos_false` are `simp`/`rfl` forms that already apply
   `perimeterPos_two_smul`; rewrite with `perimeterPos_of_top` directly.
+
+## 9. A3b-1 (2026-11-23): sectors proved; Lemma 15's strip does not fit the arms
+
+Package A3b-1 was to do items 1–3 of §5 for colour sequences without packs. **Item 2 is done**, in a
+stronger form than planned. **Items 1 and 3 are not done**: the strip of Lemma 15
+(`exists_law_separable_ge`) does not fit the arms of an annulus, on any side and for any choice of
+the strip, by half a lattice unit. This is one of the stop conditions of the package, so the session
+stopped there; a fix is proposed in §9.3. Proof-only: no definition, no tag, no `…Input`, no change
+to either `Defs.lean`.
+
+### 9.1 What is proved
+
+New file `PercLib/Models/Planar/Arms/Sectors.lean` (imports `MultiArmBasics.lean` only), 7
+theorems. Under the section hypotheses `hB : Icc (z - r) (z + r) ⊆ Icc (lo + 1) (hi - 1)`,
+`hγ : ∀ i, IsArm ω (σ i) z r lo hi (γ i)`, `hd : ArmsDisjoint σ γ` and, where needed, the landing order
+`ho : ∀ i k l, i < k → k < l → sbtw (landingPos lo hi (σ i) (γ i)) (landingPos … k) (landingPos … l)`
+(the data of a member of `multiArmEventTo`):
+
+```lean
+/-- The barrier. -/
+theorem ArmsDisjoint.of_innerPos_eq (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) (hB) (hγ) (hd) (ho)
+    {a' b' : Fin j → LatticeSite 2} {γ' : ∀ i, (zdGraph 2).Walk (a' i) (b' i)}
+    (hγ' : ∀ i, IsArm ω (σ i) z r lo hi (γ' i))
+    (hin : ∀ i, innerPos z r (σ i) (γ' i) = innerPos z r (σ i) (γ i)) : ArmsDisjoint σ γ'
+
+/-- The order (same hypotheses). -/
+theorem sbtw_landingPos_of_innerPos_eq … (i k l : Fin j) (hik : i < k) (hkl : k < l) :
+    sbtw (landingPos lo hi (σ i) (γ' i)) (landingPos lo hi (σ k) (γ' k))
+      (landingPos lo hi (σ l) (γ' l))
+
+/-- Sectors: two arms of one colour with the same inner position lie on the same side of any two
+arms `k ≠ l` of the other colour of a disjoint family. -/
+theorem sbtw_landingPos_iff_of_innerPos_eq (hB) (hγ) (hd) {k l : Fin j} (hkl : k ≠ l)
+    (hσkl : σ k = σ l) {c : Bool} (hc : c ≠ σ k) (h₁ : IsArm ω c z r lo hi W₁)
+    (h₂ : IsArm ω c z r lo hi W₂) (hin : innerPos z r c W₁ = innerPos z r c W₂) :
+    sbtw (landingPos lo hi c W₁) (landingPos … (γ k)) (landingPos … (γ l)) ↔
+      sbtw (landingPos lo hi c W₂) (landingPos … (γ k)) (landingPos … (γ l))
+```
+
+and the helpers `sbtw_apply_finRotate_apply` (any `CircularOrder`: if `f : Fin n → α` takes
+increasing triples to triples in strict cyclic order, then `f x`, `f (finRotate n x)`, `f w` are in
+strict cyclic order for every other `w`), `SimpleGraph.Walk.IsCrossing.append_of_append` and
+`IsArm.append_of_append` (if `q.append s` and `q'.append s'` are crossings, resp. arms of one colour,
+so is `q.append s'`), `IsDualArm.penultimate_eq` (two dual arms ending at the same face end with the
+same dual edge: the last face is adjacent to exactly one face of the box).
+
+**Proof of the barrier.** Suppose arms `γ' i`, `γ' i'` of one colour, `i ≠ i'`, share a vertex `v`
+(after the first vertex of `γ' i`, for open arms) or a face. Joining `γ' i` up to `v` to `γ' i'` from
+`v` gives an arm `W` (`IsArm.append_of_append`) with the inner position of `γ i` and the landing
+position of `γ' i'` (if the dual arms share only their last face, `W = γ' i` works by
+`IsDualArm.penultimate_eq`). Take `k = i + 1`, `l = i' + 1` (indices mod `j`): both have the other
+colour (no packs), `k ≠ l`, and the original landing positions satisfy `sbtw (L i) (L k) (L l)` and
+`¬ sbtw (L i') (L k) (L l)` (`sbtw_apply_finRotate_apply` twice and `sbtw_asymm`). The sector lemma
+moves the first to `W`, the second to `γ' i'`; since `W` and `γ' i'` land at the same position, this
+is a contradiction. The sector lemma is order invariance (`sbtw_innerPos_iff_sbtw_landingPos`, A1)
+for the two three-arm families `W, γ k, γ l` and `γ i, γ k, γ l` (built with nested `Fin.cases`).
+
+**Consequence for item 3.** After rerouting, nothing about the new family needs checking except
+that each new walk is an arm to the same box with the old inner position: disjointness (also across
+the four sides and in the overlaps of the strips at the corners) and the counterclockwise order of
+the new tips follow. This replaces the case analysis of the barrier in the plan.
+
+### 9.2 Items 1 and 3: the strip of Lemma 15 does not fit the arms of an annulus
+
+The step of §5 item 3 applies Lemma 15 to the final crossing of each arm in a strip along the side
+where it lands, and puts the rerouted crossing in place of it. For the new walk to be an arm to the
+boundary of `B_R(z)`, two things are needed: **input**, the final crossings must be crossings of the
+strip in Lemma 15's sense; **output**, the rerouted crossings must stay off `∂B_R(z)` before their
+ends (open), resp. inside the faces of `B_R(z)` before their ends (dual). Take the top side.
+
+* Arms of `B_R(z)`: an open arm lies in the vertex columns `[z₀ - R + 1, z₀ + R - 1]` before its last
+  vertex; a dual arm lies in the face columns `[z₀ - R, z₀ + R - 1]` (faces spanning
+  `x ∈ [z₀ - R, z₀ + R]`). The two colours have different horizontal extents.
+* Lemma 15 in `Q = [lo₀, hi₀] × [lo₁, hi₁]`: open crossings in the vertex columns `[lo₀, hi₀]`, dual
+  crossings in the face columns `[lo₀, hi₀ - 1]`, spanning `x ∈ [lo₀, hi₀]`: the same extent for both.
+* Input for dual arms needs `lo₀ ≤ z₀ - R` and `hi₀ ≥ z₀ + R`; output for open arms needs
+  `z₀ - R + 1 ≤ lo₀` and `hi₀ ≤ z₀ + R - 1`. No `Q` does both. (Vertically the two fit: both colours
+  of Lemma 15 finish at the row `hi₁ = z₁ + R`, as the arms do.)
+
+**Counterexample for the strip one column inside** (`Q = [z₀ - R + 1, z₀ + R - 1] × [z₁ + R - N,
+z₁ + R]`, the choice of the pack analysis): a dual arm that runs up the column of faces
+`z₀ + R - 1` along the right side of `B_R(z)` from below the strip to the face row `z₁ + R - 2`, then
+left along that row to the column `z₀`, then up through the top side. It is a dual arm of `B_R(z)`
+landing in the middle of the top side, but no piece of it is a bottom-top crossing of the box of
+faces `[z₀ - R + 1, z₀ + R - 2] × [z₁ + R - N - 1, z₁ + R]`; it does not land on the right side either,
+so no strip handles it. The faces missed are a column of length `N ≈ R/2` at each end of the strip,
+not "`O(1)` columns at the corners", and corner protection does not remove them.
+
+**Counterexample for the full-width strip** (`Q = [z₀ - R, z₀ + R] × …`): every input fits, but the
+first greedy open crossing of `Q` may run up the column `z₀ - R`, which is the left side of `B_R(z)`.
+A member rerouted to its tip touches `∂B_R(z)` before its end, so the new walk is not an arm to
+`∂B_R(z)` (cutting it there loses the separation and the fence, which belong to its end), and
+Lemma 15's statement gives no control over this.
+
+**Also:** Lemma 15's statement lets the new crossings visit the top row before their ends. Its proof
+does not (`exists_reroute_fence_of_exploration` cuts each member at its first top-row vertex, and the
+greedy crossings meet the top row only at their tips), but the clause is not in the statement, and
+without it a new walk can touch `∂B_R(z)` early at the top as well.
+
+**Things that do not help.** Lemma 15 for `dualConfig ω` on the lattice of faces fits horizontally
+but not vertically (the open arms would have to reach the row `z₁ + R + 1`). One strip per colour
+(narrow for open, full-width for dual) loses the separation between tips of different colours, which
+the gluing needs (adjacent open and dual tips must be far apart for their corridors); fences alone do
+not give it. Cutting the arms at a smaller box (`B_{R-1}`) has the same mismatch one unit further in.
+On the triangular lattice (site percolation, Nolin's setting) both colours live on the same sites,
+which is why the source does not meet this.
+
+### 9.3 Proposed fix: Lemma 15 in the arm box (package "A3b-0", proof-only, needs the user's word)
+
+A new theorem beside `exists_law_separable_ge` (which stays as it is): the strip with the **open box
+one column narrower on each side than the box of faces**, `[1, 4N + 1] × [0, N]` for open crossings and
+faces `[0, 4N + 1] × [-1, N]` crossing edges of `[0, 4N + 2] × [0, N]` for dual ones, with one more
+conclusion: **the new crossings meet the top row only at their ends**. For the top side of `B_R(z)`
+with `R = 2N + 1` this is exactly the arm geometry (open `[z₀ - R + 1, z₀ + R - 1]`, faces
+`[z₀ - R, z₀ + R - 1]`); other sides by `CrossingBounds.swap`, `.reflect`, `.translate`. Then every
+arm landing on a side has its final crossing in that side's strip, every rerouted crossing extends to
+an arm, and no corner protection of `B_R(z)` is needed.
+
+Proof: A2 re-instantiated, with the open exploration in the narrow box and the dual exploration in
+the wide box of faces. Checked in the code: the core of the mixed-colour separation,
+`false_of_localConn_of_exploration` (`SeparationProtection.lean`), already asks the dual walk to lie in
+the faces `[lo₀ - 1, hi₀] × [lo₁, hi₁ - 1]` of the open box `[lo, hi]`, which for the narrow box are
+exactly the wide face columns. What changes: the region hypothesis of
+`add_lt_of_exploration_of_dualConfig` (`[lo₀ - 1, hi₀]` in place of `[lo₀, hi₀ - 1]`), the box relation
+`hlo₂`, `hhi₂` of `separable_of_forall` and the corner bounds of its conclusion, the dual edges' box
+in `mem_image_dualEdge_of_mem_edges`, and the probability side of `exists_law_separable_ge` with the
+boxes moved (the open box is narrower, so the step-(a) bound in a narrower box still applies). The
+top-row clause needs one more conjunct in `exists_reroute_fence_of_exploration` (its proof already
+has it) and in `separable_of_forall`. Estimate: one session. Odd outer radius `R = 2N + 1`: Theorem 11
+iterates over scales and can use `multiArmEvent_subset_of_le` to move between `R` and `R - 1`.
+
+**Then item 3** (A3b-1 resumed) is: the four transported strips; for each arm its final crossing in
+the strip of its side; the new walk = the arm up to the start of that crossing, then the rerouted
+crossing; this is an arm with the old inner position (`innerPos_append`, the strip lies outside
+`B_r(z)` once `r + 1 < R - N`); then `ArmsDisjoint.of_innerPos_eq` and `sbtw_landingPos_of_innerPos_eq`;
+independence of the strips' good events (edges outside `B_{R-N-2}(z)` and the fence boxes) from
+`multiArmEvent σ z r R'` for `R' ≤ R - N - 3`. Draft statement, with the separated event inline:
+
+```lean
+theorem exists_law_multiArmEvent_inter_not_separated_le {j : ℕ} (σ : Fin j → Bool)
+    (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) (c : ℕ → ℝ≥0∞) {δ : ℝ≥0∞} (hδ : 0 < δ) :
+    ∃ η : ℝ, 0 < η ∧ ∃ N₀ : ℕ, ∀ q L, CrossingBounds q L c → ∀ (z : LatticeSite 2) (r N : ℕ),
+      N₀ ≤ N → r + 3 ≤ N → ((2 * N + 1 : ℕ) : ℕ∞) ≤ L →
+      law q (multiArmEvent σ z r (2 * N + 1) ∩ {ω | ¬ ∃ (a b : Fin j → LatticeSite 2)
+          (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, IsArm ω (σ i) z r (z - (2 * N + 1 : ℕ)) (z + (2 * N + 1 : ℕ)) (γ i)) ∧
+        ArmsDisjoint σ γ ∧ (∀ i k l, i < k → k < l → sbtw …) ∧
+        -- tips at doubled cyclic distance ≥ 4 √η N from each other and from the four corners
+        … ∧
+        -- a fence of colour σ i outside B_R(z) next to each tip, joined to the arm near the tip
+        …}) ≤ δ * law q (multiArmEvent σ z r (N - 2))
+```
+
+Here `R = 2N + 1` and `N - 2 = R - N - 3`; the exact constants are for that session. The fence clause
+has to be written once per side (four cases, in the coordinates of that side) or
+uniformly with a box around the tip and the perimeter position; I recommend the four cases, read off
+Lemma 15 through the three symmetries, since item 5 needs them in that form anyway.
+
+### 9.4 For A3b-2 (gluing)
+
+* The barrier works in one box. The gluing's fence connections (from a vertex `x` of the arm to the
+  fence, inside the ball of radius `⌊√η N⌋` around the tip) can leave `B_R(z)` and come back. To show
+  that such a connection of arm `i` meets no other arm `k` of its colour: if it did, at `y`, take the
+  last entry point `e ∈ ∂B_R(z)` of the connection before `y`; then `γ k` up to `y`, followed by the
+  connection backwards from `y` to `e`, is an arm with the inner position of `γ k` landing at `e`,
+  within `2⌊√η N⌋` of the tip of `i`; by `sbtw_landingPos_iff_of_innerPos_eq` it lands in the sector
+  of `k`, but the neighbours of `i` land at least `4 √η N` away from its tip, so `e` is in the sector of
+  `i`: contradiction. (When the connection does not leave `B_R(z)`, `ArmsDisjoint.of_innerPos_eq` applies
+  directly.)
+* Still needed, as recorded in §3.3: Harris for a mixed order (`Probability/`, general) and the
+  corridors from bins to windows.
+
+### 9.5 Search
+
+* Mathlib: `sbtw_cyclic_left`, `sbtw_cyclic_right`, `sbtw_asymm`, `Int.sbtw_iff` (and the instance
+  `CircularOrder ℤ` in `Order/Circular/ZMod.lean`), `finRotate_of_lt`, `finRotate_last`,
+  `Fin.val_lt_last`, `Fin.pos_iff_ne_zero`, `SimpleGraph.Walk.take_spec`, `tail_support_append`,
+  `support_append_eq_support_dropLast_append`, `List.dropLast_append_of_ne_nil`,
+  `SimpleGraph.Walk.adj_penultimate`, `SimpleGraph.Walk.Nil.eq`. Searched and not found: a lemma on
+  the successor in a cyclically ordered `Fin n`-family (no file of mathlib mentions both `sbtw` and
+  `finRotate`), a join of two walks at a common vertex that keeps a crossing property.
+* PercLib: `sbtw_innerPos_iff_sbtw_landingPos`, `innerPos_append`, `landingPos_append`,
+  `IsArm.not_nil`, `armsDisjoint_of_subsingleton`, `IsCrossing.eq_end_of_notMem`,
+  `IsCrossing.penultimate_mem`, `zdGraph_two_adj_iff`, `mem_Icc_two_iff`; the in-proof joins
+  `(q.takeUntil …).append (r.dropUntil …)` of `Separation.lean` and `SeparationSurgery.lean` are not
+  lemmas. For §9.2–§9.3: `exists_law_separable_ge`, `separable_of_forall`,
+  `exists_reroute_fence_of_exploration`, `add_lt_of_exploration_of_dualConfig`,
+  `add_lt_of_exploration_dualConfig`, `false_of_localConn_of_exploration`.
+
+### 9.6 Lessons
+
+* Section variables `lo hi` (box corners) clash with hypotheses named `hi : σ i = true`: the error is
+  an application type mismatch in `IsOpenArm ω z r lo hi`. Name colour hypotheses `hσi`.
+* A three-arm family for order invariance: nested `@Fin.cases` with explicit motives
+  (`fun t => (zdGraph 2).Walk (A t) (B t)`, then `A t.succ`, `A t.succ.succ`, last level
+  `fun t => t.elim0`); after `fin_cases t` the goals close with `exact` by definitional unfolding, and
+  `ArmsDisjoint` of the triple by `fin_cases t <;> fin_cases u` (nine goals).
+* Split an arm at a vertex with `rw [← SimpleGraph.Walk.take_spec (γ i) hv] at h`; to rewrite only
+  one side of a goal, `conv_rhs => rw [← SimpleGraph.Walk.take_spec …]`.
