@@ -653,36 +653,29 @@ theorem disjoint_annulus (z : LatticeSite 2) {s s' : ℕ} (hs : 1 ≤ s) (h : 8 
   have : (8 * s : ℤ) ≤ s' := by exact_mod_cast h
   omega
 
-/-- **Pairs in annuli at the scales `s₀ 8^j`.** The sets of pairs inside the annuli
-`s - 2 ≤ ‖· - z‖∞ ≤ 3s + 2`, `s = s₀ 8^j`, `j < J`, with any fixed set of pairs removed, are
-pairwise disjoint. -/
-theorem pairwiseDisjoint_annulus (z : LatticeSite 2) {s₀ : ℕ} (hs₀ : 1 ≤ s₀)
-    (P : Set (Sym2 (LatticeSite 2))) (J : ℕ) :
+/-- **Pairs in annuli at scales growing by a factor `8`.** The sets of pairs inside the annuli
+`s j - 2 ≤ ‖· - z‖∞ ≤ 3 s j + 2`, `j < J`, for scales `s j ≥ 1` with `8 s j ≤ s j'` for `j < j'`,
+with any fixed set of pairs removed, are pairwise disjoint. -/
+theorem pairwiseDisjoint_annulus (z : LatticeSite 2) {s : ℕ → ℕ} (hs : ∀ j, 1 ≤ s j)
+    (hs8 : ∀ j j', j < j' → 8 * s j ≤ s j') (P : Set (Sym2 (LatticeSite 2))) (J : ℕ) :
     Set.PairwiseDisjoint (↑(Finset.range J)) fun j => {e : Sym2 (LatticeSite 2) | ∀ x ∈ e,
-      x ∈ {x : LatticeSite 2 | z 0 - (3 * (s₀ * 8 ^ j : ℕ) + 2) ≤ x 0 ∧
-        x 0 ≤ z 0 + (3 * (s₀ * 8 ^ j : ℕ) + 2) ∧
-        z 1 - (3 * (s₀ * 8 ^ j : ℕ) + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * (s₀ * 8 ^ j : ℕ) + 2) ∧
-        (x 0 + (s₀ * 8 ^ j : ℕ) ≤ z 0 + 2 ∨ z 0 + (s₀ * 8 ^ j : ℕ) ≤ x 0 + 2 ∨
-          x 1 + (s₀ * 8 ^ j : ℕ) ≤ z 1 + 2 ∨ z 1 + (s₀ * 8 ^ j : ℕ) ≤ x 1 + 2)}} \ P := by
+      x ∈ {x : LatticeSite 2 | z 0 - (3 * s j + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s j + 2) ∧
+        z 1 - (3 * s j + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s j + 2) ∧
+        (x 0 + s j ≤ z 0 + 2 ∨ z 0 + s j ≤ x 0 + 2 ∨ x 1 + s j ≤ z 1 + 2 ∨
+          z 1 + s j ≤ x 1 + 2)}} \ P := by
   have hdisj : ∀ j j' : ℕ, j < j' → Disjoint
       {e : Sym2 (LatticeSite 2) | ∀ x ∈ e,
-        x ∈ {x : LatticeSite 2 | z 0 - (3 * (s₀ * 8 ^ j : ℕ) + 2) ≤ x 0 ∧
-          x 0 ≤ z 0 + (3 * (s₀ * 8 ^ j : ℕ) + 2) ∧
-          z 1 - (3 * (s₀ * 8 ^ j : ℕ) + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * (s₀ * 8 ^ j : ℕ) + 2) ∧
-          (x 0 + (s₀ * 8 ^ j : ℕ) ≤ z 0 + 2 ∨ z 0 + (s₀ * 8 ^ j : ℕ) ≤ x 0 + 2 ∨
-            x 1 + (s₀ * 8 ^ j : ℕ) ≤ z 1 + 2 ∨ z 1 + (s₀ * 8 ^ j : ℕ) ≤ x 1 + 2)}}
+        x ∈ {x : LatticeSite 2 | z 0 - (3 * s j + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s j + 2) ∧
+          z 1 - (3 * s j + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s j + 2) ∧
+          (x 0 + s j ≤ z 0 + 2 ∨ z 0 + s j ≤ x 0 + 2 ∨ x 1 + s j ≤ z 1 + 2 ∨
+            z 1 + s j ≤ x 1 + 2)}}
       {e : Sym2 (LatticeSite 2) | ∀ x ∈ e,
-        x ∈ {x : LatticeSite 2 | z 0 - (3 * (s₀ * 8 ^ j' : ℕ) + 2) ≤ x 0 ∧
-          x 0 ≤ z 0 + (3 * (s₀ * 8 ^ j' : ℕ) + 2) ∧
-          z 1 - (3 * (s₀ * 8 ^ j' : ℕ) + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * (s₀ * 8 ^ j' : ℕ) + 2) ∧
-          (x 0 + (s₀ * 8 ^ j' : ℕ) ≤ z 0 + 2 ∨ z 0 + (s₀ * 8 ^ j' : ℕ) ≤ x 0 + 2 ∨
-            x 1 + (s₀ * 8 ^ j' : ℕ) ≤ z 1 + 2 ∨ z 1 + (s₀ * 8 ^ j' : ℕ) ≤ x 1 + 2)}} := by
+        x ∈ {x : LatticeSite 2 | z 0 - (3 * s j' + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s j' + 2) ∧
+          z 1 - (3 * s j' + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s j' + 2) ∧
+          (x 0 + s j' ≤ z 0 + 2 ∨ z 0 + s j' ≤ x 0 + 2 ∨ x 1 + s j' ≤ z 1 + 2 ∨
+            z 1 + s j' ≤ x 1 + 2)}} := by
     intro j j' hjj'
-    have h8 : 8 * (s₀ * 8 ^ j) ≤ s₀ * 8 ^ j' := by
-      calc 8 * (s₀ * 8 ^ j) = s₀ * 8 ^ (j + 1) := by ring
-        _ ≤ s₀ * 8 ^ j' := Nat.mul_le_mul_left _ (Nat.pow_le_pow_right (by norm_num) hjj')
-    have hd := disjoint_annulus z (s := s₀ * 8 ^ j) (s' := s₀ * 8 ^ j')
-      (Nat.one_le_iff_ne_zero.2 (Nat.mul_ne_zero (by omega) (by positivity))) h8
+    have hd := disjoint_annulus z (hs j) (hs8 j j' hjj')
     refine Set.disjoint_left.2 fun e he he' => ?_
     obtain ⟨x, hx⟩ : ∃ x, x ∈ e := ⟨e.out.1, Sym2.out_fst_mem e⟩
     exact Set.disjoint_left.1 hd (he x hx) (he' x hx)
@@ -691,5 +684,422 @@ theorem pairwiseDisjoint_annulus (z : LatticeSite 2) {s₀ : ℕ} (hs₀ : 1 ≤
   rcases lt_or_gt_of_ne hjj' with h | h
   · exact hdisj j j' h
   · exact (hdisj j' j h).symm
+
+/-! ### Protection at many scales, uniformly over the explorations
+
+The annulus at scale `s` around `z` is `s - 2 ≤ ‖· - z‖∞ ≤ 3s + 2`; the fresh pairs at that scale
+are the pairs inside it that the exploration has not looked at. -/
+
+section Scales
+
+variable {q : Sym2 (LatticeSite 2) → unitInterval} {L : ℕ∞} {c : ℕ → ℝ≥0∞}
+  {lo hi : LatticeSite 2} {c₁ d₁ : Finset (LatticeSite 2) → LatticeSite 2}
+  {Γ : ∀ A, (zdGraph 2).Walk (c₁ A) (d₁ A)}
+
+/-- A configuration restricted to a fixed set of pairs is a measurable function of it. -/
+theorem measurable_inter_const (Q : Set (Sym2 (LatticeSite 2))) :
+    Measurable fun ω : Config (LatticeSite 2) => ω ∩ Q :=
+  Measurable.of_mem fun s => by
+    simp only [mem_inter_iff]
+    exact (measurable_set_mem s).and measurable_const
+
+/-- A configuration with a fixed set of pairs added is a measurable function of it. -/
+theorem measurable_union_const (Q : Set (Sym2 (LatticeSite 2))) :
+    Measurable fun ω : Config (LatticeSite 2) => ω ∪ Q :=
+  Measurable.of_mem fun s => by
+    simp only [mem_union]
+    exact (measurable_set_mem s).or measurable_const
+
+/-- Two configurations agreeing on `Q` agree once the pairs outside `Q` are added. -/
+theorem union_compl_eq_of_inter_eq {ω ω' : Config (LatticeSite 2)}
+    {Q : Set (Sym2 (LatticeSite 2))} (h : ω ∩ Q = ω' ∩ Q) : ω ∪ Qᶜ = ω' ∪ Qᶜ := by
+  ext e
+  have := congrArg (e ∈ ·) h
+  simp only [mem_inter_iff, eq_iff_iff] at this
+  simp only [mem_union, mem_compl_iff]
+  by_cases he : e ∈ Q <;> simp_all
+
+/-- **Open strips, at many scales.** For every exploration determined as in
+`exploration_iff_of_inter_eq`, the fresh pairs at the scales `s j` (growing by a factor `8`)
+around the point `z (A v)` attached to the last explored set are, at every scale `j < J`, crossing
+one of the bottom, right and left strips, with probability at most `(1 - c 7 ^ 4)^J`. -/
+theorem law_exploration_forall_notMem_inter_le (h : CrossingBounds q L c)
+    {g : Config (LatticeSite 2) → Config (LatticeSite 2)} (hg : Measurable g)
+    {P : Finset (LatticeSite 2) → Set (Sym2 (LatticeSite 2))}
+    (hP : ∀ (D : Finset (LatticeSite 2)) (ω ω' : Config (LatticeSite 2)), ω ∩ P D = ω' ∩ P D →
+      ∀ e ∈ (zdGraph 2).edgeSet, (∃ f ∈ dualEdge e, f ∈ D) → (e ∈ g ω ↔ e ∈ g ω'))
+    (z : Finset (LatticeSite 2) → LatticeSite 2) {s : ℕ → ℕ} (hs : ∀ j, 1 ≤ s j)
+    (hs8 : ∀ j j', j < j' → 8 * s j ≤ s j') (v J : ℕ)
+    (hJ : ∀ j < J, ((2 * s j - 1 : ℕ) : ℕ∞) ≤ L) :
+    law q {ω | ∃ A : ℕ → Finset (LatticeSite 2),
+      (∀ w ≤ v, cluster (dualConfig (g ω \ {e | ∃ x ∈ e, ∃ w' < w, x ∈ (Γ (A w')).support}) ∩
+          {s | ∀ x ∈ s, x ∈ Icc (![lo 0 - 1, lo 1] : LatticeSite 2) ![hi 0, hi 1 - 1]} ∪
+        {s | ∃ y : ℤ, lo 1 ≤ y ∧ y + 1 ≤ hi 1 - 1 ∧
+          s = s(![lo 0 - 1, y], (![lo 0 - 1, y + 1] : LatticeSite 2))}) ![lo 0 - 1, lo 1] =
+            ↑(A w)) ∧
+      ∀ j < J, ω ∉ {ω : Config (LatticeSite 2) |
+        ω ∩ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+          z (A v) 0 - (3 * s j + 2) ≤ x 0 ∧ x 0 ≤ z (A v) 0 + (3 * s j + 2) ∧
+          z (A v) 1 - (3 * s j + 2) ≤ x 1 ∧ x 1 ≤ z (A v) 1 + (3 * s j + 2) ∧
+          (x 0 + s j ≤ z (A v) 0 + 2 ∨ z (A v) 0 + s j ≤ x 0 + 2 ∨ x 1 + s j ≤ z (A v) 1 + 2 ∨
+            z (A v) 1 + s j ≤ x 1 + 2)}} \ P (A v)) ∉
+          crossing 1 (z (A v) + ![-3 * (s j : ℤ), -3 * s j]) (z (A v) + ![3 * (s j : ℤ), -s j]) ∧
+        ω ∩ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+          z (A v) 0 - (3 * s j + 2) ≤ x 0 ∧ x 0 ≤ z (A v) 0 + (3 * s j + 2) ∧
+          z (A v) 1 - (3 * s j + 2) ≤ x 1 ∧ x 1 ≤ z (A v) 1 + (3 * s j + 2) ∧
+          (x 0 + s j ≤ z (A v) 0 + 2 ∨ z (A v) 0 + s j ≤ x 0 + 2 ∨ x 1 + s j ≤ z (A v) 1 + 2 ∨
+            z (A v) 1 + s j ≤ x 1 + 2)}} \ P (A v)) ∉
+          crossing 0 (z (A v) + ![(s j : ℤ), -3 * s j]) (z (A v) + ![3 * (s j : ℤ), 3 * s j]) ∧
+        ω ∩ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+          z (A v) 0 - (3 * s j + 2) ≤ x 0 ∧ x 0 ≤ z (A v) 0 + (3 * s j + 2) ∧
+          z (A v) 1 - (3 * s j + 2) ≤ x 1 ∧ x 1 ≤ z (A v) 1 + (3 * s j + 2) ∧
+          (x 0 + s j ≤ z (A v) 0 + 2 ∨ z (A v) 0 + s j ≤ x 0 + 2 ∨ x 1 + s j ≤ z (A v) 1 + 2 ∨
+            z (A v) 1 + s j ≤ x 1 + 2)}} \ P (A v)) ∉
+          crossing 0 (z (A v) + ![-3 * (s j : ℤ), -3 * s j])
+            (z (A v) + ![-(s j : ℤ), 3 * s j])}} ≤ (1 - c 7 ^ 4) ^ J := by
+  set R : Finset (LatticeSite 2) → ℕ → Set (Sym2 (LatticeSite 2)) := fun D j =>
+    {e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+      z D 0 - (3 * s j + 2) ≤ x 0 ∧ x 0 ≤ z D 0 + (3 * s j + 2) ∧
+      z D 1 - (3 * s j + 2) ≤ x 1 ∧ x 1 ≤ z D 1 + (3 * s j + 2) ∧
+      (x 0 + s j ≤ z D 0 + 2 ∨ z D 0 + s j ≤ x 0 + 2 ∨ x 1 + s j ≤ z D 1 + 2 ∨
+        z D 1 + s j ≤ x 1 + 2)}} \ P D with hR
+  have key := law_exploration_forall_notMem_le (q := q) (Γ := Γ) (lo := lo) (hi := hi) hg hP v J
+    (β := c 7 ^ 4) (Q := R) (K := fun D j => {ω : Config (LatticeSite 2) |
+      ω ∩ R D j ∉ crossing 1 (z D + ![-3 * (s j : ℤ), -3 * s j]) (z D + ![3 * (s j : ℤ), -s j]) ∧
+      ω ∩ R D j ∉ crossing 0 (z D + ![(s j : ℤ), -3 * s j]) (z D + ![3 * (s j : ℤ), 3 * s j]) ∧
+      ω ∩ R D j ∉ crossing 0 (z D + ![-3 * (s j : ℤ), -3 * s j]) (z D + ![-(s j : ℤ), 3 * s j])})
+    (fun D j _ => ?_) (fun D j ω ω' hωω' => ?_) (fun D j _ => disjoint_sdiff_right)
+    (fun D => pairwiseDisjoint_annulus (z D) hs hs8 (P D) J) (fun D j hj => ?_)
+  · exact key
+  · have hm := measurable_inter_const (R D j)
+    exact (hm (measurableSet_crossing _ _ _).compl).inter
+      ((hm (measurableSet_crossing _ _ _).compl).inter (hm (measurableSet_crossing _ _ _).compl))
+  · simp only [mem_ofPred_eq]
+    rw [hωω']
+  · exact pow_le_law_inter_notMem_crossing_add h (z D) (t := s j) (m := 2 * s j - 1)
+      (by have := hs j; omega) (hJ j hj) _
+
+/-- **Dual strips, at many scales.** As `law_exploration_forall_notMem_inter_le`, for the dual
+configuration of `ω` with the pairs outside the fresh pairs added (counted as open). -/
+theorem law_exploration_forall_notMem_dualConfig_union_le
+    (h : CrossingBounds q L c)
+    {g : Config (LatticeSite 2) → Config (LatticeSite 2)} (hg : Measurable g)
+    {P : Finset (LatticeSite 2) → Set (Sym2 (LatticeSite 2))}
+    (hP : ∀ (D : Finset (LatticeSite 2)) (ω ω' : Config (LatticeSite 2)), ω ∩ P D = ω' ∩ P D →
+      ∀ e ∈ (zdGraph 2).edgeSet, (∃ f ∈ dualEdge e, f ∈ D) → (e ∈ g ω ↔ e ∈ g ω'))
+    (z : Finset (LatticeSite 2) → LatticeSite 2) {s : ℕ → ℕ} (hs : ∀ j, 1 ≤ s j)
+    (hs8 : ∀ j j', j < j' → 8 * s j ≤ s j') (v J : ℕ)
+    (hJ : ∀ j < J, ((2 * s j - 1 : ℕ) : ℕ∞) ≤ L) :
+    law q {ω | ∃ A : ℕ → Finset (LatticeSite 2),
+      (∀ w ≤ v, cluster (dualConfig (g ω \ {e | ∃ x ∈ e, ∃ w' < w, x ∈ (Γ (A w')).support}) ∩
+          {s | ∀ x ∈ s, x ∈ Icc (![lo 0 - 1, lo 1] : LatticeSite 2) ![hi 0, hi 1 - 1]} ∪
+        {s | ∃ y : ℤ, lo 1 ≤ y ∧ y + 1 ≤ hi 1 - 1 ∧
+          s = s(![lo 0 - 1, y], (![lo 0 - 1, y + 1] : LatticeSite 2))}) ![lo 0 - 1, lo 1] =
+            ↑(A w)) ∧
+      ∀ j < J, ω ∉ {ω : Config (LatticeSite 2) |
+        dualConfig (ω ∪ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+          z (A v) 0 - (3 * s j + 2) ≤ x 0 ∧ x 0 ≤ z (A v) 0 + (3 * s j + 2) ∧
+          z (A v) 1 - (3 * s j + 2) ≤ x 1 ∧ x 1 ≤ z (A v) 1 + (3 * s j + 2) ∧
+          (x 0 + s j ≤ z (A v) 0 + 2 ∨ z (A v) 0 + s j ≤ x 0 + 2 ∨ x 1 + s j ≤ z (A v) 1 + 2 ∨
+            z (A v) 1 + s j ≤ x 1 + 2)}} \ P (A v))ᶜ) ∉
+          crossing 1 (z (A v) + ![-3 * (s j : ℤ), -3 * s j]) (z (A v) + ![3 * (s j : ℤ), -s j]) ∧
+        dualConfig (ω ∪ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+          z (A v) 0 - (3 * s j + 2) ≤ x 0 ∧ x 0 ≤ z (A v) 0 + (3 * s j + 2) ∧
+          z (A v) 1 - (3 * s j + 2) ≤ x 1 ∧ x 1 ≤ z (A v) 1 + (3 * s j + 2) ∧
+          (x 0 + s j ≤ z (A v) 0 + 2 ∨ z (A v) 0 + s j ≤ x 0 + 2 ∨ x 1 + s j ≤ z (A v) 1 + 2 ∨
+            z (A v) 1 + s j ≤ x 1 + 2)}} \ P (A v))ᶜ) ∉
+          crossing 0 (z (A v) + ![(s j : ℤ), -3 * s j]) (z (A v) + ![3 * (s j : ℤ), 3 * s j]) ∧
+        dualConfig (ω ∪ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+          z (A v) 0 - (3 * s j + 2) ≤ x 0 ∧ x 0 ≤ z (A v) 0 + (3 * s j + 2) ∧
+          z (A v) 1 - (3 * s j + 2) ≤ x 1 ∧ x 1 ≤ z (A v) 1 + (3 * s j + 2) ∧
+          (x 0 + s j ≤ z (A v) 0 + 2 ∨ z (A v) 0 + s j ≤ x 0 + 2 ∨ x 1 + s j ≤ z (A v) 1 + 2 ∨
+            z (A v) 1 + s j ≤ x 1 + 2)}} \ P (A v))ᶜ) ∉
+          crossing 0 (z (A v) + ![-3 * (s j : ℤ), -3 * s j])
+            (z (A v) + ![-(s j : ℤ), 3 * s j])}} ≤ (1 - c 7 ^ 4) ^ J := by
+  set R : Finset (LatticeSite 2) → ℕ → Set (Sym2 (LatticeSite 2)) := fun D j =>
+    {e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+      z D 0 - (3 * s j + 2) ≤ x 0 ∧ x 0 ≤ z D 0 + (3 * s j + 2) ∧
+      z D 1 - (3 * s j + 2) ≤ x 1 ∧ x 1 ≤ z D 1 + (3 * s j + 2) ∧
+      (x 0 + s j ≤ z D 0 + 2 ∨ z D 0 + s j ≤ x 0 + 2 ∨ x 1 + s j ≤ z D 1 + 2 ∨
+        z D 1 + s j ≤ x 1 + 2)}} \ P D with hR
+  have key := law_exploration_forall_notMem_le (q := q) (Γ := Γ) (lo := lo) (hi := hi) hg hP v J
+    (β := c 7 ^ 4) (Q := R) (K := fun D j => {ω : Config (LatticeSite 2) |
+      dualConfig (ω ∪ (R D j)ᶜ) ∉
+        crossing 1 (z D + ![-3 * (s j : ℤ), -3 * s j]) (z D + ![3 * (s j : ℤ), -s j]) ∧
+      dualConfig (ω ∪ (R D j)ᶜ) ∉
+        crossing 0 (z D + ![(s j : ℤ), -3 * s j]) (z D + ![3 * (s j : ℤ), 3 * s j]) ∧
+      dualConfig (ω ∪ (R D j)ᶜ) ∉
+        crossing 0 (z D + ![-3 * (s j : ℤ), -3 * s j]) (z D + ![-(s j : ℤ), 3 * s j])})
+    (fun D j _ => ?_) (fun D j ω ω' hωω' => ?_) (fun D j _ => disjoint_sdiff_right)
+    (fun D => pairwiseDisjoint_annulus (z D) hs hs8 (P D) J) (fun D j hj => ?_)
+  · exact key
+  · have hm := measurable_dualConfig.comp (measurable_union_const (R D j)ᶜ)
+    exact (hm (measurableSet_crossing _ _ _).compl).inter
+      ((hm (measurableSet_crossing _ _ _).compl).inter (hm (measurableSet_crossing _ _ _).compl))
+  · simp only [mem_ofPred_eq]
+    rw [union_compl_eq_of_inter_eq hωω']
+  · exact pow_le_law_dualConfig_union_notMem_crossing_add h (z D) (t := s j) (m := 2 * s j - 1)
+      (by have := hs j; omega) (hJ j hj) _
+
+/-- **Open circuits, at many scales.** As `law_exploration_forall_notMem_inter_le`, for `ω` with the
+pairs outside the fresh pairs added (counted as open) crossing the four boxes of an annulus in their
+long directions. -/
+theorem law_exploration_forall_notMem_union_le
+    (h : CrossingBounds q L c)
+    {g : Config (LatticeSite 2) → Config (LatticeSite 2)} (hg : Measurable g)
+    {P : Finset (LatticeSite 2) → Set (Sym2 (LatticeSite 2))}
+    (hP : ∀ (D : Finset (LatticeSite 2)) (ω ω' : Config (LatticeSite 2)), ω ∩ P D = ω' ∩ P D →
+      ∀ e ∈ (zdGraph 2).edgeSet, (∃ f ∈ dualEdge e, f ∈ D) → (e ∈ g ω ↔ e ∈ g ω'))
+    (z : Finset (LatticeSite 2) → LatticeSite 2) {s : ℕ → ℕ} (hs : ∀ j, 1 ≤ s j)
+    (hs8 : ∀ j j', j < j' → 8 * s j ≤ s j') (v J : ℕ)
+    (hJ : ∀ j < J, ((2 * s j - 1 : ℕ) : ℕ∞) ≤ L) :
+    law q {ω | ∃ A : ℕ → Finset (LatticeSite 2),
+      (∀ w ≤ v, cluster (dualConfig (g ω \ {e | ∃ x ∈ e, ∃ w' < w, x ∈ (Γ (A w')).support}) ∩
+          {s | ∀ x ∈ s, x ∈ Icc (![lo 0 - 1, lo 1] : LatticeSite 2) ![hi 0, hi 1 - 1]} ∪
+        {s | ∃ y : ℤ, lo 1 ≤ y ∧ y + 1 ≤ hi 1 - 1 ∧
+          s = s(![lo 0 - 1, y], (![lo 0 - 1, y + 1] : LatticeSite 2))}) ![lo 0 - 1, lo 1] =
+            ↑(A w)) ∧
+      ∀ j < J, ω ∉ {ω : Config (LatticeSite 2) |
+        ω ∪ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+          z (A v) 0 - (3 * s j + 2) ≤ x 0 ∧ x 0 ≤ z (A v) 0 + (3 * s j + 2) ∧
+          z (A v) 1 - (3 * s j + 2) ≤ x 1 ∧ x 1 ≤ z (A v) 1 + (3 * s j + 2) ∧
+          (x 0 + s j ≤ z (A v) 0 + 2 ∨ z (A v) 0 + s j ≤ x 0 + 2 ∨ x 1 + s j ≤ z (A v) 1 + 2 ∨
+            z (A v) 1 + s j ≤ x 1 + 2)}} \ P (A v))ᶜ ∈
+          crossing 0 (z (A v) + ![-3 * (s j : ℤ), s j + 1])
+            (z (A v) + ![3 * (s j : ℤ) + 1, 3 * s j]) ∧
+        ω ∪ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+          z (A v) 0 - (3 * s j + 2) ≤ x 0 ∧ x 0 ≤ z (A v) 0 + (3 * s j + 2) ∧
+          z (A v) 1 - (3 * s j + 2) ≤ x 1 ∧ x 1 ≤ z (A v) 1 + (3 * s j + 2) ∧
+          (x 0 + s j ≤ z (A v) 0 + 2 ∨ z (A v) 0 + s j ≤ x 0 + 2 ∨ x 1 + s j ≤ z (A v) 1 + 2 ∨
+            z (A v) 1 + s j ≤ x 1 + 2)}} \ P (A v))ᶜ ∈
+          crossing 0 (z (A v) + ![-3 * (s j : ℤ), -3 * s j + 1])
+            (z (A v) + ![3 * (s j : ℤ) + 1, -s j]) ∧
+        ω ∪ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+          z (A v) 0 - (3 * s j + 2) ≤ x 0 ∧ x 0 ≤ z (A v) 0 + (3 * s j + 2) ∧
+          z (A v) 1 - (3 * s j + 2) ≤ x 1 ∧ x 1 ≤ z (A v) 1 + (3 * s j + 2) ∧
+          (x 0 + s j ≤ z (A v) 0 + 2 ∨ z (A v) 0 + s j ≤ x 0 + 2 ∨ x 1 + s j ≤ z (A v) 1 + 2 ∨
+            z (A v) 1 + s j ≤ x 1 + 2)}} \ P (A v))ᶜ ∈
+          crossing 1 (z (A v) + ![(s j : ℤ) + 1, -3 * s j])
+            (z (A v) + ![3 * (s j : ℤ), 3 * s j + 1]) ∧
+        ω ∪ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+          z (A v) 0 - (3 * s j + 2) ≤ x 0 ∧ x 0 ≤ z (A v) 0 + (3 * s j + 2) ∧
+          z (A v) 1 - (3 * s j + 2) ≤ x 1 ∧ x 1 ≤ z (A v) 1 + (3 * s j + 2) ∧
+          (x 0 + s j ≤ z (A v) 0 + 2 ∨ z (A v) 0 + s j ≤ x 0 + 2 ∨ x 1 + s j ≤ z (A v) 1 + 2 ∨
+            z (A v) 1 + s j ≤ x 1 + 2)}} \ P (A v))ᶜ ∈
+          crossing 1 (z (A v) + ![-3 * (s j : ℤ) + 1, -3 * s j])
+            (z (A v) + ![-(s j : ℤ), 3 * s j + 1])}} ≤ (1 - c 7 ^ 4) ^ J := by
+  set R : Finset (LatticeSite 2) → ℕ → Set (Sym2 (LatticeSite 2)) := fun D j =>
+    {e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+      z D 0 - (3 * s j + 2) ≤ x 0 ∧ x 0 ≤ z D 0 + (3 * s j + 2) ∧
+      z D 1 - (3 * s j + 2) ≤ x 1 ∧ x 1 ≤ z D 1 + (3 * s j + 2) ∧
+      (x 0 + s j ≤ z D 0 + 2 ∨ z D 0 + s j ≤ x 0 + 2 ∨ x 1 + s j ≤ z D 1 + 2 ∨
+        z D 1 + s j ≤ x 1 + 2)}} \ P D with hR
+  have key := law_exploration_forall_notMem_le (q := q) (Γ := Γ) (lo := lo) (hi := hi) hg hP v J
+    (β := c 7 ^ 4) (Q := R) (K := fun D j => {ω : Config (LatticeSite 2) |
+      ω ∪ (R D j)ᶜ ∈
+        crossing 0 (z D + ![-3 * (s j : ℤ), s j + 1]) (z D + ![3 * (s j : ℤ) + 1, 3 * s j]) ∧
+      ω ∪ (R D j)ᶜ ∈
+        crossing 0 (z D + ![-3 * (s j : ℤ), -3 * s j + 1]) (z D + ![3 * (s j : ℤ) + 1, -s j]) ∧
+      ω ∪ (R D j)ᶜ ∈
+        crossing 1 (z D + ![(s j : ℤ) + 1, -3 * s j]) (z D + ![3 * (s j : ℤ), 3 * s j + 1]) ∧
+      ω ∪ (R D j)ᶜ ∈
+        crossing 1 (z D + ![-3 * (s j : ℤ) + 1, -3 * s j]) (z D + ![-(s j : ℤ), 3 * s j + 1])})
+    (fun D j _ => ?_) (fun D j ω ω' hωω' => ?_) (fun D j _ => disjoint_sdiff_right)
+    (fun D => pairwiseDisjoint_annulus (z D) hs hs8 (P D) J) (fun D j hj => ?_)
+  · exact key
+  · have hm := measurable_union_const (R D j)ᶜ
+    exact (hm (measurableSet_crossing _ _ _)).inter ((hm (measurableSet_crossing _ _ _)).inter
+      ((hm (measurableSet_crossing _ _ _)).inter (hm (measurableSet_crossing _ _ _))))
+  · simp only [mem_ofPred_eq]
+    rw [union_compl_eq_of_inter_eq hωω']
+  · exact pow_le_law_union_mem_crossing_add h (z D) (t := s j) (m := 2 * s j - 1)
+      (by have := hs j; omega) (hJ j hj) _
+
+/-- **Dual circuits of faces, at many scales.** As `law_exploration_forall_notMem_inter_le`, for the
+dual configuration of the fresh pairs of `ω` crossing the four boxes of faces of an annulus in their
+long directions. -/
+theorem law_exploration_forall_notMem_dualConfig_inter_le
+    (h : CrossingBounds q L c)
+    {g : Config (LatticeSite 2) → Config (LatticeSite 2)} (hg : Measurable g)
+    {P : Finset (LatticeSite 2) → Set (Sym2 (LatticeSite 2))}
+    (hP : ∀ (D : Finset (LatticeSite 2)) (ω ω' : Config (LatticeSite 2)), ω ∩ P D = ω' ∩ P D →
+      ∀ e ∈ (zdGraph 2).edgeSet, (∃ f ∈ dualEdge e, f ∈ D) → (e ∈ g ω ↔ e ∈ g ω'))
+    (z : Finset (LatticeSite 2) → LatticeSite 2) {s : ℕ → ℕ} (hs : ∀ j, 1 ≤ s j)
+    (hs8 : ∀ j j', j < j' → 8 * s j ≤ s j') (v J : ℕ)
+    (hJ : ∀ j < J, ((2 * s j - 1 : ℕ) : ℕ∞) ≤ L) :
+    law q {ω | ∃ A : ℕ → Finset (LatticeSite 2),
+      (∀ w ≤ v, cluster (dualConfig (g ω \ {e | ∃ x ∈ e, ∃ w' < w, x ∈ (Γ (A w')).support}) ∩
+          {s | ∀ x ∈ s, x ∈ Icc (![lo 0 - 1, lo 1] : LatticeSite 2) ![hi 0, hi 1 - 1]} ∪
+        {s | ∃ y : ℤ, lo 1 ≤ y ∧ y + 1 ≤ hi 1 - 1 ∧
+          s = s(![lo 0 - 1, y], (![lo 0 - 1, y + 1] : LatticeSite 2))}) ![lo 0 - 1, lo 1] =
+            ↑(A w)) ∧
+      ∀ j < J, ω ∉ {ω : Config (LatticeSite 2) |
+        dualConfig (ω ∩ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+          z (A v) 0 - (3 * s j + 2) ≤ x 0 ∧ x 0 ≤ z (A v) 0 + (3 * s j + 2) ∧
+          z (A v) 1 - (3 * s j + 2) ≤ x 1 ∧ x 1 ≤ z (A v) 1 + (3 * s j + 2) ∧
+          (x 0 + s j ≤ z (A v) 0 + 2 ∨ z (A v) 0 + s j ≤ x 0 + 2 ∨ x 1 + s j ≤ z (A v) 1 + 2 ∨
+            z (A v) 1 + s j ≤ x 1 + 2)}} \ P (A v))) ∈
+          crossing 0 (z (A v) + ![-3 * (s j : ℤ), s j + 1])
+            (z (A v) + ![3 * (s j : ℤ) + 1, 3 * s j]) ∧
+        dualConfig (ω ∩ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+          z (A v) 0 - (3 * s j + 2) ≤ x 0 ∧ x 0 ≤ z (A v) 0 + (3 * s j + 2) ∧
+          z (A v) 1 - (3 * s j + 2) ≤ x 1 ∧ x 1 ≤ z (A v) 1 + (3 * s j + 2) ∧
+          (x 0 + s j ≤ z (A v) 0 + 2 ∨ z (A v) 0 + s j ≤ x 0 + 2 ∨ x 1 + s j ≤ z (A v) 1 + 2 ∨
+            z (A v) 1 + s j ≤ x 1 + 2)}} \ P (A v))) ∈
+          crossing 0 (z (A v) + ![-3 * (s j : ℤ), -3 * s j + 1])
+            (z (A v) + ![3 * (s j : ℤ) + 1, -s j]) ∧
+        dualConfig (ω ∩ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+          z (A v) 0 - (3 * s j + 2) ≤ x 0 ∧ x 0 ≤ z (A v) 0 + (3 * s j + 2) ∧
+          z (A v) 1 - (3 * s j + 2) ≤ x 1 ∧ x 1 ≤ z (A v) 1 + (3 * s j + 2) ∧
+          (x 0 + s j ≤ z (A v) 0 + 2 ∨ z (A v) 0 + s j ≤ x 0 + 2 ∨ x 1 + s j ≤ z (A v) 1 + 2 ∨
+            z (A v) 1 + s j ≤ x 1 + 2)}} \ P (A v))) ∈
+          crossing 1 (z (A v) + ![(s j : ℤ) + 1, -3 * s j])
+            (z (A v) + ![3 * (s j : ℤ), 3 * s j + 1]) ∧
+        dualConfig (ω ∩ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+          z (A v) 0 - (3 * s j + 2) ≤ x 0 ∧ x 0 ≤ z (A v) 0 + (3 * s j + 2) ∧
+          z (A v) 1 - (3 * s j + 2) ≤ x 1 ∧ x 1 ≤ z (A v) 1 + (3 * s j + 2) ∧
+          (x 0 + s j ≤ z (A v) 0 + 2 ∨ z (A v) 0 + s j ≤ x 0 + 2 ∨ x 1 + s j ≤ z (A v) 1 + 2 ∨
+            z (A v) 1 + s j ≤ x 1 + 2)}} \ P (A v))) ∈
+          crossing 1 (z (A v) + ![-3 * (s j : ℤ) + 1, -3 * s j])
+            (z (A v) + ![-(s j : ℤ), 3 * s j + 1])}} ≤ (1 - c 7 ^ 4) ^ J := by
+  set R : Finset (LatticeSite 2) → ℕ → Set (Sym2 (LatticeSite 2)) := fun D j =>
+    {e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+      z D 0 - (3 * s j + 2) ≤ x 0 ∧ x 0 ≤ z D 0 + (3 * s j + 2) ∧
+      z D 1 - (3 * s j + 2) ≤ x 1 ∧ x 1 ≤ z D 1 + (3 * s j + 2) ∧
+      (x 0 + s j ≤ z D 0 + 2 ∨ z D 0 + s j ≤ x 0 + 2 ∨ x 1 + s j ≤ z D 1 + 2 ∨
+        z D 1 + s j ≤ x 1 + 2)}} \ P D with hR
+  have key := law_exploration_forall_notMem_le (q := q) (Γ := Γ) (lo := lo) (hi := hi) hg hP v J
+    (β := c 7 ^ 4) (Q := R) (K := fun D j => {ω : Config (LatticeSite 2) |
+      dualConfig (ω ∩ R D j) ∈
+        crossing 0 (z D + ![-3 * (s j : ℤ), s j + 1]) (z D + ![3 * (s j : ℤ) + 1, 3 * s j]) ∧
+      dualConfig (ω ∩ R D j) ∈
+        crossing 0 (z D + ![-3 * (s j : ℤ), -3 * s j + 1]) (z D + ![3 * (s j : ℤ) + 1, -s j]) ∧
+      dualConfig (ω ∩ R D j) ∈
+        crossing 1 (z D + ![(s j : ℤ) + 1, -3 * s j]) (z D + ![3 * (s j : ℤ), 3 * s j + 1]) ∧
+      dualConfig (ω ∩ R D j) ∈
+        crossing 1 (z D + ![-3 * (s j : ℤ) + 1, -3 * s j]) (z D + ![-(s j : ℤ), 3 * s j + 1])})
+    (fun D j _ => ?_) (fun D j ω ω' hωω' => ?_) (fun D j _ => disjoint_sdiff_right)
+    (fun D => pairwiseDisjoint_annulus (z D) hs hs8 (P D) J) (fun D j hj => ?_)
+  · exact key
+  · have hm := measurable_dualConfig.comp (measurable_inter_const (R D j))
+    exact (hm (measurableSet_crossing _ _ _)).inter ((hm (measurableSet_crossing _ _ _)).inter
+      ((hm (measurableSet_crossing _ _ _)).inter (hm (measurableSet_crossing _ _ _))))
+  · simp only [mem_ofPred_eq]
+    rw [hωω']
+  · exact pow_le_law_dualConfig_inter_mem_crossing_add h (z D) (t := s j) (m := 2 * s j - 1)
+      (by have := hs j; omega) (hJ j hj) _
+
+/-- **Open strips at a fixed centre, at many scales.** The pairs of `ω` in the annuli at the
+scales `s j` around `z` cross, at every scale, one of the bottom, right and left strips with
+probability at most `(1 - c 7 ^ 4)^J`. -/
+theorem law_forall_notMem_inter_le (h : CrossingBounds q L c) (z : LatticeSite 2) {s : ℕ → ℕ}
+    (hs : ∀ j, 1 ≤ s j) (hs8 : ∀ j j', j < j' → 8 * s j ≤ s j') (J : ℕ)
+    (hJ : ∀ j < J, ((2 * s j - 1 : ℕ) : ℕ∞) ≤ L) :
+    law q {ω | ∀ j < J, ω ∉ {ω : Config (LatticeSite 2) |
+        ω ∩ {e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+          z 0 - (3 * s j + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s j + 2) ∧
+          z 1 - (3 * s j + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s j + 2) ∧
+          (x 0 + s j ≤ z 0 + 2 ∨ z 0 + s j ≤ x 0 + 2 ∨ x 1 + s j ≤ z 1 + 2 ∨
+            z 1 + s j ≤ x 1 + 2)}} ∉
+          crossing 1 (z + ![-3 * (s j : ℤ), -3 * s j]) (z + ![3 * (s j : ℤ), -s j]) ∧
+        ω ∩ {e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+          z 0 - (3 * s j + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s j + 2) ∧
+          z 1 - (3 * s j + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s j + 2) ∧
+          (x 0 + s j ≤ z 0 + 2 ∨ z 0 + s j ≤ x 0 + 2 ∨ x 1 + s j ≤ z 1 + 2 ∨
+            z 1 + s j ≤ x 1 + 2)}} ∉
+          crossing 0 (z + ![(s j : ℤ), -3 * s j]) (z + ![3 * (s j : ℤ), 3 * s j]) ∧
+        ω ∩ {e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+          z 0 - (3 * s j + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s j + 2) ∧
+          z 1 - (3 * s j + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s j + 2) ∧
+          (x 0 + s j ≤ z 0 + 2 ∨ z 0 + s j ≤ x 0 + 2 ∨ x 1 + s j ≤ z 1 + 2 ∨
+            z 1 + s j ≤ x 1 + 2)}} ∉
+          crossing 0 (z + ![-3 * (s j : ℤ), -3 * s j])
+            (z + ![-(s j : ℤ), 3 * s j])}} ≤ (1 - c 7 ^ 4) ^ J := by
+  set R : ℕ → Set (Sym2 (LatticeSite 2)) := fun j =>
+    {e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+      z 0 - (3 * s j + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s j + 2) ∧
+      z 1 - (3 * s j + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s j + 2) ∧
+      (x 0 + s j ≤ z 0 + 2 ∨ z 0 + s j ≤ x 0 + 2 ∨ x 1 + s j ≤ z 1 + 2 ∨
+        z 1 + s j ≤ x 1 + 2)}} with hR
+  have hQ : Set.PairwiseDisjoint (↑(Finset.range J)) R := fun i hi j hj hij => by
+    have := pairwiseDisjoint_annulus z hs hs8 ∅ J hi hj hij
+    simpa only [Function.onFun, sdiff_empty] using this
+  have key := law_inter_biInter_compl_le q (X := univ) (P := ∅) (Q := R) (J := J)
+    (β := c 7 ^ 4) (K := fun j => {ω : Config (LatticeSite 2) |
+      ω ∩ R j ∉
+        crossing 1 (z + ![-3 * (s j : ℤ), -3 * s j]) (z + ![3 * (s j : ℤ), -s j]) ∧
+      ω ∩ R j ∉
+        crossing 0 (z + ![(s j : ℤ), -3 * s j]) (z + ![3 * (s j : ℤ), 3 * s j]) ∧
+      ω ∩ R j ∉
+        crossing 0 (z + ![-3 * (s j : ℤ), -3 * s j]) (z + ![-(s j : ℤ), 3 * s j])})
+    MeasurableSet.univ (fun _ _ _ => Iff.rfl) (fun j _ => ?_) (fun j ω ω' hωω' => ?_)
+    (fun j _ => empty_disjoint _) hQ (fun j hj => ?_)
+  · refine le_trans (MeasureTheory.measure_mono fun ω hω => ?_) (key.trans_eq ?_)
+    · exact ⟨mem_univ _, mem_iInter₂.2 fun j hj => hω j (Finset.mem_range.1 hj)⟩
+    · rw [MeasureTheory.measure_univ, one_mul]
+  · have hm := measurable_inter_const (R j)
+    exact (hm (measurableSet_crossing _ _ _).compl).inter
+      ((hm (measurableSet_crossing _ _ _).compl).inter (hm (measurableSet_crossing _ _ _).compl))
+  · simp only [mem_ofPred_eq]
+    rw [hωω']
+  · exact pow_le_law_inter_notMem_crossing_add h z (t := s j) (m := 2 * s j - 1)
+      (by have := hs j; omega) (hJ j hj) _
+
+/-- **Dual strips at a fixed centre, at many scales.** The same for the dual configuration of `ω`
+with the pairs outside the annuli added. -/
+theorem law_forall_notMem_dualConfig_union_le (h : CrossingBounds q L c) (z : LatticeSite 2)
+    {s : ℕ → ℕ} (hs : ∀ j, 1 ≤ s j) (hs8 : ∀ j j', j < j' → 8 * s j ≤ s j') (J : ℕ)
+    (hJ : ∀ j < J, ((2 * s j - 1 : ℕ) : ℕ∞) ≤ L) :
+    law q {ω | ∀ j < J, ω ∉ {ω : Config (LatticeSite 2) |
+        dualConfig (ω ∪ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+          z 0 - (3 * s j + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s j + 2) ∧
+          z 1 - (3 * s j + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s j + 2) ∧
+          (x 0 + s j ≤ z 0 + 2 ∨ z 0 + s j ≤ x 0 + 2 ∨ x 1 + s j ≤ z 1 + 2 ∨
+            z 1 + s j ≤ x 1 + 2)}})ᶜ) ∉
+          crossing 1 (z + ![-3 * (s j : ℤ), -3 * s j]) (z + ![3 * (s j : ℤ), -s j]) ∧
+        dualConfig (ω ∪ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+          z 0 - (3 * s j + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s j + 2) ∧
+          z 1 - (3 * s j + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s j + 2) ∧
+          (x 0 + s j ≤ z 0 + 2 ∨ z 0 + s j ≤ x 0 + 2 ∨ x 1 + s j ≤ z 1 + 2 ∨
+            z 1 + s j ≤ x 1 + 2)}})ᶜ) ∉
+          crossing 0 (z + ![(s j : ℤ), -3 * s j]) (z + ![3 * (s j : ℤ), 3 * s j]) ∧
+        dualConfig (ω ∪ ({e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+          z 0 - (3 * s j + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s j + 2) ∧
+          z 1 - (3 * s j + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s j + 2) ∧
+          (x 0 + s j ≤ z 0 + 2 ∨ z 0 + s j ≤ x 0 + 2 ∨ x 1 + s j ≤ z 1 + 2 ∨
+            z 1 + s j ≤ x 1 + 2)}})ᶜ) ∉
+          crossing 0 (z + ![-3 * (s j : ℤ), -3 * s j])
+            (z + ![-(s j : ℤ), 3 * s j])}} ≤ (1 - c 7 ^ 4) ^ J := by
+  set R : ℕ → Set (Sym2 (LatticeSite 2)) := fun j =>
+    {e | ∀ x ∈ e, x ∈ {x : LatticeSite 2 |
+      z 0 - (3 * s j + 2) ≤ x 0 ∧ x 0 ≤ z 0 + (3 * s j + 2) ∧
+      z 1 - (3 * s j + 2) ≤ x 1 ∧ x 1 ≤ z 1 + (3 * s j + 2) ∧
+      (x 0 + s j ≤ z 0 + 2 ∨ z 0 + s j ≤ x 0 + 2 ∨ x 1 + s j ≤ z 1 + 2 ∨
+        z 1 + s j ≤ x 1 + 2)}} with hR
+  have hQ : Set.PairwiseDisjoint (↑(Finset.range J)) R := fun i hi j hj hij => by
+    have := pairwiseDisjoint_annulus z hs hs8 ∅ J hi hj hij
+    simpa only [Function.onFun, sdiff_empty] using this
+  have key := law_inter_biInter_compl_le q (X := univ) (P := ∅) (Q := R) (J := J)
+    (β := c 7 ^ 4) (K := fun j => {ω : Config (LatticeSite 2) |
+      dualConfig (ω ∪ (R j)ᶜ) ∉
+        crossing 1 (z + ![-3 * (s j : ℤ), -3 * s j]) (z + ![3 * (s j : ℤ), -s j]) ∧
+      dualConfig (ω ∪ (R j)ᶜ) ∉
+        crossing 0 (z + ![(s j : ℤ), -3 * s j]) (z + ![3 * (s j : ℤ), 3 * s j]) ∧
+      dualConfig (ω ∪ (R j)ᶜ) ∉
+        crossing 0 (z + ![-3 * (s j : ℤ), -3 * s j]) (z + ![-(s j : ℤ), 3 * s j])})
+    MeasurableSet.univ (fun _ _ _ => Iff.rfl) (fun j _ => ?_) (fun j ω ω' hωω' => ?_)
+    (fun j _ => empty_disjoint _) hQ (fun j hj => ?_)
+  · refine le_trans (MeasureTheory.measure_mono fun ω hω => ?_) (key.trans_eq ?_)
+    · exact ⟨mem_univ _, mem_iInter₂.2 fun j hj => hω j (Finset.mem_range.1 hj)⟩
+    · rw [MeasureTheory.measure_univ, one_mul]
+  · have hm := measurable_dualConfig.comp (measurable_union_const (R j)ᶜ)
+    exact (hm (measurableSet_crossing _ _ _).compl).inter
+      ((hm (measurableSet_crossing _ _ _).compl).inter (hm (measurableSet_crossing _ _ _).compl))
+  · simp only [mem_ofPred_eq]
+    rw [union_compl_eq_of_inter_eq hωω']
+  · exact pow_le_law_dualConfig_union_notMem_crossing_add h z (t := s j) (m := 2 * s j - 1)
+      (by have := hs j; omega) (hJ j hj) _
+
+end Scales
 
 end PercLib.Models.Planar
