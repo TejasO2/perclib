@@ -142,6 +142,7 @@ public import PercLib.Models.Planar.Arms.QuadDuality
 public import PercLib.Models.Planar.Arms.QuasiMultiplicativity
 public import PercLib.Models.Planar.Arms.Sectors
 public import PercLib.Models.Planar.Arms.Separation
+public import PercLib.Models.Planar.Arms.Separation.Defs
 public import PercLib.Models.Planar.Arms.SeparationEvents
 public import PercLib.Models.Planar.Arms.SeparationFence
 public import PercLib.Models.Planar.Arms.SeparationLemma

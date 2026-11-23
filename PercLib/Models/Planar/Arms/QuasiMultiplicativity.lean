@@ -11,6 +11,7 @@ extendability).
 -/
 module
 
+public import PercLib.Models.Planar.Arms.Separation.Defs
 public import PercLib.Models.Planar.Arms.SeparationLemma
 
 /-!
@@ -57,8 +58,6 @@ annulus of bounded aspect ratio.
   crosses from a set containing the bottom row out of a set missing the top row.
 * `exists_isArm_of_mem_corridor`: an arm of either colour in a vertical corridor, with its
   landing position.
-* `dualConfig_inter_eq_of_inter_eq`: the dual edges between faces of a box are determined by the
-  edges of the box enlarged by one.
 * `exists_pos_le_law_multiArmEvent`, `exists_pos_le_law_halfArmEvent` (both from
   `exists_pos_le_law_multiArmEvent_inter_halfArmEvent`): the a priori lower bound for one annulus
   of bounded aspect ratio, in the plane and in the half-plane, uniformly under crossing bounds, for
@@ -473,45 +472,6 @@ theorem exists_isArm_of_mem_corridor {ω : Config (LatticeSite 2)} {z : LatticeS
       simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply, Pi.one_apply, Pi.smul_apply,
         nsmul_eq_mul, Nat.cast_ofNat, hp0]
       omega
-
-/-- **Duals inside a box of faces.** Whether the dual edges between faces of the box
-`Icc lo hi` are open in `dualConfig ω` depends only on the edges of `ℤ²` with both ends in
-`Icc lo (hi + 1)`: such a dual edge crosses an edge whose ends are corners of its two faces. -/
-theorem dualConfig_inter_eq_of_inter_eq {lo hi : LatticeSite 2} {ω ω' : Config (LatticeSite 2)}
-    (h : ω ∩ {e | ∀ v ∈ e, v ∈ Icc lo (hi + 1)} = ω' ∩ {e | ∀ v ∈ e, v ∈ Icc lo (hi + 1)}) :
-    dualConfig ω ∩ {f | ∀ g ∈ f, g ∈ Icc lo hi} = dualConfig ω' ∩ {f | ∀ g ∈ f, g ∈ Icc lo hi} := by
-  have key : ∀ f : Sym2 (LatticeSite 2), f ∈ (zdGraph 2).edgeSet → (∀ g ∈ f, g ∈ Icc lo hi) →
-      (Sym2.map (· + 1) (dualEdge f) ∈ ω ↔ Sym2.map (· + 1) (dualEdge f) ∈ ω') := by
-    intro f hf hfg
-    set e := Sym2.map (· + 1) (dualEdge f) with he
-    have heE : e ∈ (zdGraph 2).edgeSet := map_add_mem_edgeSet 1 (dualEdge_mem_edgeSet hf)
-    have hde : dualEdge e = f := dualEdge_map_add_one_dualEdge hf
-    have heP : ∀ v ∈ e, v ∈ Icc lo (hi + 1) := by
-      intro v hv
-      obtain ⟨g, hg⟩ : ∃ g, g ∈ f := ⟨(Quot.out f).1, Sym2.out_fst_mem f⟩
-      have hvg := mem_Icc_of_mem_dualEdge heE hv (hde ▸ hg)
-      have hgB := hfg g hg
-      refine ⟨hgB.1.trans hvg.1, fun i => ?_⟩
-      have h₁ : v i ≤ (g + 1) i := hvg.2 i
-      have h₂ : g i ≤ hi i := hgB.2 i
-      simp only [Pi.add_apply, Pi.one_apply] at h₁ ⊢
-      omega
-    constructor
-    · intro hω
-      have : e ∈ ω ∩ {e | ∀ v ∈ e, v ∈ Icc lo (hi + 1)} := ⟨hω, heP⟩
-      rw [h] at this
-      exact this.1
-    · intro hω
-      have : e ∈ ω' ∩ {e | ∀ v ∈ e, v ∈ Icc lo (hi + 1)} := ⟨hω, heP⟩
-      rw [← h] at this
-      exact this.1
-  ext f
-  simp only [mem_inter_iff, mem_ofPred_eq, mem_dualConfig_iff]
-  constructor
-  · rintro ⟨⟨hf, hω⟩, hfg⟩
-    exact ⟨⟨hf, fun h' => hω ((key f hf hfg).2 h')⟩, hfg⟩
-  · rintro ⟨⟨hf, hω⟩, hfg⟩
-    exact ⟨⟨hf, fun h' => hω ((key f hf hfg).1 h')⟩, hfg⟩
 
 /-- **Arms across an annulus of bounded aspect ratio, in the plane and in the half-plane.** For
 every colour sequence `σ` of `j` arms and every ratio `K`, there is `c₀ > 0` such that, uniformly
