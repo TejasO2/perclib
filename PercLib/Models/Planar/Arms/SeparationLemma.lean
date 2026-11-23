@@ -11,6 +11,8 @@ Probab. 13 (2008), paper no. 55, Section 4.2, Definitions 6-8 and condition (4.5
 -/
 module
 
+public import Mathlib.Algebra.Order.Floor.Semifield
+public import Mathlib.Analysis.SpecificLimits.Basic
 public import PercLib.Models.Planar.Arms.SeparationEvents
 
 /-!
@@ -519,6 +521,46 @@ theorem mem_image_dualEdge_of_mem_edges {lo hi a b : LatticeSite 2} (p : (zdGrap
   rw [mem_Icc_two_iff]
   omega
 
+/-! ### The scales -/
+
+/-- **The scales of the proof.** With `D = 16 · 8^J` and `N ≥ D²`, put `M = ⌊N / D⌋` and
+`K = ⌊N / D²⌋`. Then `K ≥ 1`, `M ≥ 16`, and for `j < J` the separation scale `2 (M + 1) 8^j`
+satisfies `3 s + 1 ≤ N` and the fence scale `t = (K + 1) 8^j` satisfies `3 t + 1 ≤ M`. -/
+theorem scale_bounds {N J : ℕ} (hN : (16 * 8 ^ J) ^ 2 ≤ N) :
+    1 ≤ N / (16 * 8 ^ J) ^ 2 ∧ 16 ≤ N / (16 * 8 ^ J) ∧
+    ∀ j < J, 3 * (2 * (N / (16 * 8 ^ J) + 1) * 8 ^ j) + 1 ≤ N ∧
+      3 * ((N / (16 * 8 ^ J) ^ 2 + 1) * 8 ^ j) + 1 ≤ N / (16 * 8 ^ J) := by
+  have hY1 : 1 ≤ 8 ^ J := Nat.one_le_pow _ _ (by norm_num)
+  set Y := 8 ^ J with hY
+  set D := 16 * Y with hD
+  have hD16 : 16 ≤ D := by omega
+  have hDpos : 0 < D := by omega
+  have hMD : N / D * D ≤ N := Nat.div_mul_le_self N D
+  have hMge : D ≤ N / D := (Nat.le_div_iff_mul_le hDpos).2 (by rw [← sq]; exact hN)
+  have hK : N / D ^ 2 = N / D / D := by rw [sq, Nat.div_div_eq_div_mul]
+  have hKD : N / D ^ 2 * D ≤ N / D := by
+    rw [hK]
+    exact Nat.div_mul_le_self _ _
+  have hK1 : 1 ≤ N / D ^ 2 := (Nat.one_le_div_iff (by positivity)).2 hN
+  refine ⟨hK1, by omega, fun j hj => ?_⟩
+  have h8 : 8 * 8 ^ j ≤ Y := by
+    calc 8 * 8 ^ j = 8 ^ (j + 1) := by ring
+      _ ≤ 8 ^ J := Nat.pow_le_pow_right (by norm_num) hj
+  have hX1 : 1 ≤ 8 ^ j := Nat.one_le_pow _ _ (by norm_num)
+  set X := 8 ^ j with hX
+  set M := N / D with hM
+  set K := N / D ^ 2 with hK'
+  have hMX : M * (8 * X) ≤ M * Y := Nat.mul_le_mul_left _ h8
+  have hKX : K * (8 * X) ≤ K * Y := Nat.mul_le_mul_left _ h8
+  have hMX1 : X ≤ M * X := Nat.le_mul_of_pos_left _ (by omega)
+  have hKX1 : X ≤ K * X := Nat.le_mul_of_pos_left _ (by omega)
+  have hMY : M * (16 * Y) ≤ N := hMD
+  have hKY : K * (16 * Y) ≤ M := hKD
+  have hN256 : 256 ≤ N := by nlinarith
+  constructor
+  · nlinarith
+  · nlinarith
+
 /-! ### The deterministic part of the lemma -/
 
 /-- **Local separation, deterministic part.** Let `ω` be a configuration such that the
@@ -968,5 +1010,305 @@ theorem separable_of_forall {ω : Config (LatticeSite 2)} {lo hi lo₂ hi₂ : L
       exact hfen₂ i ((hS₂ i).2 hσ)
     · rw [hΓt i hσ]
       exact hfen₁ i ((hS₁ i).2 hσ)
+
+/-! ### Nolin's local separation lemma -/
+
+/-- **Nolin's local separation lemma** (EJP 2008, Lemma 15). For every `δ > 0` there are `η > 0`
+and `N₀` such that, uniformly over the laws with crossing bounds `c` up to `L`, for `N₀ ≤ N ≤ L`,
+with probability at least `1 - δ` the following holds in the strip `Q = [0, 4N] × [0, N]`. Every
+family of crossings of `Q` from bottom to top, each open (`σ i = true`: a walk of `ℤ²` in `Q` from
+the bottom row to the top row along open edges) or dual (`σ i = false`: a walk of faces of
+`[0, 4N - 1] × [-1, N]` from the row `-1` to the row `N` along dual-open dual edges crossing edges
+of `Q`), with crossings of the same colour disjoint, can be replaced by a family with the same
+colours and the same starting points, with crossings of the same colour disjoint, whose ends `b' i`,
+in doubled positions (`2 x` for an open end `(x, N)`, `2 x + 1` for a dual end `(x, N)`), are at
+least `4 √η N` apart and at least `4 √η N` from both ends `0` and `8 N` of the doubled top side,
+and each of which carries a fence (Nolin's condition (4.5)): some vertex of the new crossing is
+joined, in its colour and inside the ball of radius `⌊√η N⌋` around its end, to the left end of a
+left-right crossing of its colour of the box `[x - ⌊η N⌋, x + ⌊η N⌋] × [N, N + ⌊√η N⌋]` above its
+end `(x, N)`. -/
+theorem exists_law_separable_ge (c : ℕ → ℝ≥0∞) {δ : ℝ≥0∞} (hδ : 0 < δ) :
+    ∃ η : ℝ, 0 < η ∧ ∃ N₀ : ℕ, ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
+      CrossingBounds q L c → ∀ N : ℕ, N₀ ≤ N → (N : ℕ∞) ≤ L →
+      1 - δ ≤ law q {ω | ∀ (m : ℕ) (σ : Fin m → Bool) (a b : Fin m → LatticeSite 2)
+        (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, cond (σ i)
+          (a i 1 = 0 ∧ b i 1 = N ∧
+            (∀ x ∈ (γ i).support, x ∈ Icc (0 : LatticeSite 2) ![4 * (N : ℤ), N]) ∧
+            ∀ e ∈ (γ i).edges, e ∈ ω)
+          (a i 1 = -1 ∧ b i 1 = N ∧
+            (∀ x ∈ (γ i).support, x ∈ Icc (![0, -1] : LatticeSite 2) ![4 * (N : ℤ) - 1, N]) ∧
+            ∀ e ∈ (γ i).edges, e ∈ dualConfig ω ∩ dualEdge '' {e | e ∈ (zdGraph 2).edgeSet ∧
+              ∀ x ∈ e, x ∈ Icc (0 : LatticeSite 2) ![4 * (N : ℤ), N]})) →
+        (∀ i j, i ≠ j → σ i = σ j → ∀ x ∈ (γ i).support, x ∉ (γ j).support) →
+        ∃ (b' : Fin m → LatticeSite 2) (γ' : ∀ i, (zdGraph 2).Walk (a i) (b' i)),
+          (∀ i, cond (σ i)
+            (a i 1 = 0 ∧ b' i 1 = N ∧
+              (∀ x ∈ (γ' i).support, x ∈ Icc (0 : LatticeSite 2) ![4 * (N : ℤ), N]) ∧
+              ∀ e ∈ (γ' i).edges, e ∈ ω)
+            (a i 1 = -1 ∧ b' i 1 = N ∧
+              (∀ x ∈ (γ' i).support, x ∈ Icc (![0, -1] : LatticeSite 2) ![4 * (N : ℤ) - 1, N]) ∧
+              ∀ e ∈ (γ' i).edges, e ∈ dualConfig ω ∩ dualEdge '' {e | e ∈ (zdGraph 2).edgeSet ∧
+                ∀ x ∈ e, x ∈ Icc (0 : LatticeSite 2) ![4 * (N : ℤ), N]})) ∧
+          (∀ i j, i ≠ j → σ i = σ j → ∀ x ∈ (γ' i).support, x ∉ (γ' j).support) ∧
+          (∀ i j, i ≠ j → 4 * Real.sqrt η * N ≤
+            |((2 * b' i 0 + cond (σ i) 0 1 : ℤ) : ℝ) - ((2 * b' j 0 + cond (σ j) 0 1 : ℤ) : ℝ)|) ∧
+          (∀ i, 4 * Real.sqrt η * N ≤ ((2 * b' i 0 + cond (σ i) 0 1 : ℤ) : ℝ) ∧
+            4 * Real.sqrt η * N ≤ 8 * N - ((2 * b' i 0 + cond (σ i) 0 1 : ℤ) : ℝ)) ∧
+          ∀ i, ∃ x ∈ (γ' i).support, ∃ l r : LatticeSite 2,
+            l 0 = b' i 0 - ⌊η * N⌋₊ ∧ r 0 = b' i 0 + ⌊η * N⌋₊ ∧
+            cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
+              (Icc ![b' i 0 - ⌊η * N⌋₊, N] ![b' i 0 + ⌊η * N⌋₊, N + ⌊Real.sqrt η * N⌋₊]) l r ∧
+            cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
+              (Icc (b' i - (⌊Real.sqrt η * N⌋₊ : LatticeSite 2))
+                (b' i + (⌊Real.sqrt η * N⌋₊ : LatticeSite 2))) x l} := by
+  by_cases hc : 0 < c 6 ∧ 0 < c 7
+  swap
+  · exact ⟨1, one_pos, 0, fun q L h => absurd ⟨h.pos 6, h.pos 7⟩ hc⟩
+  obtain ⟨hc6, hc7⟩ := hc
+  -- the number of steps of the explorations and the number of scales
+  have hr₁ : 1 - c 6 < 1 := ENNReal.sub_lt_self ENNReal.one_ne_top one_ne_zero hc6.ne'
+  have hr₂ : 1 - c 7 ^ 4 < 1 :=
+    ENNReal.sub_lt_self ENNReal.one_ne_top one_ne_zero (pow_ne_zero 4 hc7.ne')
+  have hδ2 : 0 < δ / 2 := ENNReal.half_pos hδ.ne'
+  have hδ4 : 0 < δ / 2 / 2 := ENNReal.half_pos hδ2.ne'
+  obtain ⟨T, hT⟩ := Filter.eventually_atTop.1
+    ((ENNReal.tendsto_pow_atTop_nhds_zero_of_lt_one hr₁).eventually (gt_mem_nhds hδ4))
+  have hε : 0 < δ / 2 / ((6 * (T + 1) + 4 : ℕ) : ℝ≥0∞) :=
+    ENNReal.div_pos_iff.2 ⟨hδ2.ne', ENNReal.natCast_ne_top _⟩
+  obtain ⟨J, hJ⟩ := Filter.eventually_atTop.1
+    ((ENNReal.tendsto_pow_atTop_nhds_zero_of_lt_one hr₂).eventually (gt_mem_nhds hε))
+  refine ⟨(1 / ((16 * 8 ^ J : ℕ) : ℝ)) ^ 2, by positivity, (16 * 8 ^ J) ^ 2,
+    fun q L h N hN hNL => ?_⟩
+  obtain ⟨hK1, hM16, hscale⟩ := scale_bounds hN
+  set D := 16 * 8 ^ J with hD
+  set M := N / D with hM
+  set K := N / D ^ 2 with hK
+  set s₀ := 2 * (M + 1) with hs₀
+  -- the real parameters
+  have hDpos : (0 : ℝ) < D := by positivity
+  have hsqrt : Real.sqrt ((1 / (D : ℝ)) ^ 2) = 1 / D := Real.sqrt_sq (by positivity)
+  have hKfl : ⌊(1 / (D : ℝ)) ^ 2 * N⌋₊ = K := by
+    rw [show (1 / (D : ℝ)) ^ 2 * N = ((N : ℕ) : ℝ) / ((D ^ 2 : ℕ) : ℝ) by push_cast; ring]
+    exact Nat.floor_div_eq_div N (D ^ 2)
+  have hMfl : ⌊Real.sqrt ((1 / (D : ℝ)) ^ 2) * N⌋₊ = M := by
+    rw [hsqrt, show 1 / (D : ℝ) * N = ((N : ℕ) : ℝ) / ((D : ℕ) : ℝ) by ring]
+    exact Nat.floor_div_eq_div N D
+  have hsep : 4 * Real.sqrt ((1 / (D : ℝ)) ^ 2) * N ≤ 2 * (s₀ : ℝ) := by
+    have h₁ : (N : ℝ) / D < M + 1 := by
+      have := Nat.lt_floor_add_one ((N : ℝ) / D)
+      rwa [Nat.floor_div_eq_div] at this
+    rw [hsqrt, hs₀]
+    push_cast
+    have h₂ : 4 * (1 / (D : ℝ)) * N = 4 * ((N : ℝ) / D) := by ring
+    rw [h₂]
+    linarith
+  -- the scales
+  have hNL' : ∀ n : ℕ, n ≤ N → (n : ℕ∞) ≤ L := fun n hn => le_trans (Nat.cast_le.2 hn) hNL
+  have hMN : M ≤ N := Nat.div_le_self N D
+  have h8 : ∀ a j j' : ℕ, j < j' → 8 * (a * 8 ^ j) ≤ a * 8 ^ j' := fun a j j' hjj' => by
+    calc 8 * (a * 8 ^ j) = a * 8 ^ (j + 1) := by ring
+      _ ≤ a * 8 ^ j' := Nat.mul_le_mul_left _ (Nat.pow_le_pow_right (by norm_num) hjj')
+  have hsc1 : ∀ j, 1 ≤ s₀ * 8 ^ j := fun j =>
+    Nat.one_le_iff_ne_zero.2 (Nat.mul_ne_zero (by omega) (by positivity))
+  have htc1 : ∀ j, 1 ≤ (K + 1) * 8 ^ j := fun j =>
+    Nat.one_le_iff_ne_zero.2 (Nat.mul_ne_zero (by omega) (by positivity))
+  have hscN : ∀ j < J, 3 * (s₀ * 8 ^ j) + 1 ≤ N := fun j hj => (hscale j hj).1
+  have htcM : ∀ j < J, 3 * ((K + 1) * 8 ^ j) + 1 ≤ M := fun j hj => (hscale j hj).2
+  have hJs : ∀ j < J, ((2 * (s₀ * 8 ^ j) - 1 : ℕ) : ℕ∞) ≤ L := fun j hj =>
+    hNL' _ (by have := hscN j hj; omega)
+  have hJt : ∀ j < J, ((2 * ((K + 1) * 8 ^ j) - 1 : ℕ) : ℕ∞) ≤ L := fun j hj =>
+    hNL' _ (by have := htcM j hj; omega)
+  have hs₀le : ∀ j, s₀ ≤ s₀ * 8 ^ j := fun j => Nat.le_mul_of_pos_right _ (by positivity)
+  have hKle : ∀ j, K ≤ 3 * ((K + 1) * 8 ^ j) := fun j => by
+    have := Nat.le_mul_of_pos_right (K + 1) (show 0 < 8 ^ j by positivity)
+    omega
+  have hsO : ∀ j < J, (0 : LatticeSite 2) 1 + 3 * ((s₀ * 8 ^ j : ℕ) : ℤ) ≤
+      (![4 * (N : ℤ), N] : LatticeSite 2) 1 - 1 := fun j hj => by
+    have := hscN j hj
+    simp only [Pi.zero_apply, Matrix.cons_val_one, Matrix.cons_val_zero]
+    omega
+  have hsD : ∀ j < J, (![0, -1] : LatticeSite 2) 1 + 3 * ((s₀ * 8 ^ j : ℕ) : ℤ) ≤
+      (![4 * (N : ℤ) - 1, N] : LatticeSite 2) 1 - 1 := fun j hj => by
+    have := hscN j hj
+    simp only [Matrix.cons_val_one, Matrix.cons_val_zero]
+    omega
+  have htO : ∀ j < J, (0 : LatticeSite 2) 1 + 3 * (((K + 1) * 8 ^ j : ℕ) : ℤ) ≤
+      (![4 * (N : ℤ), N] : LatticeSite 2) 1 := fun j hj => by
+    have := htcM j hj
+    simp only [Pi.zero_apply, Matrix.cons_val_one, Matrix.cons_val_zero]
+    omega
+  have htD : ∀ j < J, (![0, -1] : LatticeSite 2) 1 + 3 * (((K + 1) * 8 ^ j : ℕ) : ℤ) ≤
+      (![4 * (N : ℤ) - 1, N] : LatticeSite 2) 1 := fun j hj => by
+    have := htcM j hj
+    simp only [Matrix.cons_val_one, Matrix.cons_val_zero]
+    omega
+  -- the two boxes and the clean choice rules
+  have hle : (0 : LatticeSite 2) ≤ ![4 * (N : ℤ), N] := by
+    rw [Pi.le_def, Fin.forall_fin_two]
+    simp
+  have hle₂ : (![0, -1] : LatticeSite 2) ≤ ![4 * (N : ℤ) - 1, N] := by
+    rw [Pi.le_def, Fin.forall_fin_two]
+    simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
+    omega
+  obtain ⟨c₁, d₁, Γ₁, hΓ₁⟩ := exists_crossing_choice_clean hle
+  obtain ⟨c₂, d₂, Γ₂, hΓ₂⟩ := exists_crossing_choice_clean hle₂
+  -- the explorations are determined by the pairs meeting their last set
+  have hPo : ∀ (D : Finset (LatticeSite 2)) (ω ω' : Config (LatticeSite 2)),
+      ω ∩ ({e | ∃ f ∈ dualEdge e, f ∈ D} ∩ (zdGraph 2).edgeSet) =
+        ω' ∩ ({e | ∃ f ∈ dualEdge e, f ∈ D} ∩ (zdGraph 2).edgeSet) →
+      ∀ e ∈ (zdGraph 2).edgeSet, (∃ f ∈ dualEdge e, f ∈ D) → (e ∈ id ω ↔ e ∈ id ω') := by
+    intro D ω ω' hωω' e he hf
+    have := congrArg (e ∈ ·) hωω'
+    simp only [mem_inter_iff, eq_iff_iff] at this
+    exact ⟨fun h' => (this.1 ⟨h', hf, he⟩).1, fun h' => (this.2 ⟨h', hf, he⟩).1⟩
+  have hPd : ∀ (D : Finset (LatticeSite 2)) (ω ω' : Config (LatticeSite 2)),
+      ω ∩ ((fun p => Sym2.map (· + 1) (dualEdge p)) ''
+          ({e | ∃ f ∈ dualEdge e, f ∈ D} ∩ (zdGraph 2).edgeSet)) =
+        ω' ∩ ((fun p => Sym2.map (· + 1) (dualEdge p)) ''
+          ({e | ∃ f ∈ dualEdge e, f ∈ D} ∩ (zdGraph 2).edgeSet)) →
+      ∀ e ∈ (zdGraph 2).edgeSet, (∃ f ∈ dualEdge e, f ∈ D) →
+        (e ∈ dualConfig ω ↔ e ∈ dualConfig ω') := by
+    intro D ω ω' hωω' e he hf
+    have := congrArg (Sym2.map (· + 1) (dualEdge e) ∈ ·) hωω'
+    simp only [mem_inter_iff, eq_iff_iff] at this
+    have hmem : Sym2.map (· + 1) (dualEdge e) ∈ (fun p => Sym2.map (· + 1) (dualEdge p)) ''
+        ({e | ∃ f ∈ dualEdge e, f ∈ D} ∩ (zdGraph 2).edgeSet) := ⟨e, ⟨hf, he⟩, rfl⟩
+    rw [mem_dualConfig_iff, mem_dualConfig_iff]
+    exact and_congr_right fun _ => not_congr ⟨fun h' => (this.1 ⟨h', hmem⟩).1,
+      fun h' => (this.2 ⟨h', hmem⟩).1⟩
+  -- the bad events and their probabilities
+  have bO := law_exploration_le_pow_of_le h 5 (lo := 0) (hi := ![4 * (N : ℤ), N]) (n := N - 1)
+    (by omega) (hNL' _ (by omega)) (by simp; omega) (by simp; omega) (Γ := Γ₁)
+    (fun A h₁ h₂ => (hΓ₁ A h₁ h₂).1) T
+  have bD := law_exploration_dualConfig_le_pow_of_le h 5 (lo := ![0, -1])
+    (hi := ![4 * (N : ℤ) - 1, N]) (n := N) (by omega) (hNL' _ le_rfl) (by simp) (by simp; omega)
+    (Γ := Γ₂) (fun A h₁ h₂ => (hΓ₂ A h₁ h₂).1) T
+  have b1 := fun v => law_exploration_forall_notMem_inter_le h (lo := 0)
+    (hi := ![4 * (N : ℤ), N]) (Γ := Γ₁) measurable_id hPo d₁ hsc1 (h8 s₀) v J hJs
+  have b2 := fun v => law_exploration_forall_notMem_dualConfig_union_le h (lo := 0)
+    (hi := ![4 * (N : ℤ), N]) (Γ := Γ₁) measurable_id hPo
+    (fun D => ![d₁ D 0, (![4 * (N : ℤ), N] : LatticeSite 2) 1 - 1]) hsc1 (h8 s₀) v J hJs
+  have b3 := fun v => law_exploration_forall_notMem_union_le h (lo := 0)
+    (hi := ![4 * (N : ℤ), N]) (Γ := Γ₁) measurable_id hPo d₁ htc1 (h8 (K + 1)) v J hJt
+  have b4 := fun v => law_exploration_forall_notMem_dualConfig_union_le h (lo := ![0, -1])
+    (hi := ![4 * (N : ℤ) - 1, N]) (Γ := Γ₂) measurable_dualConfig hPd d₂ hsc1 (h8 s₀) v J hJs
+  have b5 := fun v => law_exploration_forall_notMem_inter_le h (lo := ![0, -1])
+    (hi := ![4 * (N : ℤ) - 1, N]) (Γ := Γ₂) measurable_dualConfig hPd
+    (fun D => ![d₂ D 0, (![4 * (N : ℤ) - 1, N] : LatticeSite 2) 1 - 1] + 1) hsc1 (h8 s₀) v J
+    hJs
+  have b6 := fun v => law_exploration_forall_notMem_dualConfig_inter_le h (lo := ![0, -1])
+    (hi := ![4 * (N : ℤ) - 1, N]) (Γ := Γ₂) measurable_dualConfig hPd d₂ htc1 (h8 (K + 1)) v J
+    hJt
+  have b7 := law_forall_notMem_inter_le h
+    ![(![4 * (N : ℤ), N] : LatticeSite 2) 0, (![4 * (N : ℤ), N] : LatticeSite 2) 1] hsc1 (h8 s₀) J
+    hJs
+  have b8 := law_forall_notMem_inter_le h
+    ![(0 : LatticeSite 2) 0, (![4 * (N : ℤ), N] : LatticeSite 2) 1] hsc1 (h8 s₀) J hJs
+  have b9 := law_forall_notMem_dualConfig_union_le h
+    ![(![4 * (N : ℤ) - 1, N] : LatticeSite 2) 0, (![4 * (N : ℤ) - 1, N] : LatticeSite 2) 1] hsc1
+    (h8 s₀) J hJs
+  have b10 := law_forall_notMem_dualConfig_union_le h
+    ![(![0, -1] : LatticeSite 2) 0, (![4 * (N : ℤ) - 1, N] : LatticeSite 2) 1] hsc1 (h8 s₀) J hJs
+  have hbad := measure_union_le_add_of_le bO (measure_union_le_add_of_le bD
+    (measure_union_le_add_of_le (measure_biUnion_range_le (T + 1) fun v _ => b1 v)
+    (measure_union_le_add_of_le (measure_biUnion_range_le (T + 1) fun v _ => b2 v)
+    (measure_union_le_add_of_le (measure_biUnion_range_le (T + 1) fun v _ => b3 v)
+    (measure_union_le_add_of_le (measure_biUnion_range_le (T + 1) fun v _ => b4 v)
+    (measure_union_le_add_of_le (measure_biUnion_range_le (T + 1) fun v _ => b5 v)
+    (measure_union_le_add_of_le (measure_biUnion_range_le (T + 1) fun v _ => b6 v)
+    (measure_union_le_add_of_le b7 (measure_union_le_add_of_le b8
+    (measure_union_le_add_of_le b9 b10))))))))))
+  refine one_sub_le_measure_of_forall_notMem (hbad.trans ?_) fun ω hω => ?_
+  · -- the sum of the bounds
+    have hT' := (hT (T + 1) (by omega)).le
+    have hJ' := (hJ J le_rfl).le
+    calc _ = ((1 - c 6) ^ (T + 1) + (1 - c 6) ^ (T + 1)) +
+          ((6 * (T + 1) + 4 : ℕ) : ℝ≥0∞) * (1 - c 7 ^ 4) ^ J := by
+          push_cast
+          ring
+      _ ≤ (δ / 2 / 2 + δ / 2 / 2) +
+          ((6 * (T + 1) + 4 : ℕ) : ℝ≥0∞) * (δ / 2 / ((6 * (T + 1) + 4 : ℕ) : ℝ≥0∞)) := by
+          gcongr
+      _ ≤ δ / 2 + δ / 2 := by
+          rw [ENNReal.add_halves]
+          gcongr
+          exact ENNReal.mul_div_le
+      _ = δ := ENNReal.add_halves δ
+  · -- outside the bad events, the separation holds
+    simp only [mem_union, not_or] at hω
+    obtain ⟨hO, hD', hU1, hU2, hU3, hU4, hU5, hU6, hC1, hC2, hC3, hC4⟩ := hω
+    have hF : ∀ {F : ℕ → Set (Config (LatticeSite 2))},
+        ω ∉ ⋃ v ∈ Finset.range (T + 1), F v → ∀ v ≤ T, ω ∉ F v :=
+      fun hU v hv hv' => hU (mem_iUnion₂.2 ⟨v, Finset.mem_range.2 (by omega), hv'⟩)
+    intro m σ a b γ hcr hdisj
+    obtain ⟨b', γ', h1, h2, h3, h4, h5⟩ := separable_of_forall (lo := 0)
+      (hi := ![4 * (N : ℤ), N]) (lo₂ := ![0, -1]) (hi₂ := ![4 * (N : ℤ) - 1, N]) (by simp)
+      (by simp) (by simp; omega) (by simp; omega) (T := T) (s₀ := s₀) (K := K) (M := M)
+      (by omega) (by omega) hΓ₁ hΓ₂
+      (fun A hA => by
+        by_contra hcon
+        push Not at hcon
+        exact hO ⟨A, hA, hcon⟩)
+      (fun A hA => by
+        by_contra hcon
+        push Not at hcon
+        exact hD' ⟨A, hA, hcon⟩)
+      (fun v hv A hA hadm => by
+        by_contra hcon
+        exact hF hU1 v hv ⟨A, hA, fun j hj hK => hcon ⟨s₀ * 8 ^ j, hs₀le j,
+          hsO j hj, notMem_crossing_sdiff_of_inter _ _ _ hK⟩⟩)
+      (fun v hv A hA hadm => by
+        by_contra hcon
+        exact hF hU2 v hv ⟨A, hA, fun j hj hK => hcon ⟨s₀ * 8 ^ j, hs₀le j,
+          hsO j hj, notMem_crossing_dualConfig_union_of _ _ _ hK⟩⟩)
+      (fun v hv A hA hadm => by
+        by_contra hcon
+        exact hF hU3 v hv ⟨A, hA, fun j hj hK => hcon ⟨(K + 1) * 8 ^ j, htc1 j, hKle j,
+          htcM j hj, htO j hj, mem_crossing_union_of _ _ hK⟩⟩)
+      (fun v hv A hA hadm => by
+        by_contra hcon
+        exact hF hU4 v hv ⟨A, hA, fun j hj hK => hcon ⟨s₀ * 8 ^ j, hs₀le j,
+          hsD j hj, notMem_crossing_dualConfig_sdiff_of _ _ _ hK⟩⟩)
+      (fun v hv A hA hadm => by
+        by_contra hcon
+        exact hF hU5 v hv ⟨A, hA, fun j hj hK => hcon ⟨s₀ * 8 ^ j, hs₀le j,
+          hsD j hj,
+          notMem_crossing_dualConfig_dualConfig_union_of _ _ _ hK⟩⟩)
+      (fun v hv A hA hadm => by
+        by_contra hcon
+        exact hF hU6 v hv ⟨A, hA, fun j hj hK => hcon ⟨(K + 1) * 8 ^ j, htc1 j, hKle j,
+          htcM j hj, htD j hj, mem_crossing_dualConfig_union_of _ _ hK⟩⟩)
+      (by
+        by_contra hcon
+        exact hC1 fun j hj hK => hcon ⟨s₀ * 8 ^ j, hs₀le j, by have := hsO j hj; omega,
+          (notMem_crossing_inter_of _ _ _ hK).1, (notMem_crossing_inter_of _ _ _ hK).2.2⟩)
+      (by
+        by_contra hcon
+        exact hC2 fun j hj hK => hcon ⟨s₀ * 8 ^ j, hs₀le j, by have := hsO j hj; omega,
+          (notMem_crossing_inter_of _ _ _ hK).1, (notMem_crossing_inter_of _ _ _ hK).2.1⟩)
+      (by
+        by_contra hcon
+        exact hC3 fun j hj hK => hcon ⟨s₀ * 8 ^ j, hs₀le j, by have := hsD j hj; omega,
+          (notMem_crossing_dualConfig_inter_of _ _ _ hK).1,
+          (notMem_crossing_dualConfig_inter_of _ _ _ hK).2.2⟩)
+      (by
+        by_contra hcon
+        exact hC4 fun j hj hK => hcon ⟨s₀ * 8 ^ j, hs₀le j, by have := hsD j hj; omega,
+          (notMem_crossing_dualConfig_inter_of _ _ _ hK).1,
+          (notMem_crossing_dualConfig_inter_of _ _ _ hK).2.1⟩)
+      m σ a b γ hcr hdisj
+    refine ⟨b', γ', h1, h2, fun i j hij => ?_, fun i => ?_, fun i => ?_⟩
+    · have h' := Int.cast_lt (R := ℝ) |>.2 (h3 i j hij)
+      push_cast at h' ⊢
+      linarith
+    · obtain ⟨h₁, h₂⟩ := h4 i
+      have h₁' := Int.cast_lt (R := ℝ) |>.2 h₁
+      have h₂' := Int.cast_lt (R := ℝ) |>.2 h₂
+      simp only [Pi.zero_apply, Matrix.cons_val_zero] at h₁' h₂'
+      push_cast at h₁' h₂' ⊢
+      constructor <;> linarith
+    · rw [hKfl, hMfl]
+      exact h5 i
 
 end PercLib.Models.Planar

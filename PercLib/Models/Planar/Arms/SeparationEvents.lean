@@ -73,6 +73,32 @@ theorem measure_iUnion_inter_le {α ι : Type*} [MeasurableSpace α] [Countable 
     _ ≤ 1 * r := mul_le_mul_left prob_le_one r
     _ = r := one_mul r
 
+/-- The union bound, with bounds for both events. -/
+theorem measure_union_le_add_of_le {α : Type*} [MeasurableSpace α] {μ : Measure α} {A B : Set α}
+    {a b : ℝ≥0∞} (hA : μ A ≤ a) (hB : μ B ≤ b) : μ (A ∪ B) ≤ a + b :=
+  (measure_union_le A B).trans (add_le_add hA hB)
+
+/-- The union bound over the first `n` indices, with a common bound. -/
+theorem measure_biUnion_range_le {α : Type*} [MeasurableSpace α] {μ : Measure α}
+    {F : ℕ → Set α} {r : ℝ≥0∞} (n : ℕ) (h : ∀ v < n, μ (F v) ≤ r) :
+    μ (⋃ v ∈ Finset.range n, F v) ≤ n * r := by
+  refine (measure_biUnion_finset_le _ _).trans ?_
+  calc ∑ v ∈ Finset.range n, μ (F v) ≤ ∑ _v ∈ Finset.range n, r :=
+        Finset.sum_le_sum fun v hv => h v (Finset.mem_range.1 hv)
+    _ = n * r := by rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+
+/-- **Complement of a small event.** If every outcome outside `B` is in `F` and `μ B ≤ δ`, then
+`μ F ≥ 1 - δ`; no measurability is needed. -/
+theorem one_sub_le_measure_of_forall_notMem {α : Type*} [MeasurableSpace α] {μ : Measure α}
+    [IsProbabilityMeasure μ] {F B : Set α} {δ : ℝ≥0∞} (hB : μ B ≤ δ) (hF : ∀ ω ∉ B, ω ∈ F) :
+    1 - δ ≤ μ F := by
+  have h1 : 1 ≤ μ Bᶜ + μ B := by
+    rw [← measure_univ (μ := μ), ← compl_union_self B]
+    exact measure_union_le _ _
+  calc 1 - δ ≤ 1 - μ B := tsub_le_tsub_left hB 1
+    _ ≤ μ Bᶜ := tsub_le_iff_right.2 h1
+    _ ≤ μ F := measure_mono fun ω hω => hF ω hω
+
 end MeasureTheory
 
 namespace PercLib.Models.Planar
