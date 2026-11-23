@@ -824,7 +824,8 @@ and that chosen crossing, open in `G`; the indices `w i` increase from left to r
 distinct), and the new walks are pairwise disjoint. Moreover each new walk is open after the
 removals of its step (its edges have no end on a chosen crossing of smaller index), and its
 vertices and edges come from the chosen crossing or from the member, in which case the vertex is
-not the last one of the member. -/
+not the last one of the member. Every vertex of a new walk before its last entry is a vertex of the
+member before its last entry or a vertex of the chosen crossing other than its top end. -/
 theorem exists_reroute_of_exploration (h1 : lo 1 < hi 1) (hle : lo ≤ hi)
     (hΓ : ∀ A : Finset (LatticeSite 2),
       (∀ y : ℤ, lo 1 ≤ y → y ≤ hi 1 - 1 → (![lo 0 - 1, y] : LatticeSite 2) ∈ A) →
@@ -855,7 +856,9 @@ theorem exists_reroute_of_exploration (h1 : lo 1 < hi 1) (hle : lo ≤ hi)
       (∀ i ∈ S, ∀ x ∈ (γ' i).2.support,
         x ∈ (γ i).support.dropLast ∨ x ∈ (Γ (A (w i))).support) ∧
       (∀ i ∈ S, ∀ e ∈ (γ' i).2.edges, ∀ y ∈ e, ∀ w' < w i, y ∉ (Γ (A w')).support) ∧
-      ∀ i ∈ S, ∀ e ∈ (γ' i).2.edges, e ∈ (γ i).edges ∨ e ∈ (Γ (A (w i))).edges := by
+      (∀ i ∈ S, ∀ e ∈ (γ' i).2.edges, e ∈ (γ i).edges ∨ e ∈ (Γ (A (w i))).edges) ∧
+      ∀ i ∈ S, ∀ x ∈ (γ' i).2.support.dropLast,
+        x ∈ (γ i).support.dropLast ∨ (x ∈ (Γ (A (w i))).support ∧ x ≠ d (A (w i))) := by
   classical
   -- the first step at which the explored cluster reaches the right column
   have hex : ∃ v, v ≤ u ∧ ∃ f ∈ A v, f 0 = hi 0 := ⟨u, le_rfl, hu⟩
@@ -904,7 +907,7 @@ theorem exists_reroute_of_exploration (h1 : lo 1 < hi 1) (hle : lo ≤ hi)
   refine ⟨w, γ', fun i hi => ⟨by have := (hPR i hi).1; omega, hadm _ (hPR i hi).1,
     (hγ'S i hi).1⟩, hmono, hwd, fun i hi x hx => ?_, fun i hi e he => ?_,
     fun i hi x hx => ?_, fun i hi j hj hij x hx hx' => ?_, fun i hi x hx => ?_,
-    fun i hi e he y hy w' hw' => ?_, fun i hi e he => ?_⟩
+    fun i hi e he y hy w' hw' => ?_, fun i hi e he => ?_, fun i hi x hx => ?_⟩
   · obtain ⟨-, -, -, -, -, -, hPγ, -, hRΓ, -⟩ := hPR i hi
     rcases ((hγ'S i hi).2.1 x).1 hx with h | h
     · exact Or.inl (hPγ x h)
@@ -946,6 +949,26 @@ theorem exists_reroute_of_exploration (h1 : lo 1 < hi 1) (hle : lo ≤ hi)
     rcases (hγ'S i hi).2.2 e he with h | h
     · exact Or.inl (hPE e h)
     · exact Or.inr (hRE e h)
+  · -- the part before the end: the member before the junction, the chosen crossing before its tip
+    obtain ⟨-, -, hP2, hR2, hPp, hRp, -, -, hRΓ, -⟩ := hPR i hi
+    have hsupp : (γ' i).2.support.dropLast =
+        (P i).2.2.support.dropLast ++ (R i).2.2.support.dropLast := by
+      rw [hγ']
+      dsimp only
+      rw [dite_eq_left hi, SimpleGraph.Walk.support_copy,
+        SimpleGraph.Walk.support_append_eq_support_dropLast_append, SimpleGraph.Walk.support_copy,
+        List.dropLast_append_of_ne_nil (SimpleGraph.Walk.support_ne_nil _)]
+    rw [hsupp, List.mem_append] at hx
+    rcases hx with hx | hx
+    · -- a vertex of the path `P i` before its end is not its end
+      have hnd := hPp.support_nodup
+      rw [← (P i).2.2.dropLast_support_concat, List.nodup_append] at hnd
+      have hne : x ≠ (P i).2.1 := fun h => hnd.2.2 x hx _ (List.mem_singleton_self _) h
+      exact Or.inl (hdrop i hi x (List.dropLast_subset _ hx) hne)
+    · have hnd := hRp.support_nodup
+      rw [← (R i).2.2.dropLast_support_concat, List.nodup_append] at hnd
+      have hne : x ≠ (R i).2.1 := fun h => hnd.2.2 x hx _ (List.mem_singleton_self _) h
+      exact Or.inr ⟨hRΓ x (List.dropLast_subset _ hx), hR2 ▸ hne⟩
 
 end Greedy
 

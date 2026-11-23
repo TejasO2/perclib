@@ -39,6 +39,12 @@ The constants: `T` steps of the explorations, `J` scales, `D = 16 · 8^J`, `η =
 scales are `2 (M + 1) 8^j` and the fence scales `(K + 1) 8^j`, `j < J`. The lemma fails for small
 `N` (the corners cannot be protected), so the statement has `N₀ ≤ N`.
 
+The same proof works when the box of faces is one column wider on each side than the open box,
+`[0, 4N + 1] × [-1, N]` around the open box `[1, 4N + 1] × [0, N]`: this is how the open and the
+dual arms of a box of radius `2N + 1` meet a strip along its top side, so this form
+(`exists_law_separable_ge_arm`) is the one that fits the arms. Both forms are instances of
+`exists_law_separable_ge_aux`, and the new crossings meet the top row only at their ends.
+
 ## Main results
 
 * `exists_fence_of_le`: a fence of the fence lemma gives a fence in a narrower box.
@@ -48,8 +54,10 @@ scales are `2 (M + 1) 8^j` and the fence scales `(K + 1) 8^j`, `j < J`. The lemm
   separation of tips of different colours.
 * `lt_tip_of_corner`, `lt_abs_sub_of_exploration`: greedy tips away from the corners and from each
   other.
-* `separable_of_forall`: the deterministic part of the lemma.
+* `separable_of_forall`: the deterministic part of the lemma, for both geometries.
+* `exists_law_separable_ge_aux`: the lemma for a strip of either geometry.
 * `exists_law_separable_ge`: **Nolin's local separation lemma.**
+* `exists_law_separable_ge_arm`: **the lemma in the geometry of the arms of a box.**
 -/
 
 @[expose] public section
@@ -121,9 +129,9 @@ where it reaches the right column, for a clean choice rule. Suppose that each ad
 an annulus of scale `t` with `K ≤ 3t`, `3t + 1 ≤ M`, fitting in the box). Then every finite family
 of disjoint bottom-top crossings of the box open in `G` is rerouted to walks from the same starts
 to distinct admissible greedy tips, inside the box, along edges of the members and of the greedy
-crossings, pairwise disjoint, and each new walk has a vertex `x` joined inside the ball of radius
-`M` around its end to the left end of a left-right crossing of the fence box
-`[z₀ - K, z₀ + K] × [z₁, z₁ + M]` above its end `z`. -/
+crossings, pairwise disjoint, meeting the top row only at their ends, and each new walk has a
+vertex `x` joined inside the ball of radius `M` around its end to the left end of a left-right
+crossing of the fence box `[z₀ - K, z₀ + K] × [z₁, z₁ + M]` above its end `z`. -/
 theorem exists_reroute_fence_of_exploration (h1 : lo 1 < hi 1) (hle : lo ≤ hi)
     (hΓ : ∀ A : Finset (LatticeSite 2),
       (∀ y : ℤ, lo 1 ≤ y → y ≤ hi 1 - 1 → (![lo 0 - 1, y] : LatticeSite 2) ∈ A) →
@@ -162,6 +170,7 @@ theorem exists_reroute_fence_of_exploration (h1 : lo 1 < hi 1) (hle : lo ≤ hi)
       (∀ i ∈ S, ∀ e ∈ (γ' i).2.edges, e ∈ G) ∧
       (∀ i ∈ S, ∀ e ∈ (γ' i).2.edges, e ∈ (γ i).edges ∨ e ∈ (Γ (A (w i))).edges) ∧
       (∀ i ∈ S, ∀ j ∈ S, i ≠ j → ∀ x ∈ (γ' i).2.support, x ∉ (γ' j).2.support) ∧
+      (∀ i ∈ S, ∀ x ∈ (γ' i).2.support.dropLast, x 1 ≠ hi 1) ∧
       ∀ i ∈ S, ∃ x ∈ (γ' i).2.support, ∃ l r : LatticeSite 2,
         l 0 = (γ' i).1 0 - K ∧ r 0 = (γ' i).1 0 + K ∧
         G ∩ (zdGraph 2).edgeSet ∈
@@ -184,16 +193,23 @@ theorem exists_reroute_fence_of_exploration (h1 : lo 1 < hi 1) (hle : lo ≤ hi)
         exact List.mem_append_left _ he
     · exact ⟨a i, .nil, fun h => absurd h hiS⟩
   choose bc γc hγc using hcl
-  obtain ⟨w, γ', hw, -, hwd, -, hG, hbox, hdisj', hdrop, hopen, hedge⟩ :=
+  obtain ⟨w, γ', hw, -, hwd, -, hG, hbox, hdisj', hdrop, hopen, hedge, htopd⟩ :=
     exists_reroute_of_exploration h1 hle (fun A' h₁ h₂ => (hΓ A' h₁ h₂).1) hA hu S γc
       (fun i hi x hx => hγ i hi x ((hγc i hi).2.2.1 x hx)) ha (fun i hi => (hγc i hi).1)
       (fun i hi e he => hγG i hi e ((hγc i hi).2.2.2 e he))
       fun i hi j hj hij x hx hx' =>
         hdisj i hi j hj hij x ((hγc i hi).2.2.1 x hx) ((hγc j hj).2.2.1 x hx')
-  refine ⟨w, γ', hw, hwd, hbox, hG, fun i hi e he => ?_, hdisj', fun i hi => ?_⟩
+  refine ⟨w, γ', hw, hwd, hbox, hG, fun i hi e he => ?_, hdisj', fun i hi x hx hx1 => ?_,
+    fun i hi => ?_⟩
   · rcases hedge i hi e he with h | h
     · exact Or.inl ((hγc i hi).2.2.2 e h)
     · exact Or.inr h
+  · -- the top row is met only at the end
+    obtain ⟨hwu, hadm, -⟩ := hw i hi
+    obtain ⟨-, -, -, htopΓ⟩ := hΓ (A (w i)) (mem_leftColumn_of_exploration hA hwu.le) hadm
+    rcases htopd i hi x hx with h | ⟨h, hne⟩
+    · exact (hγc i hi).2.1 x h hx1
+    · exact hne (htopΓ x h hx1)
   · obtain ⟨hwu, hadm, hend⟩ := hw i hi
     obtain ⟨t, ht, hKt, htM, hx₀, hx₁, hy₀, hT, hB, hR, hL⟩ := hfence (w i) hwu hadm
     obtain ⟨⟨-, -, -, hd1, -, -⟩, -, -, htopΓ⟩ :=
@@ -305,8 +321,9 @@ variable {lo hi : LatticeSite 2} {c d : Finset (LatticeSite 2) → LatticeSite 2
 /-- **An open tip protected against dual crossings.** Let `A v` be an admissible set of the
 exploration of the open configuration `ω` in the box `Icc lo hi`, with the fresh part of the dual
 configuration crossing none of the three strips of scale `s` around the face below the right of its
-tip. A clean dual path `p` in the box of faces `[lo₀, hi₀ - 1] × [lo₁ - 1, hi₁]` from its bottom row
-to its top row, landing at or right of the tip, lands more than `s` to its right. -/
+tip. A clean dual path `p` in the box of faces `[lo₀ - 1, hi₀] × [lo₁ - 1, hi₁]` (all faces touching
+the box, with one more row below and above) from its bottom row to its top row, landing at or right
+of the tip, lands more than `s` to its right. -/
 theorem add_lt_of_exploration_of_dualConfig (h1 : lo 1 < hi 1) (hle : lo ≤ hi)
     (hΓ : ∀ A : Finset (LatticeSite 2),
       (∀ y : ℤ, lo 1 ≤ y → y ≤ hi 1 - 1 → (![lo 0 - 1, y] : LatticeSite 2) ∈ A) →
@@ -338,14 +355,14 @@ theorem add_lt_of_exploration_of_dualConfig (h1 : lo 1 < hi 1) (hle : lo ≤ hi)
       crossing 0 (![d (A v) 0, hi 1 - 1] + ![-3 * (s : ℤ), -3 * s])
         (![d (A v) 0, hi 1 - 1] + ![-(s : ℤ), 3 * s]))
     {a' b' : LatticeSite 2} (p : (zdGraph 2).Walk a' b') (hp : p.IsPath)
-    (hpS : ∀ x ∈ p.support, x ∈ Icc (![lo 0, lo 1 - 1] : LatticeSite 2) ![hi 0 - 1, hi 1])
+    (hpS : ∀ x ∈ p.support, x ∈ Icc (![lo 0 - 1, lo 1 - 1] : LatticeSite 2) ![hi 0, hi 1])
     (ha' : a' 1 = lo 1 - 1) (hb' : b' 1 = hi 1)
     (hbot : ∀ x ∈ p.support, x 1 = lo 1 - 1 → x = a')
     (htop : ∀ x ∈ p.support, x 1 = hi 1 → x = b')
     (hpG : ∀ e ∈ p.edges, e ∈ dualConfig ω) (hdb : d (A v) 0 ≤ b' 0) :
     d (A v) 0 + s < b' 0 := by
-  obtain ⟨y, q, hy, hqS, hqE⟩ := exists_walk_trim (lo := ![lo 0, lo 1 - 1])
-    (hi := ![hi 0 - 1, hi 1]) (by simp only [Matrix.cons_val_one, Matrix.cons_val_zero]; omega)
+  obtain ⟨y, q, hy, hqS, hqE⟩ := exists_walk_trim (lo := ![lo 0 - 1, lo 1 - 1])
+    (hi := ![hi 0, hi 1]) (by simp only [Matrix.cons_val_one, Matrix.cons_val_zero]; omega)
     p hp hpS (by simpa using ha') (by simpa using hb')
     (fun x hx h => hbot x hx (by simpa using h)) (fun x hx h => htop x hx (by simpa using h))
   by_contra hfar
@@ -573,18 +590,24 @@ theorem scale_bounds {N J : ℕ} (hN : (16 * 8 ^ J) ^ 2 ≤ N) :
 
 /-! ### The deterministic part of the lemma -/
 
-/-- **Local separation, deterministic part.** Let `ω` be a configuration such that the
-greedy explorations of `ω` in the box `Icc lo hi` and of `dualConfig ω` in the box of faces
-`Icc lo₂ hi₂ = [lo₀, hi₀ - 1] × [lo₁ - 1, hi₁]` reach the right column within `T` steps, every
-admissible greedy tip up to step `T` is protected at some scale `s ≥ s₀` against later greedy tips
-of its colour and against walks of the other colour, and carries a fence annulus at some scale `t`
-with `K ≤ 3t`, `3t + 1 ≤ M ≤ s₀`, and the four top corners are protected at some scale `s ≥ s₀`.
-Then every family of disjoint crossings of `Icc lo hi`, open or dual, is rerouted to a family with
-the same colours and starts whose ends, in doubled positions, are more than `2 s₀` apart and more
-than `2 s₀` from the two sides, each with a fence in the box `[z₀ - K, z₀ + K] × [hi₁, hi₁ + M]`
-above its end `z`, arm-joined inside the ball of radius `M` around `z`. -/
-theorem separable_of_forall {ω : Config (LatticeSite 2)} {lo hi lo₂ hi₂ : LatticeSite 2}
-    (hlo₂ : lo₂ = ![lo 0, lo 1 - 1]) (hhi₂ : hi₂ = ![hi 0 - 1, hi 1]) (h1 : lo 1 + 1 < hi 1)
+/-- **Local separation, deterministic part.** Let `k ∈ {0, 1}` and let `ω` be a configuration
+such that the greedy explorations of `ω` in the box `Icc lo hi` and of `dualConfig ω` in the box of
+faces `Icc lo₂ hi₂ = [lo₀ - k, hi₀ - 1 + k] × [lo₁ - 1, hi₁]` reach the right column within `T`
+steps, every admissible greedy tip up to step `T` is protected at some scale `s ≥ s₀` against later
+greedy tips of its colour and against walks of the other colour, and carries a fence annulus at
+some scale `t` with `K ≤ 3t`, `3t + 1 ≤ M ≤ s₀`, and the four top corners are protected at some
+scale `s ≥ s₀`. Then every family of disjoint crossings, open crossings of `Icc lo hi` or dual
+crossings of `Icc lo₂ hi₂` (whose dual edges cross edges of `[lo₀ - k, hi₀ + k] × [lo₁, hi₁]`), is
+rerouted to a family with the same colours and starts, meeting the top row only at their ends, whose
+ends, in doubled positions, are more than `2 s₀` apart and more than `2 s₀` from the two ends
+`2 (lo₀ - k)` and `2 (hi₀ + k)` of the doubled top side, each with a fence in the box
+`[z₀ - K, z₀ + K] × [hi₁, hi₁ + M]` above its end `z`, arm-joined inside the ball of radius `M`
+around `z`. For `k = 0` the two boxes span the same columns (Nolin's strip); for `k = 1` the box of
+faces is one column wider on each side, as for the open and dual arms of a box landing on its top
+side. -/
+theorem separable_of_forall {ω : Config (LatticeSite 2)} {lo hi lo₂ hi₂ : LatticeSite 2} {k : ℤ}
+    (hk : 0 ≤ k) (hk1 : k ≤ 1) (hlo₂ : lo₂ = ![lo 0 - k, lo 1 - 1])
+    (hhi₂ : hi₂ = ![hi 0 - 1 + k, hi 1]) (h1 : lo 1 + 1 < hi 1)
     (h0 : lo 0 < hi 0) {T s₀ K M : ℕ} (hs₀ : 1 ≤ s₀) (hMs : M ≤ s₀)
     {c₁ d₁ : Finset (LatticeSite 2) → LatticeSite 2} {Γ₁ : ∀ A, (zdGraph 2).Walk (c₁ A) (d₁ A)}
     (hΓ₁ : ∀ A : Finset (LatticeSite 2),
@@ -765,21 +788,22 @@ theorem separable_of_forall {ω : Config (LatticeSite 2)} {lo hi lo₂ hi₂ : L
         (a i 1 = lo 1 ∧ b i 1 = hi 1 ∧ (∀ x ∈ (γ i).support, x ∈ Icc lo hi) ∧
           ∀ e ∈ (γ i).edges, e ∈ ω)
         (a i 1 = lo₂ 1 ∧ b i 1 = hi₂ 1 ∧ (∀ x ∈ (γ i).support, x ∈ Icc lo₂ hi₂) ∧
-          ∀ e ∈ (γ i).edges, e ∈ dualConfig ω ∩
-            dualEdge '' {e | e ∈ (zdGraph 2).edgeSet ∧ ∀ x ∈ e, x ∈ Icc lo hi})) →
+          ∀ e ∈ (γ i).edges, e ∈ dualConfig ω ∩ dualEdge '' {e | e ∈ (zdGraph 2).edgeSet ∧
+            ∀ x ∈ e, x ∈ Icc (![lo 0 - k, lo 1] : LatticeSite 2) ![hi 0 + k, hi 1]})) →
       (∀ i j, i ≠ j → σ i = σ j → ∀ x ∈ (γ i).support, x ∉ (γ j).support) →
       ∃ (b' : Fin m → LatticeSite 2) (γ' : ∀ i, (zdGraph 2).Walk (a i) (b' i)),
         (∀ i, cond (σ i)
           (a i 1 = lo 1 ∧ b' i 1 = hi 1 ∧ (∀ x ∈ (γ' i).support, x ∈ Icc lo hi) ∧
             ∀ e ∈ (γ' i).edges, e ∈ ω)
           (a i 1 = lo₂ 1 ∧ b' i 1 = hi₂ 1 ∧ (∀ x ∈ (γ' i).support, x ∈ Icc lo₂ hi₂) ∧
-            ∀ e ∈ (γ' i).edges, e ∈ dualConfig ω ∩
-              dualEdge '' {e | e ∈ (zdGraph 2).edgeSet ∧ ∀ x ∈ e, x ∈ Icc lo hi})) ∧
+            ∀ e ∈ (γ' i).edges, e ∈ dualConfig ω ∩ dualEdge '' {e | e ∈ (zdGraph 2).edgeSet ∧
+              ∀ x ∈ e, x ∈ Icc (![lo 0 - k, lo 1] : LatticeSite 2) ![hi 0 + k, hi 1]})) ∧
         (∀ i j, i ≠ j → σ i = σ j → ∀ x ∈ (γ' i).support, x ∉ (γ' j).support) ∧
         (∀ i j, i ≠ j → 2 * (s₀ : ℤ) <
           |(2 * b' i 0 + cond (σ i) 0 1) - (2 * b' j 0 + cond (σ j) 0 1)|) ∧
-        (∀ i, 2 * (s₀ : ℤ) < 2 * b' i 0 + cond (σ i) 0 1 - 2 * lo 0 ∧
-          2 * (s₀ : ℤ) < 2 * hi 0 - (2 * b' i 0 + cond (σ i) 0 1)) ∧
+        (∀ i, 2 * (s₀ : ℤ) < 2 * b' i 0 + cond (σ i) 0 1 - 2 * (lo 0 - k) ∧
+          2 * (s₀ : ℤ) < 2 * (hi 0 + k) - (2 * b' i 0 + cond (σ i) 0 1)) ∧
+        (∀ i, ∀ x ∈ (γ' i).support.dropLast, x 1 ≠ hi 1) ∧
         ∀ i, ∃ x ∈ (γ' i).support, ∃ l r : LatticeSite 2, l 0 = b' i 0 - K ∧ r 0 = b' i 0 + K ∧
           cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈
             localConn (Icc ![b' i 0 - K, hi 1] ![b' i 0 + K, hi 1 + M]) l r ∧
@@ -787,9 +811,9 @@ theorem separable_of_forall {ω : Config (LatticeSite 2)} {lo hi lo₂ hi₂ : L
             localConn (Icc (b' i - (M : LatticeSite 2)) (b' i + (M : LatticeSite 2))) x l := by
   intro m σ a b γ hcr hdisj
   classical
-  have hl₂0 : lo₂ 0 = lo 0 := by rw [hlo₂]; rfl
+  have hl₂0 : lo₂ 0 = lo 0 - k := by rw [hlo₂]; rfl
   have hl₂1 : lo₂ 1 = lo 1 - 1 := by rw [hlo₂]; rfl
-  have hh₂0 : hi₂ 0 = hi 0 - 1 := by rw [hhi₂]; rfl
+  have hh₂0 : hi₂ 0 = hi 0 - 1 + k := by rw [hhi₂]; rfl
   have hh₂1 : hi₂ 1 = hi 1 := by rw [hhi₂]; rfl
   have hle : lo ≤ hi := by
     rw [Pi.le_def, Fin.forall_fin_two]
@@ -823,7 +847,8 @@ theorem separable_of_forall {ω : Config (LatticeSite 2)} {lo hi lo₂ hi₂ : L
     exact this
   have hcr₂ : ∀ i, σ i = false → a i 1 = lo₂ 1 ∧ b i 1 = hi₂ 1 ∧
       (∀ x ∈ (γ i).support, x ∈ Icc lo₂ hi₂) ∧ ∀ e ∈ (γ i).edges, e ∈ dualConfig ω ∩
-        dualEdge '' {e | e ∈ (zdGraph 2).edgeSet ∧ ∀ x ∈ e, x ∈ Icc lo hi} := fun i hσ => by
+        dualEdge '' {e | e ∈ (zdGraph 2).edgeSet ∧
+          ∀ x ∈ e, x ∈ Icc (![lo 0 - k, lo 1] : LatticeSite 2) ![hi 0 + k, hi 1]} := fun i hσ => by
     have := hcr i
     rw [hσ] at this
     exact this
@@ -832,7 +857,7 @@ theorem separable_of_forall {ω : Config (LatticeSite 2)} {lo hi lo₂ hi₂ : L
   have hS₂ : ∀ i, i ∈ Finset.univ.filter (fun i => σ i = false) ↔ σ i = false := fun i => by
     simp
   -- rerouting each colour, with fences
-  obtain ⟨w₁, γ₁, hw₁, hwd₁, hbox₁, hG₁, -, hdisj₁, hfen₁⟩ :=
+  obtain ⟨w₁, γ₁, hw₁, hwd₁, hbox₁, hG₁, -, hdisj₁, htop₁, hfen₁⟩ :=
     exists_reroute_fence_of_exploration h1' hle hΓ₁ hA₁u hu₁ (K := K) (M := M)
       (fun v hv hvr => by
         obtain ⟨t, ht, hKt, htM, hy, hT, hB, hR, hL⟩ :=
@@ -843,7 +868,7 @@ theorem separable_of_forall {ω : Config (LatticeSite 2)} {lo hi lo₂ hi₂ : L
       (fun i hi => (hcr₁ i ((hS₁ i).1 hi)).2.2.1) (fun i hi => (hcr₁ i ((hS₁ i).1 hi)).1)
       (fun i hi => (hcr₁ i ((hS₁ i).1 hi)).2.1) (fun i hi => (hcr₁ i ((hS₁ i).1 hi)).2.2.2)
       (fun i hi j hj hij => hdisj i j hij (((hS₁ i).1 hi).trans ((hS₁ j).1 hj).symm))
-  obtain ⟨w₂, γ₂, hw₂, hwd₂, hbox₂, hG₂, hedge₂, hdisj₂, hfen₂⟩ :=
+  obtain ⟨w₂, γ₂, hw₂, hwd₂, hbox₂, hG₂, hedge₂, hdisj₂, htop₂, hfen₂⟩ :=
     exists_reroute_fence_of_exploration h1₂ hle₂ hΓ₂ hA₂u hu₂ (K := K) (M := M)
       (fun v hv hvr => by
         obtain ⟨t, ht, hKt, htM, hy, hT, hB, hR, hL⟩ :=
@@ -904,7 +929,11 @@ theorem separable_of_forall {ω : Config (LatticeSite 2)} {lo hi lo₂ hi₂ : L
     · obtain ⟨s, hs, hs3, hB, hR, hL⟩ :=
         hOo (w₁ i) (by omega) A₁ (fun w hw => hA₁ w (le_trans hw (by omega))) hai
       have := add_lt_of_exploration_of_dualConfig h1' hle hΓ₁ hA₁u hwi.le hai (by omega) hs3
-        hB hR hL (Γ₂ (A₂ (w₂ j))) hPj (fun x hx => by rw [← hlo₂, ← hhi₂]; exact hSj x hx)
+        hB hR hL (Γ₂ (A₂ (w₂ j))) hPj (fun x hx => by
+          have := mem_Icc_two_iff.1 (hSj x hx)
+          rw [mem_Icc_two_iff]
+          simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
+          omega)
         (by rw [hcj1, hl₂1]) (by rw [hdj, hh₂1]) (fun x hx h => hbotj x hx (by rw [hl₂1]; exact h))
         (fun x hx h => htopj x hx (by rw [hh₂1]; exact h))
         (forall_mem_of_exploration h1₂ hΓ₂' hA₂u hwj.le haj).1 hzf
@@ -936,23 +965,32 @@ theorem separable_of_forall {ω : Config (LatticeSite 2)} {lo hi lo₂ hi₂ : L
     rw [hσ]
     rfl
   refine ⟨fun i => (Γ'' i).1, fun i => (Γ'' i).2, fun i => ?_, fun i j hij hσij x hx hx' => ?_,
-    fun i j hij => ?_, fun i => ?_, fun i => ?_⟩
+    fun i j hij => ?_, fun i => ?_, fun i x hx hx1 => ?_, fun i => ?_⟩
   · -- crossings of the right colour
     cases hσ : σ i
     · obtain ⟨hwi, hai, hei, hdi⟩ := hdat₂ i hσ
       have hiS := (hS₂ i).2 hσ
       change a i 1 = lo₂ 1 ∧ (Γ'' i).1 1 = hi₂ 1 ∧ (∀ x ∈ (Γ'' i).2.support, x ∈ Icc lo₂ hi₂) ∧
-        ∀ e ∈ (Γ'' i).2.edges, e ∈ dualConfig ω ∩
-          dualEdge '' {e | e ∈ (zdGraph 2).edgeSet ∧ ∀ x ∈ e, x ∈ Icc lo hi}
+        ∀ e ∈ (Γ'' i).2.edges, e ∈ dualConfig ω ∩ dualEdge '' {e | e ∈ (zdGraph 2).edgeSet ∧
+          ∀ x ∈ e, x ∈ Icc (![lo 0 - k, lo 1] : LatticeSite 2) ![hi 0 + k, hi 1]}
       rw [hΓf i hσ]
       refine ⟨(hcr₂ i hσ).1, by rw [hei, hdi], hbox₂ i hiS, fun e he => ⟨hG₂ i hiS e he, ?_⟩⟩
       rcases hedge₂ i hiS e he with h | h
       · exact ((hcr₂ i hσ).2.2.2 e h).2
       · obtain ⟨⟨-, hc1, -, -, hS, -⟩, -, hbot, htop⟩ :=
           hΓ₂ (A₂ (w₂ i)) (mem_leftColumn_of_exploration hA₂u hwi.le) hai
-        exact mem_image_dualEdge_of_mem_edges _ (fun x hx => by rw [← hlo₂, ← hhi₂]; exact hS x hx)
-          (fun x hx h => hbot x hx (by rw [hl₂1]; exact h))
-          (fun x hx h => htop x hx (by rw [hh₂1]; exact h)) h
+        refine mem_image_dualEdge_of_mem_edges (lo := ![lo 0 - k, lo 1]) (hi := ![hi 0 + k, hi 1])
+          _ (fun x hx => ?_) (fun x hx h => hbot x hx ?_) (fun x hx h => htop x hx ?_) h
+        · have := mem_Icc_two_iff.1 (hS x hx)
+          rw [mem_Icc_two_iff]
+          simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
+          omega
+        · simp only [Matrix.cons_val_one, Matrix.cons_val_zero] at h
+          rw [hl₂1]
+          exact h
+        · simp only [Matrix.cons_val_one, Matrix.cons_val_zero] at h
+          rw [hh₂1]
+          exact h
     · obtain ⟨-, -, hei, hdi⟩ := hdat₁ i hσ
       have hiS := (hS₁ i).2 hσ
       change a i 1 = lo 1 ∧ (Γ'' i).1 1 = hi 1 ∧ (∀ x ∈ (Γ'' i).2.support, x ∈ Icc lo hi) ∧
@@ -995,8 +1033,8 @@ theorem separable_of_forall {ω : Config (LatticeSite 2)} {lo hi lo₂ hi₂ : L
       rw [lt_abs] at this ⊢
       omega
   · -- away from the corners
-    change 2 * (s₀ : ℤ) < 2 * (Γ'' i).1 0 + cond (σ i) 0 1 - 2 * lo 0 ∧
-      2 * (s₀ : ℤ) < 2 * hi 0 - (2 * (Γ'' i).1 0 + cond (σ i) 0 1)
+    change 2 * (s₀ : ℤ) < 2 * (Γ'' i).1 0 + cond (σ i) 0 1 - 2 * (lo 0 - k) ∧
+      2 * (s₀ : ℤ) < 2 * (hi 0 + k) - (2 * (Γ'' i).1 0 + cond (σ i) 0 1)
     cases hσ : σ i
     · obtain ⟨hwi, hai, hei, -⟩ := hdat₂ i hσ
       have := hc₂ (w₂ i) hwi.le hai
@@ -1008,6 +1046,13 @@ theorem separable_of_forall {ω : Config (LatticeSite 2)} {lo hi lo₂ hi₂ : L
       rw [hΓt i hσ, hei]
       simp only [Bool.cond_true]
       omega
+  · -- the top row is met only at the ends
+    change x ∈ (Γ'' i).2.support.dropLast at hx
+    cases hσ : σ i
+    · rw [hΓf i hσ] at hx
+      exact htop₂ i ((hS₂ i).2 hσ) x hx (by rw [hh₂1]; exact hx1)
+    · rw [hΓt i hσ] at hx
+      exact htop₁ i ((hS₁ i).2 hσ) x hx hx1
   · -- fences
     change ∃ x ∈ (Γ'' i).2.support, ∃ l r : LatticeSite 2, l 0 = (Γ'' i).1 0 - K ∧
       r 0 = (Γ'' i).1 0 + K ∧
@@ -1023,52 +1068,55 @@ theorem separable_of_forall {ω : Config (LatticeSite 2)} {lo hi lo₂ hi₂ : L
 
 /-! ### Nolin's local separation lemma -/
 
-/-- **Nolin's local separation lemma** (EJP 2008, Lemma 15). For every `δ > 0` there are `η > 0`
-and `N₀` such that, uniformly over the laws with crossing bounds `c` up to `L`, for `N₀ ≤ N ≤ L`,
-with probability at least `1 - δ` the following holds in the strip `Q = [0, 4N] × [0, N]`. Every
-family of crossings of `Q` from bottom to top, each open (`σ i = true`: a walk of `ℤ²` in `Q` from
-the bottom row to the top row along open edges) or dual (`σ i = false`: a walk of faces of
-`[0, 4N - 1] × [-1, N]` from the row `-1` to the row `N` along dual-open dual edges crossing edges
-of `Q`), with crossings of the same colour disjoint, can be replaced by a family with the same
-colours and the same starting points, with crossings of the same colour disjoint, whose ends `b' i`,
-in doubled positions (`2 x` for an open end `(x, N)`, `2 x + 1` for a dual end `(x, N)`), are at
-least `4 √η N` apart and at least `4 √η N` from both ends `0` and `8 N` of the doubled top side,
-and each of which carries a fence (Nolin's condition (4.5)): some vertex of the new crossing is
-joined, in its colour and inside the ball of radius `⌊√η N⌋` around its end, to the left end of a
-left-right crossing of its colour of the box `[x - ⌊η N⌋, x + ⌊η N⌋] × [N, N + ⌊√η N⌋]` above its
-end `(x, N)`. -/
-theorem exists_law_separable_ge (c : ℕ → ℝ≥0∞) {δ : ℝ≥0∞} (hδ : 0 < δ) :
+/-- **Local separation in a strip, any of the two geometries.** For every `δ > 0` there are `η > 0`
+and `N₀` such that, uniformly over the laws with crossing bounds `c` up to `L`, for `N₀ ≤ N ≤ L`
+and `k ∈ {0, 1}`, with probability at least `1 - δ` the following holds for the open box
+`Icc lo hi = [lo₀, lo₀ + 4N] × [lo₁, lo₁ + N]` and the box of faces
+`Icc lo₂ hi₂ = [lo₀ - k, hi₀ - 1 + k] × [lo₁ - 1, hi₁]`. Every family of crossings from bottom to
+top, each open (an open walk in `Icc lo hi` from its bottom row to its top row) or dual (a walk of
+faces of `Icc lo₂ hi₂` from its bottom row to its top row along dual-open dual edges crossing edges
+of `Icc elo ehi = [lo₀ - k, hi₀ + k] × [lo₁, hi₁]`), with crossings of the same colour disjoint, can
+be replaced by a family with the same colours and the same starting points, with crossings of the
+same colour disjoint, meeting the top row only at their ends, whose ends, in doubled positions, are
+at least `4 √η N` apart and at least `4 √η N` from the two ends `2 elo₀` and `2 ehi₀` of the
+doubled top side, and each of which carries a fence as in `exists_law_separable_ge`.
+
+The boxes enter as variables with their defining equations (eleven hypotheses in all), so that
+the two instances, `exists_law_separable_ge` (`k = 0`) and `exists_law_separable_ge_arm` (`k = 1`),
+are read off without rewriting the event. -/
+theorem exists_law_separable_ge_aux (c : ℕ → ℝ≥0∞) {δ : ℝ≥0∞} (hδ : 0 < δ) :
     ∃ η : ℝ, 0 < η ∧ ∃ N₀ : ℕ, ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
       CrossingBounds q L c → ∀ N : ℕ, N₀ ≤ N → (N : ℕ∞) ≤ L →
+      ∀ (k : ℤ) (lo hi lo₂ hi₂ elo ehi : LatticeSite 2), 0 ≤ k → k ≤ 1 →
+      hi = ![lo 0 + 4 * N, lo 1 + N] → lo₂ = ![lo 0 - k, lo 1 - 1] → hi₂ = ![hi 0 - 1 + k, hi 1] →
+      elo = ![lo 0 - k, lo 1] → ehi = ![hi 0 + k, hi 1] →
       1 - δ ≤ law q {ω | ∀ (m : ℕ) (σ : Fin m → Bool) (a b : Fin m → LatticeSite 2)
         (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
         (∀ i, cond (σ i)
-          (a i 1 = 0 ∧ b i 1 = N ∧
-            (∀ x ∈ (γ i).support, x ∈ Icc (0 : LatticeSite 2) ![4 * (N : ℤ), N]) ∧
+          (a i 1 = lo 1 ∧ b i 1 = hi 1 ∧ (∀ x ∈ (γ i).support, x ∈ Icc lo hi) ∧
             ∀ e ∈ (γ i).edges, e ∈ ω)
-          (a i 1 = -1 ∧ b i 1 = N ∧
-            (∀ x ∈ (γ i).support, x ∈ Icc (![0, -1] : LatticeSite 2) ![4 * (N : ℤ) - 1, N]) ∧
+          (a i 1 = lo₂ 1 ∧ b i 1 = hi₂ 1 ∧ (∀ x ∈ (γ i).support, x ∈ Icc lo₂ hi₂) ∧
             ∀ e ∈ (γ i).edges, e ∈ dualConfig ω ∩ dualEdge '' {e | e ∈ (zdGraph 2).edgeSet ∧
-              ∀ x ∈ e, x ∈ Icc (0 : LatticeSite 2) ![4 * (N : ℤ), N]})) →
+              ∀ x ∈ e, x ∈ Icc elo ehi})) →
         (∀ i j, i ≠ j → σ i = σ j → ∀ x ∈ (γ i).support, x ∉ (γ j).support) →
         ∃ (b' : Fin m → LatticeSite 2) (γ' : ∀ i, (zdGraph 2).Walk (a i) (b' i)),
           (∀ i, cond (σ i)
-            (a i 1 = 0 ∧ b' i 1 = N ∧
-              (∀ x ∈ (γ' i).support, x ∈ Icc (0 : LatticeSite 2) ![4 * (N : ℤ), N]) ∧
+            (a i 1 = lo 1 ∧ b' i 1 = hi 1 ∧ (∀ x ∈ (γ' i).support, x ∈ Icc lo hi) ∧
               ∀ e ∈ (γ' i).edges, e ∈ ω)
-            (a i 1 = -1 ∧ b' i 1 = N ∧
-              (∀ x ∈ (γ' i).support, x ∈ Icc (![0, -1] : LatticeSite 2) ![4 * (N : ℤ) - 1, N]) ∧
+            (a i 1 = lo₂ 1 ∧ b' i 1 = hi₂ 1 ∧ (∀ x ∈ (γ' i).support, x ∈ Icc lo₂ hi₂) ∧
               ∀ e ∈ (γ' i).edges, e ∈ dualConfig ω ∩ dualEdge '' {e | e ∈ (zdGraph 2).edgeSet ∧
-                ∀ x ∈ e, x ∈ Icc (0 : LatticeSite 2) ![4 * (N : ℤ), N]})) ∧
+                ∀ x ∈ e, x ∈ Icc elo ehi})) ∧
           (∀ i j, i ≠ j → σ i = σ j → ∀ x ∈ (γ' i).support, x ∉ (γ' j).support) ∧
           (∀ i j, i ≠ j → 4 * Real.sqrt η * N ≤
             |((2 * b' i 0 + cond (σ i) 0 1 : ℤ) : ℝ) - ((2 * b' j 0 + cond (σ j) 0 1 : ℤ) : ℝ)|) ∧
-          (∀ i, 4 * Real.sqrt η * N ≤ ((2 * b' i 0 + cond (σ i) 0 1 : ℤ) : ℝ) ∧
-            4 * Real.sqrt η * N ≤ 8 * N - ((2 * b' i 0 + cond (σ i) 0 1 : ℤ) : ℝ)) ∧
+          (∀ i, 4 * Real.sqrt η * N ≤ ((2 * b' i 0 + cond (σ i) 0 1 - 2 * elo 0 : ℤ) : ℝ) ∧
+            4 * Real.sqrt η * N ≤ ((2 * ehi 0 - (2 * b' i 0 + cond (σ i) 0 1) : ℤ) : ℝ)) ∧
+          (∀ i, ∀ x ∈ (γ' i).support.dropLast, x 1 ≠ hi 1) ∧
           ∀ i, ∃ x ∈ (γ' i).support, ∃ l r : LatticeSite 2,
             l 0 = b' i 0 - ⌊η * N⌋₊ ∧ r 0 = b' i 0 + ⌊η * N⌋₊ ∧
             cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
-              (Icc ![b' i 0 - ⌊η * N⌋₊, N] ![b' i 0 + ⌊η * N⌋₊, N + ⌊Real.sqrt η * N⌋₊]) l r ∧
+              (Icc ![b' i 0 - ⌊η * N⌋₊, hi 1] ![b' i 0 + ⌊η * N⌋₊, hi 1 + ⌊Real.sqrt η * N⌋₊])
+              l r ∧
             cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
               (Icc (b' i - (⌊Real.sqrt η * N⌋₊ : LatticeSite 2))
                 (b' i + (⌊Real.sqrt η * N⌋₊ : LatticeSite 2))) x l} := by
@@ -1089,7 +1137,15 @@ theorem exists_law_separable_ge (c : ℕ → ℝ≥0∞) {δ : ℝ≥0∞} (hδ 
   obtain ⟨J, hJ⟩ := Filter.eventually_atTop.1
     ((ENNReal.tendsto_pow_atTop_nhds_zero_of_lt_one hr₂).eventually (gt_mem_nhds hε))
   refine ⟨(1 / ((16 * 8 ^ J : ℕ) : ℝ)) ^ 2, by positivity, (16 * 8 ^ J) ^ 2,
-    fun q L h N hN hNL => ?_⟩
+    fun q L h N hN hNL k lo hi lo₂ hi₂ elo ehi hk hk1 hhi hlo₂ hhi₂ helo hehi => ?_⟩
+  subst helo hehi
+  -- the coordinates of the boxes
+  have hhi0 : hi 0 = lo 0 + 4 * N := by rw [hhi]; rfl
+  have hhi1 : hi 1 = lo 1 + N := by rw [hhi]; rfl
+  have hl₂0 : lo₂ 0 = lo 0 - k := by rw [hlo₂]; rfl
+  have hl₂1 : lo₂ 1 = lo 1 - 1 := by rw [hlo₂]; rfl
+  have hh₂0 : hi₂ 0 = hi 0 - 1 + k := by rw [hhi₂]; rfl
+  have hh₂1 : hi₂ 1 = hi 1 := by rw [hhi₂]; rfl
   obtain ⟨hK1, hM16, hscale⟩ := scale_bounds hN
   set D := 16 * 8 ^ J with hD
   set M := N / D with hM
@@ -1133,33 +1189,24 @@ theorem exists_law_separable_ge (c : ℕ → ℝ≥0∞) {δ : ℝ≥0∞} (hδ 
   have hKle : ∀ j, K ≤ 3 * ((K + 1) * 8 ^ j) := fun j => by
     have := Nat.le_mul_of_pos_right (K + 1) (show 0 < 8 ^ j by positivity)
     omega
-  have hsO : ∀ j < J, (0 : LatticeSite 2) 1 + 3 * ((s₀ * 8 ^ j : ℕ) : ℤ) ≤
-      (![4 * (N : ℤ), N] : LatticeSite 2) 1 - 1 := fun j hj => by
+  have hsO : ∀ j < J, lo 1 + 3 * ((s₀ * 8 ^ j : ℕ) : ℤ) ≤ hi 1 - 1 := fun j hj => by
     have := hscN j hj
-    simp only [Pi.zero_apply, Matrix.cons_val_one, Matrix.cons_val_zero]
     omega
-  have hsD : ∀ j < J, (![0, -1] : LatticeSite 2) 1 + 3 * ((s₀ * 8 ^ j : ℕ) : ℤ) ≤
-      (![4 * (N : ℤ) - 1, N] : LatticeSite 2) 1 - 1 := fun j hj => by
+  have hsD : ∀ j < J, lo₂ 1 + 3 * ((s₀ * 8 ^ j : ℕ) : ℤ) ≤ hi₂ 1 - 1 := fun j hj => by
     have := hscN j hj
-    simp only [Matrix.cons_val_one, Matrix.cons_val_zero]
     omega
-  have htO : ∀ j < J, (0 : LatticeSite 2) 1 + 3 * (((K + 1) * 8 ^ j : ℕ) : ℤ) ≤
-      (![4 * (N : ℤ), N] : LatticeSite 2) 1 := fun j hj => by
+  have htO : ∀ j < J, lo 1 + 3 * (((K + 1) * 8 ^ j : ℕ) : ℤ) ≤ hi 1 := fun j hj => by
     have := htcM j hj
-    simp only [Pi.zero_apply, Matrix.cons_val_one, Matrix.cons_val_zero]
     omega
-  have htD : ∀ j < J, (![0, -1] : LatticeSite 2) 1 + 3 * (((K + 1) * 8 ^ j : ℕ) : ℤ) ≤
-      (![4 * (N : ℤ) - 1, N] : LatticeSite 2) 1 := fun j hj => by
+  have htD : ∀ j < J, lo₂ 1 + 3 * (((K + 1) * 8 ^ j : ℕ) : ℤ) ≤ hi₂ 1 := fun j hj => by
     have := htcM j hj
-    simp only [Matrix.cons_val_one, Matrix.cons_val_zero]
     omega
   -- the two boxes and the clean choice rules
-  have hle : (0 : LatticeSite 2) ≤ ![4 * (N : ℤ), N] := by
+  have hle : lo ≤ hi := by
     rw [Pi.le_def, Fin.forall_fin_two]
-    simp
-  have hle₂ : (![0, -1] : LatticeSite 2) ≤ ![4 * (N : ℤ) - 1, N] := by
+    omega
+  have hle₂ : lo₂ ≤ hi₂ := by
     rw [Pi.le_def, Fin.forall_fin_two]
-    simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
     omega
   obtain ⟨c₁, d₁, Γ₁, hΓ₁⟩ := exists_crossing_choice_clean hle
   obtain ⟨c₂, d₂, Γ₂, hΓ₂⟩ := exists_crossing_choice_clean hle₂
@@ -1188,38 +1235,27 @@ theorem exists_law_separable_ge (c : ℕ → ℝ≥0∞) {δ : ℝ≥0∞} (hδ 
     exact and_congr_right fun _ => not_congr ⟨fun h' => (this.1 ⟨h', hmem⟩).1,
       fun h' => (this.2 ⟨h', hmem⟩).1⟩
   -- the bad events and their probabilities
-  have bO := law_exploration_le_pow_of_le h 5 (lo := 0) (hi := ![4 * (N : ℤ), N]) (n := N - 1)
-    (by omega) (hNL' _ (by omega)) (by simp; omega) (by simp; omega) (Γ := Γ₁)
+  have bO := law_exploration_le_pow_of_le h 5 (lo := lo) (hi := hi) (n := N - 1)
+    (by omega) (hNL' _ (by omega)) (by omega) (by omega) (Γ := Γ₁)
     (fun A h₁ h₂ => (hΓ₁ A h₁ h₂).1) T
-  have bD := law_exploration_dualConfig_le_pow_of_le h 5 (lo := ![0, -1])
-    (hi := ![4 * (N : ℤ) - 1, N]) (n := N) (by omega) (hNL' _ le_rfl) (by simp) (by simp; omega)
-    (Γ := Γ₂) (fun A h₁ h₂ => (hΓ₂ A h₁ h₂).1) T
-  have b1 := fun v => law_exploration_forall_notMem_inter_le h (lo := 0)
-    (hi := ![4 * (N : ℤ), N]) (Γ := Γ₁) measurable_id hPo d₁ hsc1 (h8 s₀) v J hJs
-  have b2 := fun v => law_exploration_forall_notMem_dualConfig_union_le h (lo := 0)
-    (hi := ![4 * (N : ℤ), N]) (Γ := Γ₁) measurable_id hPo
-    (fun D => ![d₁ D 0, (![4 * (N : ℤ), N] : LatticeSite 2) 1 - 1]) hsc1 (h8 s₀) v J hJs
-  have b3 := fun v => law_exploration_forall_notMem_union_le h (lo := 0)
-    (hi := ![4 * (N : ℤ), N]) (Γ := Γ₁) measurable_id hPo d₁ htc1 (h8 (K + 1)) v J hJt
-  have b4 := fun v => law_exploration_forall_notMem_dualConfig_union_le h (lo := ![0, -1])
-    (hi := ![4 * (N : ℤ) - 1, N]) (Γ := Γ₂) measurable_dualConfig hPd d₂ hsc1 (h8 s₀) v J hJs
-  have b5 := fun v => law_exploration_forall_notMem_inter_le h (lo := ![0, -1])
-    (hi := ![4 * (N : ℤ) - 1, N]) (Γ := Γ₂) measurable_dualConfig hPd
-    (fun D => ![d₂ D 0, (![4 * (N : ℤ) - 1, N] : LatticeSite 2) 1 - 1] + 1) hsc1 (h8 s₀) v J
-    hJs
-  have b6 := fun v => law_exploration_forall_notMem_dualConfig_inter_le h (lo := ![0, -1])
-    (hi := ![4 * (N : ℤ) - 1, N]) (Γ := Γ₂) measurable_dualConfig hPd d₂ htc1 (h8 (K + 1)) v J
-    hJt
-  have b7 := law_forall_notMem_inter_le h
-    ![(![4 * (N : ℤ), N] : LatticeSite 2) 0, (![4 * (N : ℤ), N] : LatticeSite 2) 1] hsc1 (h8 s₀) J
-    hJs
-  have b8 := law_forall_notMem_inter_le h
-    ![(0 : LatticeSite 2) 0, (![4 * (N : ℤ), N] : LatticeSite 2) 1] hsc1 (h8 s₀) J hJs
-  have b9 := law_forall_notMem_dualConfig_union_le h
-    ![(![4 * (N : ℤ) - 1, N] : LatticeSite 2) 0, (![4 * (N : ℤ) - 1, N] : LatticeSite 2) 1] hsc1
-    (h8 s₀) J hJs
-  have b10 := law_forall_notMem_dualConfig_union_le h
-    ![(![0, -1] : LatticeSite 2) 0, (![4 * (N : ℤ) - 1, N] : LatticeSite 2) 1] hsc1 (h8 s₀) J hJs
+  have bD := law_exploration_dualConfig_le_pow_of_le h 5 (lo := lo₂) (hi := hi₂) (n := N)
+    (by omega) (hNL' _ le_rfl) (by omega) (by omega) (Γ := Γ₂) (fun A h₁ h₂ => (hΓ₂ A h₁ h₂).1) T
+  have b1 := fun v => law_exploration_forall_notMem_inter_le h (lo := lo) (hi := hi) (Γ := Γ₁)
+    measurable_id hPo d₁ hsc1 (h8 s₀) v J hJs
+  have b2 := fun v => law_exploration_forall_notMem_dualConfig_union_le h (lo := lo) (hi := hi)
+    (Γ := Γ₁) measurable_id hPo (fun D => ![d₁ D 0, hi 1 - 1]) hsc1 (h8 s₀) v J hJs
+  have b3 := fun v => law_exploration_forall_notMem_union_le h (lo := lo) (hi := hi) (Γ := Γ₁)
+    measurable_id hPo d₁ htc1 (h8 (K + 1)) v J hJt
+  have b4 := fun v => law_exploration_forall_notMem_dualConfig_union_le h (lo := lo₂) (hi := hi₂)
+    (Γ := Γ₂) measurable_dualConfig hPd d₂ hsc1 (h8 s₀) v J hJs
+  have b5 := fun v => law_exploration_forall_notMem_inter_le h (lo := lo₂) (hi := hi₂) (Γ := Γ₂)
+    measurable_dualConfig hPd (fun D => ![d₂ D 0, hi₂ 1 - 1] + 1) hsc1 (h8 s₀) v J hJs
+  have b6 := fun v => law_exploration_forall_notMem_dualConfig_inter_le h (lo := lo₂) (hi := hi₂)
+    (Γ := Γ₂) measurable_dualConfig hPd d₂ htc1 (h8 (K + 1)) v J hJt
+  have b7 := law_forall_notMem_inter_le h ![hi 0, hi 1] hsc1 (h8 s₀) J hJs
+  have b8 := law_forall_notMem_inter_le h ![lo 0, hi 1] hsc1 (h8 s₀) J hJs
+  have b9 := law_forall_notMem_dualConfig_union_le h ![hi₂ 0, hi₂ 1] hsc1 (h8 s₀) J hJs
+  have b10 := law_forall_notMem_dualConfig_union_le h ![lo₂ 0, hi₂ 1] hsc1 (h8 s₀) J hJs
   have hbad := measure_union_le_add_of_le bO (measure_union_le_add_of_le bD
     (measure_union_le_add_of_le (measure_biUnion_range_le (T + 1) fun v _ => b1 v)
     (measure_union_le_add_of_le (measure_biUnion_range_le (T + 1) fun v _ => b2 v)
@@ -1252,10 +1288,9 @@ theorem exists_law_separable_ge (c : ℕ → ℝ≥0∞) {δ : ℝ≥0∞} (hδ 
         ω ∉ ⋃ v ∈ Finset.range (T + 1), F v → ∀ v ≤ T, ω ∉ F v :=
       fun hU v hv hv' => hU (mem_iUnion₂.2 ⟨v, Finset.mem_range.2 (by omega), hv'⟩)
     intro m σ a b γ hcr hdisj
-    obtain ⟨b', γ', h1, h2, h3, h4, h5⟩ := separable_of_forall (lo := 0)
-      (hi := ![4 * (N : ℤ), N]) (lo₂ := ![0, -1]) (hi₂ := ![4 * (N : ℤ) - 1, N]) (by simp)
-      (by simp) (by simp; omega) (by simp; omega) (T := T) (s₀ := s₀) (K := K) (M := M)
-      (by omega) (by omega) hΓ₁ hΓ₂
+    obtain ⟨b', γ', h1, h2, h3, h4, h5, h6⟩ := separable_of_forall (lo := lo) (hi := hi)
+      (lo₂ := lo₂) (hi₂ := hi₂) hk hk1 hlo₂ hhi₂ (by omega) (by omega) (T := T) (s₀ := s₀)
+      (K := K) (M := M) (by omega) (by omega) hΓ₁ hΓ₂
       (fun A hA => by
         by_contra hcon
         push Not at hcon
@@ -1308,17 +1343,149 @@ theorem exists_law_separable_ge (c : ℕ → ℝ≥0∞) {δ : ℝ≥0∞} (hδ 
           (notMem_crossing_dualConfig_inter_of _ _ _ hK).1,
           (notMem_crossing_dualConfig_inter_of _ _ _ hK).2.1⟩)
       m σ a b γ hcr hdisj
-    refine ⟨b', γ', h1, h2, fun i j hij => ?_, fun i => ?_, fun i => ?_⟩
+    refine ⟨b', γ', h1, h2, fun i j hij => ?_, fun i => ?_, h5, fun i => ?_⟩
     · have h' := Int.cast_lt (R := ℝ) |>.2 (h3 i j hij)
       push_cast at h' ⊢
       linarith
     · obtain ⟨h₁, h₂⟩ := h4 i
       have h₁' := Int.cast_lt (R := ℝ) |>.2 h₁
       have h₂' := Int.cast_lt (R := ℝ) |>.2 h₂
-      simp only [Pi.zero_apply, Matrix.cons_val_zero] at h₁' h₂'
+      simp only [Matrix.cons_val_zero]
       push_cast at h₁' h₂' ⊢
       constructor <;> linarith
     · rw [hKfl, hMfl]
-      exact h5 i
+      exact h6 i
+
+
+/-- **Nolin's local separation lemma** (EJP 2008, Lemma 15). For every `δ > 0` there are `η > 0`
+and `N₀` such that, uniformly over the laws with crossing bounds `c` up to `L`, for `N₀ ≤ N ≤ L`,
+with probability at least `1 - δ` the following holds in the strip `Q = [0, 4N] × [0, N]`. Every
+family of crossings of `Q` from bottom to top, each open (`σ i = true`: a walk of `ℤ²` in `Q` from
+the bottom row to the top row along open edges) or dual (`σ i = false`: a walk of faces of
+`[0, 4N - 1] × [-1, N]` from the row `-1` to the row `N` along dual-open dual edges crossing edges
+of `Q`), with crossings of the same colour disjoint, can be replaced by a family with the same
+colours and the same starting points, with crossings of the same colour disjoint, whose ends `b' i`,
+in doubled positions (`2 x` for an open end `(x, N)`, `2 x + 1` for a dual end `(x, N)`), are at
+least `4 √η N` apart and at least `4 √η N` from both ends `0` and `8 N` of the doubled top side,
+and each of which carries a fence (Nolin's condition (4.5)): some vertex of the new crossing is
+joined, in its colour and inside the ball of radius `⌊√η N⌋` around its end, to the left end of a
+left-right crossing of its colour of the box `[x - ⌊η N⌋, x + ⌊η N⌋] × [N, N + ⌊√η N⌋]` above its
+end `(x, N)`. -/
+theorem exists_law_separable_ge (c : ℕ → ℝ≥0∞) {δ : ℝ≥0∞} (hδ : 0 < δ) :
+    ∃ η : ℝ, 0 < η ∧ ∃ N₀ : ℕ, ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
+      CrossingBounds q L c → ∀ N : ℕ, N₀ ≤ N → (N : ℕ∞) ≤ L →
+      1 - δ ≤ law q {ω | ∀ (m : ℕ) (σ : Fin m → Bool) (a b : Fin m → LatticeSite 2)
+        (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, cond (σ i)
+          (a i 1 = 0 ∧ b i 1 = N ∧
+            (∀ x ∈ (γ i).support, x ∈ Icc (0 : LatticeSite 2) ![4 * (N : ℤ), N]) ∧
+            ∀ e ∈ (γ i).edges, e ∈ ω)
+          (a i 1 = -1 ∧ b i 1 = N ∧
+            (∀ x ∈ (γ i).support, x ∈ Icc (![0, -1] : LatticeSite 2) ![4 * (N : ℤ) - 1, N]) ∧
+            ∀ e ∈ (γ i).edges, e ∈ dualConfig ω ∩ dualEdge '' {e | e ∈ (zdGraph 2).edgeSet ∧
+              ∀ x ∈ e, x ∈ Icc (0 : LatticeSite 2) ![4 * (N : ℤ), N]})) →
+        (∀ i j, i ≠ j → σ i = σ j → ∀ x ∈ (γ i).support, x ∉ (γ j).support) →
+        ∃ (b' : Fin m → LatticeSite 2) (γ' : ∀ i, (zdGraph 2).Walk (a i) (b' i)),
+          (∀ i, cond (σ i)
+            (a i 1 = 0 ∧ b' i 1 = N ∧
+              (∀ x ∈ (γ' i).support, x ∈ Icc (0 : LatticeSite 2) ![4 * (N : ℤ), N]) ∧
+              ∀ e ∈ (γ' i).edges, e ∈ ω)
+            (a i 1 = -1 ∧ b' i 1 = N ∧
+              (∀ x ∈ (γ' i).support, x ∈ Icc (![0, -1] : LatticeSite 2) ![4 * (N : ℤ) - 1, N]) ∧
+              ∀ e ∈ (γ' i).edges, e ∈ dualConfig ω ∩ dualEdge '' {e | e ∈ (zdGraph 2).edgeSet ∧
+                ∀ x ∈ e, x ∈ Icc (0 : LatticeSite 2) ![4 * (N : ℤ), N]})) ∧
+          (∀ i j, i ≠ j → σ i = σ j → ∀ x ∈ (γ' i).support, x ∉ (γ' j).support) ∧
+          (∀ i j, i ≠ j → 4 * Real.sqrt η * N ≤
+            |((2 * b' i 0 + cond (σ i) 0 1 : ℤ) : ℝ) - ((2 * b' j 0 + cond (σ j) 0 1 : ℤ) : ℝ)|) ∧
+          (∀ i, 4 * Real.sqrt η * N ≤ ((2 * b' i 0 + cond (σ i) 0 1 : ℤ) : ℝ) ∧
+            4 * Real.sqrt η * N ≤ 8 * N - ((2 * b' i 0 + cond (σ i) 0 1 : ℤ) : ℝ)) ∧
+          ∀ i, ∃ x ∈ (γ' i).support, ∃ l r : LatticeSite 2,
+            l 0 = b' i 0 - ⌊η * N⌋₊ ∧ r 0 = b' i 0 + ⌊η * N⌋₊ ∧
+            cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
+              (Icc ![b' i 0 - ⌊η * N⌋₊, N] ![b' i 0 + ⌊η * N⌋₊, N + ⌊Real.sqrt η * N⌋₊]) l r ∧
+            cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
+              (Icc (b' i - (⌊Real.sqrt η * N⌋₊ : LatticeSite 2))
+                (b' i + (⌊Real.sqrt η * N⌋₊ : LatticeSite 2))) x l} := by
+  obtain ⟨η, hη, N₀, hsep⟩ := exists_law_separable_ge_aux c hδ
+  refine ⟨η, hη, N₀, fun q L h N hN hNL => (hsep q L h N hN hNL 0 0 ![4 * (N : ℤ), N] ![0, -1]
+    ![4 * (N : ℤ) - 1, N] 0 ![4 * (N : ℤ), N] le_rfl zero_le_one
+    (eq_vec_two_iff.2 ⟨by simp, by simp⟩) (eq_vec_two_iff.2 ⟨by simp, by simp⟩)
+    (eq_vec_two_iff.2 ⟨by simp, by simp⟩) (eq_vec_two_iff.2 ⟨by simp, by simp⟩)
+    (eq_vec_two_iff.2 ⟨by simp, by simp⟩)).trans (measure_mono fun ω hω => ?_)⟩
+  intro m σ a b γ hcr hdisj
+  obtain ⟨b', γ', h1, h2, h3, h4, -, h5⟩ := hω m σ a b γ hcr hdisj
+  refine ⟨b', γ', h1, h2, h3, fun i => ?_, h5⟩
+  obtain ⟨h₁, h₂⟩ := h4 i
+  simp only [Pi.zero_apply, mul_zero, sub_zero, Matrix.cons_val_zero] at h₁ h₂
+  push_cast at h₁ h₂ ⊢
+  exact ⟨h₁, by linarith⟩
+
+/-- **Nolin's local separation lemma in the arm box** (EJP 2008, Lemma 15, in the geometry of the
+arms of a box). The statement of `exists_law_separable_ge` with the box of faces one column wider
+on each side than the open box: open crossings of `[1, 4N + 1] × [0, N]` (`σ i = true`), dual
+crossings (`σ i = false`) of the faces `[0, 4N + 1] × [-1, N]` from the row `-1` to the row `N`
+along dual-open dual edges crossing edges of `[0, 4N + 2] × [0, N]`; the new crossings meet the
+top row `N` only at their ends, and their ends, in doubled positions (`2 x` for an open end
+`(x, N)`, `2 x + 1` for a dual end `(x, N)`), are at least `4 √η N` apart and at least `4 √η N`
+from both ends `0` and `8 N + 4` of the doubled top side; each carries the fence of
+`exists_law_separable_ge`.
+
+This is the geometry of the arms to the box `[0, 4N + 2] × [-3N - 2, N]` (centre
+`(2N + 1, -N - 1)`, radius `2N + 1`) near its top side: before its last vertex an open arm lies in
+the columns `[1, 4N + 1]` and a dual arm in the face columns `[0, 4N + 1]`, the last vertex of an
+open arm landing on the top side is `(x, N)` with `1 ≤ x ≤ 4N + 1`, the last face of a dual arm
+landing there is `(x, N)` with `0 ≤ x ≤ 4N + 1`, and the doubled positions are the top-side
+columns of `landingPos`. -/
+theorem exists_law_separable_ge_arm (c : ℕ → ℝ≥0∞) {δ : ℝ≥0∞} (hδ : 0 < δ) :
+    ∃ η : ℝ, 0 < η ∧ ∃ N₀ : ℕ, ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
+      CrossingBounds q L c → ∀ N : ℕ, N₀ ≤ N → (N : ℕ∞) ≤ L →
+      1 - δ ≤ law q {ω | ∀ (m : ℕ) (σ : Fin m → Bool) (a b : Fin m → LatticeSite 2)
+        (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, cond (σ i)
+          (a i 1 = 0 ∧ b i 1 = N ∧
+            (∀ x ∈ (γ i).support, x ∈ Icc (![1, 0] : LatticeSite 2) ![4 * (N : ℤ) + 1, N]) ∧
+            ∀ e ∈ (γ i).edges, e ∈ ω)
+          (a i 1 = -1 ∧ b i 1 = N ∧
+            (∀ x ∈ (γ i).support, x ∈ Icc (![0, -1] : LatticeSite 2) ![4 * (N : ℤ) + 1, N]) ∧
+            ∀ e ∈ (γ i).edges, e ∈ dualConfig ω ∩ dualEdge '' {e | e ∈ (zdGraph 2).edgeSet ∧
+              ∀ x ∈ e, x ∈ Icc (0 : LatticeSite 2) ![4 * (N : ℤ) + 2, N]})) →
+        (∀ i j, i ≠ j → σ i = σ j → ∀ x ∈ (γ i).support, x ∉ (γ j).support) →
+        ∃ (b' : Fin m → LatticeSite 2) (γ' : ∀ i, (zdGraph 2).Walk (a i) (b' i)),
+          (∀ i, cond (σ i)
+            (a i 1 = 0 ∧ b' i 1 = N ∧
+              (∀ x ∈ (γ' i).support, x ∈ Icc (![1, 0] : LatticeSite 2) ![4 * (N : ℤ) + 1, N]) ∧
+              ∀ e ∈ (γ' i).edges, e ∈ ω)
+            (a i 1 = -1 ∧ b' i 1 = N ∧
+              (∀ x ∈ (γ' i).support, x ∈ Icc (![0, -1] : LatticeSite 2) ![4 * (N : ℤ) + 1, N]) ∧
+              ∀ e ∈ (γ' i).edges, e ∈ dualConfig ω ∩ dualEdge '' {e | e ∈ (zdGraph 2).edgeSet ∧
+                ∀ x ∈ e, x ∈ Icc (0 : LatticeSite 2) ![4 * (N : ℤ) + 2, N]})) ∧
+          (∀ i j, i ≠ j → σ i = σ j → ∀ x ∈ (γ' i).support, x ∉ (γ' j).support) ∧
+          (∀ i, ∀ x ∈ (γ' i).support.dropLast, x 1 ≠ N) ∧
+          (∀ i j, i ≠ j → 4 * Real.sqrt η * N ≤
+            |((2 * b' i 0 + cond (σ i) 0 1 : ℤ) : ℝ) - ((2 * b' j 0 + cond (σ j) 0 1 : ℤ) : ℝ)|) ∧
+          (∀ i, 4 * Real.sqrt η * N ≤ ((2 * b' i 0 + cond (σ i) 0 1 : ℤ) : ℝ) ∧
+            4 * Real.sqrt η * N ≤ 8 * N + 4 - ((2 * b' i 0 + cond (σ i) 0 1 : ℤ) : ℝ)) ∧
+          ∀ i, ∃ x ∈ (γ' i).support, ∃ l r : LatticeSite 2,
+            l 0 = b' i 0 - ⌊η * N⌋₊ ∧ r 0 = b' i 0 + ⌊η * N⌋₊ ∧
+            cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
+              (Icc ![b' i 0 - ⌊η * N⌋₊, N] ![b' i 0 + ⌊η * N⌋₊, N + ⌊Real.sqrt η * N⌋₊]) l r ∧
+            cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
+              (Icc (b' i - (⌊Real.sqrt η * N⌋₊ : LatticeSite 2))
+                (b' i + (⌊Real.sqrt η * N⌋₊ : LatticeSite 2))) x l} := by
+  obtain ⟨η, hη, N₀, hsep⟩ := exists_law_separable_ge_aux c hδ
+  refine ⟨η, hη, N₀, fun q L h N hN hNL => (hsep q L h N hN hNL 1 ![1, 0] ![4 * (N : ℤ) + 1, N]
+    ![0, -1] ![4 * (N : ℤ) + 1, N] 0 ![4 * (N : ℤ) + 2, N] zero_le_one le_rfl
+    (eq_vec_two_iff.2 ⟨by simp only [Matrix.cons_val_zero]; ring, by simp⟩)
+    (eq_vec_two_iff.2 ⟨by simp, by simp⟩) (eq_vec_two_iff.2 ⟨by simp, by simp⟩)
+    (eq_vec_two_iff.2 ⟨by simp, by simp⟩)
+    (eq_vec_two_iff.2 ⟨by simp only [Matrix.cons_val_zero]; ring, by simp⟩)).trans
+    (measure_mono fun ω hω => ?_)⟩
+  intro m σ a b γ hcr hdisj
+  obtain ⟨b', γ', h1, h2, h3, h4, h5, h6⟩ := hω m σ a b γ hcr hdisj
+  refine ⟨b', γ', h1, h2, h5, h3, fun i => ?_, h6⟩
+  obtain ⟨h₁, h₂⟩ := h4 i
+  simp only [Pi.zero_apply, mul_zero, sub_zero, Matrix.cons_val_zero] at h₁ h₂
+  push_cast at h₁ h₂ ⊢
+  exact ⟨h₁, by linarith⟩
 
 end PercLib.Models.Planar
