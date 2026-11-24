@@ -128,6 +128,7 @@ public import PercLib.Models.LongRange.Tags.Susceptibility
 public import PercLib.Models.NonSummable
 public import PercLib.Models.NormalizedSmallIntensity
 public import PercLib.Models.NormalizedSmallIntensityLine
+public import PercLib.Models.Planar.Arms.CapGluing
 public import PercLib.Models.Planar.Arms.ColourInversion
 public import PercLib.Models.Planar.Arms.ConnectionComparison
 public import PercLib.Models.Planar.Arms.CorridorGluing
@@ -135,6 +136,7 @@ public import PercLib.Models.Planar.Arms.Defs
 public import PercLib.Models.Planar.Arms.HalfPlaneExponents
 public import PercLib.Models.Planar.Arms.IncipientCluster
 public import PercLib.Models.Planar.Arms.Interlacing
+public import PercLib.Models.Planar.Arms.JogCorridors
 public import PercLib.Models.Planar.Arms.MultiArmBasics
 public import PercLib.Models.Planar.Arms.MultiArmBounds
 public import PercLib.Models.Planar.Arms.OneArm
