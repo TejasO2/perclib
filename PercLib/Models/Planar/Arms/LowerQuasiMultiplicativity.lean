@@ -537,8 +537,8 @@ theorem step_bound_S {K₁ M₁ S : ℕ} (hn1 : 1000 * (j + 1) * (j + 1) ≤ n) 
   refine ⟨?_, by omega, by omega⟩
   omega
 
-/-- **The arithmetic of step S: the hypotheses of the core step.** With the choices of §21.4
-item 6 (`K₁ = (2n + 24j + 5) u`, `M₁ = 2K₁`, `B = (2n + 24j + 4) u`, `S = M₁ + K₁ + m + k + 2`,
+/-- **The arithmetic of step S: the hypotheses of the core step.** With the choices of step S
+(`K₁ = (2n + 24j + 5) u`, `M₁ = 2K₁`, `B = (2n + 24j + 4) u`, `S = M₁ + K₁ + m + k + 2`,
 `R + S + 1 = ρ`, jog bound `D = 2 Rn + u + 4`, rooms `Sp`, `Gp`, `Q`, `Ap = 32 n² + 2`,
 `At = 4n² + 6n + 72j + 15`), the numerical hypotheses of `exists_pos_mul_le_law_of_far_bins` other
 than the gluing budget and the bins. -/
@@ -653,7 +653,7 @@ Proof: Theorem 11's outer half, separated form, at `R₀ = ⌊ρ / 5⌋` (unit `
 `n = 1000 (j + 1)² (w + 1) ⌈1 / √η⌉`); the starts of the far family in one of `(4NB)^j`
 assignments of bins of width `⌊η N⌋ + 1` (`NB = w ⌈1 / √η⌉²`); for each, the motion plan into
 windows aligned with the bins and the two-sided gluing (`exists_pos_mul_le_law_of_far_bins`, with
-the scales of §21.4 item 6). -/
+the scales of `step_bounds_core`). -/
 theorem exists_law_mul_law_far_le (σ : Fin j → Bool)
     (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) (c : ℕ → ℝ≥0∞) {η : ℝ} (hη : 0 < η)
     (hη1 : η ≤ 1 / 256) {w : ℕ} (hw : 7 ≤ w) :

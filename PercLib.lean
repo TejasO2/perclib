@@ -133,6 +133,7 @@ public import PercLib.Models.Planar.Arms.ColourInversion
 public import PercLib.Models.Planar.Arms.ConnectionComparison
 public import PercLib.Models.Planar.Arms.CorridorGluing
 public import PercLib.Models.Planar.Arms.Defs
+public import PercLib.Models.Planar.Arms.Extendability
 public import PercLib.Models.Planar.Arms.HalfPlaneExponents
 public import PercLib.Models.Planar.Arms.IncipientCluster
 public import PercLib.Models.Planar.Arms.InnerFamilyGluing
