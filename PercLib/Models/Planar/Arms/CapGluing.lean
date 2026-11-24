@@ -848,7 +848,7 @@ theorem exists_pos_le_law_separated_of_separated {j : ℕ} (σ : Fin j → Bool)
           (landingPos (z - R') (z + R') (σ k) (γ k)) (landingPos (z - R') (z + R') (σ l) (γ l))) ∧
         ArmsOuterSeparated ω σ z R' (s - 4 * W) M' K' γ ∧ ∀ i, innerPos z r (σ i) (γ i) ∈ J i} := by
   classical
-  set κ : ℕ := 2 * D * A + 2 with hκdef
+  set κ : ℕ := 2 * D * A + 2 with hκeq
   by_cases hc : 0 < c κ
   swap
   · exact ⟨1, one_pos, fun q L hCB => absurd (hCB.pos _) hc⟩
@@ -867,14 +867,14 @@ theorem exists_pos_le_law_separated_of_separated {j : ℕ} (σ : Fin j → Bool)
       exact_mod_cast hRD.trans (Nat.mul_le_mul_left _ hRA)
     push_cast at e₁
     have e₂ : (0 : ℤ) ≤ (D : ℤ) * A * ((W : ℤ) - 4 * K') := mul_nonneg (by positivity) (by omega)
-    rw [hκdef]
+    rw [hκeq]
     push_cast
     nlinarith
   have hκH : (W : ℤ) - 2 * K' ≤ κ * ((W : ℤ) - 2 * K') :=
-    le_mul_of_one_le_left (by omega) (by rw [hκdef]; push_cast; nlinarith)
+    le_mul_of_one_le_left (by omega) (by rw [hκeq]; push_cast; nlinarith)
   have hκC : (W : ℤ) ≤ κ * ((M' : ℤ) - 1) := by
     have : (2 : ℤ) * ((M' : ℤ) - 1) ≤ κ * ((M' : ℤ) - 1) :=
-      mul_le_mul_of_nonneg_right (by rw [hκdef]; push_cast; nlinarith) (by omega)
+      mul_le_mul_of_nonneg_right (by rw [hκeq]; push_cast; nlinarith) (by omega)
     omega
   -- the separated event with ends in given bins
   set E : (Fin j → Fin 4 × Fin (2 * A + 1)) → Set (Config (LatticeSite 2)) :=
@@ -1285,7 +1285,7 @@ theorem exists_pos_le_law_windows_of_windows {j : ℕ} (σ : Fin j → Bool)
           (t i = 3 ∧ b 0 = z 0 - R' - cond (σ i) 0 1 ∧ α i + d i ≤ b 1 ∧ b 1 ≤ β i + d i + W)}) ∧
         ∀ i, innerPos z r (σ i) (γ i) ∈ J i} := by
   classical
-  set κ : ℕ := 4 * A + 2 with hκdef
+  set κ : ℕ := 4 * A + 2 with hκeq
   by_cases hc : 0 < c κ
   swap
   · exact ⟨1, one_pos, fun q L hCB => absurd (hCB.pos _) hc⟩
@@ -1304,16 +1304,16 @@ theorem exists_pos_le_law_windows_of_windows {j : ℕ} (σ : Fin j → Bool)
   have hDA' : ((D : ℕ) : ℤ) ≤ ((A * W : ℕ) : ℤ) := by exact_mod_cast hDA
   push_cast at hRA' hDA'
   have hκV : (R' : ℤ) + M' - R ≤ κ * ((W : ℤ) - 2 * K') := by
-    rw [hκdef]
+    rw [hκeq]
     push_cast
     nlinarith
   have hκH : 2 * (D : ℤ) + W - 2 * K' ≤ κ * ((W : ℤ) - 2 * K') := by
-    rw [hκdef]
+    rw [hκeq]
     push_cast
     nlinarith
   have hκC : (W : ℤ) ≤ κ * ((M' : ℤ) - 1) := by
     have : (2 : ℤ) * ((M' : ℤ) - 1) ≤ κ * ((M' : ℤ) - 1) :=
-      mul_le_mul_of_nonneg_right (by rw [hκdef]; push_cast; nlinarith) (by omega)
+      mul_le_mul_of_nonneg_right (by rw [hκeq]; push_cast; nlinarith) (by omega)
     omega
   -- the separated event with ends in given bins
   set E : (Fin j → Fin (N + 1)) → Set (Config (LatticeSite 2)) :=
