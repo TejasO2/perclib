@@ -1737,7 +1737,7 @@ the boundary of `B_ρ(κ)` at the four corners `κ` (the one-arm bound makes the
 large); the statement records the latter, so that no arm of any family starts near a corner. -/
 theorem exists_inner_separating_event {j : ℕ} (σ : Fin j → Bool)
     (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) (c : ℕ → ℝ≥0∞) {δ : ℝ≥0∞} (hδ : 0 < δ) :
-    ∃ η : ℝ, 0 < η ∧ η ≤ 1 / 256 ∧ ∃ w N₀ : ℕ, 7 ≤ w ∧
+    ∃ η : ℝ, 0 < η ∧ η ≤ 1 / 256 ∧ ∃ w N₀ : ℕ, 7 ≤ w ∧ w % 2 = 1 ∧
       ∀ (q : Sym2 (LatticeSite 2) → unitInterval)
       (L : ℕ∞), CrossingBounds q L c → ∀ (z : LatticeSite 2) (N ρ : ℕ), 2 * ρ + 1 = w * N →
       N₀ ≤ N → (ρ : ℕ∞) ≤ L → ∃ G : Set (Config (LatticeSite 2)), MeasurableSet G ∧
@@ -1789,7 +1789,7 @@ theorem exists_inner_separating_event {j : ℕ} (σ : Fin j → Bool)
   have h2x : (0 : ℝ≥0∞) < 2 * x := by positivity
   obtain ⟨η, hη, hη1, N₁, hstrip⟩ := exists_law_separable_ge_strip c w (by omega) h2x
   have hη1' : η ≤ 1 := hη1.trans (by norm_num)
-  refine ⟨η, hη, hη1, w, N₁ + ⌈1 / η⌉₊ + 3, by omega, fun q L h z N ρ hρ hN hρL => ?_⟩
+  refine ⟨η, hη, hη1, w, N₁ + ⌈1 / η⌉₊ + 3, by omega, by omega, fun q L h z N ρ hρ hN hρL => ?_⟩
   -- the scales
   have hwN : 9 * N ≤ w * N := Nat.mul_le_mul_right N (by omega)
   have hN3 : 3 ≤ N := by omega
@@ -2081,14 +2081,16 @@ the edges inside `B_{2ρ}(z)`, the latter arm event only on the edges outside, a
 former. -/
 theorem exists_law_multiArmEvent_diff_innerSeparated_le {j : ℕ} (σ : Fin j → Bool)
     (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) (c : ℕ → ℝ≥0∞) {δ : ℝ≥0∞} (hδ : 0 < δ) :
-    ∃ η : ℝ, 0 < η ∧ η ≤ 1 ∧ ∃ w N₀ : ℕ, 7 ≤ w ∧ ∀ (q : Sym2 (LatticeSite 2) → unitInterval)
+    ∃ η : ℝ, 0 < η ∧ η ≤ 1 ∧ ∃ w N₀ : ℕ, 7 ≤ w ∧ w % 2 = 1 ∧
+      ∀ (q : Sym2 (LatticeSite 2) → unitInterval)
       (L : ℕ∞), CrossingBounds q L c → ∀ (z : LatticeSite 2) (N ρ R : ℕ), 2 * ρ + 1 = w * N →
       N₀ ≤ N → 2 * ρ + 2 ≤ R → (ρ : ℕ∞) ≤ L →
       law q (multiArmEvent σ z ρ R \ innerSeparatedArmEvent σ z ρ R (4 * Real.sqrt η * N)
           ⌊Real.sqrt η * N⌋₊ ⌊η * N⌋₊) ≤
         δ * law q (multiArmEvent σ z (2 * ρ + 1) R) := by
-  obtain ⟨η, hη, hη1, w, N₀, hw, hG⟩ := exists_inner_separating_event σ hσ c hδ
-  refine ⟨η, hη, le_trans hη1 (by norm_num), w, N₀, hw, fun q L h z N ρ R hρ hN hR hρL => ?_⟩
+  obtain ⟨η, hη, hη1, w, N₀, hw, hwo, hG⟩ := exists_inner_separating_event σ hσ c hδ
+  refine ⟨η, hη, le_trans hη1 (by norm_num), w, N₀, hw, hwo,
+    fun q L h z N ρ R hρ hN hR hρL => ?_⟩
   obtain ⟨G, hGm, hGd, hGl, -, hGsep⟩ := hG q L h z N ρ hρ hN hρL
   have hAm : MeasurableSet (multiArmEvent σ z (2 * ρ + 1) R) := measurableSet_multiArmEvent σ z _ R
   set Q : Set (LatticeSite 2) :=

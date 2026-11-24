@@ -136,6 +136,7 @@ public import PercLib.Models.Planar.Arms.Defs
 public import PercLib.Models.Planar.Arms.HalfPlaneExponents
 public import PercLib.Models.Planar.Arms.IncipientCluster
 public import PercLib.Models.Planar.Arms.InnerFamilyGluing
+public import PercLib.Models.Planar.Arms.InnerFarFamily
 public import PercLib.Models.Planar.Arms.InnerGluing
 public import PercLib.Models.Planar.Arms.InnerSeparation
 public import PercLib.Models.Planar.Arms.InnerSeparationSides
