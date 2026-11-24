@@ -23,6 +23,8 @@ sequences without packs, uniformly under crossing bounds.
 
 ## Main results
 
+* `exists_strictMono_comp_finRotate_pow`: rotating the indices of a cyclically ordered family so
+  that its positions increase.
 * `exists_pos_mul_le_law_of_plan_two_sided`: the motion plan carries a family separated at the
   outer boundary of `B_{R₀}(z)` into windows aligned with the starts of a family separated at the
   inner boundary of `B_ρ(z)`, and the two-sided gluing with regions disjoint by colour joins them.
@@ -34,6 +36,47 @@ open MeasureTheory Set PercLib.Percolation.Bond PercLib.Models.Site
 open scoped ENNReal
 
 namespace PercLib.Models.Planar
+
+/-! ### Choosing the first arm -/
+
+/-- Rotating the indices `k` times sends `0` to `k`. -/
+theorem finRotate_pow_val_apply_zero {m : ℕ} (k : Fin (m + 1)) :
+    (finRotate (m + 1) ^ (k : ℕ)) 0 = k := by
+  rw [Equiv.Perm.coe_pow, ← finCycle_eq_finRotate_iterate, finCycle_apply, zero_add]
+
+/-- **Choosing the first arm.** For pairwise distinct integer positions `P` in strict cyclic order
+along the indices, rotating the indices so that the arm of smallest position comes first makes the
+positions increasing. -/
+theorem exists_strictMono_comp_finRotate_pow {j : ℕ} {P : Fin j → ℤ}
+    (hP : ∀ i k l, i < k → k < l → sbtw (P i) (P k) (P l)) (hinj : Function.Injective P) :
+    ∃ m : ℕ, StrictMono fun i => P ((finRotate j ^ m) i) := by
+  rcases j with _ | m
+  · exact ⟨0, fun i => i.elim0⟩
+  obtain ⟨k₀, -, hk₀⟩ := Finset.univ.exists_min_image P Finset.univ_nonempty
+  refine ⟨k₀, fun i l hil => ?_⟩
+  change P ((finRotate (m + 1) ^ (k₀ : ℕ)) i) < P ((finRotate (m + 1) ^ (k₀ : ℕ)) l)
+  have hgP := sbtw_comp_finRotate_pow (k₀ : ℕ) hP
+  have hg0 : P ((finRotate (m + 1) ^ (k₀ : ℕ)) 0) = P k₀ := by
+    rw [finRotate_pow_val_apply_zero]
+  have hmin : ∀ i, P k₀ ≤ P ((finRotate (m + 1) ^ (k₀ : ℕ)) i) :=
+    fun i => hk₀ _ (Finset.mem_univ _)
+  have hne : ∀ i, i ≠ 0 → P k₀ ≠ P ((finRotate (m + 1) ^ (k₀ : ℕ)) i) := by
+    intro i hi h
+    rw [← hg0] at h
+    exact hi ((finRotate (m + 1) ^ (k₀ : ℕ)).injective (hinj h)).symm
+  have hl0 : l ≠ 0 := fun h => by
+    rw [h] at hil
+    exact absurd hil (Fin.not_lt_zero i)
+  have h₁ := hmin l
+  have h₂ := hne l hl0
+  rcases (Fin.zero_le i).lt_or_eq with h0 | h0
+  · have h₃ := Int.sbtw_iff.1 (hgP 0 i l h0 hil)
+    rw [hg0] at h₃
+    have h₄ := hmin i
+    omega
+  · subst h0
+    rw [hg0]
+    omega
 
 section Core
 
