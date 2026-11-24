@@ -22,7 +22,8 @@ Nolin's separation theorem at the outer boundary of an annulus, for colour seque
 and uniformly over the laws with crossing bounds: up to a constant factor, the arms of the `j`-arm
 event from `B_r(z)` to `∂B_R(z)` can be required to land in prescribed windows, and they can be
 chosen separated, with fences whose size is proportional to `R`. Consequences: extendability of
-the outer radius, `π(r, R) ≤ C π(r, 2R)`.
+the outer radius, `π(r, R) ≤ C π(r, 2R)`. The file also completes the upper half of
+quasi-multiplicativity for radii that may coincide.
 
 The proof is Nolin's induction on scales, assembled from the outer separation step
 (`exists_law_multiArmEvent_inter_not_separated_le`) and the motion plan
@@ -58,6 +59,9 @@ All the parameters are integers; the arithmetic of the two steps is in `window_s
   can be chosen separated at ∂B_R(z) with parameters proportional to R)` for `r₀ ≤ r`, `7r ≤ R`.
 * `exists_law_multiArmEvent_le_law_multiArmEvent_two_mul`: **extendability of the outer radius**,
   `π_σ(r, R) ≤ C π_σ(r, 2R)` for `r₀ ≤ r ≤ R`, `2R ≤ L`.
+* `law_multiArmEvent_le_mul_of_le`: **upper half of quasi-multiplicativity** for all
+  `j ≤ r₁ ≤ r₂ ≤ r₃` and every law (`C = 1`), from `law_multiArmEvent_le_mul` and
+  `multiArmEvent_self_eq_univ` (the arm event across an empty annulus is everything for `j ≤ r`).
 * `exists_pos_le_law_window_step`, `exists_pos_le_law_window_step_landing`,
   `exists_pos_le_law_glue_step`, `exists_pos_le_law_outerSeparated`: the steps.
 * `IsLanding.exists_core`, `IsLanding.exists_windows`, `exists_windows_of_ccw`,
@@ -1295,5 +1299,94 @@ theorem exists_law_multiArmEvent_le_law_multiArmEvent_two_mul {j : ℕ} (σ : Fi
       _ = d⁻¹ * d := (ENNReal.inv_mul_cancel hd0 hdt).symm
       _ ≤ (C₁ * w⁻¹ + d⁻¹) * law q (multiArmEvent σ z r (2 * R)) :=
           mul_le_mul' le_add_self h1
+
+/-! ### Quasi-multiplicativity, upper half, for all ordered radii -/
+
+/-- An arm of length zero on the left side of `B_r(z)`: the vertex `(z₀ - r, y)` (open) or the
+face `(z₀ - r - 1, y)` just left of it (dual), for `z₁ - r < y < z₁ + r`, is an arm from `B_r(z)`
+to its own boundary, landing at `12 r + 2 (z₁ + r - y) - [dual]`. -/
+theorem isArm_nil_left (ω : Config (LatticeSite 2)) (col : Bool) (z : LatticeSite 2) {r : ℕ}
+    {y : ℤ} (hy₁ : z 1 - r < y) (hy₂ : y < z 1 + r) :
+    IsArm ω col z r (z - r) (z + r)
+        (SimpleGraph.Walk.nil : (zdGraph 2).Walk ![z 0 - r - cond col 0 1, y]
+          ![z 0 - r - cond col 0 1, y]) ∧
+      landingPos (z - r) (z + r) col
+          (SimpleGraph.Walk.nil : (zdGraph 2).Walk ![z 0 - r - cond col 0 1, y]
+            ![z 0 - r - cond col 0 1, y]) =
+        12 * r + 2 * (z 1 + r - y) - cond col 0 1 := by
+  cases col
+  · refine ⟨⟨SimpleGraph.Walk.isCrossing_nil_iff.2 ⟨?_, ?_⟩, by simp⟩, ?_⟩
+    · rw [mem_Icc_two_iff]
+      simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Pi.sub_apply, Pi.add_apply,
+        Pi.natCast_apply, Pi.one_apply, Bool.cond_false]
+      omega
+    · rw [mem_Icc_two_iff]
+      simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Pi.sub_apply, Pi.add_apply,
+        Pi.natCast_apply, Pi.one_apply, Bool.cond_false]
+      omega
+    · rw [landingPos_false, SimpleGraph.Walk.penultimate_nil]
+      unfold perimeterPos
+      simp only [Pi.add_apply, Pi.smul_apply, Pi.sub_apply, Pi.natCast_apply, Pi.one_apply,
+        nsmul_eq_mul, Nat.cast_ofNat, Bool.cond_false, Matrix.cons_val_zero,
+        Matrix.cons_val_one]
+      split_ifs <;> omega
+  · refine ⟨⟨SimpleGraph.Walk.isCrossing_nil_iff.2 ⟨?_, ?_⟩, by simp⟩, ?_⟩
+    · rw [mem_Icc_two_iff]
+      simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Pi.sub_apply, Pi.add_apply,
+        Pi.natCast_apply, Bool.cond_true]
+      omega
+    · rw [mem_Icc_two_iff]
+      simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Pi.sub_apply, Pi.add_apply,
+        Pi.natCast_apply, Pi.one_apply, Bool.cond_true]
+      omega
+    · rw [landingPos_true]
+      unfold perimeterPos
+      simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply, Bool.cond_true,
+        Matrix.cons_val_zero, Matrix.cons_val_one]
+      split_ifs <;> omega
+
+/-- **The arm event across an empty annulus.** For `j ≤ r` the `j`-arm event from `B_r(z)` to its
+own boundary is everything: arms of length zero at the heights `z₁ + r - 1 - i` down the left
+side of `B_r(z)` (open arms at its vertices, dual arms at the faces just left of it) form a disjoint
+family landing in counterclockwise order, whatever the configuration. -/
+theorem multiArmEvent_self_eq_univ {j : ℕ} (σ : Fin j → Bool) (z : LatticeSite 2) {r : ℕ}
+    (hjr : j ≤ r) : multiArmEvent σ z r r = univ := by
+  refine eq_univ_of_forall fun ω => ?_
+  have hy : ∀ i : Fin j, z 1 - r < z 1 + r - 1 - ((i : ℕ) : ℤ) ∧
+      z 1 + r - 1 - ((i : ℕ) : ℤ) < z 1 + r := fun i => by
+    have := i.2
+    omega
+  refine mem_multiArmEvent_iff.2 ⟨fun i => ![z 0 - r - cond (σ i) 0 1, z 1 + r - 1 - (i : ℕ)],
+    fun i => ![z 0 - r - cond (σ i) 0 1, z 1 + r - 1 - (i : ℕ)],
+    fun i => SimpleGraph.Walk.nil, fun i => (isArm_nil_left ω (σ i) z (hy i).1 (hy i).2).1,
+    ⟨fun i k _ _ _ v hv => by simp at hv, fun i k hik _ _ v hv hv' => ?_⟩, fun i k l hik hkl => ?_⟩
+  · simp only [SimpleGraph.Walk.support_nil, List.mem_singleton] at hv hv'
+    have := congrFun (hv.symm.trans hv') 1
+    simp only [Matrix.cons_val_one, Matrix.cons_val_zero] at this
+    exact hik (Fin.ext (by omega))
+  · rw [(isArm_nil_left ω (σ i) z (hy i).1 (hy i).2).2,
+      (isArm_nil_left ω (σ k) z (hy k).1 (hy k).2).2,
+      (isArm_nil_left ω (σ l) z (hy l).1 (hy l).2).2]
+    have hik' : (i : ℕ) < k := hik
+    have hkl' : (k : ℕ) < l := hkl
+    have e : ∀ m : Fin j, cond (σ m) (0 : ℤ) 1 = 0 ∨ cond (σ m) (0 : ℤ) 1 = 1 := fun m => by
+      cases σ m <;> simp
+    rcases e i with hi | hi <;> rcases e k with hk | hk <;> rcases e l with hl | hl <;>
+      rw [hi, hk, hl] <;> exact Int.sbtw_iff.2 (Or.inl ⟨by omega, by omega⟩)
+
+/-- **Upper half of quasi-multiplicativity for ordered radii.** For `j ≤ r₁ ≤ r₂ ≤ r₃` and every
+product law, `π_σ(r₁, r₃) ≤ π_σ(r₁, r₂) π_σ(r₂, r₃)`: for strictly increasing radii this is
+`law_multiArmEvent_le_mul`, and an empty annulus carries the whole space
+(`multiArmEvent_self_eq_univ`). -/
+theorem law_multiArmEvent_le_mul_of_le (q : Sym2 (LatticeSite 2) → unitInterval) {j : ℕ}
+    (σ : Fin j → Bool) (z : LatticeSite 2) {r₁ r₂ r₃ : ℕ} (hj : j ≤ r₁) (h₁ : r₁ ≤ r₂)
+    (h₂ : r₂ ≤ r₃) :
+    law q (multiArmEvent σ z r₁ r₃) ≤
+      law q (multiArmEvent σ z r₁ r₂) * law q (multiArmEvent σ z r₂ r₃) := by
+  rcases h₁.lt_or_eq with h₁ | rfl
+  · rcases h₂.lt_or_eq with h₂ | rfl
+    · exact law_multiArmEvent_le_mul q σ z h₁ h₂
+    · rw [multiArmEvent_self_eq_univ σ z (hj.trans h₁.le), measure_univ, mul_one]
+  · rw [multiArmEvent_self_eq_univ σ z hj, measure_univ, one_mul]
 
 end PercLib.Models.Planar
