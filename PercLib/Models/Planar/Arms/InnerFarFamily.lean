@@ -31,7 +31,8 @@ integer form that the motion plan and the two-sided gluing consume
   starts far from the corners: `P(A(ρ, R) \ far separated family) ≤ δ P(A(2ρ + 1, R))`.
 * `far_of_isArm`: an arm starting in no corner zone has its start at least `N + 1` from the ends
   of its side.
-* `exists_bin`, `exists_mem_bin`: every start lies in one of `NB` bins on one of the four sides.
+* `exists_bin`, `exists_mem_bin`, `exists_bin_assignment`: every start lies in one of `NB` bins on
+  one of the four sides.
 * `exists_side_data`: the coordinate of a start in a bin and its inner position.
 * `side_facts_single`, `side_facts_pair`: the margins, gaps and side order of starts in bins, in
   integers.
@@ -219,6 +220,38 @@ theorem exists_mem_bin {c : Bool} {z lo hi a b : LatticeSite 2} {ρ NB bw : ℕ}
   · obtain ⟨g, hg1, hg2⟩ := exists_bin (NB := NB) (bw := bw) (v := a 1 - (z 1 - ρ - 1))
       (by omega) (by omega)
     exact ⟨3, g, Or.inr (Or.inr (Or.inr ⟨rfl, e, by omega, by omega⟩))⟩
+
+/-- **A bin assignment for a family.** For arms from `B_ρ(z)`, when `NB (k + 1) > 2ρ + 1`, some
+assignment `p` of a side and one of `NB` bins to every arm puts the start of arm `i` on the side
+`(p i).1` in the window `[X (p i), X (p i) + k]`, where `X (t, g) = Z_t - ρ - 1 + g (k + 1)` and
+`Z_t` is the coordinate of `z` along the side `t`. -/
+theorem exists_bin_assignment {j : ℕ} {σ : Fin j → Bool} {z lo hi : LatticeSite 2} {ρ NB k : ℕ}
+    {a b : Fin j → LatticeSite 2} {γ : ∀ i, (zdGraph 2).Walk (a i) (b i)}
+    (hγ : ∀ i, IsArm ω (σ i) z ρ lo hi (γ i))
+    (hB : Icc (z - (ρ : LatticeSite 2)) (z + ρ) ⊆ Icc (lo + 1) (hi - 1))
+    (hNB : 2 * ρ + 1 < NB * (k + 1)) {X : Fin 4 × Fin NB → ℤ}
+    (hX : ∀ p, X p = (if p.1 = 0 ∨ p.1 = 2 then z 0 else z 1) - ρ - 1 +
+      ((p.2 : ℕ) : ℤ) * (k + 1)) :
+    ∃ p : Fin j → Fin 4 × Fin NB, ∀ i,
+      ((p i).1 = 0 ∧ a i 1 = z 1 + ρ ∧ X (p i) ≤ a i 0 ∧ a i 0 ≤ X (p i) + k) ∨
+      ((p i).1 = 1 ∧ a i 0 = z 0 + ρ ∧ X (p i) ≤ a i 1 ∧ a i 1 ≤ X (p i) + k) ∨
+      ((p i).1 = 2 ∧ a i 1 = z 1 - ρ - cond (σ i) 0 1 ∧ X (p i) ≤ a i 0 ∧
+        a i 0 ≤ X (p i) + k) ∨
+      ((p i).1 = 3 ∧ a i 0 = z 0 - ρ - cond (σ i) 0 1 ∧ X (p i) ≤ a i 1 ∧
+        a i 1 ≤ X (p i) + k) := by
+  choose t g hbin using fun i => exists_mem_bin (hγ i) hB hNB
+  refine ⟨fun i => (t i, g i), fun i => ?_⟩
+  have hX' := hX (t i, g i)
+  dsimp only at hX' ⊢
+  rcases hbin i with ⟨ht, e, l, u⟩ | ⟨ht, e, l, u⟩ | ⟨ht, e, l, u⟩ | ⟨ht, e, l, u⟩
+  · rw [ite_eq_left (Or.inl ht)] at hX'
+    exact Or.inl ⟨ht, e, by omega, by omega⟩
+  · rw [ite_eq_right (by rw [ht]; decide)] at hX'
+    exact Or.inr (Or.inl ⟨ht, e, by omega, by omega⟩)
+  · rw [ite_eq_left (Or.inr ht)] at hX'
+    exact Or.inr (Or.inr (Or.inl ⟨ht, e, by omega, by omega⟩))
+  · rw [ite_eq_right (by rw [ht]; decide)] at hX'
+    exact Or.inr (Or.inr (Or.inr ⟨ht, e, by omega, by omega⟩))
 
 /-- **The coordinate and the inner position of a start in a bin.** For an arm from `B_ρ(z)`
 starting on the side `t` in the window `[x, x + bw]` of that side, at least `N + 1` from the ends of
