@@ -38,6 +38,13 @@ or round the next corner counterclockwise (a turn), and receives a new outer fen
   `c₀` depending only on `σ`, `c` and the ratios `A`, `N`. With no turn it is the
   window-to-window step with fences of any size (`W + K' ≤ M'`), which can be iterated with the
   same fences at every step.
+* `exists_pos_le_law_windows_of_stages`: **a chain of `n` stages**, `c₀ P(separated arms in the
+  windows of stage 0 at ρ 0) ≤ P(separated arms in the windows of stage n at ρ n)`, with the same
+  fences `(M, K)` throughout; `c₀` depends only on `σ`, `c`, `A`, `N`, `n`. Given a plan of moves
+  from the bins of the separated arms to prescribed windows, this is the rotation into fixed
+  windows.
+* `law_le_sum_law_windows_of_separated`: the separated event is covered by the events in which
+  the arms end in given bins (the windows a chain starts from).
 
 ## Implementation notes
 
@@ -1272,5 +1279,252 @@ theorem exists_pos_le_law_windows_of_moves (σ : Fin j → Bool)
         rw [mul_comm, mul_assoc, ENNReal.inv_mul_cancel hX0 hXt, mul_one]
 
 end Stages
+
+/-! ### Chains of stages -/
+
+section Chains
+
+variable {j : ℕ}
+
+/-- **Geometric growth along a chain** in `ℝ≥0∞`: if `c u k ≤ u (k + 1)` for `k < n`, then
+`c ^ n u 0 ≤ u n` (`geom_le` for `ℝ≥0∞`). -/
+theorem pow_mul_le_of_forall_mul_le {u : ℕ → ℝ≥0∞} {c : ℝ≥0∞} (n : ℕ)
+    (h : ∀ k < n, c * u k ≤ u (k + 1)) : c ^ n * u 0 ≤ u n := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+    calc c ^ (n + 1) * u 0 = c * (c ^ n * u 0) := by rw [pow_succ', mul_assoc]
+      _ ≤ c * u n := mul_le_mul' le_rfl (ih fun k hk => h k (by omega))
+      _ ≤ u (n + 1) := h n (by omega)
+
+/-- **A chain of stages of moves** (the rotation into fixed windows, given its plan). For a colour
+sequence `σ` without packs, ratios `A`, `N` and a number of stages `n` there is `c₀ > 0` such that
+for every law with crossing bounds `c` up to scale `L`: separated arms with fences `(M, K)` ending
+in windows `(t 0, [α 0, β 0])` on the sides of `B_{ρ 0}(z)` are carried, through `n` stages of moves
+(`exists_pos_le_law_windows_of_moves`, stage `k` from `ρ k` to `ρ (k + 1)` at the level `hl k`, with
+the moves `τ k`, `d k`), to separated arms with the **same** fences `(M, K)` ending in the windows
+`(t n, [α n, β n])` of `B_{ρ n}(z)`, separated at scale `2S - 1`:
+`c₀ P(windows at ρ 0) ≤ P(windows at ρ n)`. The windows of every stage are at least `S` from the
+corners and from each other on one side, a turning arm is the last of its side in counterclockwise
+order, and each stage's target windows are the next stage's windows. The constant depends only on
+`σ`, `c`, `A`, `N`, `n`. -/
+theorem exists_pos_le_law_windows_of_stages (σ : Fin j → Bool)
+    (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) (c : ℕ → ℝ≥0∞) (A N n : ℕ) :
+    ∃ c₀ : ℝ≥0∞, 0 < c₀ ∧ ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
+      CrossingBounds q L c → ∀ (z : LatticeSite 2) (r W M K D S : ℕ) (ρ : ℕ → ℕ) (hl : ℕ → ℤ)
+      (s : ℝ) (J : Fin j → Set ℤ) (t : ℕ → Fin j → Fin 4) (τ : ℕ → Fin j → Bool)
+      (α β d : ℕ → Fin j → ℤ),
+      1 ≤ W → W ≤ K → W + K ≤ M → W + 2 * D + 2 * M + 2 * K + 3 ≤ S →
+      W + 2 * K ≤ A * (M - 1) → 4 * (M : ℝ) ≤ s → r + M + 1 < ρ 0 →
+      (∀ k < n, (ρ k : ℤ) + M + 1 ≤ hl k ∧ hl k + W + M ≤ ρ (k + 1) ∧
+        2 * ρ (k + 1) + 2 ≤ A * W ∧ (ρ (k + 1) : ℕ∞) ≤ L) →
+      (∀ k < n, ∀ i, -(D : ℤ) ≤ d k i ∧ d k i ≤ D) →
+      (∀ k < n, ∀ i, β k i - α k i + 1 ≤ N * ((W : ℤ) + 1)) →
+      (∀ k ≤ n, ∀ i, (if t k i = 0 ∨ t k i = 2 then z 0 else z 1) - ρ k + S ≤ α k i ∧
+        β k i + S ≤ (if t k i = 0 ∨ t k i = 2 then z 0 else z 1) + ρ k) →
+      (∀ k ≤ n, ∀ i l, i ≠ l → t k i = t k l → β k i + S ≤ α k l ∨ β k l + S ≤ α k i) →
+      (∀ k < n, ∀ i l, i ≠ l → τ k i = true → t k l = t k i →
+        (t k i = 0 ∨ t k i = 3 → β k i + S ≤ α k l) ∧ (t k i = 1 ∨ t k i = 2 → β k l + S ≤ α k i)) →
+      (∀ k < n, ∀ i, (τ k i = false ∧ t (k + 1) i = t k i ∧ α (k + 1) i = α k i + d k i ∧
+          β (k + 1) i = β k i + d k i + W) ∨
+        (τ k i = true ∧ ((t k i = 1 ∧ t (k + 1) i = 0 ∧ α (k + 1) i = z 0 + hl k ∧
+            β (k + 1) i = z 0 + hl k + W) ∨
+          (t k i = 0 ∧ t (k + 1) i = 3 ∧ α (k + 1) i = z 1 + hl k ∧
+            β (k + 1) i = z 1 + hl k + W) ∨
+          (t k i = 3 ∧ t (k + 1) i = 2 ∧ α (k + 1) i = z 0 - hl k - W ∧ β (k + 1) i = z 0 - hl k) ∨
+          (t k i = 2 ∧ t (k + 1) i = 1 ∧ α (k + 1) i = z 1 - hl k - W ∧
+            β (k + 1) i = z 1 - hl k)))) →
+      c₀ * law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+        (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, IsArm ω (σ i) z r (z - (ρ 0)) (z + (ρ 0)) (γ i)) ∧ ArmsDisjoint σ γ ∧
+        (∀ i k l, i < k → k < l → sbtw (landingPos (z - (ρ 0)) (z + (ρ 0)) (σ i) (γ i))
+          (landingPos (z - (ρ 0)) (z + (ρ 0)) (σ k) (γ k)) (landingPos (z - (ρ 0)) (z + (ρ 0)) (σ
+              l) (γ l))) ∧
+        ArmsOuterSeparated ω σ z (ρ 0) s M K γ ∧ (∀ i, b i ∈ {b : LatticeSite 2 |
+          (t 0 i = 0 ∧ b 1 = z 1 + (ρ 0) ∧ α 0 i ≤ b 0 ∧ b 0 ≤ β 0 i) ∨
+          (t 0 i = 1 ∧ b 0 = z 0 + (ρ 0) ∧ α 0 i ≤ b 1 ∧ b 1 ≤ β 0 i) ∨
+          (t 0 i = 2 ∧ b 1 = z 1 - (ρ 0) - cond (σ i) 0 1 ∧ α 0 i ≤ b 0 ∧ b 0 ≤ β 0 i) ∨
+          (t 0 i = 3 ∧ b 0 = z 0 - (ρ 0) - cond (σ i) 0 1 ∧ α 0 i ≤ b 1 ∧ b 1 ≤ β 0 i)}) ∧
+        ∀ i, innerPos z r (σ i) (γ i) ∈ J i} ≤
+      law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+        (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, IsArm ω (σ i) z r (z - (ρ n)) (z + (ρ n)) (γ i)) ∧ ArmsDisjoint σ γ ∧
+        (∀ i k l, i < k → k < l → sbtw (landingPos (z - (ρ n)) (z + (ρ n)) (σ i) (γ i))
+          (landingPos (z - (ρ n)) (z + (ρ n)) (σ k) (γ k)) (landingPos (z - (ρ n)) (z + (ρ n)) (σ
+              l) (γ l))) ∧
+        ArmsOuterSeparated ω σ z (ρ n) ((2 * (S : ℤ) - 1 : ℤ) : ℝ) M K γ ∧ (∀ i, b i ∈ {b :
+            LatticeSite 2 |
+          (t n i = 0 ∧ b 1 = z 1 + (ρ n) ∧ α n i ≤ b 0 ∧ b 0 ≤ β n i) ∨
+          (t n i = 1 ∧ b 0 = z 0 + (ρ n) ∧ α n i ≤ b 1 ∧ b 1 ≤ β n i) ∨
+          (t n i = 2 ∧ b 1 = z 1 - (ρ n) - cond (σ i) 0 1 ∧ α n i ≤ b 0 ∧ b 0 ≤ β n i) ∨
+          (t n i = 3 ∧ b 0 = z 0 - (ρ n) - cond (σ i) 0 1 ∧ α n i ≤ b 1 ∧ b 1 ≤ β n i)}) ∧
+        ∀ i, innerPos z r (σ i) (γ i) ∈ J i} := by
+  obtain ⟨c₁, hc₁, hstage⟩ := exists_pos_le_law_windows_of_moves σ hσ c A N
+  refine ⟨c₁ ^ n, ENNReal.pow_pos hc₁ n, ?_⟩
+  intro q L hCB z r W M K D S ρ hl s J t τ α β d hW hWK hWKM hS hAM hs hρ0 hρ hd hN hwin hgap
+    hccw hout
+  have hS1 : (1 : ℤ) ≤ S := by omega
+  have hsS : 4 * (M : ℝ) ≤ ((2 * (S : ℤ) - 1 : ℤ) : ℝ) := by
+    have : (4 * M : ℤ) ≤ 2 * (S : ℤ) - 1 := by omega
+    exact_mod_cast this
+  have hmono : ∀ k ≤ n, ρ 0 ≤ ρ k := by
+    intro k hk
+    induction k with
+    | zero => exact le_rfl
+    | succ k ih =>
+      obtain ⟨h₁, h₂, -, -⟩ := hρ k hk
+      have := ih (by omega)
+      omega
+  -- the windows give the separation at scale `2S - 1` at the start
+  have h₀ : law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+        (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, IsArm ω (σ i) z r (z - (ρ 0)) (z + (ρ 0)) (γ i)) ∧ ArmsDisjoint σ γ ∧
+        (∀ i k l, i < k → k < l → sbtw (landingPos (z - (ρ 0)) (z + (ρ 0)) (σ i) (γ i))
+          (landingPos (z - (ρ 0)) (z + (ρ 0)) (σ k) (γ k)) (landingPos (z - (ρ 0)) (z + (ρ 0)) (σ
+              l) (γ l))) ∧
+        ArmsOuterSeparated ω σ z (ρ 0) s M K γ ∧ (∀ i, b i ∈ {b : LatticeSite 2 |
+          (t 0 i = 0 ∧ b 1 = z 1 + (ρ 0) ∧ α 0 i ≤ b 0 ∧ b 0 ≤ β 0 i) ∨
+          (t 0 i = 1 ∧ b 0 = z 0 + (ρ 0) ∧ α 0 i ≤ b 1 ∧ b 1 ≤ β 0 i) ∨
+          (t 0 i = 2 ∧ b 1 = z 1 - (ρ 0) - cond (σ i) 0 1 ∧ α 0 i ≤ b 0 ∧ b 0 ≤ β 0 i) ∨
+          (t 0 i = 3 ∧ b 0 = z 0 - (ρ 0) - cond (σ i) 0 1 ∧ α 0 i ≤ b 1 ∧ b 1 ≤ β 0 i)}) ∧
+        ∀ i, innerPos z r (σ i) (γ i) ∈ J i} ≤ law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j
+            → LatticeSite 2)
+        (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, IsArm ω (σ i) z r (z - (ρ 0)) (z + (ρ 0)) (γ i)) ∧ ArmsDisjoint σ γ ∧
+        (∀ i k l, i < k → k < l → sbtw (landingPos (z - (ρ 0)) (z + (ρ 0)) (σ i) (γ i))
+          (landingPos (z - (ρ 0)) (z + (ρ 0)) (σ k) (γ k)) (landingPos (z - (ρ 0)) (z + (ρ 0)) (σ
+              l) (γ l))) ∧
+        ArmsOuterSeparated ω σ z (ρ 0) ((2 * (S : ℤ) - 1 : ℤ) : ℝ) M K γ ∧ (∀ i, b i ∈ {b :
+            LatticeSite 2 |
+          (t 0 i = 0 ∧ b 1 = z 1 + (ρ 0) ∧ α 0 i ≤ b 0 ∧ b 0 ≤ β 0 i) ∨
+          (t 0 i = 1 ∧ b 0 = z 0 + (ρ 0) ∧ α 0 i ≤ b 1 ∧ b 1 ≤ β 0 i) ∨
+          (t 0 i = 2 ∧ b 1 = z 1 - (ρ 0) - cond (σ i) 0 1 ∧ α 0 i ≤ b 0 ∧ b 0 ≤ β 0 i) ∨
+          (t 0 i = 3 ∧ b 0 = z 0 - (ρ 0) - cond (σ i) 0 1 ∧ α 0 i ≤ b 1 ∧ b 1 ≤ β 0 i)}) ∧
+        ∀ i, innerPos z r (σ i) (γ i) ∈ J i} := by
+    refine measure_mono ?_
+    rintro ω ⟨a, b, γ, hγ, hd', ho, hsep, hw, hJ⟩
+    obtain ⟨hs₁, hs₂⟩ := le_abs_landingPos_sub_of_windows hγ (by omega) hS1 (t 0) (α 0) (β 0) hw
+      (hwin 0 (Nat.zero_le _)) (hgap 0 (Nat.zero_le _))
+    refine ⟨a, b, γ, hγ, hd', ho, ⟨fun i k hik => ?_, fun i m => ?_, hsep.2.2⟩, hw, hJ⟩
+    · rw [← Int.cast_abs]
+      exact_mod_cast hs₁ i k hik
+    · rw [← Int.cast_abs]
+      exact_mod_cast hs₂ i m
+  -- one stage
+  have hstep : ∀ m < n, c₁ * law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+        (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, IsArm ω (σ i) z r (z - (ρ m)) (z + (ρ m)) (γ i)) ∧ ArmsDisjoint σ γ ∧
+        (∀ i k l, i < k → k < l → sbtw (landingPos (z - (ρ m)) (z + (ρ m)) (σ i) (γ i))
+          (landingPos (z - (ρ m)) (z + (ρ m)) (σ k) (γ k)) (landingPos (z - (ρ m)) (z + (ρ m)) (σ
+              l) (γ l))) ∧
+        ArmsOuterSeparated ω σ z (ρ m) ((2 * (S : ℤ) - 1 : ℤ) : ℝ) M K γ ∧ (∀ i, b i ∈ {b :
+            LatticeSite 2 |
+          (t m i = 0 ∧ b 1 = z 1 + (ρ m) ∧ α m i ≤ b 0 ∧ b 0 ≤ β m i) ∨
+          (t m i = 1 ∧ b 0 = z 0 + (ρ m) ∧ α m i ≤ b 1 ∧ b 1 ≤ β m i) ∨
+          (t m i = 2 ∧ b 1 = z 1 - (ρ m) - cond (σ i) 0 1 ∧ α m i ≤ b 0 ∧ b 0 ≤ β m i) ∨
+          (t m i = 3 ∧ b 0 = z 0 - (ρ m) - cond (σ i) 0 1 ∧ α m i ≤ b 1 ∧ b 1 ≤ β m i)}) ∧
+        ∀ i, innerPos z r (σ i) (γ i) ∈ J i} ≤ law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j
+            → LatticeSite 2)
+        (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, IsArm ω (σ i) z r (z - (ρ (m + 1))) (z + (ρ (m + 1))) (γ i)) ∧ ArmsDisjoint σ γ ∧
+        (∀ i k l, i < k → k < l → sbtw (landingPos (z - (ρ (m + 1))) (z + (ρ (m + 1))) (σ i) (γ i))
+          (landingPos (z - (ρ (m + 1))) (z + (ρ (m + 1))) (σ k) (γ k)) (landingPos (z - (ρ (m +
+              1))) (z + (ρ (m + 1))) (σ l) (γ l))) ∧
+        ArmsOuterSeparated ω σ z (ρ (m + 1)) ((2 * (S : ℤ) - 1 : ℤ) : ℝ) M K γ ∧ (∀ i, b i ∈ {b :
+            LatticeSite 2 |
+          (t (m + 1) i = 0 ∧ b 1 = z 1 + (ρ (m + 1)) ∧ α (m + 1) i ≤ b 0 ∧ b 0 ≤ β (m + 1) i) ∨
+          (t (m + 1) i = 1 ∧ b 0 = z 0 + (ρ (m + 1)) ∧ α (m + 1) i ≤ b 1 ∧ b 1 ≤ β (m + 1) i) ∨
+          (t (m + 1) i = 2 ∧ b 1 = z 1 - (ρ (m + 1)) - cond (σ i) 0 1 ∧ α (m + 1) i ≤ b 0 ∧ b 0 ≤
+              β (m + 1) i) ∨
+          (t (m + 1) i = 3 ∧ b 0 = z 0 - (ρ (m + 1)) - cond (σ i) 0 1 ∧ α (m + 1) i ≤ b 1 ∧ b 1 ≤
+              β (m + 1) i)}) ∧
+        ∀ i, innerPos z r (σ i) (γ i) ∈ J i} := by
+    intro k hk
+    obtain ⟨hρ₁, hρ₂, hρ₃, hρ₄⟩ := hρ k hk
+    have hr : r + M + 1 < ρ k := hρ0.trans_le (hmono k hk.le)
+    exact hstage q L hCB z r (ρ k) (ρ (k + 1)) W M K M K D S (hl k) _ S J (t k) (t (k + 1))
+      (τ k) (α k) (β k) (d k) (α (k + 1)) (β (k + 1)) hW hWK (by omega) (by omega) hWKM hS hsS hr
+      hρ₁ hρ₂ hρ₃ hAM hρ₄ (hd k hk) (hN k hk) (hwin k hk.le) (hgap k hk.le) (hccw k hk) (hout k hk)
+      hS1 (hwin (k + 1) hk) (hgap (k + 1) hk)
+  calc c₁ ^ n * law q _ ≤ c₁ ^ n * law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j →
+      LatticeSite 2)
+        (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, IsArm ω (σ i) z r (z - (ρ 0)) (z + (ρ 0)) (γ i)) ∧ ArmsDisjoint σ γ ∧
+        (∀ i k l, i < k → k < l → sbtw (landingPos (z - (ρ 0)) (z + (ρ 0)) (σ i) (γ i))
+          (landingPos (z - (ρ 0)) (z + (ρ 0)) (σ k) (γ k)) (landingPos (z - (ρ 0)) (z + (ρ 0)) (σ
+              l) (γ l))) ∧
+        ArmsOuterSeparated ω σ z (ρ 0) ((2 * (S : ℤ) - 1 : ℤ) : ℝ) M K γ ∧ (∀ i, b i ∈ {b :
+            LatticeSite 2 |
+          (t 0 i = 0 ∧ b 1 = z 1 + (ρ 0) ∧ α 0 i ≤ b 0 ∧ b 0 ≤ β 0 i) ∨
+          (t 0 i = 1 ∧ b 0 = z 0 + (ρ 0) ∧ α 0 i ≤ b 1 ∧ b 1 ≤ β 0 i) ∨
+          (t 0 i = 2 ∧ b 1 = z 1 - (ρ 0) - cond (σ i) 0 1 ∧ α 0 i ≤ b 0 ∧ b 0 ≤ β 0 i) ∨
+          (t 0 i = 3 ∧ b 0 = z 0 - (ρ 0) - cond (σ i) 0 1 ∧ α 0 i ≤ b 1 ∧ b 1 ≤ β 0 i)}) ∧
+        ∀ i, innerPos z r (σ i) (γ i) ∈ J i} := mul_le_mul' le_rfl h₀
+    _ ≤ _ := pow_mul_le_of_forall_mul_le (u := fun m => law q {ω : Config (LatticeSite 2) | ∃ (a b
+        : Fin j → LatticeSite 2)
+        (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, IsArm ω (σ i) z r (z - (ρ m)) (z + (ρ m)) (γ i)) ∧ ArmsDisjoint σ γ ∧
+        (∀ i k l, i < k → k < l → sbtw (landingPos (z - (ρ m)) (z + (ρ m)) (σ i) (γ i))
+          (landingPos (z - (ρ m)) (z + (ρ m)) (σ k) (γ k)) (landingPos (z - (ρ m)) (z + (ρ m)) (σ
+              l) (γ l))) ∧
+        ArmsOuterSeparated ω σ z (ρ m) ((2 * (S : ℤ) - 1 : ℤ) : ℝ) M K γ ∧ (∀ i, b i ∈ {b :
+            LatticeSite 2 |
+          (t m i = 0 ∧ b 1 = z 1 + (ρ m) ∧ α m i ≤ b 0 ∧ b 0 ≤ β m i) ∨
+          (t m i = 1 ∧ b 0 = z 0 + (ρ m) ∧ α m i ≤ b 1 ∧ b 1 ≤ β m i) ∨
+          (t m i = 2 ∧ b 1 = z 1 - (ρ m) - cond (σ i) 0 1 ∧ α m i ≤ b 0 ∧ b 0 ≤ β m i) ∨
+          (t m i = 3 ∧ b 0 = z 0 - (ρ m) - cond (σ i) 0 1 ∧ α m i ≤ b 1 ∧ b 1 ≤ β m i)}) ∧
+        ∀ i, innerPos z r (σ i) (γ i) ∈ J i}) n hstep
+
+/-- **Covering the separated event by windows of bins.** Separated arms at the outer boundary of
+`B_R(z)` (separation `s ≥ 4M`) end in bins of width `W` on the sides: the separated event is
+covered by the `(4 (2A + 1)) ^ j` events in which arm `i` ends in the window of the bin `p i`
+(a side and an index), `R ≤ A W`; the first stage of a chain (`exists_pos_le_law_windows_of_stages`)
+starts from one of these. -/
+theorem law_le_sum_law_windows_of_separated (q : Sym2 (LatticeSite 2) → unitInterval)
+    {σ : Fin j → Bool} {z : LatticeSite 2} {r R W M K A : ℕ} {s : ℝ} (hrR : r < R) (hM : 1 ≤ M)
+    (hW : 1 ≤ W) (hRA : R ≤ A * W) (hs : 4 * (M : ℝ) ≤ s) (J : Fin j → Set ℤ) :
+    law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+        (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
+        (∀ i k l, i < k → k < l → sbtw (landingPos (z - R) (z + R) (σ i) (γ i))
+          (landingPos (z - R) (z + R) (σ k) (γ k)) (landingPos (z - R) (z + R) (σ l) (γ l))) ∧
+        ArmsOuterSeparated ω σ z R s M K γ ∧
+        ∀ i, innerPos z r (σ i) (γ i) ∈ J i} ≤
+      ∑ p : Fin j → Fin 4 × Fin (2 * A + 1), law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j →
+          LatticeSite 2)
+        (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
+        (∀ i k l, i < k → k < l → sbtw (landingPos (z - R) (z + R) (σ i) (γ i))
+          (landingPos (z - R) (z + R) (σ k) (γ k)) (landingPos (z - R) (z + R) (σ l) (γ l))) ∧
+        ArmsOuterSeparated ω σ z R s M K γ ∧ (∀ i, b i ∈ {b : LatticeSite 2 |
+          ((p i).1 = 0 ∧ b 1 = z 1 + R ∧ ((if (p i).1 = 0 ∨ (p i).1 = 2 then z 0 else z 1) - R +
+              (((p i).2 : ℕ) : ℤ) * (W + 1)) ≤ b 0 ∧ b 0 ≤ ((if (p i).1 = 0 ∨ (p i).1 = 2 then z 0
+              else z 1) - R + (((p i).2 : ℕ) : ℤ) * (W + 1)) + W) ∨
+          ((p i).1 = 1 ∧ b 0 = z 0 + R ∧ ((if (p i).1 = 0 ∨ (p i).1 = 2 then z 0 else z 1) - R +
+              (((p i).2 : ℕ) : ℤ) * (W + 1)) ≤ b 1 ∧ b 1 ≤ ((if (p i).1 = 0 ∨ (p i).1 = 2 then z 0
+              else z 1) - R + (((p i).2 : ℕ) : ℤ) * (W + 1)) + W) ∨
+          ((p i).1 = 2 ∧ b 1 = z 1 - R - cond (σ i) 0 1 ∧ ((if (p i).1 = 0 ∨ (p i).1 = 2 then z 0
+              else z 1) - R + (((p i).2 : ℕ) : ℤ) * (W + 1)) ≤ b 0 ∧ b 0 ≤ ((if (p i).1 = 0 ∨ (p
+              i).1 = 2 then z 0 else z 1) - R + (((p i).2 : ℕ) : ℤ) * (W + 1)) + W) ∨
+          ((p i).1 = 3 ∧ b 0 = z 0 - R - cond (σ i) 0 1 ∧ ((if (p i).1 = 0 ∨ (p i).1 = 2 then z 0
+              else z 1) - R + (((p i).2 : ℕ) : ℤ) * (W + 1)) ≤ b 1 ∧ b 1 ≤ ((if (p i).1 = 0 ∨ (p
+              i).1 = 2 then z 0 else z 1) - R + (((p i).2 : ℕ) : ℤ) * (W + 1)) + W)}) ∧
+        ∀ i, innerPos z r (σ i) (γ i) ∈ J i} := by
+  classical
+  refine (measure_mono ?_).trans (measure_iUnion_fintype_le _ _)
+  rintro ω ⟨a, b, γ, hγ, hd, ho, hsep, hJ⟩
+  have hcor := (hsep.le_abs_landingPos_sub (S := 4 * M) (by push_cast; linarith)).2
+  have hbin := fun i => (hγ i).exists_mem_bin hrR hM hW hRA (fun m => hcor i m)
+  choose t n hn hb using hbin
+  rw [mem_iUnion]
+  refine ⟨fun i => (t i, ⟨n i, hn i⟩), a, b, γ, hγ, hd, ho, hsep, fun i => ?_, hJ⟩
+  rcases hb i with ⟨h₀, h₁, h₂, h₃, -⟩ | ⟨h₀, h₁, h₂, h₃, -⟩ | ⟨h₀, h₁, h₂, h₃, -⟩ |
+      ⟨h₀, h₁, h₂, h₃, -⟩
+  · exact Or.inl ⟨h₀, h₁, h₂, h₃⟩
+  · exact Or.inr (Or.inl ⟨h₀, h₁, h₂, h₃⟩)
+  · exact Or.inr (Or.inr (Or.inl ⟨h₀, h₁, h₂, h₃⟩))
+  · exact Or.inr (Or.inr (Or.inr ⟨h₀, h₁, h₂, h₃⟩))
+
+end Chains
 
 end PercLib.Models.Planar
