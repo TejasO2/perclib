@@ -23,8 +23,12 @@ definition, `outerSeparatedArmEvent`, in the new interface module `Arms/Separati
 the outer step is restated with it, with definitionally equal statements. The A3b-2 session (§13)
 proved item 4 (Harris for a mixed order, general) and the corridor-independent half of item 5
 (conditioning on the separated event, the fence-connection argument, the gluing of continuations);
-the corridors, bins and the gluing statement remain (A3b-2b, §13.5). Nothing in `Arms/Defs.lean` or
-`Planar/Defs.lean` was changed. Local commits only, nothing pushed.
+the corridors, bins and the gluing statement remain (A3b-2b, §13.5). The A3b-2b session (§14) proved
+the gluing statement with straight corridors (`exists_pos_le_law_multiArmEventIn_of_separated`) on
+top of a gluing lemma for arbitrary corridor events (`law_mul_prod_le_law_of_corridors`); landing in
+fixed windows (staged rotation) and fences at `∂B_{R'}` are designed in §14.4 and not proved
+(A3b-2c). Nothing in `Arms/Defs.lean` or `Planar/Defs.lean` was changed. Local commits only, nothing
+pushed.
 
 ## Decisions (user, 2026-11-22)
 
@@ -1455,3 +1459,286 @@ Lessons:
 * Comparing landing positions near a side needs `IsArm.penultimate_mem`: without it `omega` considers
   the diagonal corner faces, which no dual arm can end at.
 * Builds: `MixedHarris` 7 s, `OuterGluing` about 15 s.
+
+## 14. A3b-2b (2026-11-24): the gluing statement, straight corridors
+
+Package A3b-2b = the rest of item 5 of §5 as designed in §13.5. **The gluing statement is proved for
+straight corridors**, with inner windows carried along, on top of a gluing lemma for *arbitrary*
+corridor events that later corridor shapes reuse. **Not proved:** landing in prescribed windows
+(staged rotation) and fences at `∂B_{R'}` (§14.4 gives the design; package "A3b-2c"). Proof-only,
+no definition, no `Defs.lean` touched. Commits:
+
+* `d9837d7` **Arms/CorridorGluing** (new module, 1870 lines, 43 theorems) and a proof-only refactor
+  of `Arms/OuterGluing.lean` (`mem_of_mixed_of_forall_mem` split into the per-family lemma
+  `separated_of_mixed_of_forall_mem`; the old statement is unchanged and is now a corollary).
+* this note's commit (docs only).
+
+Gate: §14.8.
+
+### 14.1 The statements proved
+
+**The gluing statement** (inner windows `J`; the plain form follows with `J = univ`):
+
+```lean
+theorem exists_pos_le_law_multiArmEventIn_of_separated {j : ℕ} (σ : Fin j → Bool)
+    (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) (c : ℕ → ℝ≥0∞) (A D : ℕ) :
+    ∃ c₀ : ℝ≥0∞, 0 < c₀ ∧ ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
+      CrossingBounds q L c → ∀ (z : LatticeSite 2) (r R R' W M K : ℕ) (s : ℝ)
+      (J : Fin j → Set ℤ), 1 ≤ W → W ≤ K → K ≤ M → 2 * W + 2 ≤ M → 4 * (M : ℝ) ≤ s →
+      r + M + 1 < R → R + M ≤ R' → R' ≤ D * R → R ≤ A * W → (R' : ℕ∞) ≤ L →
+      c₀ * law q {ω | ∃ a b γ, (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
+        (counterclockwise order at ∂B_R(z)) ∧ ArmsOuterSeparated ω σ z R s M K γ ∧
+        ∀ i, innerPos z r (σ i) (γ i) ∈ J i} ≤
+      law q (multiArmEventIn σ z r R' J fun _ => univ)
+
+theorem exists_pos_le_law_multiArmEvent_of_separated … :   -- same hypotheses, no J
+      c₀ * law q (outerSeparatedArmEvent σ z r R s M K) ≤ law q (multiArmEvent σ z r R')
+```
+
+with `c₀ = c (D A) ^ j / (4 (2A + 1)) ^ j` (and `c₀ = 1` when `c (D A) = 0`, a vacuous case).
+
+**The gluing through given corridors** (the reusable core):
+
+```lean
+theorem law_mul_prod_le_law_of_corridors (q) (hσ) {R'} (hKM : K ≤ M) (hM : 1 ≤ M)
+    (hrM : r + M + 1 < R) (hRR' : R + 2 ≤ R') (hs : 4 * (M : ℝ) ≤ s)
+    (B : Fin j → Set (LatticeSite 2)) (J : Fin j → Set ℤ) (C : Fin j → Set (Config _))
+    (T : Fin j → Set (Sym2 _)) (Q : Fin j → Set (LatticeSite 2))
+    (Φ : Fin j → Config _ → LatticeSite 2 → Prop)
+    (hCm : C i measurable) (hCT : C i determined by T i)
+    (hCmono : cond (σ i) ω ω' ⊆ cond (σ i) ω' ω → ω ∈ C i → ω' ∈ C i)   -- monotone in the colour
+    (hTT : open and dual corridors read disjoint pairs)
+    (hT : no corridor reads a pair with an end in the interior of B_R(z))
+    (hTB : σ i ≠ σ k → b ∈ B i → no pair of T k lies in Icc (b - M) (b + (M + 1)))
+    (hQloc : b ∈ B i → Q i ∩ Icc (z - R - 1) (z + R) ⊆ Icc (b - M) (b + M))
+    (hQdisj : for every separated family with ends in the bins, the regions
+       Icc (b i - M) (b i + M) ∪ Q i of two arms of one colour are disjoint)
+    (hhook : ω ∈ C i → γ an arm of colour σ i ending at b ∈ B i with an outer fence →
+       ∃ x y (P : Walk x y), x ∈ γ.support, x within M of b, P of colour σ i,
+       P.support ⊆ Icc (b - M) (b + M) ∪ Q i, y outside the interior of B_{R'}(z),
+       Φ i ω v for every point v of P outside that interior) :
+    law q (separated, ends in B, inner positions in J) * ∏ i, law q (C i) ≤
+      law q {ω | ∃ a b' γ', arms to ∂B_{R'}(z), disjoint, ordered, inner positions in J,
+        ∀ i, Φ i ω (b' i)}
+```
+
+Its proof: `D` = the pairs read by dual corridors; each `C i` is upper for the mixed order of `D`
+(`mixed_of_determined_of_increasing/decreasing`), so Harris for the mixed order gives
+`∏ P(C i) ≤ P(⋂ C i)`; the conditional form (`law_mul_le_law_inter_of_mixed_of_innerPos`, the inner-window
+version of A3b-2's conditioning) gives `P(E) P(⋂ C i) ≤ P(E ∩ ⋂ C i)`; on `E ∩ ⋂ C i` the hooks give
+the continuations and `exists_isArm_of_glue` the new arms, whose ends lie on the continuations and
+outside the interior, hence satisfy `Φ`. Everything about the shape of the corridors is in the
+hypotheses; `Φ` is where landing windows and fences at the new boundary will enter (§14.4).
+
+**Straight corridors.** A side of `B_R(z)` is described by a four-case disjunction `hside` (top, right,
+bottom, left): the bin `B` is the set of ends on that side with coordinate along the side in
+`[x, x + W]`, at least `2M` from the corners (dual arms on the bottom and left sides one row/column
+further out, `cond col 0 1`), and the corridor is `Icc lo hi`, of width `W`, from the bin straight
+out to `∂B_{R'}(z)`, crossed in direction `dir` in the configuration of the colour of the arm. Proved:
+
+* `exists_walk_of_corridor_top/right/bottom/left` and `exists_walk_of_side`: the hook. The fence of
+  an arm ending at `b` (length `2K ≥ 2W`, depth `M`) and the corridor's crossing walk meet by
+  `exists_mem_support_of_mem_Icc_of_mem_Icc` (`SeparationFence.lean`: a walk in rows `[y₀, y₁]` from
+  a column `≤ x₀` to a column `≥ x₁` meets a walk in columns `[x₀, x₁]` from a row `≤ y₀` to a row
+  `≥ y₁`); no cutting of walks is needed. Bottom and left sides use the reversed crossing.
+* `CrossingBounds.le_law_of_side`: `c κ ≤ P(corridor)` for `R' ≤ κ W`, from A1b's
+  `le_law_crossing_*_of_le` (`le_law_preimage_cond_crossing_one/zero`, either colour).
+* `measurableSet_preimage_cond_crossing`, `preimage_cond_crossing_iff_of_inter_eq` (determined by
+  `Icc lo (hi + cond col 0 1)`), `cond_mem_crossing_of_cond_subset`.
+* `sideP_of_side`, `IsArm.sideL_of_side` (end coordinates and landing position of an arm ending in
+  a bin, as integer facts), `notMem_Icc_of_side`, `mem_Icc_of_side`.
+* The integer geometry, split by sides (each a separate declaration, §14.7):
+  `false_of_corridor_of_corridor` (open and dual corridors read disjoint pairs),
+  `false_of_box_of_corridor` (+ `_top/_right/_bottom/_left`: corridors avoid the end boxes of the
+  other colour), `false_of_region_of_region` (+ four sides: regions of one colour are disjoint).
+* `pow_mul_law_le_law_multiArmEventIn_of_sides`: the gluing for fixed bins
+  (`c κ ^ j · P(E_bins) ≤ P(multiArmEventIn σ z r R' J univ)`); it uses a witness of `E_bins` for
+  the conditions on fixed sets (`hTT`, `hTB`: if `E_bins = ∅` there is nothing to prove) and the
+  witness of `ω` itself for `hQdisj`.
+* `exists_lt_le_le`, `IsArm.exists_mem_bin` (every end of a separated arm lies in one of `2A + 1`
+  bins of width `W` on its side), `side_of_bin` (the bin and its corridor satisfy `hside`), and the
+  union bound over the `(4 (2A + 1)) ^ j` bin configurations.
+
+**Arms of one colour and the corners** (`exists_lt_lt_of_eq`, `le_or_le_of_lt_of_lt`,
+`le_or_le_of_lt`): without packs, between two arms of one colour there is an arm of the other colour
+on each arc; so two arms of one colour landing on both sides of a corner `C` are not both within
+`2S` of `C`. This is the third use of pack-freeness (after the barrier and
+`two_mul_le_abs_landingPos_sub`), see §14.3.
+
+### 14.2 Decisions (mine, per the standing instruction)
+
+1. **Hypotheses.** `1 ≤ W ≤ K ≤ M`, `2W + 2 ≤ M`, `4M ≤ s`, `r + M + 1 < R`, `R + M ≤ R' ≤ D R`,
+   `R ≤ A W`, `R' ≤ L`. Deviations from the draft of §13.5: `W + 3 ≤ M` is replaced by
+   `2W + 2 ≤ M` (the draft's condition is too weak, §14.3) and `R + 2 ≤ R'` by `R + M ≤ R'` (the
+   corridor must reach the depth `M` of the fence for the hook). For Nolin's parameters
+   (`s = 4√ηN`, `M = ⌊√ηN⌋`, `K = ⌊ηN⌋`, `R = 2N + 1`) take `W = min K ⌊(M - 2) / 2⌋`, which is
+   `≥ 1` once `ηN ≥ 1` and `√ηN ≥ 4`, and `A ≍ 1/η` (`R ≤ A W`).
+2. **Constants.** Aspect ratio `κ = D A` (`R' ≤ D R ≤ D A W`), `2A + 1` bins per side,
+   `c₀ = c (D A) ^ j / (4 (2A + 1)) ^ j`. `c₀` is chosen before `q`, `L`, `z` and the radii.
+3. **Inner windows `J` are carried** (the conditioning keeps the witness, `exists_isArm_of_glue` keeps
+   the inner positions). Theorem 11's inner half needs to extend arms outwards without losing their
+   inner windows.
+4. **Bins** are given by a side and an interval of `W + 1` coordinates (step `W + 1`), with the
+   corner distance `2M` built in; the colour shifts the bottom and left sides. Corridors have width
+   `W` (`W + 1` columns) so the fence of length `2K ≥ 2W` always covers them.
+5. **Read sets** `Icc lo (hi + cond col 0 1)`: the box for an open corridor, the box enlarged by one at
+   its upper corner for a dual one (`cond_inter_edgeSet_mem_localConn_iff_of_inter_eq`). For the open
+   bottom/left corridors the enlarged box would reach into the interior of `B_R(z)`.
+6. **Generality.** The gluing lemma takes arbitrary corridor events, regions and an arbitrary end
+   property `Φ`, so the remaining corridor shapes (§14.4) only have to supply events, hooks and
+   geometry. The mixed-order lemmas for determined monotone events
+   (`mixed_of_determined_of_increasing/decreasing`) are general (any index type) but live in the planar
+   file; they can move to `Probability/MixedHarris.lean` in a later proof-only commit.
+7. **No definition.** Bins, corridors and the separated event with ends in bins are written out
+   (set-builders and the `hside` disjunction).
+
+### 14.3 Errata and observations
+
+* **The draft's `W + 3 ≤ M` is not enough for this proof.** Two adjacent arms (different colours)
+  on one side can end `2M` apart in lattice units (landing positions `4M` apart, one of them dual).
+  The box of radius `M + 1` about a point `b` of the first bin (`b` up to `W` from the first end) and
+  the read set of the second corridor (up to `W` from the second end, one more column for a dual
+  corridor) are disjoint, as the conditioning needs (`hTB`), only if `2M - 2W > M + 1`, i.e.
+  `M ≥ 2W + 2`. Example with `W = 4`, `M = 7` (so `W + 3 ≤ M`): top side, open arm ending at
+  column `0` with bin `[0, 4]`, dual arm ending at column `14` with bin `[10, 14]` (landing positions
+  `29 ≥ 4M` apart); the box about `b = 4` covers columns `[-4, 12]`, the dual corridor reads columns
+  `[10, 15]`. The statement itself is not affected; only the margin between bins and boxes.
+* **Arms of one colour at a corner (`s = 4M` exactly).** `two_mul_le_abs_landingPos_sub` gives two
+  arms of one colour `8M` apart in landing positions; near a common corner this allows both to be
+  exactly `2M` (lattice) from the corner, and then the boxes of radius `M` about their ends share the
+  corner point `(z₀ + R - M, z₁ + R - M)`. The configuration is impossible: the arm of the other
+  colour between them (on the arc through the corner) must be `4M` from both and from the corner.
+  `le_or_le_of_lt_of_lt` makes this precise: one of the two is `8M` (doubled) from the corner. With
+  `4M < s` the simpler argument would do, but the outer step gives `s = 4√ηN ≥ 4⌊√ηN⌋` with equality
+  possible.
+* **Corner faces need `M ≥ 1`**: an end of a separated arm is at least `2M` from the corners, but a
+  dual arm may end at the corner face (`b₀ = z₀ - R - 1` on the top side) when `M = 0`.
+* **Ends of separated arms determine their side**: they are at least `2M ≥ 2` from the corners, so
+  exactly one clause of `HasOuterFence` and of `IsArm.landingPos_cases` applies.
+
+### 14.4 What remains of item 5 (package "A3b-2c"): windows and fences at `∂B_{R'}`
+
+Both are instances of `law_mul_prod_le_law_of_corridors` with new corridor events and a new `Φ`; the
+conditioning, the gluing of continuations and the union bound over bins are done.
+
+**(a) Landing in fixed windows.** `Φ i ω v := v` lies where an arm ending at `v` lands in
+`window (16 R') θ η i`. For an open arm the landing position is `2 · perimeterPos (z - R') (z + R') v`;
+for a dual arm it is determined by `v` and its side up to the neighbouring face, so the corridor must
+end at least one unit inside the window (`IsArm.landingPos_cases` at `R'`). The corridors turn:
+
+* **Junctions.** An L-shaped junction of a vertical rectangle `[x₀, x₁] × [y, Y]` and a horizontal
+  rectangle `[X, X'] × [y₀, y₁]` with `[y₀, y₁] ⊆ [y, Y]`, `[x₀, x₁] ⊆ [X, X']` is
+  `exists_mem_support_of_mem_Icc_of_mem_Icc` again (the vertical crossing's walk is a "bottom-top" walk
+  of the junction square, the horizontal one a "left-right" walk); a chain of walks with consecutive
+  common vertices gives one walk (`exists_walk_of_mem_support_of_mem_support` repeatedly). Turning
+  corridors are chains of rectangles alternating in direction; the corridor event is the intersection
+  of their crossings (all of one colour, so Harris inside a corridor is the mixed Harris already used).
+* **Staged rotation** (§13.4): lift the landing positions of the bins and the window centres to
+  increasing sequences with span `< 1` turn; stage `k` of `S` moves every arm by
+  `(θ_i - α_i)/S`, less than half the smallest gap, inside the annulus band `[ρ_{k-1}, ρ_k]`:
+  radial leg, arc along the middle of the band (at most one corner, since a move is shorter than a
+  side), radial leg. Arcs of one stage are disjoint because each stays within half a gap of its
+  start. `S` and the band widths depend on `j`, `A` (the bin gap) and `θ`, `η`; the probability is
+  `c(κ')^{(number of rectangles)}` per arm.
+* **Scaling corridors** for window-to-window steps (`R → 2R`, same `θ`): on one side, vertical leg,
+  horizontal leg from column `t` to column `2t` (relative to `z₀`), vertical leg; arms farther from the
+  middle of the side turn at lower levels (nested levels by `|t|`). No corner is passed when the windows
+  are `≥ ηR` from the corners. This is the case A3b-3 iterates; it needs no rotation.
+* **Geometry** as here: one four-case description per rectangle and integer lemmas split by sides; the
+  cross-arm conditions for a stage involve only arms whose arcs lie on adjacent sides.
+
+**(b) Fences at `∂B_{R'}`** (§13.6, checked on paper in this session for the top side). Corridor of a
+bin ending at columns `[x, x + W]`:
+`V` = bottom-top crossing of `[x, x + W] × [z₁ + R, z₁ + R' - 1]` (stays inside `B_{R'}`),
+`Hc` = left-right crossing of `[x, x + W] × [z₁ + R' - M', z₁ + R' - 1]` (connector),
+`U` = bottom-top crossing of `[x, x + W] × [z₁ + R' - M', z₁ + R' + M']` (cap),
+`H` = left-right crossing of `[x - K', x + W + K'] × [z₁ + R' + 1, z₁ + R' + M']` (new fence).
+`V`, `U` both cross `Hc`'s box bottom to top inside its columns, so `V ∪ Hc ∪ U` is connected; the
+continuation is `P = (old hook) ++ V ++ Hc ++ U` up to `U`'s first point on the row `z₁ + R'`, which is
+the new end `b'` (every earlier point of `P` is inside `B_{R'}`). `Φ i ω b'` := there are `u, v` with a
+connection `b' → u` inside `Icc (b' - M') (b' + M')` (along `U` from `b'` to its meeting point with
+`H`, then along `H`) and a fence `u → v` in `[b'₀ - K', b'₀ + K'] × [b'₁, b'₁ + M']`: the sub-walk of
+`H` between its last visit to column `b'₀ - K'` and its first visit to column `b'₀ + K'`
+(`SimpleGraph.Walk.exists_walk_mem_Icc`). Hence `HasOuterFence ω (σ i) z R' M' K' (γ' i)` with
+`x := b'`, for `W ≤ K' ≤ M'`. Together with landing windows of size `η R'` at least `η R'` apart and
+from the corners this is `outerSeparatedArmEvent σ z r R' s' M' K'` with `s' ≍ η R'`, `M', K' ≍ η R'`
+small enough that neighbouring caps and fences miss each other (`4M' ≤ s'` again).
+
+### 14.5 How A3b-3 consumes the statements
+
+* **Theorem 11, outer half** (scale iteration of §11.4/§13.6): needs (G1) the first gluing
+  `c(η) P(sep_η at R) ≤ P(arms at 2R in windows θ with fences)` — rotation (a) + fences (b) — and (G2)
+  the window-to-window step `c₀(θ) P(windows θ with fences at R) ≤ P(windows θ with fences at 2R)` —
+  scaling corridors (a) + fences (b), cost independent of `η`, so `δ` can be chosen after `c₀(θ)`.
+  Both are `law_mul_prod_le_law_of_corridors` with the corridors of §14.4 and the bins of this package
+  (G2's input is separated with `s ≍ ηR`, so its bins are those of `IsArm.exists_mem_bin` with
+  `A ≍ 1/η_θ`). The straight statement proved here is the special case without windows and fences;
+  it also gives directly `P(sep at R) ≤ c₀⁻¹ P(A(r, R'))` for every `R' ∈ [R + M, D R]`.
+* **Inner half of Theorem 11**: the outer gluing keeps inner positions (`J`), so arms first put into
+  inner windows (inner separation and an inner gluing, which needs the inner predicates of §12.4 and
+  mirrored hooks) are then extended outwards with `J = window (16 r + 8) θ' η`.
+* **Extendability** `π(r, R) ≤ C π(r, 2R)`: Theorem 11 (arms in windows with fences at `R`) and one
+  window-to-window gluing (G2). `π(2r, R) ≤ C π(r, R)`: the inner analogue.
+* **Quasi-multiplicativity, lower half**: Theorem 11 at both ends of `r₂`, then corridors from window
+  `i` of the inner family to window `i` of the outer family in `B_{r₂} \ B_{r₂/4}` (scaling corridors);
+  the conditioning on two separated events uses the conditional mixed Harris on their intersection
+  (both sections are upper for the mixed order off the corridors), so the gluing lemma needs a
+  two-sided variant (inner fences of the outer family as a second hook) — about the size of
+  `law_mul_prod_le_law_of_corridors`.
+* **A priori lower bound** `π(r, R) ≥ c (r/R)^C`: the one-scale bound (A3a) at scale `r`, then (G2)
+  at the `log₂(R/r)` dyadic scales: `c₀(θ)^{log₂(R/r)} = (r/R)^{log₂(1/c₀)}`.
+
+### 14.6 Search
+
+* Mathlib: `Int.ediv_mul_le`, `Int.lt_ediv_add_one_mul_self`, `Int.ediv_lt_of_lt_mul`,
+  `Int.ediv_nonneg`, `Int.toNat_of_nonneg`, `add_one_mul`, `Finset.pow_card_le_prod`,
+  `measure_iUnion_fintype_le`, `Finset.sum_le_sum`, `Finset.sum_const`, `Fintype.card_fun`,
+  `Fintype.card_prod`, `ENNReal.div_pos`, `ENNReal.inv_mul_cancel`, `mul_le_mul_left` (the former
+  `mul_le_mul_right'`), `mul_le_mul'`, `mul_right_comm`, `Sym2.out_fst_mem`, `Bool.eq_false_or_eq_true`,
+  `Int.sbtw_iff`, `le_abs`, `Int.cast_abs`.
+* PercLib, reused: `exists_mem_support_of_mem_Icc_of_mem_Icc` and
+  `exists_walk_of_mem_support_of_mem_support` (`SeparationFence.lean`), `exists_walk_of_mem_localConn`
+  (`RSWKeyStep.lean`), `mem_crossing_iff_of_inter_eq` (`CriticalProbability.lean`),
+  `dualConfig_inter_eq_of_inter_eq`, `measurableSet_crossing`, `measurable_dualConfig`, `crossing_mono`,
+  `dualConfig_anti`, `CrossingBounds.le_law_crossing_*_of_le` (`MultiArmBounds.lean`),
+  `prodBernoulli_prod_le_biInter_of_mixed`, `prodBernoulli_mul_le_inter_of_mixed_of_determined`,
+  `measurableSet_setOf_hasOuterFence`, `measurableSet_setOf_isArm`, `IsArm.landingPos_cases`,
+  `IsArm.end_mem_Icc`, `Icc_subset_Icc_add_one_sub_one`, `two_mul_le_abs_landingPos_sub`,
+  `exists_isArm_of_glue`, `isArm_iff_cond`, `sbtw_apply_finRotate_apply`.
+* Not found (added): the gluing through given corridor events, the mixed order for determined monotone
+  events, crossings of either colour as one event (`(fun ω => cond col ω (dualConfig ω)) ⁻¹' crossing`),
+  the corner lemma for arms of one colour, bins, the hooks.
+
+### 14.7 Lessons
+
+* **Heartbeats are per declaration** and `maxHeartbeats` cannot be raised (forbidden option): a proof
+  with about twelve `omega` calls on four-case disjunctions of ten-fact conjunctions exhausts 200000.
+  Split by side into sublemmas; the dispatcher discharges mismatched cases after `clear`ing the big
+  hypotheses. State the side data over `ℤ` so that `omega` sees only linear facts.
+* `set` local definitions are unfolded during `omega`'s atom collection (timeouts at `whnf`/`isDefEq`);
+  `obtain ⟨x, hx⟩ : ∃ x, x = … := ⟨_, rfl⟩` keeps them opaque. (For a family of set-builders indexed
+  by bin configurations `obtain` left metavariables; `set` was fine there, no `omega` involved.)
+* `omega` with a goal that is a disjunction of long conjunctions negates it into a product of
+  disjunctions; give each disjunct the shape `(facts) ∧ (landing formula)` and pick it with
+  `exact Or.inl ⟨h₁, h₂⟩` after matching the cases.
+* `simp only [Matrix.cons_val_zero, Matrix.cons_val_one]` turns `x = x` into `True`: use `trivial`.
+* `n < 2 * A + 1 ∧ (P ∨ Q)` needs the parentheses; `zero_le` has no explicit argument here;
+  `mul_le_mul_right` is ambiguous in context, `mul_le_mul' le_rfl h` is not.
+* The four-sided statements were generated from Python templates with a line wrapper; the wrapper must
+  not split a `simp … at h₁ h₂` location list (parse error), and docstrings were reflowed separately.
+* Build: `CorridorGluing` about 16 s.
+
+### 14.8 Gate
+
+`scripts/gate.sh main` **passed on `d9837d7`** (axiom audit 10570 constants, only `propext`,
+`Classical.choice`, `Quot.sound`; the expected interface NOTICE from `Arms/Defs.lean`, no other
+notice; about 5 min). Final lines:
+
+```
+D-35 checks passed (tagged statements, headers of new files).
+INTERFACE change against ae4eb08e45a1: Proof PR touches an interface/non-Lean file: PercLib/Models/Planar/Arms/Defs.lean
+NOTICE: interface change; an auditor must approve before merge.
+== gate passed on d9837d77768099b4eaa5131d815432ccfb7cff60
+```
+
+This note's commit changes only `docs/`.
