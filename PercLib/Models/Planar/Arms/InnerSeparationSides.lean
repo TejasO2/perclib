@@ -325,10 +325,14 @@ bijection `Φ` of configurations (the complement, followed by the relabelling of
 dual edge) whose pairs that are edges of `ℤ²` form the dual configuration. The image of every
 product law under `Φ` is a product law with the same crossing bounds: its open crossings are the
 dual crossings of the original law, and its dual crossings are the open crossings moved by
-`(-1, -1)`. -/
+`(-1, -1)`. Its pairs inside a box `Icc A B` are determined by the pairs of the configuration inside
+`Icc A (B + 1)` (an edge between faces of `Icc A B` crosses an edge inside `Icc A (B + 1)`). -/
 theorem exists_measurableEquiv_dualConfig :
     ∃ Φ : Config (LatticeSite 2) ≃ᵐ Config (LatticeSite 2),
       (∀ ω, Φ ω ∩ (zdGraph 2).edgeSet = dualConfig ω) ∧
+      (∀ (A B : LatticeSite 2) (ω ω' : Config (LatticeSite 2)),
+        ω ∩ {e | ∀ v ∈ e, v ∈ Icc A (B + 1)} = ω' ∩ {e | ∀ v ∈ e, v ∈ Icc A (B + 1)} →
+        Φ ω ∩ {e | ∀ v ∈ e, v ∈ Icc A B} = Φ ω' ∩ {e | ∀ v ∈ e, v ∈ Icc A B}) ∧
       ∀ q : Sym2 (LatticeSite 2) → unitInterval, ∃ q' : Sym2 (LatticeSite 2) → unitInterval,
         (law q).map Φ = law q' ∧ ∀ (L : ℕ∞) (c : ℕ → ℝ≥0∞), CrossingBounds q L c →
           CrossingBounds q' L c := by
@@ -363,7 +367,56 @@ theorem exists_measurableEquiv_dualConfig :
     · intro hf
       obtain ⟨e, he, heω, rfl⟩ := (mem_dualConfig_iff' ω f).1 hf
       exact ⟨⟨e, heω, hE₁ e he⟩, dualEdge_mem_edgeSet he⟩
-  refine ⟨Φ, hΦ, fun q => ⟨fun f => unitInterval.symm (q (E.symm f)), ?_, fun L c h => ?_⟩⟩
+  have hdet : ∀ (A B : LatticeSite 2) (ω ω' : Config (LatticeSite 2)),
+      ω ∩ {e | ∀ v ∈ e, v ∈ Icc A (B + 1)} = ω' ∩ {e | ∀ v ∈ e, v ∈ Icc A (B + 1)} →
+      Φ ω ∩ {e | ∀ v ∈ e, v ∈ Icc A B} = Φ ω' ∩ {e | ∀ v ∈ e, v ∈ Icc A B} := by
+    intro A B ω ω' h
+    -- the pair relabelled to `f` has its ends in `Icc A (B + 1)`
+    have hpre : ∀ f : Sym2 (LatticeSite 2), (∀ v ∈ f, v ∈ Icc A B) →
+        ∀ v ∈ E.symm f, v ∈ Icc A (B + 1) := by
+      intro f hf v hv
+      by_cases hfe : f ∈ (zdGraph 2).edgeSet
+      · have hEs : E.symm f = Sym2.map (· + 1) (dualEdge f) := by
+          apply E.injective
+          rw [Equiv.apply_symm_apply, hE₁ _ (map_add_mem_edgeSet 1 (dualEdge_mem_edgeSet hfe)),
+            dualEdge_map_add, map_add_one_dualEdge_dualEdge hfe]
+        rw [hEs] at hv
+        obtain ⟨x, y, rfl | rfl⟩ := (mem_edgeSet_zdGraph_two_iff f).1 hfe
+        · have hx := mem_Icc_two_iff.1 (hf _ (Sym2.mem_mk_left _ _))
+          have hy := mem_Icc_two_iff.1 (hf _ (Sym2.mem_mk_right _ _))
+          rw [dualEdge_horizontal, Sym2.map_mk, Sym2.mem_iff] at hv
+          simp only [Matrix.cons_val_zero, Matrix.cons_val_one] at hx hy
+          rw [mem_Icc_two_iff]
+          rcases hv with rfl | rfl <;>
+            simp only [Pi.add_apply, Pi.one_apply, Matrix.cons_val_zero, Matrix.cons_val_one] <;>
+            omega
+        · have hx := mem_Icc_two_iff.1 (hf _ (Sym2.mem_mk_left _ _))
+          have hy := mem_Icc_two_iff.1 (hf _ (Sym2.mem_mk_right _ _))
+          rw [dualEdge_vertical, Sym2.map_mk, Sym2.mem_iff] at hv
+          simp only [Matrix.cons_val_zero, Matrix.cons_val_one] at hx hy
+          rw [mem_Icc_two_iff]
+          rcases hv with rfl | rfl <;>
+            simp only [Pi.add_apply, Pi.one_apply, Matrix.cons_val_zero, Matrix.cons_val_one] <;>
+            omega
+      · rw [E.symm_apply_eq.2 (hE₂ f hfe).symm] at hv
+        refine Icc_subset_Icc_right (fun i => ?_) (hf v hv)
+        simp only [Pi.add_apply, Pi.one_apply]
+        omega
+    ext f
+    simp only [mem_inter_iff, mem_ofPred_eq, hΦapp, Equiv.image_eq_preimage_symm, mem_preimage,
+      mem_compl_iff]
+    constructor
+    · rintro ⟨h₁, h₂⟩
+      refine ⟨fun h₃ => h₁ ?_, h₂⟩
+      have := congrArg (E.symm f ∈ ·) h
+      simp only [mem_inter_iff, mem_ofPred_eq, eq_iff_iff] at this
+      exact (this.2 ⟨h₃, hpre f h₂⟩).1
+    · rintro ⟨h₁, h₂⟩
+      refine ⟨fun h₃ => h₁ ?_, h₂⟩
+      have := congrArg (E.symm f ∈ ·) h
+      simp only [mem_inter_iff, mem_ofPred_eq, eq_iff_iff] at this
+      exact (this.1 ⟨h₃, hpre f h₂⟩).1
+  refine ⟨Φ, hΦ, hdet, fun q => ⟨fun f => unitInterval.symm (q (E.symm f)), ?_, fun L c h => ?_⟩⟩
   · have h1 := PercLib.Probability.prodBernoulli_map_compl q
     have h2 := PercLib.Probability.prodBernoulli_map_image_equiv
       (fun i => unitInterval.symm (q i)) E
