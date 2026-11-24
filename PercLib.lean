@@ -144,6 +144,7 @@ public import PercLib.Models.Planar.Arms.OuterGluing
 public import PercLib.Models.Planar.Arms.OuterSeparation
 public import PercLib.Models.Planar.Arms.QuadDuality
 public import PercLib.Models.Planar.Arms.QuasiMultiplicativity
+public import PercLib.Models.Planar.Arms.RotationGluing
 public import PercLib.Models.Planar.Arms.Sectors
 public import PercLib.Models.Planar.Arms.Separation
 public import PercLib.Models.Planar.Arms.Separation.Defs
