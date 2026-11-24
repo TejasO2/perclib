@@ -20,9 +20,11 @@ A3b-1 session (§11) did items 1 and 3 of §5: Lemma 15 on the four sides of `B_
 (`exists_separating_event`, `exists_law_multiArmEvent_inter_not_separated_le`). On the user's
 decision of 2026-11-23 ("Yes, new Defs file") the separated event of the outer step became a
 definition, `outerSeparatedArmEvent`, in the new interface module `Arms/Separation/Defs.lean` (§12);
-the outer step is restated with it, with definitionally equal statements. Next: A3b-2 (items 4
-and 5). Nothing in `Arms/Defs.lean` or `Planar/Defs.lean` was changed. Local commits only, nothing
-pushed.
+the outer step is restated with it, with definitionally equal statements. The A3b-2 session (§13)
+proved item 4 (Harris for a mixed order, general) and the corridor-independent half of item 5
+(conditioning on the separated event, the fence-connection argument, the gluing of continuations);
+the corridors, bins and the gluing statement remain (A3b-2b, §13.5). Nothing in `Arms/Defs.lean` or
+`Planar/Defs.lean` was changed. Local commits only, nothing pushed.
 
 ## Decisions (user, 2026-11-22)
 
@@ -1183,3 +1185,273 @@ tag, no `…Input`. Questions a reviewer will ask:
   statement text and the new theorem as its proof, `lake env lean` (about 1.5–2 min, mostly loading).
 * The new module's builds: about 15 s; the move rebuilt `QuasiMultiplicativity`, `SeparationSides`,
   `HalfPlaneExponents`, `OuterSeparation` in 87 s.
+
+## 13. A3b-2 (2026-11-23): Harris for a mixed order; the gluing, first part
+
+Package A3b-2 = items 4 and 5 of §5. **Item 4 is done. Item 5 is half done**: everything in the gluing
+that does not depend on the shape of the corridors is proved (conditioning on the separated event,
+the fence-connection argument of §9.4, the gluing of continuations into arms of a larger box); the
+corridors themselves, the bins for the ends and the probability assembly (the gluing *statement*,
+§13.5) are not. Proof-only, no new definition, no `Defs.lean` touched. Commits:
+
+* `8aef63a` **Probability/MixedHarris** (general, not planar; new module, 213 lines, 7 theorems).
+* `b31db79` **Arms/OuterGluing** (planar, proof-only; new module, 862 lines, 22 theorems).
+* this note's commit (docs only).
+
+Gate: passed on `b31db79` (§13.8).
+
+### 13.1 Item 4: Harris for a mixed order (`PercLib/Probability/MixedHarris.lean`)
+
+Arbitrary index type `ι`, arbitrary profile `p`, an arbitrary set `D` of coordinates; "upper for the
+mixed order" is the hypothesis `∀ ω ω', ω \ D ⊆ ω' \ D → ω' ∩ D ⊆ ω ∩ D → ω ∈ A → ω' ∈ A` (increasing
+off `D`, decreasing on `D`).
+
+```lean
+theorem prodBernoulli_map_symmDiff (p : ι → unitInterval) (D : Set ι) [DecidablePred (· ∈ D)] :
+    (prodBernoulli p).map (· ∆ D) =
+      prodBernoulli (fun i => if i ∈ D then unitInterval.symm (p i) else p i)
+
+theorem prodBernoulli_harris_of_mixed (p : ι → unitInterval) (D : Set ι) {A B : Set (Set ι)}
+    (hA : upper for the mixed order) (hB : …) (hAm : MeasurableSet A) (hBm : MeasurableSet B) :
+    prodBernoulli p A * prodBernoulli p B ≤ prodBernoulli p (A ∩ B)
+
+theorem prodBernoulli_prod_le_biInter_of_mixed (p) (D) (s : Finset κ) {A : κ → Set (Set ι)}
+    (hA : ∀ k ∈ s, upper for the mixed order) (hAm : ∀ k ∈ s, MeasurableSet (A k)) :
+    ∏ k ∈ s, prodBernoulli p (A k) ≤ prodBernoulli p (⋂ k ∈ s, A k)
+
+/-- conditional form -/
+theorem prodBernoulli_mul_le_inter_of_mixed_of_determined (p : ι → unitInterval)
+    {T D : Set ι} {A B : Set (Set ι)}
+    (hA : ∀ ω ω', ω \ T = ω' \ T → ω \ D ⊆ ω' \ D → ω' ∩ D ⊆ ω ∩ D → ω ∈ A → ω' ∈ A)
+    (hB : ∀ ω ω', ω \ D ⊆ ω' \ D → ω' ∩ D ⊆ ω ∩ D → ω ∈ B → ω' ∈ B)
+    (hBT : ∀ ω ω', ω ∩ T = ω' ∩ T → (ω ∈ B ↔ ω' ∈ B))
+    (hAm : MeasurableSet A) (hBm : MeasurableSet B) :
+    prodBernoulli p A * prodBernoulli p B ≤ prodBernoulli p (A ∩ B)
+```
+
+plus `prodBernoulli_eq_map_symmDiff`, `isUpperSet_preimage_symmDiff`, `mixed_inter`. Proof: flipping
+the coordinates of `D` (`ω ↦ ω ∆ D`) maps the law to the law with the profile flipped on `D`
+(`Measure.infinitePi_map_pi`, as in `prodBernoulli_map_compl`) and turns the mixed order into
+inclusion, so `prodBernoulli_harris` applies; the conditional form conditions on the coordinates
+outside `T` by splicing (`prodBernoulli_eq_lintegral_splice`, `LocallyMonotone.lean`) and applies
+the mixed form to the sections. **It generalises Nolin's Lemma 13**
+(`prodBernoulli_mul_mul_le_inter_of_determined`): there `A = Ainc ∩ Adec` with determination
+hypotheses; here `A` is any event whose sections at fixed coordinates outside `T` are upper for the
+mixed order, which is what the separated event satisfies (it is a union over witnesses, not an
+intersection of an increasing and a decreasing event). No percolation-facing corollary was needed:
+the planar file applies the conditional form with `T` = the pairs read by the corridors and
+`D` = those read by the dual corridors (a dual crossing is decreasing in `ω`, `dualConfig_anti`).
+
+### 13.2 Item 5, first part (`PercLib/Models/Planar/Arms/OuterGluing.lean`)
+
+**Conditioning on the separated event.** With `E_B` the separated event whose arms end in given sets
+`B i` (written out as a set-builder: arms, `ArmsDisjoint`, order, `ArmsOuterSeparated ω σ z R s M K γ`,
+`∀ i, b i ∈ B i`):
+
+```lean
+theorem law_mul_le_law_inter_of_mixed (q) (hKM : K ≤ M) {B : Fin j → Set (LatticeSite 2)}
+    {T D : Set (Sym2 (LatticeSite 2))}
+    (hT : ∀ e ∈ T, ∀ v ∈ e, v ∉ Icc (z - R + 1) (z + R - 1))
+    (hTB : ∀ i, ∀ b ∈ B i, ∀ e ∈ T, (∀ v ∈ e, v ∈ Icc (b - M) (b + (M + 1))) →
+      (e ∈ D ↔ σ i = false))
+    {C} (hCm : MeasurableSet C) (hC : C upper for the mixed order of D)
+    (hCT : C determined by T) :
+    law q E_B * law q C ≤ law q (E_B ∩ C)
+```
+
+from `mem_of_mixed_of_forall_mem` (the same witness serves for `ω'`: open arms use only edges with an
+end in the interior, which are not in `T`; a dual arm crosses such edges except at its last dual edge,
+whose edge has its ends in `Icc b (b + 1)` and so lies in `D` when it lies in `T`
+(`IsDualArm.exists_mem_or_forall_mem_Icc`); fences are determined by the box of radius `M + 1` and grow
+in their colour, `HasOuterFence.of_cond_subset`) and `measurableSet_setOf_separated_forall_mem`.
+
+**The fence-connection argument (§9.4), as proved.** `notMem_support_of_mem_Icc`: for a pack-free
+ordered disjoint family with integer separation `2M < |L i - L k|`, `2M < |L i - 4mR|` and
+`r + M + 1 < R`, a walk `P` of the colour of arm `i`, from a vertex (face) `x` of arm `i` in
+`Icc (b i - M) (b i + M)`, whose points in `Icc (z - R - 1) (z + R)` lie in `Icc (b i - M) (b i + M)`,
+misses every other arm `k` of that colour. Proof as in §9.4, with one simplification: the walk
+`γ k` up to the meeting point `v`, then `P` backwards to `x`, then `γ i` from `x` to its end, is cut at
+its first exit from the interior of `B_R(z)`; the exit point is `v` (if it lies on the part of `γ k`),
+a point of `P` in `Icc (z - R - 1) (z + R)`, or `b i`, so in all cases within `M` of `b i`; the cut walk
+is an arm with the inner position of `γ k` (`innerPos_append`) landing within `2M` of `L i`
+(`abs_landingPos_sub_le`, which needs `M < R` and the corner bound), and
+`false_of_innerPos_eq_of_abs_lt` (the sector lemma with the next arms after `i` and after `k`)
+gives the contradiction. "Last entry point" (§9.4) is not needed.
+
+**The gluing, for continuations of any shape.**
+
+```lean
+theorem exists_isArm_of_glue (hσ) {M R' : ℕ} (hrM : r + M + 1 < R) (hRR' : R + 2 ≤ R')
+    (hγ : arms to ∂B_R(z)) (hd) (ho) (hsep : 2M < |L i - L k|) (hcor : 2M < |L i - 4mR|)
+    (P : ∀ i, (zdGraph 2).Walk (x i) (y i)) (hx : ∀ i, x i ∈ (γ i).support)
+    (hxM : ∀ i, x i ∈ Icc (b i - M) (b i + M))
+    (hP : ∀ i, ∀ e ∈ (P i).edges, e ∈ cond (σ i) ω (dualConfig ω))
+    (hloc : ∀ i, ∀ v ∈ (P i).support, v ∈ Icc (z - R - 1) (z + R) → v ∈ Icc (b i - M) (b i + M))
+    (hy : ∀ i, y i ∉ cond (σ i) (Icc (z - R' + 1) (z + R' - 1)) (Icc (z - R') (z + R' - 1)))
+    (hdisj : ∀ i k, i ≠ k → σ i = σ k → ∀ v ∈ (P i).support, v ∉ (P k).support) :
+    ∃ b' γ', (∀ i, IsArm ω (σ i) z r (z - R') (z + R') (γ' i)) ∧ ArmsDisjoint σ γ' ∧ order ∧
+      (∀ i, innerPos z r (σ i) (γ' i) = innerPos z r (σ i) (γ i)) ∧ ∀ i, b' i ∈ (P i).support
+```
+
+(`γ' i` = `γ i` up to `x i`, then `P i`, cut at the first exit from the interior of `B_{R'}(z)`; order
+by order invariance at both boxes.) Also: `two_mul_le_abs_landingPos_sub` (pack-free: two arms of one
+colour land at least `2S` apart when any two land at least `S` apart: an arm of the other colour lies
+between them on each arc), `IsArm.landingPos_cases`, `isArm_iff_cond`, `IsArm.mem_Icc_of_mem_support`,
+the sharp fence determination `hasOuterFence_iff_of_inter_eq_of_le` (`K ≤ M`, box of radius `M + 1`),
+two walk helpers (`IsCrossing.eq_of_mem_support_left`, `mem_support_tail_append_of_mem_right`).
+
+### 13.3 Deviations and decisions (mine, recorded per the standing instruction)
+
+1. **Item 5 split.** The gluing statement (§13.5) is not proved; this package proves its
+   shape-independent core. Reason: size. The remaining part is coordinates (bins, four sides, two
+   colours, corridor probabilities), no new mathematics, except the rotation to fixed windows (§13.4).
+2. **Fence determination sharpened** to the box `Icc (b - M) (b + (M + 1))` for `K ≤ M`
+   (`hasOuterFence_iff_of_inter_eq` has radius `M + K + 1`): with tips `2M` apart and `K` comparable to
+   `M`, the old box would contain the neighbouring corridors. `K ≤ M` holds in the outer step
+   (`⌊ηN⌋ ≤ ⌊√ηN⌋` for `η ≤ 1`).
+3. **Integer separation hypotheses** (`2M < |L i - L k|`, `2M < |L i - 4mR|`) in the deterministic
+   lemmas; `ArmsOuterSeparated` with `2M < s` gives them (positions are integers).
+4. Hypotheses `r + M + 1 < R` (the fence boxes miss `B_r(z)`) and `R + 2 ≤ R'`.
+5. No definition. The separated event with ends in bins is a set-builder inside the statements.
+
+### 13.4 Errata and observations
+
+* **Off by one in the separation.** With `s = 4√ηN` and `M = ⌊√ηN⌋`, two *adjacent* arms (different
+  colours) can end exactly `2M` apart on a side, so their fence boxes `Icc (b ± M)` can share a column.
+  Only the boxes of arms of one colour must be disjoint, and those arms are at least `2s ≥ 8M` apart
+  (`two_mul_le_abs_landingPos_sub`): pack-freeness is used a second time here, not only in the barrier.
+* **The rotation.** Theorem 11's windows are fixed while the ends of the separated arms are anywhere
+  on `∂B_R(z)` (in cyclic order). Straight radial corridors keep each arm near the radial projection of
+  its end; reaching fixed windows needs corridors that turn round the annulus. The "radial, ring at
+  level `h_i`, radial" design with nested levels **fails for large rotations**: two arms at angles
+  `0, 1/2` (turns) going to windows at `0.9, 1.4` (both rotate by `0.9`) force `h₁ < h₀` (arc `0`
+  passes over the start of arm `1`) and `h₀ < h₁` (arc `1` passes over the start of arm `0` one turn
+  later). Proposed: rotate in stages, each moving every arm by less than half the smallest gap
+  (linear interpolation of the lifted angles of ends and windows, both increasing along the cyclic
+  order with span `< 1`; `O(1/η)` stages), all arcs at one level per stage; each stage is the straight
+  gluing plus one ring arc. Alternatively (Nolin's own route) Theorem 11 is proved by extending arms
+  that already land in windows, scale by scale, and only the first step needs any rotation (§13.6).
+
+### 13.5 What remains of item 5 (package "A3b-2b")
+
+The gluing statement, straight corridors first:
+
+```lean
+theorem exists_pos_le_law_multiArmEvent_of_separated {j : ℕ} (σ : Fin j → Bool)
+    (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) (c : ℕ → ℝ≥0∞) (A D : ℕ) :
+    ∃ c₀ : ℝ≥0∞, 0 < c₀ ∧ ∀ q L, CrossingBounds q L c → ∀ (z : LatticeSite 2) (r R R' W M K : ℕ)
+      (s : ℝ), 1 ≤ W → W ≤ K → K ≤ M → W + 3 ≤ M → 4 * M ≤ s → r + M + 1 < R → R + 2 ≤ R' →
+      R' ≤ D * R → R ≤ A * W → (R' : ℕ∞) ≤ L →
+      c₀ * law q (outerSeparatedArmEvent σ z r R s M K) ≤ law q (multiArmEvent σ z r R')
+```
+
+(Nolin's outer step gives `s = 4√ηN`, `M = ⌊√ηN⌋`, `K = ⌊ηN⌋`, `R = 2N + 1`; take
+`W = min K ⌊M/4⌋`, `A ≍ 1/η`, `N ≥ N₀'(η)`.) Design, checked on paper in this session:
+
+* **Bins.** Side `t ∈ Fin 4` of the end and index `n` with the coordinate along the side in
+  `[base + nW, base + nW + W - 1]` (`base = z₀ - R` for top/bottom, `z₁ - R` for left/right); at most
+  `4 (2R/W + 3)` bins per arm. `P(sep) ≤ Σ_β P(E_β)` over bin configurations `β`; for each `β` with
+  `E_β ≠ ∅` a witness gives the geometry below.
+* **Corridor of a bin** = the bin's columns (rows) times the band between the boxes: top
+  `[base + nW, base + nW + W - 1] × [z₁ + R, z₁ + R']`, right `[z₀ + R, z₀ + R'] × […]`, bottom
+  `[…] × [z₁ - R' - 1, z₁ - R - [dual]]`, left `[z₀ - R' - 1, z₀ - R - [dual]] × […]`; event: a crossing
+  of colour `σ i` between the two long sides (`crossing 1` / `crossing 0`, `dualConfig ⁻¹'` for dual
+  arms). Read regions: the box (open) or the box enlarged by one at its upper corner (dual); they have
+  no end in the interior of `B_R(z)` (`hT`), are pairwise disjoint and avoid the boxes of radius `M + 1`
+  about the ends in other bins (`hTB`): ends of different arms are `≥ 2M` apart along a side
+  (`s ≥ 4M`), corridors are `W` wide, `W + 3 ≤ M`; ends are `> M` from the corners, so corridors of
+  different sides lie in disjoint quadrant strips.
+* **Hook.** The fence of a top end `b` crosses `[b₀ - K, b₀ + K] × [b₁, b₁ + M]` from left to right; the
+  corridor's crossing walk, cut at its first visit to row `b₁ + M`, crosses the same box from bottom to
+  top inside the bin's columns `⊆ [b₀ - K, b₀ + K]` (`W ≤ K`); `exists_mem_support_of_crossing_walks`
+  (`Gluing.lean`, needs `1 ≤ M`) gives a common vertex (face) `p`. Continuation
+  `P i = (connection x → u) ++ (fence u → p) ++ (corridor walk p → far end)`; `hloc` holds since the
+  corridor meets `Icc (z - R - 1) (z + R)` only in its near row, inside the fence's columns; `hdisj`
+  from the disjoint read regions and the disjoint boxes of same-colour ends (`2s ≥ 8M` apart).
+  Other sides: same lemma with the walks' roles swapped (left/right) or reversed (bottom/left).
+* **Probability.** Corridor crossings: `CrossingBounds.le_law_crossing_one_of_le` and the three others
+  (`MultiArmBounds.lean`) with aspect `⌈(R' - R)/W⌉ ≤ D A`, so `P(C_β) ≥ c(DA)^j` by independence
+  (`prodBernoulli_iInter_fin_of_determined`, disjoint read regions); `law_mul_le_law_inter_of_mixed`;
+  `E_β ∩ C_β ⊆ multiArmEvent σ z r R'` by `exists_isArm_of_glue`; so
+  `c(DA)^j · P(sep) ≤ #bins^j · P(A(r, R'))`.
+* **Windows** (for Theorem 11): the staged rotation of §13.4, or the landing information
+  `b' i ∈ (P i).support` of `exists_isArm_of_glue` with corridors ending in the windows.
+
+Rough size: 1000–1500 lines, one session for the straight statement, a second for windows.
+
+### 13.6 How A3b-3 uses items 4 and 5
+
+* **Extendability, outer half** (`law (A r R) ≤ C law (A r (2R))`): outer step at scale `R`
+  (`exists_law_multiArmEvent_inter_not_separated_le`: `P(A(r,R)) ≤ P(sep_R) + δ P(A(r,N))`) and the
+  straight gluing `P(sep_R) ≤ C(η) P(A(r, R'))`; the remaining `δ`-term is handled by the scale
+  iteration below.
+* **Theorem 11, outer half, by scale iteration** (§11.4): `G_k` at scales `R_k` with disjoint annuli;
+  "first good scale from outside" costs `δ^k`; then extend the separated arms from `R_k` to `R`. For the
+  constants to close (`δ` is chosen after the per-scale cost), the per-scale extension must not depend
+  on `η`: glue once (cost `c(η)`) into arms that land in fixed windows *with fences* at the next scale,
+  then extend window-to-window at a cost depending only on the landing data. So A3b-3 will want the
+  gluing with **fences at `∂B_{R'}`** in its output: add to the corridor event a fence event at the far
+  end (a crossing of `[c - W - K', c + W + K'] × [z₁ + R' + 1, z₁ + R' + M']` beyond the corridor, a
+  crossing just inside, `[c - W - 1, c + W + 1] × [z₁ + R' - M', z₁ + R' - 1]`, and a short crossing
+  joining them along the corridor), giving `HasOuterFence` at the new end with `K_new = K'`,
+  `M_new = M' + 2W + K'`. Planned for A3b-2b or early in A3b-3.
+* **Quasi-multiplicativity, lower half**: separation at both ends (outer step for the inner event,
+  inner step — the inner predicates of §12.4 — for the outer event), Theorem 11 to put both into the
+  same windows, gluing in `B_{r₂} \ B_{r₂/4}` (corridors from window `i` to window `i`), and the
+  one-scale bound when `r₂ ≤ 8 r₁`. Conditioning on two separated events at once: the conditional
+  Harris form applies to their intersection (both sections are upper for the mixed order off the
+  corridors).
+* **A priori lower bound**: the one-scale bound and the gluing at dyadic scales.
+
+### 13.7 Search
+
+* Mathlib: `Combinatorics/SetFamily/HarrisKleitman.lean` and `FourFunctions.lean` (finite set
+  families / finite distributive lattices, counting measure; no product measure, no mixed order),
+  `Measure.infinitePi_map_pi`, `map_bernoulliMeasure`, `Measurable.symmDiff`, `Measurable.of_eval`,
+  `lintegral_mul_const'`, `Int.sbtw_iff`, `sbtw_asymm`, `sbtw_cyclic_left`, `abs_cases`, `lt_abs`,
+  `abs_le`, walk API (`take_spec`, `tail_support_append`, `support_append_eq_support_dropLast_append`,
+  `mem_support_append_iff`, `edges_append`, `edges_reverse`, `support_reverse`, `getLast_support`,
+  `end_mem_tail_support`, `mem_support_iff`, `dart_snd_mem_support_of_mem_darts`).
+* PercLib, reused: `prodBernoulli_harris`, `prodBernoulli_map_compl` (full flip; the partial flip is
+  new), `bernoulliMeasure_swap`, `prodBernoulli_eq_lintegral_splice`, `splice_preimage_eq_of_disjoint`,
+  `measurable_splice_right`, `prodBernoulli_mul_mul_le_inter_of_determined` (Lemma 13; generalised, not
+  duplicated), `localConn_mono`, `dualConfig_anti`, `hasOuterFence_iff_of_inter_eq`,
+  `cond_inter_edgeSet_mem_localConn_iff_of_inter_eq`, `measurableSet_setOf_isArm`,
+  `measurableSet_setOf_hasOuterFence`, `IsArm.end_mem_Icc`, `IsArm.landingPos_eq_of_top/right/bottom/
+  left`, `IsArm.end_mem_sides`, `IsArm.penultimate_mem`, `Icc_subset_Icc_add_one_sub_one`,
+  `sbtw_landingPos_iff_of_innerPos_eq`, `sbtw_apply_finRotate_apply`,
+  `sbtw_innerPos_iff_sbtw_landingPos`, `innerPos_append`, `exists_append_eq_of_notMem`,
+  `armsDisjoint_of_subsingleton`, `IsOpenArm/IsDualArm.mem_Icc`, `exists_mem_edgeSet_of_mem_edges`,
+  `mem_Icc_of_mem_dualEdge`. Not found (added): Harris for a mixed order and its conditional form, the
+  flip of a set of coordinates, the monotonicity of fences in their colour, the sharp fence
+  determination, the sector bound beyond the boundary, the gluing of continuations. `ArmsDisjoint.of_innerPos_eq`
+  contains a `key` step close to `false_of_innerPos_eq_of_abs_lt` but it is internal to that proof.
+
+### 13.8 Gate and lessons
+
+Gate: `scripts/gate.sh main` **passed on `b31db79`** (axiom audit 10319 constants, only `propext`,
+`Classical.choice`, `Quot.sound`; the expected interface NOTICE from `Arms/Defs.lean`, no other notice;
+about 8 min). Final lines:
+
+```
+D-35 checks passed (tagged statements, headers of new files).
+INTERFACE change against ae4eb08e45a1: Proof PR touches an interface/non-Lean file: PercLib/Models/Planar/Arms/Defs.lean
+NOTICE: interface change; an auditor must approve before merge.
+== gate passed on b31db79739d8c42c00b24274f488258daf44cd16
+```
+
+This note's commit changes only `docs/`.
+
+Lessons:
+* `lake build … | tail -1 && git commit …` commits even when the build fails (the pipeline's status is
+  `tail`'s); check for `Build completed` first. (Happened once here; the commit was amended locally
+  before anything else.)
+* `rcases abs_cases x with ⟨h, -⟩ | ⟨h, -⟩` drops the sign facts; `omega` then reports counterexamples
+  from impossible branches. Keep both conjuncts.
+* `namespace SimpleGraph.Walk` inside `namespace PercLib.Models.Planar` nests; state general walk
+  lemmas as `theorem _root_.SimpleGraph.Walk.…` with `open SimpleGraph.Walk` in a section.
+* The ascription `(r : LatticeSite 2)` in `Icc (z - r) (z + r)` is unnecessary (same term); dropping it
+  fixed most long lines.
+* Comparing landing positions near a side needs `IsArm.penultimate_mem`: without it `omega` considers
+  the diagonal corner faces, which no dual arm can end at.
+* Builds: `MixedHarris` 7 s, `OuterGluing` about 15 s.
