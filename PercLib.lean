@@ -141,6 +141,7 @@ public import PercLib.Models.Planar.Arms.InnerSeparation
 public import PercLib.Models.Planar.Arms.InnerSeparationSides
 public import PercLib.Models.Planar.Arms.Interlacing
 public import PercLib.Models.Planar.Arms.JogCorridors
+public import PercLib.Models.Planar.Arms.LowerQuasiMultiplicativity
 public import PercLib.Models.Planar.Arms.MotionPlan
 public import PercLib.Models.Planar.Arms.MultiArmBasics
 public import PercLib.Models.Planar.Arms.MultiArmBounds
