@@ -27,8 +27,13 @@ the corridors, bins and the gluing statement remain (A3b-2b, §13.5). The A3b-2b
 the gluing statement with straight corridors (`exists_pos_le_law_multiArmEventIn_of_separated`) on
 top of a gluing lemma for arbitrary corridor events (`law_mul_prod_le_law_of_corridors`); landing in
 fixed windows (staged rotation) and fences at `∂B_{R'}` are designed in §14.4 and not proved
-(A3b-2c). Nothing in `Arms/Defs.lean` or `Planar/Defs.lean` was changed. Local commits only, nothing
-pushed.
+(A3b-2c). The A3b-2c session (§15) proved fences at `∂B_{R'}` (caps) for corridors that move each arm
+along its side (jogs), the first gluing with fences at the new boundary for straight corridors
+(`exists_pos_le_law_separated_of_separated`) and the window-to-window step
+(`exists_pos_le_law_windows_of_windows`, constant independent of the separation scale); the rotation
+into fixed windows (corridors turning round the corners and a motion plan) and the two-sided gluing
+are designed in §15.4 and not proved (A3b-2d). Nothing in `Arms/Defs.lean` or `Planar/Defs.lean` was
+changed. Local commits only, nothing pushed.
 
 ## Decisions (user, 2026-11-22)
 
@@ -1742,3 +1747,307 @@ NOTICE: interface change; an auditor must approve before merge.
 ```
 
 This note's commit changes only `docs/`.
+
+## 15. A3b-2c (2026-11-24): jogs with caps, fences at the new boundary, window-to-window steps
+
+Package A3b-2c = the rest of item 5 of §5 as designed in §14.4. **Proved:** fences at `∂B_{R'}`
+(the caps `H_c`, `U`, `H_f` of §14.4(b)) for corridors that move each arm along its side by a given
+shift (jogs), on all four sides and both colours; on top of them **the first gluing with fences at
+the new boundary for straight corridors** (output `outerSeparatedArmEvent` at `R'` with new, much
+smaller fences) and **the window-to-window step** (arms in windows on the sides of `B_R` to arms in
+shifted windows on the same sides of `B_{R'}`, separation read off the windows, constant independent
+of the separation scale of the first gluing). **Not proved:** the rotation into fixed windows (the
+first gluing *into windows*, §14.4(a) "staged rotation"), which needs corridors turning round the
+corners of the annulus and a motion plan; and the two-sided gluing for the lower half of
+quasi-multiplicativity. Both are designed in §15.4. Proof-only, no definition, no `Defs.lean`
+touched. Commits:
+
+* `3f79aee` **Arms/JogCorridors** (new module, 2630 lines) and **Arms/CapGluing** (new module, first
+  part): jogs with caps on the four sides, corridor events of six crossings, the gluing inside
+  straight boxes, jogs with caps for fixed bins.
+* `f1a09be` **Arms/CapGluing**: the first gluing with fences at `∂B_{R'}` (straight).
+* `d1b2f16` **Arms/CapGluing**: the window-to-window step (module now 1444 lines).
+* `e15749d` **Arms/CapGluing**: a hypothesis renamed (`hκdef` → `hκeq`, §15.8).
+* this note's commit (docs only).
+
+Gate: §15.8.
+
+### 15.1 The statements proved
+
+**Jogs with caps** (`JogCorridors.lean`). On the top side (the other three sides are the same
+statement reflected or with the coordinates exchanged, `δ = cond col 0 1` shifting the rows (columns)
+of a dual arm on the bottom (left) side): an arm `γ` of colour `col` ending at `b` on the top side of
+`B_R(z)` in the bin columns `[x, x + W]`, at least `2M` from the corners, with an outer fence `(M, K)`,
+`W ≤ K ≤ M`; the six boxes
+
+```
+V₁  = [x + K', x + W - K'] × [z₁ + R, z₁ + h + W₀]        (bottom-top; W₀ = W - 2K')
+H   = [xl + K', xr + W - K'] × [z₁ + h, z₁ + h + W₀]      (left-right; xl ≤ x, x + d ≤ xr …)
+V₂  = [x + d + K', x + d + W - K'] × [z₁ + h, z₁ + R' - 1]
+H_c = [x + d + K', x + d + W - K'] × [z₁ + R' - M', z₁ + R' - 1]
+U   = [x + d + K', x + d + W - K'] × [z₁ + R' - M', z₁ + R' + M']
+H_f = [x + d, x + d + W] × [z₁ + R' + 1, z₁ + R' + M']
+```
+
+crossed in the configuration of the colour of the arm give (`exists_walk_of_jog_top`) a walk of that
+colour from a vertex (face) of `γ` within `M` of `b`, through the box of radius `M` about `b`, `V₁`
+and the region `[xl, xr + W] × [z₁ + h, z₁ + R' + M']`, to the **first point `y` outside the interior
+of `B_{R'}(z)`**; `y` lies on the top side, `x + d + K' ≤ y₀ ≤ x + d + W - K'`, every other point of
+the walk is inside, and `HasOuterFence ω col z R' M' K' (nil y)` (a fence of length `2K'` and depth
+`M'` at `y`), for `2K' + 1 ≤ W`, `2 ≤ M'`, `W ≤ M' + K'`, `R + M ≤ h`, `h + W₀ + M' ≤ R'`. It is the
+leg `exists_walk_leg_top` (old fence → `V₁` → `H` → `V₂`) followed by the cap `exists_walk_cap_top`
+(`V₂` → `H_c` → `U`, cut at the first exit; the part of `U` after `y` meets `H_f`, and the sub-walk of
+`H_f` between columns `y₀ ∓ K'` is the new fence, `exists_mem_localConn_of_walk_zero`). The cap takes
+its three boxes as variables with coordinate equations, so it is reusable by other legs (turns).
+
+**One arm's corridor** (`exists_corridor_jog`, any side through a four-case description `hjog`):
+the six crossings form an event `C` that is measurable, determined by the pairs inside
+`Icc lo (hi + cond col 0 1)` of the straight box `Icc lo hi` from the fat bin (`[x, x + W₀ + 2D]`
+along the side) out to distance `R' + M'`, monotone in the colour, with `c κ ^ 6 ≤ P(C)` under the
+aspect bounds `R' + M' - R ≤ κ (W₀ - 2K')`, `2D + W₀ - 2K' ≤ κ (W₀ - 2K')`, `W₀ ≤ κ (M' - 1)`; the
+bin is `[x + D, x + D + W₀]`, the shift `|d| ≤ D`, the target `[x + D + d + K', x + D + d + W₀ - K']`
+on the same side of `B_{R'}`.
+
+**The gluing inside straight boxes** (`law_mul_prod_le_law_of_sides`, `CapGluing.lean`):
+`law_mul_prod_le_law_of_corridors` when every corridor reads only pairs inside a straight box of
+width `W` from its bin out to distance `R''` and its region lies in that box; the geometric
+hypotheses of the corridor gluing (`hTT`, `hTB`, `hQdisj`, `hT`) are discharged by A3b-2b's integer
+lemmas used with a **margin `S ≥ M` in place of `M`** (separation `s ≥ 4S`, `2W + 2 ≤ S`, bins `2S`
+from the corners): wide boxes need well separated arms, not deep fences.
+
+**Jogs with caps for fixed bins** (`pow_mul_law_le_law_of_jogs`): `c κ ^ (6j) · P(separated at R
+with ends in the bins B, inner positions in J) ≤ P(arms to ∂B_{R'}(z), disjoint, ordered, inner
+positions in J, ends in the targets B' with outer fences (M', K'))`.
+
+**The first gluing with fences at `∂B_{R'}`** (straight corridors, `D = d = 0`):
+
+```lean
+theorem exists_pos_le_law_separated_of_separated {j : ℕ} (σ : Fin j → Bool)
+    (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) (c : ℕ → ℝ≥0∞) (A D : ℕ) :
+    ∃ c₀ : ℝ≥0∞, 0 < c₀ ∧ ∀ q L, CrossingBounds q L c → ∀ z (r R R' W M K M' K' : ℕ) (s : ℝ) J,
+      1 ≤ K' → 4 * K' ≤ W → W ≤ K → K ≤ M → 2 * W + 2 ≤ M → W ≤ M' →
+      4 * (M : ℝ) ≤ s → r + M + 1 < R → R + M + 1 + W + M' ≤ R' → R' + M' ≤ D * R →
+      R ≤ A * W → (R' : ℕ∞) ≤ L →
+      c₀ * law q {separated at R, scale s, fences (M, K), inner positions in J} ≤
+        law q {separated at R', scale s - 4W, fences (M', K'), inner positions in J}
+```
+
+and `exists_pos_le_law_outerSeparatedArmEvent_of_separated` (`J = univ`, with
+`outerSeparatedArmEvent`). `c₀ = c κ ^ (6j) / (4 (2A + 1)) ^ j`, `κ = 2DA + 2`. The separation at
+`R'` is inherited from a separated family ending in the same bins (`IsArm.shift_of_jog`: the landing
+position moves by the growth `(4t + 2)(R' - R)` of the perimeter up to the side `t`, up to `2W`;
+sides are ordered as the positions, so distances drop by at most `4W`,
+`abs_sub_sub_le_abs_of_shift`, and the distance to the corners by at most `2W`,
+`sub_le_abs_sub_of_shift`).
+
+**The window-to-window step**:
+
+```lean
+theorem exists_pos_le_law_windows_of_windows {j : ℕ} (σ : Fin j → Bool)
+    (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) (c : ℕ → ℝ≥0∞) (A N : ℕ) :
+    ∃ c₀ : ℝ≥0∞, 0 < c₀ ∧ ∀ q L, CrossingBounds q L c →
+      ∀ z (r R R' W M K M' K' D S : ℕ) (s : ℝ) (g' : ℤ) J (t : Fin j → Fin 4) (α β d : Fin j → ℤ),
+      1 ≤ K' → 4 * K' ≤ W → W ≤ K → K ≤ M → M ≤ S → 2 * (W + 2 * D) + 2 ≤ S → W ≤ M' →
+      4 * (S : ℝ) ≤ s → r + M + 1 < R → R + M + 1 + W + M' ≤ R' → R' + M' ≤ R + A * W →
+      D ≤ A * W → (R' : ℕ∞) ≤ L → (∀ i, -D ≤ d i ∧ d i ≤ D) →
+      (∀ i, β i - α i + 1 ≤ N * (W + 1)) →                       -- N bins per window
+      (∀ i, windows [α i, β i] at least 2S from the corners of B_R(z) on the side t i) →
+      1 ≤ g' →
+      (∀ i, windows [α i + d i, β i + d i + W] at least g' from the corners of B_{R'}(z)) →
+      (∀ i k, i ≠ k → t i = t k → these windows at least g' apart) →
+      c₀ * law q {separated at R, scale s, fences (M, K), b i ∈ window [α i, β i] on side t i, J} ≤
+        law q {separated at R', scale 2g' - 1, fences (M', K'),
+          b i ∈ window [α i + d i, β i + d i + W] on side t i, J}
+```
+
+(window on side `t`: `t = 0`: `b₁ = z₁ + R`, `α ≤ b₀ ≤ β`; `t = 1`: `b₀ = z₀ + R`, `α ≤ b₁ ≤ β`;
+`t = 2`: `b₁ = z₁ - R - δ`, `α ≤ b₀ ≤ β`; `t = 3`: `b₀ = z₀ - R - δ`, `α ≤ b₁ ≤ β`.)
+`c₀ = c κ ^ (6j) / (N + 1) ^ j`, `κ = 4A + 2`: **it depends only on `σ`, `c`, `A`, `N`**. The
+separation `2g' - 1` at `R'` is read off the windows (`le_abs_landingPos_sub_of_windows`: arms ending
+in windows at least `g` from the corners and, on one side, `g` apart, land `2g - 1` apart and from
+the corners), so iterating the step does not erode it.
+
+### 15.2 Decisions (mine, per the standing instruction)
+
+1. **Caps as in §14.4(b), cut inside the hook.** The continuation is cut at its first exit from the
+   interior of `B_{R'}(z)` by the hook itself, so the end property of
+   `law_mul_prod_le_law_of_corridors` (`Φ`) has to hold at one point only; the fence at that point is
+   `HasOuterFence … (SimpleGraph.Walk.nil : Walk y y)` (`HasOuterFence.of_nil` transfers it to any walk
+   ending at `y`). **No new definition.** A single crossing of `[x, x + W] × [z₁ + R, z₁ + R' + M']`
+   instead of `V₂, H_c, U` does not work: after first reaching the row `z₁ + R'` the walk may return
+   below `z₁ + R' - M'`, so the connection from `y` to the fence would leave the box of radius `M'`.
+2. **Window-to-window by small jogs, not nested scaling corridors.** §14.4(a)'s scaling corridors
+   (`t ↦ 2t` with levels nested by `|t|`) conflict near the corners: the L-shaped approximations of
+   rays from `z` through two ends on adjacent sides near a common corner cross. Instead one step moves
+   every arm by a fixed shift `|d i| ≤ D` along its side, with one level `h` for all arms, and every
+   corridor stays in a straight box of width `W + 2D` above its bin: the geometry is A3b-2b's, used
+   with a separation margin `S ≥ M` (decision 3). A doubling `ρ → 2ρ` is `O(1/ε)` such steps with
+   `R' - R ≍ ε ρ`; A3b-3 composes them (§15.5). No corner is passed: windows stay on their sides.
+3. **Separation margin `S` separate from the fence depth `M`** in the gluing inside straight boxes
+   (and in the bins and windows): the integer lemmas of A3b-2b are instantiated with `S`; boxes of
+   radius `M + 1` about the ends lie in those of radius `S + 1`.
+4. **Output separation.** The first gluing inherits `s - 4W` from a separated family in the same bins
+   (the arms only move by `≤ W` along their sides); the window step reads `2g' - 1` off the windows.
+   The first gluing outputs fences `(M', K')` with `M' ≥ W`, `4K' ≤ W` freely chosen: with Nolin's
+   `M = ⌊√ηN⌋`, `W ≍ ηN` the output has separation `≈ 4√ηN` and fences `≍ ηN`, i.e. **room**
+   (`s' ≫ M'`), which later steps need (the input of the first gluing has `s = 4M` exactly).
+5. **Constants.** First gluing: `κ = 2DA + 2` (all six aspect ratios), `c₀ = c κ ^ (6j) / (4(2A+1))^j`.
+   Window step: `κ = 4A + 2`, `c₀ = c κ ^ (6j) / (N + 1)^j` (`N + 1` keeps `c₀` finite for `N = 0`).
+   Both chosen before `q`, `L`, `z` and the radii.
+6. **Level `h ≥ R + M + 1`** (the legs' horizontal piece misses `Icc (z - R - 1) (z + R)`: on the
+   bottom side with `M = 1` the level `R + M` would touch the row `z₁ - R - 1`).
+7. **Interiors for either colour** through `mem_cond_interior_iff` (open: `Icc (z - R' + 1) (z + R' - 1)`,
+   dual: `Icc (z - R') (z + R' - 1)`); the bottom and left caps work in the dual interior.
+8. **Windows** are coordinate intervals `[α, β]` on a side `t`, not `window (16R) θ η`: the
+   corridors are built from side coordinates; the translation to landing data is A3b-3's (§15.5).
+9. Right and left statements are generated from the top and bottom ones by exchanging the
+   coordinates (`exists_mem_support_of_mem_Icc_of_mem_Icc_swap`, `exists_mem_localConn_of_walk_one`,
+   whose argument names are the exchanged ones). The optional move of A3b-2b's mixed-order lemmas to
+   `Probability/MixedHarris.lean` was not done.
+
+### 15.3 Errata and observations
+
+* **Two-arm separation after a shift is false at the corners**: two positions both equal to a
+  corner `4tR`, read on the two adjacent sides, move by different amounts. The lemmas use positions
+  strictly inside the sides, which holds since ends are `≥ 2S` from the corners.
+* The shift of a landing position under a straight move from `R` to `R'` is `(4t + 2)(R' - R)` for
+  the side `t` (bottom `0`, right `1`, top `2`, left `3`): positions on later sides move more, so
+  distances between arms on different sides only grow.
+* The jog's bins must start inside their windows (`α ≤ x + D`) for the target window
+  `[α + d, β + d + W]`; a bin straddling `α` would need `[α + d - W, …]`.
+* No statement of the plan or of §14 had to change; no hypothesis beyond `hσ` was needed.
+
+### 15.4 What remains of item 5: the rotation (first gluing into windows) and the two-sided gluing
+
+**(a) The first gluing into fixed windows** (§14.5 (G1)): from `separated at R` (scale `s`, after
+`exists_pos_le_law_separated_of_separated`: room `s ≫ M'`) to arms ending in prescribed windows
+`θ̃` (on the sides, away from the corners) at some `R'' ≤ D(η) R`, cost `c(η, θ̃)`. Design:
+
+* **Turns.** For an arm near the top-right corner moving clockwise: `V₁` up from its bin to the level
+  `h`, then `H = [x + K', R' - 1] × [h, h + W₀]` right through the corner square, then the right-side
+  cap (`exists_walk_cap_right` with rows `[h, h + W₀]`): the new end is on the right side of
+  `B_{R'}`, `R' - h - W₀` below its corner. Eight variants (four corners, two directions) from one by
+  reflections; the cap lemmas are already general (boxes as variables).
+* **Sectors.** With room, give each arm a sector (a box: the straight box for a jog; for a turn
+  `[x - M, R' + M' + 1] × [R - M, h + W₀ + K' + 1]` at the top-right corner), containing its old end
+  box, its corridor and its read set; if the sectors are pairwise disjoint, `hTT`, `hTB`, `hQdisj`
+  follow without the corner lemma of A3b-2b. New generic lemma `law_mul_prod_le_law_of_sectors`
+  (about 150 lines, from `law_mul_prod_le_law_of_corridors`).
+* **Motion plan.** Lift the fractional positions of the arms (`φ i`) and of the targets (`ψ i`) to
+  increasing sequences with a common offset; interpolate linearly in `S = O(1/(gap))` steps, each
+  moving every arm by less than a quarter of the smallest gap (gaps stay `≥ min(start, target)`);
+  each step is a window step in which an arm whose move passes a corner turns instead of jogging
+  (at most one arm per corner per step). The plan is integer arithmetic on side coordinates at the
+  radii `R_k = R + k Δ`; the invariant per step is "ends in windows of width `W` around the planned
+  positions, sectors disjoint".
+* **Size**: turns 4 × 150 lines (generated), sectors lemma 150, planning and invariants 500–800. One
+  session (package "A3b-2d"), or the first part of A3b-3.
+
+**(b) The two-sided gluing** (§14.5, lower half of quasi-multiplicativity): an inner family (arms
+from `B_{r₁}` to `∂B_{ρ}`, outer fences, ends in windows `θ̃`) and an outer family (arms from `∂B_{ρ'}`
+to `∂B_{r₃}`, `ρ' > ρ`, **inner** fences, starts in the same windows) are joined by straight corridors
+(jogs with `d = 0` between the two window sets, no cap) to arms from `B_{r₁}` to `∂B_{r₃}`. Needs:
+the inner predicates `HasInnerFence`/`ArmsInnerSeparated` of §12.4 (an additive definition in
+`Arms/Separation/Defs.lean`, its own interface commit; the half-unit at `∂B_r` is fixed by the inner
+strip lemma, §12.4); a hook into an inner fence (mirror of the leg, walking inwards from `∂B_{ρ'}`);
+a gluing-of-continuations lemma for two families (`exists_isArm_of_glue` with the outer family's arm
+appended after the corridor; order invariance at both boxes); the conditioning on both separated
+events (the conditional mixed Harris applies to their intersection: both sections are upper for the
+mixed order off the corridors). Size: about `law_mul_prod_le_law_of_corridors` + four inner hooks.
+
+### 15.5 How A3b-3 uses the statements
+
+* **Theorem 11, outer half.** With `u(ρ) = P(A(r, ρ))` and `v(ρ) = P(arms in windows θ̃ at ρ with
+  fences (M(ρ), K(ρ)), separated)`: `u(R) ≤ u(ρ₁)` for `ρ₁ ≤ R`; at `ρ = 2N + 1`,
+  `u(ρ) ≤ P(sep_η(ρ)) + δ u(N)` (`exists_law_multiArmEvent_inter_not_separated_le`);
+  `P(sep_η(ρ)) ≤ C_η P(sep at ρ', small fences)` (`exists_pos_le_law_separated_of_separated`);
+  `≤ C'_η v(ρ'')` (§15.4(a), to be proved); `v(ρ'') ≤ C_θ^{k} v(R)` by `k = O(log(R/ρ''))` doublings of
+  window steps (`exists_pos_le_law_windows_of_windows`, constant independent of `η`); choose `δ` after
+  `C_θ`. Base: `v(ρ) ≥ c` at scales `ρ ≍ r` from the one-scale bound (A3a) and the first gluing.
+* **Parameters for the window steps at scale `ρ`** (all proportional to `ρ`, fixed by `θ̃`): windows
+  `α i = z_side + ⌈a_i ρ⌉`, `β i = z_side + ⌊b_i ρ⌋` with `-1 < a_i < b_i < 1` from `θ̃`; bin width
+  `W = ⌊μρ⌋`, fences `M = M' = ⌊μ'ρ⌋ ≥ W`, `K = W`, `K' = ⌊W/4⌋`; margin `S ≍` (gap of `θ̃`)`·ρ/8`,
+  `s = 4S`; step `R' - R = ⌈ερ⌉` with shift `d i ≈ (a_i + b_i)/2 · (R' - R)` and
+  `D = max |d i| ≤ ερ`; then `2(W + 2D) + 2 ≤ S` needs `μ + 2ε` small against the gap, and
+  `R + M + 1 + W + M' ≤ R'` needs `ε ≥ 2μ' + μ`: choose `μ, μ' ≪ ε ≪ gap`. The windows at `R'` must
+  contain `[α + d, β + d + W]`: widen the target windows by `W` per step and shrink them back by
+  starting each doubling inside the core windows (the drift per doubling is `O(μ/ε)` of a window).
+  `N = ⌈(b - a)/μ⌉ + 1`.
+* **Windows and landing data.** A side window `[α, β]` on side `t` at `ρ` is a set of landing
+  positions (top: `8ρ + 2(z₀ + ρ) - 2b₀ - δ`, …); choose core windows `θ̃` inside the windows of `θ`
+  and away from the corners (each window of `IsLanding η θ` contains a sub-window of length `η/3` at
+  distance `≥ η/3` from the corners when `η ≤ 1/4`); then `multiArmEventIn … (window (16R) θ η)`
+  contains the window event at `R` (`multiArmEventTo_mono`).
+* **Extendability, quasi-multiplicativity, a priori bound**: as in §14.5, with the window step in
+  place of (G2) and §15.4(b) for the two-sided gluing.
+
+### 15.6 Search
+
+* PercLib, reused: `exists_mem_support_of_mem_Icc_of_mem_Icc`, `exists_walk_of_mem_support_of_mem_support`
+  (`SeparationFence.lean`); `exists_walk_of_mem_localConn`, `mem_localConn_of_walk` (`RSWKeyStep.lean`);
+  `SimpleGraph.Walk.exists_walk_mem_Icc`, `coord_le_add_one_of_adj` (`CrossingSymmetry.lean`);
+  `mem_localConn_iff_exists_walk`; `SimpleGraph.Walk.exists_append_eq_of_notMem` (`MultiArmBasics.lean`);
+  `apply_le_apply_add_one_of_adj`; `IsArm.landingPos_eq_of_top/right/bottom/left`
+  (`OuterSeparation.lean`); `IsArm.exists_mem_bin`, `IsArm.sideL_of_side`, `sideP_of_side`,
+  `false_of_corridor_of_corridor`, `false_of_box_of_corridor`, `false_of_region_of_region`,
+  `measurableSet_preimage_cond_crossing`, `preimage_cond_crossing_iff_of_inter_eq`,
+  `cond_mem_crossing_of_cond_subset`, `CrossingBounds.le_law_preimage_cond_crossing_one/zero`,
+  `law_mul_prod_le_law_of_corridors`, `cond_zero_one_apply`, `ArmsOuterSeparated.le_abs_landingPos_sub`,
+  `two_mul_le_abs_landingPos_sub`, `le_or_le_of_lt_of_lt`, `le_or_le_of_lt` (`CorridorGluing.lean`);
+  `prodBernoulli_prod_le_biInter_of_mixed` (`MixedHarris.lean`, with `D = ∅` or `univ` for Harris
+  inside one corridor).
+* Mathlib: `SimpleGraph.Walk.penultimate_mem_dropLast_support`, `SimpleGraph.Walk.adj_penultimate`,
+  `SimpleGraph.Walk.getLast_support`, `List.dropLast_append_getLast`, `SimpleGraph.Walk.support_transfer`,
+  `Finset.pow_card_le_prod`, `Finset.prod_le_prod`, `Finset.prod_const`, `Int.ceil_le`,
+  `Int.le_ceil`, `Int.cast_abs`, `abs_of_nonneg`, `abs_of_nonpos`, `neg_le_abs`, `le_abs_self`,
+  `mul_le_mul_of_nonneg_right`, `le_mul_of_one_le_left`, `Int.ediv_lt_of_lt_mul`.
+* Not found (added): the joining of walks through a common vertex with support control
+  (`exists_walk_join`), the fence inside a crossing (`exists_mem_localConn_of_walk_zero/one`), the
+  coordinate-exchanged crossing lemma, multi-crossing corridor events and Harris inside one corridor,
+  the colour-aware interior, jogs and caps, the gluing inside straight boxes with a margin, landing
+  positions after a jog, separation from side windows.
+
+### 15.7 Lessons
+
+* **Split hooks into leg and cap.** One declaration with six crossings, the cut and the new fence
+  exceeded the heartbeat budget; leg (three crossings) and cap (three crossings, cut, fence) compile
+  in seconds each.
+* **Generate three sides from one.** The right side is the top side with the coordinates exchanged:
+  a script swapping `v 0 ↔ v 1`, two-element vectors `![a, b] ↔ ![b, a]`, `crossing 0 ↔ crossing 1`
+  and the crossing-bound lemma names, with `cond col 0 1` and Fin-6 indices protected
+  (`hω (0 : Fin 6)`). It only works if the source avoids order-dependent steps: `simpa using` on
+  coordinate conjunctions breaks (use `simp only … at this; omega`), and so do simp lemma sets
+  chosen per coordinate (recompute after the swap).
+* **Boxes as variables with equations** (`hlc : lc 0 = c₀ ∧ lc 1 = …`) let legs pass their own
+  vectors to the cap without `convert`; implicit section variables used only in such equations must be
+  passed by name (`(K' := K')`), or a `ring` goal is left with a metavariable.
+* `set` for `Fin 6`-indexed vectors plus `simp [hlo, hhi]` and `nlinarith` timed out; explicit
+  vectors, `change` per `fin_cases` branch and pre-linearised aspect bounds (`rw [hw'] at hκV` with
+  `W₀ - 2K' = w`) are cheap.
+* `simp_all` in a large context times out; a case split on the colours with `rfl` closes the same
+  goals.
+* `lake env lean` on a scratch file uses `autoImplicit` default (true): a hypothesis mentioning a
+  variable bound later silently gets an auto-bound copy (`Wc✝`); the real build (`autoImplicit =
+  false`) would reject it. Bind variables before use.
+* **The proof-only classifier tokenizes ASCII only**: `hκdef` reads as `def` and makes the change an
+  interface change. Avoid identifiers whose ASCII pieces are keywords (`def`, `instance`, …); check
+  with the `FORBIDDEN` set of `scripts/check_proof_pr.py` before the gate.
+* Builds: `JogCorridors` 28 s, `CapGluing` 11 s; gate about 9 min.
+
+### 15.8 Gate
+
+`scripts/gate.sh main` **passed on `e15749d`** (axiom audit 11322 constants, only `propext`,
+`Classical.choice`, `Quot.sound`; the expected interface NOTICE from `Arms/Defs.lean`, no other
+notice). Final lines:
+
+```
+D-35 checks passed (tagged statements, headers of new files).
+INTERFACE change against ae4eb08e45a1: Proof PR touches an interface/non-Lean file: PercLib/Models/Planar/Arms/Defs.lean
+NOTICE: interface change; an auditor must approve before merge.
+== gate passed on e15749d8631dab5f138dc1a10bff92b39d3e2480
+```
+
+A first run on `d1b2f16` also passed, but its NOTICE named `CapGluing.lean` (token `def`): the
+classifier of `scripts/check_proof_pr.py` splits identifiers at non-ASCII letters, so the hypothesis
+name `hκdef` produced `def`. `e15749d` renames it (`hκeq`); no statement changed. This note's commit
+changes only `docs/`.
