@@ -36,6 +36,9 @@ quasi-multiplicativity is in `Extendability.lean`.
 * `step_scales`, `step_scales_outer`, `step_products`, `step_bound_S`, `step_bounds_core`,
   `step_bounds_budget`, `step_bounds_bins`: the arithmetic of the scales.
 * `exists_law_mul_law_far_le`: **step S**, `π(r, ⌊ρ / 5⌋) P(far inner family at ρ) ≤ C π(r, R₃)`.
+* `exists_law_mul_law_far_le_inner`: step S for a first family with inner positions in windows
+  `J`, which the motion plan and the gluing keep (`setOf_outerSeparated_subset_comp_finRotate_pow`
+  reindexes it).
 -/
 
 @[expose] public section
@@ -175,10 +178,17 @@ theorem exists_pos_mul_le_law_of_plan_two_sided (σ : Fin j → Bool)
 
 /-! ### One bin assignment -/
 
-/-- **Reindexing the separated event at the outer boundary** by a rotation of the indices. -/
-theorem outerSeparatedArmEvent_subset_comp_finRotate_pow {σ : Fin j → Bool} (m : ℕ)
-    {z : LatticeSite 2} {r R : ℕ} {s : ℝ} {M K : ℕ} :
-    outerSeparatedArmEvent σ z r R s M K ⊆ {ω : Config (LatticeSite 2) |
+/-- **Reindexing the separated event at the outer boundary, with inner windows,** by a rotation
+of the indices. -/
+theorem setOf_outerSeparated_subset_comp_finRotate_pow {σ : Fin j → Bool} (m : ℕ)
+    {z : LatticeSite 2} {r R : ℕ} {s : ℝ} {M K : ℕ} {J : Fin j → Set ℤ} :
+    {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+      (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+      (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
+      (∀ i k l, i < k → k < l → sbtw (landingPos (z - R) (z + R) (σ i) (γ i))
+        (landingPos (z - R) (z + R) (σ k) (γ k)) (landingPos (z - R) (z + R) (σ l) (γ l))) ∧
+      ArmsOuterSeparated ω σ z R s M K γ ∧ ∀ i, innerPos z r (σ i) (γ i) ∈ J i} ⊆
+    {ω : Config (LatticeSite 2) |
       ∃ (a b : Fin j → LatticeSite 2) (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
       (∀ i, IsArm ω (σ ((finRotate j ^ m) i)) z r (z - R) (z + R) (γ i)) ∧
       ArmsDisjoint (fun i => σ ((finRotate j ^ m) i)) γ ∧
@@ -187,13 +197,13 @@ theorem outerSeparatedArmEvent_subset_comp_finRotate_pow {σ : Fin j → Bool} (
           (landingPos (z - R) (z + R) (σ ((finRotate j ^ m) k)) (γ k))
           (landingPos (z - R) (z + R) (σ ((finRotate j ^ m) l)) (γ l))) ∧
       ArmsOuterSeparated ω (fun i => σ ((finRotate j ^ m) i)) z R s M K γ ∧
-      ∀ i, innerPos z r (σ ((finRotate j ^ m) i)) (γ i) ∈ (fun _ => univ : Fin j → Set ℤ) i} := by
-  rintro ω ⟨a, b, γ, hγ, hd, ho, hs⟩
+      ∀ i, innerPos z r (σ ((finRotate j ^ m) i)) (γ i) ∈ J ((finRotate j ^ m) i)} := by
+  rintro ω ⟨a, b, γ, hγ, hd, ho, hs, hJ⟩
   exact ⟨fun i => a ((finRotate j ^ m) i), fun i => b ((finRotate j ^ m) i),
     fun i => γ ((finRotate j ^ m) i), fun i => hγ _, hd.comp_perm _,
     sbtw_comp_finRotate_pow m (f := fun i => landingPos (z - R) (z + R) (σ i) (γ i)) ho,
     ⟨fun i k hik => hs.1 _ _ ((finRotate j ^ m).injective.ne hik), fun i mm => hs.2.1 _ mm,
-      fun i => hs.2.2 _⟩, fun _ => mem_univ _⟩
+      fun i => hs.2.2 _⟩, fun i => hJ _⟩
 
 /-- **Step S for one bin assignment.** For a colour sequence `σ` without packs and integers `Ap`,
 `At`, `n` there is `c₀ > 0` such that for every law with crossing bounds `c` up to scale `L`: the
@@ -211,7 +221,7 @@ theorem exists_pos_mul_le_law_of_far_bins (σ : Fin j → Bool)
     ∃ c₀ : ℝ≥0∞, 0 < c₀ ∧ ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
       CrossingBounds q L c → ∀ (z : LatticeSite 2)
       (r R₀ R ρ R₃ N u D Sp Gp Q B M₁ K₁ S m' k' : ℕ) (s₀ s' : ℝ) (t : Fin j → Fin 4)
-      (x : Fin j → ℤ),
+      (x : Fin j → ℤ) (J : Fin j → Set ℤ),
       1 ≤ u → 2 ≤ M₁ → u + K₁ ≤ M₁ → u + 2 * u ≤ Ap * (2 * u - 1) →
       u + 2 * K₁ ≤ Ap * (M₁ - 1) → u + 2 * D + 2 * (2 * u) + 2 * u + 3 ≤ Sp →
       Sp + 2 * (12 * j) * u ≤ Gp → u + 2 * (2 * u) + 2 * K₁ + 3 ≤ Q →
@@ -226,7 +236,13 @@ theorem exists_pos_mul_le_law_of_far_bins (σ : Fin j → Bool)
       2 * (u + 2 * S + 1 + k') + 1 ≤ 8 * m' →
       S + 1 + (Sp + Q + 2 * u + M₁ + u + 1) + k' ≤ N →
       S + 1 + (Sp + Q + 2 * u + M₁ + u + 1) + B ≤ N → 3 * S + k' ≤ N → u + 3 * S ≤ N →
-      c₀ * law q (outerSeparatedArmEvent σ z r R₀ s₀ (2 * u) u) *
+      c₀ * law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+          (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+          (∀ i, IsArm ω (σ i) z r (z - R₀) (z + R₀) (γ i)) ∧ ArmsDisjoint σ γ ∧
+          (∀ i k l, i < k → k < l → sbtw (landingPos (z - R₀) (z + R₀) (σ i) (γ i))
+            (landingPos (z - R₀) (z + R₀) (σ k) (γ k))
+            (landingPos (z - R₀) (z + R₀) (σ l) (γ l))) ∧
+          ArmsOuterSeparated ω σ z R₀ s₀ (2 * u) u γ ∧ ∀ i, innerPos z r (σ i) (γ i) ∈ J i} *
         law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
           (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
           (∀ i, IsArm ω (σ i) z ρ (z - R₃) (z + R₃) (γ i)) ∧ ArmsDisjoint σ γ ∧
@@ -240,14 +256,14 @@ theorem exists_pos_mul_le_law_of_far_bins (σ : Fin j → Bool)
             (t i = 1 ∧ a i 0 = z 0 + ρ ∧ x i ≤ a i 1 ∧ a i 1 ≤ x i + k') ∨
             (t i = 2 ∧ a i 1 = z 1 - ρ - cond (σ i) 0 1 ∧ x i ≤ a i 0 ∧ a i 0 ≤ x i + k') ∨
             (t i = 3 ∧ a i 0 = z 0 - ρ - cond (σ i) 0 1 ∧ x i ≤ a i 1 ∧ a i 1 ≤ x i + k')} ≤
-      law q (multiArmEvent σ z r R₃) := by
+      law q (multiArmEventIn σ z r R₃ J fun _ => univ) := by
   classical
   have hrot := fun m : Fin (j + 1) => exists_pos_mul_le_law_of_plan_two_sided
     (fun i => σ ((finRotate j ^ (m : ℕ)) i)) (comp_finRotate_pow_of_noPack hσ m) c Ap At n
   choose cm hcm hstep using hrot
   obtain ⟨m₀, -, hm₀⟩ := Finset.univ.exists_min_image cm Finset.univ_nonempty
   refine ⟨cm m₀, hcm m₀, ?_⟩
-  intro q L hCB z r R₀ R ρ R₃ N u D Sp Gp Q B M₁ K₁ S m' k' s₀ s' t x hu hM₁ huK hAp1 hAp2 hSp
+  intro q L hCB z r R₀ R ρ R₃ N u D Sp Gp Q B M₁ K₁ S m' k' s₀ s' t x J hu hM₁ huK hAp1 hAp2 hSp
     hGp hQ hs₀ hrR₀ hR₀R hApR hL hD hB huK₁ huk hkm hS hRS hMQ hs'4 hs' hm1 hrR h2ρ hAt hBK hP1
     hP2 hP3 hP4 hP5 hP6 hP7
   refine mul_measure_le_of_nonempty fun hne => ?_
@@ -373,16 +389,16 @@ theorem exists_pos_mul_le_law_of_far_bins (σ : Fin j → Bool)
   -- the core step for the rotated family
   have hm : m < j + 1 := by omega
   have key := hstep ⟨m, hm⟩ q L hCB z r R₀ R ρ R₃ u D Sp Gp Q B M₁ K₁ u S m' k' k' s₀ s'
-    (fun _ => univ) (fun i => t ((finRotate j ^ m) i))
+    (fun i => J ((finRotate j ^ m) i)) (fun i => t ((finRotate j ^ m) i))
     (fun i => (((6 - (t ((finRotate j ^ m) i) : ℕ)) % 4 : ℕ) : ℤ))
     (fun i => x ((finRotate j ^ m) i)) hu hM₁ huK hAp1 hAp2 hSp hGp hQ hs₀ hrR₀ hR₀R hApR hL hD
     hB hlamT hlamT2 hcor hgap hu huK₁ huk hkm (by omega) hMQ hs' hrR (by omega) (by omega) hAt
     hBK le_rfl hcor2 hgap2 hgap3
   refine le_trans ?_ (key.trans (measure_mono (multiArmEventTo_comp_finRotate_pow_subset
-    (σ := σ) (z := z) (r := r) (lo := z - R₃) (hi := z + R₃) (J := fun _ => univ)
+    (σ := σ) (z := z) (r := r) (lo := z - R₃) (hi := z + R₃) (J := J)
     (I := fun _ => univ) m)))
   refine mul_le_mul' (mul_le_mul' (hm₀ _ (Finset.mem_univ _)) (measure_mono ?_)) (measure_mono ?_)
-  · exact outerSeparatedArmEvent_subset_comp_finRotate_pow m
+  · exact setOf_outerSeparated_subset_comp_finRotate_pow m
   · rintro ω ⟨a, b, γ, hγ, hd, ho, hsep, -, hbin⟩
     exact ⟨fun i => a ((finRotate j ^ m) i), fun i => b ((finRotate j ^ m) i),
       fun i => γ ((finRotate j ^ m) i), fun i => hγ _, hd.comp_perm _,
@@ -642,25 +658,31 @@ section StepS
 
 variable {j : ℕ}
 
-/-- **Step S** (the first family at `⌊ρ / 5⌋` against the far inner family at `ρ`). For a colour
-sequence `σ` without packs, `0 < η ≤ 1 / 256` and `w ≥ 7` there are `C < ⊤` and `r₀` such that for
-every law with crossing bounds `c` up to scale `L`, `2ρ + 1 = wN`, `r₀ ≤ r`, `40 r ≤ ρ`,
-`2ρ + 2 ≤ R₃ ≤ L`: `π(r, ⌊ρ / 5⌋) P(far inner family at ρ) ≤ C π(r, R₃)`, where the far inner
-family is separated at the inner boundary of `B_ρ(z)` with the parameters of the inner step
-(`4 √η N`, `⌊√η N⌋`, `⌊η N⌋`) and every start at least `N + 1` from the ends of its side.
-
-Proof: Theorem 11's outer half, separated form, at `R₀ = ⌊ρ / 5⌋` (unit `u = ⌊R₀ / n²⌋`,
-`n = 1000 (j + 1)² (w + 1) ⌈1 / √η⌉`); the starts of the far family in one of `(4NB)^j`
-assignments of bins of width `⌊η N⌋ + 1` (`NB = w ⌈1 / √η⌉²`); for each, the motion plan into
-windows aligned with the bins and the two-sided gluing (`exists_pos_mul_le_law_of_far_bins`, with
-the scales of `step_bounds_core`). -/
-theorem exists_law_mul_law_far_le (σ : Fin j → Bool)
+/-- **Step S with inner windows** (the first family at `⌊ρ / 5⌋`, separated at its outer boundary
+with inner positions in windows `J`, against the far inner family at `ρ`). For a colour sequence `σ`
+without packs, `0 < η ≤ 1 / 256` and `w ≥ 7` there are `C < ⊤`, an integer `n ≥ 1000 (j + 1)²` and
+`r₀` such that for every law with crossing bounds `c` up to scale `L`, `2ρ + 1 = wN`, `r₀ ≤ r`,
+`40 r ≤ ρ`, `2ρ + 2 ≤ R₃ ≤ L` and all windows `J`: `P(first family at R₀ = ⌊ρ / 5⌋, separated at
+scale 2Q - 1 with fences (2u, u), u = ⌊R₀ / n²⌋, Q = (64 n + 24 j + 24) u, inner positions in J)
+P(far inner family at ρ) ≤ C P(arms from B_r(z) to ∂B_{R₃}(z) with inner positions in J)`. The
+proof is that of `exists_law_mul_law_far_le` without its first step (Theorem 11's outer half): the
+motion plan and the gluing keep the inner positions. -/
+theorem exists_law_mul_law_far_le_inner (σ : Fin j → Bool)
     (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) (c : ℕ → ℝ≥0∞) {η : ℝ} (hη : 0 < η)
     (hη1 : η ≤ 1 / 256) {w : ℕ} (hw : 7 ≤ w) :
-    ∃ C : ℝ≥0∞, C ≠ ⊤ ∧ ∃ r₀ : ℕ, ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
-      CrossingBounds q L c → ∀ (z : LatticeSite 2) (r N ρ R₃ : ℕ), 2 * ρ + 1 = w * N →
-      r₀ ≤ r → 40 * r ≤ ρ → 2 * ρ + 2 ≤ R₃ → (R₃ : ℕ∞) ≤ L →
-      law q (multiArmEvent σ z r (ρ / 5)) * law q {ω : Config (LatticeSite 2) |
+    ∃ C : ℝ≥0∞, C ≠ ⊤ ∧ ∃ n : ℕ, 1000 * (j + 1) * (j + 1) ≤ n ∧ ∃ r₀ : ℕ,
+      ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
+      CrossingBounds q L c → ∀ (z : LatticeSite 2) (r N ρ R₀ R₃ : ℕ) (J : Fin j → Set ℤ),
+      2 * ρ + 1 = w * N → R₀ = ρ / 5 → r₀ ≤ r → 40 * r ≤ ρ → 2 * ρ + 2 ≤ R₃ → (R₃ : ℕ∞) ≤ L →
+      law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+        (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, IsArm ω (σ i) z r (z - R₀) (z + R₀) (γ i)) ∧ ArmsDisjoint σ γ ∧
+        (∀ i k l, i < k → k < l → sbtw (landingPos (z - R₀) (z + R₀) (σ i) (γ i))
+          (landingPos (z - R₀) (z + R₀) (σ k) (γ k)) (landingPos (z - R₀) (z + R₀) (σ l) (γ l))) ∧
+        ArmsOuterSeparated ω σ z R₀
+          ((2 * (((64 * n + 24 * j + 24) * (R₀ / (n * n)) : ℕ) : ℤ) - 1 : ℤ) : ℝ)
+          (2 * (R₀ / (n * n))) (R₀ / (n * n)) γ ∧ ∀ i, innerPos z r (σ i) (γ i) ∈ J i} *
+      law q {ω : Config (LatticeSite 2) |
         ∃ (a b : Fin j → LatticeSite 2) (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
         (∀ i, IsArm ω (σ i) z ρ (z - R₃) (z + R₃) (γ i)) ∧ ArmsDisjoint σ γ ∧
         (∀ i k l, i < k → k < l → sbtw (landingPos (z - R₃) (z + R₃) (σ i) (γ i))
@@ -669,7 +691,7 @@ theorem exists_law_mul_law_far_le (σ : Fin j → Bool)
         ArmsInnerSeparated ω σ z ρ (4 * Real.sqrt η * N) ⌊Real.sqrt η * N⌋₊ ⌊η * N⌋₊ γ ∧
         ∀ i, (z 0 - ρ + N + 1 ≤ a i 0 ∧ a i 0 + N + 1 ≤ z 0 + ρ) ∨
           (z 1 - ρ + N + 1 ≤ a i 1 ∧ a i 1 + N + 1 ≤ z 1 + ρ)} ≤
-        C * law q (multiArmEvent σ z r R₃) := by
+        C * law q (multiArmEventIn σ z r R₃ J fun _ => univ) := by
   classical
   -- the integer scale `E ≥ 1 / √η` and the unit `n`
   obtain ⟨E, hE⟩ : ∃ E : ℕ, E = ⌈1 / Real.sqrt η⌉₊ := ⟨_, rfl⟩
@@ -686,7 +708,6 @@ theorem exists_law_mul_law_far_le (σ : Fin j → Bool)
     rw [hn]
     calc 1000 * (j + 1) * (j + 1) = 1000 * (j + 1) * (j + 1) * 1 * 1 := by ring
       _ ≤ 1000 * (j + 1) * (j + 1) * (w + 1) * E := by gcongr; omega
-  obtain ⟨C₁, hC₁, r₁, hsep⟩ := exists_law_multiArmEvent_le_law_outerSeparated σ hσ c hn'
   obtain ⟨c₀, hc₀, hbin⟩ := exists_pos_mul_le_law_of_far_bins σ hσ c (32 * (n * n) + 2)
     (4 * (n * n) + 6 * n + 72 * j + 15) n
   obtain ⟨NB, hNB⟩ : ∃ NB : ℕ, NB = w * (E * E) := ⟨_, rfl⟩
@@ -694,13 +715,11 @@ theorem exists_law_mul_law_far_le (σ : Fin j → Bool)
   have hd0 : d ≠ 0 := (hd ▸ lt_min hc₀ one_pos).ne'
   have hdt : d ≠ ⊤ := ne_top_of_le_ne_top ENNReal.one_ne_top (hd ▸ min_le_right _ _)
   have hdc : d ≤ c₀ := hd ▸ min_le_left _ _
-  refine ⟨C₁ * ((4 * NB : ℝ≥0∞) ^ j * d⁻¹), ENNReal.mul_ne_top hC₁
-    (ENNReal.mul_ne_top (ENNReal.pow_ne_top (ENNReal.mul_ne_top ENNReal.ofNat_ne_top
-      (ENNReal.natCast_ne_top NB))) (ENNReal.inv_ne_top.2 hd0)),
-    max r₁ (n * (n * n) + w * (E * E) + 1), ?_⟩
-  intro q L hCB z r N ρ R₃ hρ hr hrρ h2ρ hL
-  have hr₁ : r₁ ≤ r := le_trans (le_max_left _ _) hr
-  have hr₂ : n * (n * n) + w * (E * E) + 1 ≤ r := le_trans (le_max_right _ _) hr
+  refine ⟨(4 * NB : ℝ≥0∞) ^ j * d⁻¹, ENNReal.mul_ne_top (ENNReal.pow_ne_top
+    (ENNReal.mul_ne_top ENNReal.ofNat_ne_top (ENNReal.natCast_ne_top NB)))
+      (ENNReal.inv_ne_top.2 hd0), n, hn', n * (n * n) + w * (E * E) + 1, ?_⟩
+  intro q L hCB z r N ρ R₀ R₃ J hρ hR₀ hr hrρ h2ρ hL
+  have hr₂ : n * (n * n) + w * (E * E) + 1 ≤ r := hr
   -- the scales
   have hbig : 5 * (n * (n * n)) ≤ ρ := by omega
   have hNE : E * E ≤ N := by
@@ -709,7 +728,6 @@ theorem exists_law_mul_law_far_le (σ : Fin j → Bool)
   obtain ⟨hm1, hm2, hk1, hk2, -, hs4, hs2⟩ := floor_sqrt_mul_bounds hη hη1 hEs hNE
   set m := ⌊Real.sqrt η * N⌋₊ with hm
   set k := ⌊η * N⌋₊ with hk
-  obtain ⟨R₀, hR₀⟩ : ∃ R₀, R₀ = ρ / 5 := ⟨_, rfl⟩
   obtain ⟨u, hu⟩ : ∃ u, u = R₀ / (n * n) := ⟨_, rfl⟩
   obtain ⟨hn1, hnwE, hnu, hb2, hb4, hk1', hNm, hNk, huR, h5R₀, hρu⟩ :=
     step_scales hn hE1 hρ hR₀ hu hm1 hk1 hbig hNE
@@ -787,14 +805,15 @@ theorem exists_law_mul_law_far_le (σ : Fin j → Bool)
       omega
     calc _ = (((2 * Gp + 4 * u + 2 : ℕ) : ℤ) : ℝ) := (Int.cast_natCast _).symm
       _ ≤ _ := Int.cast_le.2 h'
-  -- Theorem 11, outer half, separated form, at `R₀`
-  have hR₀L : (R₀ : ℕ∞) ≤ L := le_trans (by exact_mod_cast (by omega : R₀ ≤ R₃)) hL
-  have h1 := hsep q L hCB z r R₀ hr₁ (by omega) hR₀L
-  rw [← hu] at h1
-  rw [← hR₀]
+  rw [← hu]
   have hstep : ∀ p : Fin j → Fin 4 × Fin NB,
-      law q (outerSeparatedArmEvent σ z r R₀
-        ((2 * (((64 * n + 24 * j + 24) * u : ℕ) : ℤ) - 1 : ℤ) : ℝ) (2 * u) u) *
+      law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+        (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, IsArm ω (σ i) z r (z - R₀) (z + R₀) (γ i)) ∧ ArmsDisjoint σ γ ∧
+        (∀ i k l, i < k → k < l → sbtw (landingPos (z - R₀) (z + R₀) (σ i) (γ i))
+          (landingPos (z - R₀) (z + R₀) (σ k) (γ k)) (landingPos (z - R₀) (z + R₀) (σ l) (γ l))) ∧
+        ArmsOuterSeparated ω σ z R₀ ((2 * (((64 * n + 24 * j + 24) * u : ℕ) : ℤ) - 1 : ℤ) : ℝ)
+          (2 * u) u γ ∧ ∀ i, innerPos z r (σ i) (γ i) ∈ J i} *
         law q {ω : Config (LatticeSite 2) |
         ∃ (a b : Fin j → LatticeSite 2) (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
         (∀ i, IsArm ω (σ i) z ρ (z - R₃) (z + R₃) (γ i)) ∧ ArmsDisjoint σ γ ∧
@@ -809,34 +828,76 @@ theorem exists_law_mul_law_far_le (σ : Fin j → Bool)
           ((p i).1 = 2 ∧ a i 1 = z 1 - ρ - cond (σ i) 0 1 ∧ X (p i) ≤ a i 0 ∧
             a i 0 ≤ X (p i) + k) ∨
           ((p i).1 = 3 ∧ a i 0 = z 0 - ρ - cond (σ i) 0 1 ∧ X (p i) ≤ a i 1 ∧
-            a i 1 ≤ X (p i) + k)} ≤ d⁻¹ * law q (multiArmEvent σ z r R₃) := by
+            a i 1 ≤ X (p i) + k)} ≤ d⁻¹ * law q (multiArmEventIn σ z r R₃ J fun _ => univ) := by
     intro p
     have h := hbin q L hCB z r R₀ R ρ R₃ N u D Sp Gp Q B M₁ K₁ S m k _
-      (4 * Real.sqrt η * N) (fun i => (p i).1) (fun i => X (p i)) hu1 c13 (by omega) c1 c2
+      (4 * Real.sqrt η * N) (fun i => (p i).1) (fun i => X (p i)) J hu1 c13 (by omega) c1 c2
       hSp.ge hGp.ge hQ.ge hs₀ c3 c14 c4 hL c5 c6 c10 (by omega) (by omega) hS hRS c12 hs4 hs2 b8
       c7 h2ρ c8 c11 b1 b2 b3 b4 b5 b6 b7
-    calc _ = d⁻¹ * (d * (law q (outerSeparatedArmEvent σ z r R₀
-          ((2 * (((64 * n + 24 * j + 24) * u : ℕ) : ℤ) - 1 : ℤ) : ℝ) (2 * u) u) * law q _)) := by
+    calc _ = d⁻¹ * (d * (law q _ * law q _)) := by
           rw [← mul_assoc, ENNReal.inv_mul_cancel hd0 hdt, one_mul]
-      _ ≤ d⁻¹ * law q (multiArmEvent σ z r R₃) := by
+      _ ≤ d⁻¹ * law q (multiArmEventIn σ z r R₃ J fun _ => univ) := by
           refine mul_le_mul' le_rfl (le_trans ?_ h)
           rw [← mul_assoc]
           exact mul_le_mul' (mul_le_mul' hdc le_rfl) le_rfl
-  calc law q (multiArmEvent σ z r R₀) * law q _
-      ≤ (C₁ * law q (outerSeparatedArmEvent σ z r R₀
-          ((2 * (((64 * n + 24 * j + 24) * u : ℕ) : ℤ) - 1 : ℤ) : ℝ) (2 * u) u)) *
-        ∑ p : Fin j → Fin 4 × Fin NB, law q _ :=
-        mul_le_mul' h1 ((measure_mono hcover).trans (measure_iUnion_fintype_le _ _))
-    _ = C₁ * ∑ p : Fin j → Fin 4 × Fin NB, law q (outerSeparatedArmEvent σ z r R₀
-          ((2 * (((64 * n + 24 * j + 24) * u : ℕ) : ℤ) - 1 : ℤ) : ℝ) (2 * u) u) * law q _ := by
-        rw [mul_assoc, Finset.mul_sum]
-    _ ≤ C₁ * ∑ _p : Fin j → Fin 4 × Fin NB, d⁻¹ * law q (multiArmEvent σ z r R₃) :=
-        mul_le_mul' le_rfl (Finset.sum_le_sum fun p _ => hstep p)
-    _ = C₁ * ((4 * NB : ℝ≥0∞) ^ j * d⁻¹) * law q (multiArmEvent σ z r R₃) := by
+  calc law q _ * law q _
+      ≤ law q _ * ∑ p : Fin j → Fin 4 × Fin NB, law q _ :=
+        mul_le_mul' le_rfl ((measure_mono hcover).trans (measure_iUnion_fintype_le _ _))
+    _ = ∑ p : Fin j → Fin 4 × Fin NB, law q _ * law q _ := by rw [Finset.mul_sum]
+    _ ≤ ∑ _p : Fin j → Fin 4 × Fin NB, d⁻¹ * law q (multiArmEventIn σ z r R₃ J fun _ => univ) :=
+        Finset.sum_le_sum fun p _ => hstep p
+    _ = (4 * NB : ℝ≥0∞) ^ j * d⁻¹ * law q (multiArmEventIn σ z r R₃ J fun _ => univ) := by
         rw [Finset.sum_const, Finset.card_univ, Fintype.card_fun, Fintype.card_prod,
           Fintype.card_fin, Fintype.card_fin, Fintype.card_fin, nsmul_eq_mul]
         push_cast
         ring
+
+/-- **Step S** (the first family at `⌊ρ / 5⌋` against the far inner family at `ρ`). For a colour
+sequence `σ` without packs, `0 < η ≤ 1 / 256` and `w ≥ 7` there are `C < ⊤` and `r₀` such that for
+every law with crossing bounds `c` up to scale `L`, `2ρ + 1 = wN`, `r₀ ≤ r`, `40 r ≤ ρ`,
+`2ρ + 2 ≤ R₃ ≤ L`: `π(r, ⌊ρ / 5⌋) P(far inner family at ρ) ≤ C π(r, R₃)`, where the far inner
+family is separated at the inner boundary of `B_ρ(z)` with the parameters of the inner step
+(`4 √η N`, `⌊√η N⌋`, `⌊η N⌋`) and every start at least `N + 1` from the ends of its side.
+
+Proof: Theorem 11's outer half, separated form, at `R₀ = ⌊ρ / 5⌋` (unit `u = ⌊R₀ / n²⌋`,
+`n = 1000 (j + 1)² (w + 1) ⌈1 / √η⌉`); the starts of the far family in one of `(4NB)^j`
+assignments of bins of width `⌊η N⌋ + 1` (`NB = w ⌈1 / √η⌉²`); for each, the motion plan into
+windows aligned with the bins and the two-sided gluing (`exists_pos_mul_le_law_of_far_bins`, with
+the scales of `step_bounds_core`). -/
+theorem exists_law_mul_law_far_le (σ : Fin j → Bool)
+    (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) (c : ℕ → ℝ≥0∞) {η : ℝ} (hη : 0 < η)
+    (hη1 : η ≤ 1 / 256) {w : ℕ} (hw : 7 ≤ w) :
+    ∃ C : ℝ≥0∞, C ≠ ⊤ ∧ ∃ r₀ : ℕ, ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
+      CrossingBounds q L c → ∀ (z : LatticeSite 2) (r N ρ R₃ : ℕ), 2 * ρ + 1 = w * N →
+      r₀ ≤ r → 40 * r ≤ ρ → 2 * ρ + 2 ≤ R₃ → (R₃ : ℕ∞) ≤ L →
+      law q (multiArmEvent σ z r (ρ / 5)) * law q {ω : Config (LatticeSite 2) |
+        ∃ (a b : Fin j → LatticeSite 2) (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, IsArm ω (σ i) z ρ (z - R₃) (z + R₃) (γ i)) ∧ ArmsDisjoint σ γ ∧
+        (∀ i k l, i < k → k < l → sbtw (landingPos (z - R₃) (z + R₃) (σ i) (γ i))
+          (landingPos (z - R₃) (z + R₃) (σ k) (γ k))
+          (landingPos (z - R₃) (z + R₃) (σ l) (γ l))) ∧
+        ArmsInnerSeparated ω σ z ρ (4 * Real.sqrt η * N) ⌊Real.sqrt η * N⌋₊ ⌊η * N⌋₊ γ ∧
+        ∀ i, (z 0 - ρ + N + 1 ≤ a i 0 ∧ a i 0 + N + 1 ≤ z 0 + ρ) ∨
+          (z 1 - ρ + N + 1 ≤ a i 1 ∧ a i 1 + N + 1 ≤ z 1 + ρ)} ≤
+        C * law q (multiArmEvent σ z r R₃) := by
+  obtain ⟨C₂, hC₂, n, hn, r₂, hS⟩ := exists_law_mul_law_far_le_inner σ hσ c hη hη1 hw
+  obtain ⟨C₁, hC₁, r₁, hsep⟩ := exists_law_multiArmEvent_le_law_outerSeparated σ hσ c hn
+  refine ⟨C₁ * C₂, ENNReal.mul_ne_top hC₁ hC₂, max r₁ r₂, fun q L hCB z r N ρ R₃ hρ hr hrρ h2ρ hL
+    => ?_⟩
+  have hr₁ : r₁ ≤ r := le_trans (le_max_left _ _) hr
+  have hr₂ : r₂ ≤ r := le_trans (le_max_right _ _) hr
+  have hR₀L : ((ρ / 5 : ℕ) : ℕ∞) ≤ L := le_trans (by exact_mod_cast (by omega : ρ / 5 ≤ R₃)) hL
+  have h1 := hsep q L hCB z r (ρ / 5) hr₁ (by omega) hR₀L
+  have h2 := hS q L hCB z r N ρ (ρ / 5) R₃ (fun _ => univ) hρ rfl hr₂ hrρ h2ρ hL
+  calc law q (multiArmEvent σ z r (ρ / 5)) * law q _
+      ≤ (C₁ * law q _) * law q _ := mul_le_mul' h1 le_rfl
+    _ ≤ C₁ * (law q _ * law q _) := by
+        rw [mul_assoc]
+        refine mul_le_mul' le_rfl (mul_le_mul' (measure_mono ?_) le_rfl)
+        rintro ω ⟨a, b, γ, hγ, hd, ho, hs⟩
+        exact ⟨a, b, γ, hγ, hd, ho, hs, fun _ => mem_univ _⟩
+    _ ≤ C₁ * (C₂ * law q (multiArmEvent σ z r R₃)) := mul_le_mul' le_rfl h2
+    _ = C₁ * C₂ * law q (multiArmEvent σ z r R₃) := (mul_assoc _ _ _).symm
 
 end StepS
 

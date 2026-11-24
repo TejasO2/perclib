@@ -57,6 +57,7 @@ by the edges of the annulus `B_{2R}(z) \ B_N(z)`, on which the arms of every `j`
 * `exists_reroute_top` (and `_right`, `_bottom`, `_left`): rerouting the arms landing on one side.
 * `exists_separating_event`: **the outer separation step, event form.**
 * `exists_law_multiArmEvent_inter_not_separated_le`: **the outer separation step.**
+* `exists_law_multiArmEventIn_diff_separated_le`: the outer separation step keeping inner windows.
 -/
 
 @[expose] public section
@@ -1586,11 +1587,13 @@ two cyclically consecutive arms of the same colour (or with at most one arm). Fo
 there are `0 < η ≤ 1` and `N₀` such that, uniformly over the laws with crossing bounds `c` up to
 `L`, for `R = 2N + 1` and `N₀ ≤ N ≤ L`, there is an event `G` of probability at least `1 - δ`,
 determined by the edges with both ends in the annulus `B_{2R}(z) \ B_N(z)`, such that for every
-`r < N`, on the `j`-arm event from `B_r(z)` to the boundary of `B_R(z)` and `G`, the arms can be
-chosen separated (`outerSeparatedArmEvent` with `s = 4 √η N`, `M = ⌊√η N⌋`, `K = ⌊η N⌋`): there is
-a disjoint family of arms of colours `σ` from `B_r(z)` to the boundary of `B_R(z)`, landing in
-counterclockwise order, whose landing positions are at least `4 √η N` apart and at least `4 √η N`
-from the doubled corners `4 m R`, and each of which carries a fence outside `B_R(z)` next to its end
+`r < N` and all windows `J` of inner positions, on the `j`-arm event from `B_r(z)` to the boundary
+of `B_R(z)` with inner positions in `J` and `G`, the arms can be chosen separated (as in
+`outerSeparatedArmEvent` with `s = 4 √η N`, `M = ⌊√η N⌋`, `K = ⌊η N⌋`) with the same inner
+positions: there is a disjoint family of arms of colours `σ` from `B_r(z)` to the boundary of
+`B_R(z)`, landing in counterclockwise order, whose landing positions are at least `4 √η N` apart
+and at least `4 √η N` from the doubled corners `4 m R`, and each of which carries a fence outside
+`B_R(z)` next to its end
 `b` (its last vertex, resp. face): a path of its colour across the box of length `2 ⌊η N⌋` along the
 side where it lands and depth `⌊√η N⌋`, centred at `b` along the side, whose first end is joined in
 its colour to a vertex of the arm inside the ball of radius `⌊√η N⌋` around `b`
@@ -1612,9 +1615,16 @@ theorem exists_separating_event {j : ℕ} (σ : Fin j → Bool)
           ω' ∩ {e | ∀ v ∈ e,
             v ∈ Icc (z - ((2 * R : ℕ) : LatticeSite 2)) (z + ((2 * R : ℕ) : LatticeSite 2)) \
               Icc (z - (N : LatticeSite 2)) (z + N)} → (ω ∈ G ↔ ω' ∈ G)) ∧
-        1 - δ ≤ law q G ∧ ∀ r < N, ∀ ω ∈ multiArmEvent σ z r R ∩ G,
-          ω ∈ outerSeparatedArmEvent σ z r R (4 * Real.sqrt η * N) ⌊Real.sqrt η * N⌋₊
-            ⌊η * N⌋₊ := by
+        1 - δ ≤ law q G ∧ ∀ r < N, ∀ (J : Fin j → Set ℤ),
+          ∀ ω ∈ multiArmEventIn σ z r R J (fun _ => univ) ∩ G,
+          ω ∈ {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+            (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+            (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
+            (∀ i k l, i < k → k < l → sbtw (landingPos (z - R) (z + R) (σ i) (γ i))
+              (landingPos (z - R) (z + R) (σ k) (γ k))
+              (landingPos (z - R) (z + R) (σ l) (γ l))) ∧
+            ArmsOuterSeparated ω σ z R (4 * Real.sqrt η * N) ⌊Real.sqrt η * N⌋₊ ⌊η * N⌋₊ γ ∧
+            ∀ i, innerPos z r (σ i) (γ i) ∈ J i} := by
   classical
   have hδ4 : 0 < δ / 4 := ENNReal.div_pos_iff.2 ⟨hδ.ne', ENNReal.ofNat_ne_top⟩
   obtain ⟨η, hη, hη1, N₀, htop⟩ := exists_law_separable_ge_top c hδ4
@@ -1812,7 +1822,7 @@ theorem exists_separating_event {j : ℕ} (σ : Fin j → Bool)
       {ω | Sym2.map σr '' ω ∈ E ![z 1, z 0]} ∩ {ω | Sym2.map σb '' ω ∈ E ![z 0, -z 1]} ∩
       {ω | Sym2.map σl '' ω ∈ E ![z 1, -z 0]},
     (((hframe _ _).1.inter (hframe _ _).1).inter (hframe _ _).1).inter (hframe _ _).1,
-    fun ω ω' hωω' => ?_, ?_, fun r hr ω hω => ?_⟩
+    fun ω ω' hωω' => ?_, ?_, fun r hr J ω hω => ?_⟩
   · simp only [mem_inter_iff]
     rw [(hframe _ _).2 ω ω' (hQt ω ω' hωω'), (hframe _ _).2 ω ω' (hQr ω ω' hωω'),
       (hframe _ _).2 ω ω' (hQb ω ω' hωω'), (hframe _ _).2 ω ω' (hQl ω ω' hωω')]
@@ -1841,7 +1851,7 @@ theorem exists_separating_event {j : ℕ} (σ : Fin j → Bool)
     (by rw [← hσb]; exact hFb)
   have hEl := separable_left_of_top (z := z) (zf := ![z 1, -z 0]) rfl rfl
     (by rw [← hσl]; exact hFl)
-  obtain ⟨a, b, γ, hγ, hd, ho⟩ := mem_multiArmEvent_iff.1 hA
+  obtain ⟨a, b, γ, hγ, hd, hJI, ho⟩ := hA
   obtain ⟨Lt, ht1, ht2, ht3⟩ := exists_reroute_top hR hr hEt hγ hd
   obtain ⟨Lr, hr1, hr2, hr3⟩ := exists_reroute_right hR hr hEr hγ hd
   obtain ⟨Lb, hb1, hb2, hb3⟩ := exists_reroute_bottom hR hr hEb hγ hd
@@ -1956,31 +1966,38 @@ theorem exists_separating_event {j : ℕ} (σ : Fin j → Bool)
     Icc_subset_Icc_add_one_sub_one (by omega)
   refine ⟨a, b', Γ, hΓ, ArmsDisjoint.of_innerPos_eq hσ hB hγ hd ho hΓ hin,
     fun i k l hik hkl => sbtw_landingPos_of_innerPos_eq hσ hB hγ hd ho hΓ hin i k l hik hkl,
-    fun i k hik => ?_, fun i m => ?_, hfen⟩
+    ⟨fun i k hik => ?_, fun i m => ?_, hfen⟩, fun i => ?_⟩
   · rw [hL i, hL k]
     exact hsep i k hik
   · rw [hL i]
     exact hcorner i m
+  · rw [hin i]
+    exact (hJI i).1
 
-
-/-- **Separation of arms at the outer boundary of an annulus** (the outer step of Nolin's proof of
-Theorem 11, for colour sequences without packs). Under the hypotheses of `exists_separating_event`,
-for `r < N`: the probability that the `j`-arm event from `B_r(z)` to the boundary of `B_R(z)`,
-`R = 2N + 1`, occurs but the arms cannot be chosen separated (`outerSeparatedArmEvent`, with the
-parameters of `exists_separating_event`) is at most `δ` times the probability of the `j`-arm event
-from `B_r(z)` to the boundary of `B_N(z)`. The separating event of `exists_separating_event`
-depends only on edges outside `B_N(z)`, the `j`-arm event to the boundary of `B_N(z)` only on edges
-inside, and the latter contains the `j`-arm event to the boundary of `B_R(z)`. -/
-theorem exists_law_multiArmEvent_inter_not_separated_le {j : ℕ} (σ : Fin j → Bool)
+/-- **Separation of arms at the outer boundary of an annulus, with inner windows** (the outer step
+keeping the inner positions). Under the hypotheses of `exists_separating_event`, for `r < N` and
+any windows `J` of inner positions: the probability that the `j`-arm event from `B_r(z)` to the
+boundary of `B_R(z)`, `R = 2N + 1`, with inner positions in `J` occurs but no family with inner
+positions in `J` can be chosen separated (with the parameters of `exists_separating_event`) is at
+most `δ` times the probability of the `j`-arm event from `B_r(z)` to the boundary of `B_N(z)`: the
+rerouted arms keep their inner positions. -/
+theorem exists_law_multiArmEventIn_diff_separated_le {j : ℕ} (σ : Fin j → Bool)
     (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) (c : ℕ → ℝ≥0∞) {δ : ℝ≥0∞} (hδ : 0 < δ) :
     ∃ η : ℝ, 0 < η ∧ η ≤ 1 ∧ ∃ N₀ : ℕ, ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
-      CrossingBounds q L c → ∀ (z : LatticeSite 2) (r N R : ℕ), R = 2 * N + 1 → N₀ ≤ N →
-      r < N → (N : ℕ∞) ≤ L →
-      law q (multiArmEvent σ z r R \
-          outerSeparatedArmEvent σ z r R (4 * Real.sqrt η * N) ⌊Real.sqrt η * N⌋₊ ⌊η * N⌋₊) ≤
+      CrossingBounds q L c → ∀ (z : LatticeSite 2) (r N R : ℕ) (J : Fin j → Set ℤ),
+      R = 2 * N + 1 → N₀ ≤ N → r < N → (N : ℕ∞) ≤ L →
+      law q (multiArmEventIn σ z r R J (fun _ => univ) \
+          {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+            (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+            (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
+            (∀ i k l, i < k → k < l → sbtw (landingPos (z - R) (z + R) (σ i) (γ i))
+              (landingPos (z - R) (z + R) (σ k) (γ k))
+              (landingPos (z - R) (z + R) (σ l) (γ l))) ∧
+            ArmsOuterSeparated ω σ z R (4 * Real.sqrt η * N) ⌊Real.sqrt η * N⌋₊ ⌊η * N⌋₊ γ ∧
+            ∀ i, innerPos z r (σ i) (γ i) ∈ J i}) ≤
         δ * law q (multiArmEvent σ z r N) := by
   obtain ⟨η, hη, hη1, N₀, hG⟩ := exists_separating_event σ hσ c hδ
-  refine ⟨η, hη, hη1, N₀, fun q L h z r N R hR hN hr hNL => ?_⟩
+  refine ⟨η, hη, hη1, N₀, fun q L h z r N R J hR hN hr hNL => ?_⟩
   obtain ⟨G, hGm, hGd, hGl, hGsep⟩ := hG q L h z N R hR hN hNL
   have hAm : MeasurableSet (multiArmEvent σ z r N) := measurableSet_multiArmEvent σ z r N
   have hPQ : Disjoint
@@ -2000,10 +2017,33 @@ theorem exists_law_multiArmEvent_inter_not_separated_le {j : ℕ} (σ : Fin j �
   calc _ ≤ law q (multiArmEvent σ z r N ∩ Gᶜ) := by
         refine measure_mono fun ω hω => ?_
         obtain ⟨hA, hnot⟩ := hω
-        exact ⟨multiArmEvent_subset_of_le le_rfl (by omega) hr hA,
-          fun hωG => hnot (hGsep r hr ω ⟨hA, hωG⟩)⟩
+        exact ⟨multiArmEvent_subset_of_le le_rfl (by omega) hr
+          (multiArmEventIn_subset_multiArmEvent hA), fun hωG => hnot (hGsep r hr J ω ⟨hA, hωG⟩)⟩
     _ = law q (multiArmEvent σ z r N) * law q Gᶜ := hind
     _ ≤ law q (multiArmEvent σ z r N) * δ := by gcongr
     _ = δ * law q (multiArmEvent σ z r N) := mul_comm _ _
+
+
+/-- **Separation of arms at the outer boundary of an annulus** (the outer step of Nolin's proof of
+Theorem 11, for colour sequences without packs). Under the hypotheses of `exists_separating_event`,
+for `r < N`: the probability that the `j`-arm event from `B_r(z)` to the boundary of `B_R(z)`,
+`R = 2N + 1`, occurs but the arms cannot be chosen separated (`outerSeparatedArmEvent`, with the
+parameters of `exists_separating_event`) is at most `δ` times the probability of the `j`-arm event
+from `B_r(z)` to the boundary of `B_N(z)`. The separating event of `exists_separating_event`
+depends only on edges outside `B_N(z)`, the `j`-arm event to the boundary of `B_N(z)` only on edges
+inside, and the latter contains the `j`-arm event to the boundary of `B_R(z)`. -/
+theorem exists_law_multiArmEvent_inter_not_separated_le {j : ℕ} (σ : Fin j → Bool)
+    (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) (c : ℕ → ℝ≥0∞) {δ : ℝ≥0∞} (hδ : 0 < δ) :
+    ∃ η : ℝ, 0 < η ∧ η ≤ 1 ∧ ∃ N₀ : ℕ, ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
+      CrossingBounds q L c → ∀ (z : LatticeSite 2) (r N R : ℕ), R = 2 * N + 1 → N₀ ≤ N →
+      r < N → (N : ℕ∞) ≤ L →
+      law q (multiArmEvent σ z r R \
+          outerSeparatedArmEvent σ z r R (4 * Real.sqrt η * N) ⌊Real.sqrt η * N⌋₊ ⌊η * N⌋₊) ≤
+        δ * law q (multiArmEvent σ z r N) := by
+  obtain ⟨η, hη, hη1, N₀, h⟩ := exists_law_multiArmEventIn_diff_separated_le σ hσ c hδ
+  refine ⟨η, hη, hη1, N₀, fun q L hCB z r N R hR hN hr hNL =>
+    le_trans (measure_mono ?_) (h q L hCB z r N R (fun _ => univ) hR hN hr hNL)⟩
+  rintro ω ⟨hA, hnot⟩
+  exact ⟨hA, fun ⟨a, b, γ, h₁, h₂, h₃, h₄, _⟩ => hnot ⟨a, b, γ, h₁, h₂, h₃, h₄⟩⟩
 
 end PercLib.Models.Planar

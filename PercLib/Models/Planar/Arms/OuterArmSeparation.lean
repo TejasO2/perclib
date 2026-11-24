@@ -65,7 +65,9 @@ All the parameters are integers; the arithmetic of the two steps is in `window_s
   `j ≤ r₁ ≤ r₂ ≤ r₃` and every law (`C = 1`), from `law_multiArmEvent_le_mul` and
   `multiArmEvent_self_eq_univ` (the arm event across an empty annulus is everything for `j ≤ r`).
 * `exists_pos_le_law_window_step`, `exists_pos_le_law_window_step_landing`,
-  `exists_pos_le_law_glue_step`, `exists_pos_le_law_outerSeparated`: the steps.
+  `exists_pos_le_law_glue_step`, `exists_pos_le_law_outerSeparated`: the steps;
+  `exists_pos_le_law_window_step_inner`, `exists_pos_le_law_glue_step_inner`: the window step and
+  the gluing step for arms with inner positions in windows, which they keep.
 * `IsLanding.exists_core`, `IsLanding.exists_windows`, `exists_windows_of_ccw`,
   `exists_bottom_windows`: target windows.
 
@@ -185,21 +187,14 @@ theorem window_step_bounds {j n N R r : ℕ} (hn : 1000 * (j + 1) * (j + 1) ≤ 
     have z2 := Nat.zero_le (j * u')
     linarith
 
-/-- **The window step** (the motion plan between two scales of the separated event with
-parameters proportional to the radius). For a colour sequence `σ` without packs and
-`n ≥ 1000 (j + 1)²` there is `c₀ > 0` such that for every law with crossing bounds `c` up to
-scale `L`: arms separated at the outer boundary of `B_N(z)` at scale `2 Q - 1` with fences
-`(2u, u)`, where `u = ⌊N / n²⌋` and `Q = (64 n + 24 j + 24) u`, are carried to arms to
-`∂B_R(z)`, `2N ≤ R ≤ 8N`, separated in the same way at `R` (with `u' = ⌊R / n²⌋`) and ending in
-prescribed windows whose margins from the corners, gaps and lengths are at least
-`(96 n + 24 j + 38) u'`, in the counterclockwise order of the arms: `c₀ P(separated at N) ≤
-P(separated at R, ends in the windows)`. The constant depends only on `σ`, `c` and `n`. -/
-theorem exists_pos_le_law_window_step {j : ℕ} (σ : Fin j → Bool)
+/-- **The window step with inner windows**: `exists_pos_le_law_window_step` for arms whose inner
+positions lie in windows `J`, which the motion plan keeps. -/
+theorem exists_pos_le_law_window_step_inner {j : ℕ} (σ : Fin j → Bool)
     (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) (c : ℕ → ℝ≥0∞) {n : ℕ}
     (hn : 1000 * (j + 1) * (j + 1) ≤ n) :
     ∃ c₀ : ℝ≥0∞, 0 < c₀ ∧ ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
       CrossingBounds q L c → ∀ (z : LatticeSite 2) (r N R : ℕ) (tT : Fin j → Fin 4)
-      (lamT αT βT : Fin j → ℤ),
+      (lamT αT βT : Fin j → ℤ) (J : Fin j → Set ℤ),
       n * (n * n) ≤ N → 2 * N ≤ R → R ≤ 8 * N → 2 * r + 2 ≤ N → (R : ℕ∞) ≤ L →
       (∀ i, 0 ≤ lamT i ∧ lamT i ≤ 3 ∧ (lamT i + ((tT i : ℕ) : ℤ)) % 4 = 2) →
       (∀ i l, i ≤ l → lamT i ≤ lamT l) →
@@ -213,9 +208,16 @@ theorem exists_pos_le_law_window_step {j : ℕ} (σ : Fin j → Bool)
           αT l) ∧
         (tT i = 0 ∨ tT i = 3 → βT l + (((96 * n + 24 * j + 38) * (R / (n * n)) : ℕ) : ℤ) ≤
           αT i)) →
-      c₀ * law q (outerSeparatedArmEvent σ z r N
-          ((2 * (((64 * n + 24 * j + 24) * (N / (n * n)) : ℕ) : ℤ) - 1 : ℤ) : ℝ)
-          (2 * (N / (n * n))) (N / (n * n))) ≤
+      c₀ * law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+          (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+          (∀ i, IsArm ω (σ i) z r (z - N) (z + N) (γ i)) ∧ ArmsDisjoint σ γ ∧
+          (∀ i k l, i < k → k < l → sbtw (landingPos (z - N) (z + N) (σ i) (γ i))
+            (landingPos (z - N) (z + N) (σ k) (γ k))
+            (landingPos (z - N) (z + N) (σ l) (γ l))) ∧
+          ArmsOuterSeparated ω σ z N
+            ((2 * (((64 * n + 24 * j + 24) * (N / (n * n)) : ℕ) : ℤ) - 1 : ℤ) : ℝ)
+            (2 * (N / (n * n))) (N / (n * n)) γ ∧
+          ∀ i, innerPos z r (σ i) (γ i) ∈ J i} ≤
         law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
           (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
           (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
@@ -227,10 +229,11 @@ theorem exists_pos_le_law_window_step {j : ℕ} (σ : Fin j → Bool)
             (tT i = 0 ∧ b 1 = z 1 + R ∧ αT i ≤ b 0 ∧ b 0 ≤ βT i) ∨
             (tT i = 1 ∧ b 0 = z 0 + R ∧ αT i ≤ b 1 ∧ b 1 ≤ βT i) ∨
             (tT i = 2 ∧ b 1 = z 1 - R - cond (σ i) 0 1 ∧ αT i ≤ b 0 ∧ b 0 ≤ βT i) ∨
-            (tT i = 3 ∧ b 0 = z 0 - R - cond (σ i) 0 1 ∧ αT i ≤ b 1 ∧ b 1 ≤ βT i)})} := by
+            (tT i = 3 ∧ b 0 = z 0 - R - cond (σ i) 0 1 ∧ αT i ≤ b 1 ∧ b 1 ≤ βT i)}) ∧
+          ∀ i, innerPos z r (σ i) (γ i) ∈ J i} := by
   obtain ⟨c₀, hc₀, hp⟩ := exists_pos_le_law_target_windows σ hσ c (32 * (n * n) + 2) n
   refine ⟨c₀, hc₀, ?_⟩
-  intro q L hCB z r N R tT lamT αT βT hN hNR hRN hr hL hlamT hlamT2 hcor hwid hgap
+  intro q L hCB z r N R tT lamT αT βT J hN hNR hRN hr hL hlamT hlamT2 hcor hwid hgap
   obtain ⟨h1, h2, h3, h4, h5, h6, h7, h8, h9, h10⟩ := window_step_bounds hn hN hNR hRN hr
   have hA : 3 ≤ 32 * (n * n) + 2 := by nlinarith
   have hp' := hp q L hCB z r N R (N / (n * n)) (2 * (N / (n * n))) (N / (n * n))
@@ -242,7 +245,7 @@ theorem exists_pos_le_law_window_step {j : ℕ} (σ : Fin j → Bool)
     ((64 * n + 24 * j + 24) * (R / (n * n)))
     (n + (2 * (12 * j) + 2 * n + 3) * (N / (n * n)))
     ((2 * (((64 * n + 24 * j + 24) * (N / (n * n)) : ℕ) : ℤ) - 1 : ℤ) : ℝ)
-    (fun _ => univ) tT lamT αT βT h1 le_rfl (by omega) (by omega) (by omega)
+    J tT lamT αT βT h1 le_rfl (by omega) (by omega) (by omega)
     (le_trans (by omega) (Nat.mul_le_mul_right _ hA))
     (le_trans (by omega) (Nat.mul_le_mul_right _ hA)) le_rfl le_rfl (by omega)
     (by
@@ -292,8 +295,56 @@ theorem exists_pos_le_law_window_step {j : ℕ} (σ : Fin j → Bool)
       · have := hg2 h
         push_cast at this h8' ⊢
         linarith)
-  refine le_trans ?_ (hp'.trans (measure_mono fun ω ⟨a, b, γ, hγ, hd, ho, hs, hw, _⟩ =>
-    ⟨a, b, γ, hγ, hd, ho, hs, hw⟩))
+  exact hp'
+
+/-- **The window step** (the motion plan between two scales of the separated event with
+parameters proportional to the radius). For a colour sequence `σ` without packs and
+`n ≥ 1000 (j + 1)²` there is `c₀ > 0` such that for every law with crossing bounds `c` up to
+scale `L`: arms separated at the outer boundary of `B_N(z)` at scale `2 Q - 1` with fences
+`(2u, u)`, where `u = ⌊N / n²⌋` and `Q = (64 n + 24 j + 24) u`, are carried to arms to
+`∂B_R(z)`, `2N ≤ R ≤ 8N`, separated in the same way at `R` (with `u' = ⌊R / n²⌋`) and ending in
+prescribed windows whose margins from the corners, gaps and lengths are at least
+`(96 n + 24 j + 38) u'`, in the counterclockwise order of the arms: `c₀ P(separated at N) ≤
+P(separated at R, ends in the windows)`. The constant depends only on `σ`, `c` and `n`. -/
+theorem exists_pos_le_law_window_step {j : ℕ} (σ : Fin j → Bool)
+    (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) (c : ℕ → ℝ≥0∞) {n : ℕ}
+    (hn : 1000 * (j + 1) * (j + 1) ≤ n) :
+    ∃ c₀ : ℝ≥0∞, 0 < c₀ ∧ ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
+      CrossingBounds q L c → ∀ (z : LatticeSite 2) (r N R : ℕ) (tT : Fin j → Fin 4)
+      (lamT αT βT : Fin j → ℤ),
+      n * (n * n) ≤ N → 2 * N ≤ R → R ≤ 8 * N → 2 * r + 2 ≤ N → (R : ℕ∞) ≤ L →
+      (∀ i, 0 ≤ lamT i ∧ lamT i ≤ 3 ∧ (lamT i + ((tT i : ℕ) : ℤ)) % 4 = 2) →
+      (∀ i l, i ≤ l → lamT i ≤ lamT l) →
+      (∀ i, (if tT i = 0 ∨ tT i = 2 then z 0 else z 1) - R +
+          (((96 * n + 24 * j + 38) * (R / (n * n)) : ℕ) : ℤ) ≤ αT i ∧
+        βT i + (((96 * n + 24 * j + 38) * (R / (n * n)) : ℕ) : ℤ) ≤
+          (if tT i = 0 ∨ tT i = 2 then z 0 else z 1) + R) →
+      (∀ i, αT i + (((96 * n + 24 * j + 38) * (R / (n * n)) : ℕ) : ℤ) ≤ βT i) →
+      (∀ i l, i < l → tT i = tT l →
+        (tT i = 1 ∨ tT i = 2 → βT i + (((96 * n + 24 * j + 38) * (R / (n * n)) : ℕ) : ℤ) ≤
+          αT l) ∧
+        (tT i = 0 ∨ tT i = 3 → βT l + (((96 * n + 24 * j + 38) * (R / (n * n)) : ℕ) : ℤ) ≤
+          αT i)) →
+      c₀ * law q (outerSeparatedArmEvent σ z r N
+          ((2 * (((64 * n + 24 * j + 24) * (N / (n * n)) : ℕ) : ℤ) - 1 : ℤ) : ℝ)
+          (2 * (N / (n * n))) (N / (n * n))) ≤
+        law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+          (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+          (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
+          (∀ i k l, i < k → k < l → sbtw (landingPos (z - R) (z + R) (σ i) (γ i))
+            (landingPos (z - R) (z + R) (σ k) (γ k)) (landingPos (z - R) (z + R) (σ l) (γ l))) ∧
+          ArmsOuterSeparated ω σ z R
+            ((2 * (((64 * n + 24 * j + 24) * (R / (n * n)) : ℕ) : ℤ) - 1 : ℤ) : ℝ)
+            (2 * (R / (n * n))) (R / (n * n)) γ ∧ (∀ i, b i ∈ {b : LatticeSite 2 |
+            (tT i = 0 ∧ b 1 = z 1 + R ∧ αT i ≤ b 0 ∧ b 0 ≤ βT i) ∨
+            (tT i = 1 ∧ b 0 = z 0 + R ∧ αT i ≤ b 1 ∧ b 1 ≤ βT i) ∨
+            (tT i = 2 ∧ b 1 = z 1 - R - cond (σ i) 0 1 ∧ αT i ≤ b 0 ∧ b 0 ≤ βT i) ∨
+            (tT i = 3 ∧ b 0 = z 0 - R - cond (σ i) 0 1 ∧ αT i ≤ b 1 ∧ b 1 ≤ βT i)})} := by
+  obtain ⟨c₀, hc₀, hp⟩ := exists_pos_le_law_window_step_inner σ hσ c hn
+  refine ⟨c₀, hc₀, fun q L hCB z r N R tT lamT αT βT hN hNR hRN hr hL hlamT hlamT2 hcor hwid
+    hgap => le_trans ?_ ((hp q L hCB z r N R tT lamT αT βT (fun _ => univ) hN hNR hRN hr hL hlamT
+      hlamT2 hcor hwid hgap).trans (measure_mono fun ω ⟨a, b, γ, hγ, hd, ho, hs, hw, _⟩ =>
+        ⟨a, b, γ, hγ, hd, ho, hs, hw⟩))⟩
   exact mul_le_mul' le_rfl (measure_mono fun ω ⟨a, b, γ, hγ, hd, ho, hs⟩ =>
     ⟨a, b, γ, hγ, hd, ho, hs, fun _ => mem_univ _⟩)
 
@@ -481,23 +532,15 @@ theorem div_le_floor_sqrt_mul {ε : ℝ} (hε : 0 < ε) (hε1 : ε ≤ 1) {E : �
   refine ⟨Nat.le_floor h1, Nat.floor_le_of_le (by nlinarith), Nat.le_floor h2,
     Nat.floor_le_floor (by nlinarith), h1⟩
 
-/-- **The gluing step** (the outer separated event of the outer step carried into the
-separated event with parameters proportional to the radius). For a colour sequence `σ` without
-packs, `n ≥ 1000 (j + 1)²` and `0 < ε ≤ 1` there are `c₀ > 0` and `N₁` such that for every law
-with crossing bounds `c` up to scale `L`: arms separated at the outer boundary of `B_{2N+1}(z)` with
-the parameters of the outer separation step at scale `ε` (`s = 4 √ε N`, `M = ⌊√ε N⌋`,
-`K = ⌊ε N⌋`), `N ≥ N₁`, `r < N`, are carried to arms to `∂B_R(z)`, `4N + 2 ≤ R ≤ 8N + 4`,
-separated at scale `2Q - 1` with fences `(2u', u')`, where `u' = ⌊R / n²⌋` and
-`Q = (64 n + 24 j + 24) u'`, ending in prescribed windows whose margins from the corners, gaps and
-lengths are at least `(96 n + 24 j + 38) u'`, in the counterclockwise order of the arms. The
-constants depend only on `σ`, `c`, `n` and `ε`. -/
-theorem exists_pos_le_law_glue_step {j : ℕ} (σ : Fin j → Bool)
+/-- **The gluing step with inner windows**: `exists_pos_le_law_glue_step` for arms whose inner
+positions lie in windows `J`, which the motion plan keeps. -/
+theorem exists_pos_le_law_glue_step_inner {j : ℕ} (σ : Fin j → Bool)
     (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) (c : ℕ → ℝ≥0∞) {n : ℕ}
     (hn : 1000 * (j + 1) * (j + 1) ≤ n) {ε : ℝ} (hε : 0 < ε) (hε1 : ε ≤ 1) :
     ∃ c₀ : ℝ≥0∞, 0 < c₀ ∧ ∃ N₁ : ℕ, ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
-      CrossingBounds q L c → ∀ (z : LatticeSite 2) (r N R : ℕ) (tT : Fin j → Fin 4)
-      (lamT αT βT : Fin j → ℤ),
-      N₁ ≤ N → r < N → 2 * (2 * N + 1) ≤ R → R ≤ 4 * (2 * N + 1) → (R : ℕ∞) ≤ L →
+      CrossingBounds q L c → ∀ (z : LatticeSite 2) (r N ρ R : ℕ) (tT : Fin j → Fin 4)
+      (lamT αT βT : Fin j → ℤ) (J : Fin j → Set ℤ), ρ = 2 * N + 1 →
+      N₁ ≤ N → r < N → 2 * ρ ≤ R → R ≤ 4 * ρ → (R : ℕ∞) ≤ L →
       (∀ i, 0 ≤ lamT i ∧ lamT i ≤ 3 ∧ (lamT i + ((tT i : ℕ) : ℤ)) % 4 = 2) →
       (∀ i l, i ≤ l → lamT i ≤ lamT l) →
       (∀ i, (if tT i = 0 ∨ tT i = 2 then z 0 else z 1) - R +
@@ -510,8 +553,14 @@ theorem exists_pos_le_law_glue_step {j : ℕ} (σ : Fin j → Bool)
           αT l) ∧
         (tT i = 0 ∨ tT i = 3 → βT l + (((96 * n + 24 * j + 38) * (R / (n * n)) : ℕ) : ℤ) ≤
           αT i)) →
-      c₀ * law q (outerSeparatedArmEvent σ z r (2 * N + 1) (4 * Real.sqrt ε * N)
-          ⌊Real.sqrt ε * N⌋₊ ⌊ε * N⌋₊) ≤
+      c₀ * law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+          (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+          (∀ i, IsArm ω (σ i) z r (z - ρ) (z + ρ) (γ i)) ∧ ArmsDisjoint σ γ ∧
+          (∀ i k l, i < k → k < l → sbtw (landingPos (z - ρ) (z + ρ) (σ i) (γ i))
+            (landingPos (z - ρ) (z + ρ) (σ k) (γ k)) (landingPos (z - ρ) (z + ρ) (σ l) (γ l))) ∧
+          ArmsOuterSeparated ω σ z ρ (4 * Real.sqrt ε * N)
+            ⌊Real.sqrt ε * N⌋₊ ⌊ε * N⌋₊ γ ∧
+          ∀ i, innerPos z r (σ i) (γ i) ∈ J i} ≤
         law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
           (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
           (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
@@ -523,7 +572,8 @@ theorem exists_pos_le_law_glue_step {j : ℕ} (σ : Fin j → Bool)
             (tT i = 0 ∧ b 1 = z 1 + R ∧ αT i ≤ b 0 ∧ b 0 ≤ βT i) ∨
             (tT i = 1 ∧ b 0 = z 0 + R ∧ αT i ≤ b 1 ∧ b 1 ≤ βT i) ∨
             (tT i = 2 ∧ b 1 = z 1 - R - cond (σ i) 0 1 ∧ αT i ≤ b 0 ∧ b 0 ≤ βT i) ∨
-            (tT i = 3 ∧ b 0 = z 0 - R - cond (σ i) 0 1 ∧ αT i ≤ b 1 ∧ b 1 ≤ βT i)})} := by
+            (tT i = 3 ∧ b 0 = z 0 - R - cond (σ i) 0 1 ∧ αT i ≤ b 1 ∧ b 1 ≤ βT i)}) ∧
+          ∀ i, innerPos z r (σ i) (γ i) ∈ J i} := by
   -- the integer scale `E ≥ 1 / √ε`
   obtain ⟨E, hE⟩ : ∃ E : ℕ, E = ⌈1 / Real.sqrt ε⌉₊ := ⟨_, rfl⟩
   have hs : 0 < Real.sqrt ε := Real.sqrt_pos.2 hε
@@ -545,7 +595,8 @@ theorem exists_pos_le_law_glue_step {j : ℕ} (σ : Fin j → Bool)
   obtain ⟨c₀, hc₀, hp⟩ :=
     exists_pos_le_law_target_windows_of_separated σ hσ c (40 * P) (32 * E * n)
   refine ⟨c₀, hc₀, 4 * P, ?_⟩
-  intro q L hCB z r N R tT lamT αT βT hN hr hρR hRρ hL hlamT hlamT2 hcor hwid hgap
+  intro q L hCB z r N ρ R tT lamT αT βT J hρ hN hr hρR hRρ hL hlamT hlamT2 hcor hwid hgap
+  subst hρ
   have hn1 : 1000 ≤ n := by nlinarith
   have hnn : 0 < n * n := by positivity
   have hPpos : 0 < P := by omega
@@ -577,7 +628,7 @@ theorem exists_pos_le_law_glue_step {j : ℕ} (σ : Fin j → Bool)
       2 * (12 * j) * (N / P))
     ((64 * n + 24 * j + 24) * (R / (n * n)))
     (32 * E * n + (2 * (12 * j) + 2 * (32 * E * n) + 3) * (N / P))
-    (4 * Real.sqrt ε * N) (fun _ => univ) tT lamT αT βT (by omega) (by omega) hKM (by omega)
+    (4 * Real.sqrt ε * N) J tT lamT αT βT (by omega) (by omega) hKM (by omega)
     (by
       have : (⌊Real.sqrt ε * N⌋₊ : ℝ) ≤ Real.sqrt ε * N := Nat.floor_le (by positivity)
       linarith)
@@ -637,8 +688,56 @@ theorem exists_pos_le_law_glue_step {j : ℕ} (σ : Fin j → Bool)
       · have := hg2 h
         push_cast at this h8' ⊢
         linarith)
-  refine le_trans ?_ (hp'.trans (measure_mono fun ω ⟨a, b, γ, hγ, hd, ho, hs, hw, _⟩ =>
-    ⟨a, b, γ, hγ, hd, ho, hs, hw⟩))
+  exact hp'
+
+/-- **The gluing step** (the outer separated event of the outer step carried into the
+separated event with parameters proportional to the radius). For a colour sequence `σ` without
+packs, `n ≥ 1000 (j + 1)²` and `0 < ε ≤ 1` there are `c₀ > 0` and `N₁` such that for every law
+with crossing bounds `c` up to scale `L`: arms separated at the outer boundary of `B_{2N+1}(z)` with
+the parameters of the outer separation step at scale `ε` (`s = 4 √ε N`, `M = ⌊√ε N⌋`,
+`K = ⌊ε N⌋`), `N ≥ N₁`, `r < N`, are carried to arms to `∂B_R(z)`, `4N + 2 ≤ R ≤ 8N + 4`,
+separated at scale `2Q - 1` with fences `(2u', u')`, where `u' = ⌊R / n²⌋` and
+`Q = (64 n + 24 j + 24) u'`, ending in prescribed windows whose margins from the corners, gaps and
+lengths are at least `(96 n + 24 j + 38) u'`, in the counterclockwise order of the arms. The
+constants depend only on `σ`, `c`, `n` and `ε`. -/
+theorem exists_pos_le_law_glue_step {j : ℕ} (σ : Fin j → Bool)
+    (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) (c : ℕ → ℝ≥0∞) {n : ℕ}
+    (hn : 1000 * (j + 1) * (j + 1) ≤ n) {ε : ℝ} (hε : 0 < ε) (hε1 : ε ≤ 1) :
+    ∃ c₀ : ℝ≥0∞, 0 < c₀ ∧ ∃ N₁ : ℕ, ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
+      CrossingBounds q L c → ∀ (z : LatticeSite 2) (r N R : ℕ) (tT : Fin j → Fin 4)
+      (lamT αT βT : Fin j → ℤ),
+      N₁ ≤ N → r < N → 2 * (2 * N + 1) ≤ R → R ≤ 4 * (2 * N + 1) → (R : ℕ∞) ≤ L →
+      (∀ i, 0 ≤ lamT i ∧ lamT i ≤ 3 ∧ (lamT i + ((tT i : ℕ) : ℤ)) % 4 = 2) →
+      (∀ i l, i ≤ l → lamT i ≤ lamT l) →
+      (∀ i, (if tT i = 0 ∨ tT i = 2 then z 0 else z 1) - R +
+          (((96 * n + 24 * j + 38) * (R / (n * n)) : ℕ) : ℤ) ≤ αT i ∧
+        βT i + (((96 * n + 24 * j + 38) * (R / (n * n)) : ℕ) : ℤ) ≤
+          (if tT i = 0 ∨ tT i = 2 then z 0 else z 1) + R) →
+      (∀ i, αT i + (((96 * n + 24 * j + 38) * (R / (n * n)) : ℕ) : ℤ) ≤ βT i) →
+      (∀ i l, i < l → tT i = tT l →
+        (tT i = 1 ∨ tT i = 2 → βT i + (((96 * n + 24 * j + 38) * (R / (n * n)) : ℕ) : ℤ) ≤
+          αT l) ∧
+        (tT i = 0 ∨ tT i = 3 → βT l + (((96 * n + 24 * j + 38) * (R / (n * n)) : ℕ) : ℤ) ≤
+          αT i)) →
+      c₀ * law q (outerSeparatedArmEvent σ z r (2 * N + 1) (4 * Real.sqrt ε * N)
+          ⌊Real.sqrt ε * N⌋₊ ⌊ε * N⌋₊) ≤
+        law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+          (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+          (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
+          (∀ i k l, i < k → k < l → sbtw (landingPos (z - R) (z + R) (σ i) (γ i))
+            (landingPos (z - R) (z + R) (σ k) (γ k)) (landingPos (z - R) (z + R) (σ l) (γ l))) ∧
+          ArmsOuterSeparated ω σ z R
+            ((2 * (((64 * n + 24 * j + 24) * (R / (n * n)) : ℕ) : ℤ) - 1 : ℤ) : ℝ)
+            (2 * (R / (n * n))) (R / (n * n)) γ ∧ (∀ i, b i ∈ {b : LatticeSite 2 |
+            (tT i = 0 ∧ b 1 = z 1 + R ∧ αT i ≤ b 0 ∧ b 0 ≤ βT i) ∨
+            (tT i = 1 ∧ b 0 = z 0 + R ∧ αT i ≤ b 1 ∧ b 1 ≤ βT i) ∨
+            (tT i = 2 ∧ b 1 = z 1 - R - cond (σ i) 0 1 ∧ αT i ≤ b 0 ∧ b 0 ≤ βT i) ∨
+            (tT i = 3 ∧ b 0 = z 0 - R - cond (σ i) 0 1 ∧ αT i ≤ b 1 ∧ b 1 ≤ βT i)})} := by
+  obtain ⟨c₀, hc₀, N₁, hp⟩ := exists_pos_le_law_glue_step_inner σ hσ c hn hε hε1
+  refine ⟨c₀, hc₀, N₁, fun q L hCB z r N R tT lamT αT βT hN hr hρR hRρ hL hlamT hlamT2 hcor
+    hwid hgap => le_trans ?_ ((hp q L hCB z r N (2 * N + 1) R tT lamT αT βT (fun _ => univ) rfl hN
+      hr hρR hRρ hL hlamT hlamT2 hcor hwid hgap).trans
+      (measure_mono fun ω ⟨a, b, γ, hγ, hd, ho, hs, hw, _⟩ => ⟨a, b, γ, hγ, hd, ho, hs, hw⟩))⟩
   exact mul_le_mul' le_rfl (measure_mono fun ω ⟨a, b, γ, hγ, hd, ho, hs⟩ =>
     ⟨a, b, γ, hγ, hd, ho, hs, fun _ => mem_univ _⟩)
 
