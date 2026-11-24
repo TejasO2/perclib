@@ -982,17 +982,16 @@ theorem exists_pos_le_law_turns (σ : Fin (m + 1) → Bool)
 least `S` from the corners and in counterclockwise order on each side with gaps `S`, are moved in
 `n` stages (radius growing by `Δ` per stage), each arm by the same amount at every stage, into
 windows `[u' i, v' i] ⊆ [uT i, uT i + n + w + 2nW]` at `B_{ρ₀ + nΔ}(z)`; the targets are at least
-`S` from the corners and in the same order with gaps `S` beyond their widths. The fences change
-from `(M, K)` to `(M', K')` at the first stage. The constant depends only on `σ`, `c`, `A`, `N`,
-`n`. -/
+`S` from the corners and in the same order with gaps `S` beyond their widths. The fences `(M, K)`
+are kept. The constant depends only on `σ`, `c`, `A`, `N`, `n`. -/
 theorem exists_pos_le_law_spread {j : ℕ} (σ : Fin j → Bool)
     (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) (c : ℕ → ℝ≥0∞) (A N n : ℕ) :
     ∃ c₀ : ℝ≥0∞, 0 < c₀ ∧ ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
-      CrossingBounds q L c → ∀ (z : LatticeSite 2) (r W M K M' K' D S ρ₀ Δ w : ℕ)
+      CrossingBounds q L c → ∀ (z : LatticeSite 2) (r W M K D S ρ₀ Δ w : ℕ)
       (J : Fin j → Set ℤ) (t : Fin j → Fin 4) (u v uT : Fin j → ℤ),
-      1 ≤ W → W ≤ K → W + K ≤ M → M ≤ M' → W ≤ K' → W + K' ≤ M' →
-      W + 2 * K' ≤ A * (M' - 1) → W + 2 * D + 2 * M' + 2 * K' + 3 ≤ S → r + M + 1 < ρ₀ →
-      2 * M' + W + 1 ≤ Δ → 2 * (ρ₀ + n * Δ) + 2 ≤ A * W → ((ρ₀ + n * Δ : ℕ) : ℕ∞) ≤ L →
+      1 ≤ W → W ≤ K → W + K ≤ M → W + 2 * K ≤ A * (M - 1) →
+      W + 2 * D + 2 * M + 2 * K + 3 ≤ S → r + M + 1 < ρ₀ →
+      2 * M + W + 1 ≤ Δ → 2 * (ρ₀ + n * Δ) + 2 ≤ A * W → ((ρ₀ + n * Δ : ℕ) : ℕ∞) ≤ L →
       2 * (ρ₀ + n * Δ) + 2 * n + n * W ≤ n * D → w + 2 * n * W + 1 ≤ N * (W + 1) →
       (∀ i, -(ρ₀ : ℤ) + S ≤ u i ∧ v i + S ≤ ρ₀ ∧ u i ≤ v i ∧ v i - u i ≤ w) →
       (∀ i l, i < l → t i = t l → v i + S ≤ u l) →
@@ -1021,7 +1020,7 @@ theorem exists_pos_le_law_spread {j : ℕ} (σ : Fin j → Bool)
             i) (γ i))
           (landingPos (z - (ρ₀ + n * Δ : ℕ)) (z + (ρ₀ + n * Δ : ℕ)) (σ k) (γ k)) (landingPos (z -
               (ρ₀ + n * Δ : ℕ)) (z + (ρ₀ + n * Δ : ℕ)) (σ l) (γ l))) ∧
-        ArmsOuterSeparated ω σ z (ρ₀ + n * Δ : ℕ) ((2 * (S : ℤ) - 1 : ℤ) : ℝ) M' K' γ ∧ (∀ i,
+        ArmsOuterSeparated ω σ z (ρ₀ + n * Δ : ℕ) ((2 * (S : ℤ) - 1 : ℤ) : ℝ) M K γ ∧ (∀ i,
           (t i = 0 ∧ b i 1 = z 1 + (ρ₀ + n * Δ : ℕ) ∧ z 0 - v' i ≤ b i 0 ∧ b i 0 ≤ z 0 - u' i) ∨
           (t i = 1 ∧ b i 0 = z 0 + (ρ₀ + n * Δ : ℕ) ∧ z 1 + u' i ≤ b i 1 ∧ b i 1 ≤ z 1 + v' i) ∨
           (t i = 2 ∧ b i 1 = z 1 - (ρ₀ + n * Δ : ℕ) - cond (σ i) 0 1 ∧ z 0 + u' i ≤ b i 0 ∧
@@ -1032,8 +1031,8 @@ theorem exists_pos_le_law_spread {j : ℕ} (σ : Fin j → Bool)
   classical
   obtain ⟨c₁, hc₁, hst⟩ := exists_pos_le_law_ccw_of_moves σ hσ c A N
   refine ⟨c₁ ^ n, ENNReal.pow_pos hc₁ n, ?_⟩
-  intro q L hCB z r W M K M' K' D S ρ₀ Δ w J t u v uT hW hWK hWKM hMM' hWK' hWKM' hAM' hS hr0
-    hΔ hAW hL hjog hN hwin hgap hTcor hTgap
+  intro q L hCB z r W M K D S ρ₀ Δ w J t u v uT hW hWK hWKM hAM hS hr0 hΔ hAW hL hjog hN hwin hgap
+    hTcor hTgap
   -- at least one stage
   have hn : 0 < n := by
     rcases Nat.eq_zero_or_pos n with h | h
@@ -1068,15 +1067,6 @@ theorem exists_pos_le_law_spread {j : ℕ} (σ : Fin j → Bool)
       have : (n : ℤ) * (e i + 1) ≤ n * (-D) := mul_le_mul_of_nonneg_left (by omega) hn'.le
       linarith
     · exact le_of_mul_le_mul_left h₇ hn'
-  -- windows, radii and fences of stage `k`
-  obtain ⟨Mf, hMf0, hMfs⟩ : ∃ f : ℕ → ℕ, f 0 = M ∧ ∀ k, f (k + 1) = M' :=
-    ⟨fun k => if k = 0 then M else M', rfl, fun _ => rfl⟩
-  obtain ⟨Kf, hKf0, hKfs⟩ : ∃ f : ℕ → ℕ, f 0 = K ∧ ∀ k, f (k + 1) = K' :=
-    ⟨fun k => if k = 0 then K else K', rfl, fun _ => rfl⟩
-  have hMK : ∀ k, (Mf k = M ∧ Kf k = K) ∨ (Mf k = M' ∧ Kf k = K') := fun k => by
-    rcases k with _ | k
-    · exact Or.inl ⟨hMf0, hKf0⟩
-    · exact Or.inr ⟨hMfs k, hKfs k⟩
   -- the windows of every stage are at least `S` from the corners and apart
   have hcor : ∀ k ≤ n, ∀ i, -((ρ₀ + k * Δ : ℕ) : ℤ) + S ≤ u i + k * e i - k * W ∧
       v i + k * e i + k * W + S ≤ ((ρ₀ + k * Δ : ℕ) : ℤ) := by
@@ -1117,8 +1107,7 @@ theorem exists_pos_le_law_spread {j : ℕ} (σ : Fin j → Bool)
               ℕ)) (σ i) (γ i))
             (landingPos (z - (ρ₀ + kk * Δ : ℕ)) (z + (ρ₀ + kk * Δ : ℕ)) (σ k) (γ k)) (landingPos (z
                 - (ρ₀ + kk * Δ : ℕ)) (z + (ρ₀ + kk * Δ : ℕ)) (σ l) (γ l))) ∧
-          ArmsOuterSeparated ω σ z (ρ₀ + kk * Δ : ℕ) ((2 * (S : ℤ) - 1 : ℤ) : ℝ) (Mf kk) (Kf kk) γ
-              ∧ (∀ i,
+          ArmsOuterSeparated ω σ z (ρ₀ + kk * Δ : ℕ) ((2 * (S : ℤ) - 1 : ℤ) : ℝ) M K γ ∧ (∀ i,
             (t i = 0 ∧ b i 1 = z 1 + (ρ₀ + kk * Δ : ℕ) ∧ z 0 - x.2 i ≤ b i 0 ∧ b i 0 ≤ z 0 - x.1 i)
                 ∨
             (t i = 1 ∧ b i 0 = z 0 + (ρ₀ + kk * Δ : ℕ) ∧ z 1 + x.1 i ≤ b i 1 ∧ b i 1 ≤ z 1 + x.2 i)
@@ -1138,27 +1127,17 @@ theorem exists_pos_le_law_spread {j : ℕ} (σ : Fin j → Bool)
       have hkW : (k : ℤ) * W ≤ n * W := mul_le_mul_of_nonneg_right (by omega) (by positivity)
       have hkΔ : (k + 1) * Δ ≤ n * Δ := Nat.mul_le_mul_right Δ hk
       have hkΔ' : (k + 1) * Δ = k * Δ + Δ := by ring
-      have hMk := hMK k
-      rw [hMfs, hKfs]
-      have key := hst q L hCB z r (ρ₀ + k * Δ) (ρ₀ + (k + 1) * Δ) W (Mf k) (Kf k) M' K' D S
-        (((ρ₀ + k * Δ : ℕ) : ℤ) + Mf k + 1) ((2 * (S : ℤ) - 1 : ℤ) : ℝ) S J t t (fun _ => false)
+      have key := hst q L hCB z r (ρ₀ + k * Δ) (ρ₀ + (k + 1) * Δ) W M K M K D S
+        (((ρ₀ + k * Δ : ℕ) : ℤ) + M + 1) ((2 * (S : ℤ) - 1 : ℤ) : ℝ) S J t t (fun _ => false)
         x₁ x₂ e
         (fun i => u i + ((k + 1 : ℕ) : ℤ) * e i - ((k + 1 : ℕ) : ℤ) * W)
         (fun i => v i + ((k + 1 : ℕ) : ℤ) * e i + ((k + 1 : ℕ) : ℤ) * W) hW
-        (by omega) (by omega) (by omega) hWKM' (by omega)
+        hWK (by omega) (by omega) hWKM (by omega)
         (by
-          have : (4 * Mf k : ℤ) ≤ 2 * (S : ℤ) - 1 := by omega
+          have : (4 * M : ℤ) ≤ 2 * (S : ℤ) - 1 := by omega
           exact_mod_cast this)
-        (by
-          rcases hMk with ⟨h₁, -⟩ | ⟨h₁, -⟩
-          · have : 0 ≤ k * Δ := Nat.zero_le _
-            omega
-          · rcases k with _ | k
-            · rw [hMf0] at h₁
-              omega
-            · have : Δ ≤ (k + 1) * Δ := Nat.le_mul_of_pos_left Δ (Nat.succ_pos k)
-              omega)
-        le_rfl (by rcases hMk with ⟨h₁, -⟩ | ⟨h₁, -⟩ <;> omega) (by omega) hAM'
+        (by have : 0 ≤ k * Δ := Nat.zero_le _; omega)
+        le_rfl (by omega) (by omega) hAM
         (le_trans (by exact_mod_cast (show ρ₀ + (k + 1) * Δ ≤ ρ₀ + n * Δ by omega)) hL) hed
         (fun i => by
           have := hwin i
@@ -1188,77 +1167,144 @@ theorem exists_pos_le_law_spread {j : ℕ} (σ : Fin j → Bool)
     have h₄ := he₂ i
     have h₅ := hwin i
     constructor <;> linarith
-  · have hMn : Mf n = M' := by
-      obtain ⟨n', rfl⟩ : ∃ n', n = n' + 1 := ⟨n - 1, by omega⟩
-      exact hMfs n'
-    have hKn : Kf n = K' := by
-      obtain ⟨n', rfl⟩ : ∃ n', n = n' + 1 := ⟨n - 1, by omega⟩
-      exact hKfs n'
-    simp only [hMf0, hKf0, hMn, hKn, zero_mul, add_zero] at hle
+  · simp only [zero_mul, add_zero] at hle
     exact hle
 
-/-- **The motion plan: separated arms carried into prescribed windows.** For a colour sequence
-`σ` without packs and ratios `A`, `n` there is `c₀ > 0` such that for every law with crossing
-bounds `c` up to scale `L`: separated arms at the outer boundary of `B_R(z)` (separation
-`s ≥ 2G + 4W + 2`, fences `(M, K)`, inner positions in `J`) are carried to arms to `∂B_{R'}(z)`
-ending in the prescribed windows `[αT i, βT i]` on the sides `tT i` (`0` top, `1` right, `2`
-bottom, `3` left; coordinates along the side), separated at scale `2S - 1`, with fences `(M', K')`:
-`c₀ P(separated at R) ≤ P(separated at R', ends in the windows)`.
+/-- A bound `c μ s ≤ μ t` holds when it holds for nonempty `s`. -/
+theorem mul_measure_le_of_nonempty {α : Type*} [MeasurableSpace α] {μ : Measure α}
+    {s t : Set α} {c : ℝ≥0∞} (h : s.Nonempty → c * μ s ≤ μ t) : c * μ s ≤ μ t := by
+  rcases s.eq_empty_or_nonempty with h0 | hne
+  · rw [h0, measure_empty, mul_zero]
+    exact zero_le
+  · exact h hne
 
-The windows are in the counterclockwise order of the arms, starting from the bottom side: `lamT i`
-(the side counted counterclockwise from the bottom side, `lamT i + tT i ≡ 2 (mod 4)`) is
-nondecreasing in `i`, windows on one side are in counterclockwise order with gaps `S + B`, at
-least `S` from the corners of `B_{R'}(z)` and of length at least `B`. The plan makes `12 j` rounds
-of turns (radius growing by `G + M + W + 1` per round) and then `n` stages of linear spreading
-(radius growing by `2M' + W + 1` per stage); `D ≥ 2R'/n` bounds the moves of the spreading,
-`S ≥ 2D + 2M' + 2K' + W + 3` the room they need, and `B ≥ n + (24 j + 2n + 1) W` the drift of
-the windows. The constant depends only on `σ`, `c`, `A`, `n`. -/
-theorem exists_pos_le_law_target_windows {j : ℕ} (σ : Fin j → Bool)
-    (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) (c : ℕ → ℝ≥0∞) (A n : ℕ) :
+/-- **The last stage: new fences in the target windows.** Separated arms with fences `(M, K)`
+ending in windows `[u i, v i]` (counterclockwise coordinates) on the sides `t i` of
+`B_{R' - (M + M' + W + 1)}(z)`, inside the target windows `[uT i + W, vT i - W]`, are carried
+straight out to `∂B_{R'}(z)`, ending in the target windows with fences `(M', K')`, separated at
+scale `2Q - 1`; the targets are at least `Q + M + M' + W + 1` from the corners and in
+counterclockwise order on each side with gaps `Q`. The constant depends only on `σ`, `c`, `A`,
+`N`. -/
+theorem exists_pos_le_law_fences_of_windows {j : ℕ} (σ : Fin j → Bool)
+    (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) (c : ℕ → ℝ≥0∞) (A N : ℕ) :
     ∃ c₀ : ℝ≥0∞, 0 < c₀ ∧ ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
-      CrossingBounds q L c → ∀ (z : LatticeSite 2) (r R R' W M K M' K' D S G B : ℕ) (s : ℝ)
-      (J : Fin j → Set ℤ) (tT : Fin j → Fin 4) (lamT αT βT : Fin j → ℤ),
-      1 ≤ W → W ≤ K → W + K ≤ M → M ≤ M' → K ≤ K' → W + K' ≤ M' →
-      W + 2 * K ≤ A * (M - 1) → W + 2 * K' ≤ A * (M' - 1) →
-      W + 2 * D + 2 * M' + 2 * K' + 3 ≤ S → S + 2 * (12 * j) * W ≤ G →
-      ((2 * G + 4 * W + 2 : ℕ) : ℝ) ≤ s → r + M + 1 < R →
-      R + 12 * j * (G + M + W + 1) + n * (2 * M' + W + 1) ≤ R' →
-      2 * R' + 2 ≤ A * W → (R' : ℕ∞) ≤ L → 2 * R' + 2 * n + n * W ≤ n * D →
-      n + (2 * (12 * j) + 2 * n + 1) * W ≤ B →
-      (∀ i, 0 ≤ lamT i ∧ lamT i ≤ 3 ∧ (lamT i + ((tT i : ℕ) : ℤ)) % 4 = 2) →
-      (∀ i l, i ≤ l → lamT i ≤ lamT l) →
-      (∀ i, (if tT i = 0 ∨ tT i = 2 then z 0 else z 1) - R' + S ≤ αT i ∧
-        βT i + S ≤ (if tT i = 0 ∨ tT i = 2 then z 0 else z 1) + R') →
-      (∀ i, αT i + B ≤ βT i) →
-      (∀ i l, i < l → tT i = tT l → (tT i = 1 ∨ tT i = 2 → βT i + S + B ≤ αT l) ∧
-        (tT i = 0 ∨ tT i = 3 → βT l + S + B ≤ αT i)) →
+      CrossingBounds q L c → ∀ (z : LatticeSite 2) (r R' W M K M' K' Q : ℕ) (s : ℝ)
+      (J : Fin j → Set ℤ) (t : Fin j → Fin 4) (u v uT vT : Fin j → ℤ),
+      1 ≤ W → W ≤ K → K ≤ M → 2 ≤ M' → W + K' ≤ M' → W + 2 * M + 2 * K' + 3 ≤ Q →
+      4 * (M : ℝ) ≤ s → r + M + 1 < R' - (M + M' + W + 1) → 2 * R' + 2 ≤ A * W →
+      W + 2 * K' ≤ A * (M' - 1) → (R' : ℕ∞) ≤ L →
+      (∀ i, v i - u i + 1 ≤ N * ((W : ℤ) + 1)) → (∀ i, uT i + W ≤ u i ∧ v i + W ≤ vT i) →
+      (∀ i, -(R' : ℤ) + (Q + M + M' + W + 1) ≤ uT i ∧ vT i + (Q + M + M' + W + 1) ≤ R') →
+      (∀ i l, i < l → t i = t l → vT i + Q ≤ uT l) →
       c₀ * law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
         (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
-        (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
-        (∀ i k l, i < k → k < l → sbtw (landingPos (z - R) (z + R) (σ i) (γ i))
-          (landingPos (z - R) (z + R) (σ k) (γ k)) (landingPos (z - R) (z + R) (σ l) (γ l))) ∧
-        ArmsOuterSeparated ω σ z R s M K γ ∧
+        (∀ i, IsArm ω (σ i) z r (z - (R' - (M + M' + W + 1) : ℕ)) (z + (R' - (M + M' + W + 1) : ℕ))
+            (γ i)) ∧ ArmsDisjoint σ γ ∧
+        (∀ i k l, i < k → k < l → sbtw (landingPos (z - (R' - (M + M' + W + 1) : ℕ)) (z + (R' - (M
+            + M' + W + 1) : ℕ)) (σ i) (γ i))
+          (landingPos (z - (R' - (M + M' + W + 1) : ℕ)) (z + (R' - (M + M' + W + 1) : ℕ)) (σ k) (γ
+              k)) (landingPos (z - (R' - (M + M' + W + 1) : ℕ)) (z + (R' - (M + M' + W + 1) : ℕ))
+              (σ l) (γ l))) ∧
+        ArmsOuterSeparated ω σ z (R' - (M + M' + W + 1) : ℕ) s M K γ ∧ (∀ i,
+          (t i = 0 ∧ b i 1 = z 1 + (R' - (M + M' + W + 1) : ℕ) ∧ z 0 - v i ≤ b i 0 ∧ b i 0 ≤ z 0 -
+              u i) ∨
+          (t i = 1 ∧ b i 0 = z 0 + (R' - (M + M' + W + 1) : ℕ) ∧ z 1 + u i ≤ b i 1 ∧ b i 1 ≤ z 1 +
+              v i) ∨
+          (t i = 2 ∧ b i 1 = z 1 - (R' - (M + M' + W + 1) : ℕ) - cond (σ i) 0 1 ∧ z 0 + u i ≤ b i 0
+              ∧
+            b i 0 ≤ z 0 + v i) ∨
+          (t i = 3 ∧ b i 0 = z 0 - (R' - (M + M' + W + 1) : ℕ) - cond (σ i) 0 1 ∧ z 1 - v i ≤ b i 1
+              ∧
+            b i 1 ≤ z 1 - u i)) ∧
         ∀ i, innerPos z r (σ i) (γ i) ∈ J i} ≤
         law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
         (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
         (∀ i, IsArm ω (σ i) z r (z - R') (z + R') (γ i)) ∧ ArmsDisjoint σ γ ∧
         (∀ i k l, i < k → k < l → sbtw (landingPos (z - R') (z + R') (σ i) (γ i))
           (landingPos (z - R') (z + R') (σ k) (γ k)) (landingPos (z - R') (z + R') (σ l) (γ l))) ∧
-        ArmsOuterSeparated ω σ z R' ((2 * (S : ℤ) - 1 : ℤ) : ℝ) M' K' γ ∧ (∀ i, b i ∈ {b :
+        ArmsOuterSeparated ω σ z R' ((2 * (Q : ℤ) - 1 : ℤ) : ℝ) M' K' γ ∧ (∀ i,
+          (t i = 0 ∧ b i 1 = z 1 + R' ∧ z 0 - vT i ≤ b i 0 ∧ b i 0 ≤ z 0 - uT i) ∨
+          (t i = 1 ∧ b i 0 = z 0 + R' ∧ z 1 + uT i ≤ b i 1 ∧ b i 1 ≤ z 1 + vT i) ∨
+          (t i = 2 ∧ b i 1 = z 1 - R' - cond (σ i) 0 1 ∧ z 0 + uT i ≤ b i 0 ∧
+            b i 0 ≤ z 0 + vT i) ∨
+          (t i = 3 ∧ b i 0 = z 0 - R' - cond (σ i) 0 1 ∧ z 1 - vT i ≤ b i 1 ∧
+            b i 1 ≤ z 1 - uT i)) ∧
+        ∀ i, innerPos z r (σ i) (γ i) ∈ J i} := by
+  obtain ⟨c₃, hc₃, hP3⟩ := exists_pos_le_law_ccw_of_moves σ hσ c A N
+  refine ⟨c₃, hc₃, ?_⟩
+  intro q L hCB z r R' W M K M' K' Q s J t u v uT vT hW hWK hKM hM' hWKM' hQ hs hrM hAW hAM' hL hN
+    hin hTcor hTgap
+  have hgapT : ∀ i l, i ≠ l → t i = t l → vT i + Q ≤ uT l ∨ vT l + Q ≤ uT i := by
+    intro i l hil htl
+    rcases lt_or_gt_of_ne hil with h | h
+    · exact Or.inl (hTgap i l h htl)
+    · exact Or.inr (hTgap l i h htl.symm)
+  refine hP3 q L hCB z r (R' - (M + M' + W + 1)) R' W M K M' K' 0 Q
+    (((R' - (M + M' + W + 1) : ℕ) : ℤ) + M + 1) s Q J t t (fun _ => false) u v (fun _ => 0) uT vT
+    hW hWK hKM hM' hWKM' (by omega) hs hrM le_rfl (by omega) hAW hAM' hL (fun _ => by simp) hN
+    (fun i => by have := hin i; have := hTcor i; omega)
+    (fun i l hil htl => by
+      have := hin i
+      have := hin l
+      rcases hgapT i l hil htl with h | h <;> omega)
+    (fun i l _ hτ _ => absurd hτ Bool.false_ne_true)
+    (fun i => Or.inl ⟨rfl, rfl, by have := hin i; omega, by have := hin i; omega⟩)
+    (by omega) (fun i => by have := hTcor i; omega) hgapT
+
+/-- **The motion plan for arms ending in given bins** (`exists_pos_le_law_target_windows` for the
+separated arms ending in bins `[αs i, αs i + W]` on the sides `ts i` of `B_R(z)`). -/
+theorem exists_pos_le_law_target_windows_of_bins {j : ℕ} (σ : Fin j → Bool)
+    (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) (c : ℕ → ℝ≥0∞) (A n : ℕ) :
+    ∃ c₀ : ℝ≥0∞, 0 < c₀ ∧ ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
+      CrossingBounds q L c → ∀ (z : LatticeSite 2) (r R R' W M K M' K' D S G Q B : ℕ) (s : ℝ)
+      (J : Fin j → Set ℤ) (tT : Fin j → Fin 4) (lamT αT βT : Fin j → ℤ)
+      (ts : Fin j → Fin 4) (αs : Fin j → ℤ),
+      1 ≤ W → W ≤ K → W + K ≤ M → 2 ≤ M' → W + K' ≤ M' →
+      W + 2 * K ≤ A * (M - 1) → W + 2 * K' ≤ A * (M' - 1) →
+      W + 2 * D + 2 * M + 2 * K + 3 ≤ S → S + 2 * (12 * j) * W ≤ G →
+      W + 2 * M + 2 * K' + 3 ≤ Q → ((2 * G + 4 * W + 2 : ℕ) : ℝ) ≤ s → r + M + 1 < R →
+      R + 12 * j * (G + M + W + 1) + n * (2 * M + W + 1) + (M + M' + W + 1) ≤ R' →
+      2 * R' + 2 ≤ A * W → (R' : ℕ∞) ≤ L → 2 * R' + 2 * n + n * W ≤ n * D →
+      n + (2 * (12 * j) + 2 * n + 3) * W ≤ B →
+      (∀ i, 0 ≤ lamT i ∧ lamT i ≤ 3 ∧ (lamT i + ((tT i : ℕ) : ℤ)) % 4 = 2) →
+      (∀ i l, i ≤ l → lamT i ≤ lamT l) →
+      (∀ i, (if tT i = 0 ∨ tT i = 2 then z 0 else z 1) - R' + (S + Q + M + M' + W + 1) ≤ αT i ∧
+        βT i + (S + Q + M + M' + W + 1) ≤ (if tT i = 0 ∨ tT i = 2 then z 0 else z 1) + R') →
+      (∀ i, αT i + B ≤ βT i) →
+      (∀ i l, i < l → tT i = tT l → (tT i = 1 ∨ tT i = 2 → βT i + S + Q ≤ αT l) ∧
+        (tT i = 0 ∨ tT i = 3 → βT l + S + Q ≤ αT i)) →
+      c₀ * law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+        (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
+        (∀ i k l, i < k → k < l → sbtw (landingPos (z - R) (z + R) (σ i) (γ i))
+          (landingPos (z - R) (z + R) (σ k) (γ k)) (landingPos (z - R) (z + R) (σ l) (γ l))) ∧
+        ArmsOuterSeparated ω σ z R s M K γ ∧ (∀ i, b i ∈ {b : LatticeSite 2 |
+          (ts i = 0 ∧ b 1 = z 1 + R ∧ αs i ≤ b 0 ∧ b 0 ≤ αs i + W) ∨
+          (ts i = 1 ∧ b 0 = z 0 + R ∧ αs i ≤ b 1 ∧ b 1 ≤ αs i + W) ∨
+          (ts i = 2 ∧ b 1 = z 1 - R - cond (σ i) 0 1 ∧ αs i ≤ b 0 ∧ b 0 ≤ αs i + W) ∨
+          (ts i = 3 ∧ b 0 = z 0 - R - cond (σ i) 0 1 ∧ αs i ≤ b 1 ∧ b 1 ≤ αs i + W)}) ∧
+        ∀ i, innerPos z r (σ i) (γ i) ∈ J i} ≤
+        law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+        (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, IsArm ω (σ i) z r (z - R') (z + R') (γ i)) ∧ ArmsDisjoint σ γ ∧
+        (∀ i k l, i < k → k < l → sbtw (landingPos (z - R') (z + R') (σ i) (γ i))
+          (landingPos (z - R') (z + R') (σ k) (γ k)) (landingPos (z - R') (z + R') (σ l) (γ l))) ∧
+        ArmsOuterSeparated ω σ z R' ((2 * (Q : ℤ) - 1 : ℤ) : ℝ) M' K' γ ∧ (∀ i, b i ∈ {b :
             LatticeSite 2 |
           (tT i = 0 ∧ b 1 = z 1 + R' ∧ αT i ≤ b 0 ∧ b 0 ≤ βT i) ∨
           (tT i = 1 ∧ b 0 = z 0 + R' ∧ αT i ≤ b 1 ∧ b 1 ≤ βT i) ∨
           (tT i = 2 ∧ b 1 = z 1 - R' - cond (σ i) 0 1 ∧ αT i ≤ b 0 ∧ b 0 ≤ βT i) ∨
           (tT i = 3 ∧ b 0 = z 0 - R' - cond (σ i) 0 1 ∧ αT i ≤ b 1 ∧ b 1 ≤ βT i)}) ∧
-        ∀ i, innerPos z r (σ i) (γ i) ∈ J i} := by
+        ∀ i, innerPos z r (σ i) (γ i) ∈ J i}  := by
   classical
   rcases Nat.eq_zero_or_pos j with hj | hj
   · subst hj
-    refine ⟨1, one_pos, fun q L _ z r R R' W M K M' K' D S G B s J tT lamT αT βT _ _ _ _ _ _ _ _
-      _ _ _ _ _ _ _ _ _ _ _ _ _ _ => ?_⟩
+    refine ⟨1, one_pos, ?_⟩
+    intro q L _ z r R R' W M K M' K' D S G Q B s J tT lamT αT βT ts αs
+    intros
     rw [one_mul]
     refine measure_mono ?_
-    rintro ω ⟨a, b, γ, -, hd, -, -, hJ⟩
+    rintro ω ⟨a, b, γ, -, hd, -, -, -, hJ⟩
     exact ⟨a, b, γ, fun i => i.elim0, hd, fun i => i.elim0,
       ⟨fun i => i.elim0, fun i => i.elim0, fun i => i.elim0⟩, fun i => i.elim0, hJ⟩
   obtain ⟨m, rfl⟩ : ∃ m, j = m + 1 := ⟨j - 1, by omega⟩
@@ -1267,12 +1313,10 @@ theorem exists_pos_le_law_target_windows {j : ℕ} (σ : Fin j → Bool)
   obtain ⟨N, hN⟩ : ∃ N, N = 2 * n₁ + 2 * n + 1 := ⟨_, rfl⟩
   obtain ⟨c₁, hc₁, hP1⟩ := exists_pos_le_law_turns σ hσ c A N n₁
   obtain ⟨c₂, hc₂, hP2⟩ := exists_pos_le_law_spread σ hσ c A N n
-  obtain ⟨X, hX⟩ : ∃ X : ℝ≥0∞, X = (((4 * (2 * A + 1)) ^ (m + 1) : ℕ) : ℝ≥0∞) := ⟨_, rfl⟩
-  have hX0 : X ≠ 0 := by rw [hX, Nat.cast_ne_zero]; positivity
-  have hXt : X ≠ ⊤ := by rw [hX]; exact ENNReal.natCast_ne_top _
-  refine ⟨c₁ * c₂ / X, ENNReal.div_pos (mul_ne_zero hc₁.ne' hc₂.ne') hXt, ?_⟩
-  intro q L hCB z r R R' W M K M' K' D S G B s J tT lamT αT βT hW hWK hWKM hMM' hKK' hWKM' hAM
-    hAM' hS hG hs hrM hRR' hAW hL hjog hB hlamT hlamT2 hTcor hTwid hTord
+  obtain ⟨c₃, hc₃, hP3⟩ := exists_pos_le_law_fences_of_windows σ hσ c A N
+  refine ⟨c₁ * c₂ * c₃, ENNReal.mul_pos (mul_ne_zero hc₁.ne' hc₂.ne') hc₃.ne', ?_⟩
+  intro q L hCB z r R R' W M K M' K' D S G Q B s J tT lamT αT βT ts αs hW hWK hWKM hM' hWKM' hAM
+    hAM' hS hG hQ hs hrM hRR' hAW hL hjog hB hlamT hlamT2 hTcor hTwid hTord
   have hrR : r < R := by omega
   have hRA : R ≤ A * W := by omega
   have hs' : ((2 * (G : ℤ) + 4 * W + 2 : ℤ) : ℝ) ≤ s := by push_cast at hs ⊢; linarith
@@ -1280,15 +1324,15 @@ theorem exists_pos_le_law_target_windows {j : ℕ} (σ : Fin j → Bool)
     refine le_trans ?_ hs'
     have : (4 * M : ℤ) ≤ 2 * (G : ℤ) + 4 * W + 2 := by omega
     exact_mod_cast this
-  have hcover := law_le_sum_law_windows_of_separated q (σ := σ) (z := z) (K := K) hrR
-    (by omega : 1 ≤ M) hW hRA hs4 J
-  -- the radii of the rounds of turns
+  -- the radii of the plan
   obtain ⟨Δ₁, hΔ₁⟩ : ∃ d, d = G + M + W + 1 := ⟨_, rfl⟩
-  obtain ⟨Δ₂, hΔ₂⟩ : ∃ d, d = 2 * M' + W + 1 := ⟨_, rfl⟩
-  rw [← hΔ₁, ← hΔ₂] at hRR'
-  have hnR' : n * Δ₂ ≤ R' := by omega
-  obtain ⟨ρ₁, hρ₁, hρ₁n⟩ : ∃ f : ℕ → ℕ, (∀ k < n₁, f k = R + k * Δ₁) ∧ f n₁ = R' - n * Δ₂ :=
-    ⟨fun k => if k < n₁ then R + k * Δ₁ else R' - n * Δ₂, fun k hk => ite_eq_left hk,
+  obtain ⟨Δ₂, hΔ₂⟩ : ∃ d, d = 2 * M + W + 1 := ⟨_, rfl⟩
+  obtain ⟨E, hE⟩ : ∃ d, d = M + M' + W + 1 := ⟨_, rfl⟩
+  rw [← hΔ₁, ← hΔ₂, ← hE] at hRR'
+  have hnR' : n * Δ₂ ≤ R' - E := by omega
+  obtain ⟨ρ₁, hρ₁, hρ₁n⟩ : ∃ f : ℕ → ℕ, (∀ k < n₁, f k = R + k * Δ₁) ∧
+      f n₁ = R' - E - n * Δ₂ :=
+    ⟨fun k => if k < n₁ then R + k * Δ₁ else R' - E - n * Δ₂, fun k hk => ite_eq_left hk,
       ite_eq_right (lt_irrefl _)⟩
   have hn₁0 : 0 < n₁ := by omega
   have hρ₁0 : ρ₁ 0 = R := by rw [hρ₁ 0 hn₁0]; simp
@@ -1307,190 +1351,177 @@ theorem exists_pos_le_law_target_windows {j : ℕ} (σ : Fin j → Bool)
   have eW1 : ((2 * n₁ * W : ℕ) : ℤ) = 2 * (n₁ : ℤ) * W := by push_cast; ring
   have eW2 : (((2 * n₁ + 1) * W : ℕ) : ℤ) = (2 * (n₁ : ℤ) + 1) * W := by push_cast; ring
   have eW3 : ((2 * n * W : ℕ) : ℤ) = 2 * (n : ℤ) * W := by push_cast; ring
+  have eW4 : ((2 * n₁ + 2 * n + 3) * W : ℕ) = (2 * n₁ + 1) * W + 2 * n * W + 2 * W := by ring
   -- the targets in counterclockwise coordinates
   choose uT vT hrelT hmemT using fun i => exists_ccw_window (tT i) z (αT i) (βT i)
   have hrelT' := fun i => side_center_eq (hrelT i)
   -- the plan for the arms ending in given bins
-  have key : ∀ (ts : Fin (m + 1) → Fin 4) (αs : Fin (m + 1) → ℤ) (E : Set (Config (LatticeSite 2))),
-      E = {ω : Config (LatticeSite 2) | ∃ (a b : Fin (m + 1) → LatticeSite 2)
-          (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
-          (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
-          (∀ i k l, i < k → k < l → sbtw (landingPos (z - R) (z + R) (σ i) (γ i))
-            (landingPos (z - R) (z + R) (σ k) (γ k)) (landingPos (z - R) (z + R) (σ l) (γ l))) ∧
-          ArmsOuterSeparated ω σ z R s M K γ ∧ (∀ i, b i ∈ {b : LatticeSite 2 |
-            (ts i = 0 ∧ b 1 = z 1 + R ∧ αs i ≤ b 0 ∧ b 0 ≤ αs i + W) ∨
-            (ts i = 1 ∧ b 0 = z 0 + R ∧ αs i ≤ b 1 ∧ b 1 ≤ αs i + W) ∨
-            (ts i = 2 ∧ b 1 = z 1 - R - cond (σ i) 0 1 ∧ αs i ≤ b 0 ∧ b 0 ≤ αs i + W) ∨
-            (ts i = 3 ∧ b 0 = z 0 - R - cond (σ i) 0 1 ∧ αs i ≤ b 1 ∧ b 1 ≤ αs i + W)}) ∧
-          ∀ i, innerPos z r (σ i) (γ i) ∈ J i} →
-      c₁ * c₂ * law q E ≤ law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin (m + 1) → LatticeSite 2)
-          (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
-          (∀ i, IsArm ω (σ i) z r (z - R') (z + R') (γ i)) ∧ ArmsDisjoint σ γ ∧
-          (∀ i k l, i < k → k < l → sbtw (landingPos (z - R') (z + R') (σ i) (γ i))
-            (landingPos (z - R') (z + R') (σ k) (γ k)) (landingPos (z - R') (z + R') (σ l) (γ l))) ∧
-          ArmsOuterSeparated ω σ z R' ((2 * (S : ℤ) - 1 : ℤ) : ℝ) M' K' γ ∧ (∀ i, b i ∈ {b :
-              LatticeSite 2 |
-            (tT i = 0 ∧ b 1 = z 1 + R' ∧ αT i ≤ b 0 ∧ b 0 ≤ βT i) ∨
-            (tT i = 1 ∧ b 0 = z 0 + R' ∧ αT i ≤ b 1 ∧ b 1 ≤ βT i) ∨
-            (tT i = 2 ∧ b 1 = z 1 - R' - cond (σ i) 0 1 ∧ αT i ≤ b 0 ∧ b 0 ≤ βT i) ∨
-            (tT i = 3 ∧ b 0 = z 0 - R' - cond (σ i) 0 1 ∧ αT i ≤ b 1 ∧ b 1 ≤ βT i)}) ∧
-          ∀ i, innerPos z r (σ i) (γ i) ∈ J i} := by
-    intro ts αs E hE
-    rcases E.eq_empty_or_nonempty with h0 | ⟨ω₀, hω₀⟩
-    · rw [h0, measure_empty, mul_zero]
-      simp
-    rw [hE] at hω₀
-    obtain ⟨a₀, b₀, γ₀, hγ₀, -, ho₀, hsep₀, hw₀, -⟩ := hω₀
-    choose us vs hrels hmems using fun i => exists_ccw_window (ts i) z (αs i) (αs i + W)
-    have hvs : ∀ i, vs i = us i + W := fun i => by
-      rcases hrels i with ⟨-, h₁, h₂⟩ | ⟨-, h₁, h₂⟩ | ⟨-, h₁, h₂⟩ | ⟨-, h₁, h₂⟩ <;> omega
-    have hsepZ := hsep₀.le_abs_landingPos_sub hs'
-    obtain ⟨lam, hlam, hc, hL1, hL2, hL3⟩ := exists_lift_of_separated hγ₀ hrR ho₀ (G := G)
-      (W := W) (by positivity) (by omega) le_rfl hsepZ.1 hsepZ.2 ts us vs hvs
-      (fun i => (hmems i R (σ i) (b₀ i)).1 (hw₀ i))
-    -- phase 1: rounds of turns
-    have hpot : ∑ i, ((lamT i + 8) - lam i) ≤ n₁ := by
-      have h₁ : ∑ i, ((lamT i + 8) - lam i) ≤ ∑ _i : Fin (m + 1), (12 : ℤ) :=
-        Finset.sum_le_sum fun i _ => by have := hlam i; have := hlamT i; omega
-      rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul] at h₁
-      push_cast at h₁
-      rw [hn₁]
+  refine mul_measure_le_of_nonempty fun ⟨ω₀, hω₀⟩ => ?_
+  obtain ⟨a₀, b₀, γ₀, hγ₀, -, ho₀, hsep₀, hw₀, -⟩ := hω₀
+  choose us vs hrels hmems using fun i => exists_ccw_window (ts i) z (αs i) (αs i + W)
+  have hvs : ∀ i, vs i = us i + W := fun i => by
+    rcases hrels i with ⟨-, h₁, h₂⟩ | ⟨-, h₁, h₂⟩ | ⟨-, h₁, h₂⟩ | ⟨-, h₁, h₂⟩ <;> omega
+  have hsepZ := hsep₀.le_abs_landingPos_sub hs'
+  obtain ⟨lam, hlam, hc, hL1, hL2, hL3⟩ := exists_lift_of_separated hγ₀ hrR ho₀ (G := G)
+    (W := W) (by positivity) (by omega) le_rfl hsepZ.1 hsepZ.2 ts us vs hvs
+    (fun i => (hmems i R (σ i) (b₀ i)).1 (hw₀ i))
+  -- phase 1: rounds of turns
+  have hpot : ∑ i, ((lamT i + 8) - lam i) ≤ n₁ := by
+    have h₁ : ∑ i, ((lamT i + 8) - lam i) ≤ ∑ _i : Fin (m + 1), (12 : ℤ) :=
+      Finset.sum_le_sum fun i _ => by have := hlam i; have := hlamT i; omega
+    rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul] at h₁
+    push_cast at h₁
+    rw [hn₁]
+    push_cast
+    linarith
+  obtain ⟨t₁, u₁, v₁, hc₁', hL1₁, hL3₁, hineq₁⟩ := hP1 q L hCB z r W M K G ρ₁ J
+    (fun i => lamT i + 8) lam us vs ts hW hWK hWKM hAM (by omega) (by omega)
+    (by rw [hρ₁0]; omega) hρ₁step hc hL1 hL2
+    (fun i => by rw [hρ₁0]; have := hL3 i; have := hvs i; omega)
+    (fun i => by have := hlam i; have := hlamT i; omega)
+    (fun i l hil => by have := hlamT2 i l hil; omega)
+    (by have := hlamT 0; have := hlamT (Fin.last m); omega) hpot
+  rw [hρ₁0, hρ₁n] at hineq₁
+  rw [hρ₁n] at hL3₁
+  have ht₁ : ∀ i, t₁ i = tT i := fun i => by
+    have h₁ := hc₁' i
+    have h₂ := (hlamT i).2.2
+    have := (t₁ i).isLt
+    have := (tT i).isLt
+    ext
+    omega
+  -- phase 2: spreading along the sides
+  have hNW : (2 * n₁ + 1) * W + 2 * n * W + 1 ≤ N * (W + 1) := by
+    rw [hN]
+    have : (2 * n₁ + 2 * n + 1) * (W + 1) = (2 * n₁ + 2 * n + 1) * W + (2 * n₁ + 2 * n + 1) :=
+      by ring
+    have : (2 * n₁ + 2 * n + 1) * W = (2 * n₁ + 1) * W + 2 * n * W := by ring
+    omega
+  obtain ⟨u₂, v₂, hfin, hineq₂⟩ := hP2 q L hCB z r W M K D S (R' - E - n * Δ₂) Δ₂
+    ((2 * n₁ + 1) * W) J tT u₁ v₁ (fun i => uT i + W) hW hWK hWKM hAM hS (by omega)
+    (by omega) (by rw [Nat.sub_add_cancel hnR']; omega)
+    (by rw [Nat.sub_add_cancel hnR']; exact le_trans (by exact_mod_cast (show R' - E ≤ R' by
+      omega)) hL)
+    (by rw [Nat.sub_add_cancel hnR']; omega) hNW
+    (fun i => by
+      have := hL3₁ i
       push_cast
-      linarith
-    obtain ⟨t₁, u₁, v₁, hc₁', hL1₁, hL3₁, hineq₁⟩ := hP1 q L hCB z r W M K G ρ₁ J
-      (fun i => lamT i + 8) lam us vs ts hW hWK hWKM hAM (by omega) (by omega)
-      (by rw [hρ₁0]; omega) hρ₁step hc hL1 hL2
-      (fun i => by rw [hρ₁0]; have := hL3 i; have := hvs i; omega)
-      (fun i => by have := hlam i; have := hlamT i; omega)
-      (fun i l hil => by have := hlamT2 i l hil; omega)
-      (by have := hlamT 0; have := hlamT (Fin.last m); omega) hpot
-    rw [hρ₁0, hρ₁n] at hineq₁
-    rw [hρ₁n] at hL3₁
-    have ht₁ : ∀ i, t₁ i = tT i := fun i => by
-      have h₁ := hc₁' i
+      omega)
+    (fun i l hil htl => by
+      have h₁ := hL1₁ i l hil
       have h₂ := (hlamT i).2.2
-      have := (t₁ i).isLt
-      have := (tT i).isLt
-      ext
-      omega
-    -- phase 2: spreading along the sides
-    have hnW : (2 * n₁ + 2 * n + 1) * W = (2 * n₁ + 1) * W + 2 * n * W := by ring
-    have hNW : (2 * n₁ + 1) * W + 2 * n * W + 1 ≤ N * (W + 1) := by
-      rw [hN]
-      have : (2 * n₁ + 2 * n + 1) * (W + 1) = (2 * n₁ + 2 * n + 1) * W + (2 * n₁ + 2 * n + 1) :=
-        by ring
-      omega
-    obtain ⟨u₂, v₂, hfin, hineq₂⟩ := hP2 q L hCB z r W M K M' K' D S (R' - n * Δ₂) Δ₂
-      ((2 * n₁ + 1) * W) J tT u₁ v₁ uT hW hWK hWKM hMM' (by omega) hWKM' hAM' hS (by omega)
-      (by omega) (by rw [Nat.sub_add_cancel hnR']; omega)
-      (by rw [Nat.sub_add_cancel hnR']; exact hL) (by rw [Nat.sub_add_cancel hnR']; exact hjog)
-      hNW
-      (fun i => by
-        have := hL3₁ i
-        push_cast
-        omega)
-      (fun i l hil htl => by
-        have h₁ := hL1₁ i l hil
-        have h₂ := (hlamT i).2.2
-        have h₃ := (hlamT l).2.2
-        have h₄ := hlamT i
-        have h₅ := hlamT l
-        rw [htl] at h₂
-        omega)
-      (fun i => by
-        have h₁ := hTcor i
-        have h₂ := hTwid i
-        rw [Nat.sub_add_cancel hnR']
-        push_cast
-        rcases hrelT' i with ⟨-, h₃, h₄⟩ | ⟨-, h₃, h₄⟩ <;> omega)
-      (fun i l hil htl => by
-        have h₁ := hTord i l hil htl
-        have h₂ := hrelT' l
-        have h₃ := hTwid i
-        have h₄ := hTwid l
-        rw [← htl] at h₂
-        push_cast
-        rcases hrelT' i with ⟨ho, h₅, h₆⟩ | ⟨ho, h₅, h₆⟩ <;>
-          rcases h₂ with ⟨ho', h₇, h₈⟩ | ⟨ho', h₇, h₈⟩ <;> omega)
-    rw [Nat.sub_add_cancel hnR'] at hineq₂
-    rw [mul_comm c₁ c₂, mul_assoc]
-    refine (mul_le_mul' le_rfl ((mul_le_mul' le_rfl (measure_mono ?_)).trans hineq₁)).trans
-      ((mul_le_mul' le_rfl (measure_mono ?_)).trans (hineq₂.trans (measure_mono ?_)))
-    · rw [hE]
-      rintro ω ⟨a, b, γ, h₁, h₂, h₃, h₄, h₅, h₆⟩
-      refine ⟨a, b, γ, h₁, h₂, h₃, h₄.mono ?_ le_rfl, fun i => (hmems i R (σ i) (b i)).1 (h₅ i),
-        h₆⟩
-      refine le_trans ?_ hs'
+      have h₃ := (hlamT l).2.2
+      have h₄ := hlamT i
+      have h₅ := hlamT l
+      rw [htl] at h₂
+      omega)
+    (fun i => by
+      have h₁ := hTcor i
+      have h₂ := hTwid i
+      rw [Nat.sub_add_cancel hnR']
       push_cast
-      linarith
-    · rintro ω ⟨a, b, γ, h₁, h₂, h₃, h₄, h₅, h₆⟩
-      refine ⟨a, b, γ, h₁, h₂, h₃, h₄.mono ?_ le_rfl, fun i => by rw [← ht₁ i]; exact h₅ i, h₆⟩
-      have : (2 * (S : ℤ) - 1 : ℤ) ≤ 2 * ((G : ℤ) - 2 * n₁ * W) - 1 := by
-        have : (S : ℤ) + 2 * n₁ * W ≤ G := by exact_mod_cast hG
-        omega
-      exact_mod_cast this
-    · rintro ω ⟨a, b, γ, h₁, h₂, h₃, h₄, h₅, h₆⟩
-      refine ⟨a, b, γ, h₁, h₂, h₃, h₄, fun i => (hmemT i R' (σ i) (b i)).2
-        (mem_ccw_window_of_le (hfin i).1 ?_ (h₅ i)), h₆⟩
-      have h₇ := (hfin i).2
-      have h₈ := hTwid i
-      rcases hrelT' i with ⟨-, h₉, h₁₀⟩ | ⟨-, h₉, h₁₀⟩ <;> push_cast at h₇ <;> omega
-  -- summing over the bins
-  refine (mul_le_mul' le_rfl hcover).trans ?_
-  rw [Finset.mul_sum]
-  calc ∑ p : Fin (m + 1) → Fin 4 × Fin (2 * A + 1), c₁ * c₂ / X * law q _
-      ≤ ∑ _p : Fin (m + 1) → Fin 4 × Fin (2 * A + 1), X⁻¹ * law q {ω : Config (LatticeSite 2) | ∃
-          (a b : Fin (m + 1) → LatticeSite 2)
-          (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
-          (∀ i, IsArm ω (σ i) z r (z - R') (z + R') (γ i)) ∧ ArmsDisjoint σ γ ∧
-          (∀ i k l, i < k → k < l → sbtw (landingPos (z - R') (z + R') (σ i) (γ i))
-            (landingPos (z - R') (z + R') (σ k) (γ k)) (landingPos (z - R') (z + R') (σ l) (γ l))) ∧
-          ArmsOuterSeparated ω σ z R' ((2 * (S : ℤ) - 1 : ℤ) : ℝ) M' K' γ ∧ (∀ i, b i ∈ {b :
-              LatticeSite 2 |
-            (tT i = 0 ∧ b 1 = z 1 + R' ∧ αT i ≤ b 0 ∧ b 0 ≤ βT i) ∨
-            (tT i = 1 ∧ b 0 = z 0 + R' ∧ αT i ≤ b 1 ∧ b 1 ≤ βT i) ∨
-            (tT i = 2 ∧ b 1 = z 1 - R' - cond (σ i) 0 1 ∧ αT i ≤ b 0 ∧ b 0 ≤ βT i) ∨
-            (tT i = 3 ∧ b 0 = z 0 - R' - cond (σ i) 0 1 ∧ αT i ≤ b 1 ∧ b 1 ≤ βT i)}) ∧
-          ∀ i, innerPos z r (σ i) (γ i) ∈ J i} := by
-        refine Finset.sum_le_sum fun p _ => ?_
-        rw [div_eq_mul_inv, mul_comm _ X⁻¹, mul_assoc]
-        exact mul_le_mul' le_rfl (key (fun i => (p i).1) (fun i => (if (p i).1 = 0 ∨ (p i).1 = 2
-          then z 0 else z 1) - R + (((p i).2 : ℕ) : ℤ) * (W + 1)) _ rfl)
-    _ = _ := by
-        rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
-        simp only [Fintype.card_fun, Fintype.card_prod, Fintype.card_fin]
-        rw [← mul_assoc, ← hX, ENNReal.mul_inv_cancel hX0 hXt, one_mul]
+      rcases hrelT' i with ⟨-, h₃, h₄⟩ | ⟨-, h₃, h₄⟩ <;> omega)
+    (fun i l hil htl => by
+      have h₁ := hTord i l hil htl
+      have h₂ := hrelT' l
+      have h₃ := hTwid i
+      have h₄ := hTwid l
+      rw [← htl] at h₂
+      push_cast
+      rcases hrelT' i with ⟨ho, h₅, h₆⟩ | ⟨ho, h₅, h₆⟩ <;>
+        rcases h₂ with ⟨ho', h₇, h₈⟩ | ⟨ho', h₇, h₈⟩ <;> omega)
+  rw [Nat.sub_add_cancel hnR'] at hineq₂
+  -- the last stage: new fences `(M', K')` at `R'`
+  have hv₂ : ∀ i, uT i + W ≤ u₂ i ∧ v₂ i + W ≤ vT i := fun i => by
+    have h₁ := hfin i
+    have h₂ := hTwid i
+    push_cast at h₁
+    rcases hrelT' i with ⟨-, h₃, h₄⟩ | ⟨-, h₃, h₄⟩ <;> omega
+  have hineq₃ := hP3 q L hCB z r R' W M K M' K' Q ((2 * (S : ℤ) - 1 : ℤ) : ℝ) J tT u₂ v₂ uT vT
+    hW hWK (by omega) hM' hWKM' hQ
+    (by
+      have : (4 * M : ℤ) ≤ 2 * (S : ℤ) - 1 := by omega
+      exact_mod_cast this)
+    (by omega) hAW hAM' hL
+    (fun i => by
+      have h₁ := hfin i
+      have h₂ : (N : ℤ) * (W + 1) ≥ (2 * n₁ + 1) * W + 2 * n * W + n + 1 := by
+        have : ((2 * n₁ + 1) * W + 2 * n * W + n + 1 : ℕ) ≤ N * (W + 1) := by
+          rw [hN]
+          have : (2 * n₁ + 2 * n + 1) * (W + 1) =
+              (2 * n₁ + 2 * n + 1) * W + (2 * n₁ + 2 * n + 1) := by ring
+          have : (2 * n₁ + 2 * n + 1) * W = (2 * n₁ + 1) * W + 2 * n * W := by ring
+          omega
+        exact_mod_cast this
+      push_cast at h₁ h₂
+      linarith)
+    hv₂
+    (fun i => by
+      have h₂ := hTcor i
+      rcases hrelT' i with ⟨-, h₃, h₄⟩ | ⟨-, h₃, h₄⟩ <;> omega)
+    (fun i l hil htl => by
+      have h₃ := hTord i l hil htl
+      have h₄ := hrelT' l
+      rw [← htl] at h₄
+      rcases hrelT' i with ⟨ho, h₅, h₆⟩ | ⟨ho, h₅, h₆⟩ <;>
+        rcases h₄ with ⟨ho', h₇, h₈⟩ | ⟨ho', h₇, h₈⟩ <;> omega)
+  rw [← hE] at hineq₃
+  rw [show c₁ * c₂ * c₃ * law q _ = c₃ * (c₂ * (c₁ * law q _)) from by ring]
+  refine (mul_le_mul' le_rfl ((mul_le_mul' le_rfl ((mul_le_mul' le_rfl (measure_mono ?_)).trans
+    hineq₁)).trans ((mul_le_mul' le_rfl (measure_mono ?_)).trans hineq₂))).trans
+    (hineq₃.trans (measure_mono ?_))
+  · rintro ω ⟨a, b, γ, h₁, h₂, h₃, h₄, h₅, h₆⟩
+    refine ⟨a, b, γ, h₁, h₂, h₃, h₄.mono ?_ le_rfl, fun i => (hmems i R (σ i) (b i)).1 (h₅ i),
+      h₆⟩
+    refine le_trans ?_ hs'
+    push_cast
+    linarith
+  · rintro ω ⟨a, b, γ, h₁, h₂, h₃, h₄, h₅, h₆⟩
+    refine ⟨a, b, γ, h₁, h₂, h₃, h₄.mono ?_ le_rfl, fun i => by rw [← ht₁ i]; exact h₅ i, h₆⟩
+    have : (2 * (S : ℤ) - 1 : ℤ) ≤ 2 * ((G : ℤ) - 2 * n₁ * W) - 1 := by
+      have : (S : ℤ) + 2 * n₁ * W ≤ G := by exact_mod_cast hG
+      omega
+    exact_mod_cast this
+  · rintro ω ⟨a, b, γ, h₁, h₂, h₃, h₄, h₅, h₆⟩
+    exact ⟨a, b, γ, h₁, h₂, h₃, h₄, fun i => (hmemT i R' (σ i) (b i)).2 (h₅ i), h₆⟩
 
-/-- **The first gluing into prescribed windows** (Nolin, Proposition 12, landing in windows). For
-a colour sequence `σ` without packs and ratios `A`, `n` there is `c₀ > 0` such that for every law
-with crossing bounds `c` up to scale `L`: separated arms at the outer boundary of `B_R(z)` with
-separation `s ≥ 4M` and fences `(M, K)` (the form produced by the outer separation step) are
-carried to arms to `∂B_{R'}(z)` ending in prescribed windows, separated at scale `2S - 1`, with
-fences `(M', K')`: `c₀ P(separated at R) ≤ P(separated at R', ends in the windows)`. A straight
-first gluing (`exists_pos_le_law_separated_of_separated`, corridors of width `4W`, new fences
-`(4W, W)` at `R + M + 1 + 8W`) makes room; the motion plan (`exists_pos_le_law_target_windows`)
-does the rest. Hypotheses as there, with `4W ≤ K`, `8W + 2 ≤ M`, `2G + 20W + 2 ≤ s` and the radius
-budget `R + M + 1 + 8W + 12 j (G + 5W + 1) + n (2M' + W + 1) ≤ R'`. The constant depends only on
-`σ`, `c`, `A`, `n`. -/
-theorem exists_pos_le_law_target_windows_of_separated {j : ℕ} (σ : Fin j → Bool)
+/-- **The motion plan: separated arms carried into prescribed windows.** For a colour sequence
+`σ` without packs and ratios `A`, `n` there is `c₀ > 0` such that for every law with crossing
+bounds `c` up to scale `L`: separated arms at the outer boundary of `B_R(z)` (separation
+`s ≥ 2G + 4W + 2`, fences `(M, K)`, inner positions in `J`) are carried to arms to `∂B_{R'}(z)`
+ending in the prescribed windows `[αT i, βT i]` on the sides `tT i` (`0` top, `1` right, `2`
+bottom, `3` left; coordinates along the side), separated at scale `2Q - 1`, with fences `(M', K')`:
+`c₀ P(separated at R) ≤ P(separated at R', ends in the windows)`.
+
+The windows are in the counterclockwise order of the arms, starting from the bottom side: `lamT i`
+(the side counted counterclockwise from the bottom side, `lamT i + tT i ≡ 2 (mod 4)`) is
+nondecreasing in `i`, windows on one side are in counterclockwise order with gaps `S + Q`, at
+least `S + Q + M + M' + W + 1` from the corners of `B_{R'}(z)` and of length at least `B`. The plan
+makes `12 j` rounds of turns (radius growing by `G + M + W + 1` per round), then `n` stages of
+linear spreading (radius growing by `2M + W + 1` per stage), both with the fences `(M, K)` and the
+room `S ≥ 2D + 2M + 2K + W + 3` (`D ≥ 2R'/n` bounds the moves of the spreading), and a last stage
+from `R' - (M + M' + W + 1)` to `R'` that changes the fences to `(M', K')` in the room
+`Q ≥ 2M + 2K' + W + 3` of the target windows; `B ≥ n + (24 j + 2n + 3) W` bounds the drift of the
+windows. The constant depends only on `σ`, `c`, `A`, `n`. -/
+theorem exists_pos_le_law_target_windows {j : ℕ} (σ : Fin j → Bool)
     (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) (c : ℕ → ℝ≥0∞) (A n : ℕ) :
     ∃ c₀ : ℝ≥0∞, 0 < c₀ ∧ ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
-      CrossingBounds q L c → ∀ (z : LatticeSite 2) (r R R' W M K M' K' D S G B : ℕ) (s : ℝ)
+      CrossingBounds q L c → ∀ (z : LatticeSite 2) (r R R' W M K M' K' D S G Q B : ℕ) (s : ℝ)
       (J : Fin j → Set ℤ) (tT : Fin j → Fin 4) (lamT αT βT : Fin j → ℤ),
-      1 ≤ W → 4 * W ≤ K → K ≤ M → 8 * W + 2 ≤ M → 4 * (M : ℝ) ≤ s → r + M + 1 < R →
-      4 * W ≤ M' → W ≤ K' → W + K' ≤ M' → W + 2 * K' ≤ A * (M' - 1) →
-      W + 2 * D + 2 * M' + 2 * K' + 3 ≤ S → S + 2 * (12 * j) * W ≤ G →
-      ((2 * G + 20 * W + 2 : ℕ) : ℝ) ≤ s →
-      R + M + 1 + 8 * W + 12 * j * (G + 5 * W + 1) + n * (2 * M' + W + 1) ≤ R' →
+      1 ≤ W → W ≤ K → W + K ≤ M → 2 ≤ M' → W + K' ≤ M' →
+      W + 2 * K ≤ A * (M - 1) → W + 2 * K' ≤ A * (M' - 1) →
+      W + 2 * D + 2 * M + 2 * K + 3 ≤ S → S + 2 * (12 * j) * W ≤ G →
+      W + 2 * M + 2 * K' + 3 ≤ Q → ((2 * G + 4 * W + 2 : ℕ) : ℝ) ≤ s → r + M + 1 < R →
+      R + 12 * j * (G + M + W + 1) + n * (2 * M + W + 1) + (M + M' + W + 1) ≤ R' →
       2 * R' + 2 ≤ A * W → (R' : ℕ∞) ≤ L → 2 * R' + 2 * n + n * W ≤ n * D →
-      n + (2 * (12 * j) + 2 * n + 1) * W ≤ B →
+      n + (2 * (12 * j) + 2 * n + 3) * W ≤ B →
       (∀ i, 0 ≤ lamT i ∧ lamT i ≤ 3 ∧ (lamT i + ((tT i : ℕ) : ℤ)) % 4 = 2) →
       (∀ i l, i ≤ l → lamT i ≤ lamT l) →
-      (∀ i, (if tT i = 0 ∨ tT i = 2 then z 0 else z 1) - R' + S ≤ αT i ∧
-        βT i + S ≤ (if tT i = 0 ∨ tT i = 2 then z 0 else z 1) + R') →
+      (∀ i, (if tT i = 0 ∨ tT i = 2 then z 0 else z 1) - R' + (S + Q + M + M' + W + 1) ≤ αT i ∧
+        βT i + (S + Q + M + M' + W + 1) ≤ (if tT i = 0 ∨ tT i = 2 then z 0 else z 1) + R') →
       (∀ i, αT i + B ≤ βT i) →
-      (∀ i l, i < l → tT i = tT l → (tT i = 1 ∨ tT i = 2 → βT i + S + B ≤ αT l) ∧
-        (tT i = 0 ∨ tT i = 3 → βT l + S + B ≤ αT i)) →
+      (∀ i l, i < l → tT i = tT l → (tT i = 1 ∨ tT i = 2 → βT i + S + Q ≤ αT l) ∧
+        (tT i = 0 ∨ tT i = 3 → βT l + S + Q ≤ αT i)) →
       c₀ * law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
         (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
         (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
@@ -1503,7 +1534,99 @@ theorem exists_pos_le_law_target_windows_of_separated {j : ℕ} (σ : Fin j → 
         (∀ i, IsArm ω (σ i) z r (z - R') (z + R') (γ i)) ∧ ArmsDisjoint σ γ ∧
         (∀ i k l, i < k → k < l → sbtw (landingPos (z - R') (z + R') (σ i) (γ i))
           (landingPos (z - R') (z + R') (σ k) (γ k)) (landingPos (z - R') (z + R') (σ l) (γ l))) ∧
-        ArmsOuterSeparated ω σ z R' ((2 * (S : ℤ) - 1 : ℤ) : ℝ) M' K' γ ∧ (∀ i, b i ∈ {b :
+        ArmsOuterSeparated ω σ z R' ((2 * (Q : ℤ) - 1 : ℤ) : ℝ) M' K' γ ∧ (∀ i, b i ∈ {b :
+            LatticeSite 2 |
+          (tT i = 0 ∧ b 1 = z 1 + R' ∧ αT i ≤ b 0 ∧ b 0 ≤ βT i) ∨
+          (tT i = 1 ∧ b 0 = z 0 + R' ∧ αT i ≤ b 1 ∧ b 1 ≤ βT i) ∨
+          (tT i = 2 ∧ b 1 = z 1 - R' - cond (σ i) 0 1 ∧ αT i ≤ b 0 ∧ b 0 ≤ βT i) ∨
+          (tT i = 3 ∧ b 0 = z 0 - R' - cond (σ i) 0 1 ∧ αT i ≤ b 1 ∧ b 1 ≤ βT i)}) ∧
+        ∀ i, innerPos z r (σ i) (γ i) ∈ J i}  := by
+  classical
+  obtain ⟨c₀, hc₀, hbins⟩ := exists_pos_le_law_target_windows_of_bins σ hσ c A n
+  obtain ⟨X, hX⟩ : ∃ X : ℝ≥0∞, X = (((4 * (2 * A + 1)) ^ j : ℕ) : ℝ≥0∞) := ⟨_, rfl⟩
+  have hX0 : X ≠ 0 := by rw [hX, Nat.cast_ne_zero]; positivity
+  have hXt : X ≠ ⊤ := by rw [hX]; exact ENNReal.natCast_ne_top _
+  refine ⟨c₀ / X, ENNReal.div_pos hc₀.ne' hXt, ?_⟩
+  intro q L hCB z r R R' W M K M' K' D S G Q B s J tT lamT αT βT hW hWK hWKM hM' hWKM' hAM
+    hAM' hS hG hQ hs hrM hRR' hAW hL hjog hB hlamT hlamT2 hTcor hTwid hTord
+  have hrR : r < R := by omega
+  have hRA : R ≤ A * W := by omega
+  have hs4 : 4 * (M : ℝ) ≤ s := by
+    refine le_trans ?_ hs
+    have : 4 * M ≤ 2 * G + 4 * W + 2 := by omega
+    exact_mod_cast this
+  refine (mul_le_mul' le_rfl (law_le_sum_law_windows_of_separated q (σ := σ) (z := z) (K := K)
+    hrR (by omega : 1 ≤ M) hW hRA hs4 J)).trans ?_
+  rw [Finset.mul_sum]
+  calc ∑ p : Fin j → Fin 4 × Fin (2 * A + 1), c₀ / X * law q _
+      ≤ ∑ _p : Fin j → Fin 4 × Fin (2 * A + 1), X⁻¹ * law q {ω : Config (LatticeSite 2) | ∃ (a b :
+          Fin j → LatticeSite 2)
+          (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+          (∀ i, IsArm ω (σ i) z r (z - R') (z + R') (γ i)) ∧ ArmsDisjoint σ γ ∧
+          (∀ i k l, i < k → k < l → sbtw (landingPos (z - R') (z + R') (σ i) (γ i))
+            (landingPos (z - R') (z + R') (σ k) (γ k)) (landingPos (z - R') (z + R') (σ l) (γ l))) ∧
+          ArmsOuterSeparated ω σ z R' ((2 * (Q : ℤ) - 1 : ℤ) : ℝ) M' K' γ ∧ (∀ i, b i ∈ {b :
+              LatticeSite 2 |
+            (tT i = 0 ∧ b 1 = z 1 + R' ∧ αT i ≤ b 0 ∧ b 0 ≤ βT i) ∨
+            (tT i = 1 ∧ b 0 = z 0 + R' ∧ αT i ≤ b 1 ∧ b 1 ≤ βT i) ∨
+            (tT i = 2 ∧ b 1 = z 1 - R' - cond (σ i) 0 1 ∧ αT i ≤ b 0 ∧ b 0 ≤ βT i) ∨
+            (tT i = 3 ∧ b 0 = z 0 - R' - cond (σ i) 0 1 ∧ αT i ≤ b 1 ∧ b 1 ≤ βT i)}) ∧
+          ∀ i, innerPos z r (σ i) (γ i) ∈ J i} := by
+        refine Finset.sum_le_sum fun p _ => ?_
+        rw [div_eq_mul_inv, mul_comm _ X⁻¹, mul_assoc]
+        exact mul_le_mul' le_rfl (hbins q L hCB z r R R' W M K M' K' D S G Q B s J tT lamT αT βT
+          (fun i => (p i).1) (fun i => (if (p i).1 = 0 ∨ (p i).1 = 2 then z 0 else z 1) - R +
+            (((p i).2 : ℕ) : ℤ) * (W + 1)) hW hWK hWKM hM' hWKM' hAM hAM' hS hG hQ hs hrM hRR'
+          hAW hL hjog hB hlamT hlamT2 hTcor hTwid hTord)
+    _ = _ := by
+        rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
+        simp only [Fintype.card_fun, Fintype.card_prod, Fintype.card_fin]
+        rw [← mul_assoc, ← hX, ENNReal.mul_inv_cancel hX0 hXt, one_mul]
+
+/-- **The first gluing into prescribed windows** (Nolin, Proposition 12, landing in windows). For
+a colour sequence `σ` without packs and ratios `A`, `n` there is `c₀ > 0` such that for every law
+with crossing bounds `c` up to scale `L`: separated arms at the outer boundary of `B_R(z)` with
+separation `s ≥ 4M` and fences `(M, K)` (the form produced by the outer separation step) are
+carried to arms to `∂B_{R'}(z)` ending in prescribed windows, separated at scale `2Q - 1`, with
+fences `(M', K')`: `c₀ P(separated at R) ≤ P(separated at R', ends in the windows)`. A straight
+first gluing (`exists_pos_le_law_separated_of_separated`, corridors of width `4W`, new fences
+`(4W, W)` at `R + M + 1 + 8W`) makes room; the motion plan (`exists_pos_le_law_target_windows`,
+with the fences `(4W, W)`) does the rest. Hypotheses as there, with `4W ≤ K`, `8W + 2 ≤ M`,
+`2G + 20W + 2 ≤ s` and the radius budget
+`R + M + 1 + 8W + 12 j (G + 5W + 1) + n (9W + 1) + (M' + 5W + 1) ≤ R'`. The constant depends only
+on `σ`, `c`, `A`, `n`. -/
+theorem exists_pos_le_law_target_windows_of_separated {j : ℕ} (σ : Fin j → Bool)
+    (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) (c : ℕ → ℝ≥0∞) (A n : ℕ) :
+    ∃ c₀ : ℝ≥0∞, 0 < c₀ ∧ ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
+      CrossingBounds q L c → ∀ (z : LatticeSite 2) (r R R' W M K M' K' D S G Q B : ℕ) (s : ℝ)
+      (J : Fin j → Set ℤ) (tT : Fin j → Fin 4) (lamT αT βT : Fin j → ℤ),
+      1 ≤ W → 4 * W ≤ K → K ≤ M → 8 * W + 2 ≤ M → 4 * (M : ℝ) ≤ s → r + M + 1 < R →
+      2 ≤ M' → W + K' ≤ M' → W + 2 * K' ≤ A * (M' - 1) →
+      W + 2 * D + 10 * W + 3 ≤ S → S + 2 * (12 * j) * W ≤ G → W + 8 * W + 2 * K' + 3 ≤ Q →
+      ((2 * G + 20 * W + 2 : ℕ) : ℝ) ≤ s →
+      R + M + 1 + 8 * W + 12 * j * (G + 5 * W + 1) + n * (9 * W + 1) + (M' + 5 * W + 1) ≤ R' →
+      2 * R' + 2 ≤ A * W → (R' : ℕ∞) ≤ L → 2 * R' + 2 * n + n * W ≤ n * D →
+      n + (2 * (12 * j) + 2 * n + 3) * W ≤ B →
+      (∀ i, 0 ≤ lamT i ∧ lamT i ≤ 3 ∧ (lamT i + ((tT i : ℕ) : ℤ)) % 4 = 2) →
+      (∀ i l, i ≤ l → lamT i ≤ lamT l) →
+      (∀ i, (if tT i = 0 ∨ tT i = 2 then z 0 else z 1) - R' + (S + Q + 4 * W + M' + W + 1) ≤ αT i ∧
+        βT i + (S + Q + 4 * W + M' + W + 1) ≤ (if tT i = 0 ∨ tT i = 2 then z 0 else z 1) + R') →
+      (∀ i, αT i + B ≤ βT i) →
+      (∀ i l, i < l → tT i = tT l → (tT i = 1 ∨ tT i = 2 → βT i + S + Q ≤ αT l) ∧
+        (tT i = 0 ∨ tT i = 3 → βT l + S + Q ≤ αT i)) →
+      c₀ * law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+        (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
+        (∀ i k l, i < k → k < l → sbtw (landingPos (z - R) (z + R) (σ i) (γ i))
+          (landingPos (z - R) (z + R) (σ k) (γ k)) (landingPos (z - R) (z + R) (σ l) (γ l))) ∧
+        ArmsOuterSeparated ω σ z R s M K γ ∧
+        ∀ i, innerPos z r (σ i) (γ i) ∈ J i} ≤
+        law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+        (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, IsArm ω (σ i) z r (z - R') (z + R') (γ i)) ∧ ArmsDisjoint σ γ ∧
+        (∀ i k l, i < k → k < l → sbtw (landingPos (z - R') (z + R') (σ i) (γ i))
+          (landingPos (z - R') (z + R') (σ k) (γ k)) (landingPos (z - R') (z + R') (σ l) (γ l))) ∧
+        ArmsOuterSeparated ω σ z R' ((2 * (Q : ℤ) - 1 : ℤ) : ℝ) M' K' γ ∧ (∀ i, b i ∈ {b :
             LatticeSite 2 |
           (tT i = 0 ∧ b 1 = z 1 + R' ∧ αT i ≤ b 0 ∧ b 0 ≤ βT i) ∨
           (tT i = 1 ∧ b 0 = z 0 + R' ∧ αT i ≤ b 1 ∧ b 1 ≤ βT i) ∨
@@ -1513,8 +1636,8 @@ theorem exists_pos_le_law_target_windows_of_separated {j : ℕ} (σ : Fin j → 
   obtain ⟨c₁, hc₁, hg⟩ := exists_pos_le_law_separated_of_separated σ hσ c A (A + 4)
   obtain ⟨c₂, hc₂, hp⟩ := exists_pos_le_law_target_windows σ hσ c A n
   refine ⟨c₂ * c₁, ENNReal.mul_pos hc₂.ne' hc₁.ne', ?_⟩
-  intro q L hCB z r R R' W M K M' K' D S G B s J tT lamT αT βT hW hWK hKM hWM hs hrM hWM' hWK'
-    hWKM' hAM' hS hG hs' hRR' hAW hL hjog hB hlamT hlamT2 hTcor hTwid hTord
+  intro q L hCB z r R R' W M K M' K' D S G Q B s J tT lamT αT βT hW hWK hKM hWM hs hrM hM' hWKM'
+    hAM' hS hG hQ hs' hRR' hAW hL hjog hB hlamT hlamT2 hTcor hTwid hTord
   have hA : 1 ≤ A := by
     rcases Nat.eq_zero_or_pos A with h | h
     · subst h
@@ -1531,15 +1654,18 @@ theorem exists_pos_le_law_target_windows_of_separated {j : ℕ} (σ : Fin j → 
   have h₁ := hg q L hCB z r R (R + M + 1 + 8 * W) (4 * W) M K (4 * W) W s J hW le_rfl hWK hKM
     (by omega) le_rfl hs hrM (by omega) hRD hRA
     (le_trans (by exact_mod_cast (show R + M + 1 + 8 * W ≤ R' by omega)) hL)
-  have h₂ := hp q L hCB z r (R + M + 1 + 8 * W) R' W (4 * W) W M' K' D S G B
-    (s - 4 * ((4 * W : ℕ) : ℝ)) J tT lamT αT βT hW le_rfl (by omega) hWM' hWK' hWKM'
+  have h₂ := hp q L hCB z r (R + M + 1 + 8 * W) R' W (4 * W) W M' K' D S G Q B
+    (s - 4 * ((4 * W : ℕ) : ℝ)) J tT lamT αT βT hW le_rfl (by omega) hM' hWKM'
     (by
       have : 3 * W ≤ 4 * W - 1 := by omega
       have : 4 * W - 1 ≤ A * (4 * W - 1) := Nat.le_mul_of_pos_left _ hA
       omega)
-    hAM' hS hG (by push_cast at hs' ⊢; linarith) (by omega) (by
+    hAM' (by omega) hG (by omega) (by push_cast at hs' ⊢; linarith) (by omega) (by
       have : 12 * j * (G + 5 * W + 1) = 12 * j * (G + 4 * W + W + 1) := by ring
-      omega) hAW hL hjog hB hlamT hlamT2 hTcor hTwid hTord
+      have : n * (9 * W + 1) = n * (2 * (4 * W) + W + 1) := by ring
+      omega) hAW hL hjog hB hlamT hlamT2 (fun i => by
+        have := hTcor i
+        constructor <;> omega) hTwid hTord
   calc c₂ * c₁ * law q _ = c₂ * (c₁ * law q _) := mul_assoc _ _ _
     _ ≤ c₂ * law q _ := mul_le_mul' le_rfl h₁
     _ ≤ _ := h₂
