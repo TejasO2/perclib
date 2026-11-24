@@ -137,6 +137,7 @@ public import PercLib.Models.Planar.Arms.Interlacing
 public import PercLib.Models.Planar.Arms.MultiArmBasics
 public import PercLib.Models.Planar.Arms.MultiArmBounds
 public import PercLib.Models.Planar.Arms.OneArm
+public import PercLib.Models.Planar.Arms.OuterGluing
 public import PercLib.Models.Planar.Arms.OuterSeparation
 public import PercLib.Models.Planar.Arms.QuadDuality
 public import PercLib.Models.Planar.Arms.QuasiMultiplicativity
