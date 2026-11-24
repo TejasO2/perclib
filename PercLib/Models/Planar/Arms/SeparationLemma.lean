@@ -1069,24 +1069,24 @@ theorem separable_of_forall {ω : Config (LatticeSite 2)} {lo hi lo₂ hi₂ : L
 /-! ### Nolin's local separation lemma -/
 
 /-- **Local separation in a strip of any width, any of the two geometries.** For every `δ > 0` there
-are `0 < η ≤ 1` and `N₀` such that, uniformly over the laws with crossing bounds `c` up to `L`, for
-`N₀ ≤ N ≤ L` and `k ∈ {0, 1}`, with probability at least `1 - δ` the following holds for the open
-box `Icc lo hi = [lo₀, lo₀ + wN] × [lo₁, lo₁ + N]` of any width `w ≥ 1` and the box of faces `Icc
-lo₂ hi₂ = [lo₀ - k, hi₀ - 1 + k] × [lo₁ - 1, hi₁]`. Every family of crossings from bottom to top,
-each open (an open walk in `Icc lo hi` from its bottom row to its top row) or dual (a walk of faces
-of `Icc lo₂ hi₂` from its bottom row to its top row along dual-open dual edges crossing edges of
-`Icc elo ehi = [lo₀ - k, hi₀ + k] × [lo₁, hi₁]`), with crossings of the same colour disjoint, can be
-replaced by a family with the same colours and the same starting points, with crossings of the same
-colour disjoint, meeting the top row only at their ends, whose ends, in doubled positions, are at
-least `4 √η N` apart and at least `4 √η N` from the two ends `2 elo₀` and `2 ehi₀` of the doubled
-top side, and each of which carries a fence as in `exists_law_separable_ge`.
+are `0 < η ≤ 1 / 256` and `N₀` such that, uniformly over the laws with crossing bounds `c` up to
+`L`, for `N₀ ≤ N ≤ L` and `k ∈ {0, 1}`, with probability at least `1 - δ` the following holds for
+the open box `Icc lo hi = [lo₀, lo₀ + wN] × [lo₁, lo₁ + N]` of any width `w ≥ 1` and the box of
+faces `Icc lo₂ hi₂ = [lo₀ - k, hi₀ - 1 + k] × [lo₁ - 1, hi₁]`. Every family of crossings from bottom
+to top, each open (an open walk in `Icc lo hi` from its bottom row to its top row) or dual (a walk
+of faces of `Icc lo₂ hi₂` from its bottom row to its top row along dual-open dual edges crossing
+edges of `Icc elo ehi = [lo₀ - k, hi₀ + k] × [lo₁, hi₁]`), with crossings of the same colour
+disjoint, can be replaced by a family with the same colours and the same starting points, with
+crossings of the same colour disjoint, meeting the top row only at their ends, whose ends, in
+doubled positions, are at least `4 √η N` apart and at least `4 √η N` from the two ends `2 elo₀` and
+`2 ehi₀` of the doubled top side, and each of which carries a fence as in `exists_law_separable_ge`.
 
-The boxes enter as variables with their defining equations (eleven hypotheses in all), so that
-the two instances, `exists_law_separable_ge` (`k = 0`) and `exists_law_separable_ge_arm` (`k = 1`),
-are read off without rewriting the event. -/
+The boxes enter as variables with their defining equations (eleven hypotheses in all), so that the
+two instances, `exists_law_separable_ge` (`k = 0`) and `exists_law_separable_ge_arm` (`k = 1`), are
+read off without rewriting the event. -/
 theorem exists_law_separable_ge_aux_wide (c : ℕ → ℝ≥0∞) (w : ℕ) (hw : 1 ≤ w) {δ : ℝ≥0∞}
     (hδ : 0 < δ) :
-    ∃ η : ℝ, 0 < η ∧ η ≤ 1 ∧ ∃ N₀ : ℕ, ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
+    ∃ η : ℝ, 0 < η ∧ η ≤ 1 / 256 ∧ ∃ N₀ : ℕ, ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
       CrossingBounds q L c → ∀ N : ℕ, N₀ ≤ N → (N : ℕ∞) ≤ L →
       ∀ (k : ℤ) (lo hi lo₂ hi₂ elo ehi : LatticeSite 2), 0 ≤ k → k ≤ 1 →
       hi = ![lo 0 + w * N, lo 1 + N] → lo₂ = ![lo 0 - k, lo 1 - 1] → hi₂ = ![hi 0 - 1 + k, hi 1] →
@@ -1123,7 +1123,7 @@ theorem exists_law_separable_ge_aux_wide (c : ℕ → ℝ≥0∞) (w : ℕ) (hw 
                 (b' i + (⌊Real.sqrt η * N⌋₊ : LatticeSite 2))) x l} := by
   by_cases hc : 0 < c (w + 1 + 1) ∧ 0 < c 7
   swap
-  · exact ⟨1, one_pos, le_rfl, 0, fun q L h => absurd ⟨h.pos _, h.pos 7⟩ hc⟩
+  · exact ⟨1 / 256, by norm_num, le_rfl, 0, fun q L h => absurd ⟨h.pos _, h.pos 7⟩ hc⟩
   obtain ⟨hc6, hc7⟩ := hc
   -- the number of steps of the explorations and the number of scales
   have hr₁ : 1 - c (w + 1 + 1) < 1 := ENNReal.sub_lt_self ENNReal.one_ne_top one_ne_zero hc6.ne'
@@ -1137,11 +1137,15 @@ theorem exists_law_separable_ge_aux_wide (c : ℕ → ℝ≥0∞) (w : ℕ) (hw 
     ENNReal.div_pos_iff.2 ⟨hδ2.ne', ENNReal.natCast_ne_top _⟩
   obtain ⟨J, hJ⟩ := Filter.eventually_atTop.1
     ((ENNReal.tendsto_pow_atTop_nhds_zero_of_lt_one hr₂).eventually (gt_mem_nhds hε))
-  have hD1 : (1 : ℝ) ≤ ((16 * 8 ^ J : ℕ) : ℝ) := by
-    have : 1 ≤ 16 * 8 ^ J := Nat.one_le_iff_ne_zero.2 (by positivity)
+  have hD16 : (16 : ℝ) ≤ ((16 * 8 ^ J : ℕ) : ℝ) := by
+    have : 16 ≤ 16 * 8 ^ J := Nat.le_mul_of_pos_right 16 (by positivity)
     exact_mod_cast this
-  refine ⟨(1 / ((16 * 8 ^ J : ℕ) : ℝ)) ^ 2, by positivity,
-    pow_le_one₀ (by positivity) (div_le_one_of_le₀ hD1 (by positivity)), (16 * 8 ^ J) ^ 2 + w,
+  have hη256 : (1 / ((16 * 8 ^ J : ℕ) : ℝ)) ^ 2 ≤ 1 / 256 := by
+    have h₁ : 1 / ((16 * 8 ^ J : ℕ) : ℝ) ≤ 1 / 16 := one_div_le_one_div_of_le (by norm_num) hD16
+    have h₂ : (0 : ℝ) ≤ 1 / ((16 * 8 ^ J : ℕ) : ℝ) := by positivity
+    calc (1 / ((16 * 8 ^ J : ℕ) : ℝ)) ^ 2 ≤ (1 / 16) ^ 2 := pow_le_pow_left₀ h₂ h₁ 2
+      _ = 1 / 256 := by norm_num
+  refine ⟨(1 / ((16 * 8 ^ J : ℕ) : ℝ)) ^ 2, by positivity, hη256, (16 * 8 ^ J) ^ 2 + w,
     fun q L h N hN hNL k lo hi lo₂ hi₂ elo ehi hk hk1 hhi hlo₂ hhi₂ helo hehi => ?_⟩
   subst helo hehi
   -- the coordinates of the boxes
@@ -1424,8 +1428,9 @@ theorem exists_law_separable_ge_aux (c : ℕ → ℝ≥0∞) {δ : ℝ≥0∞} (
               (Icc (b' i - (⌊Real.sqrt η * N⌋₊ : LatticeSite 2))
                 (b' i + (⌊Real.sqrt η * N⌋₊ : LatticeSite 2))) x l} := by
   obtain ⟨η, hη, hη1, N₀, hsep⟩ := exists_law_separable_ge_aux_wide c 4 (by norm_num) hδ
-  exact ⟨η, hη, hη1, N₀, fun q L h N hN hNL k lo hi lo₂ hi₂ elo ehi hk hk1 hhi =>
-    hsep q L h N hN hNL k lo hi lo₂ hi₂ elo ehi hk hk1 (by rw [hhi]; norm_num)⟩
+  exact ⟨η, hη, hη1.trans (by norm_num), N₀,
+    fun q L h N hN hNL k lo hi lo₂ hi₂ elo ehi hk hk1 hhi =>
+      hsep q L h N hN hNL k lo hi lo₂ hi₂ elo ehi hk hk1 (by rw [hhi]; norm_num)⟩
 
 /-- **Nolin's local separation lemma** (EJP 2008, Lemma 15). For every `δ > 0` there are `η > 0`
 and `N₀` such that, uniformly over the laws with crossing bounds `c` up to `L`, for `N₀ ≤ N ≤ L`,

@@ -51,13 +51,13 @@ namespace PercLib.Models.Planar
 
 /-- **Local separation in a strip of any width** (Nolin's Lemma 15,
 `exists_law_separable_ge_aux_wide` at `k = 0`), for families indexed by any finite type. For every
-width `w ≥ 1` and every `δ > 0` there are `0 < η ≤ 1` and `N₀` such that, uniformly over the laws
-with crossing bounds `c` up to `L`, for `N₀ ≤ N ≤ L`, with probability at least `1 - δ` the
+width `w ≥ 1` and every `δ > 0` there are `0 < η ≤ 1 / 256` and `N₀` such that, uniformly over the
+laws with crossing bounds `c` up to `L`, for `N₀ ≤ N ≤ L`, with probability at least `1 - δ` the
 separation property holds in the open box `Icc lo hi = [lo₀, lo₀ + wN] × [lo₁, lo₁ + N]` with the
 faces `[lo₀, hi₀ - 1] × [lo₁ - 1, hi₁]`, at any position. -/
 theorem exists_law_separable_ge_strip (c : ℕ → ℝ≥0∞) (w : ℕ) (hw : 1 ≤ w) {δ : ℝ≥0∞}
     (hδ : 0 < δ) :
-    ∃ η : ℝ, 0 < η ∧ η ≤ 1 ∧ ∃ N₀ : ℕ, ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
+    ∃ η : ℝ, 0 < η ∧ η ≤ 1 / 256 ∧ ∃ N₀ : ℕ, ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
       CrossingBounds q L c → ∀ (lo hi : LatticeSite 2) (N : ℕ), hi 0 = lo 0 + w * N →
       hi 1 = lo 1 + N → N₀ ≤ N → (N : ℕ∞) ≤ L →
       1 - δ ≤ law q {ω | ∀ (ι : Type) [Finite ι] (σ : ι → Bool) (a b : ι → LatticeSite 2)

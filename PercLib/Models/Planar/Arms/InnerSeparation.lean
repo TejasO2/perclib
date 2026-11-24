@@ -1654,20 +1654,91 @@ theorem mem_innerSeparatedArmEvent_of_frames {j : ℕ} {σ : Fin j → Bool}
       rw [abs_sub_comm]
       exact le_trans (by linarith) (le_abs_self _)
 
+/-- **The budget of the inner step**: if `B` has probability at most `8x` and four events fail with
+probability at most `2x` each, then the complement of `B` intersected with the four events has
+probability at least `1 - 16x`. -/
+theorem one_sub_le_measure_compl_inter {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
+    [IsProbabilityMeasure μ] {B E₁ E₂ E₃ E₄ : Set Ω} {x δ : ℝ≥0∞}
+    (hm : MeasurableSet (Bᶜ ∩ (E₁ ∩ E₂ ∩ E₃ ∩ E₄))) (hB : μ B ≤ 8 * x) (h₁ : μ E₁ᶜ ≤ 2 * x)
+    (h₂ : μ E₂ᶜ ≤ 2 * x) (h₃ : μ E₃ᶜ ≤ 2 * x) (h₄ : μ E₄ᶜ ≤ 2 * x) (hx : 16 * x = δ) :
+    1 - δ ≤ μ (Bᶜ ∩ (E₁ ∩ E₂ ∩ E₃ ∩ E₄)) := by
+  have hGc : μ (Bᶜ ∩ (E₁ ∩ E₂ ∩ E₃ ∩ E₄))ᶜ ≤ δ := by
+    have hsub : (Bᶜ ∩ (E₁ ∩ E₂ ∩ E₃ ∩ E₄))ᶜ ⊆ B ∪ E₁ᶜ ∪ E₂ᶜ ∪ E₃ᶜ ∪ E₄ᶜ := by
+      intro ω hω
+      simp only [mem_compl_iff, mem_inter_iff, not_and_or, not_not, mem_union] at hω ⊢
+      tauto
+    calc _ ≤ μ (B ∪ E₁ᶜ ∪ E₂ᶜ ∪ E₃ᶜ ∪ E₄ᶜ) := measure_mono hsub
+      _ ≤ μ (B ∪ E₁ᶜ ∪ E₂ᶜ ∪ E₃ᶜ) + μ E₄ᶜ := measure_union_le _ _
+      _ ≤ μ (B ∪ E₁ᶜ ∪ E₂ᶜ) + μ E₃ᶜ + μ E₄ᶜ := by
+        gcongr
+        exact measure_union_le _ _
+      _ ≤ μ (B ∪ E₁ᶜ) + μ E₂ᶜ + μ E₃ᶜ + μ E₄ᶜ := by
+        gcongr
+        exact measure_union_le _ _
+      _ ≤ μ B + μ E₁ᶜ + μ E₂ᶜ + μ E₃ᶜ + μ E₄ᶜ := by
+        gcongr
+        exact measure_union_le _ _
+      _ ≤ 8 * x + 2 * x + 2 * x + 2 * x + 2 * x := by gcongr
+      _ = 16 * x := by ring
+      _ = δ := hx
+  rw [prob_compl_eq_one_sub hm] at hGc
+  exact tsub_le_iff_right.2 (by rw [add_comm]; exact tsub_le_iff_right.1 hGc)
+
+/-- **The corner events of the inner step**, read at any corner: a configuration outside the union
+`B` of the eight one-arm events at the four corners `κ s₀ s₁` of `B_ρ(z)` (both colours) has no
+one-arm event of either colour from `B_N(κ')` to the boundary of `B_ρ(κ')` at any corner `κ'`. -/
+theorem notMem_multiArmEvent_corner_of_notMem {z : LatticeSite 2} {N ρ : ℕ}
+    {κ : Bool → Bool → LatticeSite 2}
+    (hκ : κ = fun s₀ s₁ => ![if s₀ then z 0 + ρ else z 0 - ρ, if s₁ then z 1 + ρ else z 1 - ρ])
+    {B : Set (Config (LatticeSite 2))}
+    (hB : B = ⋃ t : Bool × Bool × Bool, multiArmEvent ![t.1] (κ t.2.1 t.2.2) N ρ)
+    (ω : Config (LatticeSite 2)) (hnB : ω ∉ B) (col : Bool) (κ' : LatticeSite 2)
+    (hκ0 : κ' 0 = z 0 - ρ ∨ κ' 0 = z 0 + ρ) (hκ1 : κ' 1 = z 1 - ρ ∨ κ' 1 = z 1 + ρ) :
+    ω ∉ multiArmEvent ![col] κ' N ρ := by
+  intro hmem
+  apply hnB
+  rw [hB, mem_iUnion]
+  rcases hκ0 with h0 | h0 <;> rcases hκ1 with h1 | h1
+  · refine ⟨(col, false, false), ?_⟩
+    have : κ' = κ false false := by
+      rw [hκ]
+      funext i
+      fin_cases i <;> simp [h0, h1]
+    rwa [this] at hmem
+  · refine ⟨(col, false, true), ?_⟩
+    have : κ' = κ false true := by
+      rw [hκ]
+      funext i
+      fin_cases i <;> simp [h0, h1]
+    rwa [this] at hmem
+  · refine ⟨(col, true, false), ?_⟩
+    have : κ' = κ true false := by
+      rw [hκ]
+      funext i
+      fin_cases i <;> simp [h0, h1]
+    rwa [this] at hmem
+  · refine ⟨(col, true, true), ?_⟩
+    have : κ' = κ true true := by
+      rw [hκ]
+      funext i
+      fin_cases i <;> simp [h0, h1]
+    rwa [this] at hmem
+
 /-- **The inner separation step** (the internal extremities in Nolin's proof of Theorem 11, for
-colour sequences without packs). For every `δ > 0` there are `0 < η ≤ 1`, an odd width `w ≥ 7` and
-`N₀` such that, uniformly over the laws with crossing bounds `c` up to `L`, for `N₀ ≤ N`,
-`2ρ + 1 = wN` and `ρ ≤ L`, there is an event `G` of probability at least `1 - δ`, determined by the
-edges inside `B_{2ρ}(z)`, on which every family of `j` arms from `B_ρ(z)` to the boundary of
-`B_R(z)` (`2ρ + 1 ≤ R`) can be rerouted into a family separated at the inner boundary
+colour sequences without packs). For every `δ > 0` there are `0 < η ≤ 1 / 256`, an odd width
+`w ≥ 7` and `N₀` such that, uniformly over the laws with crossing bounds `c` up to `L`, for
+`N₀ ≤ N`, `2ρ + 1 = wN` and `ρ ≤ L`, there is an event `G` of probability at least `1 - δ`,
+determined by the edges inside `B_{2ρ}(z)`, on which every family of `j` arms from `B_ρ(z)` to the
+boundary of `B_R(z)` (`2ρ + 1 ≤ R`) can be rerouted into a family separated at the inner boundary
 (`innerSeparatedArmEvent`, separation `4 √η N`, fences of depth `⌊√η N⌋` and half-length `⌊η N⌋`),
 with the same landing positions. `G` consists of Lemma 15 in the dual lattice on four strips of
 depth `N` along the sides of `B_ρ(z)` and of the absence of arms of either colour from `B_N(κ)` to
 the boundary of `B_ρ(κ)` at the four corners `κ` (the one-arm bound makes these rare for `w`
-large). -/
+large); the statement records the latter, so that no arm of any family starts near a corner. -/
 theorem exists_inner_separating_event {j : ℕ} (σ : Fin j → Bool)
     (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) (c : ℕ → ℝ≥0∞) {δ : ℝ≥0∞} (hδ : 0 < δ) :
-    ∃ η : ℝ, 0 < η ∧ η ≤ 1 ∧ ∃ w N₀ : ℕ, 7 ≤ w ∧ ∀ (q : Sym2 (LatticeSite 2) → unitInterval)
+    ∃ η : ℝ, 0 < η ∧ η ≤ 1 / 256 ∧ ∃ w N₀ : ℕ, 7 ≤ w ∧
+      ∀ (q : Sym2 (LatticeSite 2) → unitInterval)
       (L : ℕ∞), CrossingBounds q L c → ∀ (z : LatticeSite 2) (N ρ : ℕ), 2 * ρ + 1 = w * N →
       N₀ ≤ N → (ρ : ℕ∞) ≤ L → ∃ G : Set (Config (LatticeSite 2)), MeasurableSet G ∧
         (∀ ω ω' : Config (LatticeSite 2), ω ∩ {e | ∀ v ∈ e, v ∈ Icc
@@ -1675,7 +1746,10 @@ theorem exists_inner_separating_event {j : ℕ} (σ : Fin j → Bool)
           ω' ∩ {e | ∀ v ∈ e, v ∈ Icc
             (z - ((2 * ρ : ℕ) : LatticeSite 2)) (z + ((2 * ρ : ℕ) : LatticeSite 2))} →
           (ω ∈ G ↔ ω' ∈ G)) ∧
-        1 - δ ≤ law q G ∧ ∀ R : ℕ, 2 * ρ + 1 ≤ R → ∀ ω ∈ multiArmEvent σ z ρ R ∩ G,
+        1 - δ ≤ law q G ∧
+        (∀ ω ∈ G, ∀ (col : Bool) (κ : LatticeSite 2), (κ 0 = z 0 - ρ ∨ κ 0 = z 0 + ρ) →
+          (κ 1 = z 1 - ρ ∨ κ 1 = z 1 + ρ) → ω ∉ multiArmEvent ![col] κ N ρ) ∧
+        ∀ R : ℕ, 2 * ρ + 1 ≤ R → ∀ ω ∈ multiArmEvent σ z ρ R ∩ G,
           ω ∈ innerSeparatedArmEvent σ z ρ R (4 * Real.sqrt η * N) ⌊Real.sqrt η * N⌋₊
             ⌊η * N⌋₊ := by
   classical
@@ -1714,6 +1788,7 @@ theorem exists_inner_separating_event {j : ℕ} (σ : Fin j → Bool)
   obtain ⟨w, hw⟩ : ∃ w : ℕ, w = 2 * (w₁ + w₂ + 4) + 1 := ⟨_, rfl⟩
   have h2x : (0 : ℝ≥0∞) < 2 * x := by positivity
   obtain ⟨η, hη, hη1, N₁, hstrip⟩ := exists_law_separable_ge_strip c w (by omega) h2x
+  have hη1' : η ≤ 1 := hη1.trans (by norm_num)
   refine ⟨η, hη, hη1, w, N₁ + ⌈1 / η⌉₊ + 3, by omega, fun q L h z N ρ hρ hN hρL => ?_⟩
   -- the scales
   have hwN : 9 * N ≤ w * N := Nat.mul_le_mul_right N (by omega)
@@ -1726,12 +1801,12 @@ theorem exists_inner_separating_event {j : ℕ} (σ : Fin j → Bool)
     have h₃ : 1 / η * η = 1 := by field_simp
     nlinarith
   have hsq : η ≤ Real.sqrt η := by
-    have := Real.sqrt_le_one.2 hη1
+    have := Real.sqrt_le_one.2 hη1'
     have h₁ := Real.mul_self_sqrt hη.le
     nlinarith [Real.sqrt_nonneg η]
   have hsN : 1 ≤ Real.sqrt η * N := le_trans hηN (by gcongr)
   have hMN : ⌊Real.sqrt η * N⌋₊ ≤ N := Nat.floor_le_of_le (by
-    have := Real.sqrt_le_one.2 hη1
+    have := Real.sqrt_le_one.2 hη1'
     have h₂ : (0 : ℝ) ≤ N := Nat.cast_nonneg N
     nlinarith)
   have hKN : ⌊η * N⌋₊ ≤ N := Nat.floor_le_of_le (by
@@ -1968,36 +2043,20 @@ theorem exists_inner_separating_event {j : ℕ} (σ : Fin j → Bool)
     cases s₀ <;> cases s₁ <;>
       simp only [Bool.false_eq_true, ↓reduceIte, Pi.sub_apply, Pi.add_apply, Pi.natCast_apply,
         Matrix.cons_val_zero, Matrix.cons_val_one] at this ⊢ <;> push_cast <;> omega
+  -- no arm at a corner off `B`
+  have hcorG : ∀ ω : Config (LatticeSite 2), ω ∉ B → ∀ (col : Bool) (κ' : LatticeSite 2),
+      (κ' 0 = z 0 - ρ ∨ κ' 0 = z 0 + ρ) → (κ' 1 = z 1 - ρ ∨ κ' 1 = z 1 + ρ) →
+      ω ∉ multiArmEvent ![col] κ' N ρ := notMem_multiArmEvent_corner_of_notMem hκ hB
   -- the separating event
   refine ⟨Bᶜ ∩ (Eb ∩ Er ∩ Et ∩ El), hBm.compl.inter ((((hmeas _ hdb).inter (hmeas _ hdr)).inter
-    (hmeas _ hdt)).inter (hmeas _ hdl)), fun ω ω' hωω' => ?_, ?_, fun R hR ω hω => ?_⟩
+    (hmeas _ hdt)).inter (hmeas _ hdl)), fun ω ω' hωω' => ?_, ?_,
+    fun ω hω => hcorG ω hω.1, fun R hR ω hω => ?_⟩
   · simp only [mem_inter_iff, mem_compl_iff]
     rw [hdB ω ω' hωω', hdb ω ω' hωω', hdr ω ω' hωω', hdt ω ω' hωω', hdl ω ω' hωω']
   · have hGm : MeasurableSet (Bᶜ ∩ (Eb ∩ Er ∩ Et ∩ El)) := hBm.compl.inter
       ((((hmeas _ hdb).inter (hmeas _ hdr)).inter (hmeas _ hdt)).inter (hmeas _ hdl))
-    have hGc : law q (Bᶜ ∩ (Eb ∩ Er ∩ Et ∩ El))ᶜ ≤ δ' := by
-      have hsub : (Bᶜ ∩ (Eb ∩ Er ∩ Et ∩ El))ᶜ ⊆ B ∪ Ebᶜ ∪ Erᶜ ∪ Etᶜ ∪ Elᶜ := by
-        intro ω hω
-        simp only [mem_compl_iff, mem_inter_iff, not_and_or, not_not, mem_union] at hω ⊢
-        tauto
-      calc _ ≤ law q (B ∪ Ebᶜ ∪ Erᶜ ∪ Etᶜ ∪ Elᶜ) := measure_mono hsub
-        _ ≤ law q (B ∪ Ebᶜ ∪ Erᶜ ∪ Etᶜ) + law q Elᶜ := measure_union_le _ _
-        _ ≤ law q (B ∪ Ebᶜ ∪ Erᶜ) + law q Etᶜ + law q Elᶜ := by
-          gcongr
-          exact measure_union_le _ _
-        _ ≤ law q (B ∪ Ebᶜ) + law q Erᶜ + law q Etᶜ + law q Elᶜ := by
-          gcongr
-          exact measure_union_le _ _
-        _ ≤ law q B + law q Ebᶜ + law q Erᶜ + law q Etᶜ + law q Elᶜ := by
-          gcongr
-          exact measure_union_le _ _
-        _ ≤ 8 * x + 2 * x + 2 * x + 2 * x + 2 * x := by gcongr
-        _ = 16 * x := by ring
-        _ = δ' := h16
-    rw [prob_compl_eq_one_sub hGm] at hGc
-    have h₁ : 1 - δ' ≤ law q (Bᶜ ∩ (Eb ∩ Er ∩ Et ∩ El)) :=
-      tsub_le_iff_right.2 (by rw [add_comm]; exact tsub_le_iff_right.1 hGc)
-    exact le_trans (tsub_le_tsub_left (min_le_left _ _) _) h₁
+    exact le_trans (tsub_le_tsub_left (min_le_left _ _) _)
+      (one_sub_le_measure_compl_inter hGm hlB hlb hlr hlt hll h16)
   · obtain ⟨hA, hnB, ⟨⟨⟨hb, hr⟩, ht⟩, hl⟩⟩ := hω
     rw [hEb, mem_ofPred_eq, hEV] at hb
     rw [hEr, mem_ofPred_eq, hEV] at hr
@@ -2010,34 +2069,7 @@ theorem exists_inner_separating_event {j : ℕ} (σ : Fin j → Bool)
     refine mem_innerSeparatedArmEvent_of_frames hσ (by omega) (by omega) hR hsN
       (fun c => cond c Fob Fdb) (fun c => cond c For Fdr) (fun c => cond c Fot Fdt)
       (fun c => cond c Fol Fdl) hFb0 hFb1 hFr0 hFr1 hFt0 hFt1 hFl0 hFl1 hYb hYdb hYr hYdr hYt
-      hYdt hYl hYdl rfl rfl rfl rfl rfl rfl rfl rfl hb hr ht hl (fun col κ' hκ0 hκ1 hmem => ?_) hA
-    apply hnB
-    rw [hB, mem_iUnion]
-    rcases hκ0 with h0 | h0 <;> rcases hκ1 with h1 | h1
-    · refine ⟨(col, false, false), ?_⟩
-      have : κ' = κ false false := by
-        rw [hκ]
-        funext i
-        fin_cases i <;> simp [h0, h1]
-      rwa [this] at hmem
-    · refine ⟨(col, false, true), ?_⟩
-      have : κ' = κ false true := by
-        rw [hκ]
-        funext i
-        fin_cases i <;> simp [h0, h1]
-      rwa [this] at hmem
-    · refine ⟨(col, true, false), ?_⟩
-      have : κ' = κ true false := by
-        rw [hκ]
-        funext i
-        fin_cases i <;> simp [h0, h1]
-      rwa [this] at hmem
-    · refine ⟨(col, true, true), ?_⟩
-      have : κ' = κ true true := by
-        rw [hκ]
-        funext i
-        fin_cases i <;> simp [h0, h1]
-      rwa [this] at hmem
+      hYdt hYl hYdl rfl rfl rfl rfl rfl rfl rfl rfl hb hr ht hl (hcorG ω hnB) hA
 
 /-- **Separation of arms at the inner boundary of an annulus** (the internal extremities in Nolin's
 proof of Theorem 11, for colour sequences without packs). Under the constants of
@@ -2056,8 +2088,8 @@ theorem exists_law_multiArmEvent_diff_innerSeparated_le {j : ℕ} (σ : Fin j �
           ⌊Real.sqrt η * N⌋₊ ⌊η * N⌋₊) ≤
         δ * law q (multiArmEvent σ z (2 * ρ + 1) R) := by
   obtain ⟨η, hη, hη1, w, N₀, hw, hG⟩ := exists_inner_separating_event σ hσ c hδ
-  refine ⟨η, hη, hη1, w, N₀, hw, fun q L h z N ρ R hρ hN hR hρL => ?_⟩
-  obtain ⟨G, hGm, hGd, hGl, hGsep⟩ := hG q L h z N ρ hρ hN hρL
+  refine ⟨η, hη, le_trans hη1 (by norm_num), w, N₀, hw, fun q L h z N ρ R hρ hN hR hρL => ?_⟩
+  obtain ⟨G, hGm, hGd, hGl, -, hGsep⟩ := hG q L h z N ρ hρ hN hρL
   have hAm : MeasurableSet (multiArmEvent σ z (2 * ρ + 1) R) := measurableSet_multiArmEvent σ z _ R
   set Q : Set (LatticeSite 2) :=
     Icc (z - ((2 * ρ : ℕ) : LatticeSite 2)) (z + ((2 * ρ : ℕ) : LatticeSite 2)) with hQ
