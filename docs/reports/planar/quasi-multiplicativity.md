@@ -52,7 +52,10 @@ proved Theorem 11's outer half (landing in the windows of landing data, and a se
 parameters proportional to the radius), extendability of the outer radius, the upper half of
 quasi-multiplicativity for all ordered radii and the a priori lower bound; Theorem 11's inner half,
 the lower half of quasi-multiplicativity and extendability inwards need an inner separation step,
-designed in §19.6 and not proved. Nothing in
+designed in §19.6 and not proved. The A3b-3b session (§20) proved the inner separation step
+(`exists_inner_separating_event`, `exists_law_multiArmEvent_diff_innerSeparated_le`) by corner exclusion
+through the one-arm bound, Lemma 15 in thin strips and Lemma 15 for the dual configuration; Theorem 11's
+inner half, the lower half of quasi-multiplicativity and extendability inwards remain (§20.5). Nothing in
 `Arms/Defs.lean` or `Planar/Defs.lean` was changed. Local commits only, nothing pushed.
 
 ## Decisions (user, 2026-11-22)
@@ -3302,3 +3305,238 @@ NOTICE: interface change; an auditor must approve before merge.
 ```
 
 This note's commit changes only `docs/`.
+
+## 20. A3b-3b (2026-11-24): the inner separation step
+
+Package A3b-3b = the rest of item 6 of §5, as set out in §19.6: (1) the inner separation step,
+(2) Theorem 11's inner half, (3) the lower half of quasi-multiplicativity, (4) extendability inwards.
+**Done: (1), in event form and in probability form.** (2)–(4) are not started; they are the next
+package (§20.5). Proof-only; neither `Defs` file touched; no `@[tag]`, no `…Input`, no new
+definition. Commits:
+
+* `6682f36` **Arms/SeparationLemma, Arms/InnerSeparationSides, Arms/InnerSeparation** (part 1):
+  Lemma 15 in strips of any width (`exists_law_separable_ge_aux_wide`; the old auxiliary statement is
+  its `w = 4` instance, byte for byte), the strip event at any position and its determination by a
+  finite box, the dual configuration as a measurable bijection of configurations with the same
+  crossing bounds, Lemma 15 read through a frame of the dual lattice, and the frame reroute.
+* `4d7b581` **Arms/InnerSeparation** (part 2): the four sides, the four frames, corner exclusion,
+  the deterministic inner step, `exists_inner_separating_event`,
+  `exists_law_multiArmEvent_diff_innerSeparated_le`.
+* this note's commit (docs only).
+
+Sizes: `InnerSeparationSides.lean` 724 lines, `InnerSeparation.lean` 2092 lines. Gate: §20.8.
+
+### 20.1 Step 0: the route (decided on paper before any Lean)
+
+**(I3) was checked first.** Damron–Sapozhnikov–Vágvölgyi (arXiv 0806.2425, Ann. Probab. 37 (2009)),
+§6, Lemma 6.2 (arm separation with arms constrained to the sides of the inner and the outer annuli,
+both ends) give no proof: they cite Kesten (1987, Lemma 4) and Nolin (Theorem 11) and say the same
+proof is valid. So (I3) offers nothing for the inner boundary on `ℤ²`.
+
+**The coordinator's concern about (I2) is right as (I2) was stated in §19.6, and it is avoided by a
+different corner estimate.** §19.6 proposed to exclude, near each corner, "an arm that starts within
+`D` of a corner and turns it". The concern: an arm starting at distance `d` from a corner turns it
+within a strip of depth `D` at the cost of a `d × D` crossing, small only for `d ≫ D`, so (I2) seemed to
+need two scales (long thin crossings along the sides, and a separate treatment near the corners).
+**One estimate suffices:** an arm that turns a corner of `B_ρ(z)` within depth `N` of the strip passes
+within `N` of the corner, and continues to `∂B_R(z)`, far away. So it contains a **one-arm event of
+its colour from `B_N(κ)` to `∂B_ρ(κ)`** at that corner `κ`. By A1b's a priori upper bound (for
+`![true]` and `![false]`) this has probability `≤ C ((N + 1)/(ρ + 1))^a`, small when `ρ/N` is large,
+whatever the starting points. Excluding these eight events (four corners, two colours) excludes every
+arm from the corner zones: no arm starts near a corner, and no initial piece turns one. The price is
+that the strips must be **long and thin** (depth `N ≪` side `2ρ`), whereas Lemma 15 (A2) is for the
+strip `4N × N`.
+
+**Lemma 15 in thin strips is cheap.** A2's proof of `exists_law_separable_ge_aux` depends on the width
+only through the bound on the number of greedy crossings, `law_exploration_le_pow_of_le h k`, which is
+already parametric in the aspect ratio `k` (bound `(1 - c (k + 1))^(u + 1)`); the protection events are
+per crossing tip and the deterministic part `separable_of_forall` takes any box. Replacing `h 5` by
+`h (w + 1)` and asking `N ≥ w + 1` gives the lemma for width `wN` (`exists_law_separable_ge_aux_wide`).
+
+**The half-unit at the inner boundary.** Reflecting Lemma 15 through a side of `B_ρ(z)` (crossings
+running *towards* the inner box) fits open crossings but puts dual crossings one face row inside: any
+reflection of `ℤ²` moves faces by one row against vertices (`dualConfig_image_reflect`), so no image of
+Lemma 15 under a symmetry of `ℤ²` fits both colours (the §12.4 warning; checked: a reversed reflected
+dual crossing may run along the touching layer of faces, and cutting it there loses the fence). **Lemma
+15 applied to the dual configuration fits exactly:** with the faces as the vertices of a copy of `ℤ²`,
+Lemma 15's open crossings are our dual walks and its dual crossings are our open walks moved by
+`(-1, -1)` (`dualConfig_dualConfig`). On the bottom side of `B_ρ(z)`, unreflected, with the strip
+`lo = (z₀ - ρ - 1, z₁ - ρ - 1 - N)`, `hi = (z₀ + ρ, z₁ - ρ - 1)` (`k = 0`, width `2ρ + 1 = wN`), the new
+dual walks end on the face row `z₁ - ρ - 1` (the faces touching `B_ρ(z)`) and the new open walks on the
+row `z₁ - ρ`, both visiting it only at their ends; the fences are exactly the boxes of
+`HasInnerFence` (depth `M`, no extra row); the doubled strip columns are the inner positions up to a
+constant, and the strip's ends are the corners `0`, `4ρ + 2`. The other sides by frames: top by the
+reflection `(x, y) ↦ (x, -y)` of faces (vertices `(x - 1, -y)`), left by the swap (vertices
+`(y - 1, x - 1)`), right by the quarter turn `(x, y) ↦ (y, -x)` (vertices `(y - 1, -x)`).
+
+**Conclusion: (I2) with corner exclusion by the one-arm bound, thin strips, Lemma 15 in the dual
+lattice.** No hypothesis beyond `hσ` and the small-radius threshold is needed; (I1) (a U-shaped
+Lemma 15, about 4000 lines) is avoided.
+
+### 20.2 The statements proved
+
+`Arms/InnerSeparationSides.lean`:
+
+* `exists_law_separable_ge_strip` (`c`, `w ≥ 1`, `δ > 0`): `∃ η ∈ (0, 1], ∃ N₀, ∀ q L, CrossingBounds q L c →
+  ∀ lo hi N, hi₀ = lo₀ + wN → hi₁ = lo₁ + N → N₀ ≤ N ≤ L → 1 - δ ≤ law q {Lemma 15 in Icc lo hi, faces
+  [lo₀, hi₀ - 1] × [lo₁ - 1, hi₁], families over any finite type}` (the `k = 0` instance at any
+  position).
+* `mem_separable_strip_of_inter_eq`: that event is determined by the pairs in
+  `[lo₀ - M - K - 1, hi₀ + M + K + 1] × [lo₁ - 1, hi₁ + M + 1]` when `lo₁ + M ≤ hi₁`.
+* `exists_equiv_dualEdge`, **`exists_measurableEquiv_dualConfig`**: a measurable bijection `Φ` of
+  configurations (complement, then every edge relabelled by its dual edge) with `Φ ω ∩ E = dualConfig ω`;
+  its pairs in `Icc A B` are determined by the pairs of `ω` in `Icc A (B + 1)`; `(law q).map Φ = law q'`
+  with `CrossingBounds q L c → CrossingBounds q' L c`.
+* `separable_of_frame`: for `Y` with `Y ∩ E = F false '' dualConfig ω` and
+  `dualConfig Y = F true '' (ω ∩ E)`, Lemma 15 for `Y` in `Icc lo hi` reroutes families of walks of `ω`
+  whose `F`-images are strip crossings; the conclusions are read through `F` (fence boxes as preimages).
+
+`Arms/InnerSeparation.lean`:
+
+* `IsArm.append_left` (replacing the start of an arm), `exists_append_eq_far` (first visit to the far
+  row of a frame; the corner hypothesis concerns only the two columns next to the strip),
+  `ArmsDisjoint.of_landingPos_eq` (**the barrier for new starts**: arms with the old landing positions of
+  a disjoint ordered pack-free family are disjoint; one application of the sector lemma
+  `sbtw_landingPos_iff_of_innerPos_eq`).
+* `exists_reroute_of_frame`: the cut, Lemma 15 in the frame, and the new arms (reversed new crossing
+  followed by the old arm after its first visit to the far row), with the old landing positions.
+* `exists_reroute_inner_bottom`, `_right`, `_top`, `_left`: for arms starting on that side, new arms
+  with inner positions `4 √η N` apart and inside the side's interval `[m(4ρ + 2) + 4√ηN,
+  (m + 1)(4ρ + 2) - 4√ηN]` (`m = 0, 1, 2, 3` for bottom, right, top, left), and `HasInnerFence ω (σ i) z ρ
+  ⌊√η N⌋ ⌊η N⌋`. Needs `1 ≤ N`, `1 ≤ ρ`, `ρ + N + 2 ≤ R`, `1 ≤ √η N` and no arm within `N` of a corner.
+* `frame_relations`, `law_frame_apply`, `exists_frame_bottom/top/left/right`.
+* `mem_multiArmEvent_one_of_walk`: a walk of colour `c` visiting `B_n(κ)` (faces touching it) and ending
+  outside `B_P(κ)`'s interior gives `ω ∈ multiArmEvent ![c] κ n P`.
+* `mem_innerSeparatedArmEvent_of_frames`: the deterministic inner step.
+* **`exists_inner_separating_event`** (plan item: §5 item 6, inner separation step; §19.6):
+
+```lean
+theorem exists_inner_separating_event (σ) (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) (c) {δ} (hδ : 0 < δ) :
+    ∃ η : ℝ, 0 < η ∧ η ≤ 1 ∧ ∃ w N₀ : ℕ, 7 ≤ w ∧ ∀ q L, CrossingBounds q L c → ∀ z (N ρ : ℕ),
+      2 * ρ + 1 = w * N → N₀ ≤ N → (ρ : ℕ∞) ≤ L → ∃ G, MeasurableSet G ∧
+        (G determined by the pairs inside B_{2ρ}(z)) ∧ 1 - δ ≤ law q G ∧
+        ∀ R, 2 * ρ + 1 ≤ R → ∀ ω ∈ multiArmEvent σ z ρ R ∩ G,
+          ω ∈ innerSeparatedArmEvent σ z ρ R (4 * √η * N) ⌊√η * N⌋₊ ⌊η * N⌋₊
+```
+
+* **`exists_law_multiArmEvent_diff_innerSeparated_le`** (probability form, same constants,
+  `2ρ + 2 ≤ R`): `law q (A(ρ, R) \ innerSeparatedArmEvent …) ≤ δ * law q (A(2ρ + 1, R))`.
+
+The rerouted family keeps the **landing positions** (not only the order): the new arms are the old
+arms after their first visit to the far row of the strip.
+
+### 20.3 Decisions (mine, per the standing instruction)
+
+1. **Route (I2) with the one-arm corner estimate** (§20.1), not the two-scale crossing scheme.
+2. **Lemma 15 generalised in place to any width** (`exists_law_separable_ge_aux_wide`); the old
+   auxiliary statement is kept as its `w = 4` corollary, so no caller changed.
+3. **Lemma 15 for the dual configuration**, through a measurable bijection `Φ` of configurations rather
+   than the push-forward by `dualConfig` (which is not injective): laws of arbitrary events transport by
+   `MeasurableEquiv.map_apply`, so no measurability of Lemma 15's event is needed for its probability.
+4. **One generic reroute through a frame**, four side instances generated from one template (frame
+   coordinates `F c v` given by two equations; strip box by two equations), instead of four read-back
+   lemmas of the side events.
+5. **Inner radius `ρ` with `2ρ + 1 = wN`**, `w` odd `≥ 7` chosen from `δ` and the one-arm constants;
+   strip depth `N`; corner zones of radius `N`, one-arm events to radius `ρ` (inside `B_{2ρ}(z)`).
+   Constants: `w` from `δ` and `c`, then `(η, N₁)` from Lemma 15 with `δ/8`, `N₀ = N₁ + ⌈1/η⌉ + 3`
+   (so `√η N ≥ 1`).
+6. **Budget** `δ' = min(δ, 1) = 16x`: eight corner events of probability `≤ x`, four side events failing
+   with probability `≤ 2x`.
+7. **Separation parameters** `s = 4√ηN`, `M = ⌊√ηN⌋`, `K = ⌊ηN⌋` (as in the outer step); `s ≥ 2M + 2`, as
+   the two-sided gluing asks, once `√ηN ≥ 1`.
+8. **Probability form against `A(2ρ + 1, R)`** (determined outside `B_{2ρ}(z)`), for `2ρ + 2 ≤ R`.
+9. **No new definition**; the strip events appear as hypotheses written out (generated text).
+
+### 20.4 Errata and observations
+
+* §19.6's (I2) corner estimate ("a four-arm-type event in a small box at the corner") is not what is
+  needed: a one-arm event suffices and is simpler (§20.1); and the coordinator's objection to the
+  version "arms that start near a corner and turn it" holds — that event is not small.
+* §12.4's half-unit warning is confirmed: no lattice symmetry fits Lemma 15 to the inner boundary for
+  both colours; the dual lattice does.
+* `HasInnerFence` as defined in §16.2 fits exactly the fences produced (no row added); the definition
+  needed no change.
+* An arm may run far beside a strip after its initial piece; the cut lemma's corner hypothesis must
+  concern only the exit step (the two columns next to the strip), not all points of the arm.
+* No plan statement had to change; no hypothesis beyond `hσ` and the approved small-radius threshold.
+
+### 20.5 What remains (package "A3b-3c"), with a design
+
+**Theorem 11, inner half.** The inner step gives, for `a'(ρ) = π(ρ, R)` (fixed `R`),
+`a'(ρ) ≤ P(inner-sep at ρ) + δ a'(2ρ + 1)`. To close the induction one needs that extending inner-separated
+arms inwards costs at most a constant per scale, i.e. an *inward* window step, which the outer machinery
+does not provide; §19.6's reduction avoids it: glue the inner-separated family at `ρ` (starts binned into
+windows of width `≤ 2K' - W`, factor `(ρ/K')^j`, a constant of `η`) to a first family from `B_r(z)` with
+inner positions in `θ'` and outer ends aligned with the bins (`exists_pos_le_law_two_sided`), the first
+family coming from the outer machinery with the inner windows `J = window θ'` carried (the motion plan
+carries `J`; the outer step needs `J` added: one line, `hin` of `exists_separating_event`), with large
+final fences (§19.4). Design to be fixed in that package: the target statement is the landing-window
+form `π(r, R) ≤ C P(A(r, R) with inner positions in window (16 r + 8) θ' η)`, the induction runs over
+the inner separation radius `ρ` between `r` and `R`, and the levels sum when `δ < c_W`.
+
+**Lower half of quasi-multiplicativity** by §18.4 with §19.4's large final fences, using the inner step's
+separated family at `R' ≈ 2 r₂` directly for step 2 once Theorem 11's inner half (separated form) holds.
+
+**Extendability inwards** `π(2r, R) ≤ C π(r, R)` from the lower half and the one-scale bound
+(`π(r, 2r) π(2r, R) ≤ C π(r, R)`, `π(r, 2r) ≥ c`).
+
+Estimated size: one large session (1500–2500 lines).
+
+### 20.6 Search
+
+* PercLib, reused: `law_exploration_le_pow_of_le` (already parametric in the aspect ratio),
+  `exists_law_separable_ge_aux` (generalised), `mem_separable_top_of_inter_eq` (adapted),
+  `separable_bottom_of_top` (pattern), `exists_law_multiArmEvent_le_rpow` (one-arm bound, both colours),
+  `prodBernoulli_map_compl`, `prodBernoulli_map_image_equiv`, `measurable_image_equiv`,
+  `law_comp_sym2Map_apply`, `CrossingBounds.swap/.reflect`, `dualConfig_dualConfig`,
+  `dualConfig_image_reflect`, `dualConfig_image_swap`, `dualEdgeEquiv`, `dualEdge_map_add`,
+  `map_add_one_dualEdge_dualEdge`, `inter_edgeSet_mem_crossing_iff`, `dualConfig_inter_edgeSet`,
+  `image_add_mem_crossing_iff`, `inter_edgeSet_mem_localConn_of_image`, `image_sym2Map_inter_edgeSet`,
+  `image_sym2Map_mem_iff_of_inter_eq`, `mem_image_dualEdge_of_forall_mem_edges`,
+  `exists_append_eq_of_notMem`, `exists_append_eq_of_exists_mem`, `isArm_iff_cond`,
+  `IsArm.innerPos_cases`, `IsArm.append_of_append`, `IsDualArm.penultimate_eq`,
+  `sbtw_landingPos_iff_of_innerPos_eq`, `sbtw_apply_finRotate_apply`, `landingPos_append`,
+  `innerPos_append`, `mem_multiArmEventTo_iff_of_inter_eq`, `measurableSet_multiArmEvent`,
+  `measurableSet_of_determined_finite`, `finite_setOf_forall_mem`, `prodBernoulli_inter_of_determined`,
+  `multiArmEvent_subset_of_le`, `localConn_mono_set`.
+* Mathlib: `Equiv.Perm.subtypeCongr`, `MeasurableEquiv.map_apply`, `measurable_compl`, `Measure.map_map`,
+  `tendsto_rpow_neg_atTop`, `tendsto_natCast_atTop_atTop`, `Real.div_rpow`, `Real.rpow_neg`,
+  `Real.rpow_le_rpow`, `ofReal_measureReal`, `measure_iUnion_fintype_le`, `ENNReal.mul_div_cancel`,
+  `prob_compl_eq_one_sub`, `Set.image_congr`, `Sym2.map_map`, `Sym2.map_comp`, `Set.image_comp`.
+* Literature: Damron–Sapozhnikov–Vágvölgyi §6 (no inner-boundary argument, §20.1).
+* Not found (added): Lemma 15 in thin strips, the dual configuration as a measurable bijection, the
+  inner separation step.
+
+### 20.7 Lessons
+
+* Text-generated side lemmas: write the proof once with the frame coordinates as hypotheses
+  (`F c v 0 = …`, `F c v 1 = …`) and close every coordinate goal by `simp only [hF0, hF1, …]; omega`; the
+  same script then compiles for all four sides.
+* `rw [hF0]` with `hF0 : ∀ c v, F c v 0 = …` rewrites all instances of the first match at once; use
+  `simp only [hF0]`.
+* `if` conditions rewritten by `simp only [h]` with `h : a = b` lose the shape a negated hypothesis
+  about the same condition needs; split the simp calls.
+* `(F true).toHom v` and `F true v` are different atoms for `omega`; state `∀ v, (F true).toHom v =
+  F true v := fun _ => rfl` and rewrite.
+* `Set.mem_setOf_eq`, `if_pos`, `dif_pos`, `cond_true` are deprecated here: `Set.mem_ofPred_eq`,
+  `↓reduceIte`, `Bool.cond_true`, `dite_eq_left_of_eq_true`.
+* The `show` linter rejects `show` for goals that are not intermediate states; use `change`.
+
+### 20.8 Gate
+
+`scripts/gate.sh main` **passed on `4d7b581`** (full rebuild of the dependants of `SeparationLemma`,
+4026 jobs; axiom audit 13136 constants, only `propext`, `Classical.choice`, `Quot.sound`; 418 modules in
+the import closure; the interface NOTICE, expected: the classifier names the first interface file on
+this branch, `Arms/Defs.lean`; no other notice). Final lines:
+
+```
+D-35 checks passed (tagged statements, headers of new files).
+INTERFACE change against ae4eb08e45a1: Proof PR touches an interface/non-Lean file: PercLib/Models/Planar/Arms/Defs.lean
+NOTICE: interface change; an auditor must approve before merge.
+== gate passed on 4d7b5811cacdf6826bfd2843e49c2164ff352cf3
+```
+
+A first run on the same commit failed in the build step on an unreadable `.olean` of aesop ("invalid
+header"): macOS had evicted files of the worktree (iCloud "Optimize Mac Storage", disk 92% full;
+4076 files under `.lake` marked `dataless`). Reading the files restores them (about one second each);
+the second run passed. This note's commit changes only `docs/`.
