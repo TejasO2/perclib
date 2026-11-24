@@ -52,15 +52,10 @@ open scoped ENNReal
 namespace PercLib.Models.Planar
 
 /-- The measure of a set is at most the measure of a second set plus a bound for the part of the
-first outside the second. -/
+first outside the second (from `measure_le_inter_add_sdiff`). -/
 theorem measure_le_add_of_diff_le {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} {A E : Set Ω}
     {x : ℝ≥0∞} (h : μ (A \ E) ≤ x) : μ A ≤ μ E + x :=
-  calc μ A ≤ μ (E ∪ (A \ E)) := measure_mono fun ω hω => by
-        by_cases h' : ω ∈ E
-        · exact Or.inl h'
-        · exact Or.inr ⟨hω, h'⟩
-    _ ≤ μ E + μ (A \ E) := measure_union_le _ _
-    _ ≤ μ E + x := add_le_add le_rfl h
+  (measure_le_inter_add_sdiff μ A E).trans (add_le_add (measure_mono inter_subset_right) h)
 
 /-- **The arithmetic of one induction step** of quasi-multiplicativity: from
 `p ≤ F + δ G`, `a ≤ C_b b`, `b F ≤ C_S π`, `a ≤ C_b a'`, `a' G ≤ C π`, `δ C_b = 1/2` and
