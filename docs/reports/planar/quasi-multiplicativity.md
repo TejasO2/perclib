@@ -62,8 +62,12 @@ small) and repaired all three (`exists_pos_le_law_two_sided_of_colour`; the inne
 `η ≤ 1/256` stated); it proved the core step of the lower half (`exists_pos_mul_le_law_of_plan_two_sided`)
 and the reindexing by rotations; the binning, the arithmetic and the induction of the lower half, extendability
 inwards and Theorem 11's inner half remain, redesigned in §21.2 and §21.6 (order: lower half, inwards
-extendability, then the inner half at bounded ratio). Nothing in `Arms/Defs.lean` or `Planar/Defs.lean`
-was changed. Local commits only, nothing pushed.
+extendability, then the inner half at bounded ratio). The A3b-3d session (§22) proved the lower half of
+quasi-multiplicativity (`exists_law_multiArmEvent_mul_law_multiArmEvent_le`) and extendability of the
+inner radius (`exists_law_multiArmEvent_le_law_multiArmEvent_of_le_two_mul`) by the route of §21.2, with
+step S, the far inner family and its bins, and extendability of the outer radius at bounded ratio below
+`L`; Theorem 11's inner half remains (package A3b-3e, §21.6). Nothing in `Arms/Defs.lean` or
+`Planar/Defs.lean` was changed. Local commits only, nothing pushed.
 
 ## Decisions (user, 2026-11-22)
 
@@ -3757,6 +3761,184 @@ D-35 checks passed (tagged statements, headers of new files).
 INTERFACE change against ae4eb08e45a1: Proof PR touches an interface/non-Lean file: PercLib/Models/Planar/Arms/Defs.lean
 NOTICE: interface change; an auditor must approve before merge.
 == gate passed on 2b5dbc46a18fb6ae829a30165673642668d8eaf6
+```
+
+This note's commit changes only `docs/`.
+
+## 22. A3b-3d (2026-11-24): the lower half of quasi-multiplicativity; extendability inwards
+
+Package A3b-3d = items (2) and (3) of §21.2, by the design of §21.6 ("A3b-3d", items 1–6) with the
+scales of §21.4 item 6. **Done.** Proof-only; neither `Defs` file touched; no `@[tag]`, no `…Input`, no
+new definition. Commits:
+
+* `b68e897` **Arms/InnerFarFamily** (new), **Arms/LowerQuasiMultiplicativity**, **Arms/InnerSeparation**:
+  the far inner family (probability form), bins, side data and integer facts of starts in bins; step S
+  for one bin assignment; the inner step states that `w` is odd; the rotation of
+  `exists_strictMono_comp_finRotate_pow` is at most `j`.
+* `b57a34e` **Arms/LowerQuasiMultiplicativity**: step S and the arithmetic of its scales;
+  `exists_bin_assignment`.
+* `6aacc55`, `61d57b7` **Arms/Extendability** (new): extendability of the outer radius at bounded ratio,
+  the induction (lower half of quasi-multiplicativity), extendability of the inner radius.
+* this note's commit (docs only).
+
+Sizes: `InnerFarFamily.lean` 460 lines, `LowerQuasiMultiplicativity.lean` 843 (was 170),
+`Extendability.lean` 320. Gate: §22.7.
+
+### 22.1 The statements proved, by plan item of §21.6
+
+All for a colour sequence without packs (`hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)`), uniformly under
+`CrossingBounds q L c`, with every constant (and the threshold `r₀`) chosen before `q`, `L`, `z` and the
+radii.
+
+**Item 1 (bins and the far family)**, `Arms/InnerFarFamily.lean`:
+
+* `far_of_notMem_corner`, **`far_of_isArm`**: a start in none of the four corner zones of radius `N`
+  (both colours, the inner step's corner events) has a coordinate at least `N + 1` from both ends of its
+  range: `(z₀ - ρ + N + 1 ≤ a₀ ∧ a₀ + N + 1 ≤ z₀ + ρ) ∨ (same for the second coordinate)`.
+* **`exists_law_multiArmEvent_diff_far_le`**: as `exists_law_multiArmEvent_diff_innerSeparated_le`, with
+  the event `E_far(ρ, R)` = a family separated at the inner boundary (`4√ηN`, `⌊√ηN⌋`, `⌊ηN⌋`) whose
+  starts all have the far property: `P(A(ρ, R) \ E_far) ≤ δ P(A(2ρ + 1, R))` for `2ρ + 1 = wN`, `N₀ ≤ N`,
+  `2ρ + 2 ≤ R`, `ρ ≤ L`; it also exports `7 ≤ w`, `w` odd, `0 < η ≤ 1/256`.
+* `exists_bin`, `exists_mem_bin`, **`exists_bin_assignment`**: every family has an assignment
+  `p : Fin j → Fin 4 × Fin NB` of a side and a bin `[X(t, g), X(t, g) + k]`,
+  `X(t, g) = Z_t - ρ - 1 + g (k + 1)`, once `NB (k + 1) > 2ρ + 1`.
+
+**Item 2 (per bin assignment)**:
+
+* `exists_side_data` (coordinate `y` along the side and the side's inner-position formula of a far start in
+  a bin), `side_facts_single` (margins `V`, `2S` from the ends of the sides of `B_R(z)`, side index
+  `(6 - t) % 4`), `side_facts_pair` (side order and gaps from `P₁ + D ≤ P₂`), `le_abs_sub_of_eq_colour`
+  (one colour: twice the separation), `floor_sqrt_mul_bounds` (`⌊N/E⌋ ≤ m`, `16 m ≤ N`, `⌊N/E²⌋ ≤ k`,
+  `16 k ≤ m`, `4m ≤ 4√ηN`, `2m + 2 ≤ 4√ηN`).
+* `outerSeparatedArmEvent_subset_comp_finRotate_pow` (reindexing the first family).
+* **`exists_pos_mul_le_law_of_far_bins`** (`Arms/LowerQuasiMultiplicativity.lean`): `c₀ P(outer-separated
+  at R₀, fences (2u, u)) P(far family with starts in the windows [x i, x i + k'] of the sides t i) ≤
+  π(r, R₃)`, for any `t`, `x`; a witness fixes the cyclic order, a rotation (one of `j + 1`, constant = the
+  least of their constants) makes it linear, and the core step `exists_pos_mul_le_law_of_plan_two_sided`
+  applies with corridor width `u`, `bw = k'`, `S = M₁ + K₁ + m' + k' + 2`, `R + S + 1 = ρ`. Hypotheses
+  passed through (the reason for their number), plus seven inequalities for the bins.
+
+**Item 3 (arithmetic)**: `step_scales`, `step_scales_outer`, `step_products`, `step_bound_S`,
+`step_bounds_core`, `step_bounds_budget`, `step_bounds_bins`; and **step S**,
+**`exists_law_mul_law_far_le`** (`0 < η ≤ 1/256`, `7 ≤ w`): `∃ C ≠ ⊤, ∃ r₀, … 2ρ + 1 = wN → r₀ ≤ r →
+40 r ≤ ρ → 2ρ + 2 ≤ R₃ → R₃ ≤ L → π(r, ⌊ρ/5⌋) P(E_far(ρ, R₃)) ≤ C π(r, R₃)`.
+
+**Item 4 (bounded-ratio extendability)**, `Arms/Extendability.lean`:
+`exists_law_multiArmEvent_le_law_multiArmEvent_of_le_eight_mul` (`1 ≤ C`, `r₀ ≤ r ≤ R ≤ R' ≤ 8R`,
+`R' ≤ L`) and **`exists_law_multiArmEvent_le_law_multiArmEvent_of_le_pow_mul`** (`R' ≤ 8^k R`).
+
+**Item 5 (the induction)**: **`exists_law_multiArmEvent_mul_law_multiArmEvent_le`**:
+
+```lean
+theorem exists_law_multiArmEvent_mul_law_multiArmEvent_le (σ : Fin j → Bool)
+    (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) (c : ℕ → ℝ≥0∞) :
+    ∃ C : ℝ≥0∞, C ≠ ⊤ ∧ ∃ r₀ : ℕ, ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
+      CrossingBounds q L c → ∀ (z : LatticeSite 2) (r₁ r₂ r₃ : ℕ), r₀ ≤ r₁ → r₁ ≤ r₂ →
+      r₂ ≤ r₃ → (r₃ : ℕ∞) ≤ L →
+      law q (multiArmEvent σ z r₁ r₂) * law q (multiArmEvent σ z r₂ r₃) ≤
+        C * law q (multiArmEvent σ z r₁ r₃)
+```
+
+(the target statement of the mandate, unchanged). Helpers `measure_le_add_of_diff_le`,
+`mul_le_of_induction_step`.
+
+**Item 6 (extendability inwards)**: **`exists_law_multiArmEvent_le_law_multiArmEvent_of_le_two_mul`**:
+`∃ C ≠ ⊤, ∃ r₀, … r₀ ≤ r → r ≤ r' → r' ≤ 2r → r' ≤ R → R ≤ L → π(r', R) ≤ C π(r, R)`; and Nolin's form
+`exists_law_multiArmEvent_two_mul_le_law_multiArmEvent` (`2r ≤ R ≤ L`, `π(2r, R) ≤ C π(r, R)`).
+
+### 22.2 The proof of the lower half
+
+Fix `r₁`, `r₃` and induct on `r₃ - r₂`. With `X = max(2r₂, 40r₁)`, `w = 2a + 1`, `mX = ⌊X/w⌋`,
+`N = 2mX + 3` and `ρ = w·mX + w + a`, one has `2ρ + 1 = wN` and `X < ρ ≤ X + 2w`; `N ≥ N₀` from
+`r₁ ≥ wN₀`. If `r₃ < 2ρ + 2`, then `r₃ ≤ 81 r₂`, and `Φ(r₂) ≤ π(r₁, r₂) ≤ C_b π(r₁, r₃)`. Otherwise
+`π(r₂, r₃) ≤ π(ρ, r₃) ≤ P(E_far) + δ π(2ρ + 1, r₃)`; `π(r₁, r₂) ≤ C_b π(r₁, ⌊ρ/5⌋)` (monotonicity if
+`⌊ρ/5⌋ ≤ r₂`, bounded-ratio extendability otherwise, ratio `≤ 9`) and `π(r₁, r₂) ≤ C_b π(r₁, 2ρ + 1)`
+(ratio `≤ 81`); step S and the induction hypothesis at `2ρ + 1` give
+`Φ(r₂) ≤ C_b C_S π(r₁, r₃) + δ C_b C π(r₁, r₃) ≤ C π(r₁, r₃)` with `δ C_b = 1/2`, `C = 2 C_b C_S + C_b`.
+Step S: Theorem 11's outer half (separated form) at `R₀ = ⌊ρ/5⌋ ≥ 8 r₁`; `E_far ⊆ ⋃_p E_far(p)` over
+the `(4NB)^j` bin assignments; for each, `exists_pos_mul_le_law_of_far_bins`.
+
+### 22.3 Decisions (mine, per the standing instruction)
+
+1. **The far property on the start coordinates** (at least `N + 1` from both ends of the side) instead of
+   §21.6's `2N + 1 ≤ |innerPos − m(4ρ + 2)|`: it is what the corner events give directly
+   (`mem_multiArmEvent_one_of_walk` at the start), and what the margins need; equivalent up to constants.
+2. **`w` odd exported** by `exists_inner_separating_event` and `exists_law_multiArmEvent_diff_innerSeparated_le`
+   (statement strengthening in place; the width was `2(w₁ + w₂ + 4) + 1` already): without it
+   `2ρ + 1 = wN` may have no solution and the induction could not choose `ρ`.
+3. **The rotation is at most `j`** in `exists_strictMono_comp_finRotate_pow` (strengthened in place, no
+   caller): the per-bin constant is the least of the `j + 1` rotated core constants.
+4. **Bins**: width `k + 1` with `bw = k' = k = ⌊ηN⌋` (not `k' - u`: the core needs only `bw ≤ k'`),
+   `NB = wE²` (not `2wE² + 4`: `N < E²(k + 1)` already gives `2ρ + 1 < NB(k + 1)`), `E = ⌈1/√η⌉`.
+5. **Scales** as §21.4 item 6 with `bw = k`, `Ap = 32n² + 2`, `At = 4n² + 6n + 72j + 15` (checked:
+   `S + 1 ≤ At·u`), `R₀ = ⌊ρ/5⌋`, `Rn = ⌊R/n⌋`, `D = 2Rn + u + 4`, `Sp = 7u + 2D + 3`, `Gp = Sp + 24ju`,
+   `Q = 2K₁ + 5u + 3`; step S asks `40 r ≤ ρ` and `r₀ = max(r₁, n³ + wE² + 1)` (so `ρ ≥ 5n³`, `N ≥ E²`).
+   The arithmetic is seven lemmas (per-declaration heartbeats), linear in the atoms `n u`, `j u`, `j² u`,
+   `j Rn`, `n Rn`, `n² u` with the product facts given explicitly.
+6. **Bounded-ratio extendability via the window step from `⌈R'/8⌉`** (only `R' ≤ L`), iterated to `8^k`;
+   one constant `C_b` (ratio `8³`) for both extensions in the induction.
+7. **The induction's inner radius** `ρ ∈ (X, X + 2w]` from `mX = ⌊X/w⌋` (no search over `N`).
+8. **Module split**: `InnerFarFamily` (item 1 and the integer facts), `LowerQuasiMultiplicativity` (items
+   2–3), `Extendability` (items 4–6).
+9. **No definition**; the far event is written out in the three statements that use it.
+
+### 22.4 Errata and observations
+
+* §21.6 item 1's bin count `2wE² + 4` and width `k' - u` are not needed (decision 4); no statement changed.
+* The inner step did not export that `w` is odd (decision 2); a statement of the form
+  `∀ N ρ, 2ρ + 1 = wN → …` with an even `w` would be vacuous, so the export is needed by any caller that
+  must produce a `ρ`.
+* The design's `Φ(r₂) ≤ C₆ π(r₁, r₃) + δ C₅ Φ(2ρ + 1)` holds with `C₅ = C_b` (ratio `≤ 81`) and
+  `C₆ = C_b C_S`; `⌊ρ/5⌋` may lie below or above `r₂` (both handled).
+* No plan statement is false; no hypothesis beyond `hσ` and the approved small radii was needed.
+
+### 22.5 Search
+
+* PercLib, reused: `exists_pos_mul_le_law_of_plan_two_sided`, `exists_strictMono_comp_finRotate_pow`,
+  `comp_finRotate_pow_of_noPack`, `sbtw_comp_finRotate_pow`, `ArmsDisjoint.comp_perm`,
+  `multiArmEventTo_comp_finRotate_pow_subset`, `exists_inner_separating_event`,
+  `mem_multiArmEvent_one_of_walk`, `isArm_iff_cond`, `IsArm.innerPos_cases`,
+  `sbtw_innerPos_iff_sbtw_landingPos`, `exists_lt_lt_of_eq`, `div_le_floor_sqrt_mul`,
+  `exists_law_multiArmEvent_le_law_outerSeparated`, `exists_pos_le_law_window_step`,
+  `exists_bottom_windows`, `exists_pos_le_law_multiArmEvent`, `multiArmEvent_subset_of_le`,
+  `mul_measure_le_of_nonempty` (MotionPlan; a duplicate was written and removed),
+  `prodBernoulli_inter_of_determined`.
+* Mathlib: `measure_le_inter_add_sdiff`, `measure_union_le`, `measure_iUnion_fintype_le`,
+  `Finset.exists_min_image`, `Finset.mul_sum`, `Fintype.card_fun`, `Fintype.card_prod`,
+  `Nat.lt_div_mul_add`, `Nat.div_mul_le_self`, `Nat.le_div_iff_mul_le`, `Nat.div_lt_iff_lt_mul`,
+  `Nat.lt_of_mul_lt_mul_left`, `Nat.le_of_mul_le_mul_left`, `Int.toNat_of_nonneg`, `ite_eq_left`,
+  `ite_eq_right`, `ENNReal.inv_two_add_inv_two`, `ENNReal.mul_inv`, `Nat.strong_induction_on`,
+  `one_le_pow₀`.
+* Not found (added): the far inner family, bins of arm starts, step S, bounded-ratio extendability with
+  only the larger radius below `L`, the lower half of quasi-multiplicativity, extendability inwards.
+
+### 22.6 Lessons
+
+* `omega` on a goal that is a disjunction of four conjunctions, in a large context, ran for more than ten
+  minutes of wall-clock without a heartbeat error (the build had to be stopped); choose the disjunct
+  explicitly and keep such steps in small lemmas (`exists_bin_assignment`).
+* `gcongr` on `μ {ω | ∃ a b γ, …} ≤ μ {ω | ∃ a b γ, …}` descends into the set-builder with the same
+  witnesses; for reindexed families use `mul_le_mul'` and `measure_mono` with the goals left explicit.
+* `if_pos`/`if_neg` are deprecated (`ite_eq_left`/`ite_eq_right`); `Set.diff_union_self`,
+  `measure_le_inter_add_diff` are deprecated (`sdiff` names).
+* Linear arithmetic over `ℕ` with the scale definitions as equations (not `subst`) and products as atoms
+  (`n * u`, `j * u`, …) stays within the heartbeat budget; the unused-variables linter then names the
+  hypotheses the arithmetic did not need.
+* `rw [mul_assoc, Finset.mul_sum]`, not `rw [Finset.mul_sum, mul_assoc]`, for `(C * a) * ∑ = C * ∑ a * f`.
+
+### 22.7 Gate
+
+`scripts/gate.sh main` **passed on `61d57b7`** (axiom audit 13480 constants, only `propext`,
+`Classical.choice`, `Quot.sound`; 422 modules in the import closure; the interface NOTICE, expected: the
+classifier names the first interface file on this branch, `Arms/Defs.lean`; no other notice). A first run on
+`6aacc55` was stopped after its build step to replace a hand proof by mathlib's `measure_le_inter_add_sdiff`
+(`61d57b7`). Final lines:
+
+```
+D-35 checks passed (tagged statements, headers of new files).
+INTERFACE change against ae4eb08e45a1: Proof PR touches an interface/non-Lean file: PercLib/Models/Planar/Arms/Defs.lean
+NOTICE: interface change; an auditor must approve before merge.
+== gate passed on 61d57b799e4bf06bc0ecf56ec00ee804afa19e7f
 ```
 
 This note's commit changes only `docs/`.
