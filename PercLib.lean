@@ -351,6 +351,7 @@ public import PercLib.Probability.LayerCakeProduct
 public import PercLib.Probability.LocallyMonotone
 public import PercLib.Probability.MassTransport
 public import PercLib.Probability.MassTransportTuple
+public import PercLib.Probability.MixedHarris
 public import PercLib.Probability.MixedSpatialMoments
 public import PercLib.Probability.Mixing
 public import PercLib.Probability.MomentConvergence
