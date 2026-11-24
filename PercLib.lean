@@ -135,6 +135,7 @@ public import PercLib.Models.Planar.Arms.CorridorGluing
 public import PercLib.Models.Planar.Arms.Defs
 public import PercLib.Models.Planar.Arms.HalfPlaneExponents
 public import PercLib.Models.Planar.Arms.IncipientCluster
+public import PercLib.Models.Planar.Arms.InnerGluing
 public import PercLib.Models.Planar.Arms.Interlacing
 public import PercLib.Models.Planar.Arms.JogCorridors
 public import PercLib.Models.Planar.Arms.MotionPlan
@@ -159,6 +160,7 @@ public import PercLib.Models.Planar.Arms.Separator
 public import PercLib.Models.Planar.Arms.ThreePoint
 public import PercLib.Models.Planar.Arms.TurnCorridors
 public import PercLib.Models.Planar.Arms.TwoPoint
+public import PercLib.Models.Planar.Arms.TwoSidedGluing
 public import PercLib.Models.Planar.CriticalProbability
 public import PercLib.Models.Planar.CrossingSymmetry
 public import PercLib.Models.Planar.Defs
