@@ -55,8 +55,15 @@ the lower half of quasi-multiplicativity and extendability inwards need an inner
 designed in §19.6 and not proved. The A3b-3b session (§20) proved the inner separation step
 (`exists_inner_separating_event`, `exists_law_multiArmEvent_diff_innerSeparated_le`) by corner exclusion
 through the one-arm bound, Lemma 15 in thin strips and Lemma 15 for the dual configuration; Theorem 11's
-inner half, the lower half of quasi-multiplicativity and extendability inwards remain (§20.5). Nothing in
-`Arms/Defs.lean` or `Planar/Defs.lean` was changed. Local commits only, nothing pushed.
+inner half, the lower half of quasi-multiplicativity and extendability inwards remain (§20.5). The A3b-3c
+session (§21) found that the inner step's families do not fit the two-sided gluing as stated (neighbouring
+starts too close for regions disjoint across colours; starts too close to the corners; `η` not known to be
+small) and repaired all three (`exists_pos_le_law_two_sided_of_colour`; the inner step's corner events and
+`η ≤ 1/256` stated); it proved the core step of the lower half (`exists_pos_mul_le_law_of_plan_two_sided`)
+and the reindexing by rotations; the binning, the arithmetic and the induction of the lower half, extendability
+inwards and Theorem 11's inner half remain, redesigned in §21.2 and §21.6 (order: lower half, inwards
+extendability, then the inner half at bounded ratio). Nothing in `Arms/Defs.lean` or `Planar/Defs.lean`
+was changed. Local commits only, nothing pushed.
 
 ## Decisions (user, 2026-11-22)
 
@@ -3540,3 +3547,216 @@ A first run on the same commit failed in the build step on an unreadable `.olean
 header"): macOS had evicted files of the worktree (iCloud "Optimize Mac Storage", disk 92% full;
 4076 files under `.lake` marked `dataless`). Reading the files restores them (about one second each);
 the second run passed. This note's commit changes only `docs/`.
+
+## 21. A3b-3c (2026-11-24): the inner family meets the two-sided gluing; the core of the lower half
+
+Package A3b-3c = the rest of item 6 of §5 as designed in §20.5: (1) Theorem 11's inner half, (2) the
+lower half of quasi-multiplicativity, (3) extendability inwards. **Not finished.** Before any Lean, the
+route of §20.5 was checked against the statements it composes, and two of its steps do not fit (§21.1);
+both were repaired. The package then built the pieces of (2) that do not depend on the arithmetic of the
+scales: the inner step with small `η` and its corner events, the two-sided gluing in a form that the
+inner step's families satisfy, the reindexing of families by rotations, and the core composite step
+(motion plan into aligned windows, then the gluing). What remains of (2) is the binning of the inner
+family, the arithmetic and the induction (§21.6); (3) follows from (2) in a few lines; (1) needs (2), (3)
+and a one-scale bound with inner windows (§21.6). Proof-only; neither `Defs` file touched; no `@[tag]`,
+no `…Input`, no new definition. Commits:
+
+* `02b1797` **Arms/SeparationLemma, Arms/InnerSeparationSides, Arms/InnerSeparation**: `η ≤ 1/256` in
+  Lemma 15 and the inner step (statement strengthening; Lemma 15's `η` is `(1/(16·8^J))²`); the inner
+  step's statement records that `G` excludes the eight corner one-arm events.
+* `c23e8be` **Arms/InnerFamilyGluing** (new module): rotations of the indices; the two-sided gluing with
+  regions disjoint by colour.
+* `cd1daf1`, `2b5dbc4` **Arms/LowerQuasiMultiplicativity** (new module): the motion plan into aligned
+  windows followed by the gluing; choosing the first arm.
+* this note's commit (docs only).
+
+Gate: §21.8.
+
+### 21.1 Errata to §20.5 (found on paper, before any Lean)
+
+1. **The inner step's family does not fit `exists_pos_le_law_two_sided`.** That lemma asks the regions
+   `G i` of *all* pairs of arms to be disjoint, each `G i` containing the box of radius `M' + 1` about the
+   start of arm `i`, with gaps `> W + 2S`, `S ≥ M + K + M' + K' + 2`. The inner step gives inner positions
+   `4√ηN` apart, i.e. starts `2√ηN ≈ 2M'` apart (`M' = ⌊√ηN⌋`): the boxes of radius `M' + 1` about two
+   neighbouring starts may overlap. Counterexample to the hypotheses: two arms of different colours on
+   the bottom side with inner positions `P` and `P + ⌈4√ηN⌉`; any corridors aligned with them are at most
+   `2M' + 2K'` apart, less than `W + 2S`. In the proof of `law_mul_mul_prod_le_law_of_two_sided`, the
+   disjointness of regions of arms of *different* colours is used only through `hreg` (a pair read by a
+   corridor lies in no other arm's region): for the mixed order and for the conditioning sets. That needs
+   only (a) the corridors read different pairs, (b) no corridor reads a pair inside the box about an end
+   or a start of an arm of the other colour. Arms of one colour are at least `2 · 4√ηN` apart (pack-free,
+   `exists_lt_lt_of_eq`), enough for disjoint regions. Fixed by `exists_pos_le_law_two_sided_of_colour`.
+2. **Corners.** Straight corridors from `∂B_R` to `∂B_ρ` must stand `2S ≈ 2M'` inside the corners of
+   `B_R`, and `ρ - R ≥ S`; so the starts must be about `3M'` from the corners of `B_ρ`, but the inner step
+   only guarantees `2√ηN`. Fixed without new probability: `G` already excludes, at each corner `κ` of
+   `B_ρ`, the one-arm events of both colours from `B_N(κ)` to `∂B_ρ(κ)`; any arm of any family (the
+   rerouted ones too) then starts at least `N` from the corners. The statement of
+   `exists_inner_separating_event` now records this conjunct.
+3. **`K' ≪ M'` needs `η` small**, which the statements did not say (`η ≤ 1`; with `η = 1`, `M' = K' = N`
+   and no gluing fits). Lemma 15's proof takes `η = (1/(16·8^J))² ≤ 1/256`; the three statements now say
+   so (`√η ≤ 1/16`, `16 K' ≤ M'`).
+4. **The motion plan needs linearly ordered targets** (`lamT` monotone from the lower-left corner) but
+   the inner family is only cyclically ordered: its indices are rotated (σ ∘ finRotate^k, pack-free again)
+   so that the arm of smallest inner position comes first.
+
+No plan statement is false; no hypothesis beyond `hσ` and the approved small radii is needed.
+
+### 21.2 The route for (2), (3), (1) (decided here; replaces §20.5's order)
+
+**(2) by an induction on `r₂` downward, without Theorem 11's inner half.** For `r₁ ≤ r₂ ≤ r₃`, put
+`Φ(r₂) = π(r₁, r₂) π(r₂, r₃)`. Take a valid inner radius `ρ` (`2ρ + 1 = wN`) in `[X, X + w]`,
+`X = max(2r₂, K₀ r₁)`. Then `π(r₂, r₃) ≤ π(ρ, r₃) ≤ P(E_far(ρ)) + δ π(2ρ + 1, r₃)` (inner step, probability
+form, with `E_far` the inner-separated event with corner distances `≥ 2N + 1`), and
+* **step S:** `π(r₁, ⌊ρ/5⌋) · P(E_far(ρ)) ≤ C_S π(r₁, r₃)`: Theorem 11's outer half (separated form) at
+  `R₀ = ⌊ρ/5⌋`, then for each bin assignment of the starts of `E_far` (constant number of bins), the motion
+  plan into windows aligned with the bins and the gluing with regions disjoint by colour;
+* `π(r₁, r₂) ≤ C π(r₁, R')` for `R' ≤ K r₂` (outward extendability at bounded ratio; from the window step,
+  which accepts any `R' ∈ [2N, 8N]`, so that `R' ≤ L` suffices).
+Hence `Φ(r₂) ≤ C₆ π(r₁, r₃) + δ C₅ Φ(2ρ + 1)`; with `δ = 1/(2C₅)` (chosen before `η`, `w`) the induction
+closes; the base (`2ρ + 2 > r₃`) is bounded-ratio extendability. Small `r₂/r₁` are covered by `X ≥ K₀ r₁`
+(the one-scale bound for `π(r₁, ·)` at bounded ratio).
+
+**(3) from (2):** `π(r, r') π(r', R) ≤ C π(r, R)` and `π(r, r') ≥ c` for `r ≤ r' ≤ 2r`.
+
+**(1) from (2), (3) and a one-scale bound with inner windows** (not the induction of §20.5): with the
+same step S carrying the inner windows `J` (the plan and the gluing carry `J`),
+`P(A_J(r, R)) ≥ c P(E_far(ρ)) ≥ c (π(ρ, R) - δ π(2ρ + 1, R)) ≥ (c/2) π(r, R)` for `ρ ≍ r`, using (3) for
+`π(2ρ + 1, R) ≤ C π(ρ, R)` and `π(ρ, R) ≥ π(r, R)`. The first family at bounded ratio with inner positions
+in `window (16r + 8) θ' η` needs: a one-scale bound with inner windows (straight corridors from the windows
+of `θ'` on the four sides; A3a's corridors are on the top side only), the outer step with `J`
+(`exists_separating_event` keeps inner positions, `hin`), and the gluing step with `J`. §20.5's induction
+over `ρ` would need the same base plus `J`-versions of the window step and of the induction; this route
+needs neither.
+
+### 21.3 The statements proved
+
+`Arms/InnerSeparation.lean` (changed statements, proofs adapted; callers unchanged in meaning):
+
+* `exists_law_separable_ge_aux_wide`, `exists_law_separable_ge_strip`: `0 < η ≤ 1/256`.
+* `exists_inner_separating_event`: `0 < η ≤ 1/256`, and the new conjunct
+  `∀ ω ∈ G, ∀ col κ, (κ₀ = z₀ ± ρ) → (κ₁ = z₁ ± ρ) → ω ∉ multiArmEvent ![col] κ N ρ`.
+* helpers `notMem_multiArmEvent_corner_of_notMem`, `one_sub_le_measure_compl_inter` (split out of the
+  inner step's proof for the per-declaration heartbeat budget).
+
+`Arms/InnerFamilyGluing.lean`:
+
+* rotations: `val_finRotate_succ`, `sbtw_comp_finRotate`, `sbtw_of_comp_finRotate`,
+  `sbtw_comp_finRotate_pow`, `sbtw_of_comp_finRotate_pow`, `comp_finRotate_pow_of_noPack`,
+  `ArmsDisjoint.comp_perm`, `ArmsDisjoint.of_comp_perm`, `multiArmEventTo_subset_comp_finRotate_pow`,
+  `multiArmEventTo_comp_finRotate_pow_subset`;
+* corridor geometry: `mem_Icc_add_one_of_mem_Icc_add_cond`, `disjoint_two_sided_boxes` (read sets of two
+  corridors), `disjoint_two_sided_box_of_window` (a corridor misses the box of radius `Mb + 1` about a
+  point of another arm's window, at any radius `ρ' ≥ R`);
+* **`law_mul_mul_prod_le_law_of_two_sided_of_colour`**: as `law_mul_mul_prod_le_law_of_two_sided` with
+  `hG` only for arms of one colour, plus `hTT` (read sets pairwise disjoint), `hTBx`, `hTB'x` (no read pair
+  inside the box about an end/start of an arm of the other colour); `hTG` dropped (no longer needed);
+* **`exists_pos_le_law_two_sided_of_colour`**: as `exists_pos_le_law_two_sided` (constant `c A ^ j`) with
+  the gap hypothesis split: `x i + W + 2S < x k` (or the reverse) for arms of one colour on one side, and
+  `x i + W + (M + K + M' + K' + 2) < x k` (or the reverse) for any two arms on one side.
+
+`Arms/LowerQuasiMultiplicativity.lean`:
+
+* `finRotate_pow_val_apply_zero`, **`exists_strictMono_comp_finRotate_pow`** (positions in strict cyclic
+  order, pairwise distinct ⇒ some rotation makes them increasing);
+* **`exists_pos_mul_le_law_of_plan_two_sided`** (step S's core, abstract parameters):
+  `c₀ · P(separated at ∂B_{R₀}, fences (2u, u), inner positions in J) · P(separated at the inner boundary of
+  B_ρ, fences (m', k'), starts in [x i, x i + bw] on sides t i) ≤ P(A_J(r, R₃))`, for targets in the plan's
+  linear order (`lamT`), with the hypotheses of `exists_pos_le_law_target_windows` (unit `u`, jog bound `D`,
+  rooms `Sp`, `Gp`, `Q`, target width `B`, output fences `(M₁, K₁)`) and of
+  `exists_pos_le_law_two_sided_of_colour` (corridors `[x i, x i + W]`, `S`, `ρ ≤ R + At W`) passed through.
+
+### 21.4 Decisions (mine, per the standing instruction)
+
+1. **Order (2) → (3) → (1)** instead of (1) → (2) → (3) (§21.2): (2) does not need (1); (1) then needs only
+   a bounded-ratio first family.
+2. **Repair the gluing, not the inner step**: a variant of the two-sided gluing with regions disjoint by
+   colour (the old lemma unchanged), rather than an inward straight gluing that would shrink the inner
+   fences (a mirror of `CapGluing`, ~1500 lines).
+3. **Statement strengthenings in place** (`η ≤ 1/256`, the corner conjunct): equivalent or stronger, all
+   callers adapted in the same commit; the alternative (duplicate lemmas) would copy ~400 lines.
+4. **Rotation of indices** for the plan's linear order (reindexing lemmas for any power of `finRotate`).
+5. **Step S with abstract parameters** (hypotheses passed through; the reason for their number is stated in
+   its docstring); the arithmetic goes in separate lemmas (heartbeats).
+6. Bin width `bw = k' - u`, first-family unit `u = ⌊R₀/n²⌋`, `R₀ = ⌊ρ/5⌋`, corridor width `W = u`,
+   `K₁ = (2n + 24j + 5)u`, `M₁ = 2K₁`, `B = (2n + 24j + 4)u`, `Q = 2K₁ + 5u + 3`, `S = M₁ + K₁ + m' + k' + 2`,
+   `R = ρ - (S + 1)`, `n = 1000 (j+1)² (w+1) E`, `E = ⌈1/√η⌉` (planned for §21.6; not yet in Lean).
+
+### 21.5 Search
+
+* PercLib, reused: `exists_pos_le_law_target_windows`, `law_mul_mul_prod_le_law_of_two_sided` (copied and
+  patched), `exists_pos_le_law_two_sided` (copied and patched), `exists_two_sided_side`,
+  `two_sided_side_facts`, `disjoint_two_sided_regions`, `CrossingBounds.le_law_two_sided_side`,
+  `exists_walks_two_sided`, `disjoint_Icc_of_lt`, `exists_lt_lt_of_eq`, `sbtw_apply_finRotate_apply`,
+  `Int.sbtw_iff`, `mem_multiArmEvent_one_of_walk`.
+* Mathlib: `finRotate_last`, `coe_finRotate_of_ne_last`, `finCycle_eq_finRotate_iterate`, `finCycle_apply`,
+  `Equiv.Perm.coe_pow`, `Equiv.Perm.mul_apply`, `pow_succ`, `pow_succ'`, `sbtw_cyclic_left`,
+  `sbtw_cyclic_right`, `Finset.exists_min_image`, `Equiv.apply_symm_apply`, `Equiv.symm_apply_apply`,
+  `pow_le_pow_left₀`, `one_div_le_one_div_of_le`.
+* Not found (added): rotation invariance of the arm events, the two-sided gluing with regions disjoint by
+  colour.
+
+### 21.6 What remains (packages "A3b-3d" and "A3b-3e"), with a design
+
+**A3b-3d: (2) and (3).** In `Arms/LowerQuasiMultiplicativity.lean`:
+1. *Bins and the far family.* `E_far(ρ, r₃)` := inner-separated at `ρ` to `∂B_{r₃}` with parameters
+   `(4√ηN, m', k')` and `∀ i m, 2N + 1 ≤ |innerPos − m(4ρ + 2)|`; from the inner step's corner conjunct,
+   `P(A(ρ, r₃) \ E_far) ≤ δ P(A(2ρ + 1, r₃))` (copy of `exists_law_multiArmEvent_diff_innerSeparated_le`;
+   the far property from `mem_multiArmEvent_one_of_walk` applied to the new arms, start in a corner zone ⇒
+   one-arm event). Bins on side `t`: `x(t, g) = Z_t − ρ − 1 + g(bw + 1)`, `g < NB = 2wE² + 4`;
+   `P(E_far) ≤ Σ_p P(E_far(p))` (`measure_iUnion_fintype_le`).
+2. *Per bin assignment* (`mul_measure_le_of_nonempty`): from a witness, inner positions in cyclic order
+   (`sbtw_innerPos_iff_sbtw_landingPos`), rotation by `exists_strictMono_comp_finRotate_pow`, then
+   `lamT = ⌊P/(4ρ + 2)⌋` monotone, same-side gaps `|Δc| ≥ 2m'` (any) and `≥ 4m'` (one colour, via
+   `exists_lt_lt_of_eq`), corners `c ∈ [Z − ρ + N, Z + ρ − N]` (from the far property via
+   `IsArm.innerPos_cases`). Reindex both families and the output (`InnerFamilyGluing` rotation lemmas) and
+   apply `exists_pos_mul_le_law_of_plan_two_sided` for `σ ∘ finRotate^k` (constants: max over `k : Fin j`).
+3. *Arithmetic* (separate lemmas, `linarith` with explicit products, as `window_step_bounds`): with the
+   choices of §21.4 item 6 and `⌊N/E⌋ ≤ m' ≤ N/16`, `16k' ≤ m'`, `⌊N/E²⌋ ≤ k'`, `10n²u ≤ wN`
+   (`div_le_floor_sqrt_mul` gives the first and third), every plan/gluing quantity is `≤ T = 80nu ≤ (m'+1)/125`,
+   which gives the gaps, corners and `ρ − R = S + 1 ≤ At·u` for a constant `At` of `n` (for example
+   `At = 3(2n + 24j + 5) + 3 + 20n²`; to be checked).
+4. *Bounded-ratio extendability*: `π(r, N) ≤ C π(r, R')` for `r₀ ≤ r ≤ N ≤ R' ≤ 8N`, `R' ≤ L` (window step
+   from `⌊R'/2⌋`; small ratios by the one-scale bound), then any bounded ratio by iteration.
+5. *The induction* (strong induction on `r₃ − r₂`) and the statement
+   `∃ C ≠ ⊤, ∃ r₀, ∀ q L, CrossingBounds q L c → ∀ z r₁ r₂ r₃, r₀ ≤ r₁ → r₁ ≤ r₂ → r₂ ≤ r₃ → r₃ ≤ L →
+   π(r₁, r₂) π(r₂, r₃) ≤ C π(r₁, r₃)`; constants in the order `C_ext`, `C₅`, `δ = (2C₅)⁻¹`, `(η, w, N₀)`,
+   `n`, `C_S`, `C`, `r₀`.
+6. (3): `∃ C r₀, r₀ ≤ r ≤ r' ≤ 2r, r' ≤ R ≤ L → π(r', R) ≤ C π(r, R)` from (2) and
+   `exists_pos_le_law_multiArmEvent` (`r' = r` trivial).
+Estimated 1000–1300 lines.
+
+**A3b-3e: (1).** One-scale bound with inner windows (four straight corridors families, side versions of
+`exists_isArm_of_mem_corridor` by the frame template of A3b-3b), the outer step with `J` (variant of
+`exists_separating_event` keeping `innerPos ∈ J`: the rerouted arms keep their inner positions, `hin`),
+the gluing step with `J` (the plan carries `J`), step S with `J` (already carried by
+`exists_pos_mul_le_law_of_plan_two_sided`), then `P(A_J(r, R)) ≥ (c/2) π(r, R)` as in §21.2. Estimated
+800–1200 lines.
+
+### 21.7 Lessons
+
+* A statement change in `SeparationLemma.lean` rebuilds ~600 dependants (full build ~6 min here).
+* Adding one conjunct to a proof at the edge of the heartbeat budget broke it twice: split self-contained
+  blocks into lemmas (`notMem_multiArmEvent_corner_of_notMem`, `one_sub_le_measure_compl_inter`).
+* A bound variable `b` of a set-builder (`∃ a b γ`) silently captures an outer `b : ℕ` in `x i + b`: name
+  window widths `bw`.
+* Dependent reindexing (`γ (e.symm (e i))` vs `γ i`): rewrite through
+  `∀ x y, x = y → f (γ x) = f (γ y)` (`rintro x y rfl; rfl`) and `change`, not `rw` on `γ`.
+* `rw [h]` with `h : P (rot^k 0) = …` fails on a `fun`-applied goal: `change` the goal to its beta form first.
+* The proof of the two-sided gluing could be patched textually (Python) for the variant: 6 occurrences of the
+  region lemma, `hreg` and the two conditioning sets.
+
+### 21.8 Gate
+
+`scripts/gate.sh main` **passed on `2b5dbc4`** (full rebuild of the dependants of `SeparationLemma`; axiom audit
+13245 constants, only `propext`, `Classical.choice`, `Quot.sound`; 420 modules in the import closure; the
+interface NOTICE, expected: the classifier names the first interface file on this branch, `Arms/Defs.lean`;
+no other notice). Final lines:
+
+```
+D-35 checks passed (tagged statements, headers of new files).
+INTERFACE change against ae4eb08e45a1: Proof PR touches an interface/non-Lean file: PercLib/Models/Planar/Arms/Defs.lean
+NOTICE: interface change; an auditor must approve before merge.
+== gate passed on 2b5dbc46a18fb6ae829a30165673642668d8eaf6
+```
+
+This note's commit changes only `docs/`.
