@@ -155,6 +155,7 @@ public import PercLib.Models.Planar.Arms.SeparationSides
 public import PercLib.Models.Planar.Arms.SeparationSurgery
 public import PercLib.Models.Planar.Arms.Separator
 public import PercLib.Models.Planar.Arms.ThreePoint
+public import PercLib.Models.Planar.Arms.TurnCorridors
 public import PercLib.Models.Planar.Arms.TwoPoint
 public import PercLib.Models.Planar.CriticalProbability
 public import PercLib.Models.Planar.CrossingSymmetry
