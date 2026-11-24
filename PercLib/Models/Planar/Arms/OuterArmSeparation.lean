@@ -22,8 +22,8 @@ Nolin's separation theorem at the outer boundary of an annulus, for colour seque
 and uniformly over the laws with crossing bounds: up to a constant factor, the arms of the `j`-arm
 event from `B_r(z)` to `∂B_R(z)` can be required to land in prescribed windows, and they can be
 chosen separated, with fences whose size is proportional to `R`. Consequences: extendability of
-the outer radius, `π(r, R) ≤ C π(r, 2R)`. The file also completes the upper half of
-quasi-multiplicativity for radii that may coincide.
+the outer radius, `π(r, R) ≤ C π(r, 2R)`, and the a priori lower bound `π(r, R) ≥ c (r / R)^α`.
+The file also completes the upper half of quasi-multiplicativity for radii that may coincide.
 
 The proof is Nolin's induction on scales, assembled from the outer separation step
 (`exists_law_multiArmEvent_inter_not_separated_le`) and the motion plan
@@ -59,6 +59,8 @@ All the parameters are integers; the arithmetic of the two steps is in `window_s
   can be chosen separated at ∂B_R(z) with parameters proportional to R)` for `r₀ ≤ r`, `7r ≤ R`.
 * `exists_law_multiArmEvent_le_law_multiArmEvent_two_mul`: **extendability of the outer radius**,
   `π_σ(r, R) ≤ C π_σ(r, 2R)` for `r₀ ≤ r ≤ R`, `2R ≤ L`.
+* `exists_le_law_multiArmEvent_rpow`: **the a priori lower bound**, `c₀ (r / R)^α ≤ π_σ(r, R)` for
+  `r₀ ≤ r ≤ R ≤ L` (the separated event loses a fixed factor per doubling of the radius).
 * `law_multiArmEvent_le_mul_of_le`: **upper half of quasi-multiplicativity** for all
   `j ≤ r₁ ≤ r₂ ≤ r₃` and every law (`C = 1`), from `law_multiArmEvent_le_mul` and
   `multiArmEvent_self_eq_univ` (the arm event across an empty annulus is everything for `j ≤ r`).
@@ -1388,5 +1390,145 @@ theorem law_multiArmEvent_le_mul_of_le (q : Sym2 (LatticeSite 2) → unitInterva
     · exact law_multiArmEvent_le_mul q σ z h₁ h₂
     · rw [multiArmEvent_self_eq_univ σ z (hj.trans h₁.le), measure_univ, mul_one]
   · rw [multiArmEvent_self_eq_univ σ z hj, measure_univ, one_mul]
+
+/-! ### The a priori lower bound -/
+
+/-- **The a priori lower bound** (Nolin, Proposition 14, lower half: polynomial lower bound for the
+`j`-arm event). For a colour sequence `σ` without packs there are `c₀ > 0`, `α > 0` and `r₀` such
+that for every law with crossing bounds `c` up to scale `L` and `r₀ ≤ r ≤ R ≤ L`:
+`c₀ (r / R)^α ≤ π_σ(r, R)`.
+
+Proof: the separated event with parameters proportional to the radius has probability at least
+`c₁` for `7r ≤ R < 14r` (`exists_pos_le_law_outerSeparated`) and loses at most the factor
+`w = min(c_W, 1/2)` when the radius doubles (`exists_pos_le_law_window_step`); with
+`α = log_{1/2} w`, induction on `R` gives `P(separated at R) ≥ c₁ (7r / R)^α`. For `r < R < 7r` the
+one-scale lower bound applies, and `π_σ(r, r) = 1` for `j ≤ r`. -/
+theorem exists_le_law_multiArmEvent_rpow {j : ℕ} (σ : Fin j → Bool)
+    (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) (c : ℕ → ℝ≥0∞) :
+    ∃ c₀ α : ℝ, 0 < c₀ ∧ 0 < α ∧ ∃ r₀ : ℕ, ∀ (q : Sym2 (LatticeSite 2) → unitInterval)
+      (L : ℕ∞), CrossingBounds q L c → ∀ (z : LatticeSite 2) (r R : ℕ), r₀ ≤ r → r ≤ R →
+        (R : ℕ∞) ≤ L → c₀ * ((r : ℝ) / R) ^ α ≤ (law q).real (multiArmEvent σ z r R) := by
+  obtain ⟨m, hm⟩ : ∃ m : ℕ, m = 1000 * (j + 1) * (j + 1) := ⟨_, rfl⟩
+  have hn : 1000 * (j + 1) * (j + 1) ≤ m := hm.ge
+  obtain ⟨c₁, hc₁, rB, hbase⟩ := exists_pos_le_law_outerSeparated σ hσ c hn
+  obtain ⟨cW, hcW, hwin⟩ := exists_pos_le_law_window_step σ hσ c hn
+  obtain ⟨c₂, hc₂, hone⟩ := exists_pos_le_law_multiArmEvent σ c 7
+  -- real constants
+  obtain ⟨w, hw⟩ : ∃ w : ℝ≥0∞, w = min cW (1 / 2) := ⟨_, rfl⟩
+  have hw0 : 0 < w := hw ▸ lt_min hcW (by norm_num)
+  have hw2 : w ≤ 1 / 2 := hw ▸ min_le_right _ _
+  have hwc : w ≤ cW := hw ▸ min_le_left _ _
+  have hwt : w ≠ ⊤ := ne_top_of_le_ne_top (by norm_num) hw2
+  have hwr0 : 0 < w.toReal := ENNReal.toReal_pos hw0.ne' hwt
+  have hwr2 : w.toReal ≤ 1 / 2 := by
+    have := ENNReal.toReal_mono (by norm_num) hw2
+    simpa using this
+  obtain ⟨d₁, hd₁⟩ : ∃ d₁ : ℝ, d₁ = (min c₁ 1).toReal := ⟨_, rfl⟩
+  have hd₁0 : 0 < d₁ := hd₁ ▸ ENNReal.toReal_pos (lt_min hc₁ one_pos).ne'
+    (ne_top_of_le_ne_top ENNReal.one_ne_top (min_le_right _ _))
+  have hd₁1 : d₁ ≤ 1 := hd₁ ▸ ENNReal.toReal_le_of_le_ofReal zero_le_one
+    (by rw [ENNReal.ofReal_one]; exact min_le_right _ _)
+  obtain ⟨d₂, hd₂⟩ : ∃ d₂ : ℝ, d₂ = (min c₂ 1).toReal := ⟨_, rfl⟩
+  have hd₂0 : 0 < d₂ := hd₂ ▸ ENNReal.toReal_pos (lt_min hc₂ one_pos).ne'
+    (ne_top_of_le_ne_top ENNReal.one_ne_top (min_le_right _ _))
+  have hd₂1 : d₂ ≤ 1 := hd₂ ▸ ENNReal.toReal_le_of_le_ofReal zero_le_one
+    (by rw [ENNReal.ofReal_one]; exact min_le_right _ _)
+  obtain ⟨α, hα⟩ : ∃ α : ℝ, α = Real.logb (1 / 2) w.toReal := ⟨_, rfl⟩
+  have hα0 : 0 < α := by
+    rw [hα]
+    exact Real.logb_pos_of_base_lt_one (by norm_num) (by norm_num) hwr0 (by linarith)
+  have hαw : (1 / 2 : ℝ) ^ α = w.toReal := by
+    rw [hα]; exact Real.rpow_logb (by norm_num) (by norm_num) hwr0
+  refine ⟨min d₁ d₂, α, lt_min hd₁0 hd₂0, hα0,
+    max (max rB (m * (m * m) + 2)) (max (4 * j + 1) j), ?_⟩
+  intro q L hCB z r R hr hrR hRL
+  have hrB : rB ≤ r := le_trans (le_max_left _ _) (le_trans (le_max_left _ _) hr)
+  have hm3 : m * (m * m) + 2 ≤ r := le_trans (le_max_right _ _) (le_trans (le_max_left _ _) hr)
+  have hj4 : 4 * j + 1 ≤ r := le_trans (le_max_left _ _) (le_trans (le_max_right _ _) hr)
+  have hr0 : (0 : ℝ) < r := by exact_mod_cast (by omega : 0 < r)
+  have hRr : (r : ℝ) ≤ R := by exact_mod_cast hrR
+  have hR0 : (0 : ℝ) < R := hr0.trans_le hRr
+  have hpow1 : ∀ x : ℝ, 0 ≤ x → x ≤ 1 → x ^ α ≤ 1 := fun x hx0 hx1 =>
+    Real.rpow_le_one hx0 hx1 hα0.le
+  -- the separated event at `R ≥ 7r`, by induction on `R`
+  have key : ∀ R : ℕ, 7 * r ≤ R → (R : ℕ∞) ≤ L →
+      d₁ * ((7 * r : ℝ) / R) ^ α ≤ (law q (outerSeparatedArmEvent σ z r R
+        ((2 * (((64 * m + 24 * j + 24) * (R / (m * m)) : ℕ) : ℤ) - 1 : ℤ) : ℝ)
+        (2 * (R / (m * m))) (R / (m * m)))).toReal := by
+    intro R
+    induction R using Nat.strong_induction_on with
+    | _ R ih =>
+    intro hR hRL
+    have hR0' : (0 : ℝ) < R := by exact_mod_cast (by omega : 0 < R)
+    by_cases hsmall : R < 14 * r
+    · have hb := hbase q L hCB z r R hrB hR (by omega) hRL
+      have h1 : d₁ ≤ (law q (outerSeparatedArmEvent σ z r R
+          ((2 * (((64 * m + 24 * j + 24) * (R / (m * m)) : ℕ) : ℤ) - 1 : ℤ) : ℝ)
+          (2 * (R / (m * m))) (R / (m * m)))).toReal :=
+        hd₁ ▸ ENNReal.toReal_mono (measure_ne_top _ _) ((min_le_left _ _).trans hb)
+      have h2 : ((7 * r : ℝ) / R) ^ α ≤ 1 := hpow1 _ (by positivity)
+        (by rw [div_le_one hR0']; exact_mod_cast hR)
+      nlinarith
+    · have hNL : ((R / 2 : ℕ) : ℕ∞) ≤ L := le_trans (by exact_mod_cast (by omega : R / 2 ≤ R)) hRL
+      have hih := ih (R / 2) (by omega) (by omega) hNL
+      obtain ⟨tT, lamT, αT, βT, hw1, hw2', hw3, hw4, hw5⟩ := exists_bottom_windows hn z R
+      have hW := hwin q L hCB z r (R / 2) R tT lamT αT βT (by omega) (by omega) (by omega)
+        (by omega) hRL hw1 hw2' hw3 hw4 hw5
+      have hWB : w * law q (outerSeparatedArmEvent σ z r (R / 2)
+          ((2 * (((64 * m + 24 * j + 24) * (R / 2 / (m * m)) : ℕ) : ℤ) - 1 : ℤ) : ℝ)
+          (2 * (R / 2 / (m * m))) (R / 2 / (m * m))) ≤ law q (outerSeparatedArmEvent σ z r R
+          ((2 * (((64 * m + 24 * j + 24) * (R / (m * m)) : ℕ) : ℤ) - 1 : ℤ) : ℝ)
+          (2 * (R / (m * m))) (R / (m * m))) := by
+        refine (mul_le_mul' hwc le_rfl).trans (hW.trans (measure_mono ?_))
+        rintro ω ⟨a, b, γ, hγ, hd, ho, hs, -⟩
+        exact ⟨a, b, γ, hγ, hd, ho, hs⟩
+      have hWr := ENNReal.toReal_mono (measure_ne_top _ _) hWB
+      rw [ENNReal.toReal_mul] at hWr
+      -- `(7r / R)^α ≤ w (7r / N)^α` with `N = ⌊R / 2⌋`
+      have hN0 : (0 : ℝ) < (R / 2 : ℕ) := by exact_mod_cast (by omega : 0 < R / 2)
+      have hNR : ((R / 2 : ℕ) : ℝ) / R ≤ 1 / 2 := by
+        rw [div_le_iff₀ hR0']
+        have : ((R / 2 : ℕ) : ℝ) * 2 ≤ R := by exact_mod_cast (Nat.div_mul_le_self R 2)
+        linarith
+      have hsplit : (7 * r : ℝ) / R = (7 * r : ℝ) / (R / 2 : ℕ) * (((R / 2 : ℕ) : ℝ) / R) := by
+        field_simp
+      have hpow : ((7 * r : ℝ) / R) ^ α ≤ ((7 * r : ℝ) / (R / 2 : ℕ)) ^ α * w.toReal := by
+        rw [hsplit, Real.mul_rpow (by positivity) (by positivity), ← hαw]
+        gcongr
+      have hpos : 0 ≤ ((7 * r : ℝ) / (R / 2 : ℕ)) ^ α := by positivity
+      calc d₁ * ((7 * r : ℝ) / R) ^ α ≤ d₁ * (((7 * r : ℝ) / (R / 2 : ℕ)) ^ α * w.toReal) :=
+            mul_le_mul_of_nonneg_left hpow hd₁0.le
+        _ = w.toReal * (d₁ * ((7 * r : ℝ) / (R / 2 : ℕ)) ^ α) := by ring
+        _ ≤ w.toReal * (law q _).toReal := mul_le_mul_of_nonneg_left hih hwr0.le
+        _ ≤ _ := hWr
+  -- conclusion
+  have hrRpow : ((r : ℝ) / R) ^ α ≤ 1 := hpow1 _ (by positivity) (by rw [div_le_one hR0]; exact hRr)
+  have hrRpos : 0 ≤ ((r : ℝ) / R) ^ α := by positivity
+  rw [Measure.real]
+  by_cases hbig : 7 * r ≤ R
+  · have h1 := key R hbig hRL
+    have h2 : (law q (outerSeparatedArmEvent σ z r R
+        ((2 * (((64 * m + 24 * j + 24) * (R / (m * m)) : ℕ) : ℤ) - 1 : ℤ) : ℝ)
+        (2 * (R / (m * m))) (R / (m * m)))).toReal ≤ (law q (multiArmEvent σ z r R)).toReal :=
+      ENNReal.toReal_mono (measure_ne_top _ _)
+        (measure_mono outerSeparatedArmEvent_subset_multiArmEvent)
+    have h3 : ((r : ℝ) / R) ^ α ≤ ((7 * r : ℝ) / R) ^ α := by
+      gcongr
+      linarith
+    calc min d₁ d₂ * ((r : ℝ) / R) ^ α ≤ d₁ * ((7 * r : ℝ) / R) ^ α :=
+          mul_le_mul (min_le_left _ _) h3 hrRpos hd₁0.le
+      _ ≤ _ := h1.trans h2
+  · rcases hrR.lt_or_eq with hlt | rfl
+    · have h1 : d₂ ≤ (law q (multiArmEvent σ z r R)).toReal :=
+        hd₂ ▸ ENNReal.toReal_mono (measure_ne_top _ _)
+          ((min_le_left _ _).trans (hone q L hCB z r R (by omega) hlt (by omega) hRL))
+      calc min d₁ d₂ * ((r : ℝ) / R) ^ α ≤ d₂ * 1 :=
+            mul_le_mul (min_le_right _ _) hrRpow hrRpos hd₂0.le
+        _ ≤ _ := by rw [mul_one]; exact h1
+    · have hj : j ≤ r := le_trans (le_max_right _ _) (le_trans (le_max_right _ _) hr)
+      rw [multiArmEvent_self_eq_univ σ z hj, measure_univ, ENNReal.toReal_one]
+      calc min d₁ d₂ * ((r : ℝ) / r) ^ α ≤ 1 * 1 :=
+            mul_le_mul ((min_le_left _ _).trans hd₁1) hrRpow hrRpos zero_le_one
+        _ = 1 := one_mul 1
 
 end PercLib.Models.Planar
