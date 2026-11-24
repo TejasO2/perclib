@@ -32,8 +32,15 @@ along its side (jogs), the first gluing with fences at the new boundary for stra
 (`exists_pos_le_law_separated_of_separated`) and the window-to-window step
 (`exists_pos_le_law_windows_of_windows`, constant independent of the separation scale); the rotation
 into fixed windows (corridors turning round the corners and a motion plan) and the two-sided gluing
-are designed in §15.4 and not proved (A3b-2d). Nothing in `Arms/Defs.lean` or `Planar/Defs.lean` was
-changed. Local commits only, nothing pushed.
+are designed in §15.4 and not proved (A3b-2d). The A3b-2d session (§16) proved corridors that turn
+round the four corners, jogs whose new fence may be as large as the old one, the gluing over disjoint
+regions, the stage of moves between windows (jogs and turns, `exists_pos_le_law_windows_of_moves`) and
+chains of stages with constant fences (`exists_pos_le_law_windows_of_stages`); it added the inner
+fence predicates as an interface commit in `Arms/Separation/Defs.lean`. The motion plan (the stage
+data from start bins to prescribed windows, package A3b-2e) and the two-sided gluing are designed in
+§16.5–§16.6 and not proved; §16.4 records that A3b-2c's window step cannot be iterated (fixed by the
+wide caps). Nothing in `Arms/Defs.lean` or `Planar/Defs.lean` was changed. Local commits only, nothing
+pushed.
 
 ## Decisions (user, 2026-11-22)
 
@@ -2051,3 +2058,368 @@ A first run on `d1b2f16` also passed, but its NOTICE named `CapGluing.lean` (tok
 classifier of `scripts/check_proof_pr.py` splits identifiers at non-ASCII letters, so the hypothesis
 name `hκdef` produced `def`. `e15749d` renames it (`hκeq`); no statement changed. This note's commit
 changes only `docs/`.
+
+## 16. A3b-2d (2026-11-24): corner turns, wide caps, stages of moves between windows; inner fences
+
+Package A3b-2d = the rest of item 5 of §5 as designed in §15.4: (a) the first gluing into fixed
+windows (the rotation) and (b) the two-sided gluing. **Proved for (a):** corridors that turn round
+the four corners, jogs whose new fence may be as large as the old one (wide caps), the gluing over
+pairwise disjoint regions, **the stage of moves between windows** (every arm jogs along its side
+or turns round the next corner, constant independent of the separation scale) and **chains of
+stages** with constant fences. **Not proved for (a):** the motion plan, i.e. the existence, for given
+start bins and prescribed target windows, of the stage data the chain theorem takes; it is pure
+integer combinatorics, designed in §16.5 (package "A3b-2e"). **For (b):** the inner fence
+predicates are added as an interface-only commit; the two-sided gluing itself is designed in §16.6,
+not proved. One erratum to §15.5 (the window step of A3b-2c cannot be iterated) is fixed by the wide
+caps (§16.4). Commits:
+
+* `b069f97` **Arms/TurnCorridors** (new module, 1905 lines, 24 theorems; proof-only).
+* `3d5707e` **Arms/RotationGluing** (new module): gluing over regions, region disjointness, one move,
+  the stage of moves (proof-only).
+* `f04a0ba` **Arms/RotationGluing**: chains of stages, covering by bin windows (module now 1530
+  lines, 19 theorems; proof-only).
+* `4aba31b` **Arms/Separation/Defs** (**interface**, additive): `HasInnerFence`,
+  `ArmsInnerSeparated`, `innerSeparatedArmEvent` and their API (+462 lines; nothing outer changes).
+* this note's commit (docs only).
+
+Gate: §16.10.
+
+### 16.1 The statements proved (a)
+
+**Legs of two crossings** (`exists_walk_leg2_top/bottom/right/left`): a fenced arm ending in the
+bin `[x, x + W]` on a side of `B_R(z)` (`W ≤ K ≤ M`) is continued on the crossings of `V₁` (out of
+the side, `[x, x + W] × [z₁ + R, z₁ + h + W]` on the top side) and of a band `H` at the level `h`
+(`[xl, xr] × [z₁ + h, z₁ + h + W]`, any `xl ≤ x`, `x + W ≤ xr`) by a walk of its colour through the box
+of radius `M` about its end and `V₁` to a vertex of the crossing walk of `H`, whose walk is returned.
+
+**Turns** (`exists_walk_turn_right_top`, `exists_walk_turn_top_left`, `exists_walk_turn_left_bottom`,
+`exists_walk_turn_bottom_right`; the four counterclockwise ones): a leg whose band runs to the far
+boundary of `B_{R'}(z)`, followed by the cap of the *next* side (A3b-2c's `exists_walk_cap_*`, whose
+fence size `K'` is free) on the band. From the right side to the top side: `H₁ = [z₀ + R, z₀ + h + W]
+× [y, y + W]`, band `V = [z₀ + h, z₀ + h + W] × [y, z₁ + R' - 1]`, top cap on the columns
+`[z₀ + h, z₀ + h + W]`; the new end is the first exit from the interior of `B_{R'}(z)`, on the top side
+in those columns, with a fence `(M', K')`, for `R + M + 1 ≤ h`, `h + W + M' ≤ R'`, `W + K' ≤ M'`.
+The other three are the same at their corners (from the top side to the left side the band is
+`[z₀ - R' + 1 - δ, x + W] × [z₁ + h, z₁ + h + W]`; `δ = cond col 0 1` appears only in rows (columns)
+that touch the old side or the new side).
+
+**Jogs with wide caps** (`exists_walk_jogCap_top` and the three other sides): A3b-2c's jog with the
+inset of the bands set to `0` and the cap's fence box `[x + d - K', x + d + W + K']` decoupled from the
+corridor: the new fence may be as long as `M' - W` (in A3b-2c it was at most `(W - 1)/2`).
+
+**Corridor events** (`exists_corridor_of_boxes`, eight instances `exists_corridor_jogCap_*`,
+`exists_corridor_turn_*`): six crossings (a turn has five; the first is counted twice) form an event
+that is measurable, determined by its boxes, monotone in the colour and of probability at least
+`c κ ^ 6` under `2R' + 2 ≤ κW`, `W + 2K' ≤ κ(M' - 1)`; the event, its read pairs, the region of the
+continuation and the boxes of radius `M + 1` about the possible ends lie in a given rectangle
+`Icc gl gh`.
+
+**Gluing over disjoint regions** (`law_mul_prod_le_law_of_regions`): `law_mul_prod_le_law_of_corridors`
+when each corridor's pairs, its continuation region and the boxes about its possible ends lie in a
+region `G i`, the `G i` pairwise disjoint; the conditions on other-colour corridors and same-colour
+regions then hold automatically. For fixed bins: `pow_mul_law_le_law_of_regions`
+(`c κ ^ (6j) P(separated, ends in B) ≤ P(arms to ∂B_{R'}, ends in B' with fences (M', K'))`).
+
+**Regions and one move.** `disjoint_regions_of_moves` (64 cases, eight sublemmas, `omega`): the
+rectangles of two moves are disjoint when the windows are `S` from the corners and `S` apart on one
+side, a turning arm is the last of its side in counterclockwise order, and
+`S ≥ W + 2D + 2M + 2K' + 3`. `exists_corridor_move`: the corridor of one move (four jogs, four
+turns) in its rectangle, from the window `[α, β]`, the bin start `x ∈ [α, β]` and the move.
+
+**The stage of moves between windows** (`exists_pos_le_law_windows_of_moves`):
+
+```lean
+theorem exists_pos_le_law_windows_of_moves (σ) (hσ) (c : ℕ → ℝ≥0∞) (A N : ℕ) :
+    ∃ c₀ : ℝ≥0∞, 0 < c₀ ∧ ∀ q L, CrossingBounds q L c → ∀ z r R R' W M K M' K' D S (h : ℤ) s
+      (g' : ℤ) J (t t' : Fin j → Fin 4) (τ : Fin j → Bool) (α β d α' β' : Fin j → ℤ),
+      1 ≤ W → W ≤ K → K ≤ M → 2 ≤ M' → W + K' ≤ M' → W + 2D + 2M + 2K' + 3 ≤ S →
+      4M ≤ s → r + M + 1 < R → R + M + 1 ≤ h → h + W + M' ≤ R' →
+      2R' + 2 ≤ A W → W + 2K' ≤ A (M' - 1) → R' ≤ L → |d i| ≤ D →
+      (windows [α i, β i] of N bins of width W) → (windows S from the corners of B_R) →
+      (windows on one side S apart) → (a turning arm is the last of its side counterclockwise) →
+      (target: τ i = false: t' i = t i, [α i + d i, β i + d i + W];
+               τ i = true: next side counterclockwise, [z₀ + h, z₀ + h + W] from the right side,
+               [z₁ + h, z₁ + h + W] from the top, [z₀ - h - W, z₀ - h] from the left,
+               [z₁ - h - W, z₁ - h] from the bottom) →
+      1 ≤ g' → (targets g' from the corners of B_{R'}) → (targets on one side g' apart) →
+      c₀ * P(separated at R (s, M, K), ends in the windows (t, α, β), inner positions in J) ≤
+        P(separated at R' (2g' - 1, M', K'), ends in the windows (t', α', β'), J)
+```
+
+(windows as in `exists_pos_le_law_windows_of_windows`: side `0` top, `1` right, `2` bottom, `3` left,
+coordinate along the side). `c₀ = c A ^ (6j) / (N + 1) ^ j`: **depends only on `σ`, `c`, `A`, `N`**.
+With `τ ≡ false` this is the window-to-window step with output fences of any size; with `M' = M`,
+`K' = K` (`W + K ≤ M`) it can be iterated with the same fences.
+
+**Chains of stages** (`exists_pos_le_law_windows_of_stages`): `n` stages from radii `ρ k` to
+`ρ (k + 1)` at levels `hl k`, stage data `t k`, `α k`, `β k`, `τ k`, `d k` (the targets of stage `k`
+are the windows of stage `k + 1`), fences `(M, K)` throughout, `g' = S` at every stage:
+
+```lean
+    c₀ * P(separated at ρ 0 (s, M, K), ends in the windows of stage 0, J) ≤
+      P(separated at ρ n (2S - 1, M, K), ends in the windows of stage n, J)
+```
+
+with `c₀ = c₀(stage) ^ n`, under the stage hypotheses for every `k < n` (windows `S` from the corners
+and apart for every `k ≤ n`), `W + K ≤ M`, `W + 2D + 2M + 2K + 3 ≤ S`, `W + 2K ≤ A(M - 1)`,
+`r + M + 1 < ρ 0`, `ρ k + M + 1 ≤ hl k`, `hl k + W + M ≤ ρ (k + 1)`, `2ρ(k + 1) + 2 ≤ A W`.
+Helper `pow_mul_le_of_forall_mul_le` (`geom_le` in `ℝ≥0∞`).
+
+**Covering by bins** (`law_le_sum_law_windows_of_separated`): `P(separated at R, s ≥ 4M) ≤
+Σ_p P(separated, arm i ends in the bin window p i)` over the `(4(2A + 1))^j` choices of a side and a
+bin of width `W` per arm (`R ≤ AW`); a chain starts from one of these.
+
+### 16.2 The inner fences (interface, `Arms/Separation/Defs.lean`, commit `4aba31b`)
+
+```lean
+def HasInnerFence (ω) (c : Bool) (z) (r M K : ℕ) {a b} (γ : Walk a b) : Prop :=
+  ∃ x ∈ γ.support, ∃ u v, G ∩ E ∈ localConn (Icc (a - M) (a + M)) x u ∧
+    ((a 1 = z 1 + r ∧ u 0 = a 0 - K ∧ v 0 = a 0 + K ∧ G ∩ E ∈ localConn (Icc ![a 0 - K, a 1 - M] ![a 0 + K, a 1]) u v) ∨
+     (a 0 = z 0 + r ∧ u 1 = a 1 - K ∧ v 1 = a 1 + K ∧ … (Icc ![a 0 - M, a 1 - K] ![a 0, a 1 + K]) u v) ∨
+     (a 1 = z 1 - r - cond c 0 1 ∧ … (Icc ![a 0 - K, a 1] ![a 0 + K, a 1 + M]) u v) ∨
+     (a 0 = z 0 - r - cond c 0 1 ∧ … (Icc ![a 0, a 1 - K] ![a 0 + M, a 1 + K]) u v))
+def ArmsInnerSeparated (ω) (σ) (z) (r : ℕ) (s : ℝ) (M K : ℕ) (γ) : Prop :=
+  (∀ i k, i ≠ k → s ≤ |innerPos z r (σ i) (γ i) - innerPos z r (σ k) (γ k)|) ∧
+  (∀ i (m : ℕ), s ≤ |innerPos z r (σ i) (γ i) - m (4r + 2)|) ∧ ∀ i, HasInnerFence ω (σ i) z r M K (γ i)
+def innerSeparatedArmEvent (σ) (z) (r R : ℕ) (s : ℝ) (M K : ℕ) :=
+  {ω | ∃ a b γ, arms from B_r(z) to ∂B_R(z) ∧ ArmsDisjoint σ γ ∧ order ∧ ArmsInnerSeparated ω σ z r s M K γ}
+```
+
+(`G = cond c ω (dualConfig ω)`, `E` the edges.) This is §12.4's intended shape. API, mirroring the
+outer one: `mem_innerSeparatedArmEvent_iff` (`Iff.rfl`), `innerSeparatedArmEvent_subset_multiArmEvent`,
+`HasInnerFence.mono`, `ArmsInnerSeparated.mono`, `innerSeparatedArmEvent_mono` (antitone in `s`,
+monotone in `M`, not in `K`), `innerSeparatedArmEvent_fin_zero`, `measurableSet_setOf_hasInnerFence`,
+`measurableSet_innerSeparatedArmEvent`, `hasInnerFence_iff_of_inter_eq` (box
+`Icc (a - (M + K)) (a + (M + K + 1))`), `mem_innerSeparatedArmEvent_iff_of_inter_eq` (`r < R`, box
+`B_{R + M + K + 1}(z)`), `HasInnerFence.map_add`, `image_add_mem_innerSeparatedArmEvent(_iff)`
+(with `innerPos_map_add`), the helper `IsArm.start_mem_Icc` (an arm from `B_r(z)` starts in
+`Icc (z - r - 1) (z + r)`), and an `example`: with every edge open, the open arm `(1, 0) → (2, 0)`
+from `B_1(0)` to `∂B_2(0)` has inner position `9` (corners `6`, `12`) and the inner fence
+`(1, -1) → (1, 1)` in `[0, 1] × [-1, 1]`, so it lies in `innerSeparatedArmEvent ![true] 0 1 2 2 1 1`.
+
+**The half-unit (§12.4) is settled as follows:** the dual inner fence box is anchored at the first
+face `a` and contains its row (column), which lies just outside `B_r(z)`, and the `M` rows inside.
+A fence one row further in (the other form §12.4 anticipated from reflecting Lemma 15's arm box) is
+also a fence in this sense (a connection in a sub-box is a connection in the box), so the definition
+fits both forms an inner separation step may produce; it does not fix a half-unit that a proof could
+contradict.
+
+For the interface PR (stacked after the outer one, §12.5): the three definitions and the 14 API
+theorems above, one `example`; no tag, no `…Input`. A reviewer's questions: right notion (mirror of
+the outer, fence box inside `B_r`); duplicates (none; `rg -i "innerfence|innerSeparated"` empty
+before); the corner formula `m (4r + 2)` (the doubled inner box has side `4r + 2`, `innerPos`'s
+docstring); arms separated at both ends are written inline (`ArmsOuterSeparated … ∧
+ArmsInnerSeparated …`), as §12.3 proposed.
+
+### 16.3 Decisions (mine, per the standing instruction)
+
+1. **Wide caps.** The output fence of a stage is decoupled from the corridor width (`W + K' ≤ M'`
+   instead of `4K' ≤ W`), so a stage can output the fences it was given (`M' = M`, `K' = K`); this
+   is what makes stages iterable (erratum, §16.4).
+2. **Counterclockwise turns only, from anywhere on the side.** A turn is taken by the last arm of its
+   side in counterclockwise order, from wherever its window is; it lands on the next side near its
+   start corner (`[z₀ + h, z₀ + h + W]` etc.). Arms never need to approach a corner by jogs (they
+   cannot: corners recede faster than jogs move, §16.4). One turn per side per stage.
+3. **Regions are rectangles,** one formula for each side and kind of move (in
+   `disjoint_regions_of_moves`, together with the window bounds); disjointness from one-dimensional
+   conditions on the windows: `S` from the corners, `S` apart, the turning arm last;
+   `S ≥ W + 2D + 2M + 2K' + 3`. The gluing over regions replaces A3b-2b's corner lemma (`hQdisj` and
+   `hTB` follow from disjointness), at the price of needing room (`s ≫ M`), which the straight first
+   gluing provides.
+4. **One level `h` per stage** for all arms; jogs use the band `[x - D, x + D + W]` (`xl = x - D`,
+   `xr = x + D`); turns use the same `h`. Typical: `h = R + M + 1`, `R' ≥ h + W + M'`; a turn's landing
+   is `R' - h - W` from the new corner, so the next stage needs `R' - R ≥ S + M + W + 1`.
+5. **Constants.** `κ = A` with `2R' + 2 ≤ AW` and `W + 2K' ≤ A(M' - 1)` (all box aspect ratios);
+   `c₀ = c A ^ (6j) / (N + 1) ^ j` per stage, `c₀ ^ n` for a chain of `n` stages. Chosen before `q`,
+   `L`, `z` and the radii.
+6. **Windows and bins** as in A3b-2c: a jog's target widens by `W` (`[α + d, β + d + W]`); a turn's
+   target has width `W` whatever the source window (it is fixed by `h`). The chain uses `g' = S` at
+   every stage (separation `2S - 1`, read off the windows).
+7. **The plan is data.** The chain theorem takes the stage data as functions of the stage index and
+   checks every stage's hypotheses; producing the data (the motion plan) is separate (§16.5).
+8. **Turn events have five crossings, the first counted twice,** so every move's event is indexed by
+   `Fin 6` and has the bound `c κ ^ 6`.
+9. **No new definition** in the proof modules; the stage statement is written out (as A3b-2c's
+   window step). The inner fences are definitions (interface commit), as the task required.
+10. `geom_le` exists only for `ℝ`; its `ℝ≥0∞` form `pow_mul_le_of_forall_mul_le` is proved locally
+    (seven lines) rather than added to a general file.
+
+### 16.4 Errata and observations
+
+* **A3b-2c's window step cannot be iterated as §15.5 says.** Its hypotheses `4K' ≤ W ≤ K` force the
+  output fence `K'` to be at most a quarter of the input `K`; iterating `n` steps shrinks `K` by
+  `4^n`, so after `O(log(R/ρ)/ε)` steps (§15.5) the fences vanish and the aspect ratios blow up. The
+  cause is the cap's fence box tied to the corridor (`[x + d, x + d + W]`). Fix: wide caps (§16.3.1);
+  `exists_pos_le_law_windows_of_moves` with `τ ≡ false` and `M' = M`, `K' = K` is the iterable
+  window step. §15.5's parameter list ("`K = W`, `K' = ⌊W/4⌋`") should read `K' = K`, `W + K ≤ M`.
+* **Corners recede faster than jogs move.** A stage grows the radius by `R' - R ≥ M + W + M' + 1`
+  while a jog moves an arm by `|d| ≤ D < S/2`; with `S > 2M` an arm's distance to the next corner grows
+  at every stage. So §15.4's "turn when near the corner" never happens; turns are taken from anywhere
+  on the side by the last arm of the side (decision 2).
+* **A turn's landing must clear the new corner by `S`** (it is the next stage's window): the stage
+  needs `h + W + S ≤ R'`, i.e. `R' - R ≥ S + M + W + 1`. Not a hypothesis of the stage lemma (its
+  output windows are checked by `hcor'`), but every plan needs it.
+* **Two turning arms on one side are excluded by the "last of its side" condition only if windows are
+  nonempty** (`α ≤ β`): `disjoint_regions_of_moves` takes `α ≤ β` for both arms; the stage proof gets
+  it from the bin start `x ∈ [α, β]` of a nonempty bin event.
+* No plan statement of §2 or §14–§15 had to change; no hypothesis beyond `hσ` was needed.
+
+### 16.5 What remains of (a): the motion plan (package "A3b-2e", no probability)
+
+**Statement to prove** (pure integer combinatorics): for `j` arms whose start windows are bins of
+width `W` on the sides `t⁰ i` of `B_{ρ₀}(z)` (from `law_le_sum_law_windows_of_separated`), in
+counterclockwise order of `i`, at least `S₀ ≫ S` from the corners and from each other, and target
+windows `(t^T i, [a i, b i])` on `B_{ρ_F}(z)` in the same cyclic order, of width at least `w_F`, at
+least `S_T` from the corners and apart, there are `n ≤ n₀(j, ρ₀/W, …)` and stage data `ρ k`,
+`hl k`, `t k`, `α k`, `β k`, `τ k`, `d k` satisfying every hypothesis of
+`exists_pos_le_law_windows_of_stages`, with stage `0` = the start bins and the windows of stage `n`
+inside the target windows (then `multiArmEventTo_mono`-style monotonicity of the window event gives
+the target event). All parameters are proportional to `ρ₀` with constants from `η`, `j` and the
+target data, so the chain constant `c₀ ^ n` depends only on those.
+
+**Design.**
+1. *Lifted sides.* Number the sides counterclockwise `0` bottom, `1` right, `2` top, `3` left (the
+   stage lemma's `t` is a relabelling). Lift start and target sides to integers `λ⁰ i ≤ λ^T i`,
+   nondecreasing along `i` with `λ (j - 1) ≤ λ 0 + 4`, `λ^T i - λ⁰ i ≤ 7` (choose the lift of the
+   targets with `min (λ^T - λ⁰) ∈ [0, 4)`; the targets' lifted positions minus the starts' lie in an
+   interval of length less than one turn, so the maximum is below `8`).
+2. *Turn rounds* (at most `8j` stages). In each stage, on each side the last arm in counterclockwise
+   order turns iff its lifted side is below its target; all other arms go straight (`d = 0`). Invariant:
+   `λ` stays nondecreasing along `i` with the wrap condition, `λ ≤ λ^T`, so on one side the remaining
+   turns `λ^T - λ` increase counterclockwise and the last arm has the most; `Σ (λ^T - λ)` drops by at
+   least one per stage while positive. Geometry: a turn at stage `k` lands at the side coordinate
+   `±(ρ_k + M + 1)` (level `hl k = ρ_k + M + 1`), farther out than every arm already on that side, so
+   with `ρ_{k+1} - ρ_k = Δ ≥ 2S + (widths) + M + W + 1` every window stays `S` from the corners and
+   from the others; windows widen by `W` per stage.
+3. *Spreading* (`S₁` stages). On each side, interpolate linearly from the positions after the turn
+   rounds to the target positions: `α_i(k) = u_i + ⌊k (v_i - u_i) / S₁⌋`; gaps stay at least
+   `min(start gap, target gap) - 1`, corner margins too (the radius grows linearly in `k`, so margins
+   interpolate), moves are at most `⌈2ρ_F / S₁⌉ ≤ D`. Floors with a variable denominator: state the
+   bounds `S₁ ⌊x/S₁⌋ ≤ x < S₁ ⌊x/S₁⌋ + S₁` as hypotheses and close with `nlinarith`.
+4. *Parameters.* `W ≪ M ≍ K ≪ D ≪ S ≪ Δ`, all `≍ ρ₀` with ratios from `η`, `j`, `θ̃`; the radius grows
+   by `(8j + S₁) Δ`, so `ρ_F ≤ C(η, j, θ̃) ρ₀` (the first gluing's `R ≤ D(η) R` budget).
+5. *Assembly.* `c₀(η) P(sep at ρ₀, s) ≤ Σ_p P(bin windows p) ≤ #p · c₀(stage)^{-n} P(target windows)`.
+
+Size estimate: 1000–1500 lines (the lift bookkeeping and the interpolation), one session.
+
+### 16.6 (b) The two-sided gluing: design (not proved)
+
+**Statement** (the form the lower half of quasi-multiplicativity uses, after both families have
+been put into aligned windows by Theorem 11 and window steps): for windows `(t i, [α i, β i])` at
+`R` (outer boundary of the inner family) and the *same* side coordinates at `R' = R + Δ` (inner
+boundary of the outer family, `[α i, β i + W]` say),
+
+```lean
+c₀ * P(arms B_{r₁} → ∂B_R, outer-separated (s, M, K), ends in the windows (t, α, β))
+   * P(arms B_{R'} → ∂B_{r₃}, inner-separated (s', M', K'), starts in the windows (t, α', β'))
+  ≤ P(multiArmEvent σ z r₁ r₃)          (inner windows of the first family carried, `J`)
+```
+
+with `c₀ = c(κ)^{3j}/(N+1)^{2j}`, `κ` from `Δ / W`, for `R + M + K + 1 < R' - M' - K' - 2`
+(independence) and the corner/gap conditions of the windows.
+
+**Proof plan and pieces.**
+1. *Independence.* The first event is determined by `B_{R + M + K + 1}(z)`
+   (`mem_outerSeparatedArmEvent_iff_of_inter_eq` with bins); the second by the pairs with an end
+   outside `B_{R' - M' - K' - 2}(z)`: a new determination lemma for `innerSeparatedArmEvent` (arms
+   from `B_{R'}` use edges with an end outside `B_{R'}`; inner fences lie within `M' + K' + 1` of
+   the starts). Then `prodBernoulli` independence (`prodBernoulli_iInter_fin_of_determined` pattern)
+   gives `P(E_in) P(E_out) = P(E_in ∩ E_out)`.
+2. *Straight two-sided corridors.* For arm `i` on the top side: one bottom-top crossing
+   `V = [x, x + W] × [z₁ + R, z₁ + R']` of the colour of the arm. It meets the outer fence of the inner
+   arm (horizontal, in `[b₀ - K, b₀ + K] × [R, R + M]`, `W ≤ K`) and the inner fence of the outer arm
+   (horizontal, in `[a₀ - K', a₀ + K'] × [R' - M', R']`, `W ≤ K'`) by
+   `exists_mem_support_of_mem_Icc_of_mem_Icc`, giving `x ∈ γ_in → fence → V → fence → y ∈ γ_out`.
+   Four sides (right/left by the coordinate swap). Corridor probability `c(κ)` per arm.
+3. *Conditioning on both families.* The sections of `E_in ∩ E_out` at fixed coordinates off the
+   corridors are upper for the mixed order: for `E_in` this is `separated_of_mixed_of_forall_mem`
+   (corridors miss the interior of `B_R` and the other-colour fence boxes at `R`); for `E_out` the
+   mirror (`separated_of_mixed` at the inner boundary: corridors miss the exterior of `B_{R'}` except
+   near the starts, and the other-colour inner fence boxes). Then
+   `prodBernoulli_mul_le_inter_of_mixed_of_determined` with `A = E_in ∩ E_out`.
+4. *The barrier at the inner boundary* (mirror of `notMem_support_of_mem_Icc`): a walk of the colour
+   of outer arm `i`, from a vertex of it near its start, whose points outside `B_{R'}` lie near the
+   start, misses every other outer arm of that colour (pack-free; same proof with `innerPos` and the
+   sector lemma `sbtw_innerPos_iff_sbtw_landingPos`).
+5. *Gluing.* `exists_isArm_of_glue` with the continuation `P_i ++ (tail of γ_out i)` (ending at
+   `∂B_{r₃}`); `hdisj` from disjoint regions (corridors), the outer family's disjointness, and step 4;
+   order by order invariance at both boxes.
+6. *Bins.* Union over the bins of both families (`(N + 1)^{2j}` configurations), as in the window
+   step.
+
+Reuses: `law_mul_le_law_inter_of_mixed_of_innerPos` (conditioning, generalised to two events),
+`exists_isArm_of_glue`, `exists_mem_support_of_mem_Icc_of_mem_Icc(_swap)`, `exists_walk_join`,
+`le_abs_landingPos_sub_of_windows`, the corridor event tools of `JogCorridors.lean` and
+`TurnCorridors.lean`, the new inner fence API. Size: about `law_mul_prod_le_law_of_corridors` plus
+four hooks plus the inner barrier, 1200–1500 lines, one session (after A3b-2e, or in parallel: it
+needs no plan).
+
+### 16.7 How A3b-3 uses the statements
+
+* **Window steps that iterate.** `exists_pos_le_law_windows_of_stages` with `τ ≡ false` (or
+  `exists_pos_le_law_windows_of_moves` with `τ ≡ false`, `M' = M`, `K' = K`): fences constant, constant
+  `c₀(σ, c, A, N)` per step, independent of `η` when windows and fences are proportional to the radius.
+  This replaces A3b-2c's `exists_pos_le_law_windows_of_windows` in §15.5's iteration (erratum §16.4).
+* **Theorem 11, outer half** (§15.5 with this package): outer step (`exists_law_multiArmEvent_inter_not_separated_le`)
+  → straight first gluing with fences (`exists_pos_le_law_separated_of_separated`, room `s' ≫ M'`)
+  → covering by bins (`law_le_sum_law_windows_of_separated`) → the plan of §16.5 (A3b-2e) and the chain
+  (`exists_pos_le_law_windows_of_stages`) into the core windows `θ̃` at `ρ'' ≤ C(η) ρ` → iterable window
+  steps (chain with `τ ≡ false`) to `R`; choose `δ` after the window-step constant.
+* **Quasi-multiplicativity, lower half**: §16.6 after aligning both families' windows by window steps.
+* **Inner half of Theorem 11**: the inner separation step will produce `innerSeparatedArmEvent`
+  (fence box as in §16.2); the inner gluing is the mirror of this package (turns and jogs inward), or
+  reduced to the outer one by the two-sided gluing.
+
+### 16.8 Search
+
+* PercLib, reused: `exists_walk_cap_top/right/bottom/left`, `exists_walk_join`,
+  `exists_mem_support_of_mem_Icc_of_mem_Icc(_swap)`, `exists_walk_of_mem_localConn`,
+  `measurableSet_setOf_forall_cond_crossing`, `forall_cond_crossing_iff_of_inter_eq`,
+  `prod_law_le_law_setOf_forall_cond_crossing`, `cond_mem_crossing_of_cond_subset`,
+  `CrossingBounds.le_law_preimage_cond_crossing_one/zero`, `mem_cond_interior_iff`,
+  `law_mul_prod_le_law_of_corridors`, `HasOuterFence.of_nil`, `exists_lt_mem_bin`,
+  `IsArm.exists_mem_bin`, `ArmsOuterSeparated.le_abs_landingPos_sub`, `le_abs_landingPos_sub_of_windows`,
+  `cond_zero_one_apply`; for the interface: the whole outer API as a template, `innerPos_map_add`,
+  `isOpenArm_toWalk_iff`, `perimeterPos_of_right`, `edgeSet_mem_localConn_Icc`.
+* Mathlib: `geom_le` (for `ℝ` only; the `ℝ≥0∞` form proved locally), `Finset.pow_card_le_prod`,
+  `measure_iUnion_fintype_le`, `ENNReal.pow_pos`, `ite_eq_left_of_eq_true`,
+  `ite_eq_right_of_eq_false` (the `ite_cond_eq_true/false` names are deprecated), `eq_true`, `eq_false`,
+  `Sym2.out_fst_mem`, `Set.disjoint_left`, `Icc_subset_Icc`.
+* Not found (added): turns at corners, wide caps, corridor events from boxes in a region, gluing over
+  disjoint regions, region disjointness of moves, the stage of moves, chains of stages, the covering by
+  bin windows, inner fences.
+
+### 16.9 Lessons
+
+* **`omega` reasons about `Fin 4` equalities** (`t i = 0`, `t i = 1` contradict); the
+  `first | omega | absurd …` fallback was flagged as unreachable.
+* **`rcases … with rfl` on `t' = t`** eliminates `t` (the right-hand variable); use a named
+  hypothesis and `subst t'` to keep `t`.
+* Event texts with a bound `k` (`∀ i k l, i < k → …`) capture a stage index named `k` substituted into
+  them: name stage indices `m` in such places; radii `ρ k` need parentheses inside applications.
+* **Generated 64-case disjointness**: eight sublemmas (one per case of the first arm), each `rcases`
+  on the second arm and one `omega`, with only the needed same-side facts introduced per case; unused
+  hypotheses named `_h…` (the linter flags hypotheses that `omega` happened not to use).
+* Boxes as variables with equations (`obtain ⟨gl, hgl₀, hgl₁⟩ : ∃ gl, gl 0 = … ∧ gl 1 = … :=
+  ⟨![_, _], rfl, rfl⟩`) again kept every region fact `omega`-ready.
+* `CrossingBounds.le_law_box_one/zero` (corners as four integers) let the probability facts of a
+  `Fin 6` event be passed by `fin_cases` and `exact` without `change`.
+* Builds: `TurnCorridors` 18 s, `RotationGluing` 9 s, the interface change rebuilt the dependents of
+  `Arms/Separation/Defs.lean` in a few minutes.
+
+### 16.10 Gate
+
+`scripts/gate.sh main` **passed on `4aba31b`** (axiom audit 12144 constants, only `propext`,
+`Classical.choice`, `Quot.sound`; the interface NOTICE, expected: the classifier names the first
+interface file, `Arms/Defs.lean`; `Arms/Separation/Defs.lean` changed too, by the additive interface
+commit `4aba31b`; no other notice). Final lines:
+
+```
+D-35 checks passed (tagged statements, headers of new files).
+INTERFACE change against ae4eb08e45a1: Proof PR touches an interface/non-Lean file: PercLib/Models/Planar/Arms/Defs.lean
+NOTICE: interface change; an auditor must approve before merge.
+== gate passed on 4aba31b4c1fc6dd4da6e40a50622e8f3235750de
+```
+
+The gate ran after a full `lake build --wfail` of the same tree (4020 jobs, which rebuilt the
+dependents of `Arms/Separation/Defs.lean`). This note's commit changes only `docs/`.
