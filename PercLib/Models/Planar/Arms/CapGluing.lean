@@ -31,6 +31,12 @@ at the cost of a constant factor (Nolin's Proposition 12, with fences at the new
   (`IsArm.shift_of_jog`, `abs_sub_sub_le_abs_of_shift`, `sub_le_abs_sub_of_shift`), and the new
   fences have any size `M' ≥ W`, `K' ≤ W / 4`.
 
+* **Window-to-window steps** (`exists_pos_le_law_windows_of_windows`): arms ending in windows
+  on the sides of `B_R(z)` are moved along their sides by fixed shifts (jogs) and capped at
+  `∂B_{R'}(z)`, ending in the shifted windows; the separation at `R'` is read off the windows
+  (`le_abs_landingPos_sub_of_windows`), so the constant does not depend on the separation scale
+  of the first gluing.
+
 ## Main results
 
 * `law_mul_prod_le_law_of_sides`: the gluing inside straight boxes.
@@ -40,7 +46,13 @@ at the cost of a constant factor (Nolin's Proposition 12, with fences at the new
   `exists_pos_le_law_outerSeparatedArmEvent_of_separated`: **the first gluing with fences at
   `∂B_{R'}(z)`**, `c₀ P(separated at R, scale s, fences (M, K)) ≤ P(separated at R', scale s - 4W,
   fences (M', K'))`, inner windows carried.
+* `le_abs_landingPos_sub_of_windows`: arms ending in separated windows on the sides are
+  separated.
+* `exists_pos_le_law_windows_of_windows`: **the window-to-window step**, `c₀ P(separated, ends in
+  windows [α i, β i] at R) ≤ P(separated at scale 2g' - 1 with fences (M', K'), ends in windows
+  [α i + d i, β i + d i + W] at R')`.
 -/
+
 
 @[expose] public section
 
@@ -968,5 +980,465 @@ theorem exists_pos_le_law_outerSeparatedArmEvent_of_separated {j : ℕ} (σ : Fi
 
 
 end Straight
+
+/-! ### Separation from windows on the sides -/
+
+section Windows
+
+/-- **Landing positions of two ends in windows on the sides**, integer form. Two ends on sides
+`t₁, t₂` of `B_ρ`, with coordinates `p₁, p₂` along their sides at least `g` from the corners, land
+at least `2g - 1` apart if they lie on different sides or, on one side, at least `g` apart. -/
+theorem le_abs_sub_of_windows {z0 z1 ρ g L₁ L₂ p₁ p₂ e₁ e₂ : ℤ} {t₁ t₂ : Fin 4}
+    (he₁ : 0 ≤ e₁ ∧ e₁ ≤ 1) (he₂ : 0 ≤ e₂ ∧ e₂ ≤ 1)
+    (h₁ : (t₁ = 0 ∧ L₁ = 8 * ρ + 2 * (z0 + ρ) - (2 * p₁ + e₁) ∧ z0 - ρ + g ≤ p₁ ∧
+        p₁ + g ≤ z0 + ρ) ∨
+      (t₁ = 1 ∧ L₁ = 4 * ρ + (2 * p₁ + e₁) - 2 * (z1 - ρ) ∧ z1 - ρ + g ≤ p₁ ∧ p₁ + g ≤ z1 + ρ) ∨
+      (t₁ = 2 ∧ L₁ = 2 * p₁ + e₁ - 2 * (z0 - ρ) ∧ z0 - ρ + g ≤ p₁ ∧ p₁ + g ≤ z0 + ρ) ∨
+      (t₁ = 3 ∧ L₁ = 12 * ρ + 2 * (z1 + ρ) - (2 * p₁ + e₁) ∧ z1 - ρ + g ≤ p₁ ∧ p₁ + g ≤ z1 + ρ))
+    (h₂ : (t₂ = 0 ∧ L₂ = 8 * ρ + 2 * (z0 + ρ) - (2 * p₂ + e₂) ∧ z0 - ρ + g ≤ p₂ ∧
+        p₂ + g ≤ z0 + ρ) ∨
+      (t₂ = 1 ∧ L₂ = 4 * ρ + (2 * p₂ + e₂) - 2 * (z1 - ρ) ∧ z1 - ρ + g ≤ p₂ ∧ p₂ + g ≤ z1 + ρ) ∨
+      (t₂ = 2 ∧ L₂ = 2 * p₂ + e₂ - 2 * (z0 - ρ) ∧ z0 - ρ + g ≤ p₂ ∧ p₂ + g ≤ z0 + ρ) ∨
+      (t₂ = 3 ∧ L₂ = 12 * ρ + 2 * (z1 + ρ) - (2 * p₂ + e₂) ∧ z1 - ρ + g ≤ p₂ ∧ p₂ + g ≤ z1 + ρ))
+    (hgap : t₁ = t₂ → p₁ + g ≤ p₂ ∨ p₂ + g ≤ p₁) :
+    2 * g - 1 ≤ |L₁ - L₂| := by
+  rw [le_abs]
+  rcases h₁ with ⟨ht₁, h₁⟩ | ⟨ht₁, h₁⟩ | ⟨ht₁, h₁⟩ | ⟨ht₁, h₁⟩ <;>
+    rcases h₂ with ⟨ht₂, h₂⟩ | ⟨ht₂, h₂⟩ | ⟨ht₂, h₂⟩ | ⟨ht₂, h₂⟩ <;>
+    first
+    | (have := hgap (ht₁.trans ht₂.symm); omega)
+    | omega
+
+/-- **Distance to the corners of an end in a window on a side**, integer form. -/
+theorem le_abs_sub_corner_of_window {z0 z1 ρ g L p e : ℤ} {t : Fin 4} (he : 0 ≤ e ∧ e ≤ 1)
+    (hg : 1 ≤ g)
+    (h : (t = 0 ∧ L = 8 * ρ + 2 * (z0 + ρ) - (2 * p + e) ∧ z0 - ρ + g ≤ p ∧ p + g ≤ z0 + ρ) ∨
+      (t = 1 ∧ L = 4 * ρ + (2 * p + e) - 2 * (z1 - ρ) ∧ z1 - ρ + g ≤ p ∧ p + g ≤ z1 + ρ) ∨
+      (t = 2 ∧ L = 2 * p + e - 2 * (z0 - ρ) ∧ z0 - ρ + g ≤ p ∧ p + g ≤ z0 + ρ) ∨
+      (t = 3 ∧ L = 12 * ρ + 2 * (z1 + ρ) - (2 * p + e) ∧ z1 - ρ + g ≤ p ∧ p + g ≤ z1 + ρ))
+    (m : ℕ) : 2 * g - 1 ≤ |L - 4 * m * ρ| := by
+  have key : ∀ k : ℕ, (4 * k * ρ + 2 * g - 1 ≤ L ∧ L + 2 * g - 1 ≤ 4 * (k + 1) * ρ) →
+      2 * g - 1 ≤ |L - 4 * m * ρ| := by
+    intro k ⟨h₁, h₂⟩
+    have hρ : 0 ≤ ρ := by nlinarith
+    rcases le_or_gt m k with hm | hm
+    · have : (m : ℤ) * ρ ≤ k * ρ := mul_le_mul_of_nonneg_right (by exact_mod_cast hm) hρ
+      exact le_abs.2 (Or.inl (by nlinarith))
+    · have : ((k : ℤ) + 1) * ρ ≤ m * ρ := mul_le_mul_of_nonneg_right (by exact_mod_cast hm) hρ
+      exact le_abs.2 (Or.inr (by nlinarith))
+  rcases h with ⟨-, h⟩ | ⟨-, h⟩ | ⟨-, h⟩ | ⟨-, h⟩
+  · exact key 2 ⟨by push_cast; omega, by push_cast; omega⟩
+  · exact key 1 ⟨by push_cast; omega, by push_cast; omega⟩
+  · exact key 0 ⟨by push_cast; omega, by push_cast; omega⟩
+  · exact key 3 ⟨by push_cast; omega, by push_cast; omega⟩
+
+variable {j : ℕ} {σ : Fin j → Bool} {z : LatticeSite 2} {r : ℕ}
+
+/-- **Arms ending in separated windows are separated.** Let the arms of a family to `∂B_ρ(z)` end in
+windows `[α i, β i]` on the sides `t i` (`0` top, `1` right, `2` bottom, `3` left; coordinates along
+the side), at least `g` from the corners, windows on one side at least `g` apart. Then any two
+landing positions are at least `2g - 1` apart and every landing position is at least `2g - 1`
+from the doubled corners. -/
+theorem le_abs_landingPos_sub_of_windows {ω : Config (LatticeSite 2)} {ρ : ℕ}
+    {a b : Fin j → LatticeSite 2} {γ : ∀ i, (zdGraph 2).Walk (a i) (b i)}
+    (hγ : ∀ i, IsArm ω (σ i) z r (z - ρ) (z + ρ) (γ i)) (hrρ : r < ρ) {g : ℤ} (hg : 1 ≤ g)
+    (t : Fin j → Fin 4) (α β : Fin j → ℤ)
+    (hwin : ∀ i, (t i = 0 ∧ b i 1 = z 1 + ρ ∧ α i ≤ b i 0 ∧ b i 0 ≤ β i) ∨
+      (t i = 1 ∧ b i 0 = z 0 + ρ ∧ α i ≤ b i 1 ∧ b i 1 ≤ β i) ∨
+      (t i = 2 ∧ b i 1 = z 1 - ρ - cond (σ i) 0 1 ∧ α i ≤ b i 0 ∧ b i 0 ≤ β i) ∨
+      (t i = 3 ∧ b i 0 = z 0 - ρ - cond (σ i) 0 1 ∧ α i ≤ b i 1 ∧ b i 1 ≤ β i))
+    (hcor : ∀ i, (if t i = 0 ∨ t i = 2 then z 0 else z 1) - ρ + g ≤ α i ∧
+      β i + g ≤ (if t i = 0 ∨ t i = 2 then z 0 else z 1) + ρ)
+    (hgap : ∀ i k, i ≠ k → t i = t k → β i + g ≤ α k ∨ β k + g ≤ α i) :
+    (∀ i k, i ≠ k → 2 * g - 1 ≤ |landingPos (z - ρ) (z + ρ) (σ i) (γ i) -
+      landingPos (z - ρ) (z + ρ) (σ k) (γ k)|) ∧
+    ∀ i (m : ℕ), 2 * g - 1 ≤ |landingPos (z - ρ) (z + ρ) (σ i) (γ i) - 4 * m * ρ| := by
+  have he : ∀ i, 0 ≤ cond (σ i) (0 : ℤ) 1 ∧ cond (σ i) (0 : ℤ) 1 ≤ 1 := fun i => by
+    cases σ i <;> simp
+  -- the position of each end along its side
+  have hpos : ∀ i, ∃ p : ℤ, α i ≤ p ∧ p ≤ β i ∧
+      ((t i = 0 ∧ landingPos (z - ρ) (z + ρ) (σ i) (γ i) =
+          8 * ρ + 2 * (z 0 + ρ) - (2 * p + cond (σ i) 0 1) ∧ z 0 - ρ + g ≤ p ∧ p + g ≤ z 0 + ρ) ∨
+        (t i = 1 ∧ landingPos (z - ρ) (z + ρ) (σ i) (γ i) =
+          4 * ρ + (2 * p + cond (σ i) 0 1) - 2 * (z 1 - ρ) ∧ z 1 - ρ + g ≤ p ∧ p + g ≤ z 1 + ρ) ∨
+        (t i = 2 ∧ landingPos (z - ρ) (z + ρ) (σ i) (γ i) =
+          2 * p + cond (σ i) 0 1 - 2 * (z 0 - ρ) ∧ z 0 - ρ + g ≤ p ∧ p + g ≤ z 0 + ρ) ∨
+        (t i = 3 ∧ landingPos (z - ρ) (z + ρ) (σ i) (γ i) =
+          12 * ρ + 2 * (z 1 + ρ) - (2 * p + cond (σ i) 0 1) ∧ z 1 - ρ + g ≤ p ∧
+            p + g ≤ z 1 + ρ)) := by
+    intro i
+    have hc := hcor i
+    rcases hwin i with ⟨ht, hb, h₁, h₂⟩ | ⟨ht, hb, h₁, h₂⟩ | ⟨ht, hb, h₁, h₂⟩ | ⟨ht, hb, h₁, h₂⟩ <;>
+      simp only [ht, Fin.isValue, true_or, or_true, ite_true, ite_false, Fin.reduceEq,
+        or_self] at hc
+    · exact ⟨b i 0, h₁, h₂, Or.inl ⟨ht, (hγ i).landingPos_eq_of_top hrρ hb, by omega, by omega⟩⟩
+    · exact ⟨b i 1, h₁, h₂, Or.inr (Or.inl ⟨ht, (hγ i).landingPos_eq_of_right hrρ hb, by omega,
+        by omega⟩)⟩
+    · exact ⟨b i 0, h₁, h₂, Or.inr (Or.inr (Or.inl ⟨ht, (hγ i).landingPos_eq_of_bottom hrρ hb,
+        by omega, by omega⟩))⟩
+    · exact ⟨b i 1, h₁, h₂, Or.inr (Or.inr (Or.inr ⟨ht, (hγ i).landingPos_eq_of_left hrρ hb,
+        by omega, by omega⟩))⟩
+  choose p hpα hpβ hp using hpos
+  refine ⟨fun i k hik => le_abs_sub_of_windows (he i) (he k) (hp i) (hp k) fun htt => ?_,
+    fun i m => le_abs_sub_corner_of_window (he i) hg (hp i) m⟩
+  rcases hgap i k hik htt with h | h
+  · exact Or.inl (by linarith [hpβ i, hpα k])
+  · exact Or.inr (by linarith [hpβ k, hpα i])
+
+end Windows
+
+/-! ### Window-to-window steps -/
+
+section WindowSteps
+
+variable {j : ℕ} {σ : Fin j → Bool} {z : LatticeSite 2} {r R : ℕ} {s : ℝ} {M K : ℕ}
+
+/-- **The bin of a coordinate in a window.** A coordinate `ℓ ∈ [α, β]` lies in one of the `N` bins
+`[α + n (W + 1), α + n (W + 1) + W]`, `n < N`, when `β - α + 1 ≤ N (W + 1)`. -/
+theorem exists_lt_mem_bin {α β ℓ : ℤ} {W N : ℕ} (h₁ : α ≤ ℓ) (h₂ : ℓ ≤ β)
+    (hN : β - α + 1 ≤ N * ((W : ℤ) + 1)) :
+    ∃ n : ℕ, n < N ∧ α + n * ((W : ℤ) + 1) ≤ ℓ ∧ ℓ ≤ α + n * ((W : ℤ) + 1) + W := by
+  have hW1 : (0 : ℤ) < W + 1 := by positivity
+  have hq0 : 0 ≤ (ℓ - α) / (W + 1) := Int.ediv_nonneg (by omega) hW1.le
+  have hq1 : (ℓ - α) / (W + 1) * (W + 1) ≤ ℓ - α := Int.ediv_mul_le _ hW1.ne'
+  have hq2 : ℓ - α < ((ℓ - α) / (W + 1) + 1) * (W + 1) := Int.lt_ediv_add_one_mul_self _ hW1
+  have hq3 : (ℓ - α) / (W + 1) < N := Int.ediv_lt_of_lt_mul hW1 (by linarith)
+  rw [add_one_mul] at hq2
+  refine ⟨((ℓ - α) / (W + 1)).toNat, by omega, ?_, ?_⟩ <;> rw [Int.toNat_of_nonneg hq0] <;>
+    nlinarith
+
+/-- **A window-to-window step for fixed bins.** Separated arms (separation `s ≥ 4S`, fences
+`(M, K)`) ending in windows `[α i, β i]` on the sides `t i` of `B_R(z)` and in the bins
+`[x i + D, x i + D + W]` are moved along their sides by `d i` (`|d i| ≤ D`) and capped at
+`∂B_{R'}(z)`: they end in the windows `[α i + d i, β i + d i + W]` with fences `(M', K')`, separated
+at scale `2g' - 1` when these windows are at least `g'` from the corners and from each other on one
+side. Cost `c κ ^ (6j)`. -/
+theorem pow_mul_law_le_law_windows_of_bins (q : Sym2 (LatticeSite 2) → unitInterval)
+    {L : ℕ∞} {c : ℕ → ℝ≥0∞} (hCB : CrossingBounds q L c)
+    (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) {R' M' K' W D κ S : ℕ} {h g' : ℤ}
+    (hM : 1 ≤ M) (hWK : W ≤ K) (hKM : K ≤ M) (hK' : 2 * K' + 1 ≤ W) (hM' : 2 ≤ M')
+    (hWM' : W ≤ M' + K') (hh : (R : ℤ) + M + 1 ≤ h) (hhR : h + ((W : ℤ) - 2 * K') + M' ≤ R')
+    (hrM : r + M + 1 < R) (hMS : M ≤ S) (hWS : 2 * (W + 2 * D) + 2 ≤ S) (hs : 4 * (S : ℝ) ≤ s)
+    (hκV : (R' : ℤ) + M' - R ≤ κ * ((W : ℤ) - 2 * K'))
+    (hκH : 2 * (D : ℤ) + W - 2 * K' ≤ κ * ((W : ℤ) - 2 * K'))
+    (hκC : (W : ℤ) ≤ κ * ((M' : ℤ) - 1)) (hL : (R' : ℕ∞) ≤ L) (J : Fin j → Set ℤ)
+    (t : Fin j → Fin 4) (x α β d : Fin j → ℤ) (hd : ∀ i, -(D : ℤ) ≤ d i ∧ d i ≤ D)
+    (hxα : ∀ i, α i ≤ x i + D) (hg' : 1 ≤ g')
+    (hcor' : ∀ i, (if t i = 0 ∨ t i = 2 then z 0 else z 1) - R' + g' ≤ α i + d i ∧
+      β i + d i + W + g' ≤ (if t i = 0 ∨ t i = 2 then z 0 else z 1) + R')
+    (hgap' : ∀ i k, i ≠ k → t i = t k →
+      β i + d i + W + g' ≤ α k + d k ∨ β k + d k + W + g' ≤ α i + d i) :
+    c κ ^ (6 * j) * law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+      (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+      (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
+      (∀ i k l, i < k → k < l → sbtw (landingPos (z - R) (z + R) (σ i) (γ i))
+        (landingPos (z - R) (z + R) (σ k) (γ k)) (landingPos (z - R) (z + R) (σ l) (γ l))) ∧
+      ArmsOuterSeparated ω σ z R s M K γ ∧ (∀ i, b i ∈ {b : LatticeSite 2 | (t i = 0 ∧ b 1 = z 1 + R
+          ∧ α i ≤ b 0 ∧ b 0 ≤ β i) ∨
+          (t i = 1 ∧ b 0 = z 0 + R ∧ α i ≤ b 1 ∧ b 1 ≤ β i) ∨
+          (t i = 2 ∧ b 1 = z 1 - R - cond (σ i) 0 1 ∧ α i ≤ b 0 ∧ b 0 ≤ β i) ∨
+          (t i = 3 ∧ b 0 = z 0 - R - cond (σ i) 0 1 ∧ α i ≤ b 1 ∧ b 1 ≤ β i)}) ∧ (∀ i, b i ∈ {b :
+              LatticeSite 2 | (t i = 0 ∧ b 1 = z 1 + R ∧ x i + D ≤ b 0 ∧ b 0 ≤ x i + D + W ∧
+            z 0 - R + 2 * S ≤ b 0 ∧ b 0 + 2 * S ≤ z 0 + R) ∨
+          (t i = 1 ∧ b 0 = z 0 + R ∧ x i + D ≤ b 1 ∧ b 1 ≤ x i + D + W ∧
+            z 1 - R + 2 * S ≤ b 1 ∧ b 1 + 2 * S ≤ z 1 + R) ∨
+          (t i = 2 ∧ b 1 = z 1 - R - cond (σ i) 0 1 ∧ x i + D ≤ b 0 ∧ b 0 ≤ x i + D + W ∧
+            z 0 - R + 2 * S ≤ b 0 ∧ b 0 + 2 * S ≤ z 0 + R) ∨
+          (t i = 3 ∧ b 0 = z 0 - R - cond (σ i) 0 1 ∧ x i + D ≤ b 1 ∧ b 1 ≤ x i + D + W ∧
+            z 1 - R + 2 * S ≤ b 1 ∧ b 1 + 2 * S ≤ z 1 + R)}) ∧
+      ∀ i, innerPos z r (σ i) (γ i) ∈ J i} ≤
+    law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+      (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+      (∀ i, IsArm ω (σ i) z r (z - R') (z + R') (γ i)) ∧ ArmsDisjoint σ γ ∧
+      (∀ i k l, i < k → k < l → sbtw (landingPos (z - R') (z + R') (σ i) (γ i))
+        (landingPos (z - R') (z + R') (σ k) (γ k)) (landingPos (z - R') (z + R') (σ l) (γ l))) ∧
+      ArmsOuterSeparated ω σ z R' ((2 * g' - 1 : ℤ) : ℝ) M' K' γ ∧ (∀ i, b i ∈ {b : LatticeSite 2 |
+          (t i = 0 ∧ b 1 = z 1 + R' ∧ α i + d i ≤ b 0 ∧ b 0 ≤ β i + d i + W) ∨
+          (t i = 1 ∧ b 0 = z 0 + R' ∧ α i + d i ≤ b 1 ∧ b 1 ≤ β i + d i + W) ∨
+          (t i = 2 ∧ b 1 = z 1 - R' - cond (σ i) 0 1 ∧ α i + d i ≤ b 0 ∧ b 0 ≤ β i + d i + W) ∨
+          (t i = 3 ∧ b 0 = z 0 - R' - cond (σ i) 0 1 ∧ α i + d i ≤ b 1 ∧ b 1 ≤ β i + d i + W)}) ∧
+      ∀ i, innerPos z r (σ i) (γ i) ∈ J i} := by
+  classical
+  have hrR : r < R := by omega
+  have hRR' : R ≤ R' := by omega
+  -- the empty case
+  by_cases hne : ∃ (ω₀ : Config (LatticeSite 2)) (a₀ b₀ : Fin j → LatticeSite 2)
+      (γ₀ : ∀ i, (zdGraph 2).Walk (a₀ i) (b₀ i)),
+      (∀ i, b₀ i ∈ {b : LatticeSite 2 | (t i = 0 ∧ b 1 = z 1 + R ∧ α i ≤ b 0 ∧ b 0 ≤ β i) ∨
+          (t i = 1 ∧ b 0 = z 0 + R ∧ α i ≤ b 1 ∧ b 1 ≤ β i) ∨
+          (t i = 2 ∧ b 1 = z 1 - R - cond (σ i) 0 1 ∧ α i ≤ b 0 ∧ b 0 ≤ β i) ∨
+          (t i = 3 ∧ b 0 = z 0 - R - cond (σ i) 0 1 ∧ α i ≤ b 1 ∧ b 1 ≤ β i)}) ∧ ∀ i, b₀ i ∈ {b :
+              LatticeSite 2 | (t i = 0 ∧ b 1 = z 1 + R ∧ x i + D ≤ b 0 ∧ b 0 ≤ x i + D + W ∧
+            z 0 - R + 2 * S ≤ b 0 ∧ b 0 + 2 * S ≤ z 0 + R) ∨
+          (t i = 1 ∧ b 0 = z 0 + R ∧ x i + D ≤ b 1 ∧ b 1 ≤ x i + D + W ∧
+            z 1 - R + 2 * S ≤ b 1 ∧ b 1 + 2 * S ≤ z 1 + R) ∨
+          (t i = 2 ∧ b 1 = z 1 - R - cond (σ i) 0 1 ∧ x i + D ≤ b 0 ∧ b 0 ≤ x i + D + W ∧
+            z 0 - R + 2 * S ≤ b 0 ∧ b 0 + 2 * S ≤ z 0 + R) ∨
+          (t i = 3 ∧ b 0 = z 0 - R - cond (σ i) 0 1 ∧ x i + D ≤ b 1 ∧ b 1 ≤ x i + D + W ∧
+            z 1 - R + 2 * S ≤ b 1 ∧ b 1 + 2 * S ≤ z 1 + R)}
+  swap
+  · refine le_trans (le_of_eq ?_) zero_le
+    refine mul_eq_zero_of_right _ ?_
+    convert measure_empty (μ := law q)
+    ext ω
+    simp only [mem_ofPred_eq, mem_empty_iff_false, iff_false]
+    rintro ⟨a, b, γ, -, -, -, -, h₅, h₆, -⟩
+    exact hne ⟨ω, a, b, γ, h₅, h₆⟩
+  obtain ⟨ω₀, a₀, b₀, γ₀, hW₀, hB₀⟩ := hne
+  -- the bins start inside the windows
+  have hxβ : ∀ i, x i + D ≤ β i ∧ α i ≤ x i + D + W := by
+    intro i
+    have h₁ := hW₀ i
+    have h₂ := hB₀ i
+    simp only [mem_ofPred_eq] at h₁ h₂
+    rcases h₁ with ⟨ht, -, h₁, h₁'⟩ | ⟨ht, -, h₁, h₁'⟩ | ⟨ht, -, h₁, h₁'⟩ | ⟨ht, -, h₁, h₁'⟩ <;>
+      rcases h₂ with ⟨ht', -, h₂, h₂', -⟩ | ⟨ht', -, h₂, h₂', -⟩ | ⟨ht', -, h₂, h₂', -⟩ |
+        ⟨ht', -, h₂, h₂', -⟩ <;>
+      exact ⟨by omega, by omega⟩
+  have hjog := fun i => jog_of_bin (σ i) z R R' M' K' W D S (t i) (x i) (d i)
+  refine le_trans (mul_le_mul' le_rfl (measure_mono fun ω hω => ?_))
+    ((pow_mul_law_le_law_of_jogs (σ := σ) (z := z) (r := r) (R := R) (s := s) (M := M)
+    (K := K) q hCB hσ (R' := R') (M' := M') (K' := K') (W₀ := W) (D := D) (κ := κ) (S := S)
+    (h := h) hM hWK hKM hK' hM' hWM' hh hhR hrM hMS hWS hs hκV hκH hκC hL J x d hd _ _ _ _ _ _
+    hjog).trans (measure_mono ?_))
+  · obtain ⟨a, b, γ, h₁, h₂, h₃, h₄, -, h₆, h₇⟩ := hω
+    exact ⟨a, b, γ, h₁, h₂, h₃, h₄, h₆, h₇⟩
+  rintro ω ⟨a, b', γ', hγ', hd', ho', hJ', hB'⟩
+  -- the new ends lie in the new windows
+  have hwin : ∀ i, (t i = 0 ∧ b' i 1 = z 1 + R' ∧ α i + d i ≤ b' i 0 ∧
+        b' i 0 ≤ β i + d i + W) ∨
+      (t i = 1 ∧ b' i 0 = z 0 + R' ∧ α i + d i ≤ b' i 1 ∧ b' i 1 ≤ β i + d i + W) ∨
+      (t i = 2 ∧ b' i 1 = z 1 - R' - cond (σ i) 0 1 ∧ α i + d i ≤ b' i 0 ∧
+        b' i 0 ≤ β i + d i + W) ∨
+      (t i = 3 ∧ b' i 0 = z 0 - R' - cond (σ i) 0 1 ∧ α i + d i ≤ b' i 1 ∧
+        b' i 1 ≤ β i + d i + W) := by
+    intro i
+    have h := (hB' i).1
+    have hx := hxβ i
+    have hx' := hxα i
+    simp only [mem_ofPred_eq] at h
+    rcases h with ⟨ht, h₁, h₂, h₃⟩ | ⟨ht, h₁, h₂, h₃⟩ | ⟨ht, h₁, h₂, h₃⟩ | ⟨ht, h₁, h₂, h₃⟩
+    · exact Or.inl ⟨ht, h₁, by omega, by omega⟩
+    · exact Or.inr (Or.inl ⟨ht, h₁, by omega, by omega⟩)
+    · exact Or.inr (Or.inr (Or.inl ⟨ht, h₁, by omega, by omega⟩))
+    · exact Or.inr (Or.inr (Or.inr ⟨ht, h₁, by omega, by omega⟩))
+  obtain ⟨hs₁, hs₂⟩ := le_abs_landingPos_sub_of_windows hγ' (by omega) hg' t
+    (fun i => α i + d i) (fun i => β i + d i + W) hwin
+    (fun i => ⟨(hcor' i).1, by have := (hcor' i).2; linarith⟩)
+    (fun i k hik htt => by
+      rcases hgap' i k hik htt with h | h
+      · exact Or.inl (by linarith)
+      · exact Or.inr (by linarith))
+  refine ⟨a, b', γ', hγ', hd', ho', ⟨fun i k hik => ?_, fun i m => ?_, fun i => (hB' i).2⟩,
+    fun i => hwin i, hJ'⟩
+  · rw [← Int.cast_abs]
+    exact_mod_cast hs₁ i k hik
+  · rw [← Int.cast_abs]
+    exact_mod_cast hs₂ i m
+
+/-- **The window-to-window step** (the gluing that A3b-3 iterates). For a colour sequence `σ`
+without packs and ratios `A`, `N` there is `c₀ > 0` such that for every law with crossing bounds `c`
+up to scale `L`: separated arms (separation `s ≥ 4S`, fences `(M, K)`) ending in windows
+`[α i, β i]` on the sides `t i` of `B_R(z)` (at least `2S` from the corners, each covered by `N`
+bins of width `W`) are moved along their sides by `d i` (`|d i| ≤ D`) and end, with fences
+`(M', K')`, in the windows `[α i + d i, β i + d i + W]` of `∂B_{R'}(z)`, separated at scale
+`2g' - 1` when these windows are at least `g'` from the corners and from each other on one side:
+`c₀ P(windows at R) ≤ P(windows at R')`. The constant depends only on `σ`, `c`, `A`, `N`; with
+windows and fences proportional to the radius it does not depend on the separation scale of the
+first gluing. -/
+theorem exists_pos_le_law_windows_of_windows {j : ℕ} (σ : Fin j → Bool)
+    (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) (c : ℕ → ℝ≥0∞) (A N : ℕ) :
+    ∃ c₀ : ℝ≥0∞, 0 < c₀ ∧ ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
+      CrossingBounds q L c → ∀ (z : LatticeSite 2) (r R R' W M K M' K' D S : ℕ) (s : ℝ) (g' : ℤ)
+      (J : Fin j → Set ℤ) (t : Fin j → Fin 4) (α β d : Fin j → ℤ),
+      1 ≤ K' → 4 * K' ≤ W → W ≤ K → K ≤ M → M ≤ S → 2 * (W + 2 * D) + 2 ≤ S → W ≤ M' →
+      4 * (S : ℝ) ≤ s → r + M + 1 < R → R + M + 1 + W + M' ≤ R' → R' + M' ≤ R + A * W →
+      D ≤ A * W → (R' : ℕ∞) ≤ L → (∀ i, -(D : ℤ) ≤ d i ∧ d i ≤ D) →
+      (∀ i, β i - α i + 1 ≤ N * ((W : ℤ) + 1)) →
+      (∀ i, (if t i = 0 ∨ t i = 2 then z 0 else z 1) - R + 2 * S ≤ α i ∧
+        β i + 2 * S ≤ (if t i = 0 ∨ t i = 2 then z 0 else z 1) + R) →
+      1 ≤ g' →
+      (∀ i, (if t i = 0 ∨ t i = 2 then z 0 else z 1) - R' + g' ≤ α i + d i ∧
+        β i + d i + W + g' ≤ (if t i = 0 ∨ t i = 2 then z 0 else z 1) + R') →
+      (∀ i k, i ≠ k → t i = t k →
+        β i + d i + W + g' ≤ α k + d k ∨ β k + d k + W + g' ≤ α i + d i) →
+      c₀ * law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+        (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
+        (∀ i k l, i < k → k < l → sbtw (landingPos (z - R) (z + R) (σ i) (γ i))
+          (landingPos (z - R) (z + R) (σ k) (γ k)) (landingPos (z - R) (z + R) (σ l) (γ l))) ∧
+        ArmsOuterSeparated ω σ z R s M K γ ∧ (∀ i, b i ∈ {b : LatticeSite 2 | (t i = 0 ∧ b 1 = z 1 +
+            R ∧ α i ≤ b 0 ∧ b 0 ≤ β i) ∨
+          (t i = 1 ∧ b 0 = z 0 + R ∧ α i ≤ b 1 ∧ b 1 ≤ β i) ∨
+          (t i = 2 ∧ b 1 = z 1 - R - cond (σ i) 0 1 ∧ α i ≤ b 0 ∧ b 0 ≤ β i) ∨
+          (t i = 3 ∧ b 0 = z 0 - R - cond (σ i) 0 1 ∧ α i ≤ b 1 ∧ b 1 ≤ β i)}) ∧
+        ∀ i, innerPos z r (σ i) (γ i) ∈ J i} ≤
+      law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+        (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, IsArm ω (σ i) z r (z - R') (z + R') (γ i)) ∧ ArmsDisjoint σ γ ∧
+        (∀ i k l, i < k → k < l → sbtw (landingPos (z - R') (z + R') (σ i) (γ i))
+          (landingPos (z - R') (z + R') (σ k) (γ k)) (landingPos (z - R') (z + R') (σ l) (γ l))) ∧
+        ArmsOuterSeparated ω σ z R' ((2 * g' - 1 : ℤ) : ℝ) M' K' γ ∧ (∀ i, b i ∈ {b : LatticeSite 2
+            | (t i = 0 ∧ b 1 = z 1 + R' ∧ α i + d i ≤ b 0 ∧ b 0 ≤ β i + d i + W) ∨
+          (t i = 1 ∧ b 0 = z 0 + R' ∧ α i + d i ≤ b 1 ∧ b 1 ≤ β i + d i + W) ∨
+          (t i = 2 ∧ b 1 = z 1 - R' - cond (σ i) 0 1 ∧ α i + d i ≤ b 0 ∧ b 0 ≤ β i + d i + W) ∨
+          (t i = 3 ∧ b 0 = z 0 - R' - cond (σ i) 0 1 ∧ α i + d i ≤ b 1 ∧ b 1 ≤ β i + d i + W)}) ∧
+        ∀ i, innerPos z r (σ i) (γ i) ∈ J i} := by
+  classical
+  set κ : ℕ := 4 * A + 2 with hκdef
+  by_cases hc : 0 < c κ
+  swap
+  · exact ⟨1, one_pos, fun q L hCB => absurd (hCB.pos _) hc⟩
+  have hX0 : ((((N + 1) ^ j : ℕ)) : ℝ≥0∞) ≠ 0 := by
+    rw [Nat.cast_ne_zero]
+    positivity
+  have hXt : ((((N + 1) ^ j : ℕ)) : ℝ≥0∞) ≠ ⊤ := ENNReal.natCast_ne_top _
+  refine ⟨c κ ^ (6 * j) / ((((N + 1) ^ j : ℕ)) : ℝ≥0∞),
+    ENNReal.div_pos (pow_ne_zero _ hc.ne') hXt, ?_⟩
+  intro q L hCB z r R R' W M K M' K' D S s g' J t α β d hK'1 hK'W hWK hKM hMS hWS hWM' hs hrM
+    hRR' hRA hDA hR'L hd hN hcor hg' hcor' hgap'
+  have hW : 1 ≤ W := by omega
+  -- the aspect ratios
+  have e₀ : (0 : ℤ) ≤ (A : ℤ) * ((W : ℤ) - 4 * K') := mul_nonneg (by positivity) (by omega)
+  have hRA' : ((R' + M' : ℕ) : ℤ) ≤ ((R + A * W : ℕ) : ℤ) := by exact_mod_cast hRA
+  have hDA' : ((D : ℕ) : ℤ) ≤ ((A * W : ℕ) : ℤ) := by exact_mod_cast hDA
+  push_cast at hRA' hDA'
+  have hκV : (R' : ℤ) + M' - R ≤ κ * ((W : ℤ) - 2 * K') := by
+    rw [hκdef]
+    push_cast
+    nlinarith
+  have hκH : 2 * (D : ℤ) + W - 2 * K' ≤ κ * ((W : ℤ) - 2 * K') := by
+    rw [hκdef]
+    push_cast
+    nlinarith
+  have hκC : (W : ℤ) ≤ κ * ((M' : ℤ) - 1) := by
+    have : (2 : ℤ) * ((M' : ℤ) - 1) ≤ κ * ((M' : ℤ) - 1) :=
+      mul_le_mul_of_nonneg_right (by rw [hκdef]; push_cast; nlinarith) (by omega)
+    omega
+  -- the separated event with ends in given bins
+  set E : (Fin j → Fin (N + 1)) → Set (Config (LatticeSite 2)) :=
+      fun n => {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+        (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
+        (∀ i k l, i < k → k < l → sbtw (landingPos (z - R) (z + R) (σ i) (γ i))
+          (landingPos (z - R) (z + R) (σ k) (γ k)) (landingPos (z - R) (z + R) (σ l) (γ l))) ∧
+        ArmsOuterSeparated ω σ z R s M K γ ∧ (∀ i, b i ∈ {b : LatticeSite 2 | (t i = 0 ∧ b 1 = z 1 +
+            R ∧ α i ≤ b 0 ∧ b 0 ≤ β i) ∨
+          (t i = 1 ∧ b 0 = z 0 + R ∧ α i ≤ b 1 ∧ b 1 ≤ β i) ∨
+          (t i = 2 ∧ b 1 = z 1 - R - cond (σ i) 0 1 ∧ α i ≤ b 0 ∧ b 0 ≤ β i) ∨
+          (t i = 3 ∧ b 0 = z 0 - R - cond (σ i) 0 1 ∧ α i ≤ b 1 ∧ b 1 ≤ β i)}) ∧ (∀ i, b i ∈ {b :
+              LatticeSite 2 | (t i = 0 ∧ b 1 = z 1 + R ∧ (α i + (((n i : Fin (N + 1)) : ℕ) : ℤ) * (W
+              + 1) - D) + D ≤ b 0 ∧ b 0 ≤ (α i + (((n i : Fin (N + 1)) : ℕ) : ℤ) * (W + 1) - D) + D
+              + W ∧
+            z 0 - R + 2 * S ≤ b 0 ∧ b 0 + 2 * S ≤ z 0 + R) ∨
+          (t i = 1 ∧ b 0 = z 0 + R ∧ (α i + (((n i : Fin (N + 1)) : ℕ) : ℤ) * (W + 1) - D) + D ≤ b 1
+              ∧ b 1 ≤ (α i + (((n i : Fin (N + 1)) : ℕ) : ℤ) * (W + 1) - D) + D + W ∧
+            z 1 - R + 2 * S ≤ b 1 ∧ b 1 + 2 * S ≤ z 1 + R) ∨
+          (t i = 2 ∧ b 1 = z 1 - R - cond (σ i) 0 1 ∧ (α i + (((n i : Fin (N + 1)) : ℕ) : ℤ) * (W +
+              1) - D) + D ≤ b 0 ∧ b 0 ≤ (α i + (((n i : Fin (N + 1)) : ℕ) : ℤ) * (W + 1) - D) + D +
+              W ∧
+            z 0 - R + 2 * S ≤ b 0 ∧ b 0 + 2 * S ≤ z 0 + R) ∨
+          (t i = 3 ∧ b 0 = z 0 - R - cond (σ i) 0 1 ∧ (α i + (((n i : Fin (N + 1)) : ℕ) : ℤ) * (W +
+              1) - D) + D ≤ b 1 ∧ b 1 ≤ (α i + (((n i : Fin (N + 1)) : ℕ) : ℤ) * (W + 1) - D) + D +
+              W ∧
+            z 1 - R + 2 * S ≤ b 1 ∧ b 1 + 2 * S ≤ z 1 + R)}) ∧
+        ∀ i, innerPos z r (σ i) (γ i) ∈ J i} with hE
+  -- every end in a window lies in a bin of the window
+  have hbin : ∀ i (b : LatticeSite 2), b ∈ {b : LatticeSite 2 | (t i = 0 ∧ b 1 = z 1 + R ∧ α i ≤ b 0
+      ∧ b 0 ≤ β i) ∨
+          (t i = 1 ∧ b 0 = z 0 + R ∧ α i ≤ b 1 ∧ b 1 ≤ β i) ∨
+          (t i = 2 ∧ b 1 = z 1 - R - cond (σ i) 0 1 ∧ α i ≤ b 0 ∧ b 0 ≤ β i) ∨
+          (t i = 3 ∧ b 0 = z 0 - R - cond (σ i) 0 1 ∧ α i ≤ b 1 ∧ b 1 ≤ β i)} → ∃ n : ℕ, n < N + 1 ∧
+      b ∈ {b : LatticeSite 2 |
+        (t i = 0 ∧ b 1 = z 1 + R ∧ α i + (n : ℤ) * (W + 1) - D + D ≤ b 0 ∧
+          b 0 ≤ α i + (n : ℤ) * (W + 1) - D + D + W ∧
+          z 0 - R + 2 * S ≤ b 0 ∧ b 0 + 2 * S ≤ z 0 + R) ∨
+        (t i = 1 ∧ b 0 = z 0 + R ∧ α i + (n : ℤ) * (W + 1) - D + D ≤ b 1 ∧
+          b 1 ≤ α i + (n : ℤ) * (W + 1) - D + D + W ∧
+          z 1 - R + 2 * S ≤ b 1 ∧ b 1 + 2 * S ≤ z 1 + R) ∨
+        (t i = 2 ∧ b 1 = z 1 - R - cond (σ i) 0 1 ∧ α i + (n : ℤ) * (W + 1) - D + D ≤ b 0 ∧
+          b 0 ≤ α i + (n : ℤ) * (W + 1) - D + D + W ∧
+          z 0 - R + 2 * S ≤ b 0 ∧ b 0 + 2 * S ≤ z 0 + R) ∨
+        (t i = 3 ∧ b 0 = z 0 - R - cond (σ i) 0 1 ∧ α i + (n : ℤ) * (W + 1) - D + D ≤ b 1 ∧
+          b 1 ≤ α i + (n : ℤ) * (W + 1) - D + D + W ∧
+          z 1 - R + 2 * S ≤ b 1 ∧ b 1 + 2 * S ≤ z 1 + R)} := by
+    intro i b hb
+    have hc' := hcor i
+    simp only [mem_ofPred_eq] at hb
+    rcases hb with ⟨ht, h₁, h₂, h₃⟩ | ⟨ht, h₁, h₂, h₃⟩ | ⟨ht, h₁, h₂, h₃⟩ | ⟨ht, h₁, h₂, h₃⟩ <;>
+      simp only [ht, Fin.isValue, true_or, or_true, ite_true, ite_false, Fin.reduceEq,
+        or_self] at hc'
+    · obtain ⟨n, hn, hn₁, hn₂⟩ := exists_lt_mem_bin h₂ h₃ (hN i)
+      exact ⟨n, by omega, Or.inl ⟨ht, h₁, by omega, by omega, by omega, by omega⟩⟩
+    · obtain ⟨n, hn, hn₁, hn₂⟩ := exists_lt_mem_bin h₂ h₃ (hN i)
+      exact ⟨n, by omega, Or.inr (Or.inl ⟨ht, h₁, by omega, by omega, by omega, by omega⟩)⟩
+    · obtain ⟨n, hn, hn₁, hn₂⟩ := exists_lt_mem_bin h₂ h₃ (hN i)
+      exact ⟨n, by omega, Or.inr (Or.inr (Or.inl ⟨ht, h₁, by omega, by omega, by omega,
+        by omega⟩))⟩
+    · obtain ⟨n, hn, hn₁, hn₂⟩ := exists_lt_mem_bin h₂ h₃ (hN i)
+      exact ⟨n, by omega, Or.inr (Or.inr (Or.inr ⟨ht, h₁, by omega, by omega, by omega,
+        by omega⟩))⟩
+  have hcover : law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+        (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
+        (∀ i k l, i < k → k < l → sbtw (landingPos (z - R) (z + R) (σ i) (γ i))
+          (landingPos (z - R) (z + R) (σ k) (γ k)) (landingPos (z - R) (z + R) (σ l) (γ l))) ∧
+        ArmsOuterSeparated ω σ z R s M K γ ∧ (∀ i, b i ∈ {b : LatticeSite 2 | (t i = 0 ∧ b 1 = z 1 +
+            R ∧ α i ≤ b 0 ∧ b 0 ≤ β i) ∨
+          (t i = 1 ∧ b 0 = z 0 + R ∧ α i ≤ b 1 ∧ b 1 ≤ β i) ∨
+          (t i = 2 ∧ b 1 = z 1 - R - cond (σ i) 0 1 ∧ α i ≤ b 0 ∧ b 0 ≤ β i) ∨
+          (t i = 3 ∧ b 0 = z 0 - R - cond (σ i) 0 1 ∧ α i ≤ b 1 ∧ b 1 ≤ β i)}) ∧
+        ∀ i, innerPos z r (σ i) (γ i) ∈ J i} ≤ ∑ n, law q (E n) := by
+    refine (measure_mono ?_).trans (measure_iUnion_fintype_le _ _)
+    rintro ω ⟨a, b, γ, hγ, hd', ho, hsep, hw, hJ⟩
+    choose n hn hb using fun i => hbin i (b i) (hw i)
+    rw [mem_iUnion]
+    refine ⟨fun i => ⟨n i, hn i⟩, ?_⟩
+    rw [hE]
+    exact ⟨a, b, γ, hγ, hd', ho, hsep, hw, hb, hJ⟩
+  -- the gluing for each choice of bins
+  have hβ : ∀ n, c κ ^ (6 * j) * law q (E n) ≤ law q {ω : Config (LatticeSite 2) |
+      ∃ (a b : Fin j → LatticeSite 2) (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, IsArm ω (σ i) z r (z - R') (z + R') (γ i)) ∧ ArmsDisjoint σ γ ∧
+        (∀ i k l, i < k → k < l → sbtw (landingPos (z - R') (z + R') (σ i) (γ i))
+          (landingPos (z - R') (z + R') (σ k) (γ k)) (landingPos (z - R') (z + R') (σ l) (γ l))) ∧
+        ArmsOuterSeparated ω σ z R' ((2 * g' - 1 : ℤ) : ℝ) M' K' γ ∧ (∀ i, b i ∈ {b : LatticeSite 2
+            | (t i = 0 ∧ b 1 = z 1 + R' ∧ α i + d i ≤ b 0 ∧ b 0 ≤ β i + d i + W) ∨
+          (t i = 1 ∧ b 0 = z 0 + R' ∧ α i + d i ≤ b 1 ∧ b 1 ≤ β i + d i + W) ∨
+          (t i = 2 ∧ b 1 = z 1 - R' - cond (σ i) 0 1 ∧ α i + d i ≤ b 0 ∧ b 0 ≤ β i + d i + W) ∨
+          (t i = 3 ∧ b 0 = z 0 - R' - cond (σ i) 0 1 ∧ α i + d i ≤ b 1 ∧ b 1 ≤ β i + d i + W)}) ∧
+        ∀ i, innerPos z r (σ i) (γ i) ∈ J i} := by
+    intro n
+    rw [hE]
+    exact pow_mul_law_le_law_windows_of_bins q hCB hσ (h := R + M + 1) (by omega) hWK hKM
+      (by omega) (by omega) (by omega) le_rfl (by omega) hrM hMS hWS hs hκV hκH hκC hR'L J t
+      (fun i => α i + (((n i : Fin (N + 1)) : ℕ) : ℤ) * (W + 1) - D) α β d hd
+      (fun i => by have : (0 : ℤ) ≤ ((n i : ℕ) : ℤ) * (W + 1) := by positivity
+                   omega) hg' hcor' hgap'
+  refine (mul_le_mul' le_rfl hcover).trans ?_
+  rw [Finset.mul_sum]
+  calc ∑ n, c κ ^ (6 * j) / ((((N + 1) ^ j : ℕ)) : ℝ≥0∞) * law q (E n)
+      ≤ ∑ _n : Fin j → Fin (N + 1), law q {ω : Config (LatticeSite 2) |
+          ∃ (a b : Fin j → LatticeSite 2) (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+          (∀ i, IsArm ω (σ i) z r (z - R') (z + R') (γ i)) ∧ ArmsDisjoint σ γ ∧
+          (∀ i k l, i < k → k < l → sbtw (landingPos (z - R') (z + R') (σ i) (γ i))
+            (landingPos (z - R') (z + R') (σ k) (γ k))
+            (landingPos (z - R') (z + R') (σ l) (γ l))) ∧
+          ArmsOuterSeparated ω σ z R' ((2 * g' - 1 : ℤ) : ℝ) M' K' γ ∧ (∀ i, b i ∈ {b : LatticeSite
+              2 | (t i = 0 ∧ b 1 = z 1 + R' ∧ α i + d i ≤ b 0 ∧ b 0 ≤ β i + d i + W) ∨
+          (t i = 1 ∧ b 0 = z 0 + R' ∧ α i + d i ≤ b 1 ∧ b 1 ≤ β i + d i + W) ∨
+          (t i = 2 ∧ b 1 = z 1 - R' - cond (σ i) 0 1 ∧ α i + d i ≤ b 0 ∧ b 0 ≤ β i + d i + W) ∨
+          (t i = 3 ∧ b 0 = z 0 - R' - cond (σ i) 0 1 ∧ α i + d i ≤ b 1 ∧ b 1 ≤ β i + d i + W)}) ∧
+          ∀ i, innerPos z r (σ i) (γ i) ∈ J i} * ((((N + 1) ^ j : ℕ) : ℝ≥0∞))⁻¹ := by
+        refine Finset.sum_le_sum fun n _ => ?_
+        rw [div_eq_mul_inv, mul_right_comm]
+        exact mul_le_mul_left (hβ n) _
+    _ = _ := by
+        rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
+        simp only [Fintype.card_fun, Fintype.card_fin]
+        rw [mul_comm, mul_assoc, ENNReal.inv_mul_cancel hX0 hXt, mul_one]
+
+
+end WindowSteps
 
 end PercLib.Models.Planar
