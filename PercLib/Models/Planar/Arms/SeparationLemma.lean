@@ -1068,27 +1068,28 @@ theorem separable_of_forall {ω : Config (LatticeSite 2)} {lo hi lo₂ hi₂ : L
 
 /-! ### Nolin's local separation lemma -/
 
-/-- **Local separation in a strip, any of the two geometries.** For every `δ > 0` there are
-`0 < η ≤ 1` and `N₀` such that, uniformly over the laws with crossing bounds `c` up to `L`, for
+/-- **Local separation in a strip of any width, any of the two geometries.** For every `δ > 0` there
+are `0 < η ≤ 1` and `N₀` such that, uniformly over the laws with crossing bounds `c` up to `L`, for
 `N₀ ≤ N ≤ L` and `k ∈ {0, 1}`, with probability at least `1 - δ` the following holds for the open
-box `Icc lo hi = [lo₀, lo₀ + 4N] × [lo₁, lo₁ + N]` and the box of faces
-`Icc lo₂ hi₂ = [lo₀ - k, hi₀ - 1 + k] × [lo₁ - 1, hi₁]`. Every family of crossings from bottom to
-top, each open (an open walk in `Icc lo hi` from its bottom row to its top row) or dual (a walk of
-faces of `Icc lo₂ hi₂` from its bottom row to its top row along dual-open dual edges crossing edges
-of `Icc elo ehi = [lo₀ - k, hi₀ + k] × [lo₁, hi₁]`), with crossings of the same colour disjoint, can
-be replaced by a family with the same colours and the same starting points, with crossings of the
-same colour disjoint, meeting the top row only at their ends, whose ends, in doubled positions, are
-at least `4 √η N` apart and at least `4 √η N` from the two ends `2 elo₀` and `2 ehi₀` of the
-doubled top side, and each of which carries a fence as in `exists_law_separable_ge`.
+box `Icc lo hi = [lo₀, lo₀ + wN] × [lo₁, lo₁ + N]` of any width `w ≥ 1` and the box of faces `Icc
+lo₂ hi₂ = [lo₀ - k, hi₀ - 1 + k] × [lo₁ - 1, hi₁]`. Every family of crossings from bottom to top,
+each open (an open walk in `Icc lo hi` from its bottom row to its top row) or dual (a walk of faces
+of `Icc lo₂ hi₂` from its bottom row to its top row along dual-open dual edges crossing edges of
+`Icc elo ehi = [lo₀ - k, hi₀ + k] × [lo₁, hi₁]`), with crossings of the same colour disjoint, can be
+replaced by a family with the same colours and the same starting points, with crossings of the same
+colour disjoint, meeting the top row only at their ends, whose ends, in doubled positions, are at
+least `4 √η N` apart and at least `4 √η N` from the two ends `2 elo₀` and `2 ehi₀` of the doubled
+top side, and each of which carries a fence as in `exists_law_separable_ge`.
 
 The boxes enter as variables with their defining equations (eleven hypotheses in all), so that
 the two instances, `exists_law_separable_ge` (`k = 0`) and `exists_law_separable_ge_arm` (`k = 1`),
 are read off without rewriting the event. -/
-theorem exists_law_separable_ge_aux (c : ℕ → ℝ≥0∞) {δ : ℝ≥0∞} (hδ : 0 < δ) :
+theorem exists_law_separable_ge_aux_wide (c : ℕ → ℝ≥0∞) (w : ℕ) (hw : 1 ≤ w) {δ : ℝ≥0∞}
+    (hδ : 0 < δ) :
     ∃ η : ℝ, 0 < η ∧ η ≤ 1 ∧ ∃ N₀ : ℕ, ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
       CrossingBounds q L c → ∀ N : ℕ, N₀ ≤ N → (N : ℕ∞) ≤ L →
       ∀ (k : ℤ) (lo hi lo₂ hi₂ elo ehi : LatticeSite 2), 0 ≤ k → k ≤ 1 →
-      hi = ![lo 0 + 4 * N, lo 1 + N] → lo₂ = ![lo 0 - k, lo 1 - 1] → hi₂ = ![hi 0 - 1 + k, hi 1] →
+      hi = ![lo 0 + w * N, lo 1 + N] → lo₂ = ![lo 0 - k, lo 1 - 1] → hi₂ = ![hi 0 - 1 + k, hi 1] →
       elo = ![lo 0 - k, lo 1] → ehi = ![hi 0 + k, hi 1] →
       1 - δ ≤ law q {ω | ∀ (m : ℕ) (σ : Fin m → Bool) (a b : Fin m → LatticeSite 2)
         (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
@@ -1120,12 +1121,12 @@ theorem exists_law_separable_ge_aux (c : ℕ → ℝ≥0∞) {δ : ℝ≥0∞} (
             cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
               (Icc (b' i - (⌊Real.sqrt η * N⌋₊ : LatticeSite 2))
                 (b' i + (⌊Real.sqrt η * N⌋₊ : LatticeSite 2))) x l} := by
-  by_cases hc : 0 < c 6 ∧ 0 < c 7
+  by_cases hc : 0 < c (w + 1 + 1) ∧ 0 < c 7
   swap
-  · exact ⟨1, one_pos, le_rfl, 0, fun q L h => absurd ⟨h.pos 6, h.pos 7⟩ hc⟩
+  · exact ⟨1, one_pos, le_rfl, 0, fun q L h => absurd ⟨h.pos _, h.pos 7⟩ hc⟩
   obtain ⟨hc6, hc7⟩ := hc
   -- the number of steps of the explorations and the number of scales
-  have hr₁ : 1 - c 6 < 1 := ENNReal.sub_lt_self ENNReal.one_ne_top one_ne_zero hc6.ne'
+  have hr₁ : 1 - c (w + 1 + 1) < 1 := ENNReal.sub_lt_self ENNReal.one_ne_top one_ne_zero hc6.ne'
   have hr₂ : 1 - c 7 ^ 4 < 1 :=
     ENNReal.sub_lt_self ENNReal.one_ne_top one_ne_zero (pow_ne_zero 4 hc7.ne')
   have hδ2 : 0 < δ / 2 := ENNReal.half_pos hδ.ne'
@@ -1140,17 +1141,21 @@ theorem exists_law_separable_ge_aux (c : ℕ → ℝ≥0∞) {δ : ℝ≥0∞} (
     have : 1 ≤ 16 * 8 ^ J := Nat.one_le_iff_ne_zero.2 (by positivity)
     exact_mod_cast this
   refine ⟨(1 / ((16 * 8 ^ J : ℕ) : ℝ)) ^ 2, by positivity,
-    pow_le_one₀ (by positivity) (div_le_one_of_le₀ hD1 (by positivity)), (16 * 8 ^ J) ^ 2,
+    pow_le_one₀ (by positivity) (div_le_one_of_le₀ hD1 (by positivity)), (16 * 8 ^ J) ^ 2 + w,
     fun q L h N hN hNL k lo hi lo₂ hi₂ elo ehi hk hk1 hhi hlo₂ hhi₂ helo hehi => ?_⟩
   subst helo hehi
   -- the coordinates of the boxes
-  have hhi0 : hi 0 = lo 0 + 4 * N := by rw [hhi]; rfl
+  have hhi0 : hi 0 = lo 0 + w * N := by rw [hhi]; rfl
   have hhi1 : hi 1 = lo 1 + N := by rw [hhi]; rfl
   have hl₂0 : lo₂ 0 = lo 0 - k := by rw [hlo₂]; rfl
   have hl₂1 : lo₂ 1 = lo 1 - 1 := by rw [hlo₂]; rfl
   have hh₂0 : hi₂ 0 = hi 0 - 1 + k := by rw [hhi₂]; rfl
   have hh₂1 : hi₂ 1 = hi 1 := by rw [hhi₂]; rfl
-  obtain ⟨hK1, hM16, hscale⟩ := scale_bounds hN
+  have hD2 : 1 ≤ (16 * 8 ^ J) ^ 2 := Nat.one_le_iff_ne_zero.2 (by positivity)
+  have hwN : w + 1 ≤ N := by omega
+  obtain ⟨hK1, hM16, hscale⟩ := scale_bounds (le_trans (Nat.le_add_right _ w) hN)
+  have hwNpos : (0 : ℤ) < (w : ℤ) * N :=
+    mul_pos (by exact_mod_cast hw) (by exact_mod_cast (show 0 < N by omega))
   set D := 16 * 8 ^ J with hD
   set M := N / D with hM
   set K := N / D ^ 2 with hK
@@ -1239,11 +1244,21 @@ theorem exists_law_separable_ge_aux (c : ℕ → ℝ≥0∞) {δ : ℝ≥0∞} (
     exact and_congr_right fun _ => not_congr ⟨fun h' => (this.1 ⟨h', hmem⟩).1,
       fun h' => (this.2 ⟨h', hmem⟩).1⟩
   -- the bad events and their probabilities
-  have bO := law_exploration_le_pow_of_le h 5 (lo := lo) (hi := hi) (n := N - 1)
-    (by omega) (hNL' _ (by omega)) (by omega) (by omega) (Γ := Γ₁)
+  have hbO : hi 0 ≤ lo 0 + ((w + 1 : ℕ) : ℤ) * ((N - 1 : ℕ) : ℤ) := by
+    rw [hhi0, Nat.cast_sub (by omega : 1 ≤ N)]
+    have hwN' : ((w : ℤ) + 1) ≤ N := by exact_mod_cast hwN
+    push_cast
+    nlinarith
+  have hbD : hi₂ 0 ≤ lo₂ 0 + ((w + 1 : ℕ) : ℤ) * (N : ℤ) := by
+    rw [hh₂0, hl₂0, hhi0]
+    have hN1 : (1 : ℤ) ≤ N := by exact_mod_cast (show 1 ≤ N by omega)
+    push_cast
+    nlinarith
+  have bO := law_exploration_le_pow_of_le h (w + 1) (lo := lo) (hi := hi) (n := N - 1)
+    (by omega) (hNL' _ (by omega)) (by omega) hbO (Γ := Γ₁)
     (fun A h₁ h₂ => (hΓ₁ A h₁ h₂).1) T
-  have bD := law_exploration_dualConfig_le_pow_of_le h 5 (lo := lo₂) (hi := hi₂) (n := N)
-    (by omega) (hNL' _ le_rfl) (by omega) (by omega) (Γ := Γ₂) (fun A h₁ h₂ => (hΓ₂ A h₁ h₂).1) T
+  have bD := law_exploration_dualConfig_le_pow_of_le h (w + 1) (lo := lo₂) (hi := hi₂) (n := N)
+    (by omega) (hNL' _ le_rfl) (by omega) hbD (Γ := Γ₂) (fun A h₁ h₂ => (hΓ₂ A h₁ h₂).1) T
   have b1 := fun v => law_exploration_forall_notMem_inter_le h (lo := lo) (hi := hi) (Γ := Γ₁)
     measurable_id hPo d₁ hsc1 (h8 s₀) v J hJs
   have b2 := fun v => law_exploration_forall_notMem_dualConfig_union_le h (lo := lo) (hi := hi)
@@ -1273,7 +1288,7 @@ theorem exists_law_separable_ge_aux (c : ℕ → ℝ≥0∞) {δ : ℝ≥0∞} (
   · -- the sum of the bounds
     have hT' := (hT (T + 1) (by omega)).le
     have hJ' := (hJ J le_rfl).le
-    calc _ = ((1 - c 6) ^ (T + 1) + (1 - c 6) ^ (T + 1)) +
+    calc _ = ((1 - c (w + 1 + 1)) ^ (T + 1) + (1 - c (w + 1 + 1)) ^ (T + 1)) +
           ((6 * (T + 1) + 4 : ℕ) : ℝ≥0∞) * (1 - c 7 ^ 4) ^ J := by
           push_cast
           ring
@@ -1360,6 +1375,57 @@ theorem exists_law_separable_ge_aux (c : ℕ → ℝ≥0∞) {δ : ℝ≥0∞} (
     · rw [hKfl, hMfl]
       exact h6 i
 
+
+
+/-- **Local separation in a strip, any of the two geometries**: the width `4N` instance of
+`exists_law_separable_ge_aux_wide`. For every `δ > 0` there are `0 < η ≤ 1` and `N₀` such that,
+uniformly over the laws with crossing bounds `c` up to `L`, for `N₀ ≤ N ≤ L` and `k ∈ {0, 1}`, with
+probability at least `1 - δ` the separation property holds for the open box
+`Icc lo hi = [lo₀, lo₀ + 4N] × [lo₁, lo₁ + N]` and the box of faces
+`Icc lo₂ hi₂ = [lo₀ - k, hi₀ - 1 + k] × [lo₁ - 1, hi₁]`.
+
+The boxes enter as variables with their defining equations (eleven hypotheses in all), so that
+the two instances, `exists_law_separable_ge` (`k = 0`) and `exists_law_separable_ge_arm` (`k = 1`),
+are read off without rewriting the event. -/
+theorem exists_law_separable_ge_aux (c : ℕ → ℝ≥0∞) {δ : ℝ≥0∞} (hδ : 0 < δ) :
+    ∃ η : ℝ, 0 < η ∧ η ≤ 1 ∧ ∃ N₀ : ℕ, ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
+      CrossingBounds q L c → ∀ N : ℕ, N₀ ≤ N → (N : ℕ∞) ≤ L →
+      ∀ (k : ℤ) (lo hi lo₂ hi₂ elo ehi : LatticeSite 2), 0 ≤ k → k ≤ 1 →
+      hi = ![lo 0 + 4 * N, lo 1 + N] → lo₂ = ![lo 0 - k, lo 1 - 1] → hi₂ = ![hi 0 - 1 + k, hi 1] →
+      elo = ![lo 0 - k, lo 1] → ehi = ![hi 0 + k, hi 1] →
+      1 - δ ≤ law q {ω | ∀ (m : ℕ) (σ : Fin m → Bool) (a b : Fin m → LatticeSite 2)
+        (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, cond (σ i)
+          (a i 1 = lo 1 ∧ b i 1 = hi 1 ∧ (∀ x ∈ (γ i).support, x ∈ Icc lo hi) ∧
+            ∀ e ∈ (γ i).edges, e ∈ ω)
+          (a i 1 = lo₂ 1 ∧ b i 1 = hi₂ 1 ∧ (∀ x ∈ (γ i).support, x ∈ Icc lo₂ hi₂) ∧
+            ∀ e ∈ (γ i).edges, e ∈ dualConfig ω ∩ dualEdge '' {e | e ∈ (zdGraph 2).edgeSet ∧
+              ∀ x ∈ e, x ∈ Icc elo ehi})) →
+        (∀ i j, i ≠ j → σ i = σ j → ∀ x ∈ (γ i).support, x ∉ (γ j).support) →
+        ∃ (b' : Fin m → LatticeSite 2) (γ' : ∀ i, (zdGraph 2).Walk (a i) (b' i)),
+          (∀ i, cond (σ i)
+            (a i 1 = lo 1 ∧ b' i 1 = hi 1 ∧ (∀ x ∈ (γ' i).support, x ∈ Icc lo hi) ∧
+              ∀ e ∈ (γ' i).edges, e ∈ ω)
+            (a i 1 = lo₂ 1 ∧ b' i 1 = hi₂ 1 ∧ (∀ x ∈ (γ' i).support, x ∈ Icc lo₂ hi₂) ∧
+              ∀ e ∈ (γ' i).edges, e ∈ dualConfig ω ∩ dualEdge '' {e | e ∈ (zdGraph 2).edgeSet ∧
+                ∀ x ∈ e, x ∈ Icc elo ehi})) ∧
+          (∀ i j, i ≠ j → σ i = σ j → ∀ x ∈ (γ' i).support, x ∉ (γ' j).support) ∧
+          (∀ i j, i ≠ j → 4 * Real.sqrt η * N ≤
+            |((2 * b' i 0 + cond (σ i) 0 1 : ℤ) : ℝ) - ((2 * b' j 0 + cond (σ j) 0 1 : ℤ) : ℝ)|) ∧
+          (∀ i, 4 * Real.sqrt η * N ≤ ((2 * b' i 0 + cond (σ i) 0 1 - 2 * elo 0 : ℤ) : ℝ) ∧
+            4 * Real.sqrt η * N ≤ ((2 * ehi 0 - (2 * b' i 0 + cond (σ i) 0 1) : ℤ) : ℝ)) ∧
+          (∀ i, ∀ x ∈ (γ' i).support.dropLast, x 1 ≠ hi 1) ∧
+          ∀ i, ∃ x ∈ (γ' i).support, ∃ l r : LatticeSite 2,
+            l 0 = b' i 0 - ⌊η * N⌋₊ ∧ r 0 = b' i 0 + ⌊η * N⌋₊ ∧
+            cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
+              (Icc ![b' i 0 - ⌊η * N⌋₊, hi 1] ![b' i 0 + ⌊η * N⌋₊, hi 1 + ⌊Real.sqrt η * N⌋₊])
+              l r ∧
+            cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
+              (Icc (b' i - (⌊Real.sqrt η * N⌋₊ : LatticeSite 2))
+                (b' i + (⌊Real.sqrt η * N⌋₊ : LatticeSite 2))) x l} := by
+  obtain ⟨η, hη, hη1, N₀, hsep⟩ := exists_law_separable_ge_aux_wide c 4 (by norm_num) hδ
+  exact ⟨η, hη, hη1, N₀, fun q L h N hN hNL k lo hi lo₂ hi₂ elo ehi hk hk1 hhi =>
+    hsep q L h N hN hNL k lo hi lo₂ hi₂ elo ehi hk hk1 (by rw [hhi]; norm_num)⟩
 
 /-- **Nolin's local separation lemma** (EJP 2008, Lemma 15). For every `δ > 0` there are `η > 0`
 and `N₀` such that, uniformly over the laws with crossing bounds `c` up to `L`, for `N₀ ≤ N ≤ L`,
