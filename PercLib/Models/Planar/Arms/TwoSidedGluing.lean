@@ -31,7 +31,7 @@ The proof:
    second by the pairs outside it (`law_inter_eq_mul_of_separated`).
 2. *Corridors.* The corridor events are crossings of one colour in disjoint regions; by Harris for
    a mixed order their intersection has probability at least the product.
-3. *Conditioning on both families.* With the ends and the starts confined to fixed bins, both
+3. *Conditioning on both families.* With the ends and the starts confined to fixed windows, both
    events are upper for the mixed order off the corridors (`separated_of_mixed_of_forall_mem`,
    `innerSeparated_of_mixed_of_forall_mem`), and so is their intersection; the conditional form of
    Harris for a mixed order applies.
@@ -49,14 +49,30 @@ The proof:
   reads; for the dual colour these have an end in the box and an end in the box shifted by
   `(1, 1)`.
 * `exists_walks_of_fences`: joining an outer fence, a corridor and an inner fence.
-* `exists_walks_two_sided_top` (and the three other sides): the straight two-sided hook.
+* `exists_walks_two_sided_top` (and the three other sides), `exists_walks_two_sided`: the
+  straight two-sided hook.
+* `exists_two_sided_side`, `two_sided_side_facts`, `disjoint_two_sided_regions`,
+  `CrossingBounds.le_law_two_sided_side`: the geometry and the crossing bound of the straight
+  corridors.
 * `law_mul_mul_prod_le_law_of_two_sided`: the two-sided gluing through given corridors in
   disjoint regions.
 * `exists_pos_le_law_two_sided`: **the two-sided gluing** with straight corridors from windows on
   the sides: `c₀ · P(outer-separated at R, ends in the windows) · P(inner-separated at R', starts
   in the windows) ≤ P(j arms from B_r(z) to ∂B_{R₃}(z))`, with `c₀ = c A ^ j` for `R' - R ≤ A W`.
-* `law_mul_law_le_of_separated_of_separated`: the lower half of quasi-multiplicativity, modulo the
-  separation of the two families (taken as plain inequalities).
+* `exists_pos_mul_le_of_separated_of_separated`: the lower half of quasi-multiplicativity, modulo
+  the separation of the two families (taken as plain inequalities).
+
+## Implementation notes
+
+* The windows of the two families are aligned with one straight corridor per arm: the corridor
+  `[x, x + W]` along the side lies inside both fences of every arm ending (starting) in the window
+  (`β ≤ x + K`, `x + W ≤ α + K`, and the same with `K'`), so no bins and no jogs are needed and the
+  constant is `c A ^ j`. Aligning the windows of the two families beforehand is the job of the
+  motion plan (`MotionPlan.lean`) and of binning.
+* A dual corridor on the top side reads pairs one row outside `B_{R'}(z)`. Its event is restated as
+  determined by the pairs it actually reads (`cond_mem_crossing_iff_of_agree`), each with an end in
+  `B_{R'}(z)`; this keeps the corridors away from the arms of the second family beyond their first
+  step.
 -/
 
 @[expose] public section
@@ -536,6 +552,282 @@ theorem exists_walks_two_sided_left (hM : 1 ≤ M) (hKM : K ≤ M) (hK'M' : K' �
 
 end Hooks
 
+/-! ### Straight two-sided corridors from windows on the sides -/
+
+section Windows
+
+variable {z : LatticeSite 2} {R R' M K M' K' W S : ℕ} {col : Bool} {t : Fin 4}
+  {x α β α' β' : ℤ} {dir : Fin 2} {lo hi gl gh : LatticeSite 2}
+
+/-- **The data of one straight two-sided corridor** on the side `t` (`0` top, `1` right, `2`
+bottom, `3` left): its direction `dir`, the box `Icc lo hi` of width `W` from the side of `B_R(z)`
+to the side of `B_{R'}(z)` at the side coordinates `[x, x + W]`, and its region `Icc gl gh`,
+which contains the box, the boxes about the ends of the inner arms and about the starts of the
+outer arms, up to `S` on both sides along the side. -/
+theorem exists_two_sided_side (t : Fin 4) (col : Bool) (z : LatticeSite 2) (R R' M M' W S : ℕ)
+    (x : ℤ) : ∃ (dir : Fin 2) (lo hi gl gh : LatticeSite 2),
+      (t = 0 ∧ dir = 1 ∧ lo = ![x, z 1 + R] ∧ hi = ![x + W, z 1 + R'] ∧
+        gl = ![x - S, z 1 + R - M - 1] ∧ gh = ![x + W + S, z 1 + R' + M' + 1]) ∨
+      (t = 1 ∧ dir = 0 ∧ lo = ![z 0 + R, x] ∧ hi = ![z 0 + R', x + W] ∧
+        gl = ![z 0 + R - M - 1, x - S] ∧ gh = ![z 0 + R' + M' + 1, x + W + S]) ∨
+      (t = 2 ∧ dir = 1 ∧ lo = ![x, z 1 - R' - cond col 0 1] ∧
+        hi = ![x + W, z 1 - R - cond col 0 1] ∧
+        gl = ![x - S, z 1 - R' - M' - 2] ∧ gh = ![x + W + S, z 1 - R + M + 1]) ∨
+      (t = 3 ∧ dir = 0 ∧ lo = ![z 0 - R' - cond col 0 1, x] ∧
+        hi = ![z 0 - R - cond col 0 1, x + W] ∧
+        gl = ![z 0 - R' - M' - 2, x - S] ∧ gh = ![z 0 - R + M + 1, x + W + S]) := by
+  fin_cases t
+  · exact ⟨1, _, _, _, _, Or.inl ⟨rfl, rfl, rfl, rfl, rfl, rfl⟩⟩
+  · exact ⟨0, _, _, _, _, Or.inr (Or.inl ⟨rfl, rfl, rfl, rfl, rfl, rfl⟩)⟩
+  · exact ⟨1, _, _, _, _, Or.inr (Or.inr (Or.inl ⟨rfl, rfl, rfl, rfl, rfl, rfl⟩))⟩
+  · exact ⟨0, _, _, _, _, Or.inr (Or.inr (Or.inr ⟨rfl, rfl, rfl, rfl, rfl, rfl⟩))⟩
+
+/-- **The geometry of one straight two-sided corridor.** For a corridor as in
+`exists_two_sided_side`, at least `2S` from the corners of `B_R(z)` along the side, with the
+windows `[α, β]` (ends at `B_R(z)`) and `[α', β']` (starts at `B_{R'}(z)`) aligned with it: the
+pairs read by the corridor miss the interior of `B_R(z)`, have an end in `B_{R'}(z)` and lie in
+the region; the corridor lies in the start box of `B_{R'}(z)` for its colour; the boxes about the
+possible ends and starts lie in the region; the corridor meets `Icc (z - R - 1) (z + R)` only near
+the possible ends; and the boxes about the possible starts miss `Icc (z - R - 1) (z + R)`. -/
+theorem two_sided_side_facts (hW : 1 ≤ W) (hWK : W ≤ K) (hKM : K ≤ M) (hWK' : W ≤ K')
+    (hK'M' : K' ≤ M') (hS : M + K + M' + K' + 2 ≤ S)
+    (hRR' : R + M + K + 1 + M' + K' + 1 < R')
+    (hside : (t = 0 ∧ dir = 1 ∧ lo = ![x, z 1 + R] ∧ hi = ![x + W, z 1 + R'] ∧
+        gl = ![x - S, z 1 + R - M - 1] ∧ gh = ![x + W + S, z 1 + R' + M' + 1]) ∨
+      (t = 1 ∧ dir = 0 ∧ lo = ![z 0 + R, x] ∧ hi = ![z 0 + R', x + W] ∧
+        gl = ![z 0 + R - M - 1, x - S] ∧ gh = ![z 0 + R' + M' + 1, x + W + S]) ∨
+      (t = 2 ∧ dir = 1 ∧ lo = ![x, z 1 - R' - cond col 0 1] ∧
+        hi = ![x + W, z 1 - R - cond col 0 1] ∧
+        gl = ![x - S, z 1 - R' - M' - 2] ∧ gh = ![x + W + S, z 1 - R + M + 1]) ∨
+      (t = 3 ∧ dir = 0 ∧ lo = ![z 0 - R' - cond col 0 1, x] ∧
+        hi = ![z 0 - R - cond col 0 1, x + W] ∧
+        gl = ![z 0 - R' - M' - 2, x - S] ∧ gh = ![z 0 - R + M + 1, x + W + S]))
+    (hc0 : t = 0 ∨ t = 2 → z 0 - R + 2 * S ≤ x ∧ x + W + 2 * S ≤ z 0 + R)
+    (hc1 : t = 1 ∨ t = 3 → z 1 - R + 2 * S ≤ x ∧ x + W + 2 * S ≤ z 1 + R)
+    (hal : β ≤ x + K ∧ x + W ≤ α + K ∧ β' ≤ x + K' ∧ x + W ≤ α' + K') :
+    (∀ v ∈ Icc lo (hi + cond col 0 1), v ∉ Icc (z - (R : LatticeSite 2) + 1) (z + R - 1)) ∧
+    ((∀ v ∈ Icc lo hi, v ∈ Icc (z - (R' : LatticeSite 2)) (z + R')) ∨
+      ∀ v ∈ Icc (lo + cond col 0 1) (hi + cond col 0 1),
+        v ∈ Icc (z - (R' : LatticeSite 2)) (z + R')) ∧
+    (∀ v ∈ Icc lo (hi + cond col 0 1), v ∈ Icc gl gh) ∧ (∀ v ∈ Icc lo hi, v ∈ Icc gl gh) ∧
+    (∀ v ∈ Icc lo hi, v ∈ cond col (Icc (z - (R' : LatticeSite 2)) (z + R'))
+      (Icc (z - (R' : LatticeSite 2) - 1) (z + R'))) ∧
+    (∀ b : LatticeSite 2, ((t = 0 ∧ b 1 = z 1 + R ∧ α ≤ b 0 ∧ b 0 ≤ β) ∨
+        (t = 1 ∧ b 0 = z 0 + R ∧ α ≤ b 1 ∧ b 1 ≤ β) ∨
+        (t = 2 ∧ b 1 = z 1 - R - cond col 0 1 ∧ α ≤ b 0 ∧ b 0 ≤ β) ∨
+        (t = 3 ∧ b 0 = z 0 - R - cond col 0 1 ∧ α ≤ b 1 ∧ b 1 ≤ β)) →
+      Icc (b - (M : LatticeSite 2)) (b + ((M + 1 : ℕ) : LatticeSite 2)) ⊆ Icc gl gh ∧
+      ∀ v ∈ Icc lo hi, v ∈ Icc (z - (R : LatticeSite 2) - 1) (z + R) →
+        v ∈ Icc (b - (M : LatticeSite 2)) (b + M)) ∧
+    ∀ a : LatticeSite 2, ((t = 0 ∧ a 1 = z 1 + R' ∧ α' ≤ a 0 ∧ a 0 ≤ β') ∨
+        (t = 1 ∧ a 0 = z 0 + R' ∧ α' ≤ a 1 ∧ a 1 ≤ β') ∨
+        (t = 2 ∧ a 1 = z 1 - R' - cond col 0 1 ∧ α' ≤ a 0 ∧ a 0 ≤ β') ∨
+        (t = 3 ∧ a 0 = z 0 - R' - cond col 0 1 ∧ α' ≤ a 1 ∧ a 1 ≤ β')) →
+      Icc (a - (M' : LatticeSite 2)) (a + ((M' + 1 : ℕ) : LatticeSite 2)) ⊆ Icc gl gh ∧
+      ∀ v ∈ Icc (a - (M' : LatticeSite 2)) (a + M'),
+        v ∉ Icc (z - (R : LatticeSite 2) - 1) (z + R) := by
+  have hcol : cond col (0 : ℤ) 1 = 0 ∨ cond col (0 : ℤ) 1 = 1 := by cases col <;> simp
+  have hcor : ((t = 0 ∨ t = 2) ∧ z 0 - R + 2 * S ≤ x ∧ x + W + 2 * S ≤ z 0 + R) ∨
+      ((t = 1 ∨ t = 3) ∧ z 1 - R + 2 * S ≤ x ∧ x + W + 2 * S ≤ z 1 + R) := by
+    by_cases h : t = 0 ∨ t = 2
+    · exact Or.inl ⟨h, hc0 h⟩
+    · exact Or.inr ⟨by omega, hc1 (by omega)⟩
+  clear hc0 hc1
+  rcases hside with ⟨rfl, rfl, rfl, rfl, rfl, rfl⟩ | ⟨rfl, rfl, rfl, rfl, rfl, rfl⟩ |
+    ⟨rfl, rfl, rfl, rfl, rfl, rfl⟩ | ⟨rfl, rfl, rfl, rfl, rfl, rfl⟩ <;>
+  rcases hcor with ⟨ht, h₁, h₂⟩ | ⟨ht, h₁, h₂⟩ <;>
+  (try exact absurd ht (by decide)) <;>
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  all_goals first
+    | (intro v hv hvR
+       rw [mem_Icc_two_iff] at hv hvR
+       simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply, Pi.one_apply, Matrix.cons_val_zero,
+      Matrix.cons_val_one, cond_zero_one_apply] at hv hvR
+       omega)
+    | (left
+       intro v hv
+       rw [mem_Icc_two_iff] at hv ⊢
+       simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply, Matrix.cons_val_zero,
+      Matrix.cons_val_one] at hv ⊢
+       omega)
+    | (right
+       intro v hv
+       rw [mem_Icc_two_iff] at hv ⊢
+       simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply, Matrix.cons_val_zero,
+      Matrix.cons_val_one, cond_zero_one_apply] at hv ⊢
+       omega)
+    | (intro v hv
+       rw [mem_Icc_two_iff] at hv ⊢
+       simp only [Pi.add_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
+         cond_zero_one_apply] at hv ⊢
+       omega)
+    | (intro v hv
+       rw [mem_Icc_two_iff] at hv
+       simp only [Matrix.cons_val_zero, Matrix.cons_val_one] at hv
+       cases col <;> simp only [Bool.cond_true, Bool.cond_false] at hv hcol ⊢ <;>
+         rw [mem_Icc_two_iff] <;>
+         simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply, Pi.one_apply] <;> omega)
+    | (intro b hb
+       rcases hb with ⟨ht, e₁, e₂, e₃⟩ | ⟨ht, e₁, e₂, e₃⟩ | ⟨ht, e₁, e₂, e₃⟩ |
+         ⟨ht, e₁, e₂, e₃⟩ <;> (try exact absurd ht (by decide))
+       refine ⟨fun v hv => ?_, fun v hv hvR => ?_⟩
+       · rw [mem_Icc_two_iff] at hv ⊢
+         simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply, Matrix.cons_val_zero,
+      Matrix.cons_val_one] at hv ⊢
+         push_cast at hv
+         omega
+       · rw [mem_Icc_two_iff] at hv hvR
+         try rw [mem_Icc_two_iff]
+         simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply, Pi.one_apply,
+           Matrix.cons_val_zero, Matrix.cons_val_one] at hv hvR ⊢
+         omega)
+
+/-- **The crossing bound of a straight two-sided corridor**: with `R' ≤ R + A W`, the corridor is
+crossed in the configuration of its colour with probability at least `c A`. -/
+theorem CrossingBounds.le_law_two_sided_side {q : Sym2 (LatticeSite 2) → unitInterval} {L : ℕ∞}
+    {c : ℕ → ℝ≥0∞} (hCB : CrossingBounds q L c) {A : ℕ} (hW : 1 ≤ W) (hWL : (W : ℕ∞) ≤ L)
+    (hRR' : R ≤ R') (hA : R' ≤ R + A * W)
+    (hside : (t = 0 ∧ dir = 1 ∧ lo = ![x, z 1 + R] ∧ hi = ![x + W, z 1 + R'] ∧
+        gl = ![x - S, z 1 + R - M - 1] ∧ gh = ![x + W + S, z 1 + R' + M' + 1]) ∨
+      (t = 1 ∧ dir = 0 ∧ lo = ![z 0 + R, x] ∧ hi = ![z 0 + R', x + W] ∧
+        gl = ![z 0 + R - M - 1, x - S] ∧ gh = ![z 0 + R' + M' + 1, x + W + S]) ∨
+      (t = 2 ∧ dir = 1 ∧ lo = ![x, z 1 - R' - cond col 0 1] ∧
+        hi = ![x + W, z 1 - R - cond col 0 1] ∧
+        gl = ![x - S, z 1 - R' - M' - 2] ∧ gh = ![x + W + S, z 1 - R + M + 1]) ∨
+      (t = 3 ∧ dir = 0 ∧ lo = ![z 0 - R' - cond col 0 1, x] ∧
+        hi = ![z 0 - R - cond col 0 1, x + W] ∧
+        gl = ![z 0 - R' - M' - 2, x - S] ∧ gh = ![z 0 - R + M + 1, x + W + S])) :
+    c A ≤ law q ((fun ω : Config (LatticeSite 2) => cond col ω (dualConfig ω)) ⁻¹'
+      crossing dir lo hi) := by
+  have hA' : (R' : ℤ) ≤ R + A * W := by exact_mod_cast hA
+  rcases hside with ⟨-, rfl, rfl, rfl, -, -⟩ | ⟨-, rfl, rfl, rfl, -, -⟩ |
+    ⟨-, rfl, rfl, rfl, -, -⟩ | ⟨-, rfl, rfl, rfl, -, -⟩
+  · exact hCB.le_law_box_one col A hW hWL (by omega) (by omega) (by omega)
+  · exact hCB.le_law_box_zero col A hW hWL (by omega) (by omega) (by omega)
+  · exact hCB.le_law_box_one col A hW hWL (by omega) (by omega) (by omega)
+  · exact hCB.le_law_box_zero col A hW hWL (by omega) (by omega) (by omega)
+
+/-- **The straight two-sided hook, on any side**: for a corridor as in `exists_two_sided_side`, an
+arm ending in the window `[α, β]` at `B_R(z)` with an outer fence and an arm starting in the window
+`[α', β']` at `B_{R'}(z)` with an inner fence, the windows aligned with the corridor, are joined
+through the corridor (`exists_walks_two_sided_top` and the three other sides). -/
+theorem exists_walks_two_sided {ω : Config (LatticeSite 2)} {a b a' b' : LatticeSite 2}
+    {γ : (zdGraph 2).Walk a b} {δ : (zdGraph 2).Walk a' b'}
+    (hW : 1 ≤ W) (hWK : W ≤ K) (hKM : K ≤ M) (hWK' : W ≤ K') (hK'M' : K' ≤ M')
+    (hS : M + K + M' + K' + 2 ≤ S) (hRR' : R + M + K + 1 + M' + K' + 1 < R')
+    (hside : (t = 0 ∧ dir = 1 ∧ lo = ![x, z 1 + R] ∧ hi = ![x + W, z 1 + R'] ∧
+        gl = ![x - S, z 1 + R - M - 1] ∧ gh = ![x + W + S, z 1 + R' + M' + 1]) ∨
+      (t = 1 ∧ dir = 0 ∧ lo = ![z 0 + R, x] ∧ hi = ![z 0 + R', x + W] ∧
+        gl = ![z 0 + R - M - 1, x - S] ∧ gh = ![z 0 + R' + M' + 1, x + W + S]) ∨
+      (t = 2 ∧ dir = 1 ∧ lo = ![x, z 1 - R' - cond col 0 1] ∧
+        hi = ![x + W, z 1 - R - cond col 0 1] ∧
+        gl = ![x - S, z 1 - R' - M' - 2] ∧ gh = ![x + W + S, z 1 - R + M + 1]) ∨
+      (t = 3 ∧ dir = 0 ∧ lo = ![z 0 - R' - cond col 0 1, x] ∧
+        hi = ![z 0 - R - cond col 0 1, x + W] ∧
+        gl = ![z 0 - R' - M' - 2, x - S] ∧ gh = ![z 0 - R + M + 1, x + W + S]))
+    (hc0 : t = 0 ∨ t = 2 → z 0 - R + 2 * S ≤ x ∧ x + W + 2 * S ≤ z 0 + R)
+    (hc1 : t = 1 ∨ t = 3 → z 1 - R + 2 * S ≤ x ∧ x + W + 2 * S ≤ z 1 + R)
+    (hal : β ≤ x + K ∧ x + W ≤ α + K ∧ β' ≤ x + K' ∧ x + W ≤ α' + K')
+    (hC : cond col ω (dualConfig ω) ∈ crossing dir lo hi)
+    (hb : (t = 0 ∧ b 1 = z 1 + R ∧ α ≤ b 0 ∧ b 0 ≤ β) ∨
+        (t = 1 ∧ b 0 = z 0 + R ∧ α ≤ b 1 ∧ b 1 ≤ β) ∨
+        (t = 2 ∧ b 1 = z 1 - R - cond col 0 1 ∧ α ≤ b 0 ∧ b 0 ≤ β) ∨
+        (t = 3 ∧ b 0 = z 0 - R - cond col 0 1 ∧ α ≤ b 1 ∧ b 1 ≤ β))
+    (ha : (t = 0 ∧ a' 1 = z 1 + R' ∧ α' ≤ a' 0 ∧ a' 0 ≤ β') ∨
+        (t = 1 ∧ a' 0 = z 0 + R' ∧ α' ≤ a' 1 ∧ a' 1 ≤ β') ∨
+        (t = 2 ∧ a' 1 = z 1 - R' - cond col 0 1 ∧ α' ≤ a' 0 ∧ a' 0 ≤ β') ∨
+        (t = 3 ∧ a' 0 = z 0 - R' - cond col 0 1 ∧ α' ≤ a' 1 ∧ a' 1 ≤ β'))
+    (hf : HasOuterFence ω col z R M K γ) (hf' : HasInnerFence ω col z R' M' K' δ) :
+    ∃ (x₀ w x₁ : LatticeSite 2) (P₁ : (zdGraph 2).Walk x₀ w) (P₂ : (zdGraph 2).Walk w x₁),
+      x₀ ∈ γ.support ∧ x₀ ∈ Icc (b - (M : LatticeSite 2)) (b + M) ∧ x₁ ∈ δ.support ∧
+      (∀ e ∈ P₁.edges, e ∈ cond col ω (dualConfig ω)) ∧
+      (∀ e ∈ P₂.edges, e ∈ cond col ω (dualConfig ω)) ∧
+      (∀ v ∈ P₁.support, v ∈ Icc (b - (M : LatticeSite 2)) (b + M) ∨ v ∈ Icc lo hi) ∧
+      ∀ v ∈ P₂.support, v ∈ Icc (a' - (M' : LatticeSite 2)) (a' + M') := by
+  have hM : 1 ≤ M := by omega
+  have hM' : 1 ≤ M' := by omega
+  have hcor : ((t = 0 ∨ t = 2) ∧ z 0 - R + 2 * S ≤ x ∧ x + W + 2 * S ≤ z 0 + R) ∨
+      ((t = 1 ∨ t = 3) ∧ z 1 - R + 2 * S ≤ x ∧ x + W + 2 * S ≤ z 1 + R) := by
+    by_cases h : t = 0 ∨ t = 2
+    · exact Or.inl ⟨h, hc0 h⟩
+    · exact Or.inr ⟨by omega, hc1 (by omega)⟩
+  clear hc0 hc1
+  obtain ⟨hal₁, hal₂, hal₃, hal₄⟩ := hal
+  rcases hside with ⟨rfl, rfl, rfl, rfl, -, -⟩ | ⟨rfl, rfl, rfl, rfl, -, -⟩ |
+    ⟨rfl, rfl, rfl, rfl, -, -⟩ | ⟨rfl, rfl, rfl, rfl, -, -⟩ <;>
+  rcases hcor with ⟨ht, h₁, h₂⟩ | ⟨ht, h₁, h₂⟩ <;> (try exact absurd ht (by decide)) <;>
+  rcases hb with ⟨hbt, hb₁, hb₂, hb₃⟩ | ⟨hbt, hb₁, hb₂, hb₃⟩ | ⟨hbt, hb₁, hb₂, hb₃⟩ |
+    ⟨hbt, hb₁, hb₂, hb₃⟩ <;> (try exact absurd hbt (by decide)) <;>
+  rcases ha with ⟨hat, ha₁, ha₂, ha₃⟩ | ⟨hat, ha₁, ha₂, ha₃⟩ | ⟨hat, ha₁, ha₂, ha₃⟩ |
+    ⟨hat, ha₁, ha₂, ha₃⟩ <;> (try exact absurd hat (by decide))
+  · exact exists_walks_two_sided_top hM hKM hM' hK'M' (by omega) (by omega) hC hb₁ (by omega)
+      (by omega) (by omega) (by omega) ha₁ (by omega) (by omega) (by omega) (by omega) hf hf'
+  · exact exists_walks_two_sided_right hM hKM hK'M' hW (by omega) (by omega) hC hb₁ (by omega)
+      (by omega) (by omega) (by omega) ha₁ (by omega) (by omega) (by omega) (by omega) hf hf'
+  · exact exists_walks_two_sided_bottom hM hKM hM' hK'M' (by omega) (by omega) hC hb₁ (by omega)
+      (by omega) (by omega) (by omega) ha₁ (by omega) (by omega) (by omega) (by omega) hf hf'
+  · exact exists_walks_two_sided_left hM hKM hK'M' hW (by omega) (by omega) hC hb₁ (by omega)
+      (by omega) (by omega) (by omega) ha₁ (by omega) (by omega) (by omega) (by omega) hf hf'
+
+/-- **The regions of two straight two-sided corridors are disjoint** when the corridors are at
+least `2S` from the corners of `B_R(z)` and, on one side, more than `W + 2S` apart. -/
+theorem disjoint_two_sided_regions {t₁ t₂ : Fin 4} {col₁ col₂ : Bool} {x₁ x₂ : ℤ}
+    {dir₁ dir₂ : Fin 2} {lo₁ hi₁ gl₁ gh₁ lo₂ hi₂ gl₂ gh₂ : LatticeSite 2}
+    (hMS : M + 2 ≤ S) (hMR : M + 1 < R)
+    (hside₁ : (t₁ = 0 ∧ dir₁ = 1 ∧ lo₁ = ![x₁, z 1 + R] ∧ hi₁ = ![x₁ + W, z 1 + R'] ∧
+        gl₁ = ![x₁ - S, z 1 + R - M - 1] ∧ gh₁ = ![x₁ + W + S, z 1 + R' + M' + 1]) ∨
+      (t₁ = 1 ∧ dir₁ = 0 ∧ lo₁ = ![z 0 + R, x₁] ∧ hi₁ = ![z 0 + R', x₁ + W] ∧
+        gl₁ = ![z 0 + R - M - 1, x₁ - S] ∧ gh₁ = ![z 0 + R' + M' + 1, x₁ + W + S]) ∨
+      (t₁ = 2 ∧ dir₁ = 1 ∧ lo₁ = ![x₁, z 1 - R' - cond col₁ 0 1] ∧
+        hi₁ = ![x₁ + W, z 1 - R - cond col₁ 0 1] ∧
+        gl₁ = ![x₁ - S, z 1 - R' - M' - 2] ∧ gh₁ = ![x₁ + W + S, z 1 - R + M + 1]) ∨
+      (t₁ = 3 ∧ dir₁ = 0 ∧ lo₁ = ![z 0 - R' - cond col₁ 0 1, x₁] ∧
+        hi₁ = ![z 0 - R - cond col₁ 0 1, x₁ + W] ∧
+        gl₁ = ![z 0 - R' - M' - 2, x₁ - S] ∧ gh₁ = ![z 0 - R + M + 1, x₁ + W + S]))
+    (hside₂ : (t₂ = 0 ∧ dir₂ = 1 ∧ lo₂ = ![x₂, z 1 + R] ∧ hi₂ = ![x₂ + W, z 1 + R'] ∧
+        gl₂ = ![x₂ - S, z 1 + R - M - 1] ∧ gh₂ = ![x₂ + W + S, z 1 + R' + M' + 1]) ∨
+      (t₂ = 1 ∧ dir₂ = 0 ∧ lo₂ = ![z 0 + R, x₂] ∧ hi₂ = ![z 0 + R', x₂ + W] ∧
+        gl₂ = ![z 0 + R - M - 1, x₂ - S] ∧ gh₂ = ![z 0 + R' + M' + 1, x₂ + W + S]) ∨
+      (t₂ = 2 ∧ dir₂ = 1 ∧ lo₂ = ![x₂, z 1 - R' - cond col₂ 0 1] ∧
+        hi₂ = ![x₂ + W, z 1 - R - cond col₂ 0 1] ∧
+        gl₂ = ![x₂ - S, z 1 - R' - M' - 2] ∧ gh₂ = ![x₂ + W + S, z 1 - R + M + 1]) ∨
+      (t₂ = 3 ∧ dir₂ = 0 ∧ lo₂ = ![z 0 - R' - cond col₂ 0 1, x₂] ∧
+        hi₂ = ![z 0 - R - cond col₂ 0 1, x₂ + W] ∧
+        gl₂ = ![z 0 - R' - M' - 2, x₂ - S] ∧ gh₂ = ![z 0 - R + M + 1, x₂ + W + S]))
+    (hc0₁ : t₁ = 0 ∨ t₁ = 2 → z 0 - R + 2 * S ≤ x₁ ∧ x₁ + W + 2 * S ≤ z 0 + R)
+    (hc1₁ : t₁ = 1 ∨ t₁ = 3 → z 1 - R + 2 * S ≤ x₁ ∧ x₁ + W + 2 * S ≤ z 1 + R)
+    (hc0₂ : t₂ = 0 ∨ t₂ = 2 → z 0 - R + 2 * S ≤ x₂ ∧ x₂ + W + 2 * S ≤ z 0 + R)
+    (hc1₂ : t₂ = 1 ∨ t₂ = 3 → z 1 - R + 2 * S ≤ x₂ ∧ x₂ + W + 2 * S ≤ z 1 + R)
+    (hgap : t₁ = t₂ → x₁ + W + 2 * S < x₂ ∨ x₂ + W + 2 * S < x₁) :
+    Disjoint (Icc gl₁ gh₁) (Icc gl₂ gh₂) := by
+  have hcor₁ : ((t₁ = 0 ∨ t₁ = 2) ∧ z 0 - R + 2 * S ≤ x₁ ∧ x₁ + W + 2 * S ≤ z 0 + R) ∨
+      ((t₁ = 1 ∨ t₁ = 3) ∧ z 1 - R + 2 * S ≤ x₁ ∧ x₁ + W + 2 * S ≤ z 1 + R) := by
+    by_cases h : t₁ = 0 ∨ t₁ = 2
+    · exact Or.inl ⟨h, hc0₁ h⟩
+    · exact Or.inr ⟨by omega, hc1₁ (by omega)⟩
+  have hcor₂ : ((t₂ = 0 ∨ t₂ = 2) ∧ z 0 - R + 2 * S ≤ x₂ ∧ x₂ + W + 2 * S ≤ z 0 + R) ∨
+      ((t₂ = 1 ∨ t₂ = 3) ∧ z 1 - R + 2 * S ≤ x₂ ∧ x₂ + W + 2 * S ≤ z 1 + R) := by
+    by_cases h : t₂ = 0 ∨ t₂ = 2
+    · exact Or.inl ⟨h, hc0₂ h⟩
+    · exact Or.inr ⟨by omega, hc1₂ (by omega)⟩
+  have hgap' : (t₁ = t₂ ∧ (x₁ + W + 2 * S < x₂ ∨ x₂ + W + 2 * S < x₁)) ∨ t₁ ≠ t₂ := by
+    by_cases h : t₁ = t₂
+    · exact Or.inl ⟨h, hgap h⟩
+    · exact Or.inr h
+  clear hc0₁ hc1₁ hc0₂ hc1₂ hgap
+  refine disjoint_Icc_of_lt ?_
+  rcases hside₁ with ⟨rfl, -, -, -, rfl, rfl⟩ | ⟨rfl, -, -, -, rfl, rfl⟩ |
+    ⟨rfl, -, -, -, rfl, rfl⟩ | ⟨rfl, -, -, -, rfl, rfl⟩ <;>
+  rcases hside₂ with ⟨rfl, -, -, -, rfl, rfl⟩ | ⟨rfl, -, -, -, rfl, rfl⟩ |
+    ⟨rfl, -, -, -, rfl, rfl⟩ | ⟨rfl, -, -, -, rfl, rfl⟩ <;>
+  rcases hcor₁ with ⟨ht₁, h₁, h₂⟩ | ⟨ht₁, h₁, h₂⟩ <;> (try exact absurd ht₁ (by decide)) <;>
+  rcases hcor₂ with ⟨ht₂, h₃, h₄⟩ | ⟨ht₂, h₃, h₄⟩ <;> (try exact absurd ht₂ (by decide)) <;>
+  rcases hgap' with ⟨hteq, hg⟩ | hne <;> (try exact absurd hteq (by decide)) <;>
+  (try exact absurd rfl hne) <;>
+  simp only [Matrix.cons_val_zero, Matrix.cons_val_one] <;> omega
+
+end Windows
+
 /-! ### The two-sided gluing through given corridors -/
 
 section Corridors
@@ -889,5 +1181,265 @@ theorem law_mul_mul_prod_le_law_of_two_sided (q : Sym2 (LatticeSite 2) → unitI
   exact ⟨a, b'', γ', hγ', hd'', fun i => ⟨hin i ▸ hJ i, mem_univ _⟩, ho''⟩
 
 end Corridors
+
+/-! ### The two-sided gluing with straight corridors -/
+
+section Main
+
+variable {j : ℕ}
+
+/-- **The two-sided gluing** (the gluing step of the lower half of quasi-multiplicativity, Nolin's
+Proposition 17). For a colour sequence `σ` without packs and a ratio `A` there is `c₀ > 0` such
+that for every law with crossing bounds `c` up to scale `L` the following holds. Let `γ` range over
+the families of arms from `B_r(z)` to the boundary of `B_R(z)` separated at the outer boundary
+(separation `s ≥ 2M + 1`, fences `(M, K)`), with inner positions in `J` and ends in windows
+`[α i, β i]` on the sides `t i` of `B_R(z)` (`0` top, `1` right, `2` bottom, `3` left, side
+coordinates as in `exists_pos_le_law_windows_of_moves`), and `δ` over the families of arms from
+`B_{R'}(z)` to the boundary of `B_{R₃}(z)` separated at the inner boundary (separation
+`s' ≥ 2M' + 2`, fences `(M', K')`), with starts in windows `[α' i, β' i]` on the same sides `t i`
+of `B_{R'}(z)`. Suppose that each pair of windows is aligned with a corridor `[x i, x i + W]`
+spanned by both fences (`β i ≤ x i + K`, `x i + W ≤ α i + K`, and the same with `K'`), that the
+corridors are at least `2S` from the corners of `B_R(z)` and, on one side, more than `W + 2S`
+apart, where `S ≥ M + K + M' + K' + 2`, and `W ≤ K ≤ M`, `W ≤ K' ≤ M'`,
+`R + M + K + M' + K' + 2 < R'`, `R' + M' + 1 < R₃`, `R' ≤ R + A W`. Then
+`c₀ · P(γ) · P(δ) ≤ P(j arms from B_r(z) to ∂B_{R₃}(z) with inner positions in J)`,
+with `c₀ = c A ^ j`: one straight corridor of width `W` and length `R' - R ≤ A W` per arm. -/
+theorem exists_pos_le_law_two_sided (σ : Fin j → Bool)
+    (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) (c : ℕ → ℝ≥0∞) (A : ℕ) :
+    ∃ c₀ : ℝ≥0∞, 0 < c₀ ∧ ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
+      CrossingBounds q L c → ∀ (z : LatticeSite 2) (r R R' R₃ W M K M' K' S : ℕ) (s s' : ℝ)
+      (J : Fin j → Set ℤ) (t : Fin j → Fin 4) (x α β α' β' : Fin j → ℤ),
+      1 ≤ W → W ≤ K → K ≤ M → W ≤ K' → K' ≤ M' → M + K + M' + K' + 2 ≤ S →
+      2 * (M : ℝ) + 1 ≤ s → 2 * (M' : ℝ) + 2 ≤ s' →
+      r + M + 1 < R → R + M + K + 1 + M' + K' + 1 < R' → R' + M' + 1 < R₃ →
+      R' ≤ R + A * W → (W : ℕ∞) ≤ L →
+      (∀ i, β i ≤ x i + K ∧ x i + W ≤ α i + K ∧ β' i ≤ x i + K' ∧ x i + W ≤ α' i + K') →
+      (∀ i, (if t i = 0 ∨ t i = 2 then z 0 else z 1) - R + 2 * S ≤ x i ∧
+        x i + W + 2 * S ≤ (if t i = 0 ∨ t i = 2 then z 0 else z 1) + R) →
+      (∀ i k, i ≠ k → t i = t k → x i + W + 2 * S < x k ∨ x k + W + 2 * S < x i) →
+      c₀ * law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+        (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
+        (∀ i k l, i < k → k < l → sbtw (landingPos (z - R) (z + R) (σ i) (γ i))
+          (landingPos (z - R) (z + R) (σ k) (γ k)) (landingPos (z - R) (z + R) (σ l) (γ l))) ∧
+        ArmsOuterSeparated ω σ z R s M K γ ∧ (∀ i, b i ∈ {b : LatticeSite 2 |
+          (t i = 0 ∧ b 1 = z 1 + R ∧ α i ≤ b 0 ∧ b 0 ≤ β i) ∨
+          (t i = 1 ∧ b 0 = z 0 + R ∧ α i ≤ b 1 ∧ b 1 ≤ β i) ∨
+          (t i = 2 ∧ b 1 = z 1 - R - cond (σ i) 0 1 ∧ α i ≤ b 0 ∧ b 0 ≤ β i) ∨
+          (t i = 3 ∧ b 0 = z 0 - R - cond (σ i) 0 1 ∧ α i ≤ b 1 ∧ b 1 ≤ β i)}) ∧
+        ∀ i, innerPos z r (σ i) (γ i) ∈ J i} *
+      law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+        (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, IsArm ω (σ i) z R' (z - R₃) (z + R₃) (γ i)) ∧ ArmsDisjoint σ γ ∧
+        (∀ i k l, i < k → k < l → sbtw (landingPos (z - R₃) (z + R₃) (σ i) (γ i))
+          (landingPos (z - R₃) (z + R₃) (σ k) (γ k)) (landingPos (z - R₃) (z + R₃) (σ l) (γ l))) ∧
+        ArmsInnerSeparated ω σ z R' s' M' K' γ ∧ ∀ i, a i ∈ {a : LatticeSite 2 |
+          (t i = 0 ∧ a 1 = z 1 + R' ∧ α' i ≤ a 0 ∧ a 0 ≤ β' i) ∨
+          (t i = 1 ∧ a 0 = z 0 + R' ∧ α' i ≤ a 1 ∧ a 1 ≤ β' i) ∨
+          (t i = 2 ∧ a 1 = z 1 - R' - cond (σ i) 0 1 ∧ α' i ≤ a 0 ∧ a 0 ≤ β' i) ∨
+          (t i = 3 ∧ a 0 = z 0 - R' - cond (σ i) 0 1 ∧ α' i ≤ a 1 ∧ a 1 ≤ β' i)}} ≤
+      law q (multiArmEventIn σ z r R₃ J fun _ => univ) := by
+  classical
+  by_cases hc : 0 < c A
+  swap
+  · exact ⟨1, one_pos, fun q L hCB => absurd (hCB.pos _) hc⟩
+  refine ⟨c A ^ j, ENNReal.pow_pos hc _, ?_⟩
+  intro q L hCB z r R R' R₃ W M K M' K' S s s' J t x α β α' β' hW hWK hKM hWK' hK'M' hS hs hs'
+    hrM hRR' hR'R₃ hA hWL hal hcor hgap
+  have hM : 1 ≤ M := by omega
+  have hM' : 1 ≤ M' := by omega
+  have hc0 : ∀ i, t i = 0 ∨ t i = 2 → z 0 - R + 2 * S ≤ x i ∧ x i + W + 2 * S ≤ z 0 + R :=
+    fun i h => by
+      have := hcor i
+      rwa [ite_eq_left h] at this
+  have hc1 : ∀ i, t i = 1 ∨ t i = 3 → z 1 - R + 2 * S ≤ x i ∧ x i + W + 2 * S ≤ z 1 + R :=
+    fun i h => by
+      have hn : ¬(t i = 0 ∨ t i = 2) := by omega
+      have := hcor i
+      rwa [ite_eq_right hn] at this
+  choose dir lo hi gl gh hside using fun i =>
+    exists_two_sided_side (t i) (σ i) z R R' M M' W S (x i)
+  have hfacts := fun i => two_sided_side_facts (α := α i) (β := β i) (α' := α' i) (β' := β' i)
+    hW hWK hKM hWK' hK'M' hS hRR' (hside i) (hc0 i) (hc1 i) (hal i)
+  have hmain := law_mul_mul_prod_le_law_of_two_sided (σ := σ) (z := z) (r := r) (R := R) (s := s)
+    (M := M) (K := K) (R' := R') (R₃ := R₃) (M' := M') (K' := K') (s' := s') q hσ hKM hM hK'M' hM'
+    hrM hRR' hR'R₃ hs hs'
+    (fun i => {b : LatticeSite 2 |
+      (t i = 0 ∧ b 1 = z 1 + R ∧ α i ≤ b 0 ∧ b 0 ≤ β i) ∨
+      (t i = 1 ∧ b 0 = z 0 + R ∧ α i ≤ b 1 ∧ b 1 ≤ β i) ∨
+      (t i = 2 ∧ b 1 = z 1 - R - cond (σ i) 0 1 ∧ α i ≤ b 0 ∧ b 0 ≤ β i) ∨
+      (t i = 3 ∧ b 0 = z 0 - R - cond (σ i) 0 1 ∧ α i ≤ b 1 ∧ b 1 ≤ β i)})
+    (fun i => {a : LatticeSite 2 |
+      (t i = 0 ∧ a 1 = z 1 + R' ∧ α' i ≤ a 0 ∧ a 0 ≤ β' i) ∨
+      (t i = 1 ∧ a 0 = z 0 + R' ∧ α' i ≤ a 1 ∧ a 1 ≤ β' i) ∨
+      (t i = 2 ∧ a 1 = z 1 - R' - cond (σ i) 0 1 ∧ α' i ≤ a 0 ∧ a 0 ≤ β' i) ∨
+      (t i = 3 ∧ a 0 = z 0 - R' - cond (σ i) 0 1 ∧ α' i ≤ a 1 ∧ a 1 ≤ β' i)}) J
+    (fun i => (fun ω : Config (LatticeSite 2) => cond (σ i) ω (dualConfig ω)) ⁻¹'
+      crossing (dir i) (lo i) (hi i))
+    (fun i => {e : Sym2 (LatticeSite 2) | (∀ v ∈ e, v ∈ Icc (lo i) (hi i + cond (σ i) 0 1)) ∧
+      (∃ v ∈ e, v ∈ Icc (lo i) (hi i)) ∧
+      ∃ v ∈ e, v ∈ Icc (lo i + cond (σ i) 0 1) (hi i + cond (σ i) 0 1)})
+    (fun i => Icc (lo i) (hi i)) (fun i => Icc (gl i) (gh i))
+    (fun i => measurableSet_preimage_cond_crossing (σ i) (dir i) (lo i) (hi i))
+    (fun i ω ω' h => cond_mem_crossing_iff_of_agree (σ i) (dir i) (lo i) (hi i)
+      fun e h₁ h₂ h₃ => by
+        have := Set.ext_iff.1 h e
+        exact ⟨fun he => (this.1 ⟨he, h₁, h₂, h₃⟩).1, fun he => (this.2 ⟨he, h₁, h₂, h₃⟩).1⟩)
+    (fun i ω ω' h hω => cond_mem_crossing_of_cond_subset h hω)
+    (fun i e he v hv => (hfacts i).1 v (he.1 v hv))
+    (fun i e he => (hfacts i).2.1.elim
+      (fun h => by
+        obtain ⟨v, hv, hv'⟩ := he.2.1
+        exact ⟨v, hv, h v hv'⟩)
+      (fun h => by
+        obtain ⟨v, hv, hv'⟩ := he.2.2
+        exact ⟨v, hv, h v hv'⟩))
+    (fun i e he v hv => (hfacts i).2.2.1 v (he.1 v hv))
+    (fun i b hb => ((hfacts i).2.2.2.2.2.1 b hb).1)
+    (fun i a ha => ((hfacts i).2.2.2.2.2.2 a ha).1)
+    (fun i v hv => (hfacts i).2.2.2.1 v hv)
+    (fun i k hik => disjoint_two_sided_regions (by omega) (by omega) (hside i) (hside k) (hc0 i)
+      (hc1 i) (hc0 k) (hc1 k) (hgap i k hik))
+    (fun i b hb v hv hvR => ((hfacts i).2.2.2.2.2.1 b hb).2 v hv hvR)
+    (fun i v hv => (hfacts i).2.2.2.2.1 v hv)
+    (fun i a ha => ((hfacts i).2.2.2.2.2.2 a ha).2)
+    (fun i ω hω a b γ _ hb hf a' b' δ _ ha hf' => exists_walks_two_sided hW hWK hKM hWK' hK'M'
+      hS hRR' (hside i) (hc0 i) (hc1 i) (hal i) hω hb ha hf hf')
+  have hprod : c A ^ j ≤ ∏ i, law q ((fun ω : Config (LatticeSite 2) =>
+      cond (σ i) ω (dualConfig ω)) ⁻¹' crossing (dir i) (lo i) (hi i)) := by
+    calc c A ^ j = ∏ _i : Fin j, c A := by
+          rw [Finset.prod_const, Finset.card_univ, Fintype.card_fin]
+      _ ≤ _ := Finset.prod_le_prod fun i _ =>
+          hCB.le_law_two_sided_side hW hWL (by omega) hA (hside i)
+  calc c A ^ j * law q _ * law q _ = law q _ * law q _ * c A ^ j := by ring
+    _ ≤ _ := mul_le_mul' le_rfl hprod
+    _ ≤ _ := hmain
+
+/-- **The lower half of quasi-multiplicativity, modulo the separation of both families.** For a
+colour sequence `σ` without packs and a ratio `A` there is `c₀ > 0` such that for every law with
+crossing bounds `c` up to scale `L`: if the arms of the annulus `(r₁, r₂)` can be chosen separated
+at the outer boundary of `B_R(z)` with ends in the windows `[α i, β i]`, at a cost `C₁`
+(`P(A(r₁, r₂)) ≤ C₁ P(separated)`), and the arms of the annulus `(r₂, r₃)` can be chosen separated
+at the inner boundary of `B_{R'}(z)` with starts in the windows `[α' i, β' i]`, at a cost `C₂`, the
+windows and the parameters being as in `exists_pos_le_law_two_sided`, then
+`c₀ · P(A(r₁, r₂)) · P(A(r₂, r₃)) ≤ C₁ C₂ · P(A(r₁, r₃))`. Theorem 11 (outer and inner halves) and
+the alignment of the windows provide the two hypotheses; they are taken here as plain
+inequalities. -/
+theorem exists_pos_mul_le_of_separated_of_separated (σ : Fin j → Bool)
+    (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) (c : ℕ → ℝ≥0∞) (A : ℕ) :
+    ∃ c₀ : ℝ≥0∞, 0 < c₀ ∧ ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
+      CrossingBounds q L c → ∀ (z : LatticeSite 2) (r₁ r₂ r₃ R R' W M K M' K' S : ℕ) (s s' : ℝ)
+      (t : Fin j → Fin 4) (x α β α' β' : Fin j → ℤ) (C₁ C₂ : ℝ≥0∞),
+      1 ≤ W → W ≤ K → K ≤ M → W ≤ K' → K' ≤ M' → M + K + M' + K' + 2 ≤ S →
+      2 * (M : ℝ) + 1 ≤ s → 2 * (M' : ℝ) + 2 ≤ s' →
+      r₁ + M + 1 < R → R + M + K + 1 + M' + K' + 1 < R' → R' + M' + 1 < r₃ →
+      R' ≤ R + A * W → (W : ℕ∞) ≤ L →
+      (∀ i, β i ≤ x i + K ∧ x i + W ≤ α i + K ∧ β' i ≤ x i + K' ∧ x i + W ≤ α' i + K') →
+      (∀ i, (if t i = 0 ∨ t i = 2 then z 0 else z 1) - R + 2 * S ≤ x i ∧
+        x i + W + 2 * S ≤ (if t i = 0 ∨ t i = 2 then z 0 else z 1) + R) →
+      (∀ i k, i ≠ k → t i = t k → x i + W + 2 * S < x k ∨ x k + W + 2 * S < x i) →
+      law q (multiArmEvent σ z r₁ r₂) ≤ C₁ * law q {ω : Config (LatticeSite 2) |
+        ∃ (a b : Fin j → LatticeSite 2)
+        (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, IsArm ω (σ i) z r₁ (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
+        (∀ i k l, i < k → k < l → sbtw (landingPos (z - R) (z + R) (σ i) (γ i))
+          (landingPos (z - R) (z + R) (σ k) (γ k)) (landingPos (z - R) (z + R) (σ l) (γ l))) ∧
+        ArmsOuterSeparated ω σ z R s M K γ ∧ (∀ i, b i ∈ {b : LatticeSite 2 |
+          (t i = 0 ∧ b 1 = z 1 + R ∧ α i ≤ b 0 ∧ b 0 ≤ β i) ∨
+          (t i = 1 ∧ b 0 = z 0 + R ∧ α i ≤ b 1 ∧ b 1 ≤ β i) ∨
+          (t i = 2 ∧ b 1 = z 1 - R - cond (σ i) 0 1 ∧ α i ≤ b 0 ∧ b 0 ≤ β i) ∨
+          (t i = 3 ∧ b 0 = z 0 - R - cond (σ i) 0 1 ∧ α i ≤ b 1 ∧ b 1 ≤ β i)}) ∧
+        ∀ i, innerPos z r₁ (σ i) (γ i) ∈ (univ : Set ℤ)} →
+      law q (multiArmEvent σ z r₂ r₃) ≤ C₂ * law q {ω : Config (LatticeSite 2) |
+        ∃ (a b : Fin j → LatticeSite 2)
+        (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, IsArm ω (σ i) z R' (z - r₃) (z + r₃) (γ i)) ∧ ArmsDisjoint σ γ ∧
+        (∀ i k l, i < k → k < l → sbtw (landingPos (z - r₃) (z + r₃) (σ i) (γ i))
+          (landingPos (z - r₃) (z + r₃) (σ k) (γ k)) (landingPos (z - r₃) (z + r₃) (σ l) (γ l))) ∧
+        ArmsInnerSeparated ω σ z R' s' M' K' γ ∧ ∀ i, a i ∈ {a : LatticeSite 2 |
+          (t i = 0 ∧ a 1 = z 1 + R' ∧ α' i ≤ a 0 ∧ a 0 ≤ β' i) ∨
+          (t i = 1 ∧ a 0 = z 0 + R' ∧ α' i ≤ a 1 ∧ a 1 ≤ β' i) ∨
+          (t i = 2 ∧ a 1 = z 1 - R' - cond (σ i) 0 1 ∧ α' i ≤ a 0 ∧ a 0 ≤ β' i) ∨
+          (t i = 3 ∧ a 0 = z 0 - R' - cond (σ i) 0 1 ∧ α' i ≤ a 1 ∧ a 1 ≤ β' i)}} →
+      c₀ * (law q (multiArmEvent σ z r₁ r₂) * law q (multiArmEvent σ z r₂ r₃)) ≤
+        C₁ * C₂ * law q (multiArmEvent σ z r₁ r₃) := by
+  obtain ⟨c₀, hc₀, h⟩ := exists_pos_le_law_two_sided σ hσ c A
+  refine ⟨c₀, hc₀, ?_⟩
+  intro q L hCB z r₁ r₂ r₃ R R' W M K M' K' S s s' t x α β α' β' C₁ C₂ hW hWK hKM hWK' hK'M' hS
+    hs hs' hrM hRR' hR'r₃ hA hWL hal hcor hgap h₁ h₂
+  have hglue : c₀ * law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+          (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+          (∀ i, IsArm ω (σ i) z r₁ (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
+          (∀ i k l, i < k → k < l → sbtw (landingPos (z - R) (z + R) (σ i) (γ i))
+            (landingPos (z - R) (z + R) (σ k) (γ k)) (landingPos (z - R) (z + R) (σ l) (γ l))) ∧
+          ArmsOuterSeparated ω σ z R s M K γ ∧ (∀ i, b i ∈ {b : LatticeSite 2 |
+            (t i = 0 ∧ b 1 = z 1 + R ∧ α i ≤ b 0 ∧ b 0 ≤ β i) ∨
+            (t i = 1 ∧ b 0 = z 0 + R ∧ α i ≤ b 1 ∧ b 1 ≤ β i) ∨
+            (t i = 2 ∧ b 1 = z 1 - R - cond (σ i) 0 1 ∧ α i ≤ b 0 ∧ b 0 ≤ β i) ∨
+            (t i = 3 ∧ b 0 = z 0 - R - cond (σ i) 0 1 ∧ α i ≤ b 1 ∧ b 1 ≤ β i)}) ∧
+          ∀ i, innerPos z r₁ (σ i) (γ i) ∈ (univ : Set ℤ)} *
+      law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+          (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+          (∀ i, IsArm ω (σ i) z R' (z - r₃) (z + r₃) (γ i)) ∧ ArmsDisjoint σ γ ∧
+          (∀ i k l, i < k → k < l → sbtw (landingPos (z - r₃) (z + r₃) (σ i) (γ i))
+            (landingPos (z - r₃) (z + r₃) (σ k) (γ k)) (landingPos (z - r₃) (z + r₃) (σ l) (γ l))) ∧
+          ArmsInnerSeparated ω σ z R' s' M' K' γ ∧ ∀ i, a i ∈ {a : LatticeSite 2 |
+            (t i = 0 ∧ a 1 = z 1 + R' ∧ α' i ≤ a 0 ∧ a 0 ≤ β' i) ∨
+            (t i = 1 ∧ a 0 = z 0 + R' ∧ α' i ≤ a 1 ∧ a 1 ≤ β' i) ∨
+            (t i = 2 ∧ a 1 = z 1 - R' - cond (σ i) 0 1 ∧ α' i ≤ a 0 ∧ a 0 ≤ β' i) ∨
+            (t i = 3 ∧ a 0 = z 0 - R' - cond (σ i) 0 1 ∧ α' i ≤ a 1 ∧ a 1 ≤ β' i)}} ≤
+      law q (multiArmEvent σ z r₁ r₃) :=
+    h q L hCB z r₁ R R' r₃ W M K M' K' S s s' (fun _ => univ) t x α β α' β' hW hWK hKM
+      hWK' hK'M' hS hs hs' hrM hRR' hR'r₃ hA hWL hal hcor hgap
+  calc c₀ * (law q (multiArmEvent σ z r₁ r₂) * law q (multiArmEvent σ z r₂ r₃))
+      ≤ c₀ * ((C₁ * law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+            (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+            (∀ i, IsArm ω (σ i) z r₁ (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
+            (∀ i k l, i < k → k < l → sbtw (landingPos (z - R) (z + R) (σ i) (γ i))
+              (landingPos (z - R) (z + R) (σ k) (γ k)) (landingPos (z - R) (z + R) (σ l) (γ l))) ∧
+            ArmsOuterSeparated ω σ z R s M K γ ∧ (∀ i, b i ∈ {b : LatticeSite 2 |
+              (t i = 0 ∧ b 1 = z 1 + R ∧ α i ≤ b 0 ∧ b 0 ≤ β i) ∨
+              (t i = 1 ∧ b 0 = z 0 + R ∧ α i ≤ b 1 ∧ b 1 ≤ β i) ∨
+              (t i = 2 ∧ b 1 = z 1 - R - cond (σ i) 0 1 ∧ α i ≤ b 0 ∧ b 0 ≤ β i) ∨
+              (t i = 3 ∧ b 0 = z 0 - R - cond (σ i) 0 1 ∧ α i ≤ b 1 ∧ b 1 ≤ β i)}) ∧
+            ∀ i, innerPos z r₁ (σ i) (γ i) ∈ (univ : Set ℤ)}) *
+        (C₂ * law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+            (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+            (∀ i, IsArm ω (σ i) z R' (z - r₃) (z + r₃) (γ i)) ∧ ArmsDisjoint σ γ ∧
+            (∀ i k l, i < k → k < l → sbtw (landingPos (z - r₃) (z + r₃) (σ i) (γ i))
+              (landingPos (z - r₃) (z + r₃) (σ k) (γ k))
+                (landingPos (z - r₃) (z + r₃) (σ l) (γ l))) ∧
+            ArmsInnerSeparated ω σ z R' s' M' K' γ ∧ ∀ i, a i ∈ {a : LatticeSite 2 |
+              (t i = 0 ∧ a 1 = z 1 + R' ∧ α' i ≤ a 0 ∧ a 0 ≤ β' i) ∨
+              (t i = 1 ∧ a 0 = z 0 + R' ∧ α' i ≤ a 1 ∧ a 1 ≤ β' i) ∨
+              (t i = 2 ∧ a 1 = z 1 - R' - cond (σ i) 0 1 ∧ α' i ≤ a 0 ∧ a 0 ≤ β' i) ∨
+              (t i = 3 ∧ a 0 = z 0 - R' - cond (σ i) 0 1 ∧ α' i ≤ a 1 ∧ a 1 ≤ β' i)}})) :=
+        mul_le_mul' le_rfl (mul_le_mul' h₁ h₂)
+    _ = C₁ * C₂ * (c₀ * law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+            (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+            (∀ i, IsArm ω (σ i) z r₁ (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
+            (∀ i k l, i < k → k < l → sbtw (landingPos (z - R) (z + R) (σ i) (γ i))
+              (landingPos (z - R) (z + R) (σ k) (γ k)) (landingPos (z - R) (z + R) (σ l) (γ l))) ∧
+            ArmsOuterSeparated ω σ z R s M K γ ∧ (∀ i, b i ∈ {b : LatticeSite 2 |
+              (t i = 0 ∧ b 1 = z 1 + R ∧ α i ≤ b 0 ∧ b 0 ≤ β i) ∨
+              (t i = 1 ∧ b 0 = z 0 + R ∧ α i ≤ b 1 ∧ b 1 ≤ β i) ∨
+              (t i = 2 ∧ b 1 = z 1 - R - cond (σ i) 0 1 ∧ α i ≤ b 0 ∧ b 0 ≤ β i) ∨
+              (t i = 3 ∧ b 0 = z 0 - R - cond (σ i) 0 1 ∧ α i ≤ b 1 ∧ b 1 ≤ β i)}) ∧
+            ∀ i, innerPos z r₁ (σ i) (γ i) ∈ (univ : Set ℤ)} *
+        law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+            (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+            (∀ i, IsArm ω (σ i) z R' (z - r₃) (z + r₃) (γ i)) ∧ ArmsDisjoint σ γ ∧
+            (∀ i k l, i < k → k < l → sbtw (landingPos (z - r₃) (z + r₃) (σ i) (γ i))
+              (landingPos (z - r₃) (z + r₃) (σ k) (γ k))
+                (landingPos (z - r₃) (z + r₃) (σ l) (γ l))) ∧
+            ArmsInnerSeparated ω σ z R' s' M' K' γ ∧ ∀ i, a i ∈ {a : LatticeSite 2 |
+              (t i = 0 ∧ a 1 = z 1 + R' ∧ α' i ≤ a 0 ∧ a 0 ≤ β' i) ∨
+              (t i = 1 ∧ a 0 = z 0 + R' ∧ α' i ≤ a 1 ∧ a 1 ≤ β' i) ∨
+              (t i = 2 ∧ a 1 = z 1 - R' - cond (σ i) 0 1 ∧ α' i ≤ a 0 ∧ a 0 ≤ β' i) ∨
+              (t i = 3 ∧ a 0 = z 0 - R' - cond (σ i) 0 1 ∧ α' i ≤ a 1 ∧ a 1 ≤ β' i)}}) := by ring
+    _ ≤ C₁ * C₂ * law q (multiArmEvent σ z r₁ r₃) := mul_le_mul' le_rfl hglue
+
+
+end Main
 
 end PercLib.Models.Planar
