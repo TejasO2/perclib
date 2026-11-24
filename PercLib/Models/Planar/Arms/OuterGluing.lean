@@ -52,9 +52,10 @@ gluing that do not depend on the shape of the corridors.
   `M + 1` about the end.
 * `IsDualArm.exists_mem_or_forall_mem_Icc`, `IsOpenArm.exists_mem_Icc_of_mem_edges`: arms use
   (cross) only edges with an end inside the box, except at the last dual edge.
-* `mem_of_mixed_of_forall_mem`: the separated event with confined ends is upper for the mixed
-  order off the corridors; `law_mul_le_law_inter_of_mixed`: its positive correlation with the
-  corridor events (conditioning on the separated event).
+* `separated_of_mixed_of_forall_mem` (one family of arms) and `mem_of_mixed_of_forall_mem` (the
+  event): the separated event with confined ends is upper for the mixed order off the corridors;
+  `law_mul_le_law_inter_of_mixed`: its positive correlation with the corridor events (conditioning
+  on the separated event).
 * `abs_landingPos_sub_le`: arms ending near each other, away from the corners, land near each
   other.
 * `false_of_innerPos_eq_of_abs_lt`: an arm with the inner position of arm `k` cannot land closer to
@@ -218,31 +219,24 @@ section Conditioning
 
 variable {j : ℕ} {σ : Fin j → Bool} {R : ℕ} {s : ℝ} {M K : ℕ}
 
-/-- **The separated event with confined ends is upper for the mixed order off the corridors.**
-Let `K ≤ M`, let `T` be a set of pairs (the corridors) with no end in the interior of `B_R(z)`,
-and `D` a set of pairs (morally the dual corridors). Suppose that a pair of `T` with both ends in
-the box `Icc (b - M) (b + (M + 1))` about a possible end `b ∈ B i` of arm `i` lies in `D` exactly
-when arm `i` is dual. If `ω` has separated arms with ends in the sets `B i`, so has every `ω'` that
-agrees with `ω` off `T`, has more open pairs than `ω` off `D` and fewer on `D`: the same arms
-witness it. -/
-theorem mem_of_mixed_of_forall_mem (hKM : K ≤ M) {B : Fin j → Set (LatticeSite 2)}
+/-- **Separated arms with confined ends stay separated under the mixed order off the corridors**
+(one family of arms). Let `K ≤ M`, let `T` be a set of pairs (the corridors) with no end in the
+interior of `B_R(z)`, and `D` a set of pairs (morally the dual corridors). Suppose that a pair of
+`T` with both ends in the box `Icc (b - M) (b + (M + 1))` about a possible end `b ∈ B i` of arm `i`
+lies in `D` exactly when arm `i` is dual. If `γ` is a family of arms of `ω`, separated, with ends in
+the sets `B i`, then it is a separated family of arms of every `ω'` that agrees with `ω` off `T`,
+has more open pairs than `ω` off `D` and fewer on `D`. -/
+theorem separated_of_mixed_of_forall_mem (hKM : K ≤ M) {B : Fin j → Set (LatticeSite 2)}
     {T D : Set (Sym2 (LatticeSite 2))}
     (hT : ∀ e ∈ T, ∀ v ∈ e, v ∉ Icc (z - (R : LatticeSite 2) + 1) (z + R - 1))
     (hTB : ∀ i, ∀ b ∈ B i, ∀ e ∈ T, (∀ v ∈ e, v ∈ Icc (b - (M : LatticeSite 2))
       (b + ((M + 1 : ℕ) : LatticeSite 2))) → (e ∈ D ↔ σ i = false))
     {ω' : Config (LatticeSite 2)} (h₀ : ω \ T = ω' \ T) (h₁ : ω \ D ⊆ ω' \ D)
-    (h₂ : ω' ∩ D ⊆ ω ∩ D)
-    (hω : ∃ (a b : Fin j → LatticeSite 2) (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
-      (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
-      (∀ i k l, i < k → k < l → sbtw (landingPos (z - R) (z + R) (σ i) (γ i))
-        (landingPos (z - R) (z + R) (σ k) (γ k)) (landingPos (z - R) (z + R) (σ l) (γ l))) ∧
-      ArmsOuterSeparated ω σ z R s M K γ ∧ ∀ i, b i ∈ B i) :
-    ∃ (a b : Fin j → LatticeSite 2) (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
-      (∀ i, IsArm ω' (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
-      (∀ i k l, i < k → k < l → sbtw (landingPos (z - R) (z + R) (σ i) (γ i))
-        (landingPos (z - R) (z + R) (σ k) (γ k)) (landingPos (z - R) (z + R) (σ l) (γ l))) ∧
-      ArmsOuterSeparated ω' σ z R s M K γ ∧ ∀ i, b i ∈ B i := by
-  obtain ⟨a, b, γ, hγ, hd, ho, ⟨hs₁, hs₂, hf⟩, hB⟩ := hω
+    (h₂ : ω' ∩ D ⊆ ω ∩ D) {a b : Fin j → LatticeSite 2} {γ : ∀ i, (zdGraph 2).Walk (a i) (b i)}
+    (hγ : ∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) (hsep : ArmsOuterSeparated ω σ z R s M K γ)
+    (hB : ∀ i, b i ∈ B i) :
+    (∀ i, IsArm ω' (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsOuterSeparated ω' σ z R s M K γ := by
+  obtain ⟨hs₁, hs₂, hf⟩ := hsep
   have key : ∀ e, e ∉ T → (e ∈ ω ↔ e ∈ ω') := by
     intro e heT
     have := congrArg (e ∈ ·) h₀
@@ -259,7 +253,7 @@ theorem mem_of_mixed_of_forall_mem (hKM : K ≤ M) {B : Fin j → Set (LatticeSi
     simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply, Pi.one_apply] at hv ⊢
     push_cast
     omega
-  refine ⟨a, b, γ, fun i => ?_, hd, ho, ⟨hs₁, hs₂, fun i => ?_⟩, hB⟩
+  refine ⟨fun i => ?_, ⟨hs₁, hs₂, fun i => ?_⟩⟩
   · -- the arms
     have hγi := hγ i
     cases hc : σ i
@@ -310,6 +304,31 @@ theorem mem_of_mixed_of_forall_mem (hKM : K ≤ M) {B : Fin j → Set (LatticeSi
         refine (hasOuterFence_iff_of_inter_eq_of_le hKM subset_rfl ?_).1 hfi
         rw [hω₀, inter_assoc, inter_self]
       exact hf₀.of_cond_subset hsub
+
+/-- **The separated event with confined ends is upper for the mixed order off the corridors.**
+Under the hypotheses of `separated_of_mixed_of_forall_mem`, if `ω` has separated arms with ends in
+the sets `B i`, so has every `ω'` that agrees with `ω` off `T`, has more open pairs than `ω` off
+`D` and fewer on `D`: the same arms witness it. -/
+theorem mem_of_mixed_of_forall_mem (hKM : K ≤ M) {B : Fin j → Set (LatticeSite 2)}
+    {T D : Set (Sym2 (LatticeSite 2))}
+    (hT : ∀ e ∈ T, ∀ v ∈ e, v ∉ Icc (z - (R : LatticeSite 2) + 1) (z + R - 1))
+    (hTB : ∀ i, ∀ b ∈ B i, ∀ e ∈ T, (∀ v ∈ e, v ∈ Icc (b - (M : LatticeSite 2))
+      (b + ((M + 1 : ℕ) : LatticeSite 2))) → (e ∈ D ↔ σ i = false))
+    {ω' : Config (LatticeSite 2)} (h₀ : ω \ T = ω' \ T) (h₁ : ω \ D ⊆ ω' \ D)
+    (h₂ : ω' ∩ D ⊆ ω ∩ D)
+    (hω : ∃ (a b : Fin j → LatticeSite 2) (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+      (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
+      (∀ i k l, i < k → k < l → sbtw (landingPos (z - R) (z + R) (σ i) (γ i))
+        (landingPos (z - R) (z + R) (σ k) (γ k)) (landingPos (z - R) (z + R) (σ l) (γ l))) ∧
+      ArmsOuterSeparated ω σ z R s M K γ ∧ ∀ i, b i ∈ B i) :
+    ∃ (a b : Fin j → LatticeSite 2) (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+      (∀ i, IsArm ω' (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
+      (∀ i k l, i < k → k < l → sbtw (landingPos (z - R) (z + R) (σ i) (γ i))
+        (landingPos (z - R) (z + R) (σ k) (γ k)) (landingPos (z - R) (z + R) (σ l) (γ l))) ∧
+      ArmsOuterSeparated ω' σ z R s M K γ ∧ ∀ i, b i ∈ B i := by
+  obtain ⟨a, b, γ, hγ, hd, ho, hsep, hB⟩ := hω
+  obtain ⟨hγ', hsep'⟩ := separated_of_mixed_of_forall_mem hKM hT hTB h₀ h₁ h₂ hγ hsep hB
+  exact ⟨a, b, γ, hγ', hd, ho, hsep', hB⟩
 
 /-- **Measurability** of the separated event with confined ends. -/
 theorem measurableSet_setOf_separated_forall_mem (σ : Fin j → Bool) (z : LatticeSite 2)
