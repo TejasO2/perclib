@@ -671,3 +671,12 @@ corresponding wiki assertion (B5SL for I.4.21) as unformalised. See the concorda
 | Tag | Kind | Title | Formal status | Part I locator |
 |---|---|---|---|---|
 | `R6CI` | corollary | The source interception error is negligible above and at the upper critical dimension | unformalised | Lemma I.5.27; Proposition I.4.20 |
+
+## Branches taken by Yujin Kim (ruling 24; fork `yujinhkim/perclib`)
+
+His branches are the claims in this area: do not start the same work. Tip and status as last seen by the coordinator.
+
+| Branch | Tip | Status |
+|---|---|---|
+| `lrp-I41-mt-updated` | `e6cf6fe` | merged into `claude/zen-lovelace-rvlcw2` (via the branch below), 22 Nov 2026; pull request #9 |
+| `work/yujin-cutoff-moment-prereqs` | `39f24c2` | merged into `claude/zen-lovelace-rvlcw2` at `4ca13cb` (proof-only, gate passed), 22 Nov 2026; pull request #10 |

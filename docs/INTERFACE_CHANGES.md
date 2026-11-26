@@ -6,13 +6,54 @@ deprecated alias for one release where that is possible.
 
 ## Announced, not yet merged
 
+(none)
+
+## Merged
+
+### New definitions, 22 Nov round 3 batches (gated at `8fe99e9`, `99b7770`, `28c8877`) (additive; no existing name changed)
+
+- `PercLib.Probability.generationSize` (`p-b-NCWZ`, audit-r18-b); `PercLib.Percolation.Bond.truncatedChi` (`p-c-2DZD`, audit-r18-c).
+- `pairBoundary`, `SeparatesPairs`, `openDegree`, `incidentCount` (`p-d-B2ZL`, audit-r18-d).
+- `ConvexOrder`, `UnifIntegrableAlong` (`Probability/ConvexOrder.lean`, `p-a-MDB8`, audit-r19-a).
+- `PercLib.Models.Site.pathCount`, `restrictedChi`, `interChi` (`p-d-H35T`, audit-r19-b).
+- Lemmas `HierarchicalLattice.ball_eq_block`, `card_setOf_hierDist_le` (audit-r18-a changes).
+
+### New definitions, 21-22 Nov batches (gated at `28c5f0a` `1f14e57` and `d5dcd74`) (additive; no existing name changed)
+
+- `frontier-trivalent-count` (SO5J; audited APPROVE WITH CHANGES, `audit-r15-frontier-a`, change applied in
+  `work/frontier-trivalent-count-fix` @ `d65cae9`): in new `PercLib/Percolation/Bond/Multipoint/TrivalentCount.lean`:
+  `Vtx`, `embed`, `hat`, `graft`, `prune`, `canonical`. Additive.
 - `p-a-EKDO` (audited APPROVE with 3 exact edits applied verbatim, `audit-r14-outside-batch`): in new
   `PercLib/Models/HierarchicalComparison/Defs.lean`: `DigitHierarchy` and `DigitHierarchy.offset`, `blockIndex`, `block`,
   `commonLevel`, `childHierarchy`, `translate`; `layerWeight`, `InStrictAncestor`, `InBlockLayer`, `layerKernel`,
   `blockLayerKernel`, `ancestorKernel`, `restrictedKernel`, `expectedBlockMax`, `blockScale`, `blockPairSum`,
   `IsGoodBlock`, `IsAncestrallyGood`. Additive; no existing name changed.
+- `frontier-dfs-pivot` (KRU2; audited APPROVE, `audit-r15-frontier-a`, sha `263cc67`): in new
+  `PercLib/Combinatorics/DFSPivot.lean` (namespace `PercLib.DFS`): `visitList`, `visit`, `coinOrder`, `coinRun`, `flipCoin`.
+  Additive; placement outside a `Defs.lean` file noted by the auditor as non-blocking.
 
-## Merged
+### Stopped priority exploration (`priorityExploration`)
+
+- **What:** new definitions in the new file
+  `PercLib/Probability/Exploration/PriorityStopped/Defs.lean`, namespace
+  `PercLib.Percolation.Bond`: the structure `PriorityExploration.State G` (discovered vertices,
+  queried edges; `@[ext]`), `State.init`, `State.eligible`, `State.nextQuery`, `State.step`,
+  and `priorityExploration G ι o n ω t` (tag 28UY), `priorityQuery`, `priorityAnswer` for a
+  graph `G : SimpleGraph V`, an edge order `ι : G.edgeSet ↪ ℕ`, a root `o`, a threshold `n`
+  and a bond configuration `ω`. The root cluster is `cluster (ω ∩ G.edgeSet) o`. API and tag
+  PWBU in `PercLib/Probability/Exploration/PriorityStopped.lean` and its `Tags/` file
+  (`work/frontier-priority-exploration`).
+- **Breaks:** nothing (additive change).
+
+- `p-b-AFJX-fix` (AFJX, ICQP; audited APPROVE, `audit-r14-outside-b`, exact edit applied verbatim): in new
+  `PercLib/Combinatorics/Finpartition/Defs.lean` (namespace `Finpartition`): `extendSingleton`, `insertIntoPart`,
+  `extendOption`, `restrictErase`; in new `PercLib/Probability/HigherCorrelation/Defs.lean`: `higherCorrelation`.
+  Additive; no existing name changed.
+- `p-a-VI3Y` (VI3Y; audited APPROVE): in new `PercLib/Models/HierarchicalBlockLayers/Defs.lean` (namespace
+  `PercLib.Models.HierarchicalLayers`): `pairLevel`, `block`, `IsCopy`, `layerWeight`, `layerProfile`, `openCopies`,
+  `fullConfig`, `blockConfig`, `ancestorConfig`, `exactKernel`, `truncatedKernel`, `ancestorKernel`. Additive.
+- `frontier-section-comparison` (9GXY; audited APPROVE, `audit-r14-frontier-b`): in new
+  `PercLib/Probability/SectionComparison.lean` (namespace `PercLib.Probability`): `SamplingTree` and `law`. Additive.
 
 ### New definitions, round 15 batch (`p-b-CUE4-fix`, `frontier-brw-first-moment`) (additive; no existing name changed)
 
@@ -98,3 +139,10 @@ deprecated alias for one release where that is possible.
 
 Earlier respellings (the `localConn`/`localCluster`/`boundaryFlux`/`IsCut` fold, the header
 and linter migrations) predate this file; see `git log` of the integration branch.
+
+## Announced 22 November 2026 (round 3): new definitions awaiting audit
+
+New definitions only (no renames, nothing removed); each merges after a fresh D-35 audit approves it (audit `audit-r19-c`).
+
+- `blockCorner` (branch `work/p-a-F2G0`), `PercLib.Analysis.HasLogExponent` (branch `work/p-c-F7SW`), `erdosRenyiWindow` and
+  `homogeneousProfile` (branch `work/p-d-4SZ9`).

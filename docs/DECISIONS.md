@@ -1277,3 +1277,22 @@ Tom: "I brought in Codex as a contributor with instructions to build the lace ex
     e. Interface changes of ours that would break the area (renames, respellings) are
        announced in `docs/INTERFACE_CHANGES.md` before they merge (item h above), and the
        `ModelNorm` migration (the long-range norm, ruling 11e) is done now rather than later for that reason.
+
+### D-38. The wiki prose is licensed CC BY 4.0
+Recorded 22 November 2026 by the coordinator from ruling 23 (21 November 2026, Tom). This
+answers the part of R-2 that was deferred: the wiki prose licence.
+
+- The wiki prose (articles, reading maps, errata, records, `COVERAGE.md` and descriptive
+  text under `wiki/`) is © Tom Hutchcroft and the PercLib contributors, licensed under
+  Creative Commons Attribution 4.0 International (CC BY 4.0),
+  https://creativecommons.org/licenses/by/4.0/ . Lean code and tooling, including the
+  wiki's build and test code, stay Apache-2.0 (R-2, 12 November 2026).
+- The licence covers the wiki's own text. Statements quoted from published papers remain
+  their authors'. Tom's unpublished book and notes are not part of the wiki and are not
+  licensed by this; their all-rights-reserved notices stand.
+- Suggested attribution: "PercLib wiki, T. Hutchcroft and contributors,
+  https://tomhutchcroft.github.io/perclib/, CC BY 4.0".
+- `wiki/NOTICE`, the root `NOTICE` and `README.md`, the site footer on every page and the
+  About page say so. Contributions to `wiki/` prose are accepted under CC BY 4.0 and to Lean
+  and tooling under Apache-2.0; the contributor vouches for material generated with AI
+  assistance that they submit (`CONTRIBUTING.md`, `AGENTS.md`).

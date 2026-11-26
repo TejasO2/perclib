@@ -46,7 +46,18 @@ export async function checkHistory(root = wikiRoot, base) {
     if (!base || /^0+$/.test(base)) throw Error('CI cannot identify a tag-history base commit');
     if (!/^[a-f0-9]{40}$/.test(base)) throw Error('Invalid CI base SHA');
     try { git(['cat-file','-e',`${base}^{commit}`]); }
-    catch { git(['fetch','--no-tags','--depth=1','origin',base]); }
+    catch {
+      // Parallel test files may fetch into the same shallow clone at once; git then fails
+      // with "shallow file has changed since we read it". Retry a few times.
+      for (let attempt = 1; ; attempt++) {
+        try { git(['fetch','--no-tags','--depth=1','origin',base]); break; }
+        catch (e) {
+          try { git(['cat-file','-e',`${base}^{commit}`]); break; } catch {}
+          if (attempt >= 4) throw e;
+          execFileSync('sleep', [String(attempt)]);
+        }
+      }
+    }
   }
   if (!base) {
     try { git(['rev-parse','--show-toplevel']); base = 'HEAD'; }

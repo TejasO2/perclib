@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Tests for scripts/integrate.sh in a temporary git repository with a stub
-scripts/gate.sh (fails when the file named by $STUB_GATE_FAIL_IF exists)."""
+scripts/gate.sh (fails when the file named by $STUB_GATE_FAIL_IF exists, then prints
+the file $STUB_GATE_LOG; copies $STUB_GATE_MANIFEST to .lake/manifest-raw.json)."""
+import json
 import os
 from pathlib import Path
 import shutil
@@ -14,7 +16,11 @@ TRAILER = "Co-Authored-By: Test <test@example.invalid>\nClaude-Session: test"
 
 STUB_GATE = """#!/usr/bin/env bash
 echo "== gate on $(git rev-parse HEAD)"
+if [ -n "${STUB_GATE_MANIFEST:-}" ]; then
+  mkdir -p .lake && cp "$STUB_GATE_MANIFEST" .lake/manifest-raw.json
+fi
 if [ -n "${STUB_GATE_FAIL_IF:-}" ] && [ -e "$STUB_GATE_FAIL_IF" ]; then
+  [ -n "${STUB_GATE_LOG:-}" ] && cat "$STUB_GATE_LOG"
   echo "error: stub gate failed"; exit 1
 fi
 echo "== gate passed on $(git rev-parse HEAD)"
@@ -46,6 +52,8 @@ class IntegrateTest(unittest.TestCase):
                    "module\n\npublic import PercLib.A\npublic import PercLib.M\n")
         self.commit_all("init")
         self.base = self.git("rev-parse", "HEAD")
+        # the remote integration branch, for the transient-base check
+        self.git("update-ref", f"refs/remotes/origin/{INTEGRATION}", self.base)
 
     def tearDown(self):
         self.tmp.cleanup()
@@ -128,6 +136,87 @@ class IntegrateTest(unittest.TestCase):
         self.assertIn("work/bad: dropped after gate failure", result.stdout)
         self.assertFalse((self.repo / "BAD").exists())
         self.assertEqual(len(list(self.logs.glob("gate-*.log"))), 2)
+
+    def aux(self, name, text):
+        path = Path(self.tmp.name) / name
+        path.write_text(text)
+        return str(path)
+
+    def test_culprit_from_error_line(self):
+        self.branch("bad", {"PercLib/Bad.lean": "module\n", "BAD": "x\n"})
+        self.branch("x", {"PercLib/X.lean": "module\n"})
+        self.branch("y", {"PercLib/Y.lean": "module\n"})
+        log = self.aux("stub.log", "\u2716 [3/9] Building PercLib.Bad\n"
+                       "error: PercLib/Bad.lean:3:7: unknown identifier 'foo'\n"
+                       "error: build failed\n")
+        result = self.integrate("work/bad", "work/x", "work/y",
+                                STUB_GATE_FAIL_IF="BAD", STUB_GATE_LOG=log)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("integrate: dropping work/bad (culprit: PercLib/Bad.lean)", result.stdout)
+        self.assertIn("merged (2): work/x work/y", result.stdout)
+        self.assertIn("work/bad: dropped after gate failure, culprit PercLib/Bad.lean",
+                      result.stdout)
+        self.assertEqual(len(list(self.logs.glob("gate-*.log"))), 2)
+
+    def test_culprit_from_d35_line(self):
+        self.branch("bad", {"PercLib/Bad.lean": "module\n\ntheorem foo : True := trivial\n",
+                            "BAD": "x\n"})
+        self.branch("x", {"PercLib/X.lean": "module\n"})
+        log = self.aux("stub.log", "FAIL (i) PercLib.Bad.foo: a binder has type the tagged "
+                       "statement PercLib.T (ABCD)\nD-35 checks failed: 1 problem(s).\n")
+        manifest = self.aux("manifest.json", json.dumps({"declarations": [
+            {"name": "PercLib.Bad.foo", "module": "PercLib.Bad"},
+            {"name": "PercLib.x", "module": "PercLib.X"}]}))
+        result = self.integrate("work/bad", "work/x", STUB_GATE_FAIL_IF="BAD",
+                                STUB_GATE_LOG=log, STUB_GATE_MANIFEST=manifest)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("integrate: dropping work/bad (culprit: PercLib/Bad.lean)", result.stdout)
+        self.assertIn("merged (1): work/x", result.stdout)
+
+    def test_culprit_from_d35_file_line(self):
+        self.branch("bad", {"PercLib/Bad.lean": "module\n", "BAD": "x\n"})
+        self.branch("x", {"PercLib/X.lean": "module\n"})
+        log = self.aux("stub.log", "FAIL (v) PercLib/Bad.lean: no module docstring\n")
+        result = self.integrate("work/bad", "work/x", STUB_GATE_FAIL_IF="BAD",
+                                STUB_GATE_LOG=log)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("integrate: dropping work/bad (culprit: PercLib/Bad.lean)", result.stdout)
+
+    def test_ambiguous_culprit_drops_last(self):
+        self.branch("b1", {"PercLib/B1.lean": "module\n"})
+        self.branch("b2", {"PercLib/B2.lean": "module\n", "BAD": "x\n"})
+        log = self.aux("stub.log", "error: PercLib/B1.lean:1:0: oops\n"
+                       "error: PercLib/B2.lean:1:0: oops\n")
+        result = self.integrate("work/b1", "work/b2", STUB_GATE_FAIL_IF="BAD",
+                                STUB_GATE_LOG=log)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn("integrate: dropping", result.stdout)
+        self.assertIn("merged (1): work/b1", result.stdout)
+        self.assertIn("work/b2: dropped after gate failure (log", result.stdout)
+
+    def test_failing_file_no_branch_changed_drops_last(self):
+        self.branch("bad", {"PercLib/Bad.lean": "module\n", "BAD": "x\n"})
+        self.branch("x", {"PercLib/X.lean": "module\n"})
+        log = self.aux("stub.log", "error: PercLib/Bad.lean:1:0: oops\n"
+                       "error: PercLib/M.lean:1:0: downstream breakage\n")
+        result = self.integrate("work/bad", "work/x", STUB_GATE_FAIL_IF="BAD",
+                                STUB_GATE_LOG=log)
+        self.assertNotIn("integrate: dropping", result.stdout)
+        self.assertIn("work/x: dropped after gate failure (log", result.stdout)
+
+    def test_refuses_branch_cut_from_transient_merge(self):
+        self.write("PercLib/T.lean", "module\n")
+        self.commit_all("transient integrate merge")  # local only, not on origin
+        transient = self.git("rev-parse", "HEAD")
+        self.git("checkout", "-q", "-b", "work/late", transient)
+        self.write("PercLib/L.lean", "module\n")
+        self.commit_all("late work")
+        self.git("checkout", "-q", INTEGRATION)
+        result = self.integrate("work/late")
+        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+        self.assertIn("work/late was cut from", result.stderr)
+        self.assertIn(f"not on origin/{INTEGRATION}", result.stderr)
+        self.assertEqual(self.git("rev-parse", "HEAD"), transient)
 
     def test_gate_failure_with_no_branch_left_resets_to_tip(self):
         self.branch("bad", {"BAD": "x\n"})

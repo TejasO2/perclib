@@ -1,7 +1,8 @@
 # Wiki article editing and assertion tags
 
 This directory is the PercLib wiki, kept in the public `perclib` repository. Its prose is
-all rights reserved pending a licence decision; the code and tooling are Apache-2.0.
+licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/); the code and
+tooling are Apache-2.0.
 See [NOTICE](NOTICE).
 
 The twelve articles live in `articles/*.md`. W-1 preserves the original prototype

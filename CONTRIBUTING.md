@@ -135,9 +135,13 @@ Use the issue templates:
 
 ## Licence and credit
 
-Lean code and tooling are under Apache-2.0 (see `LICENSE`). By opening a pull request you
-agree that your contribution is licensed on those terms. Contributors are credited in the
-commit history; adapted code names its source, revision and licence in its file header.
+Lean code and tooling are under Apache-2.0 (see `LICENSE`); the wiki prose in `wiki/` is
+under Creative Commons Attribution 4.0 International (CC BY 4.0, see `wiki/NOTICE`). By
+opening a pull request you agree that your contribution to `wiki/` prose is licensed under
+CC BY 4.0, and your contribution to Lean code and tooling under Apache-2.0. If you submit
+material generated with AI assistance, you vouch for it as your own contribution: you have
+checked it and have the right to license it on these terms. Contributors are credited in
+the commit history; adapted code names its source, revision and licence in its file header.
 
 ## A prompt you can give your assistant
 

@@ -118,7 +118,8 @@ test("Pages build under /perclib/: banner, robots, About, draft markers and ever
       "Tom Hutchcroft is responsible for this wiki",
       "Mathematical gap",
       "Apache License, Version 2.0",
-      "© Tom Hutchcroft, all rights reserved for now",
+      "© Tom Hutchcroft and the PercLib contributors",
+      "Creative Commons Attribution 4.0 International (CC BY 4.0)",
       commit,
       "2026-11-21 12:34 UTC",
       "This build shows no formal status",
@@ -126,6 +127,7 @@ test("Pages build under /perclib/: banner, robots, About, draft markers and ever
       assert.ok(aboutText.toLowerCase().includes(key.toLowerCase()), `About: ${key}`);
     assert.ok(about.includes('href="https://github.com/tomhutchcroft/perclib/issues/new/choose"'));
     assert.ok(!/id="tag-|data-assertion/.test(about));
+    assert.ok(about.includes('<footer class="footer">') && /<footer[^>]*>.*licenses\/by\/4\.0.*Apache-2\.0.*<\/footer>/s.test(about), "footer licence line");
 
     // Home page lead with the build's counts.
     const home = plain(html.get("index.html"));
