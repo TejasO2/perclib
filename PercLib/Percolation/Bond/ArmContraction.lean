@@ -20,7 +20,7 @@ public import PercLib.Models.Lattice
 # Arm contraction on `ℤ^d` from one finite set
 
 Bond percolation on `ℤ^d` with a translation-invariant profile `q` of range one in the
-sup-norm. For a finite set `S ∋ 0` inside `Λ_{L-1} = {x : ‖x‖ ≤ L - 1}`, the first-exit
+sup-norm. For a finite set `S ∋ 0` inside `Λ_{L - 1} = {x : ‖x‖ ≤ L - 1}`, the first-exit
 inequality from `S`, translation invariance and `‖y‖ ≤ L` for every vertex `y` reached by one
 step out of `S` give the contraction of the probability of reaching sup-norm distance `r`:
 `P(0 ↔ {‖b‖ ≥ (k+1)L}) ≤ Φ_q(0,S) P(0 ↔ {‖b‖ ≥ kL})`.
