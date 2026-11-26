@@ -34,8 +34,7 @@ unimodularity.
 * `PercLib.hasMassTransport_self`: a group acting on itself by left multiplication has the
   mass-transport property.
 * `PercLib.hasMassTransport_multiplicative_self`: an additive group acting on itself by
-  translation has the mass-transport property; `PercLib.isPretransitive_multiplicative_self`:
-  this action is transitive.
+  translation has the mass-transport property.
 -/
 
 @[expose] public section
@@ -104,9 +103,5 @@ theorem hasMassTransport_multiplicative_self (G : Type*) [AddGroup G] :
   exact ((Equiv.neg G).trans ((Equiv.addLeft o).trans (Equiv.addRight o))).tsum_eq
     (fun w ↦ F w o)
 
-/-- An additive group acts transitively on itself by translation (as `Multiplicative G`). -/
-theorem isPretransitive_multiplicative_self (G : Type*) [AddGroup G] :
-    MulAction.IsPretransitive (Multiplicative G) G :=
-  ⟨fun x y ↦ ⟨Multiplicative.ofAdd (y + -x), by rw [ofAdd_smul, vadd_eq_add, neg_add_cancel_right]⟩⟩
 
 end PercLib

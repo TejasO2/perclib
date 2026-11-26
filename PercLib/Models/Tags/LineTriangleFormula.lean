@@ -77,7 +77,7 @@ theorem line_deriv_chi_lt_triangle_formula (J : Sym2 ℤ → ℝ≥0)
               tau (intensityProfile J β.toNNReal) v 0).toReal ^ 2) :=
   ⟨line_rowSum J hJ, line_tau_eq J hJ, line_chi_eq_div J hJ, line_chi_eq J hJ,
     fun _ hβ a => line_hasDerivAt_chi J hJ hβ a, line_triangle_eq J hJ, inferInstance,
-    line_connected J hJ, isPretransitive_multiplicative_self ℤ,
+    line_connected J hJ, inferInstance,
     hasMassTransport_multiplicative_self ℤ, line_map_smul_eq J hJ, line_chi_lt_top J hJ,
     line_eventually_deriv_chi_lt J hJ⟩
 
