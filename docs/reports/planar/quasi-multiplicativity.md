@@ -3942,3 +3942,254 @@ NOTICE: interface change; an auditor must approve before merge.
 ```
 
 This note's commit changes only `docs/`.
+
+## 23. A3b-3e (2026-11-24): Theorem 11, inner half; Theorem 11 at both ends for large ratios
+
+Package A3b-3e = item (1) of §21.2, by the design of §21.6 ("A3b-3e"). **Done**, and item 6 of §5
+(Theorem 11) is complete except for windows at **both** ends at aspect ratios `2 ≤ R / r < 32` (design
+in §23.6). Proof-only; neither `Defs` file touched; no `@[tag]`, no `…Input`, no new definition.
+Commits:
+
+* `a45b2cc` **Arms/InnerWindows** (new): straight corridors on the four sides in counterclockwise
+  coordinates; the one-scale bound with inner windows.
+* `935953c` **Arms/OuterSeparation, Arms/OuterArmSeparation, Arms/InnerWindows,
+  Arms/LowerQuasiMultiplicativity**: the outer step, the window step, the gluing step and step S keep
+  inner windows `J`; separated arms from inner windows at one scale.
+* `ce6bd27` **Arms/InnerArmSeparation** (new): Theorem 11's inner half; the separated form at the
+  inner end; extendability of the inner radius at bounded ratio.
+* `ca935e6` **Arms/OuterArmSeparation, Arms/InnerArmSeparation**: the window step into landing windows
+  keeps `J`; the separated form of the outer half with inner windows; Theorem 11 with windows at both
+  ends for `32 r ≤ R`.
+* this note's commit (docs only).
+
+Sizes: `InnerWindows.lean` 582 lines, `InnerArmSeparation.lean` 465 lines. Gate: §23.8.
+
+### 23.1 The statements proved, by plan item of §21.6 ("A3b-3e")
+
+All for a colour sequence without packs (`hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)`), uniformly
+under `CrossingBounds q L c`, with every constant (and the threshold `r₀`) chosen before `q`, `L`,
+`z` and the radii. Inner windows are `window (16 r + 8) θ η` (the cycle of inner positions has
+perimeter `16 r + 8`).
+
+**Item 1 (one-scale bound with inner windows on all four sides)**, `Arms/InnerWindows.lean`:
+
+* `exists_isCrossing_of_mem_crossing`: a crossing of a box in direction `d`, in either orientation
+  (`S` on the side `lo d` and `T` exited on `hi d`, or the reverse), contains a crossing walk inside
+  the box (generalises A3a's `exists_isCrossing_of_mem_crossing_one`).
+* `exists_ccw_corridor` (the box of a straight corridor on the side `m` — `0` bottom, `1` right,
+  `2` top, `3` left — at counterclockwise coordinates `[Y, Y + W]`, faces for the dual colour, as in
+  `exists_two_sided_side`), **`exists_isArm_of_mem_ccw_corridor`** (the side version of A3a's
+  `exists_isArm_of_mem_corridor`, all four sides and both colours in one statement: an arm inside the
+  box with `innerPos ∈ [m(4r + 2) + 2Y, m(4r + 2) + 2(Y + W) + 2]` and
+  `landingPos ∈ [4mR + 2(Y + R - r) - 1, 4mR + 2(Y + W + R - r) + 1]`, for `1 ≤ Y`, `Y + W + 1 ≤ 2r`),
+  `CrossingBounds.le_law_ccw_corridor`, `disjoint_ccw_corridors` (read sets `Icc lo (hi + 1)`).
+* `ccw_core_bounds`, `ccw_core_gap`: the corridor `Y = ⌈(a - m/4)(16r + 8)/2⌉`, `W = ⌊r / n⌋`
+  (`n μ ≥ 1`) inside the core window `[a, a + μ]` of `IsLanding.exists_core` has margins `≥ 2`, its
+  inner positions in the window of the landing data, and corridors of one side are more than `W + 1`
+  apart.
+* **`exists_pos_le_law_multiArmEventIn_window_inner`**: `∃ c₀ > 0, ∃ r₀, … r₀ ≤ r → r < R → R ≤ K r →
+  R ≤ L → c₀ ≤ P(multiArmEventIn σ z r R (window (16 r + 8) θ η) univ)` (`c₀ = c(2Kn)^j`, `r₀ = 16n`;
+  no pack-freeness needed).
+* **`exists_pos_le_law_outerSeparated_inner`**: as `exists_pos_le_law_outerSeparated` (`7r ≤ R ≤ 48r`)
+  with the inner positions in `window (16 r + 8) θ η`.
+
+**Item 2 (the outer step and the gluing step with `J`)**:
+
+* `exists_separating_event` **strengthened in place**: for every `r < N` and **all windows `J`**,
+  `A_J(r, R) ∩ G ⊆ {separated arms with the same parameters and inner positions in J}` (the rerouted
+  arms keep their inner positions, `hin`); the old conclusion is its `J = univ` instance.
+  `exists_law_multiArmEventIn_diff_separated_le` (new, the probability form with `J`);
+  `exists_law_multiArmEvent_inter_not_separated_le` is now derived from it (statement unchanged).
+* `exists_pos_le_law_glue_step_inner`, `exists_pos_le_law_window_step_inner`,
+  `exists_pos_le_law_window_step_landing_inner` (new; the old three are their `J = univ` corollaries,
+  statements unchanged). The gluing step with `J` takes the radius `ρ` with `ρ = 2N + 1`.
+
+**Item 3 (step S with `J`)**, `Arms/LowerQuasiMultiplicativity.lean`:
+
+* `exists_pos_mul_le_law_of_far_bins` **strengthened in place**: windows `J` for the first family,
+  output `multiArmEventIn σ z r R₃ J univ` (the rotation reindexes `J`;
+  `setOf_outerSeparated_subset_comp_finRotate_pow` replaces `outerSeparatedArmEvent_subset_comp_finRotate_pow`).
+* **`exists_law_mul_law_far_le_inner`**: `∃ C < ⊤, ∃ n ≥ 1000(j + 1)², ∃ r₀, … 2ρ + 1 = wN → R₀ = ⌊ρ/5⌋ →
+  r₀ ≤ r → 40r ≤ ρ → 2ρ + 2 ≤ R₃ ≤ L → P(first family at R₀, separated with (2Q - 1, 2u, u),
+  u = ⌊R₀/n²⌋, inner positions in J) · P(far inner family at ρ) ≤ C P(A_J(r, R₃))`;
+  `exists_law_mul_law_far_le` (statement unchanged) is its corollary with Theorem 11's outer half.
+
+**Item 4 (Theorem 11, inner half)**, `Arms/InnerArmSeparation.lean`:
+
+* `le_two_mul_of_le_add_inv_two_mul` (`x ≤ F + x/2`, `x < ⊤` ⇒ `x ≤ 2F`);
+  `exists_law_multiArmEvent_le_law_multiArmEvent_of_le_mul` (extendability inwards at any bounded
+  ratio `K`, `1 ≤ C`).
+* **`exists_law_multiArmEvent_le_law_multiArmEventIn_window_inner`**:
+
+```lean
+theorem exists_law_multiArmEvent_le_law_multiArmEventIn_window_inner (σ : Fin j → Bool)
+    (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) {η : ℚ} {θ : Fin j → ℚ} (hθ : IsLanding η θ)
+    (c : ℕ → ℝ≥0∞) :
+    ∃ C : ℝ≥0∞, C ≠ ⊤ ∧ ∃ r₀ : ℕ, ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
+      CrossingBounds q L c → ∀ (z : LatticeSite 2) (r R : ℕ), r₀ ≤ r → 2 * r ≤ R →
+      (R : ℕ∞) ≤ L →
+      law q (multiArmEvent σ z r R) ≤
+        C * law q (multiArmEventIn σ z r R (window (16 * r + 8) θ η) fun _ => univ)
+```
+
+  (the mandate's `P(A_J(r, R)) ≥ (c/2) π(r, R)`, with `C = 2 min(c₁, 1)⁻¹ C_S + c₂⁻¹`).
+* **The separated form at the inner end**, `exists_law_multiArmEvent_le_law_innerSeparated`:
+  `∃ 0 < η ≤ 1, ∃ w N₀, 7 ≤ w, w odd, … 2ρ + 1 = wN → N₀ ≤ N → 2ρ + 2 ≤ R ≤ L →
+  π(ρ, R) ≤ 2 P(innerSeparatedArmEvent σ z ρ R (4√ηN) ⌊√ηN⌋ ⌊ηN⌋)` — at the radii of the inner step
+  (they are `≍` every radius up to the factor `w`; with extendability inwards this is the separated
+  form at every inner radius up to a constant and a bounded change of radius).
+
+**Theorem 11 at both ends** (the mandate's last item):
+
+* `exists_law_multiArmEvent_le_law_outerSeparated_inner` (the separated form of the outer half with
+  inner windows): `π(r, R) ≤ C P(separated at ∂B_R, (2Q - 1, 2u, u), inner positions in
+  window (16 r + 8) θ η)` for `r₀ ≤ r`, `7r ≤ R ≤ L` — separation at the outer end and windows at
+  the inner end.
+* **`exists_law_multiArmEvent_le_law_multiArmEventIn_windows`**: `π(r, R) ≤ C P(multiArmEventIn σ z r R
+  (window (16 r + 8) θ' η) (window (16 R) θ η))` for `r₀ ≤ r`, **`32 r ≤ R`**, `R ≤ L` (plan §2.4's
+  `exists_law_multiArmEvent_le_law_multiArmEventIn` at large ratio; `2r ≤ R < 32r` open, §23.6).
+
+### 23.2 The proofs
+
+**Inner half.** With `ρ ∈ (40r, 40r + 2w]`, `2ρ + 1 = wN` (as in §22.2): if `R < 2ρ + 2` then
+`R ≤ 81 r` and the one-scale bound with inner windows gives `π ≤ 1 ≤ c₂⁻¹ P(A_J)`. Otherwise
+`π(r, R) ≤ π(ρ, R) ≤ P(E_far) + δ π(2ρ + 1, R)` and `π(2ρ + 1, R) ≤ C_b π(r, R)` (QM lower half and
+the one-scale bound, ratio `≤ 90`), so `π(r, R) ≤ 2 P(E_far)` with `δ C_b = 1/2`; then
+`min(c₁,1) P(E_far) ≤ P(sep_J at ⌊ρ/5⌋) P(E_far) ≤ C_S P(A_J(r, R))` (one-scale separated bound with
+inner windows, `8r ≤ ⌊ρ/5⌋ ≤ 48r`; step S with `J`). No induction over scales.
+
+**Separated form of the outer half with inner windows.** Nolin's induction (§19.2) with `J` carried
+by the outer step, the gluing step and the window step; the outer step's error term `δ π(r, N)`
+has no `J`, so the left side is `π(r, R)` and the induction passes through the inner half:
+`π(r, R) ≤ π(r, ρ) ≤ C_in P(A_J(r, ρ)) ≤ C_in (P(S_J(ρ)) + δ π(r, N))` with
+`π(r, N) ≤ C b_J(N) ≤ C c_W⁻¹ b_J(R)`; `δ = (2 C_in c_W⁻¹)⁻¹`, so `C = 2(C_in c_G⁻¹ + c₁⁻¹)`.
+
+**Both ends.** `π(r, R) ≤ π(r, ⌊R/4⌋) ≤ C₁ b_J(⌊R/4⌋) ≤ C₁ c_L⁻¹ P(A_{J,I}(r, R))` (window step with
+`J` into the landing windows, `n` of the landing data).
+
+### 23.3 Decisions (mine, per the standing instruction)
+
+1. **Corridors in counterclockwise coordinates** `(m, Y)` (side of the cycle of inner positions,
+   distance from the corner where the side begins), one statement for the four sides and both colours
+   (case split inside, `omega`), instead of four generated side lemmas: the corridor lemma needs no
+   frame, only coordinates; the boxes are those of `exists_two_sided_side` re-indexed.
+2. **Variants with `J` as the primary statements, the old names as corollaries** (`_inner` suffix) for
+   the gluing step and the two window steps; **in-place strengthening** for `exists_separating_event`
+   (one caller) and `exists_pos_mul_le_law_of_far_bins` (one caller). No statement weakened; every
+   existing caller unchanged in meaning.
+3. **Step S with `J` exposes `n`** (`∃ n ≥ 1000(j + 1)²`) and takes the first family's separated event
+   itself, not `π(r, R₀)`: the inner half supplies that event's lower bound at one scale; the old step
+   S uses Theorem 11's outer half.
+4. **Extendability inwards by quasi-multiplicativity and the one-scale bound** at ratio `≤ 90`
+   (`exists_law_multiArmEvent_le_law_multiArmEvent_of_le_mul`), one step instead of iterating the
+   ratio-2 statement.
+5. **Inner radius** `ρ = w⌊40r/w⌋ + w + (w - 1)/2` (as §22.3 item 7 with `X = 40 r`).
+6. **The separated form at the inner end at the radii of the inner step** (`2ρ + 1 = wN`), constant 2.
+7. **Both ends for `32 r ≤ R` only** (§23.6 for smaller ratios).
+8. **Normalised constants** `min(·, 1)`, `max(·, 1)` as before; no definition.
+
+### 23.4 Errata and observations
+
+* §21.2's "inner half at bounded ratio" needs no induction: a single inner step at `ρ ≍ r` plus
+  extendability inwards suffices, as designed; confirmed.
+* The outer half's separated form **with** inner windows cannot be proved by the outer induction alone:
+  the outer step's error term is `δ π(r, N)` without windows, so the induction needs the inner half.
+  The order is therefore inner half → outer half with `J` → both ends.
+* **Both ends at small ratios do not follow from the outer half and the gluing**: the window step
+  needs separated arms at a radius `N ≥ 7r` with `2N ≤ R`, i.e. `R ≥ 14r`; the outer half avoided
+  this by shrinking the inner box (`B_{⌊R/32⌋}`), which windows at the inner end forbid.
+* No plan statement is false; no hypothesis beyond `hσ` and the approved small radii was needed.
+* **Environment.** During the last builds macOS evicted up to ~38600 files of the worktree
+  (`.hash`, `.trace`, `.olean`, `.ilean`, the IR files, Mathlib sources). Lake then blocks at ~0 % CPU
+  on a read, or fails with `time expired (error code: 60, connection timed out)` and reports
+  `Running Mathlib.…` / `bad import` for modules whose files it could not read (no Lean error). The
+  re-materialisation line with `xargs -P 32` restored ~10 files/s (8 readers: ~0.3 files/s); the
+  `.olean`, `.trace` and `.lean` files first, then the rest. A waiter `until ! pgrep -f '<pattern>'`
+  must not contain its own pattern in its command line (it waits on itself).
+
+### 23.5 Search
+
+* PercLib, reused: `exists_two_sided_side` (box format), `cond_mem_crossing_iff_of_agree`,
+  `mem_Icc_add_one_of_mem_Icc_add_cond`, `measurableSet_preimage_cond_crossing`,
+  `CrossingBounds.le_law_box_one/zero`, `disjoint_Icc_of_lt`, `isArm_iff_cond`,
+  `IsArm.innerPos_cases`, `IsArm.landingPos_eq_of_top/right/bottom/left`,
+  `Icc_subset_Icc_add_one_sub_one`, `IsLanding.exists_core`, `IsLanding.exists_windows`,
+  `exists_bottom_windows`, `prodBernoulli_iInter_fin_of_determined`, `localConn_comm`,
+  `mem_localConn_iff_exists_walk`, `exists_append_eq_of_notMem`, `exists_append_eq_of_exists_mem`,
+  `multiArmEventIn_subset_multiArmEvent`, `multiArmEventTo_comp_finRotate_pow_subset`,
+  `exists_law_multiArmEvent_diff_far_le`, `exists_law_multiArmEvent_diff_innerSeparated_le`,
+  `exists_law_multiArmEvent_mul_law_multiArmEvent_le`, `exists_pos_le_law_multiArmEvent`,
+  `measure_le_add_of_diff_le`.
+* Mathlib: `Int.le_ceil`, `Int.ceil_lt_add_one`, `Nat.le_ceil`, `Nat.one_le_ceil_iff`,
+  `Nat.div_mul_le_self`, `Nat.lt_div_mul_add`, `Nat.le_div_iff_mul_le`, `le_mul_of_one_le_right`,
+  `mul_le_mul_of_nonneg_left/right`, `Int.sbtw_iff`, `ENNReal.add_le_add_iff_right`,
+  `ENNReal.inv_two_add_inv_two`, `ENNReal.mul_inv`, `Finset.prod_le_prod`.
+* Not found (added): crossing walks in either orientation, straight corridors on every side with
+  inner positions, the one-scale bound with inner windows, the inner half of Theorem 11.
+
+### 23.6 What remains of item 6, with a design: both ends at ratios `2 ≤ R / r < 32`
+
+Needed: `c ≤ P(A_{J,I}(r, R))` for `2r ≤ R ≤ 32r` (then `π ≤ 1 ≤ c⁻¹ P`). A deterministic family of
+`j` disjoint corridors in the annulus from the core windows of `θ'` on `∂B_r` to those of `θ` on
+`∂B_R`, preserving the cyclic order, each a chain of `O(j)` rectangles of aspect ratio `O(1/μ)`.
+Construction: (a) radial legs from the inner core windows to the ring `r + (R - r)/4`
+(`exists_isArm_of_mem_ccw_corridor`'s boxes); (b) a **one-scale motion plan** in the ring
+`[r + (R - r)/4, r + 3(R - r)/4]`: rotate all arms counterclockwise by the lifted differences of
+`exists_lift_of_separated` (§17.1), in `≤ 8j` turn rounds at nested levels `h_k` (level spacing
+`(R - r)/(32 j)`), as `exists_turn_step` does with radius growth replaced by level steps inside the
+fixed ring; (c) radial legs to the outer core windows. Probability `≥ (c κ)^{O(j²)}` by
+`law_mul_prod_le_law_of_regions` (independent corridors). Estimated 800–1200 lines (the turn corridors
+of `TurnCorridors.lean` are reusable; the motion plan's combinatorics `exists_turn_step` is reusable
+with a different radius bookkeeping). Then `exists_law_multiArmEvent_le_law_multiArmEventIn_windows`
+holds for `2r ≤ R`.
+
+### 23.7 Design for A3b-4 (half-plane OC/OCO separation; non-centred boxes)
+
+**Targets** (plan §2.4 "half-plane versions"; `half-plane-exponents.md` §7 for U1b):
+`π⁺_σ(r, R) ≤ C P⁺(arms landing in windows)` for `σ ∈ {OC, OCO}` (`halfArmEventTo`, linear order),
+quasi-multiplicativity and extendability for `π⁺`, and the non-centred outer box version
+`multiArmEventTo σ z r lo hi` with `B_{N/τ}(z) ⊆ Icc lo hi ⊆ B_N(z)`.
+
+1. **Half-plane outer step.** The half-annulus boundary has three sides (top, the right half-side,
+   the left half-side); arms land on them in linear order. Reuse `exists_law_separable_ge_top` on the
+   top side and its reflections (`separable_right_of_top`, `separable_left_of_top`) on the half-sides
+   cut at the line `y = z₁` (strip events at any position, `mem_separable_strip_of_inter_eq`). The
+   bottom side is the boundary line: no arm lands there (`halfArmEventTo` keeps arms in
+   `{v | z₁ ≤ v₁}`), so the corner exclusion of A3b-3b is needed only at the two corners on the line,
+   by the one-arm bound (§20.1) in the half-plane (`exists_law_multiArmEvent_le_rpow` restricted, or a
+   half-plane one-arm bound from `exists_halfArmEvent_two_bounds`' proof).
+   Pack-freeness: `OC`, `OCO` have no two consecutive arms of one colour in the linear order, which is
+   all the barrier needs (the cyclic condition `σ (j-1) ≠ σ 0` is not needed: the line separates the
+   first and last arms).
+2. **Half-plane gluing.** The motion plan in the half-annulus: lifted positions without wrap
+   (linear order), turns only at the two upper corners; `exists_pos_le_law_target_windows` restricted
+   to `tT ∈ {top, right, left}` and windows above the line by margin `S`. Corridors stay in the upper
+   half-plane when the windows are `≥ S` above the line.
+3. **Half-plane Theorem 11 / QM / extendability**: the induction of §19.2 verbatim; the inner half by
+   §23.2 with half-plane corridors (`exists_pos_le_law_halfArmEvent`'s corridors already land in
+   order) and the inner step on three sides (the bottom side is the line).
+4. **Non-centred boxes.** `multiArmEventTo σ z r lo hi` with `B_{N/τ}(z) ⊆ Icc lo hi ⊆ B_N(z)`: compare
+   with `B_{N/τ}` and `B_N` by monotonicity (`multiArmEventTo_subset_of_le_of_le`) in one direction,
+   and in the other glue from separated arms at `∂B_{N/(2τ)}` into the four sides of `Icc lo hi`
+   (the motion plan's window step with the target box `Icc lo hi` instead of `B_R`: the side
+   coordinates of `exists_side_window` take `lo`, `hi` in place of `z ± R`; corners of `Icc lo hi`
+   replace `4mR`). Simplest statement: `π(r, N) ≤ C P(multiArmEventTo σ z r lo hi univ univ)` and the
+   converse inclusion bound, both for `τ` fixed.
+5. **Order:** (1)–(3) for `OC`, `OCO` first (U1b needs the three-arm half-plane upper bound with
+   separation, `half-plane-exponents.md` §4.3 option (2)); (4) when U2/Stage 3 need it.
+
+### 23.8 Gate
+
+`scripts/gate.sh main` **passed on `ca935e6`** (axiom audit 13626 constants, only `propext`,
+`Classical.choice`, `Quot.sound`; 424 modules in the import closure; the interface NOTICE, expected:
+the classifier names the first interface file on this branch, `Arms/Defs.lean`; no other notice). A
+first gate passed on `ce6bd27` (13597 constants), before the two-ended form. Final lines:
+
+```
+D-35 checks passed (tagged statements, headers of new files).
+INTERFACE change against ae4eb08e45a1: Proof PR touches an interface/non-Lean file: PercLib/Models/Planar/Arms/Defs.lean
+NOTICE: interface change; an auditor must approve before merge.
+== gate passed on ca935e6f8afa180546e538b86febf5518fd41fbf
+```
+
+This note's commit changes only `docs/`.
