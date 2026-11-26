@@ -1,17 +1,20 @@
 # Status
 
-Handoff for the maintainer (LEAD role of D-34). Updated 26 November 2026, ~05:55 UTC, end of **paced cycle 2** (ruling 25).
+Handoff for the maintainer (LEAD role of D-34). Updated 26 November 2026, ~08:40 UTC, end of **paced cycle 3** (ruling 25).
 Older history: [STATUS_LOG.md](STATUS_LOG.md) (do not read by default; cycle 1 details are at its end).
 A maintainer with no memory resumes from this file and `/home/user/reports/ACTIVE.md` (ruling 25: 40 calls per round;
 order: collaborators' pull requests and fork branches, then `main`, then the task board, then our own work).
 
 ## Tip and gate
 
-- Branch `claude/zen-lovelace-rvlcw2`. **Last gated commit `80a735b`** (`== gate passed`, log `/home/user/reports/gate-cycle2b.log`).
-  On top: this STATUS commit only (docs). Push it; it reaches `main` with the next batch.
-- **`main` = `be36e68`** (PR #25, merged by us). PR #24 (`c1f1a95`) also merged by us this cycle. The integration PR open+merge
+- Branch `claude/zen-lovelace-rvlcw2`. **Last gated commit `97fee82`** (cycle 3: `scripts/integrate.sh 62815b5 work/tasks-restock-r3`,
+  `== gate passed`, log `/home/user/reports/integrate-cycle3.log`). On top: this STATUS commit only (docs).
+- **`main` = `026af1c`** (PR #26, cycle 3, merged by us; head `97fee82`). Before: #25 `be36e68`, #24 `c1f1a95` (cycle 2). The integration PR open+merge
   through the API **worked this cycle** (the cycle-1 refusal did not recur). `origin/main` is merged back (fast-forward).
-- Batches this cycle:
+- Cycle 3 batch: task-board restock `714fb71` (lane B, 8 tasks) + our `227d7c6` holding `exploration-terminates-at-cluster` (7WHX)
+  out: possible overlap with the BFS exploration in Yujin's #15/#16 (`Bond/Exploration/BFS/Cluster.lean`); file kept in
+  `714fb71`. Re-add only if the overlap check clears it. `check_tasks.py` clean.
+- Cycle 2 batches:
   - `scripts/integrate.sh ded7bc4 pr/11 pr/12` -> **`d311edc`**, gate passed (log `/home/user/reports/integrate-cycle2.log`). PR #24.
   - `65f027f`: the five exact docstring edits of `audit-c1-planar` applied verbatim (`scripts/apply_exact_edits.py`); changed
     modules built `--wfail`. `80a735b`: 7 proved tasks moved to `tasks/done/`, FRONTIER regenerated. Gate on `80a735b` passed
@@ -46,7 +49,7 @@ PR to `main`: POST `/pulls` (head `claude/zen-lovelace-rvlcw2`), then PUT `/pull
 | #13-#23 | yujinhkim stack (ruling 24), opened by us in cycle 1, commented | not reviewed; tips unchanged this cycle | audit `060-audit-c2-yujin-defs` queued (#13, #15, #17) |
 | #2 | tomhutchcroft `work/lace-foundations` @ `630d985` | unchanged since 21 Nov | Codex's area; Tom's |
 
-No new comments on any thread since cycle 1. Yujin stack (base `45309ab`, bottom to top; D = definitions, needs audit; P = proof-only,
+Cycle 3 (08:25): no new comments, no new or moved PR/fork tips. Yujin stack (base `45309ab`, bottom to top; D = definitions, needs audit; P = proof-only,
 merges on the gate after its base): #13 `exploration-envelope` `aa1cf85` D -> #14 `exploration-proofs` `9e7382d` P -> #15
 `bfs-definitions` `45926a3` D -> #16 `bfs-core-proofs` `20fb6e9` P -> #17 `bfs-revelation-definitions` `2bde2d8` D -> #18
 `bfs-revelation-proofs` `e9d938c` P -> #19 `bfs-limit-proofs` `302759e` P -> #20 `generation-definitions` `8acc3a8` D (9) -> #21
@@ -61,6 +64,8 @@ apply exact edits in a `-fix` commit, comment on each PR. Then audit #20 + #22.
 ## Progress (D-35 measure)
 
 Manifest regenerated at `d311edc`: **417 proved of 1,403** (FRONTIER: 258 ready, 721 blocked, 7 without prerequisites).
+Cycle 3 report: pull requests handled 0 new (none opened or updated; #13-#23 await `060`); merged to `main`: `026af1c` (PR #26); assertions proved: none merged (prover branch `work/p-d-IZAO` finished, needs audit);
+agents started by me: 0 (`060` still queued, unclaimed; no new brief so lane B stays at one task).
 Cycle 2 report: pull requests handled 4 (#11, #12 merged and commented; #24, #25 opened and merged); merged to `main`: `c1f1a95`,
 `be36e68`; assertions proved this cycle: none new (no prover sessions ran); agents started by me: 0 (1 audit brief queued, `060`).
 Lane B finished since cycle 1: `audit-c1-planar` (report `/home/user/reports/audit-c1-planar.md`).
@@ -69,20 +74,21 @@ Lane B finished since cycle 1: `audit-c1-planar` (report `/home/user/reports/aud
 
 - `frontier-nonbacktracking-recurrence` @ `1a3f0ed` (0MK8): approved, fails the gate on `local macro`
   (`PercLib/Combinatorics/NonbacktrackingRecurrence.lean` lines 98, 379). Needs fix branch (inline the notations, statements unchanged).
+- `work/p-d-IZAO` @ `a2b00b4` (IZAO, 87W3, `Bond/Tags/TriangleInvariant.lean`): tagged; request `audit-requests/p-d-IZAO.md`.
 - `work/p-b-W8PB` @ `f030931` (W8PB, `Probability/Tags/PartitionSizeMoments.lean`) and `work/p-c-J1LW` @ `772a62c` (J1LW,
   `Bond/Tags/RevealedCluster.lean`): tagged statements; audit requests in `/home/user/reports/audit-requests/` (not yet briefed;
   move to `done/` when briefed).
 
 ## In flight / claims
 
-- Lane B: `060-audit-c2-yujin-defs` (queued, unclaimed). `tasks-restock-r3` claim **released** this cycle (idle 4 days; moved to
-  `/home/user/reports/claims-released/`; branch `work/tasks-restock-r3` @ `0d92c19` left in place, not merged).
+- Lane B: `060-audit-c2-yujin-defs` (queued, unclaimed). `tasks-restock-r3` finished at `714fb71` (05:48) and merged in cycle 3;
+  its empty claim dir `claims/tasks-restock-r3` can be removed. `work/p-a-YXL0` = `62815b5` (prover slot a, no commits yet).
 - Launcher `tag-*` claims: self-directed provers (PROVER-CHARTER).
 
 ## Queue (`/home/user/reports/queue/`)
 
-Next lane-B briefs, one per cycle, in this order: (1) batched audit W8PB + J1LW (2 tags); (2) 0MK8 macro fix; (3) task-board
-restock: only **8 open tasks** (ruling 19 asks 20+; public material only; nothing in the planar, lace or long-range areas);
+Next lane-B briefs, one per cycle, after `060`: (1) batched audit W8PB + J1LW + IZAO/87W3 (4 tags); (2) 0MK8 macro fix;
+(3) further restock (now ~15 open; ruling 19 asks 20+; nothing in planar, lace or long-range areas; check 7WHX overlap);
 (4) `tasks/areas/planar.md` map for Tejas; (5) integrate.sh culprit parsing (tooling). Raise (3) earlier if contributors run dry.
 Prover drain only (ruling 21): `420`-`423` in queue. Held: `HOLD-060/205/210/220/230/371` (ruling 18b).
 
@@ -103,9 +109,10 @@ Prover drain only (ruling 21): `420`-`423` in queue. Held: `HOLD-060/205/210/220
 
 ## For Tom
 
+- Merged by us under ruling 22, cycle 3: #26 (`026af1c`: task-board restock, gate `97fee82`; 7WHX task held, see Tip).
 - Merged by us under ruling 22: #24 (`c1f1a95`: Tejas's #11, #12 after a D-35 audit + gate; KGNK) and #25 (`be36e68`: audit
   docstring edits, task board, FRONTIER). Compare link: https://github.com/tomhutchcroft/perclib/compare/main...claude/zen-lovelace-rvlcw2 —
-  last gate `80a735b` (local, not CI); last gate + kernel replay: `a747905`.
+  last gate `97fee82` (local, not CI); last gate + kernel replay: `a747905`.
 - Pull requests #13-#23 were opened by us from Yujin's fork (ruling 24) so that each has a thread; their audit has started.
 - Stray remote branch `work/fix-ci-cancelled-push-run-fix` (merged); delete when convenient. Issue #1 can be closed.
 
