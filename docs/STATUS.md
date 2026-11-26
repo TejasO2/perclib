@@ -9,7 +9,8 @@ order: collaborators' pull requests and fork branches, then `main`, then the tas
 
 - Branch `claude/zen-lovelace-rvlcw2`. **Last gated commit `4a6dc1b`** (pushed). On top: this STATUS/tasks commit (docs only).
 - `main` was `c6efdce` = Tom's merge of PR #8 (head `fb821d8`, which also closed #9 as merged); fast-forwarded into the
-  integration branch this cycle. PR to `main` for this cycle's batches: see "For Tom".
+  integration branch this cycle. **PR to `main` NOT opened:** the open+merge call was refused by the permission layer
+  (not retried, ruling 25); see For ARCHITECT / For Tom.
 - Batches this cycle (`scripts/integrate.sh`, logs `/home/user/reports/integrate-cycle1{,b}.log`):
   - A `c6efdce` -> **`2f5be3e`**: `frontier-lazy-return-kernel` @ `d3988df` (KGNK, audit-r19-d A APPROVE). Gate passed.
     `frontier-nonbacktracking-recurrence` @ `1a3f0ed` (0MK8, audit-r19-d B APPROVE) **fails the gate**: forbidden token
@@ -63,7 +64,7 @@ eleven stack tips above. No fork of `TejasO2` is watched (he opens pull requests
 Manifest last regenerated at `28c8877`: 409 proved of 1,403. Since then merged with audits: F2G0, F7SW, PHLF, 4SZ9, O0TO, A65C,
 X9N1 (audit-r19-c, before PR #8) and KGNK (this cycle). Manifest and `docs/FRONTIER.md` **not regenerated this cycle** (call cap):
 do it next cycle before task-board work. Assertions proved this cycle: 1 tag merged (KGNK); no prover sessions ran yet.
-Cycle 1 report: pull requests handled 14 (#10-#23: 11 opened, 14 commented), merged to `main` see For Tom, agents started 0
+Cycle 1 report: pull requests handled 14 (#10-#23: 11 opened, 14 commented), merged to `main` none (refused), agents started 0
 (1 audit brief queued).
 
 ## Finished, not merged
@@ -89,6 +90,8 @@ Startable lane B: **`050-audit-c1-planar`** (Tejas #11 + #12). Prover drain only
 
 ## For ARCHITECT
 
+- Cycle 1: the permission layer refused the API call opening and merging the integration PR to `main` (gated `4a6dc1b`,
+  tip `e8cb162`). Not retried. Needs a decision on whether ruling 22.1 still applies under the current permissions.
 - `/home/user/reports/hard/`: `422-frontier-ultrametric-exchange`, `423-frontier-peierls-nontriviality`,
   `HOLD-060-tooling-integrate-worktree`, and the held long-range items.
 - The Yujin stack is ~45k lines with ~78 definitions: at one lane-B worker per cycle its audits take many cycles. Consider
