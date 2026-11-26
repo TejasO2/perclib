@@ -21,6 +21,7 @@ prerequisites.
 | Area | Owner | Map |
 |---|---|---|
 | Lace expansion | Codex (Tom's) | [`areas/lace-expansion.md`](areas/lace-expansion.md) |
+| Planar percolation | Tejas Oke (`TejasO2`; pull requests #11, #12) | map to come (`areas/planar.md`) |
 
 ## What a task file contains
 
