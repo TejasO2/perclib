@@ -1093,6 +1093,31 @@ lists at the end of an article." ARCHITECT's reading, binding on the style guide
   by the coordinator) come first, so that Tom can see the pattern before it is applied
   to 142 articles; it is listed "For Tom" with the page to look at.
 
+**Ruling 19.** 21 Nov, Tom, having seen the live site: "The model article looks great." The
+ruling-8 shape is therefore confirmed as the pattern: roll it out to the other articles in
+the critic's order, at the pace ruling 11g allows. "Inline citations should be hyperlinked,
+probably to a bibliography at the bottom of the page." ARCHITECT (recorded here and in
+`wiki/STYLE.md`; one generator package with tests, then the model article first):
+- Every citation in running text is a link to its entry in a "References" section at the
+  bottom of the same page, built by the generator from the source catalogue: only the works
+  cited on that page, in a consistent style (authors, title, journal/volume/year or arXiv
+  identifier), each with an anchor (`#ref-<key>`), an outbound link (DOI or arXiv) where one
+  exists, and backlinks to the places in the article that cite it. Locators stay in the text
+  of the citation ("Theorem 1.1", "§3").
+- Authors write citations by catalogue key in one markup form; the generator renders the
+  visible text and the link. A citation whose key is not in the catalogue fails the build; a
+  plain-text citation left unlinked is reported by the link report and, once the backlog is
+  cleared, fails the build.
+- The book-in-preparation entry is a reference like any other, with no link and no locator
+  (ruling 6).
+- Works inside collapsed proofs are cited the same way; following a reference backlink into
+  a collapsed block opens it (ruling 8).
+- A site-wide bibliography page lists every catalogue entry with the articles that cite it.
+  The provenance panel and reading maps keep their own detail; they are not the bibliography.
+- Migration: the model article and the already restructured articles first, then each
+  article as it is restructured; a scout fills gaps in catalogue entries (arXiv and DOI
+  metadata) and lists for Tom any reference it could not verify.
+
 ### D-37. The repository must run without us
 Recorded 20 November 2026 by the coordinator from rulings 9 and 10 (container file
 `RULINGS.md`), with their text. Supersedes D-28 where they differ.
@@ -1252,3 +1277,22 @@ Tom: "I brought in Codex as a contributor with instructions to build the lace ex
     e. Interface changes of ours that would break the area (renames, respellings) are
        announced in `docs/INTERFACE_CHANGES.md` before they merge (item h above), and the
        `ModelNorm` migration (the long-range norm, ruling 11e) is done now rather than later for that reason.
+
+### D-38. The wiki prose is licensed CC BY 4.0
+Recorded 22 November 2026 by the coordinator from ruling 23 (21 November 2026, Tom). This
+answers the part of R-2 that was deferred: the wiki prose licence.
+
+- The wiki prose (articles, reading maps, errata, records, `COVERAGE.md` and descriptive
+  text under `wiki/`) is © Tom Hutchcroft and the PercLib contributors, licensed under
+  Creative Commons Attribution 4.0 International (CC BY 4.0),
+  https://creativecommons.org/licenses/by/4.0/ . Lean code and tooling, including the
+  wiki's build and test code, stay Apache-2.0 (R-2, 12 November 2026).
+- The licence covers the wiki's own text. Statements quoted from published papers remain
+  their authors'. Tom's unpublished book and notes are not part of the wiki and are not
+  licensed by this; their all-rights-reserved notices stand.
+- Suggested attribution: "PercLib wiki, T. Hutchcroft and contributors,
+  https://tomhutchcroft.github.io/perclib/, CC BY 4.0".
+- `wiki/NOTICE`, the root `NOTICE` and `README.md`, the site footer on every page and the
+  About page say so. Contributions to `wiki/` prose are accepted under CC BY 4.0 and to Lean
+  and tooling under Apache-2.0; the contributor vouches for material generated with AI
+  assistance that they submit (`CONTRIBUTING.md`, `AGENTS.md`).

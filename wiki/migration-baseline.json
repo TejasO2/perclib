@@ -144,19 +144,23 @@
       "sections": {
         "diagram": {
           "title": "The diagram",
-          "sha256": "fb0d0613e1830dd645556d64c9395e49f765abd4451c9f6c1a9a0cb74e9e0f77"
+          "sha256": "0764ef33f428c97ff1f105e966b6c53dc35668051a2bdeadd445d0b4caf5666e"
         },
         "consequences": {
           "title": "A conditional mean-field theorem",
-          "sha256": "5b4b020ea03097db050eb4b78bddbbb4b00ca2eb683fb619bf14d5ae0ab1a5f9"
-        },
-        "proof-architecture": {
-          "title": "Why the diagram enters",
-          "sha256": "c63ae8ed24af17c1c890b6bb1fa7a3321d33d836e22a470241dd9a59b925ef69"
+          "sha256": "a595610b297162690bf53b18a7c740603f1c2dc9096fe0911178c84da66364d9"
         },
         "scope": {
           "title": "Spatial estimates and quantitative variants",
           "sha256": "4536e6a8d8cc44e43589b53c220f24219688a99e6aea4d3b8bf0d3d35d8b3557"
+        },
+        "history": {
+          "title": "History and attribution",
+          "sha256": "4a86d0485c248bf6db02a352780d501d0daa1a56f344644d8e6d0c3708a38d83"
+        },
+        "references": {
+          "title": "References",
+          "sha256": "e3379cdbafa75fcd3a7e6892cd5dc3c8fd5e2173924d94f06890fab3c8107890"
         }
       }
     },
@@ -238,7 +242,7 @@
         },
         "history": {
           "title": "History and attribution",
-          "sha256": "1eceb796d07eebf779f0dbe10bb22dbe7612927b5bc32ca88138a0110f9b9f42"
+          "sha256": "0107c7b6a2b96edb8d02a33ea8a1a703ccb33bb416e7a251a04ddc8b8a7b799a"
         },
         "references": {
           "title": "References",
@@ -246,7 +250,7 @@
         }
       },
       "lead": {
-        "sha256": "e6ee841d3f501a1b427efe1d907c755296af4ade69de4216f8991076fb22aac8"
+        "sha256": "4007a383b9913b5587743e74e1c7db10305e5945d9eed07860b1ffccb47dae29"
       }
     },
     "finite-random-graphs": {
@@ -262,12 +266,20 @@
           "sha256": "99bb4a4b45c1197abbb780a2c32154c6fec641946bbabb8db3282474f4227afd"
         },
         "window": {
-          "title": "The critical-window viewpoint",
-          "sha256": "3ca4f03e02641e492a341779cb28cf661ef4f75f664495184ce4dc5db13fca8f"
+          "title": "The critical window of the Erdős–Rényi graph",
+          "sha256": "f51df7ce7c18421437151e6c493ccf0c6066e65c29c3cab3d1362d5b6e7e7c68"
         },
         "connections": {
           "title": "Exploration and other finite hosts",
           "sha256": "c5ee11ce333f3ea10edd7802c75b1f32c71dbaa92a605b1417ff6dc207520eb5"
+        },
+        "history": {
+          "title": "History and attribution",
+          "sha256": "24146cff457933ed0fe4802d7b4a9e1e6f0f3863fd58736a3cfe34fb53cf7b31"
+        },
+        "references": {
+          "title": "References",
+          "sha256": "62b0e653f9ba5dd65ae3b7279004dda37ad61947d1da3e4b1c40c9098a453272"
         }
       }
     },

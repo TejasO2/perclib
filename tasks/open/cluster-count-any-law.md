@@ -43,6 +43,9 @@ existing `Integrable.of_finite`-type lemma).
 - New `PercLib/Percolation/Bond/Tags/ClusterCountAnyLaw.lean` (the tagged statement only).
 - Its import line in `PercLib.lean`.
 
+The open task `component-count-edge-insert` also appends to `ClusterCount.lean`: do not take both
+at once, and if both are in progress, coordinate through the two pull requests.
+
 ## Allowed inputs
 `PercLib/Percolation/Bond/ClusterCount.lean`, `PercLib/Percolation/Bond/Basic.lean`, mathlib;
 wiki assertion ZAIH.

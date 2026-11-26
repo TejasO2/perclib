@@ -8,20 +8,21 @@ Truncated first moments and size-biased laws of nonnegative random variables, wi
 cluster-volume instance. New proofs against pinned mathlib
 56a005855ea17e0b0958f73ec801ae140b0a1679; no upstream proof is copied. Random variables
 are `ℝ≥0∞`-valued and expectations are lower Lebesgue integrals; the size-biased law is
-mathlib's `Measure.withDensity`, and no definition is introduced.
+`sizeBiased` of `SizeBias/Defs.lean` (mathlib's `Measure.withDensity`).
 -/
 module
 
 public import PercLib.Percolation.Bond.ClusterMoments
 public import PercLib.Percolation.Bond.RowSum
+public import PercLib.Probability.SizeBias.Defs
 public import Mathlib.MeasureTheory.Measure.WithDensity
 public import Mathlib.MeasureTheory.Integral.Lebesgue.Countable
 
 /-!
 # Truncated first moments and size-biased laws
 
-Truncated means of a nonnegative random variable from its first two moments, the size-biased law as
-a `withDensity` measure, and its instance for the cluster volume.
+Truncated means of a nonnegative random variable from its first two moments, the size-biased law
+`sizeBiased` (a `withDensity` measure), and its instance for the cluster volume.
 
 ## Main results
 
@@ -133,31 +134,22 @@ theorem le_lintegral_min (P : Measure Ω) {X : Ω → ℝ≥0∞} (hX : Measurab
 /-- The size-biased law of `X ≥ 0` with `0 < E X < ∞` is a probability measure. -/
 theorem isProbabilityMeasure_withDensity_div (P : Measure Ω) {X : Ω → ℝ≥0∞}
     (hX : Measurable X) (h0 : ∫⁻ ω, X ω ∂P ≠ 0) (htop : ∫⁻ ω, X ω ∂P ≠ ∞) :
-    IsProbabilityMeasure (P.withDensity fun ω => X ω / ∫⁻ ω, X ω ∂P) := by
-  constructor
-  rw [withDensity_apply _ MeasurableSet.univ, Measure.restrict_univ]
-  simp_rw [div_eq_mul_inv]
-  rw [lintegral_mul_const _ hX, ENNReal.mul_inv_cancel h0 htop]
+    IsProbabilityMeasure (P.withDensity fun ω => X ω / ∫⁻ ω, X ω ∂P) :=
+  isProbabilityMeasure_sizeBiased P hX h0 htop
 
 /-- Expectations under the size-biased law: `Ê F = E[X F] / E X` for measurable `F ≥ 0`. -/
 theorem lintegral_withDensity_div (P : Measure Ω) {X F : Ω → ℝ≥0∞} (hX : Measurable X)
     (hF : Measurable F) :
     ∫⁻ ω, F ω ∂(P.withDensity fun ω => X ω / ∫⁻ ω, X ω ∂P) =
-      (∫⁻ ω, X ω * F ω ∂P) / ∫⁻ ω, X ω ∂P := by
-  rw [lintegral_withDensity_eq_lintegral_mul _ (hX.div_const _) hF]
-  simp_rw [div_eq_mul_inv]
-  rw [← lintegral_mul_const _ (show Measurable fun ω => X ω * F ω from hX.mul hF)]
-  congr 1 with ω
-  simp only [Pi.mul_apply]
-  ring
+      (∫⁻ ω, X ω * F ω ∂P) / ∫⁻ ω, X ω ∂P :=
+  lintegral_sizeBiased P hX hF
 
 /-- The size-biased mean: `Ê X = E X² / E X`, with `E X²` allowed to be infinite. -/
 theorem lintegral_self_withDensity_div (P : Measure Ω) {X : Ω → ℝ≥0∞}
     (hX : Measurable X) :
     ∫⁻ ω, X ω ∂(P.withDensity fun ω => X ω / ∫⁻ ω, X ω ∂P) =
-      (∫⁻ ω, X ω ^ 2 ∂P) / ∫⁻ ω, X ω ∂P := by
-  rw [lintegral_withDensity_div P hX hX]
-  simp_rw [pow_two]
+      (∫⁻ ω, X ω ^ 2 ∂P) / ∫⁻ ω, X ω ∂P :=
+  lintegral_self_sizeBiased P hX
 
 end PercLib.Probability
 

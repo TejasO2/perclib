@@ -80,11 +80,12 @@ theorem tsum_ite_not_mem_le (s : Sym2 V → I) (C : Finset V) {u : V} (hu : u �
   · have : v ≠ u := fun h => hv (h ▸ hu)
     simp [hv, this]
 
-/-- **Two-layer ghost comparison, upper bound, with explicit bounds.** If the `q₀`-cluster of `o` is
-finite almost surely, every off-diagonal row sum of `s` is at most `δ` and every ghost transform
-`G_v(h)` of the union law is at most `G`, then `G_o(h) ≤ E[1 - e^{-hX}] + δ · E[X e^{-hX}] · G`. -/
-theorem lintegral_ghost_union_le [Countable V] (q₀ s : Sym2 V → I) (o : V) {h : ℝ}
-    (hh : 0 < h) (hfin : ∀ᵐ ω ∂(law q₀), (cluster ω o).Finite) {δ G : ℝ≥0∞}
+/-- **Two-layer ghost comparison, upper bound, with explicit bounds.** If every off-diagonal row
+sum of `s` is at most `δ` and every ghost transform `G_v(h)` of the union law is at most `G`, then
+`G_o(h) ≤ E[1 - e^{-hX}] + δ · E[X e^{-hX}] · G`. The `q₀`-cluster of `o` may be infinite with
+positive probability: on that event it contains a mark almost surely. -/
+theorem lintegral_ghost_union_le_of_rowSum_le [Countable V] (q₀ s : Sym2 V → I) (o : V) {h : ℝ}
+    (hh : 0 < h) {δ G : ℝ≥0∞}
     (hδ : ∀ u, rowSum (fun e => unitInterval.toENNReal (s e)) u ≤ δ)
     (hG : ∀ v, ∫⁻ ω, (1 - EReal.exp (-((h : EReal) * (((cluster ω v).encard : ℝ≥0∞) : EReal))))
         ∂(law fun e => σ (σ (q₀ e) * σ (s e))) ≤ G) :
@@ -169,24 +170,62 @@ theorem lintegral_ghost_union_le [Countable V] (q₀ s : Sym2 V → I) (o : V) {
           exact Finset.sum_congr rfl fun u hu => by simp [hu]
       _ = (C.card : ℝ≥0∞) * δ := by rw [Finset.sum_const, nsmul_eq_mul]
   -- the infinite part
-  have hinf : Pr Einf = 0 := by
-    change Pr ((fun η : Set ((Sym2 V ⊕ Sym2 V) ⊕ V) => (Sum.inl ⁻¹' (Sum.inl ⁻¹' η) : Config V))
-      ⁻¹' {ω | (cluster ω o).Infinite}) = 0
-    rw [← Measure.map_apply measurable_three_first (measurableSet_cluster_infinite o), hPr,
-      prodBernoulli_three_map_first]
-    exact ae_iff.1 hfin
+  have hinf : Pr (E1 ∪ Einf) = Pr E1 := by
+    -- the marks hit an infinite first-layer cluster almost surely
+    set Linf : Config V → Set V := fun ω => {w | w ∈ cluster ω o ∧ (cluster ω o).Infinite}
+      with hLinf
+    have hLm : ∀ w, MeasurableSet {ω | w ∈ Linf ω} := fun w =>
+      (measurableSet_conn o w).inter (measurableSet_cluster_infinite o)
+    have hA := prodBernoulli_sum_inter_nonempty (Sum.elim q₀ s) measurable_preimage_inl
+      (L := Linf) hLm hh hp (p := p)
+    rw [prodBernoulli_map_preimage_inl] at hA
+    have hint : ∫⁻ ω, (1 - EReal.exp (-((h : EReal) * (((Linf ω).encard : ℝ≥0∞) : EReal))))
+        ∂(prodBernoulli q₀) = law q₀ {ω | (cluster ω o).Infinite} := by
+      rw [← lintegral_indicator_one (measurableSet_cluster_infinite o), law]
+      refine lintegral_congr fun ω => ?_
+      by_cases hω : (cluster ω o).Infinite
+      · have hL : Linf ω = cluster ω o := by ext w; simp [hLinf, hω]
+        rw [hL, hω.encard_eq, PercLib.Analysis.exp_neg_mul_top hh]
+        simp [hω]
+      · have hL : Linf ω = ∅ := by ext w; simp [hLinf, hω]
+        simp [hL, hω]
+    have hEinf : Pr Einf = law q₀ {ω | (cluster ω o).Infinite} := by
+      change Pr ((fun η : Set ((Sym2 V ⊕ Sym2 V) ⊕ V) => (Sum.inl ⁻¹' (Sum.inl ⁻¹' η) : Config V))
+        ⁻¹' {ω | (cluster ω o).Infinite}) = _
+      rw [← Measure.map_apply measurable_three_first (measurableSet_cluster_infinite o), hPr,
+        prodBernoulli_three_map_first]
+    have hAsub : {η : Set ((Sym2 V ⊕ Sym2 V) ⊕ V) |
+        (Linf (Sum.inl ⁻¹' (Sum.inl ⁻¹' η)) ∩ Sum.inr ⁻¹' η).Nonempty} ⊆ Einf ∩ E1 := by
+      rintro η ⟨y, ⟨hy, hyi⟩, hym⟩
+      exact ⟨hyi, y, hy, hym⟩
+    have hE1m : MeasurableSet E1 :=
+      (measurableSet_prod_inter_nonempty (K := fun ω : Config V => cluster ω o)
+        (fun w => measurableSet_conn o w)).preimage
+        (measurable_three_first.prodMk measurable_preimage_inr)
+    have hdiff : Pr (Einf \ E1) = 0 := by
+      have hsplit := measure_inter_add_sdiff Einf hE1m (μ := Pr)
+      have hle : Pr Einf ≤ Pr (Einf ∩ E1) := by
+        rw [hEinf, ← hint, ← hA, hPr]
+        exact measure_mono hAsub
+      refine le_antisymm ?_ zero_le
+      refine (ENNReal.add_le_add_iff_left (measure_ne_top Pr (Einf ∩ E1))).1 ?_
+      rw [hsplit, add_zero]
+      exact hle
+    refine le_antisymm ?_ (measure_mono subset_union_left)
+    rw [← union_sdiff_self]
+    exact (measure_union_le _ _).trans (by rw [hdiff, add_zero])
   -- assembling
   rw [← prodBernoulli_three_union_cluster q₀ s o hh hp,
     ← prodBernoulli_three_first_cluster q₀ s o hh hp]
   calc _ ≤ Pr (E1 ∪ Einf ∪ ⋃ C, ⋃ u, ⋃ v, T C u v) := measure_mono hsub
-    _ ≤ Pr E1 + Pr Einf + ∑' C, ∑' u, ∑' v, Pr (T C u v) := by
-        refine (measure_union_le _ _).trans (add_le_add (measure_union_le _ _) ?_)
+    _ ≤ Pr (E1 ∪ Einf) + ∑' C, ∑' u, ∑' v, Pr (T C u v) := by
+        refine (measure_union_le _ _).trans (add_le_add le_rfl ?_)
         exact (measure_iUnion_le _).trans (ENNReal.tsum_le_tsum fun C =>
           (measure_iUnion_le _).trans (ENNReal.tsum_le_tsum fun u => measure_iUnion_le _))
     _ ≤ Pr E1 + ∑' C : Finset V, law q₀ {ω | cluster ω o = C} *
           (((C : Set V).encard : ℝ≥0∞) *
             EReal.exp (-((h : EReal) * (((C : Set V).encard : ℝ≥0∞) : EReal)))) * (δ * G) := by
-        rw [hinf, add_zero]
+        rw [hinf]
         gcongr with C
         calc ∑' u, ∑' v, Pr (T C u v)
             ≤ ∑' u, ∑' v, law q₀ {ω | cluster ω o = C} *
@@ -214,6 +253,22 @@ theorem lintegral_ghost_union_le [Countable V] (q₀ s : Sym2 V → I) (o : V) {
         refine add_le_add le_rfl ((mul_le_mul_left (tsum_law_cluster_eq_finset_mul_le q₀ o
           (fun T => (T : ℝ≥0∞) * EReal.exp (-((h : EReal) * ((T : ℝ≥0∞) : EReal))))) _).trans_eq ?_)
         ring
+
+/-- **Two-layer ghost comparison, upper bound, with explicit bounds**, in the form with an
+almost surely finite `q₀`-cluster; the finiteness is not needed
+(`lintegral_ghost_union_le_of_rowSum_le`). -/
+theorem lintegral_ghost_union_le [Countable V] (q₀ s : Sym2 V → I) (o : V) {h : ℝ}
+    (hh : 0 < h) (_hfin : ∀ᵐ ω ∂(law q₀), (cluster ω o).Finite) {δ G : ℝ≥0∞}
+    (hδ : ∀ u, rowSum (fun e => unitInterval.toENNReal (s e)) u ≤ δ)
+    (hG : ∀ v, ∫⁻ ω, (1 - EReal.exp (-((h : EReal) * (((cluster ω v).encard : ℝ≥0∞) : EReal))))
+        ∂(law fun e => σ (σ (q₀ e) * σ (s e))) ≤ G) :
+    ∫⁻ ω, (1 - EReal.exp (-((h : EReal) * (((cluster ω o).encard : ℝ≥0∞) : EReal))))
+        ∂(law fun e => σ (σ (q₀ e) * σ (s e))) ≤
+      ∫⁻ ω, (1 - EReal.exp (-((h : EReal) * (((cluster ω o).encard : ℝ≥0∞) : EReal))))
+          ∂(law q₀) +
+        δ * (∫⁻ ω, ((cluster ω o).encard : ℝ≥0∞) *
+          EReal.exp (-((h : EReal) * (((cluster ω o).encard : ℝ≥0∞) : EReal))) ∂(law q₀)) * G :=
+  lintegral_ghost_union_le_of_rowSum_le q₀ s o hh hδ hG
 
 /-- **BEJT.** If the `q₀`-cluster `X` of `o` is finite almost surely, then
 `E[1 - e^{-hX}] ≤ G_o(h) ≤ E[1 - e^{-hX}] + δ · E[X e^{-hX}] · G*(h)`, where

@@ -401,4 +401,35 @@ example :
   · rw [tau_comm, tau_bool_half]; norm_num
   · simp [tau_self]
 
+
+/-! ### Finset forms -/
+
+open Classical in
+/-- Finset form of the cluster identity: for a real family `a` on vertices and a finite set
+`F`, `∑_{u,v ∈ F} a_u a_v T(u,v) = E[∑_C (∑_{u ∈ F ∩ C} a_u)²]`, the sum over the open
+clusters `C`. -/
+theorem sum_finset_mul_connProb_eq_integral [Countable V] (μ : Measure (Config V))
+    [IsFiniteMeasure μ] (F : Finset V) (a : V → ℝ) :
+    ∑ u ∈ F, ∑ v ∈ F, a u * a v * (connProb μ u v).toReal =
+      ∫ ω, ∑' C : (openGraph ω).ConnectedComponent,
+        (∑ u ∈ F with (openGraph ω).connectedComponentMk u = C, a u) ^ 2 ∂μ := by
+  have h := sum_mul_connProb_eq_integral μ (fun u : F => (u : V)) (fun u => a u)
+  rw [← Finset.sum_coe_sort F]
+  simp_rw [← Finset.sum_coe_sort F (fun v => _ * a v * _)]
+  refine h.trans ?_
+  congr 1
+  funext ω
+  congr 1
+  funext C
+  congr 1
+  rw [Finset.sum_filter, Finset.sum_filter, ← Finset.sum_coe_sort F]
+
+/-- Finiteness of the off-diagonal triangle: if `Δₓ, Δ_y < ⊤` then `T³(x,y) < ⊤`. -/
+theorem triangle_lt_top [Countable V] (μ : Measure (Config V)) [IsFiniteMeasure μ] (x y : V)
+    (hx : ∑' u, ∑' v, connProb μ x u * connProb μ u v * connProb μ v x < ⊤)
+    (hy : ∑' u, ∑' v, connProb μ y u * connProb μ u v * connProb μ v y < ⊤) :
+    ∑' u, ∑' v, connProb μ x u * connProb μ u v * connProb μ v y < ⊤ :=
+  (triangle_le_rpow μ x y).trans_lt
+    (ENNReal.rpow_lt_top_of_nonneg (by norm_num) (ENNReal.mul_ne_top hx.ne hy.ne))
+
 end PercLib.Percolation.Bond

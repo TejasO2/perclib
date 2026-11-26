@@ -12,6 +12,7 @@ module
 public import PercLib.Meta.Tag
 public import PercLib.Percolation.Bond.IndependentLayer.AddedVolume
 public import PercLib.Percolation.Bond.IndependentLayer.Conditional
+public import PercLib.Percolation.Bond.IndependentLayer.OmittedMass
 
 /-!
 # Independent layers and the ghost field: correspondence
@@ -23,6 +24,7 @@ Wiki correspondence for the ghost field and the independent-layer ghost comparis
 * `ghost_field_magnetization`
 * `ghost_comparison_omitted_edges`
 * `ghost_bound_added_mass`
+* `omitted_mass_negligible_of_regularlyVarying`
 -/
 
 @[expose] public section
@@ -156,5 +158,36 @@ theorem ghost_bound_added_mass [Countable V] (q₀ s : Sym2 V → I) (o : V) {h 
   refine le_trans ?_ htail
   rw [mul_comm]
   gcongr
+
+/-- A regularly varying volume tail makes omitted cluster mass negligible: for a transitive
+profile `q` with a.s. finite root cluster volume `X` and `F t = P(X > t)` regularly varying
+of index `-ρ`, `0 < ρ < 1`, scales `z_R → ∞`, normalizers `η_R ≍ F(z_R)`, lower profiles
+coupled to `q` by independent layers with rows `a_{R,s}` and
+`limsup_R a_{R,s} z_R η_R ≤ b(s) → 0`, for every `δ > 0`,
+`lim_{s → ∞} limsup_R η_R⁻¹ P(|K \ C_{R,s}| ≥ δ z_R) = 0`. -/
+@[tag "L9YJ"]
+theorem omitted_mass_negligible_of_regularlyVarying [Countable V] (q : Sym2 V → I) (o : V)
+    {ρ : ℝ} (hρ0 : 0 < ρ) (hρ1 : ρ < 1)
+    (hT : ∀ x y : V, ∃ τ : V ≃ V, τ x = y ∧ ∀ e, q (Sym2.map τ e) = q e)
+    (hfin : ∀ᵐ ω ∂(law q), (cluster ω o).Finite)
+    (hrv : PercLib.Analysis.RegularlyVarying (-ρ) fun t =>
+      (law q {ω | ENNReal.ofReal t < ((cluster ω o).encard : ℝ≥0∞)}).toReal)
+    {ι : Type*} {l : Filter ι} {z η : ι → ℝ} (hz : Filter.Tendsto z l Filter.atTop)
+    (hη : ∃ c C : ℝ, 0 < c ∧ ∀ᶠ R in l,
+      c * (law q {ω | ENNReal.ofReal (z R) < ((cluster ω o).encard : ℝ≥0∞)}).toReal ≤ η R ∧
+      η R ≤ C * (law q {ω | ENNReal.ofReal (z R) < ((cluster ω o).encard : ℝ≥0∞)}).toReal)
+    (q₀ s' : ι → ℝ → Sym2 V → I) (a : ι → ℝ → ℝ≥0∞) (b : ℝ → ℝ)
+    (hq : ∀ R s, 1 ≤ s → (fun e => σ (σ (q₀ R s e) * σ (s' R s e))) = q)
+    (ha : ∀ R s, 1 ≤ s → ∀ u, rowSum (fun e => unitInterval.toENNReal (s' R s e)) u ≤ a R s)
+    (hb : Filter.Tendsto b Filter.atTop (nhds 0))
+    (hab : ∀ s, 1 ≤ s →
+      Filter.limsup (fun R => a R s * ENNReal.ofReal (z R * η R)) l ≤ ENNReal.ofReal (b s))
+    {δ : ℝ} (hδ : 0 < δ) :
+    Filter.Tendsto (fun s => Filter.limsup (fun R => (ENNReal.ofReal (η R))⁻¹ *
+        ((law (q₀ R s)).prod (law (s' R s)))
+          {x | ENNReal.ofReal (δ * z R) ≤
+            ((cluster (x.1 ∪ x.2) o \ cluster x.1 o).encard : ℝ≥0∞)}) l)
+      Filter.atTop (nhds 0) :=
+  tendsto_limsup_law_added_volume_ge q o hρ0 hρ1 hT hfin hrv hz hη q₀ s' a b hq ha hb hab hδ
 
 end PercLib.Percolation.Bond

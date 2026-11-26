@@ -36,6 +36,7 @@ const baseline = JSON.parse(
 );
 const assertions = assertionsIn(real);
 const sha = (text) => createHash("sha256").update(text).digest("hex");
+const { sources } = JSON.parse(await fs.readFile(path.join(wikiRoot, "src/content/catalog.json"), "utf8"));
 const front = (await fs.readFile(path.join(here, "fixtures/lead/articles/lead-fixture.md"), "utf8")).split("\n---\n\n")[0] + "\n---\n\n";
 const frontLines = front.split("\n").length; // file line of the first body line
 
@@ -43,7 +44,7 @@ function setup(lead = fixture.lead) {
   const copy = { ...structuredClone(fixture), lead };
   const articles = [...real, copy];
   const pages = new Map(articles.map((p) => [p.id, p]));
-  const { bodies, wanted, resolvedWanted } = prepareBodies(articles, pages);
+  const { bodies, wanted, resolvedWanted } = prepareBodies(articles, pages, sources);
   const graph = linkGraph(articles, bodies, assertions, baseline);
   return { articles, pages, bodies, wanted, resolvedWanted, graph };
 }

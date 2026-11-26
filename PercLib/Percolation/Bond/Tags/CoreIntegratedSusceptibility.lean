@@ -90,15 +90,8 @@ theorem susceptibility_derivative_blowup [Countable V] (J : Sym2 V → ℝ≥0)
       chi (intensityProfile J b.toNNReal) o = ⊤ → ∀ β ∈ Ioo a b,
         1 / ((rowSum (fun e => (J e : ℝ≥0∞)) o).toReal * (b - β)) ≤
           (chi (intensityProfile J β.toNNReal) o).toReal) := by
-  refine ⟨fun β hβ => ?_, ?_, fun hR0 hb β hβ =>
-    one_div_le_chi_of_chi_eq_top J hJ o hR hR0 ha hfin hb hβ⟩
-  · have hs : a < (a + β) / 2 := by linarith [hβ.1]
-    have hs' : (a + β) / 2 < β := by linarith [hβ.1]
-    have ht : (β + b) / 2 < b := by linarith [hβ.2]
-    have ht' : β < (β + b) / 2 := by linarith [hβ.2]
-    exact ⟨_, Icc ((a + β) / 2) ((β + b) / 2),
-      mem_nhdsWithin_of_mem_nhds (Icc_mem_nhds hs' ht'),
-      lipschitzOnWith_chi J hJ o hR ha hfin hs ht⟩
+  refine ⟨PercLib.Models.NormalizedSmallIntensity.locallyLipschitzOn_chi J hJ o hR ha hfin, ?_,
+    fun hR0 hb β hβ => one_div_le_chi_of_chi_eq_top J hJ o hR hR0 ha hfin hb hβ⟩
   · filter_upwards [ae_differentiableAt_chi J hJ o hR ha hfin] with β hβ hmem
     have hd := (hβ hmem).hasDerivAt
     exact ⟨_, hd, hasDerivAt_chi_mem_Icc J hJ o hR ha hfin hmem hd⟩

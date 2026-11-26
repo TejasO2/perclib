@@ -162,7 +162,10 @@ variable {d : ℕ}
 the box with `i`-th coordinate `lo i` is joined to some vertex of the box with `i`-th coordinate
 `hi i` by a path of open nearest-neighbour edges all of whose vertices lie in the box. Open
 pairs that are not edges of `zdGraph d` are ignored. In `ℤ²`, `crossing 0` is a left-right
-crossing and `crossing 1` a bottom-top crossing. -/
+crossing and `crossing 1` a bottom-top crossing. The box is closed. A box of width zero in
+direction `i` (`lo ≤ hi`, `lo i = hi i`) is crossed by every configuration
+(`crossing_eq_univ_of_eq`), and an empty box (`¬lo ≤ hi`) by none
+(`crossing_eq_empty_of_not_le`). -/
 def crossing (i : Fin d) (lo hi : LatticeSite d) : Set (Config (LatticeSite d)) :=
   {ω | ∃ a ∈ Icc lo hi, a i = lo i ∧ ∃ b ∈ Icc lo hi, b i = hi i ∧
     ω ∩ (zdGraph d).edgeSet ∈ localConn (Icc lo hi) a b}

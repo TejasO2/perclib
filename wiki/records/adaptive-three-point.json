@@ -746,6 +746,16 @@
       "tag": "Q3MP",
       "proof_uses": [],
       "reason": "The proof is a direct bijection argument (tree completion and coordinate swaps preserving product weights) and invokes no other wiki assertion."
+    },
+    {
+      "order": 42,
+      "tag": "JM5A",
+      "proof_uses": [
+        "IP6C",
+        "XCYH",
+        "7GOV"
+      ],
+      "reason": "Proof from cited results: Conijn's Theorem 3 (from Beliaev–Izyurov) and the existence of the fixed-radius continuum limits give the hypotheses of the point-completion transfer; RSW and the distance comparison give positivity of the limits; the positive square root gives the limit."
     }
   ]
 }
