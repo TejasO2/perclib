@@ -39,6 +39,10 @@ times the probability of arms with inner positions in the windows.
   `π(ρ, R) ≤ 2 P(arms separated at the inner boundary of B_ρ(z))` for the radii `2ρ + 1 = wN` of
   the inner separation step.
 * `exists_law_multiArmEvent_le_law_multiArmEventIn_window_inner`: **Theorem 11, inner half**.
+* `exists_law_multiArmEvent_le_law_outerSeparated_inner`: the separated form of the outer half with
+  the inner positions in windows (needs the inner half: the outer step's error term has no windows).
+* `exists_law_multiArmEvent_le_law_multiArmEventIn_windows`: **Theorem 11 with windows at both
+  ends**, for `32 r ≤ R`.
 -/
 
 @[expose] public section
@@ -251,6 +255,210 @@ theorem exists_law_multiArmEvent_le_law_multiArmEventIn_window_inner (σ : Fin j
           rw [← mul_assoc, ENNReal.inv_mul_cancel hd₁0 hd₁t, one_mul]
       _ ≤ d₁⁻¹ * (CS * law q (multiArmEventIn σ z r R (window (16 * r + 8) θ η)
           fun _ => univ)) := mul_le_mul' le_rfl ((mul_le_mul' (hd₁c.trans hc) le_rfl).trans hSS)
+
+/-! ### Theorem 11 at both ends -/
+
+/-- **Theorem 11, outer half, separated form, with inner windows**
+(`exists_law_multiArmEvent_le_law_outerSeparated` with the inner positions in the windows of landing
+data). For a colour sequence `σ` without packs,
+landing data `(η, θ)` and `n ≥ 1000 (j + 1)²` there are `C < ⊤` and `r₀` such that for every law
+with crossing bounds `c` up to scale `L`, `r₀ ≤ r` and `7r ≤ R ≤ L`: `π(r, R)` is at most `C` times
+the probability that there are arms from `B_r(z)` to `∂B_R(z)` with inner positions in
+`window (16 r + 8) θ η`, separated at the outer boundary at scale `2Q - 1` with fences `(2u, u)`
+(`u = ⌊R / n²⌋`, `Q = (64 n + 24 j + 24) u`).
+
+Proof: Nolin's induction on scales as in the outer half, with the inner positions kept by the outer
+step, the gluing step and the window step; the term `δ π(r, N)` of the outer step is bounded through
+Theorem 11's inner half at `ρ = 2 ⌊R / 6⌋ + 1`, `π(r, ρ) ≤ C_in P(arms with inner positions in the
+windows)`, so `δ` is chosen after `C_in`. -/
+theorem exists_law_multiArmEvent_le_law_outerSeparated_inner (σ : Fin j → Bool)
+    (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) {η : ℚ} {θ : Fin j → ℚ} (hθ : IsLanding η θ)
+    (c : ℕ → ℝ≥0∞) {n : ℕ} (hn : 1000 * (j + 1) * (j + 1) ≤ n) :
+    ∃ C : ℝ≥0∞, C ≠ ⊤ ∧ ∃ r₀ : ℕ, ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
+      CrossingBounds q L c → ∀ (z : LatticeSite 2) (r R : ℕ), r₀ ≤ r → 7 * r ≤ R →
+      (R : ℕ∞) ≤ L →
+      law q (multiArmEvent σ z r R) ≤ C * law q {ω : Config (LatticeSite 2) |
+        ∃ (a b : Fin j → LatticeSite 2) (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
+        (∀ i k l, i < k → k < l → sbtw (landingPos (z - R) (z + R) (σ i) (γ i))
+          (landingPos (z - R) (z + R) (σ k) (γ k)) (landingPos (z - R) (z + R) (σ l) (γ l))) ∧
+        ArmsOuterSeparated ω σ z R
+          ((2 * (((64 * n + 24 * j + 24) * (R / (n * n)) : ℕ) : ℤ) - 1 : ℤ) : ℝ)
+          (2 * (R / (n * n))) (R / (n * n)) γ ∧
+        ∀ i, innerPos z r (σ i) (γ i) ∈ window (16 * r + 8) θ η i} := by
+  obtain ⟨C₀, hC₀, rI, hinner⟩ :=
+    exists_law_multiArmEvent_le_law_multiArmEventIn_window_inner σ hσ hθ c
+  obtain ⟨c₁, hc₁, rB, hbase⟩ := exists_pos_le_law_outerSeparated_inner σ hσ hθ c hn
+  obtain ⟨cW, hcW, hwin⟩ := exists_pos_le_law_window_step_inner σ hσ c hn
+  obtain ⟨Ci, hCi⟩ : ∃ Ci : ℝ≥0∞, Ci = max C₀ 1 := ⟨_, rfl⟩
+  have hCit : Ci ≠ ⊤ := hCi ▸ max_ne_top hC₀ ENNReal.one_ne_top
+  have hCi1 : 1 ≤ Ci := hCi ▸ le_max_right _ _
+  have hC₀i : C₀ ≤ Ci := hCi ▸ le_max_left _ _
+  obtain ⟨w, hw⟩ : ∃ w : ℝ≥0∞, w = min cW 1 := ⟨_, rfl⟩
+  have hw0 : w ≠ 0 := (hw ▸ lt_min hcW one_pos).ne'
+  have hwt : w ≠ ⊤ := ne_top_of_le_ne_top ENNReal.one_ne_top (hw ▸ min_le_right _ _)
+  have hwc : w ≤ cW := hw ▸ min_le_left _ _
+  -- `δ` with `Ci w⁻¹ δ = 1/2`
+  obtain ⟨D, hD⟩ : ∃ D : ℝ≥0∞, D = Ci * w⁻¹ := ⟨_, rfl⟩
+  have hDt : D ≠ ⊤ := hD ▸ ENNReal.mul_ne_top hCit (ENNReal.inv_ne_top.2 hw0)
+  have hD0 : D ≠ 0 := by
+    rw [hD]
+    exact mul_ne_zero (lt_of_lt_of_le one_pos hCi1).ne' (ENNReal.inv_ne_zero.2 hwt)
+  obtain ⟨δ, hδ⟩ : ∃ δ : ℝ≥0∞, δ = (2 * D)⁻¹ := ⟨_, rfl⟩
+  have hδ0 : 0 < δ := by
+    rw [hδ]
+    exact ENNReal.inv_pos.2 (ENNReal.mul_ne_top ENNReal.ofNat_ne_top hDt)
+  have hδD : δ * D = 2⁻¹ := by
+    rw [hδ, ENNReal.mul_inv (Or.inl two_ne_zero) (Or.inl ENNReal.ofNat_ne_top), mul_assoc,
+      ENNReal.inv_mul_cancel hD0 hDt, mul_one]
+  obtain ⟨ε, hε, hε1, N₀, hstep⟩ := exists_law_multiArmEventIn_diff_separated_le σ hσ c hδ0
+  obtain ⟨cG, hcG, N₁, hglue⟩ := exists_pos_le_law_glue_step_inner σ hσ c hn hε hε1
+  obtain ⟨g, hg⟩ : ∃ g : ℝ≥0∞, g = min cG 1 := ⟨_, rfl⟩
+  have hg0 : g ≠ 0 := (hg ▸ lt_min hcG one_pos).ne'
+  have hgt : g ≠ ⊤ := ne_top_of_le_ne_top ENNReal.one_ne_top (hg ▸ min_le_right _ _)
+  have hgc : g ≤ cG := hg ▸ min_le_left _ _
+  obtain ⟨E, hE⟩ : ∃ E : ℝ≥0∞, E = Ci * g⁻¹ + c₁⁻¹ := ⟨_, rfl⟩
+  have hEt : E ≠ ⊤ := hE ▸ ENNReal.add_ne_top.2 ⟨ENNReal.mul_ne_top hCit
+    (ENNReal.inv_ne_top.2 hg0), ENNReal.inv_ne_top.2 hc₁.ne'⟩
+  refine ⟨2 * E, ENNReal.mul_ne_top ENNReal.ofNat_ne_top hEt,
+    max (max (rB + 7) (n * (n * n))) (max (max N₀ N₁) rI), ?_⟩
+  intro q L hCB z r R₀ hr
+  have hrB : rB ≤ r := by
+    have := le_trans (le_max_left _ _) (le_trans (le_max_left _ _) hr); omega
+  have h7 : 7 ≤ r := by
+    have := le_trans (le_max_left _ _) (le_trans (le_max_left _ _) hr); omega
+  have hn3 : n * (n * n) ≤ r := le_trans (le_max_right _ _) (le_trans (le_max_left _ _) hr)
+  have hN₀ : N₀ ≤ r :=
+    le_trans (le_max_left _ _) (le_trans (le_max_left _ _) (le_trans (le_max_right _ _) hr))
+  have hN₁ : N₁ ≤ r :=
+    le_trans (le_max_right _ _) (le_trans (le_max_left _ _) (le_trans (le_max_right _ _) hr))
+  have hrI : rI ≤ r := le_trans (le_max_right _ _) (le_trans (le_max_right _ _) hr)
+  have hinv : ∀ {x y : ℝ≥0∞} {e : ℝ≥0∞}, e ≠ 0 → e ≠ ⊤ → e * x ≤ y → x ≤ e⁻¹ * y :=
+    fun {x y e} he0 het h => by
+      calc x = e⁻¹ * (e * x) := by rw [← mul_assoc, ENNReal.inv_mul_cancel he0 het, one_mul]
+        _ ≤ e⁻¹ * y := mul_le_mul' le_rfl h
+  induction R₀ using Nat.strong_induction_on with
+  | _ R ih =>
+  intro hR hRL
+  obtain ⟨B, hB⟩ : ∃ B : Set (Config (LatticeSite 2)), B = {ω : Config (LatticeSite 2) |
+      ∃ (a b : Fin j → LatticeSite 2) (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+      (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
+      (∀ i k l, i < k → k < l → sbtw (landingPos (z - R) (z + R) (σ i) (γ i))
+        (landingPos (z - R) (z + R) (σ k) (γ k)) (landingPos (z - R) (z + R) (σ l) (γ l))) ∧
+      ArmsOuterSeparated ω σ z R
+        ((2 * (((64 * n + 24 * j + 24) * (R / (n * n)) : ℕ) : ℤ) - 1 : ℤ) : ℝ)
+        (2 * (R / (n * n))) (R / (n * n)) γ ∧
+      ∀ i, innerPos z r (σ i) (γ i) ∈ window (16 * r + 8) θ η i} := ⟨_, rfl⟩
+  rw [← hB]
+  by_cases hsmall : R < 42 * r + 42
+  · -- small ratios: the one-scale bound for separated arms from inner windows
+    have hb := hbase q L hCB z r R hrB hR (by omega) hRL
+    rw [← hB] at hb
+    have hc₁t : c₁ ≠ ⊤ := ne_top_of_le_ne_top ENNReal.one_ne_top (hb.trans prob_le_one)
+    calc law q (multiArmEvent σ z r R) ≤ 1 := prob_le_one
+      _ = c₁⁻¹ * c₁ := (ENNReal.inv_mul_cancel hc₁.ne' hc₁t).symm
+      _ ≤ (2 * E) * law q B := by
+          refine mul_le_mul' ?_ hb
+          rw [hE, two_mul]
+          exact le_trans le_add_self (add_le_add le_rfl le_add_self)
+  · -- the induction step at `N = ⌊R / 6⌋`, `ρ = 2N + 1`
+    have hNL : ((R / 6 : ℕ) : ℕ∞) ≤ L := le_trans (by exact_mod_cast (by omega : R / 6 ≤ R)) hRL
+    have hρL : ((2 * (R / 6) + 1 : ℕ) : ℕ∞) ≤ L :=
+      le_trans (by exact_mod_cast (by omega : 2 * (R / 6) + 1 ≤ R)) hRL
+    -- Theorem 11's inner half at `ρ`
+    have h0 := hinner q L hCB z r (2 * (R / 6) + 1) hrI (by omega) hρL
+    -- the outer step at `ρ`, keeping the inner positions
+    have h2 := hstep q L hCB z r (R / 6) (2 * (R / 6) + 1) (window (16 * r + 8) θ η) rfl
+      (by omega) (by omega) hNL
+    obtain ⟨S, hS⟩ : ∃ S : Set (Config (LatticeSite 2)), S = {ω : Config (LatticeSite 2) |
+        ∃ (a b : Fin j → LatticeSite 2) (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+        (∀ i, IsArm ω (σ i) z r (z - ((2 * (R / 6) + 1 : ℕ) : LatticeSite 2))
+          (z + ((2 * (R / 6) + 1 : ℕ) : LatticeSite 2)) (γ i)) ∧ ArmsDisjoint σ γ ∧
+        (∀ i k l, i < k → k < l →
+          sbtw (landingPos (z - ((2 * (R / 6) + 1 : ℕ) : LatticeSite 2))
+              (z + ((2 * (R / 6) + 1 : ℕ) : LatticeSite 2)) (σ i) (γ i))
+            (landingPos (z - ((2 * (R / 6) + 1 : ℕ) : LatticeSite 2))
+              (z + ((2 * (R / 6) + 1 : ℕ) : LatticeSite 2)) (σ k) (γ k))
+            (landingPos (z - ((2 * (R / 6) + 1 : ℕ) : LatticeSite 2))
+              (z + ((2 * (R / 6) + 1 : ℕ) : LatticeSite 2)) (σ l) (γ l))) ∧
+        ArmsOuterSeparated ω σ z (2 * (R / 6) + 1) (4 * Real.sqrt ε * (R / 6 : ℕ))
+          ⌊Real.sqrt ε * (R / 6 : ℕ)⌋₊ ⌊ε * (R / 6 : ℕ)⌋₊ γ ∧
+        ∀ i, innerPos z r (σ i) (γ i) ∈ window (16 * r + 8) θ η i} := ⟨_, rfl⟩
+    rw [← hS] at h2
+    -- the gluing step from `ρ` to `R` and the window step from `N` to `R`
+    obtain ⟨tT, lamT, αT, βT, hw1', hw2, hw3, hw4, hw5⟩ := exists_bottom_windows hn z R
+    have hG := hglue q L hCB z r (R / 6) (2 * (R / 6) + 1) R tT lamT αT βT
+      (window (16 * r + 8) θ η) rfl (by omega) (by omega) (by omega) (by omega) hRL hw1' hw2 hw3
+      hw4 hw5
+    rw [← hS] at hG
+    have hGB : g * law q S ≤ law q B := by
+      refine (mul_le_mul' hgc le_rfl).trans (hG.trans (measure_mono ?_))
+      rw [hB]
+      rintro ω ⟨a, b, γ, hγ, hd, ho, hs, -, hJ⟩
+      exact ⟨a, b, γ, hγ, hd, ho, hs, hJ⟩
+    have hW := hwin q L hCB z r (R / 6) R tT lamT αT βT (window (16 * r + 8) θ η) (by omega)
+      (by omega) (by omega) (by omega) hRL hw1' hw2 hw3 hw4 hw5
+    have hih := ih (R / 6) (by omega) (by omega) hNL
+    have hWB : law q (multiArmEvent σ z r (R / 6)) ≤ 2 * E * (w⁻¹ * law q B) := by
+      refine hih.trans (mul_le_mul' le_rfl (hinv hw0 hwt ?_))
+      refine (mul_le_mul' hwc le_rfl).trans (hW.trans (measure_mono ?_))
+      rw [hB]
+      rintro ω ⟨a, b, γ, hγ, hd, ho, hs, -, hJ⟩
+      exact ⟨a, b, γ, hγ, hd, ho, hs, hJ⟩
+    have hA : law q (multiArmEventIn σ z r (2 * (R / 6) + 1) (window (16 * r + 8) θ η)
+        fun _ => univ) ≤ law q S + δ * law q (multiArmEvent σ z r (R / 6)) :=
+      measure_le_add_of_diff_le h2
+    calc law q (multiArmEvent σ z r R)
+        ≤ law q (multiArmEvent σ z r (2 * (R / 6) + 1)) :=
+          measure_mono (multiArmEvent_subset_of_le le_rfl (by omega) (by omega))
+      _ ≤ Ci * law q (multiArmEventIn σ z r (2 * (R / 6) + 1) (window (16 * r + 8) θ η)
+            fun _ => univ) := h0.trans (mul_le_mul' hC₀i le_rfl)
+      _ ≤ Ci * (g⁻¹ * law q B + δ * (2 * E * (w⁻¹ * law q B))) :=
+          mul_le_mul' le_rfl (hA.trans (add_le_add (hinv hg0 hgt hGB) (mul_le_mul' le_rfl hWB)))
+      _ = Ci * g⁻¹ * law q B + ((δ * (Ci * w⁻¹)) * 2) * (E * law q B) := by ring
+      _ = Ci * g⁻¹ * law q B + E * law q B := by
+          rw [← hD, hδD, ENNReal.inv_mul_cancel two_ne_zero ENNReal.ofNat_ne_top, one_mul]
+      _ ≤ E * law q B + E * law q B := by
+          gcongr
+          rw [hE]
+          exact le_self_add
+      _ = 2 * E * law q B := by ring
+
+/-- **Theorem 11 with windows at both ends, at large ratio** (Nolin, Theorem 11; plan §2.4
+`exists_law_multiArmEvent_le_law_multiArmEventIn` for `32 r ≤ R`, with the approved `∃ r₀`). For a
+colour sequence `σ` without packs and landing data `(η, θ)` (outer) and `(η, θ')` (inner) there are
+`C < ⊤` and `r₀` such that for every law with crossing bounds `c` up to scale `L`, `r₀ ≤ r` and
+`32 r ≤ R ≤ L`: `π(r, R) ≤ C P(arms from B_r(z) to ∂B_R(z) with inner positions in
+window (16 r + 8) θ' η, landing in window (16 R) θ η)`. Proof: `π(r, R) ≤ π(r, ⌊R / 4⌋)`, the
+separated form with inner windows at `⌊R / 4⌋`, and the window step with inner windows into the
+windows of the landing data. -/
+theorem exists_law_multiArmEvent_le_law_multiArmEventIn_windows (σ : Fin j → Bool)
+    (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) {η : ℚ} {θ θ' : Fin j → ℚ} (hθ : IsLanding η θ)
+    (hθ' : IsLanding η θ') (c : ℕ → ℝ≥0∞) :
+    ∃ C : ℝ≥0∞, C ≠ ⊤ ∧ ∃ r₀ : ℕ, ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
+      CrossingBounds q L c → ∀ (z : LatticeSite 2) (r R : ℕ), r₀ ≤ r → 32 * r ≤ R →
+      (R : ℕ∞) ≤ L →
+      law q (multiArmEvent σ z r R) ≤
+        C * law q (multiArmEventIn σ z r R (window (16 * r + 8) θ' η) (window (16 * R) θ η)) := by
+  obtain ⟨n, hn, w, hw0, hwt, hwin⟩ := exists_pos_le_law_window_step_landing_inner σ hσ hθ c
+  obtain ⟨C₁, hC₁, r₁, hsep⟩ := exists_law_multiArmEvent_le_law_outerSeparated_inner σ hσ hθ' c hn
+  refine ⟨C₁ * w⁻¹, ENNReal.mul_ne_top hC₁ (ENNReal.inv_ne_top.2 hw0.ne'),
+    max r₁ (n * (n * n) + 8), fun q L hCB z r R hr hR hRL => ?_⟩
+  have hr₁ : r₁ ≤ r := le_trans (le_max_left _ _) hr
+  have hn3 : n * (n * n) + 8 ≤ r := le_trans (le_max_right _ _) hr
+  have hNL : ((R / 4 : ℕ) : ℕ∞) ≤ L := le_trans (by exact_mod_cast (by omega : R / 4 ≤ R)) hRL
+  have h1 := hsep q L hCB z r (R / 4) hr₁ (by omega) hNL
+  have h2 := hwin q L hCB z r (R / 4) R (window (16 * r + 8) θ' η) (by omega) (by omega)
+    (by omega) (by omega) hRL
+  calc law q (multiArmEvent σ z r R) ≤ law q (multiArmEvent σ z r (R / 4)) :=
+        measure_mono (multiArmEvent_subset_of_le le_rfl (by omega) (by omega))
+    _ ≤ C₁ * (w⁻¹ * law q (multiArmEventIn σ z r R (window (16 * r + 8) θ' η)
+          (window (16 * R) θ η))) := by
+        refine h1.trans (mul_le_mul' le_rfl ?_)
+        calc _ = w⁻¹ * (w * law q _) := by
+              rw [← mul_assoc, ENNReal.inv_mul_cancel hw0.ne' hwt, one_mul]
+          _ ≤ _ := mul_le_mul' le_rfl h2
+    _ = C₁ * w⁻¹ * _ := (mul_assoc _ _ _).symm
 
 end InnerHalf
 

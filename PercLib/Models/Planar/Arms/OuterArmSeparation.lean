@@ -66,8 +66,9 @@ All the parameters are integers; the arithmetic of the two steps is in `window_s
   `multiArmEvent_self_eq_univ` (the arm event across an empty annulus is everything for `j ≤ r`).
 * `exists_pos_le_law_window_step`, `exists_pos_le_law_window_step_landing`,
   `exists_pos_le_law_glue_step`, `exists_pos_le_law_outerSeparated`: the steps;
-  `exists_pos_le_law_window_step_inner`, `exists_pos_le_law_glue_step_inner`: the window step and
-  the gluing step for arms with inner positions in windows, which they keep.
+  `exists_pos_le_law_window_step_inner`, `exists_pos_le_law_glue_step_inner`,
+  `exists_pos_le_law_window_step_landing_inner`: the window steps and the gluing step for arms with
+  inner positions in windows, which they keep.
 * `IsLanding.exists_core`, `IsLanding.exists_windows`, `exists_windows_of_ccw`,
   `exists_bottom_windows`: target windows.
 
@@ -1211,29 +1212,36 @@ theorem exists_law_multiArmEvent_le_law_outerSeparated {j : ℕ} (σ : Fin j →
           exact le_self_add
       _ = 2 * D * law q B := by ring
 
-/-- **The window step into the windows of landing data**: with `n ≥ 1000 (j + 1)² (Λ + 1)`, where
-`Λ` is given by `IsLanding.exists_windows`, separated arms at `N` are carried to arms to `∂B_R(z)`,
-`2N ≤ R ≤ 8N`, landing in the windows `window (16 R) θ η`, at the cost of the window step. -/
-theorem exists_pos_le_law_window_step_landing {j : ℕ} (σ : Fin j → Bool)
+/-- **The window step into the windows of landing data, with inner windows**:
+`exists_pos_le_law_window_step_landing` for arms whose inner positions lie in windows `J`, which
+the window step keeps. -/
+theorem exists_pos_le_law_window_step_landing_inner {j : ℕ} (σ : Fin j → Bool)
     (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) {η : ℚ} {θ : Fin j → ℚ} (hθ : IsLanding η θ)
     (c : ℕ → ℝ≥0∞) :
     ∃ n : ℕ, 1000 * (j + 1) * (j + 1) ≤ n ∧ ∃ c₀ : ℝ≥0∞, 0 < c₀ ∧ c₀ ≠ ⊤ ∧
       ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
-      CrossingBounds q L c → ∀ (z : LatticeSite 2) (r N R : ℕ),
+      CrossingBounds q L c → ∀ (z : LatticeSite 2) (r N R : ℕ) (J : Fin j → Set ℤ),
       n * (n * n) ≤ N → 2 * N ≤ R → R ≤ 8 * N → 2 * r + 2 ≤ N → (R : ℕ∞) ≤ L →
-      c₀ * law q (outerSeparatedArmEvent σ z r N
-          ((2 * (((64 * n + 24 * j + 24) * (N / (n * n)) : ℕ) : ℤ) - 1 : ℤ) : ℝ)
-          (2 * (N / (n * n))) (N / (n * n))) ≤
-        law q (multiArmEventIn σ z r R (fun _ => univ) (window (16 * R) θ η)) := by
+      c₀ * law q {ω : Config (LatticeSite 2) | ∃ (a b : Fin j → LatticeSite 2)
+          (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+          (∀ i, IsArm ω (σ i) z r (z - N) (z + N) (γ i)) ∧ ArmsDisjoint σ γ ∧
+          (∀ i k l, i < k → k < l → sbtw (landingPos (z - N) (z + N) (σ i) (γ i))
+            (landingPos (z - N) (z + N) (σ k) (γ k))
+            (landingPos (z - N) (z + N) (σ l) (γ l))) ∧
+          ArmsOuterSeparated ω σ z N
+            ((2 * (((64 * n + 24 * j + 24) * (N / (n * n)) : ℕ) : ℤ) - 1 : ℤ) : ℝ)
+            (2 * (N / (n * n))) (N / (n * n)) γ ∧
+          ∀ i, innerPos z r (σ i) (γ i) ∈ J i} ≤
+        law q (multiArmEventIn σ z r R J (window (16 * R) θ η)) := by
   obtain ⟨Λ, hΛ, hwinθ⟩ := hθ.exists_windows
   refine ⟨1000 * (j + 1) * (j + 1) * (Λ + 1), Nat.le_mul_of_pos_right _ (by omega), ?_⟩
   obtain ⟨n, hn'⟩ : ∃ n, n = 1000 * (j + 1) * (j + 1) * (Λ + 1) := ⟨_, rfl⟩
   rw [← hn']
   have hn : 1000 * (j + 1) * (j + 1) ≤ n := by
     rw [hn']; exact Nat.le_mul_of_pos_right _ (by omega)
-  obtain ⟨cW, hcW, hwin⟩ := exists_pos_le_law_window_step σ hσ c hn
+  obtain ⟨cW, hcW, hwin⟩ := exists_pos_le_law_window_step_inner σ hσ c hn
   refine ⟨min cW 1, lt_min hcW one_pos, ne_top_of_le_ne_top ENNReal.one_ne_top (min_le_right _ _),
-    fun q L hCB z r N R hN hNR hRN hr hRL => ?_⟩
+    fun q L hCB z r N R J hN hNR hRN hr hRL => ?_⟩
   have hΛn : Λ * (96 * n + 24 * j + 42) ≤ n * n := by
     have h1 : 24 * j + 42 ≤ n := by nlinarith
     have h2 : 1000 * (Λ + 1) ≤ n := by
@@ -1260,11 +1268,11 @@ theorem exists_pos_le_law_window_step_landing {j : ℕ} (σ : Fin j → Bool)
     omega
   obtain ⟨tT, lamT, αT, βT, hw1, hw2, hw3, hw4, hw5, hland⟩ :=
     hwinθ z R ((96 * n + 24 * j + 38) * (R / (n * n))) hΛR
-  have h := hwin q L hCB z r N R tT lamT αT βT hN hNR hRN hr hRL hw1 hw2 hw3 hw4 hw5
+  have h := hwin q L hCB z r N R tT lamT αT βT J hN hNR hRN hr hRL hw1 hw2 hw3 hw4 hw5
   refine (mul_le_mul' (min_le_left _ _) le_rfl).trans (h.trans (measure_mono ?_))
-  rintro ω ⟨a, b, γ, hγ, hd, ho, hs, hw⟩
+  rintro ω ⟨a, b, γ, hγ, hd, ho, hs, hw, hJ⟩
   have hrR : r < R := by omega
-  refine ⟨a, b, γ, hγ, hd, fun i => ⟨mem_univ _, hland ω r i (σ i) (a i) (b i) (γ i) (hγ i) hrR
+  refine ⟨a, b, γ, hγ, hd, fun i => ⟨hJ i, hland ω r i (σ i) (a i) (b i) (γ i) (hγ i) hrR
     (fun m => ?_) (hw i)⟩, ho⟩
   have h1 := hs.2.1 i m
   have hQ : (4 : ℝ) ≤ ((2 * (((64 * n + 24 * j + 24) * (R / (n * n)) : ℕ) : ℤ) - 1 : ℤ) : ℝ) := by
@@ -1275,6 +1283,26 @@ theorem exists_pos_le_law_window_step_landing {j : ℕ} (σ : Fin j → Bool)
   have h2 := hQ.trans h1
   rw [← Int.cast_abs] at h2
   exact_mod_cast h2
+
+/-- **The window step into the windows of landing data**: with `n ≥ 1000 (j + 1)² (Λ + 1)`, where
+`Λ` is given by `IsLanding.exists_windows`, separated arms at `N` are carried to arms to `∂B_R(z)`,
+`2N ≤ R ≤ 8N`, landing in the windows `window (16 R) θ η`, at the cost of the window step. -/
+theorem exists_pos_le_law_window_step_landing {j : ℕ} (σ : Fin j → Bool)
+    (hσ : j ≤ 1 ∨ ∀ i, σ i ≠ σ (finRotate j i)) {η : ℚ} {θ : Fin j → ℚ} (hθ : IsLanding η θ)
+    (c : ℕ → ℝ≥0∞) :
+    ∃ n : ℕ, 1000 * (j + 1) * (j + 1) ≤ n ∧ ∃ c₀ : ℝ≥0∞, 0 < c₀ ∧ c₀ ≠ ⊤ ∧
+      ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
+      CrossingBounds q L c → ∀ (z : LatticeSite 2) (r N R : ℕ),
+      n * (n * n) ≤ N → 2 * N ≤ R → R ≤ 8 * N → 2 * r + 2 ≤ N → (R : ℕ∞) ≤ L →
+      c₀ * law q (outerSeparatedArmEvent σ z r N
+          ((2 * (((64 * n + 24 * j + 24) * (N / (n * n)) : ℕ) : ℤ) - 1 : ℤ) : ℝ)
+          (2 * (N / (n * n))) (N / (n * n))) ≤
+        law q (multiArmEventIn σ z r R (fun _ => univ) (window (16 * R) θ η)) := by
+  obtain ⟨n, hn, c₀, hc₀, hc₀t, h⟩ := exists_pos_le_law_window_step_landing_inner σ hσ hθ c
+  refine ⟨n, hn, c₀, hc₀, hc₀t, fun q L hCB z r N R hN hNR hRN hr hRL => le_trans ?_
+    ((h q L hCB z r N R (fun _ => univ) hN hNR hRN hr hRL).trans le_rfl)⟩
+  exact mul_le_mul' le_rfl (measure_mono fun ω ⟨a, b, γ, hγ, hd, ho, hs⟩ =>
+    ⟨a, b, γ, hγ, hd, ho, hs, fun _ => mem_univ _⟩)
 
 /-- **Theorem 11, outer half** (Nolin, Theorem 11, the external extremities: arms landing in
 prescribed windows). For a colour sequence `σ` without packs (`j ≤ 1` or no two cyclically
