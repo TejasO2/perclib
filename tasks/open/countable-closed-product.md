@@ -8,8 +8,6 @@ labels: []
 
 # Coordinate sampling, independence of disjoint blocks and the countable closed product
 
-Being done by the project's own agents; do not start it.
-
 ## Goal
 Prove wiki assertion **QH7Q** (article `finite-transcripts`) in full and tag it. The library has
 the law of an injectively sampled configuration in `infinitePi` form and independence of one

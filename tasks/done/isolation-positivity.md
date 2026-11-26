@@ -8,8 +8,6 @@ labels: []
 
 # When a vertex is isolated with positive probability
 
-Being done by the project's own agents; do not start it.
-
 ## Goal
 Prove wiki assertion **UNJ6** (article `open-degree-laws`) in full and tag it. The library
 expresses the isolation probability as a decreasing limit of finite products

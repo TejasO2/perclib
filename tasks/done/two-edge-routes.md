@@ -8,8 +8,6 @@ labels: []
 
 # Exact connection probability through a family of two-edge routes
 
-Being done by the project's own agents; do not start it.
-
 ## Goal
 Prove wiki assertion **YPNG** (article `connection-paths`) in full and tag it. The library has the
 homogeneous case (`tau_completeBipartite_bool`, `PercLib/Percolation/Bond/PathLowerBounds.lean`:
