@@ -600,7 +600,8 @@ four strips in their long direction, namely left-right crossings of the top stri
 crossings of the right strip `z + [2n, 4n] × [-4n, 4n]` and of the left strip
 `z + [-4n, -2n] × [-4n, 4n]`. Two adjacent strips share a corner square, which their crossings
 cross in perpendicular directions; the event stands for the open circuit around the box of
-radius `2n - 1` in the one-arm bounds. -/
+radius `2n - 1` in the one-arm bounds. For `n = 0` every strip is a single point and the event
+is everything. -/
 def fourStrip (z : LatticeSite 2) (n : ℕ) : Set (Config (LatticeSite 2)) :=
   crossing 0 (z + ![-4 * (n : ℤ), 2 * n]) (z + ![4 * (n : ℤ), 4 * n]) ∩
   crossing 0 (z + ![-4 * (n : ℤ), -4 * n]) (z + ![4 * (n : ℤ), -2 * n]) ∩
@@ -948,7 +949,8 @@ the dual vertex `f` standing for the face with lower-left corner `f`). Direction
 box `[lo, lo + (k n, n)]` crossed from left to right, direction `i = 1` the box
 `[lo, lo + (n, k n)]` crossed from bottom to top. At `1/2` such bounds hold at every scale,
 `L = ⊤`, by the Russo–Seymour–Welsh bounds; near `1/2` they hold below the characteristic
-length. -/
+length. The case `k = 0` is a box of width zero, crossed by every configuration, so only
+`1 ≤ k` constrains `c`. -/
 structure CrossingBounds (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞) (c : ℕ → ℝ≥0∞) :
     Prop where
   /-- The bounds are positive. -/
@@ -1521,7 +1523,9 @@ end Arms
 /-- A family of arms with colours `σ` is **disjoint** when two open arms share no vertex except
 possibly their first one and two dual arms share no face. (An open arm and a dual arm of one
 configuration never cross: an open edge is not crossed by an open dual edge.) For `r = 0` the
-open arms all start at the centre. -/
+open arms all start at the centre. Two open arms may share their first vertex for every `r`, so
+for `r ≥ 1` this is weaker than vertex-disjointness: two arms may leave `B_r(z)` from the same
+boundary vertex. -/
 def ArmsDisjoint {j : ℕ} (σ : Fin j → Bool) {a b : Fin j → LatticeSite 2}
     (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)) : Prop :=
   (∀ i k, i ≠ k → σ i = true → σ k = true → ∀ v ∈ (γ i).support.tail, v ∉ (γ k).support) ∧
@@ -1741,7 +1745,9 @@ box `Icc lo hi`: there is a disjoint family of `j` arms (`ArmsDisjoint`), arm `i
 its landing position in the window `I i`, landing in counterclockwise order: for `i < k < l`
 the landing positions of the arms `i`, `k`, `l` are in strict cyclic order (`sbtw`, for the
 circular order of `ℤ`). Positions are perimeter positions on the doubled lattice (`innerPos`,
-`landingPos`). -/
+`landingPos`). The event is meant for `B_r(z)` inside `Icc (lo + 1) (hi - 1)`; otherwise a walk
+of length zero at a vertex of `B_r(z)` outside that box is an open arm, so that for example
+`multiArmEvent (fun _ : Fin 1 => true) z r R = univ` when `R ≤ r`. -/
 def multiArmEventTo {j : ℕ} (σ : Fin j → Bool) (z : LatticeSite 2) (r : ℕ)
     (lo hi : LatticeSite 2) (J I : Fin j → Set ℤ) : Set (Config (LatticeSite 2)) :=
   {ω | ∃ (a b : Fin j → LatticeSite 2) (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
