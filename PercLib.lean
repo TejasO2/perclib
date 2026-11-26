@@ -219,6 +219,7 @@ public import PercLib.Models.TreeRecursion
 public import PercLib.Models.UnattainedThreshold
 public import PercLib.Models.ZeroOneExamples
 public import PercLib.Percolation.Bond.AmplitudeContraction
+public import PercLib.Percolation.Bond.ArmContraction
 public import PercLib.Percolation.Bond.BallExploration
 public import PercLib.Percolation.Bond.Basic
 public import PercLib.Percolation.Bond.BoundaryContraction
@@ -308,6 +309,7 @@ public import PercLib.Percolation.Bond.PathComparison
 public import PercLib.Percolation.Bond.PathCountSusceptibility
 public import PercLib.Percolation.Bond.PathLowerBounds
 public import PercLib.Percolation.Bond.Pivotal
+public import PercLib.Percolation.Bond.PlanarVolumeTail
 public import PercLib.Percolation.Bond.ProfileRegularity
 public import PercLib.Percolation.Bond.RestrictedSusceptibility
 public import PercLib.Percolation.Bond.RootGlobalPercolation
@@ -328,6 +330,7 @@ public import PercLib.Percolation.Bond.SusceptibilityContinuity
 public import PercLib.Percolation.Bond.SusceptibilityDerivative
 public import PercLib.Percolation.Bond.SusceptibilityEndpoint
 public import PercLib.Percolation.Bond.SusceptibilityLevel
+public import PercLib.Percolation.Bond.Tags.ArmContraction
 public import PercLib.Percolation.Bond.Tags.BoundaryForest
 public import PercLib.Percolation.Bond.Tags.ChemicalMoments
 public import PercLib.Percolation.Bond.Tags.ClosedSeparatorDefs
@@ -366,6 +369,7 @@ public import PercLib.Percolation.Bond.Tags.LatticePathSusceptibility
 public import PercLib.Percolation.Bond.Tags.MarkedVolumeMoments
 public import PercLib.Percolation.Bond.Tags.OpenDegreeCounts
 public import PercLib.Percolation.Bond.Tags.OptimizedClusterTail
+public import PercLib.Percolation.Bond.Tags.PlanarVolumeTail
 public import PercLib.Percolation.Bond.Tags.RestrictedSusceptibility
 public import PercLib.Percolation.Bond.Tags.RootGlobalPercolation
 public import PercLib.Percolation.Bond.Tags.SubcriticalBound
