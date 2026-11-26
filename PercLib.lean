@@ -178,6 +178,7 @@ public import PercLib.Models.LongRange.TruncatedMoments
 public import PercLib.Models.NonSummable
 public import PercLib.Models.NormalizedSmallIntensity
 public import PercLib.Models.NormalizedSmallIntensityLine
+public import PercLib.Models.NormalizedSmallIntensityLineSymmetry
 public import PercLib.Models.PathCount
 public import PercLib.Models.Planar.Arms.Defs
 public import PercLib.Models.Planar.Defs
@@ -205,6 +206,7 @@ public import PercLib.Models.Tags.HierarchicalTwoPointConditional
 public import PercLib.Models.Tags.KernelsAndSitePaths
 public import PercLib.Models.Tags.Lattice
 public import PercLib.Models.Tags.Line
+public import PercLib.Models.Tags.LineTriangleFormula
 public import PercLib.Models.Tags.PathCount
 public import PercLib.Models.Tags.Site
 public import PercLib.Models.Tags.SmallIntensity
@@ -447,6 +449,9 @@ public import PercLib.Probability.FiniteExpectation
 public import PercLib.Probability.FirstMoment
 public import PercLib.Probability.GaltonWatson
 public import PercLib.Probability.GaltonWatson.Defs
+public import PercLib.Probability.GaltonWatsonCriticalSurvival
+public import PercLib.Probability.GaltonWatsonTotalProgeny
+public import PercLib.Probability.GaltonWatsonTotalProgenyTail
 public import PercLib.Probability.GeneratingFunction
 public import PercLib.Probability.GhostBinaryTree
 public import PercLib.Probability.GhostFieldDerivative
@@ -510,6 +515,7 @@ public import PercLib.Probability.Tags.FiniteCertificate
 public import PercLib.Probability.Tags.FiniteCoordinates
 public import PercLib.Probability.Tags.FourFunctions
 public import PercLib.Probability.Tags.GaltonWatson
+public import PercLib.Probability.Tags.GaltonWatsonCriticalSurvival
 public import PercLib.Probability.Tags.GhostBinaryTree
 public import PercLib.Probability.Tags.GhostFieldDerivative
 public import PercLib.Probability.Tags.GhostTransform
