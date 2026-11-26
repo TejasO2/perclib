@@ -8,8 +8,6 @@ labels: [good-first-task]
 
 # Restricted clusters lie in full-cluster intersections, not always with equality
 
-Being done by the project's own agents; do not start it.
-
 ## Goal
 Prove wiki assertion **HQ6X** (article `connectivity`) in full and tag it. The library proves the
 inclusion (`conn_of_localConn`, `PercLib/Percolation/Bond/LocalConnectivity.lean`); the assertion

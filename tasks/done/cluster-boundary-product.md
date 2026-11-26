@@ -8,8 +8,6 @@ labels: []
 
 # Law of a prescribed finite cluster as internal connectivity times a boundary product
 
-Being done by the project's own agents; do not start it.
-
 ## Goal
 Prove wiki assertion **R3I9** (article `boundary-laws`) in full and tag it. The library has the
 event identity and the factorisation `P(K(x) = C) = P(I_C) P(D_C)` (`law_cluster_eq_finset`,

@@ -8,8 +8,6 @@ labels: [good-first-task]
 
 # Finitely many edge changes do not affect the existence of an infinite component
 
-Being done by the project's own agents; do not start it.
-
 ## Goal
 Prove wiki assertion **D106** (article `infinite-cluster-zero-one`) in full and tag it. The
 library has the one-pair, configuration version (`exists_cluster_infinite_insert_iff`,
