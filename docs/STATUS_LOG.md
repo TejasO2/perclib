@@ -630,3 +630,10 @@ package (critic M-X3) and the article splits (X-S1/A-S1, deferred); restructurin
 
 - Round 14 (new series, 21 Nov ~23:15): batch gated at `29c7c4b` (11 tagged statements), 343 proved; full STATUS at `13418dc`.
 - Round 15 (21 Nov ~23:15): batch gated at `c26219e` (10 tagged statements: 32GP, R2Y7, J2TE, L9YJ, XA7C, CYYG, 94E7, CUE4, N0HM, TIKW), 353 proved.
+
+## Paced cycle 1 (26 Nov 2026, ~02:50 UTC), moved from STATUS in cycle 2
+
+- Batches `c6efdce` -> `2f5be3e` (KGNK, `frontier-lazy-return-kernel` @ `d3988df`) and `2f5be3e` -> `4a6dc1b` (PR #10 update
+  `80ee07a`, proof-only); both gated. `frontier-nonbacktracking-recurrence` @ `1a3f0ed` (0MK8) failed the gate on `local macro`.
+- PRs #13-#23 opened from Yujin's fork (ruling 24), all commented; Tejas #11/#12 first response; audit `050-audit-c1-planar` queued.
+- The integration PR to `main` was refused by the permission layer that cycle; Tom then merged #10 directly (`97b39e5`).
