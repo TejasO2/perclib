@@ -1214,7 +1214,7 @@ theorem exists_half_separating_event {j : ℕ} (σ : Fin j → Bool)
   obtain ⟨J₁, htop⟩ := exists_law_separable_ge_top_of_le c hδ3
   obtain ⟨J₂, hhalf⟩ := exists_law_separable_ge_top_half c hδ3
   set J := max J₁ J₂ with hJdef
-  set η : ℝ := (1 / ((16 * 8 ^ J : ℕ) : ℝ)) ^ 2 with hηdef
+  set η : ℝ := (1 / ((16 * 8 ^ J : ℕ) : ℝ)) ^ 2 with hetaJ
   have hD1 : (1 : ℝ) ≤ ((16 * 8 ^ J : ℕ) : ℝ) := by
     have : 1 ≤ 16 * 8 ^ J := Nat.one_le_iff_ne_zero.2 (by positivity)
     exact_mod_cast this
