@@ -4445,3 +4445,265 @@ Lessons:
   propositional step by hand.
 * After `nsmul_eq_mul` fires on a function (`2 • z = 2 * z`), the coordinates need `Pi.mul_apply`
   and `Pi.ofNat_apply`.
+
+## 25. A3b-4b (2026-11-27): the half-plane gluing, part 1 (core, clockwise turns, stage of moves, straight boxes)
+
+Package A3b-4b = §24.6 first bullet (§23.7 (2)): the half-plane gluing, from the separated
+half-plane event of §24.1 to arms landing in prescribed half-plane windows. **Done: part 1, the
+machinery** — the gluing core for arms of the half-plane, the clockwise turns that the half-plane
+needs, the stage of moves between windows, and the straight-box gluing that the first gluing is
+built on. **Not done: part 2** — the first gluing's bins and fences, the half-plane motion plan, the
+two target-window theorems A3b-4c will call, and the windows example (§25.5 has the design). Proof-only;
+`Planar/Defs.lean`, `Arms/Defs.lean`, `Arms/Separation/Defs.lean` untouched; no `@[tag]`, no
+`…Input`, no new definition (the separated half-plane event is written inline). Commits:
+
+* `aa58f4d` **Arms/HalfGluing** (new): sectors and order in the half-plane, the barrier, the glued
+  family, the gluing through corridors and over regions.
+* `70af002` **Arms/HalfTurnCorridors**, **Arms/HalfRotationGluing** (new): clockwise turns; regions,
+  the corridor of one move and the stage of moves in the half-plane.
+* `a43848a` **Arms/HalfCapGluing** (new): arms of one colour in the linear order; gluing through
+  straight boxes and through jogs with caps.
+* this note's commit (docs only).
+
+Sizes: `HalfGluing` 896 lines (9 theorems), `HalfTurnCorridors` 386 (4), `HalfRotationGluing` 1062
+(10), `HalfCapGluing` 450 (5). Gate: §25.7.
+
+### 25.1 The statements proved, by plan item
+
+Plan items of A3b-4b (numbering of this note): **(b1)** gluing core in the half-plane; **(b2)**
+clockwise turns; **(b3)** the stage of moves in the half-plane; **(b4)** the straight first gluing;
+**(b5)** the motion plan; **(b6)** the window step and the gluing step into prescribed windows;
+**(b7)** half-plane windows and their `example`. Done: (b1), (b2), (b3), the first half of (b4).
+
+All for `hσ : ∀ i k : Fin j, i.val + 1 = k.val → σ i ≠ σ k` (linear pack-freeness, as in §24),
+uniformly under `CrossingBounds q L c`, constants chosen before `q`, `L`, `z` and the radii. The
+separated half-plane event with ends in sets `B i` and inner windows `J i` is written inline as
+
+```lean
+{ω | ∃ (a b : Fin j → LatticeSite 2) (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
+  (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
+  (∀ i, ∀ v ∈ (γ i).support, z 1 ≤ v 1) ∧
+  (StrictMono fun i => landingPos (z - R) (z + R) (σ i) (γ i)) ∧
+  ArmsOuterSeparated ω σ z R s M K γ ∧ (∀ i, b i ∈ B i) ∧ ∀ i, innerPos z r (σ i) (γ i) ∈ J i}
+```
+
+(the conjunct order of §24.1's output, with the plane's cyclic-order conjunct replaced by the
+half-plane condition and `StrictMono`).
+
+**(b1) `Arms/HalfGluing.lean`:**
+
+* `false_of_innerPos_eq_of_abs_lt_half` — the sector lemma: an arm of the half-plane with the inner
+  position of `γ k` does not land closer to `γ i` (same colour, `i ≠ k`) than every arm of the other
+  colour. Proof: replace `γ k` by the arm in the family (`Function.update` on a sigma family) and
+  apply §24's barrier `armsDisjoint_and_strictMono_of_innerPos_eq_half`; the neighbour `i ± 1`
+  lands between `γ i` and the new arm.
+* `strictMono_landingPos_of_innerPos_eq_half` — a disjoint family of half-plane arms to `∂B_{R'}`
+  with the colours and inner positions of an increasing family to `∂B_R` is increasing (the open
+  virtual arm of `exists_isArm_virtual` at both radii, same inner position, lands lowest).
+* `notMem_support_of_mem_Icc_half`, `exists_isArm_of_glue_half` — the barrier beyond the boundary
+  and the glued family (half-plane, increasing, same inner positions), for continuations in the
+  half-plane.
+* `measurableSet_setOf_separated_half`, `law_mul_le_law_inter_of_mixed_half` — conditioning.
+* **`law_mul_prod_le_law_of_corridors_half`** — the plane's `law_mul_prod_le_law_of_corridors`
+  with `hQH : ∀ i, ∀ v ∈ Q i, z 1 ≤ v 1` and `hBH` (the boxes of radius `M` about the possible ends
+  in the half-plane); output: disjoint half-plane arms to `∂B_{R'}(z)`, increasing, inner positions
+  in `J`, ends satisfying `Φ`.
+* `law_mul_prod_le_law_of_regions_half`, **`pow_mul_law_le_law_of_regions_half`** — over disjoint
+  regions `G i` with `hGH : ∀ i, ∀ v ∈ G i, z 1 ≤ v 1`; cost `c κ ^ (6j)`.
+
+**(b2) `Arms/HalfTurnCorridors.lean`:** `exists_walk_turn_top_right` (top side → right side at the
+top-right corner: `V₁ = [x, x + W] × [z₁ + R, z₁ + h + W]`, band `[x, z₀ + R' - 1] × [z₁ + h,
+z₁ + h + W]`, right cap; new end on the right side in the rows `[z₁ + h, z₁ + h + W]`),
+`exists_walk_turn_left_top` (left side → top side at the top-left corner: `H₁ = [z₀ - h - W, z₀ - R
+- δ] × [y, y + W]`, band `[z₀ - h - W, z₀ - h] × [y, z₁ + R' - 1]`, top cap; new end on the top side
+in the columns `[z₀ - h - W, z₀ - h]`), and their corridor events `exists_corridor_turn_top_right`,
+`exists_corridor_turn_left_top` (six crossings, `c κ ^ 6`, in a rectangle `Icc gl gh`). Built from
+the existing legs (`exists_walk_leg2_top/left`) and caps (`exists_walk_cap_right/top`).
+
+**(b3) `Arms/HalfRotationGluing.lean`:** moves `τ : Fin 3` (`0` jog, `1` counterclockwise turn: right
+→ top, top → left; `2` clockwise turn: top → right, left → top), sides `t ≠ 2`.
+
+* `disjoint_regions_of_moves_half` (seven sublemmas `_0`…`_6`, 49 cases, `omega`): the regions of
+  two moves are disjoint when windows are `S` from the corners and `S` apart on a side, a
+  counterclockwise turning arm is the **last** of its side, a clockwise turning arm the **first**,
+  no corner is turned in both directions, `S ≥ W + 2D + 2M + 2K' + 3`. Regions of the new moves:
+  top → right `[α - M, z₀ + R' + M' + 1] × [z₁ + R - M - K', z₁ + h + W + K' + 1]`, left → top
+  `[z₀ - h - W - K', z₀ - R + M + K' + 1] × [α - M, z₁ + R' + M' + 1]`; the five others as in the plane.
+* `exists_corridor_move_half` — the corridor of one move.
+* **`exists_pos_le_law_windows_of_moves_half`** — the stage:
+
+```lean
+theorem exists_pos_le_law_windows_of_moves_half (σ) (hσ : linear) (c) (A N : ℕ) :
+    ∃ c₀, 0 < c₀ ∧ ∀ q L, CrossingBounds q L c → ∀ z r R R' W M K M' K' D S h s g' J t t' τ α β d α' β',
+      1 ≤ W → W ≤ K → K ≤ M → 2 ≤ M' → W + K' ≤ M' → W + 2D + 2M + 2K' + 3 ≤ S →
+      4M ≤ s → r + M + 1 < R → R + M + 1 ≤ h → h + W + M' ≤ R' → 2R' + 2 ≤ A W →
+      W + 2K' ≤ A (M' - 1) → R' ≤ L → |d i| ≤ D → (windows covered by N bins) →
+      (∀ i, t i ≠ 2) → (windows S from the corners) → (∀ i, t i ≠ 0 → z₁ + S ≤ α i) →
+      (windows on one side S apart) →
+      (τ i = 1: last of its side counterclockwise) → (τ i = 2: first of its side) →
+      (no corner turned both ways) →
+      (targets: τ = 0 jog [α + d, β + d + W]; τ = 1 right → top [z₀ + h, z₀ + h + W],
+               top → left [z₁ + h, z₁ + h + W]; τ = 2 top → right [z₁ + h, z₁ + h + W],
+               left → top [z₀ - h - W, z₀ - h]) →
+      1 ≤ g' → (targets g' from the corners of B_{R'}) → (targets on one side g' apart) →
+      c₀ * P(half-plane separated at R (s, M, K), ends in the windows (t, α, β), J) ≤
+        P(half-plane separated at R' (2g' - 1, M', K'), ends in the windows (t', α', β'), J)
+```
+
+with `c₀ = c A ^ (6j) / (N + 1) ^ j` (only `σ`, `c`, `A`, `N`). The windows on the half-sides must
+be `S` above the line; then every region lies in the half-plane (`hGH`, derived inside).
+
+**(b4), first half, `Arms/HalfCapGluing.lean`:** `exists_lt_lt_of_eq_half` (between two arms of one
+colour an arm of the other colour lands, linear order), `le_or_le_of_lt_of_lt_half`,
+`two_mul_le_abs_sub_half`; `law_mul_prod_le_law_of_sides_half` (straight boxes, with `hQH`, `hBH`,
+`4S ≤ R`), **`pow_mul_law_le_law_of_jogs_half`** (jogs with caps for fixed bins, with `hloH : ∀ i,
+z₁ ≤ (lo i) 1`, `hBH`, `4S ≤ R`).
+
+### 25.2 The proofs
+
+* **Sector lemma without new topology.** §24's barrier already says that any half-plane family with
+  the inner positions of an increasing disjoint family is increasing. Replacing one arm by the
+  offending arm `W` keeps the inner positions, so `W` must land between the neighbours of `γ k`,
+  not next to `γ i`.
+* **Order at two radii.** The open virtual arm below the line (§24.2) exists at every radius in one
+  configuration and has inner position `2r + 1`; `sbtw_innerPos_iff_sbtw_landingPos_three` at `R`
+  and at `R'` transfers `γ i < γ k` (landing) through the inner positions.
+* **Gluing.** The plane's proofs, with the half-plane condition carried by every walk (old arms and
+  continuations), the linear barrier in place of the cyclic one, and the order from the previous
+  item. Python text transformations of the plane's statements and proofs (order conjunct →
+  half-plane conjuncts, patterns, lemma names) compiled at once or after one small fix.
+* **Clockwise turns** compose the existing legs and caps (the leg of the top side with the band to
+  the right, the right cap; the leg of the left side with the band upwards, the top cap).
+* **Straight boxes.** The plane's corner analysis used the cyclic absence of packs twice: two arms of
+  one colour on both sides of a corner (now the linear between-lemma) and near both ends of the
+  cycle of positions (impossible in the half-plane: positions lie in `[6R, 14R]`, so `4S ≤ R`
+  suffices).
+
+### 25.3 Decisions (mine, per the standing instruction)
+
+1. **Clockwise turns** (top → right, left → top), at the two upper corners only; see §25.4.
+2. **Half-plane copies, not in-place generalisation.** The plane's gluing chain carries the cyclic
+   colour hypothesis and the cyclic-order conjunct in every event; generalising it in place would
+   change every caller in A3b-2…A3b-3e. The half-plane chain is a parallel set of statements (names
+   with `_half`), produced by text transformation.
+3. **Moves as `τ : Fin 3`**; turning rule: counterclockwise by the last arm of its side, clockwise by
+   the first; corners turned in one direction per stage (an explicit hypothesis; in a plan it holds
+   by monotonicity of the target sides).
+4. **The line in the stage lemma:** windows on the half-sides at least `S` above the line
+   (`t i ≠ 0 → z₁ + S ≤ α i`); the regions then lie in the half-plane. The output event does not
+   record the distance to the line; the next stage's windows do.
+5. **Straight boxes with `4S ≤ R`** instead of the plane's wrap argument; the boxes and end boxes in
+   the half-plane as hypotheses (`hloH`, `hBH`), to be supplied by the bins.
+6. No definition, no tag, no change to existing files other than `PercLib.lean` (four imports).
+
+### 25.4 Errata and observations
+
+* **§24.6 (first bullet) and §23.7 (2): clockwise turns are needed.** The design said to reuse
+  `exists_pos_le_law_windows_of_stages` / `exists_turn_step` with the bottom side excluded. The plane's
+  machinery turns counterclockwise only and reaches a window on an earlier side by going round the
+  box (`lamT + 8` lifts, up to 11 turns). Without the bottom side this is impossible: for `j = 1`, an
+  arm landing on the left half-side and a target window on the right half-side need two clockwise
+  turns (left → top → right). The landing form of Theorem 11 for `π⁺` (arbitrary half-plane landing
+  data) and the alignment of the QM lower half both need such targets. Fixed by (b2); turns stay at
+  the two upper corners. `exists_turn_step`'s rule does not apply; the half-plane plan needs its own
+  rounds (§25.5 (4)).
+* **The plane chain cannot be reused even for `OC`:** its output events do not record where the
+  glued arms lie (so the half-plane condition is lost), and for `OCO` its colour hypothesis fails.
+* No plan statement is false; nothing beyond linear pack-freeness was needed (small radii will enter
+  only through the arithmetic of part 2, as in the plane).
+
+### 25.5 What remains (A3b-4b part 2), with a design
+
+1. **First gluing, bins and fences** (`pow_mul_law_le_law_separated_of_bins_half`,
+   `exists_pos_le_law_separated_of_separated_half`; copies of `CapGluing.lean`'s, on top of
+   `pow_mul_law_le_law_of_jogs_half`). Input: §24.1's output form, i.e. the event above **plus the
+   line separation** `(∀ i, 6R + s ≤ L i ∧ L i + s ≤ 14R)` (reals); output the same at `R'` with
+   separation `s - 4W` and line separation `s - 4W`. Needed: a line analogue of
+   `sub_le_abs_sub_of_shift` (a right-side position `L ∈ (4R, 8R)` moves by `6(R' - R) ± 2E`, the line
+   point `6R` to `6R'`; a left-side position `L ∈ (12R, 16R)` by `14(R' - R) ± 2E`, `14R` to `14R'`;
+   top-side positions are `≥ 2R` from both); `t i ≠ 2` from the witness of the nonempty case (its
+   ends are in the half-plane); `hloH` and `hBH` from the line separation (`s ≥ 4M` gives ends `≥ 2M`
+   above the line, bins of width `W ≤ M`); `4M ≤ R`.
+2. **Covering by bins** (`law_le_sum_law_windows_of_separated_half`), a copy.
+3. **The stage in counterclockwise coordinates** (`exists_pos_le_law_ccw_of_moves_half`), a copy of
+   `exists_pos_le_law_ccw_of_moves` with `τ : Fin 3`. In ccw coordinates (`u` = `y - z₁` on the right
+   side, `z₀ - x` on the top side, `z₁ - y` on the left side) a counterclockwise turn lands in
+   `[-h - W, -h]` on the next side (its start) and a clockwise turn in `[h, h + W]` on the previous
+   side (its end).
+4. **Rounds of turns.** State: lifted sides `λ i ∈ {1, 2, 3}` (right, top, left), windows `[u, v]`,
+   lexicographic order of `(λ, u)` with gaps `G`, windows `G` from the corners, half-side windows
+   `G` above the line, targets `λT` monotone. Rule per round: at the top-right corner the last
+   right-side arm turns counterclockwise if its `λT > 1`, otherwise the first top-side arm turns
+   clockwise if its `λT = 1`; at the top-left corner the last top-side arm turns counterclockwise if
+   its `λT = 3`, otherwise the first left-side arm turns clockwise if its `λT ≤ 2`; all other arms jog
+   by `0`. By monotonicity of `λT` no corner is turned both ways and no arm is asked to turn twice.
+   Progress: if some arm has `λ ≠ λT`, the last (first) arm of its side turns, so `Σ |λT - λ|`
+   drops by at least one per round; `2j` rounds, idle afterwards. Radius increment per round
+   `≥ G + M + W + 1` (turn landings clear the corners); gaps shrink by `2W` per round. Simpler than
+   the plane: no wrap, no lifts by `16R`, at most two turns per arm.
+5. **Spreading and the last stage**: copies of `exists_pos_le_law_spread` (add the line margin, linear
+   in the stage index like the corner margins) and `exists_pos_le_law_fences_of_windows`.
+6. **The two theorems A3b-4c calls**: `exists_pos_le_law_half_target_windows` (window step: from
+   the half-plane separated event with `s ≥ 2G + 4W + 2` and line separation at `R`, into target
+   windows `(tT, αT, βT)`, `tT ≠ 2`, increasing, margins from the corners and the line, at `R'`, with
+   fences `(M', K')` and separation `2Q - 1`), and `exists_pos_le_law_half_target_windows_of_separated`
+   (composite with item 1, from §24.1's output).
+7. **Half-plane windows** `window (16R) θ η` with `θ i ∈ [3/8 + η, 7/8 - 2η]` (landing positions in
+   `(6R, 14R)`), an `IsLanding.exists_windows` analogue (core windows inside one side, margins from
+   the corners and the line), and an `example` that such data exist (e.g. `j = 2`, `η = 1/16`,
+   `θ = ![1/2, 5/8]`).
+
+Estimate 1500–2000 lines, one or two sessions. Order: 1, 2, 3, 4, 5, 6, 7.
+
+### 25.6 For A3b-4c
+
+After part 2, A3b-4c calls `exists_pos_le_law_half_target_windows` as the window step and
+`exists_pos_le_law_half_target_windows_of_separated` as the gluing step, exactly where §19.1 uses
+`exists_pos_le_law_target_windows` and `..._of_separated` (`exists_pos_le_law_window_step`,
+`exists_pos_le_law_glue_step`): same parameters (`A = 32n² + 2`, unit `⌊R/n²⌋`). For the
+throwaway windows of the intermediate steps use `j` windows on the **top side** (the analogue of
+`exists_bottom_windows`): every configuration reaches them with at most one turn per arm.
+
+### 25.7 Gate
+
+`scripts/gate.sh 7d084c2` **passed on `a43848a`** (axiom audit 17730 constants, only `propext`,
+`Classical.choice`, `Quot.sound`; 626 modules in the import closure; the interface NOTICE, expected:
+the classifier names this branch's pending interface file `Arms/Separation/Defs.lean`; no other
+notice). Final lines:
+
+```
+D-35 checks passed (tagged statements, headers of new files).
+INTERFACE change against 7d084c206b9a: Proof PR touches an interface/non-Lean file: PercLib/Models/Planar/Arms/Separation/Defs.lean
+NOTICE: interface change; an auditor must approve before merge.
+== gate passed on a43848aaa786dbd5523be8b5afd97e946ef1dc3d
+```
+
+This note's commit changes only `docs/`.
+
+### 25.8 Search
+
+* PercLib, reused: `armsDisjoint_and_strictMono_of_innerPos_eq_half`, `exists_isArm_virtual`,
+  `IsArm.of_agree_of_le`, `IsArm.landingPos_mem_Icc_of_half`, `sbtw_innerPos_iff_sbtw_landingPos_three`,
+  `ArmsDisjoint.pair`, `abs_landingPos_sub_le`, `notMem_Icc_of_mem_Icc_end`, `cond_Icc_subset_cond_Icc`,
+  `Icc_subset_cond_Icc`, `innerPos_append`, `separated_of_mixed_of_forall_mem`,
+  `prodBernoulli_mul_le_inter_of_mixed_of_determined`, `prodBernoulli_prod_le_biInter_of_mixed`,
+  `mixed_of_determined_of_increasing/decreasing`, `Icc_sub_add_subset_Icc_sub_add_succ`,
+  `exists_walk_leg2_top/left`, `exists_walk_cap_right/top`, `exists_corridor_of_boxes`,
+  `box_mem_region`, `CrossingBounds.le_law_box_one/zero`, `exists_corridor_jogCap_*`,
+  `exists_corridor_turn_right_top/top_left`, `side_cases`, `disjoint_Icc_of_lt`, `exists_lt_mem_bin`,
+  `le_abs_landingPos_sub_of_windows`, `false_of_region_of_region`, `false_of_corridor_of_corridor`,
+  `false_of_box_of_corridor`, `IsArm.sideL_of_side`, `sideP_of_side`, `exists_corridor_jog`.
+* Mathlib: `Function.update_self`, `Function.update_of_ne`, `StrictMono.lt_iff_lt`,
+  `StrictMono.injective`.
+* Not found (added): clockwise turn corridors; any gluing for arms of a half-plane.
+
+### 25.9 Lessons
+
+* **Quote heredoc delimiters** (`<<'EOF'`): an unquoted heredoc ran the backticks of a docstring as
+  shell commands and silently dropped a fragment.
+* **Text transformation of whole proofs** (regex on the order conjunct, then a few literal
+  replacements) gave ~2000 lines of half-plane copies that compiled at once or after one fix each;
+  assert the number of replacements in the script.
+* A sigma-typed family update (`Function.update (fun m => ⟨a m, b m, γ m⟩) k ⟨a', b', W⟩`) replaces one
+  arm of a dependent family; `rw [Function.update_self]` works under `(F k).2.2`, and after
+  `rw [Function.update_of_ne]` a `dsimp only` reduces `⟨a l, b l, γ l⟩.2.2` before `omega`.
