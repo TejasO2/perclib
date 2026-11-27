@@ -192,6 +192,7 @@ public import PercLib.Models.Planar.Arms.HalfGluing
 public import PercLib.Models.Planar.Arms.HalfMotionPlan
 public import PercLib.Models.Planar.Arms.HalfOuterSeparation
 public import PercLib.Models.Planar.Arms.HalfPlaneExponents
+public import PercLib.Models.Planar.Arms.HalfPlaneThreeArms
 public import PercLib.Models.Planar.Arms.HalfRotationGluing
 public import PercLib.Models.Planar.Arms.HalfSeparationSides
 public import PercLib.Models.Planar.Arms.HalfTurnCorridors
