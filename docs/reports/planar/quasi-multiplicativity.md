@@ -4193,3 +4193,255 @@ NOTICE: interface change; an auditor must approve before merge.
 ```
 
 This note's commit changes only `docs/`.
+
+## 24. A3b-4 (2026-11-27): the half-plane outer separation step; design for the rest
+
+Package A3b-4 = §23.7 (half-plane separation for `OC`, `OCO`; non-centred boxes). **Done: item 1,
+the half-plane outer step, in event form and probability form, for every colour sequence with no
+two consecutive arms of one colour in the linear order** (so `OC`, `OCO` and more). **Not done:
+items 2–4** (§24.6 has the design and the order). Proof-only; `Planar/Defs.lean`, `Arms/Defs.lean`
+and `Arms/Separation/Defs.lean` untouched; no `@[tag]`, no `…Input`, no new definition (the separated
+half-plane event is written inline). Commits:
+
+* `6d98681` **Arms/HalfSeparationSides, Arms/HalfOuterSeparation** (new) and in-place
+  generalisations in `Arms/SeparationLemma`, `Arms/OuterSeparation`, `Arms/InnerSeparationSides`.
+* `f8cbf3f` **Arms/HalfOuterSeparation**: rename of one hypothesis (`hηdef`; the gate's classifier
+  reads `def` after a Greek letter as a keyword and called the file an interface change).
+* this note's commit (docs only).
+
+Sizes: `HalfSeparationSides.lean` 1095 lines, `HalfOuterSeparation.lean` 1742 lines. Gate: §24.8.
+
+### 24.1 The statements proved, by plan item
+
+All uniformly under `CrossingBounds q L c`, constants (`η`, `N₀`) chosen before `q`, `L`, `z` and
+the radii. The colour hypothesis is the **linear** pack-freeness
+`hσ : ∀ i k : Fin j, i.val + 1 = k.val → σ i ≠ σ k` (the first and the last arm may have one
+colour, as in `OCO`).
+
+**Item 1 (§23.7 (1), the half-plane outer step)**:
+
+* `exists_law_separable_ge_top_half` (`HalfSeparationSides`): Lemma 15 for the strip of a
+  half-side read on a top row: open crossings in `[A, B] × [T - N, T]`, dual crossings in the faces
+  `[A, B] × [T - N - 1, T]` whose dual edges cross edges of `[A, B + 1] × [T - N, T]`, `B = A + 2N`
+  (width `2`); separation `4√η N` of the ends from each other and from `2A` (the line) and
+  `2(B + 1)` (the corner); fences as in Lemma 15. Stated as `∃ J₀, ∀ J ≥ J₀, η = (1/(16·8^J))² → …`.
+* `exists_law_separable_ge_top_of_le`: the top side of `B_R(z)` (Lemma 15 of
+  `exists_law_separable_ge_top`) in the same `∀ J ≥ J₀` form, so that the top side and the
+  half-sides share one `η` (fences must have one `K = ⌊ηN⌋`, `HasOuterFence` is not monotone in `K`).
+* `mem_separable_top_half_of_inter_eq` (determination by `[A - M - K, B + 1 + M + K] × [T - N, T + M + 1]`),
+  `separable_right_half_of_top` (swap), `separable_left_half_of_top` (quarter turn, `T = -X`).
+* `IsArm.exists_append_eq_right_half`, `…_left_half` (final crossings of half-plane arms lie in the
+  half-side strips; derived from the full-side lemmas and the half-plane condition),
+  `exists_reroute_right_half`, `exists_reroute_left_half` (new landing positions in
+  `[6R + s, 8R - s]`, resp. `[12R + s, 14R - s]`, the new arms in the half-plane).
+* The virtual arm and the barrier: `exists_walk_column`, `IsArm.of_agree_of_le`,
+  `IsArm.landingPos_mem_Icc_of_half` (half-plane arms land in `[6R, 14R]`), `exists_isArm_virtual`
+  (in the configuration equal to `ω` on the edges above the line, with the column below `B_r(z)`
+  open for an open virtual arm, a straight arm down to the bottom side, landing at `2R + [dual]`,
+  inner position `2r + 1 + [dual]`), `sbtw_innerPos_iff_sbtw_landingPos_three`, `ArmsDisjoint.pair`,
+  **`armsDisjoint_and_strictMono_of_innerPos_eq_half`** (a family of half-plane arms with the colours
+  and inner positions of a disjoint, increasingly landing family is disjoint and lands increasingly).
+* `halfArmEventIn_subset_halfArmEventIn_of_le` (monotonicity of the half-plane event in the outer
+  radius, `r < N ≤ R`, windows `J` kept).
+* **`exists_half_separating_event`** (event form):
+
+```lean
+theorem exists_half_separating_event {j : ℕ} (σ : Fin j → Bool)
+    (hσ : ∀ i k : Fin j, i.val + 1 = k.val → σ i ≠ σ k) (c : ℕ → ℝ≥0∞) {δ : ℝ≥0∞}
+    (hδ : 0 < δ) :
+    ∃ η : ℝ, 0 < η ∧ η ≤ 1 ∧ ∃ N₀ : ℕ, ∀ (q : Sym2 (LatticeSite 2) → unitInterval) (L : ℕ∞),
+      CrossingBounds q L c → ∀ (z : LatticeSite 2) (N R : ℕ), R = 2 * N + 1 → N₀ ≤ N →
+      (N : ℕ∞) ≤ L → ∃ G : Set (Config (LatticeSite 2)), MeasurableSet G ∧
+        (G determined by the edges of B_{2R}(z) \ B_N(z)) ∧ 1 - δ ≤ law q G ∧
+        ∀ r < N, ∀ (J : Fin j → Set ℤ), ∀ ω ∈ halfArmEventIn σ z r R J (fun _ => univ) ∩ G,
+          ∃ a b γ, (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
+            (∀ i, ∀ v ∈ (γ i).support, z 1 ≤ v 1) ∧
+            (StrictMono fun i => landingPos (z - R) (z + R) (σ i) (γ i)) ∧
+            ArmsOuterSeparated ω σ z R (4 * √η * N) ⌊√η * N⌋₊ ⌊η * N⌋₊ γ ∧
+            (∀ i, 6R + 4√η N ≤ landingPos … (γ i) ∧ landingPos … (γ i) + 4√η N ≤ 14R) ∧
+            ∀ i, innerPos z r (σ i) (γ i) ∈ J i
+```
+
+* **`exists_law_halfArmEventIn_diff_separated_le`** (probability form): for `R = 2N + 1`,
+  `N₀ ≤ N ≤ L`, `r < N`, all `J`:
+  `P(A⁺_J(r, R) \ {separated half-plane family as above}) ≤ δ · P(A⁺(r, N))`.
+
+**Items 2–4: not done** (§24.6).
+
+### 24.2 The proof
+
+* **Strips cut at the line.** An open arm of the half-plane lies in the rows `[z₁, z₁ + R - 1]`
+  before its end, a dual arm in the face rows `[z₁, z₁ + R - 1]`. Read through the swap (right) or
+  the quarter turn (left) as a top strip, the open and the face columns coincide at the line and the
+  face columns reach one further at the corner: Lemma 15 with `k = 0` at one end and `k' = 1` at the
+  other. A strip ending at the line fits the arms exactly, so **no corner exclusion is needed** at
+  the two points of the line (§23.7 (1) proposed one; it is not needed, see §24.4). With
+  `R = 2N + 1` the half-side strip has length `2N` and depth `N` (width `2`), the top strip length
+  `4N` (width `4`).
+* **One `η`.** Lemma 15's proof picks a number of scales `J` from `δ` and the width; every larger `J`
+  works with `η = (1/(16·8^J))²`. `exists_law_separable_ge_aux_wide_of_le` states this; the top and
+  half-side events then use `J = max J₁ J₂`.
+* **Rerouting.** Top: `exists_reroute_top` (now also saying that the new arm lies in the old arm and
+  the strip, above `z₁ + R - N - 1`, hence in the half-plane). Half-sides: as on the full sides, with
+  the half-side events.
+* **Barrier (linear).** Two arms `i < i'` of one colour are separated by two arms of the other
+  colour: their right neighbours `i + 1`, `i' + 1` if `i' + 1 < j`; else `i - 1`, `i + 1` if `i > 0`;
+  else (`i` first, `i'` last) the arm `1` and a **virtual arm** below the line of the colour opposite
+  to arm `0`. The virtual arm lives in the configuration `ω↓` equal to `ω` on the edges with both
+  ends at height `≥ z₁` (all half-plane arms of `ω` are arms of `ω↓`, `IsArm.of_agree_of_le`) and
+  lands at `2R` or `2R + 1`, below all half-plane landing positions (`≥ 6R`). The sector argument
+  of `ArmsDisjoint.of_innerPos_eq` then runs through `sbtw_innerPos_iff_sbtw_landingPos_three`
+  (order invariance for three arms given one by one). The increasing order of the new family follows
+  from the cyclic order of `(γ'_i, γ'_k, V)` and `V` landing lowest.
+* **Probability form.** `G` is the intersection of the top event at `z` and the two half-side events
+  in their frames (probability `≥ 1 - δ/3` each), determined by `B_{2R}(z) \ B_N(z)`; the half-plane
+  event at radius `N` is determined by the edges in `B_N(z)` (`mem_halfArmEventTo_iff_of_agree`) and
+  contains `A⁺_J(r, R)` (`halfArmEventIn_subset_halfArmEventIn_of_le`); independence as in the plane.
+
+### 24.3 Decisions (mine, per the standing instruction)
+
+1. **Linear pack-freeness** `σ i ≠ σ (i + 1)` as the hypothesis, for every `j` (covers `OC`, `OCO`;
+   no specialisation needed).
+2. **Strips ending at the line, `k = 0`, `k' = 1`** (generalising Lemma 15 in place to two end
+   parameters; the old statements are the instances `k = k'`), instead of corner exclusion.
+3. **Uniform `η`** by restating Lemma 15 for all `J ≥ J₀` (`exists_law_separable_ge_aux_wide_of_le`),
+   the old `exists_law_separable_ge_aux_wide` its `J = J₀` corollary; new `exists_law_separable_ge_top_of_le`
+   beside the old top lemma (unchanged).
+4. **Virtual arm** in a modified configuration to reuse the cyclic order invariance, instead of a
+   new topological lemma for the half-plane.
+5. **In-place strengthening of `exists_reroute_top`** (one more conjunct: where the new arm lies);
+   its only caller adapted.
+6. **The separated half-plane event inline**: `ArmsOuterSeparated` (with the same `s`, `M`, `K` as
+   the plane) together with the half-plane condition, `StrictMono` of the landing positions and the
+   separation `[6R + s, 14R - s]` from the line. No new definition.
+7. Half-side event parameters: `A = z₁`, `B = z₁ + R - 1` (the expression `z₁ + R - 1 + 1` appears
+   for the corner and is kept syntactically, so that the frame events and the reroute lemmas match).
+8. Probability split `δ/3` per side; `N₀ = (16·8^J)² + 4`.
+
+### 24.4 Errata and observations
+
+* **§23.7 (1): the corner exclusion at the line is not needed.** With the half-side strip ending at
+  the line (face columns starting with the open columns there), every final crossing of an arm
+  landing on a half-side lies in the strip, and Lemma 15 keeps the new ends `4√ηN` away from the
+  line. The half-plane one-arm bound is not used.
+* §23.7 (1) did not mention that the half-side strips have a different width (`2`) from the top
+  strip (`4`), so the plain `∃ η` form of Lemma 15 gives two different `η`; fixed by the `∀ J ≥ J₀`
+  form (decision 3).
+* The cyclic condition `σ (j-1) ≠ σ 0` is indeed not needed: the virtual arm below the line plays
+  the role of the missing separator (confirmed in Lean, `armsDisjoint_and_strictMono_of_innerPos_eq_half`).
+* No plan statement is false; nothing beyond `hσ` (linear) was needed; no small-radius threshold is
+  needed for item 1 (only `N₀ ≤ N`, as in the plane).
+
+### 24.5 Search
+
+* PercLib, reused: `exists_law_separable_ge_aux_wide` (generalised), `separable_of_forall`
+  (generalised), `exists_law_separable_ge_top`, `mem_separable_top_of_inter_eq`,
+  `separable_right_of_top` / `separable_left_of_top` (adapted into the half versions),
+  `IsArm.exists_append_eq_right/left`, `exists_reroute_top/right/left`, `IsArm.penultimate_mem`,
+  `IsArm.end_mem_sides`, `IsArm.landingPos_eq_of_top/right/bottom/left`,
+  `Icc_subset_Icc_add_one_sub_one`, `sbtw_innerPos_iff_sbtw_landingPos`, `IsArm.append_of_append`,
+  `IsDualArm.penultimate_eq`, `innerPos_append`, `landingPos_append`, `ArmsDisjoint.mono`,
+  `IsArm.exists_append_eq_of_le_of_le`, `mem_halfArmEventTo_iff_of_agree`,
+  `measurableSet_halfArmEvent`, `halfArmEventIn_subset_halfArmEvent`, `image_sym2Map_mem_iff_of_inter_eq`,
+  `finite_setOf_forall_mem`, `measurableSet_of_determined_finite`, `law_comp_sym2Map_apply`,
+  `CrossingBounds.swap/.reflect`, `exists_iso_swap`, `exists_iso_reflect_one`,
+  `prodBernoulli_inter_of_determined`, `mem_Icc_of_mem_dualEdge`, `mem_dualConfig_iff`,
+  `dualEdgeEquiv`, `map_add_mem_edgeSet`, `dualEdge_mem_edgeSet`, `exists_walk_row` (pattern).
+* Mathlib: `SimpleGraph.Walk.mem_support_of_mem_edges`, `snd_mem_tail_support`, `adj_snd`,
+  `take_spec`, `support_takeUntil_subset_support`, `support_dropUntil_subset_support`,
+  `List.dropLast_cons_of_ne_nil`, `Sym2.mem_iff_exists`, `Int.sbtw_iff`, `Fin.cases`.
+* Not found (added): Lemma 15 with different ends; Lemma 15 for all scale parameters from some on;
+  half-side transports; a column walk (only the row walk existed); order invariance for three arms
+  given one by one; the barrier, the outer step and outer-radius monotonicity in the half-plane.
+
+### 24.6 What remains, with a design and an order
+
+The full-plane outer half took A3b-2…A3b-3 (gluing, motion plan, window steps, induction); the
+inner half A3b-3b…A3b-3e. The half-plane versions reuse most geometry but need their own statements.
+Proposed packages (each one session; estimates in Lean lines):
+
+* **A3b-4b: half-plane gluing (§23.7 (2)), ~1500–2500.** From the separated half-plane event at
+  `∂B_N` (24.1) to landing in prescribed windows at `∂B_{R'}`, `R' ≍ N`, with fences: the motion plan
+  in linear order (no wrap; `exists_lift_of_separated` is not needed, the positions are already
+  linear), turns only at the two upper corners, windows `≥ S` above the line. Reuse
+  `exists_pos_le_law_windows_of_stages` / `exists_turn_step` (TurnCorridors, RotationGluing) with the
+  bottom side excluded; the corridors stay above the line when the windows and the separated ends
+  are `≥ S` above it (the separated ends are `≥ 2√ηN` above the line in rows, 24.1). Half-plane
+  windows: `window (16R) θ η` with `θ` in `[3/8 + η, 7/8 - 2η]` (positions in `(6R, 14R)`), i.e.
+  `IsLanding η θ` plus the margins; an `example` that such data exist.
+* **A3b-4c: half-plane Theorem 11, outer half, + QM upper half + extendability outwards
+  (§23.7 (3) first half), ~800–1200.** Nolin's induction (§19.2) verbatim with 24.1's outer step,
+  A3b-4b's gluing and window steps; the a priori lower bound `c₀ (r/R)^α ≤ π⁺` from the window steps.
+* **A3b-4d…f: the inner half for `π⁺`** (needed by U1b, see below), by §23.2: half-plane inner step
+  (Lemma 15 at the inner boundary on the **upper half of `∂B_ρ(z)`**: top side and two half-sides of
+  `B_ρ(z)`, with the dual-configuration trick of A3b-3b and the line handled as here: strips ending
+  at the line, no corner exclusion at the line, the one-arm corner exclusion of §20.1 at the two
+  upper corners only), half-plane two-sided gluing and step S, QM lower half by the induction of
+  §21.2, extendability inwards, then `π⁺(r, R) ≤ C P(A⁺_J(r, R))`. Estimate 3 sessions.
+* **Item 4 (non-centred boxes): not needed by U2a** (`planar-pack-analysis.md` §4.2: U2a is an RSW
+  construction without separation; non-centred boxes enter only Stage 3's comparison of four-arm
+  probabilities across centres). Design unchanged from §23.7 (4): monotonicity one way, the window
+  step with target box `Icc lo hi` the other way (the side coordinates of `exists_side_window` take
+  `lo`, `hi` in place of `z ± R`; corners of `Icc lo hi` in place of `4mR`). Do it when Stage 3 starts.
+
+### 24.7 For U1b (three arms `OCO` in the half-plane, upper bound, option (2) of `half-plane-exponents.md` §4.3)
+
+* **What U1b needs.** Werner's count works once the open arms of `x` stay off the line `y = x₁`
+  outside a fixed box `B_k(x)` (then the dual cluster of `x`'s upper face, cut to `B_{3n}(0)`, has its
+  lowest faces only near `x`, the map `x ↦ cluster` has bounded multiplicity, and the BK count of
+  dual clusters crossing `B_{3n} \ B_n` — as in U1's two-arm proof, `sum_law_le_sum_pow_of_forall_mem_foldl`,
+  `mem_foldl_of_pairwise_notMem_localConn` — gives `Σ_x P(strict arms at x) ≤ C`). Strictness is
+  obtained by moving the half-plane event up: for `y = x + (k + 1)e₂`, arms of `A⁺_y(k, R)` lie in
+  `{height ≥ x₁ + k + 1}`; joining them to `x` inside `B_k(y)` needs their starts in **inner windows**
+  on the upper half of `∂B_k(y)` (finite energy at `q = 1/2` then gives a fixed local configuration
+  of probability `≥ 2^{-O(k²)}`). So U1b needs **the half-plane inner half of Theorem 11 at a fixed
+  inner radius `k = r₀`, uniformly in `R`**:
+  `π⁺_{OCO}(k, R) ≤ C · P(halfArmEventIn ![true, false, true] y k R (window (16k + 8) θ' η) univ)`
+  for half-plane inner landing data `θ'` (positions in `(6k + 3, 14k + 7)`), plus translation
+  (`law_halfArmEvent_eq_law_halfArmEvent_zero`) and inner monotonicity `π⁺(0, R) ≤ π⁺(k, R)` (the
+  half-plane analogue of `multiArmEvent_subset_of_le` for the inner radius; same virtual-arm proof as
+  `halfArmEventIn_subset_halfArmEventIn_of_le`).
+* **Not provided by this package.** 24.1 is the outer step only; the inner half is A3b-4d…f (24.6).
+  **U1b's upper bound is therefore not reachable directly after this package**; its lower bound is
+  (the RSW construction of `half-plane-exponents.md` §4.2). Options for the coordinator/user:
+  (a) run A3b-4b…f first (about 5 sessions), then U1b; (b) U1b's lower bound now, upper bound after
+  A3b-4f; (c) option (1)/(3) of `half-plane-exponents.md` §4.3 (`![false, true, false]`, no separation).
+* A fixed-scale shortcut (routing the arms of `A⁺_y(k, R)` from **arbitrary** starts on `∂B_k(y)` to
+  `x` by an exhaustive finite construction, avoiding inner windows) was considered and rejected:
+  starts may be adjacent or at corners, and the local surgery interferes with the event at `y`.
+
+### 24.8 Gate and lessons
+
+Gate: `scripts/gate.sh 7d084c2` (the Tom's-main commit merged into this branch) **passed on
+`f8cbf3f`** (axiom audit 17393 constants, only `propext`, `Classical.choice`, `Quot.sound`; 622
+modules in the import closure; the interface NOTICE, expected: the classifier names this branch's
+pending interface file `Arms/Separation/Defs.lean`). A first run passed on `6d98681` with the NOTICE
+naming `HalfOuterSeparation.lean` for the token `def` in `hηdef` (fixed in `f8cbf3f`). Final lines:
+
+```
+D-35 checks passed (tagged statements, headers of new files).
+INTERFACE change against 7d084c206b9a: Proof PR touches an interface/non-Lean file: PercLib/Models/Planar/Arms/Separation/Defs.lean
+NOTICE: interface change; an auditor must approve before merge.
+== gate passed on f8cbf3f98436416635a583d9d9e7d9e5835d0f42
+```
+
+This note's commit changes only `docs/`.
+
+Lessons:
+
+* **Text transformation of existing proofs** (python substitution of coordinates, then compile) gave
+  the half-side transports (~900 lines) at the first compile: the transport proofs are pure
+  coordinate chases (`omega` after `simp` of `![…]` entries), so replacing the coordinates of the
+  frame and of the side by variables works unchanged.
+* The classifier splits identifiers at non-ASCII letters: `hηdef` reads as the keyword `def`. Check
+  new files with `check_paths_and_source` from `scripts/check_proof_pr.py` before the gate.
+* `\b` does not work in BSD `sed`; the substitution silently did nothing. Check with `grep` after
+  each substitution.
+* The shell's working directory can reset to the main checkout between commands; always `cd` to the
+  worktree explicitly.
+* `nlinarith` stopped finding the product of two hypotheses once the context grew; give the product
+  (`mul_le_mul_of_nonneg_right`) and use `linarith`.
+* `tauto` failed on goals with `sbtw` on `ℤ` (it unfolds to a disjunction of conjunctions); prove the
+  propositional step by hand.
+* After `nsmul_eq_mul` fires on a function (`2 • z = 2 * z`), the coordinates need `Pi.mul_apply`
+  and `Pi.ofNat_apply`.
