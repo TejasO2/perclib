@@ -4707,3 +4707,296 @@ This note's commit changes only `docs/`.
 * A sigma-typed family update (`Function.update (fun m => ⟨a m, b m, γ m⟩) k ⟨a', b', W⟩`) replaces one
   arm of a dependent family; `rw [Function.update_self]` works under `(F k).2.2`, and after
   `rw [Function.update_of_ne]` a `dsimp only` reduces `⟨a l, b l, γ l⟩.2.2` before `omega`.
+
+## 26. A3b-4b part 2 (2026-11-27): the half-plane motion plan and the target-window theorems
+
+Package A3b-4b part 2 = §25.5 items 1–7. **Done: all seven items.** Separated arms of the
+half-plane (landing in increasing order, without two consecutive arms of one colour, separated
+from each other, from the corners and from the two points of the line on the boundary) are carried
+into prescribed windows on the top side and the upper half-sides of a larger box, with fences of
+any size at the end and the separation from the line kept, at a cost depending only on `σ`, `c` and
+the ratios; from the separated event of the half-plane outer step (§24.1) through a straight first
+gluing; and target windows inside landing data in the upper half of the boundary exist. Proof-only;
+`Planar/Defs.lean`, `Arms/Defs.lean`, `Arms/Separation/Defs.lean` untouched; no `@[tag]`, no
+`…Input`, no new definition. Commits:
+
+* `ad588da` **Arms/HalfFirstGluing** (new): the line after a jog, the straight first gluing with
+  fences at the new boundary, covering by bins (items 1–2).
+* `76cfd98` **Arms/HalfMotionPlan** (new): the stage in counterclockwise coordinates, the rounds
+  of turns, the start, the three phases, the two target-window theorems (items 3–6).
+* `79c9b22` **Arms/HalfWindows** (new): windows in the upper half of the boundary, top-side
+  windows, windows inside landing data, the `example` (item 7).
+* this note's commit (docs only).
+
+Sizes: `HalfFirstGluing` 480 lines (4 theorems), `HalfMotionPlan` 1734 (12), `HalfWindows` 326
+(3 and one `example`). Gate: §26.7.
+
+### 26.1 The statements proved, by plan item
+
+All for `hσ : ∀ i k : Fin j, i.val + 1 = k.val → σ i ≠ σ k` (linear pack-freeness), uniformly
+under `CrossingBounds q L c`, constants chosen before `q`, `L`, `z` and the radii. The **separated
+half-plane event with the line separation** at radius `R` (separation `s`, fences `(M, K)`, inner
+windows `J`) is written inline, in the conjunct order of §24.1's output:
+
+```lean
+{ω | ∃ a b γ, (∀ i, IsArm ω (σ i) z r (z - R) (z + R) (γ i)) ∧ ArmsDisjoint σ γ ∧
+  (∀ i, ∀ v ∈ (γ i).support, z 1 ≤ v 1) ∧
+  (StrictMono fun i => landingPos (z - R) (z + R) (σ i) (γ i)) ∧
+  ArmsOuterSeparated ω σ z R s M K γ ∧
+  (∀ i, 6 * (R : ℝ) + s ≤ landingPos … (γ i) ∧ (landingPos … (γ i) : ℝ) + s ≤ 14 * R) ∧
+  [(∀ i, b i ∈ window i) ∧] ∀ i, innerPos z r (σ i) (γ i) ∈ J i}
+```
+
+With `s = 4√η N`, `M = ⌊√η N⌋`, `K = ⌊η N⌋` this is literally the event of
+`exists_half_separating_event` / `exists_law_halfArmEventIn_diff_separated_le`.
+
+**Item 1 (first gluing, bins, fences, line separation)** — `Arms/HalfFirstGluing.lean`:
+
+* `le_sub_of_shift_half`: the line analogue of `sub_le_abs_sub_of_shift`. A landing position `L`
+  at least `S ≥ 0` from the corners `4mR` with `6R + S ≤ L ≤ 14R - S`, moved by the jog shift
+  `(4t + 2)(R' - R) ± 2E` of its side, satisfies `6R' + S - 2E ≤ L' ≤ 14R' - S + 2E`.
+* `pow_mul_law_le_law_separated_of_bins_half` (fixed bins; `4M ≤ R`): the bins on the half-sides
+  lie at least `2M - W` above the line and no bin is on the bottom side, read off a configuration
+  of the event (otherwise the event is empty); this gives `hloH` and `hBH` of
+  `pow_mul_law_le_law_of_jogs_half`. Output separation and line separation `s - 4W`.
+* **`exists_pos_le_law_separated_of_separated_half`**:
+
+```lean
+theorem exists_pos_le_law_separated_of_separated_half (σ) (hσ) (c) (A D : ℕ) :
+    ∃ c₀ > 0, ∀ q L, CrossingBounds q L c → ∀ z r R R' W M K M' K' (s : ℝ) J,
+      1 ≤ K' → 4K' ≤ W → W ≤ K → K ≤ M → 2W + 2 ≤ M → W ≤ M' → 4M ≤ s → 4M ≤ R →
+      r + M + 1 < R → R + M + 1 + W + M' ≤ R' → R' + M' ≤ D R → R ≤ A W → R' ≤ L →
+      c₀ * P(half sep. at R, s, (M, K), line s, J) ≤ P(half sep. at R', s - 4W, (M', K'), line s - 4W, J)
+```
+
+  `c₀ = c κ ^ (6j) / (4(2A + 1))^j`, `κ = 2DA + 2` (as in the plane).
+
+**Item 2 (covering by bins)**: `law_le_sum_law_windows_of_separated_half` — the separated
+half-plane event (with the line conjunct, kept in the summands) is covered by the
+`(4(2A + 1))^j` bin events (`R ≤ A W`, `4M ≤ s`).
+
+**Item 3 (the stage in counterclockwise coordinates)** — `Arms/HalfMotionPlan.lean`:
+`exists_pos_le_law_ccw_of_moves_half`, the statement of `exists_pos_le_law_windows_of_moves_half`
+with windows `[u, v]` in counterclockwise coordinates (`u = y - z₁` right, `z₀ - x` top,
+`z₁ - y` left), `t i ≠ 2`, the line as `(t i = 1 → S ≤ u i) ∧ (t i = 3 → v i + S ≤ 0)`, the
+counterclockwise turner last of its side (`v k + S ≤ u i`), the clockwise turner first
+(`v i + S ≤ u k`), no corner turned both ways, and moves in containment form: jog
+`[u + e - W, v + e + W]`, counterclockwise turn `[-h - W, -h]`, clockwise turn `[h, h + W]`.
+Same constant `c A^(6j)/(N + 1)^j`.
+
+**Item 4 (rounds of turns)**:
+
+* `gap_of_lex_half`, `side_of_lift_half` (lifted side `1, 2, 3` ↔ side right, top, left).
+* **`exists_turn_step_half`** (pure combinatorics). State: lifted sides `lam i ∈ [1, 3]` with
+  `(lam i + t i) % 4 = 2`, lexicographic order of `(lam, u)` with gaps `G`, windows `G` from the
+  corners, `lam = 1 → G ≤ u`, `lam = 3 → v + G ≤ 0`; targets `lamT ∈ [1, 3]` nondecreasing.
+  Rule: arm `i` turns **counterclockwise** iff `lam i < lamT i` and `lam i < lam l` for all `l > i`
+  (last of its side); it turns **clockwise** iff `lamT i < lam i`, `lam l < lam i` for all `l < i`
+  (first of its side) and no arm `k` of the side `lam i - 1` turns counterclockwise (the corner is
+  free). This is §25.5 (4)'s rule per corner. Output: the stage data (`τ : Fin 3`, the hypotheses
+  of item 3), the invariant at `ρ'` with gaps `G - 2W`, and the potential `Σ |lamT - lam|`
+  nonincreasing, strictly decreasing while positive (if some `lam i < lamT i`, the largest such
+  index turns counterclockwise; otherwise the smallest index with `lamT i < lam i` turns clockwise,
+  its corner being free since no arm turns counterclockwise). Radius conditions `ρ ≤ h + W`,
+  `h + W + (G - 2W) ≤ ρ'`.
+* `exists_lift_of_separated_half` (the start): from landing positions `≥ S` apart, from the
+  corners and from `6R`, `14R` (`2G + 4W + 2 ≤ S`), ends in windows `[u, u + W]`: lifted sides
+  `lam ∈ [1, 3]` with the whole invariant. No wrap, no lift by `16R`.
+* `exists_pos_le_law_turns_half` (phase 1): `n₁` rounds, `Σ |lamT - lam| ≤ n₁`, radius growth
+  `≥ G + M + W + 1`, fences `(M, K)` kept; every arm ends on its target side, gaps and margins from
+  the corners and the line `G - 2n₁W`, widths `≤ (2n₁ + 1)W`. Constant `c₁ ^ n₁`.
+
+**Item 5 (spreading and the last stage)**:
+
+* `exists_pos_le_law_spread_half` (phase 2): the plane's spreading with `t i ≠ 2` and the line
+  margin `S`, linear in the stage index (`le_add_mul_of_le_of_le` at both ends; targets need
+  `S ≤ uT` on the right side, `uT + n + w + 2nW + S ≤ 0` on the left side).
+* `exists_pos_le_law_fences_of_windows_half` (the last stage, fences `(M, K) → (M', K')`, room
+  `Q`; targets `Q` from the line).
+* `IsArm.line_le_of_window_half`: an arm ending in a window `g` from the corners and, on a
+  half-side, `g` above the line lands in `[6R + 2g - 1, 14R - 2g + 1]`.
+
+**Item 6 (the two theorems A3b-4c calls)**:
+
+```lean
+theorem exists_pos_le_law_half_target_windows (σ) (hσ) (c) (A n n₁ : ℕ) (hn₁ : 2 * j ≤ n₁) :
+    ∃ c₀ > 0, ∀ q L, CrossingBounds q L c → ∀ z r R R' W M K M' K' D S G Q B (s : ℝ) J
+      (tT : Fin j → Fin 4) (lamT αT βT : Fin j → ℤ),
+      1 ≤ W → W ≤ K → W + K ≤ M → 2 ≤ M' → W + K' ≤ M' →
+      W + 2K ≤ A (M - 1) → W + 2K' ≤ A (M' - 1) →
+      W + 2D + 2M + 2K + 3 ≤ S → S + 2 n₁ W ≤ G → W + 2M + 2K' + 3 ≤ Q →
+      2G + 4W + 2 ≤ s → r + M + 1 < R →
+      R + n₁ (G + M + W + 1) + n (2M + W + 1) + (M + M' + W + 1) ≤ R' →
+      2R' + 2 ≤ A W → R' ≤ L → 2R' + 2n + nW ≤ n D → n + (2n₁ + 2n + 3) W ≤ B →
+      (∀ i, 1 ≤ lamT i ≤ 3 ∧ (lamT i + tT i) % 4 = 2) → Monotone lamT →
+      (targets S + Q + M + M' + W + 1 from the corners of B_{R'}) →
+      (∀ i, tT i ≠ 0 → z₁ + (S + Q + M + M' + W + 1) ≤ αT i) →      -- from the line
+      (∀ i, αT i + B ≤ βT i) → (targets on one side in ccw order with gap S + Q) →
+      c₀ * P(half sep. at R, s, (M, K), line s, J) ≤
+        P(half sep. at R', 2Q - 1, (M', K'), line 2Q - 1, ends in (tT, αT, βT), J)
+```
+
+`c₀ = c₁ c₂ c₃ / (4(2A + 1))^j` (stage constant at `N = 2n₁ + 2n + 1`), depending only on `σ`,
+`c`, `A`, `n`, `n₁`. With `n₁ = 12j` every hypothesis is the plane's
+`exists_pos_le_law_target_windows` hypothesis (same text after substitution) plus the line margin
+and `lamT ≥ 1`. The output carries the line separation `2Q - 1` (read off the targets), so it is
+again an input of the theorem after dropping the windows.
+
+```lean
+theorem exists_pos_le_law_half_target_windows_of_separated (σ) (hσ) (c) (A n n₁ : ℕ)
+    (hn₁ : 2 * j ≤ n₁) :
+    ∃ c₀ > 0, ∀ q L, CrossingBounds q L c → ∀ z r R R' W M K M' K' D S G Q B (s : ℝ) J tT lamT αT βT,
+      1 ≤ W → 4W ≤ K → K ≤ M → 8W + 2 ≤ M → 4M ≤ s → 4M ≤ R → r + M + 1 < R →
+      2 ≤ M' → W + K' ≤ M' → W + 2K' ≤ A (M' - 1) →
+      W + 2D + 10W + 3 ≤ S → S + 2 n₁ W ≤ G → W + 8W + 2K' + 3 ≤ Q → 2G + 20W + 2 ≤ s →
+      R + M + 1 + 8W + n₁ (G + 5W + 1) + n (9W + 1) + (M' + 5W + 1) ≤ R' →
+      2R' + 2 ≤ A W → R' ≤ L → 2R' + 2n + nW ≤ n D → n + (2n₁ + 2n + 3) W ≤ B →
+      (lamT as above) → (targets S + Q + 4W + M' + W + 1 from the corners and the line) → … →
+      c₀ * P(half sep. at R, s, (M, K), line s, J) ≤ (the output above)
+```
+
+(`_of_separated` = item 1 with corridors `4W`, fences `(4W, W)` at `R + M + 1 + 8W`, ratios `A`,
+`A + 4`, then the plan; `c₀ = c₂ c₁`.) Also `exists_pos_le_law_half_target_windows_of_bins` (fixed
+bins; the core of the plan).
+
+**Item 7 (half-plane windows)** — `Arms/HalfWindows.lean`:
+
+* `exists_windows_of_ccw_half`: `exists_windows_of_ccw` with the margin from the line
+  (`u ≥ Y` right, `v ≤ -Y` left ⇒ `z₁ + Y ≤ αT`).
+* `exists_top_windows_half`: `j` windows on the top side of length
+  `Y = (96n + 24j + 38)⌊R/n²⌋`, `Y` from the corners, `2Y` apart, `lamT = 2` (the analogue of
+  `exists_bottom_windows`; the line margin is void on the top side).
+* **`IsLanding.exists_windows_half`**: for `IsLanding η θ` with
+  `∀ i, 3/8 + η ≤ θ i ∧ θ i + 2η ≤ 7/8`, there is `Λ > 0` such that for `R ≥ Λ(Y + 4)` there
+  are targets in the plan's half-plane format (`lamT ∈ [1, 3]` nondecreasing; margins `Y` from the
+  corners and from the line; lengths and gaps `Y`) such that an arm ending in window `i`, landing
+  `≥ 4` from the doubled corners, has `landingPos ∈ window (16R) θ η i`.
+* `example : IsLanding (1/16) ![1/2, 5/8] ∧ ∀ i, 3/8 + 1/16 ≤ θ i ∧ θ i + 2·(1/16) ≤ 7/8` (D-5).
+
+### 26.2 The proofs
+
+* **First gluing.** The plane's chain (`pow_mul_law_le_law_separated_of_bins`) on top of
+  `pow_mul_law_le_law_of_jogs_half` (`D = 0`, `S = M`): the line conjunct is dropped before the
+  jogs and restored after them from the configuration `ω₀` of the event and
+  `IsArm.shift_of_jog` + `le_sub_of_shift_half` (the same trick as the separation). The landing
+  formulas `landingPos = 6R + 2(b₁ - z₁) + [dual]` (right) and `14R - 2(b₁ - z₁) - [dual]` (left)
+  put the ends of `ω₀` at least `2M` above the line, hence the bins `≥ 2M - W` above it.
+* **Rounds of turns.** The two predicates (counterclockwise / clockwise) are defined by
+  `obtain ⟨P, hP⟩ : ∃ P, ∀ i, P i ↔ …`; all moves, sides and windows follow by cases; the
+  lexicographic order after the round is a 9-case `omega` (a clockwise turn onto a side lands at its
+  end, after the arms that stay; a counterclockwise turn at its start; both onto the top side at
+  once from the right and from the left land at the two ends, `-h + G' ≤ h`). The potential uses
+  `abs_cases` and `omega`.
+* **Phases and the plan.** Copies of `MotionPlan.lean` with `τ : Fin 3`, the line margin carried
+  linearly, `n₁` rounds, `Σ |lamT - lam| ≤ 2j ≤ n₁` at the start; `j = 0` separately.
+* **Windows.** `IsLanding.exists_core` reused: the core `[a, a + μ]` satisfies `a ≥ θ ≥ 3/8 + η`
+  and `a + μ ≤ θ + η ≤ 7/8 - η`, so `μ ≤ η`, the core side is not the bottom one, and the ccw
+  windows `u ≥ (8a - 3)R ≥ 8ηR ≥ 8μR ≥ Y + 4` (right), `v ≤ (8(a + μ) - 7)R ≤ -8ηR` (left).
+
+### 26.3 Decisions (mine, per the standing instruction)
+
+1. **The number of rounds is a parameter `n₁ ≥ 2j`** of the plan (and of the constant). Each arm
+   needs at most two turns, so `2j` rounds suffice; with `n₁ = 12j` A3b-4c can reuse the plane's
+   arithmetic (`window_step_bounds`, `glue_bounds_*`) verbatim, since then every common hypothesis
+   is textually the plane's.
+2. **The line separation is a conjunct of the event** (§24.1's real form `6R + s ≤ L ∧ L + s ≤ 14R`,
+   right after `ArmsOuterSeparated`), in the input and in the output of every theorem of items 1, 2
+   and 6; the phases (internal) carry it as margins of the windows instead.
+3. **Target windows need a margin from the line equal to their corner margin**
+   (`tT i ≠ 0 → z₁ + (S + Q + M + M' + W + 1) ≤ αT i`), a separate hypothesis; `lamT ∈ [1, 3]`
+   replaces the plane's `[0, 3]` (it excludes the bottom side).
+4. **Turning rule** as in §25.5 (4), phrased per arm: counterclockwise iff below its target and
+   last of its side; clockwise iff above its target, first of its side, and the corner is not taken
+   by a counterclockwise turn. Potential `Σ |lamT - lam|` (`abs`).
+5. **`4M ≤ R`** in the first gluing (inherited from `4S ≤ R` of the straight-box gluing, `S = M`);
+   it holds in every application (`M ≍ √η N`, `R ≍ N`).
+6. **`t i ≠ 2` and the bins' height above the line are read off a configuration of the event**
+   (§25.5 (1)), not assumed: the bins come from a covering that does not know about the line.
+7. **No small-radius threshold**: all hypotheses are linear in the radii (as in the plane, §17.2
+   decision 10); small radii make them unsatisfiable, not false.
+8. **Windows from landing data with margin `η` from the line** (`3/8 + η ≤ θ i`,
+   `θ i + 2η ≤ 7/8`), the half-plane analogue of `IsLanding`'s gaps; `IsLanding.exists_core` reused
+   unchanged.
+9. **`exists_top_windows_half`** added (not in the item list): the throwaway targets of §25.6.
+10. **No definition, no tag**; events inline, produced by a Python template (event texts, line
+    wrapping at 100 columns); `PercLib.lean` gets three imports.
+
+### 26.4 Errata and observations
+
+* No plan statement is false; nothing beyond linear pack-freeness was needed; no threshold on
+  radii.
+* §25.5 (1): the line analogue of `sub_le_abs_sub_of_shift` needs the **corner separation** as
+  well as the line separation (on the top side, `L > 8R` alone does not give
+  `L' ≥ 6R' + S - 2E`; `L ≥ 8R + S` does), and `S ≥ 0` (to exclude the bottom side).
+* §25.5 (4): "at most `2j` rounds" is right as a count of turns: the potential `Σ |lamT - lam|` is
+  at most `2j` and drops by at least one per round while positive; no arm is asked to turn twice
+  in one round (the two rules need `lam < lamT`, resp. `lamT < lam`).
+* §25.5 (6): the targets also need the line margin inside the plan (phase 2 needs `S` below the
+  left targets' far end, i.e. `vT + S + W ≤ 0`), which the margin of decision 3 provides.
+
+### 26.5 Search
+
+* PercLib, reused: `exists_pos_le_law_windows_of_moves_half`, `pow_mul_law_le_law_of_jogs_half`,
+  `jog_of_bin`, `IsArm.shift_of_jog`, `abs_sub_sub_le_abs_of_shift`, `sub_le_abs_sub_of_shift`,
+  `mem_bin_zero_of_mem_bin`, `IsArm.exists_mem_bin`, `ArmsOuterSeparated.le_abs_landingPos_sub`,
+  `ArmsOuterSeparated.mono`, `IsArm.landingPos_eq_of_top/right/left`,
+  `IsArm.exists_landingPos_eq_of_window`, `exists_side_window`, `exists_ccw_window`,
+  `side_center_eq`, `mem_side_window_of_le`, `le_add_mul_of_le_of_le`,
+  `exists_pow_mul_le_of_forall_exists`, `mul_measure_le_of_nonempty`, `exists_windows_of_ccw`,
+  `IsLanding.exists_core`, `mem_Icc_two_iff`.
+* Mathlib: `abs_cases`, `abs_le`, `abs_eq_zero`, `Finset.sum_lt_sum`, `Finset.sum_le_sum`,
+  `Finset.max'`, `Finset.min'`, `Finset.le_max'`, `Finset.min'_le`,
+  `Finset.sum_eq_zero_iff_of_nonneg`, `Int.ceil_le`, `Int.le_ceil`, `Int.ceil_nonneg`,
+  `measure_iUnion_fintype_le`, `ENNReal.mul_inv_cancel`.
+* Not found (added): clockwise and counterclockwise rounds of turns with a free-corner rule; a
+  motion plan for a linear (half-plane) order; the line separation after a jog; windows of landing
+  data in a half of the boundary.
+
+### 26.6 For A3b-4c
+
+* **Window step** = `exists_pos_le_law_half_target_windows` with `n₁ = 12j` and the plane's
+  parameters (`A = 32n² + 2`, unit `⌊R/n²⌋`, `exists_pos_le_law_window_step`'s choices); the plane's
+  `window_step_bounds` then supplies every common hypothesis. Extra: `lamT ≥ 1` and the line
+  margin of the targets — `exists_top_windows_half` (void margin) for the throwaway targets,
+  `IsLanding.exists_windows_half` for landing data.
+* **Gluing step** = `exists_pos_le_law_half_target_windows_of_separated` with `n₁ = 12j`, from
+  `exists_half_separating_event`'s output (literally the input event with `s = 4√η N`); extra
+  hypothesis `4M ≤ R` (`M = ⌊√η N⌋`, `R = 2N + 1`).
+* **The induction (§19.2) runs on the separated half-plane event with the line conjunct**; the
+  outputs of both steps contain it with `2Q - 1`, so dropping the windows (`measure_mono`) gives the
+  next input. The one-scale bound for it (the analogue of `exists_pos_le_law_outerSeparated`) is
+  A3a's `exists_pos_le_law_halfArmEvent`, §24.1's outer step and the gluing step into top windows.
+* The landing form of Theorem 11 for `π⁺` uses `IsLanding.exists_windows_half` (hypothesis
+  `3/8 + η ≤ θ i`, `θ i + 2η ≤ 7/8`).
+
+### 26.7 Gate
+
+`scripts/gate.sh 7d084c2` **passed on `79c9b22`** (axiom audit 18117 constants, only `propext`,
+`Classical.choice`, `Quot.sound`; 629 modules in the import closure; the interface NOTICE, expected:
+the classifier names this branch's pending interface file `Arms/Separation/Defs.lean`; no other
+notice). Final lines:
+
+```
+D-35 checks passed (tagged statements, headers of new files).
+INTERFACE change against 7d084c206b9a: Proof PR touches an interface/non-Lean file: PercLib/Models/Planar/Arms/Separation/Defs.lean
+NOTICE: interface change; an auditor must approve before merge.
+== gate passed on 79c9b222ded00a1dcd3e0fd3ab2599e97d6eb520
+```
+
+This note's commit changes only `docs/`.
+
+### 26.8 Lessons
+
+* **`split_ifs` prunes branches with hypotheses in context**: with `t ≠ 2` known, the branch
+  `if t = 2` disappears and the case names shift.
+* **A line-wrapping script must not split tactic lines**: a `first | … | …` split over two lines is
+  a parse error ("unexpected token '|'"). Keep long tactic alternatives short or restructure.
+* `omega` proves goals mixing `Fin 4`/`Fin 3` equalities with integers (`t = 1`, `(lam + ↑↑t) % 4 = 2`
+  ⇒ `lam = 1`), so sides can be matched with lifted sides without `fin_cases`.
+* Deprecations on this toolchain: `if_pos`/`if_neg` → `ite_eq_left`/`ite_eq_right`,
+  `if_true`/`if_false` → `ite_true`/`ite_false`, `push_neg` → `push Not`; `show` that changes the
+  goal is linted (use `change`).
+* Keep the plane's linking equalities (`eW1…eW4`: casts of products) when copying a proof: `omega`
+  needs them to identify `↑((2n₁ + 1) W)` with `(2↑n₁ + 1)↑W`.
+* Template generation of the event texts (Python, `{{NAME}}` placeholders, wrapping at 100
+  columns) gave ~2500 lines; most theorems compiled at the first build.
