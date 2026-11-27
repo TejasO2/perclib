@@ -440,7 +440,8 @@ part followed by a rerouted final crossing), whose landing positions `L i` are a
 apart and in `[8R + 4 √η N, 12R - 4 √η N]`, and each of which carries a fence above its end `b'`:
 a crossing of its colour from the left side to the right side of
 `[b'₀ - ⌊η N⌋, b'₀ + ⌊η N⌋] × [b'₁, b'₁ + ⌊√η N⌋]` whose left end is joined in its colour to a
-vertex of the new arm inside the ball of radius `⌊√η N⌋` around `b'`. -/
+vertex of the new arm inside the ball of radius `⌊√η N⌋` around `b'`. Every vertex (face) of a new
+arm is one of the old arm or lies in the strip, at height at least `z₁ + R - N - 1`. -/
 theorem exists_reroute_top {η : ℝ} {N R : ℕ} (hR : R = 2 * N + 1) (hr : r < N)
     (hω : ω ∈ {ω | ∀ (ι : Type) [Finite ι] (σ : ι → Bool) (a b : ι → LatticeSite 2)
       (γ : ∀ i, (zdGraph 2).Walk (a i) (b i)),
@@ -489,6 +490,7 @@ theorem exists_reroute_top {η : ℝ} {N R : ℕ} (hR : R = 2 * N + 1) (hr : r <
         IsArm ω (σ i) z r (z - R) (z + R) Γ ∧
         innerPos z r (σ i) Γ = innerPos z r (σ i) (γ i) ∧
         landingPos (z - R) (z + R) (σ i) Γ = L i ∧
+        (∀ v ∈ Γ.support, v ∈ (γ i).support ∨ z 1 + R - N - 1 ≤ v 1) ∧
         ∃ x ∈ Γ.support, ∃ l r' : LatticeSite 2,
           cond (σ i) ω (dualConfig ω) ∩ (zdGraph 2).edgeSet ∈ localConn
             (Icc (b' - (⌊Real.sqrt η * N⌋₊ : LatticeSite 2))
@@ -590,13 +592,23 @@ theorem exists_reroute_top {η : ℝ} {N R : ℕ} (hR : R = 2 * N + 1) (hr : r <
       have h0 := hγ i
       rw [← hpq i hi] at h0
       exact h0.append_right hS hT hb hE
-    refine ⟨b'' ⟨i, hi⟩, (p i hi).append (γ'' ⟨i, hi⟩), hArm, ?_, ?_, y, ?_, l, r', hyl, hb1, hl,
-      hr', by rwa [hb1]⟩
+    refine ⟨b'' ⟨i, hi⟩, (p i hi).append (γ'' ⟨i, hi⟩), hArm, ?_, ?_, ?_, y, ?_, l, r', hyl, hb1,
+      hl, hr', by rwa [hb1]⟩
     · rw [innerPos_append _ (hpne i hi)]
       conv_rhs => rw [← hpq i hi]
       rw [innerPos_append _ (hpne i hi)]
     · beta_reduce
       rw [dite_eq_left hi, hArm.landingPos_eq_of_top (by omega) hb1]
+    · intro v hv
+      rw [SimpleGraph.Walk.mem_support_append_iff] at hv
+      rcases hv with hv | hv
+      · left
+        rw [← hpq i hi, SimpleGraph.Walk.mem_support_append_iff]
+        exact Or.inl hv
+      · right
+        revert h1
+        cases σ i <;> rintro ⟨-, -, hS, -⟩ <;> have := mem_Icc_two_iff.1 (hS v hv) <;>
+          simp only [Matrix.cons_val_zero, Matrix.cons_val_one] at this <;> omega
     · rw [SimpleGraph.Walk.mem_support_append_iff]
       exact Or.inr hy
   · have h4 := H4 ⟨i, hi⟩ ⟨k, hk⟩ (fun h => hik (congrArg Subtype.val h))
@@ -1893,7 +1905,7 @@ theorem exists_separating_event {j : ℕ} (σ : Fin j → Bool)
       HasOuterFence ω (σ i) z R ⌊Real.sqrt η * N⌋₊ ⌊η * N⌋₊ Γ := by
     intro i
     rcases hcase i with ⟨h1, -, hΛi⟩ | ⟨h1, -, hΛi⟩ | ⟨h1, -, hΛi⟩ | ⟨h1, -, hΛi⟩
-    · obtain ⟨b', Γ, hΓ, hin, hL, x, hx, l, r', hxl, hfen⟩ := ht1 i h1
+    · obtain ⟨b', Γ, hΓ, hin, hL, -, x, hx, l, r', hxl, hfen⟩ := ht1 i h1
       exact ⟨b', Γ, hΓ, hin, hL.trans hΛi.symm, x, hx, l, r', hxl, Or.inl hfen⟩
     · obtain ⟨b', Γ, hΓ, hin, hL, x, hx, l, r', hxl, hfen⟩ := hr1 i h1
       exact ⟨b', Γ, hΓ, hin, hL.trans hΛi.symm, x, hx, l, r', hxl, Or.inr (Or.inl hfen)⟩

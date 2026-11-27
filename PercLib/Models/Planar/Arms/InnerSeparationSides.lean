@@ -95,8 +95,8 @@ theorem exists_law_separable_ge_strip (c : ℕ → ℝ≥0∞) (w : ℕ) (hw : 1
               (Icc (b' i - (⌊Real.sqrt η * N⌋₊ : LatticeSite 2))
                 (b' i + (⌊Real.sqrt η * N⌋₊ : LatticeSite 2))) x l} := by
   obtain ⟨η, hη, hη1, N₀, hsep⟩ := exists_law_separable_ge_aux_wide c w hw hδ
-  refine ⟨η, hη, hη1, N₀, fun q L h lo hi N hhi0 hhi1 hN hNL => (hsep q L h N hN hNL 0
-    lo hi ![lo 0, lo 1 - 1] ![hi 0 - 1, hi 1] lo hi le_rfl zero_le_one
+  refine ⟨η, hη, hη1, N₀, fun q L h lo hi N hhi0 hhi1 hN hNL => (hsep q L h N hN hNL 0 0
+    lo hi ![lo 0, lo 1 - 1] ![hi 0 - 1, hi 1] lo hi le_rfl zero_le_one le_rfl zero_le_one
     (eq_vec_two_iff.2 ⟨hhi0, hhi1⟩) (eq_vec_two_iff.2 ⟨by simp, by simp⟩)
     (eq_vec_two_iff.2 ⟨by simp, by simp⟩) (eq_vec_two_iff.2 ⟨by simp, by simp⟩)
     (eq_vec_two_iff.2 ⟨by simp, by simp⟩)).trans

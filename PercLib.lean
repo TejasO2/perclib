@@ -186,7 +186,9 @@ public import PercLib.Models.Planar.Arms.ConnectionComparison
 public import PercLib.Models.Planar.Arms.CorridorGluing
 public import PercLib.Models.Planar.Arms.Defs
 public import PercLib.Models.Planar.Arms.Extendability
+public import PercLib.Models.Planar.Arms.HalfOuterSeparation
 public import PercLib.Models.Planar.Arms.HalfPlaneExponents
+public import PercLib.Models.Planar.Arms.HalfSeparationSides
 public import PercLib.Models.Planar.Arms.IncipientCluster
 public import PercLib.Models.Planar.Arms.InnerArmSeparation
 public import PercLib.Models.Planar.Arms.InnerFamilyGluing
