@@ -189,7 +189,9 @@ public import PercLib.Models.Planar.Arms.Extendability
 public import PercLib.Models.Planar.Arms.HalfGluing
 public import PercLib.Models.Planar.Arms.HalfOuterSeparation
 public import PercLib.Models.Planar.Arms.HalfPlaneExponents
+public import PercLib.Models.Planar.Arms.HalfRotationGluing
 public import PercLib.Models.Planar.Arms.HalfSeparationSides
+public import PercLib.Models.Planar.Arms.HalfTurnCorridors
 public import PercLib.Models.Planar.Arms.IncipientCluster
 public import PercLib.Models.Planar.Arms.InnerArmSeparation
 public import PercLib.Models.Planar.Arms.InnerFamilyGluing
