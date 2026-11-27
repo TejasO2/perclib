@@ -187,7 +187,9 @@ public import PercLib.Models.Planar.Arms.CorridorGluing
 public import PercLib.Models.Planar.Arms.Defs
 public import PercLib.Models.Planar.Arms.Extendability
 public import PercLib.Models.Planar.Arms.HalfCapGluing
+public import PercLib.Models.Planar.Arms.HalfFirstGluing
 public import PercLib.Models.Planar.Arms.HalfGluing
+public import PercLib.Models.Planar.Arms.HalfMotionPlan
 public import PercLib.Models.Planar.Arms.HalfOuterSeparation
 public import PercLib.Models.Planar.Arms.HalfPlaneExponents
 public import PercLib.Models.Planar.Arms.HalfRotationGluing
