@@ -1954,6 +1954,498 @@ theorem exists_halfArmEvent_three_bounds :
     rw [measureReal_def, le_div_iff₀ (by positivity)]
     nlinarith [sq_nonneg (R : ℝ)]
 
+/-! ### Open–dual–open: the dual construction -/
+
+/-- **Opening three edges and closing one**, all of probability one half, multiplies a
+probability by at most `16`. -/
+theorem law_setOf_insert_insert_insert_sdiff_mem_le {q : Sym2 (LatticeSite 2) → unitInterval}
+    {e₁ e₂ e₃ e₄ : Sym2 (LatticeSite 2)} (h₁ : (q e₁ : ℝ) = 1 / 2) (h₂ : (q e₂ : ℝ) = 1 / 2)
+    (h₃ : (q e₃ : ℝ) = 1 / 2) (h₄ : (q e₄ : ℝ) = 1 / 2) (F : Set (Config (LatticeSite 2))) :
+    law q {ω | insert e₁ (insert e₂ (insert e₃ (ω \ {e₄}))) ∈ F} ≤ 16 * law q F := by
+  calc law q {ω | insert e₁ (insert e₂ (insert e₃ (ω \ {e₄}))) ∈ F}
+      ≤ 2 * law q {η | insert e₁ (insert e₂ (insert e₃ η)) ∈ F} :=
+        law_setOf_diff_singleton_mem_le h₄ {η | insert e₁ (insert e₂ (insert e₃ η)) ∈ F}
+    _ ≤ 2 * (2 * law q {η | insert e₁ (insert e₂ η) ∈ F}) :=
+        mul_le_mul_right (law_setOf_insert_mem_le h₃ {η | insert e₁ (insert e₂ η) ∈ F}) _
+    _ ≤ 2 * (2 * (2 * law q {η | insert e₁ η ∈ F})) :=
+        mul_le_mul_right (mul_le_mul_right (law_setOf_insert_mem_le h₂
+          {η | insert e₁ η ∈ F}) _) _
+    _ ≤ 2 * (2 * (2 * (2 * law q F))) :=
+        mul_le_mul_right (mul_le_mul_right (mul_le_mul_right (law_setOf_insert_mem_le h₁ F) _) _) _
+    _ = 16 * law q F := by ring
+
+/-- **Three half-plane arms, open–dual–open, from walks at an extended lowest face** (the lower
+bound, assembly). Let the face `x` (lower-left corner `x`) lie on the bottom row of the box
+`Icc lo hi`, joined to a face `w` of its top row by a dual-open walk of faces of the box, and let
+the left, bottom and right edges of `x` be open. Let walks of the dual of the dual configuration,
+sharing no vertex, go from the faces on the left of `x` and at `x`, at or above the bottom row,
+to faces outside the box (in `ω` they are open walks from the upper corners of `x`, translated
+by `(-1, -1)`). If `B_R(x)`, `R ≥ 2`, fits in the box above the row, then `x` has three arms to
+distance `R` in the half-plane, open, dual, open: the open arms go round the face `x` through its
+left edge, and through its bottom and right edges, and continue along the translated walks. -/
+theorem mem_halfArmEvent_three_open_of_dualWalks {R : ℕ} (hR : 2 ≤ R)
+    {x xl xu xr xur w gl gr : LatticeSite 2} (hx1 : x 1 = lo 1)
+    (hfit : lo 0 + R ≤ x 0 ∧ x 0 + R ≤ hi 0 ∧ x 1 + R ≤ hi 1)
+    (hxl : xl 0 + 1 = x 0 ∧ xl 1 = x 1) (hxu : xu 0 = x 0 ∧ xu 1 = x 1 + 1)
+    (hxr : xr 0 = x 0 + 1 ∧ xr 1 = x 1) (hxur : xur 0 = x 0 + 1 ∧ xur 1 = x 1 + 1)
+    (hw1 : w 1 = hi 1)
+    (hxw : dualConfig ω ∩ (zdGraph 2).edgeSet ∈ localConn (Icc lo hi) x w)
+    (heL : s(x, xu) ∈ ω) (heB : s(x, xr) ∈ ω) (heR : s(xr, xur) ∈ ω)
+    (δl : (zdGraph 2).Walk xl gl) (hgl : gl ∉ Icc lo (hi - 1))
+    (hδl1 : ∀ h ∈ δl.support, lo 1 ≤ h 1)
+    (hδlE : ∀ E ∈ δl.edges, E ∈ dualConfig (dualConfig ω))
+    (δr : (zdGraph 2).Walk x gr) (hgr : gr ∉ Icc lo (hi - 1))
+    (hδr1 : ∀ h ∈ δr.support, lo 1 ≤ h 1)
+    (hδrE : ∀ E ∈ δr.edges, E ∈ dualConfig (dualConfig ω))
+    (hdisj : ∀ h ∈ δl.support, h ∉ δr.support) :
+    ω ∈ halfArmEvent ![true, false, true] x 0 R := by
+  classical
+  have hR1 : 1 ≤ R := by omega
+  have hpt : ∀ u v : LatticeSite 2, u 0 = v 0 → u 1 = v 1 → u = v :=
+    fun u v h0 h1 => funext (Fin.forall_fin_two.2 ⟨h0, h1⟩)
+  obtain ⟨φ, hφ⟩ := exists_zdGraph_iso_add (d := 2) 1
+  set f : zdGraph 2 →g zdGraph 2 := φ.toHom with hfdef
+  have hf : ∀ v, f v = v + 1 := fun v => hφ v
+  have hf' : (⇑f : LatticeSite 2 → LatticeSite 2) = (· + 1) := funext hf
+  have hfi : Function.Injective f := by rw [hf']; exact add_left_injective 1
+  -- the open edges of the dual of the dual configuration
+  have hdd : ∀ E ∈ dualConfig (dualConfig ω), Sym2.map f E ∈ ω := by
+    intro E hE
+    rw [dualConfig_dualConfig] at hE
+    obtain ⟨g, ⟨hgω, -⟩, rfl⟩ := hE
+    have h : ((fun v : LatticeSite 2 => v + 1) ∘ fun v => v - 1) = id := by
+      funext v
+      simp
+    rw [hf', Sym2.map_map, h, Sym2.map_id, id]
+    exact hgω
+  -- the interior of `B_R(x)`
+  have hxT : x ∈ Icc (x - (R : LatticeSite 2) + 1) (x + R - 1) := by
+    rw [mem_Icc_two_iff]
+    simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply, Pi.one_apply]
+    omega
+  have hxrT : xr ∈ Icc (x - (R : LatticeSite 2) + 1) (x + R - 1) := by
+    rw [mem_Icc_two_iff]
+    simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply, Pi.one_apply]
+    omega
+  have hout : ∀ g : LatticeSite 2, g ∉ Icc lo (hi - 1) → lo 1 ≤ g 1 →
+      f g ∉ Icc (x - (R : LatticeSite 2) + 1) (x + R - 1) := fun g hg hg1 h => hg (by
+    rw [hf, mem_Icc_two_iff] at h
+    rw [mem_Icc_two_iff]
+    simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply, Pi.one_apply] at h ⊢
+    omega)
+  -- the left open arm: up the left edge of `x`, then along the translated left walk
+  have hfxl : f xl = xu := by
+    rw [hf]
+    exact hpt _ _ (by simp only [Pi.add_apply, Pi.one_apply]; omega)
+      (by simp only [Pi.add_apply, Pi.one_apply]; omega)
+  have hfx : f x = xur := by
+    rw [hf]
+    exact hpt _ _ (by simp only [Pi.add_apply, Pi.one_apply]; omega)
+      (by simp only [Pi.add_apply, Pi.one_apply]; omega)
+  have hadjL : (zdGraph 2).Adj x (f xl) := by rw [hfxl, zdGraph_two_adj_iff]; omega
+  obtain ⟨pL, DL, sL, hDLs, hpL, hDL⟩ := SimpleGraph.Walk.exists_append_eq_of_notMem
+    (T := Icc (x - (R : LatticeSite 2) + 1) (x + R - 1)) (δl.map f)
+    (hout gl hgl (hδl1 gl δl.end_mem_support))
+  have hDLsupp : ∀ v ∈ DL.support, ∃ h ∈ δl.support, v = f h := fun v hv => by
+    have : v ∈ (δl.map f).support := by
+      rw [← hDLs, SimpleGraph.Walk.mem_support_append_iff]; exact Or.inl hv
+    rw [SimpleGraph.Walk.support_map, List.mem_map] at this
+    obtain ⟨h, hh, rfl⟩ := this
+    exact ⟨h, hh, rfl⟩
+  have hDLe : ∀ e ∈ DL.edges, e ∈ ω := fun e he => by
+    have : e ∈ (δl.map f).edges := by
+      rw [← hDLs, SimpleGraph.Walk.edges_append]; exact List.mem_append_left _ he
+    rw [SimpleGraph.Walk.edges_map, List.mem_map] at this
+    obtain ⟨E, hE, rfl⟩ := this
+    exact hdd E (hδlE E hE)
+  have hrowL : ∀ v ∈ DL.support, x 1 + 1 ≤ v 1 := fun v hv => by
+    obtain ⟨h, hh, rfl⟩ := hDLsupp v hv
+    have := hδl1 h hh
+    rw [hf]
+    simp only [Pi.add_apply, Pi.one_apply]
+    omega
+  -- the right open arm: along the bottom and up the right edge of `x`, then the right walk
+  have hadjR₁ : (zdGraph 2).Adj x xr := by rw [zdGraph_two_adj_iff]; omega
+  have hadjR₂ : (zdGraph 2).Adj xr (f x) := by rw [hfx, zdGraph_two_adj_iff]; omega
+  obtain ⟨pR, DR, sR, hDRs, hpR, hDR⟩ := SimpleGraph.Walk.exists_append_eq_of_notMem
+    (T := Icc (x - (R : LatticeSite 2) + 1) (x + R - 1))
+    (SimpleGraph.Walk.cons hadjR₂ (δr.map f)) (hout gr hgr (hδr1 gr δr.end_mem_support))
+  have hDRsupp : ∀ v ∈ DR.support, v = xr ∨ ∃ h ∈ δr.support, v = f h := fun v hv => by
+    have : v ∈ (SimpleGraph.Walk.cons hadjR₂ (δr.map f)).support := by
+      rw [← hDRs, SimpleGraph.Walk.mem_support_append_iff]; exact Or.inl hv
+    rw [SimpleGraph.Walk.support_cons, List.mem_cons, SimpleGraph.Walk.support_map,
+      List.mem_map] at this
+    rcases this with rfl | ⟨h, hh, rfl⟩
+    · exact Or.inl rfl
+    · exact Or.inr ⟨h, hh, rfl⟩
+  have hDRe : ∀ e ∈ DR.edges, e ∈ ω := fun e he => by
+    have : e ∈ (SimpleGraph.Walk.cons hadjR₂ (δr.map f)).edges := by
+      rw [← hDRs, SimpleGraph.Walk.edges_append]; exact List.mem_append_left _ he
+    rw [SimpleGraph.Walk.edges_cons, List.mem_cons, SimpleGraph.Walk.edges_map,
+      List.mem_map] at this
+    rcases this with rfl | ⟨E, hE, rfl⟩
+    · rw [hfx]; exact heR
+    · exact hdd E (hδrE E hE)
+  have hrowR : ∀ v ∈ DR.support, x 1 ≤ v 1 ∧ v ≠ x := fun v hv => by
+    rcases hDRsupp v hv with rfl | ⟨h, hh, rfl⟩
+    · exact ⟨by omega, fun h => by have := congrFun h 0; omega⟩
+    · have := hδr1 h hh
+      rw [hf]
+      refine ⟨by simp only [Pi.add_apply, Pi.one_apply]; omega, fun h' => ?_⟩
+      have := congrFun h' 1
+      simp only [Pi.add_apply, Pi.one_apply] at this
+      omega
+  -- the two open arms
+  have hS : ∀ v : LatticeSite 2,
+      v ∈ Icc (x - ((0 : ℕ) : LatticeSite 2)) (x + ((0 : ℕ) : LatticeSite 2)) → v = x := by
+    intro v hv
+    simpa using hv
+  have hαL : IsOpenArm ω x 0 (x - R) (x + R) (SimpleGraph.Walk.cons hadjL DL) := by
+    refine ⟨⟨by simp, fun v hv hvS => ?_, hpL, fun v hv => ?_⟩, fun e he => ?_⟩
+    · rw [SimpleGraph.Walk.support_cons, List.tail_cons] at hv
+      have := hrowL v hv
+      rw [hS v hvS] at this
+      omega
+    · rw [SimpleGraph.Walk.support_cons, List.dropLast_cons_of_ne_nil
+        (SimpleGraph.Walk.support_ne_nil _), List.mem_cons] at hv
+      rcases hv with rfl | hv
+      · exact hxT
+      · exact hDL v hv
+    · rw [SimpleGraph.Walk.edges_cons, List.mem_cons] at he
+      rcases he with rfl | he
+      · rw [hfxl]; exact heL
+      · exact hDLe e he
+  have hαR : IsOpenArm ω x 0 (x - R) (x + R) (SimpleGraph.Walk.cons hadjR₁ DR) := by
+    refine ⟨⟨by simp, fun v hv hvS => ?_, hpR, fun v hv => ?_⟩, fun e he => ?_⟩
+    · rw [SimpleGraph.Walk.support_cons, List.tail_cons] at hv
+      exact (hrowR v hv).2 (hS v hvS)
+    · rw [SimpleGraph.Walk.support_cons, List.dropLast_cons_of_ne_nil
+        (SimpleGraph.Walk.support_ne_nil _), List.mem_cons] at hv
+      rcases hv with rfl | hv
+      · exact hxT
+      · exact hDR v hv
+    · rw [SimpleGraph.Walk.edges_cons, List.mem_cons] at he
+      rcases he with rfl | he
+      · exact heB
+      · exact hDRe e he
+  have hB : Icc (x - ((0 : ℕ) : LatticeSite 2)) (x + ((0 : ℕ) : LatticeSite 2)) ⊆
+      Icc (x - R + 1) (x + R - 1) := fun v hv => by rw [hS v hv]; exact hxT
+  have hαLn := hαL.not_nil hB
+  have hαRn := hαR.not_nil hB
+  have hpLB := hαL.end_mem_boxBoundary hαLn
+  have hpRB := hαR.end_mem_boxBoundary hαRn
+  have hαLH : ∀ v ∈ (SimpleGraph.Walk.cons hadjL DL).support, x 1 ≤ v 1 := fun v hv => by
+    rw [SimpleGraph.Walk.support_cons, List.mem_cons] at hv
+    rcases hv with rfl | hv
+    · exact le_rfl
+    · have := hrowL v hv; omega
+  have hαRH : ∀ v ∈ (SimpleGraph.Walk.cons hadjR₁ DR).support, x 1 ≤ v 1 := fun v hv => by
+    rw [SimpleGraph.Walk.support_cons, List.mem_cons] at hv
+    rcases hv with rfl | hv
+    · exact le_rfl
+    · exact (hrowR v hv).1
+  -- the dual arm, from the face `x` along the dual-open walk to the top
+  obtain ⟨P, hPs, hPe⟩ := exists_walk_of_mem_localConn hxw
+  have hwF : w ∉ Icc (x - (R : LatticeSite 2)) (x + R - 1) := fun h => by
+    rw [mem_Icc_two_iff] at h
+    simp only [Pi.add_apply, Pi.sub_apply, Pi.natCast_apply, Pi.one_apply] at h
+    omega
+  obtain ⟨g₁, δ₁, c, β, hβ, hβs, hβp, hδ₁n, hδ₁d, hg₁, hδ₁s, hδ₁e⟩ :=
+    exists_isDualArm_of_walk hR1 P (by
+      rw [mem_Icc_two_iff]; simp only [Pi.sub_apply, Pi.one_apply]; omega) hwF hPe
+  have hPH : ∀ v ∈ P.support, x 1 ≤ v 1 := fun v hv => by
+    have := hPs v hv
+    rw [mem_Icc_two_iff] at this
+    omega
+  -- the landing order
+  have hlt₁ : landingPos (x - R) (x + R) true (SimpleGraph.Walk.cons hadjR₁ DR) <
+      landingPos (x - R) (x + R) false β := by
+    have h := landingPos_lt_of_dualWalk_left (ω := ω \ {s(x, xr)}) (x := x) (s := xr) (sl := x)
+      (fL := x) hxr.2 (by omega) (by omega) ⟨by omega, hxr.2.symm⟩ ⟨by omega, hxr.2.symm⟩ DR
+      (fun e he => ⟨hDRe e he, fun h => by
+        rw [mem_singleton_iff] at h
+        exact (hrowR x (mem_support_of_mem_edge DR he (h ▸ Sym2.mem_mk_left x xr))).2 rfl⟩)
+      (fun v hv => hαR.mem_Icc hαRn (by
+        rw [SimpleGraph.Walk.support_cons]; exact List.mem_cons_of_mem _ hv))
+      (fun v hv => (hrowR v hv).1) hpRB (fun h => h.2 rfl) δ₁ hδ₁n hδ₁d
+      (fun h hh => hPH h (hδ₁s h hh)) hg₁
+      (fun E hE => dualConfig_anti sdiff_subset (hPe E (hδ₁e E hE)))
+    rw [landingPos_false, hβp]
+    rw [landingPos_true] at h ⊢
+    exact h
+  have hlt₂ : landingPos (x - R) (x + R) false β <
+      landingPos (x - R) (x + R) true (SimpleGraph.Walk.cons hadjL DL) := by
+    have h := lt_landingPos_of_dualWalk_right (ω := ω \ {s(x, xr)}) (x := x) (s := x)
+      (sr := xr) (fR := x) rfl (by omega) (by omega) hxr ⟨rfl, rfl⟩
+      (SimpleGraph.Walk.cons hadjL DL)
+      (fun e he => ⟨hαL.mem_of_mem_edges e he, fun h => by
+        rw [mem_singleton_iff] at h
+        rw [h, SimpleGraph.Walk.edges_cons, List.mem_cons] at he
+        rcases he with he | he
+        · rw [hfxl, Sym2.eq_iff] at he
+          rcases he with ⟨-, he⟩ | ⟨he, -⟩
+          · have := congrFun he 1; omega
+          · have := congrFun he 1; omega
+        · have := hrowL xr (mem_support_of_mem_edge DL he (Sym2.mem_mk_right x xr))
+          omega⟩)
+      (fun v hv => hαL.mem_Icc hαLn hv) hαLH hpLB (fun h => h.2 rfl) δ₁ hδ₁n hδ₁d
+      (fun h hh => hPH h (hδ₁s h hh)) hg₁
+      (fun E hE => dualConfig_anti sdiff_subset (hPe E (hδ₁e E hE)))
+    rw [landingPos_false, hβp]
+    exact h
+  -- the open arms meet only at `x`
+  have hd₀₂ : ∀ v ∈ (SimpleGraph.Walk.cons hadjR₁ DR).support.tail,
+      v ∉ (SimpleGraph.Walk.cons hadjL DL).support := fun v hv hv' => by
+    rw [SimpleGraph.Walk.support_cons, List.tail_cons] at hv
+    rw [SimpleGraph.Walk.support_cons, List.mem_cons] at hv'
+    rcases hv' with rfl | hv'
+    · exact (hrowR v hv).2 rfl
+    obtain ⟨h, hh, rfl⟩ := hDLsupp v hv'
+    rcases hDRsupp _ hv with h' | ⟨h', hh', h''⟩
+    · have := hrowL _ hv'
+      rw [h'] at this
+      omega
+    · exact hdisj h hh (hfi h'' ▸ hh')
+  have hd₂₀ : ∀ v ∈ (SimpleGraph.Walk.cons hadjL DL).support.tail,
+      v ∉ (SimpleGraph.Walk.cons hadjR₁ DR).support := fun v hv hv' => by
+    rw [SimpleGraph.Walk.support_cons, List.tail_cons] at hv
+    exact hd₀₂ v (by
+      rw [SimpleGraph.Walk.support_cons, List.mem_cons] at hv'
+      rcases hv' with rfl | hv'
+      · exfalso
+        have := hrowL _ hv
+        omega
+      · rw [SimpleGraph.Walk.support_cons, List.tail_cons]; exact hv') (by
+        rw [SimpleGraph.Walk.support_cons]; exact List.mem_cons_of_mem _ hv)
+  -- the three arms form the half-plane event
+  have hfam : ∀ i : Fin 3, ∃ (a b : LatticeSite 2) (γ : (zdGraph 2).Walk a b),
+      IsArm ω (![true, false, true] i) x 0 (x - R) (x + R) γ ∧ (∀ v ∈ γ.support, x 1 ≤ v 1) ∧
+      (∀ v ∈ γ.support, ![true, false, true] i = true →
+        v ∈ ![(SimpleGraph.Walk.cons hadjR₁ DR).support, [],
+          (SimpleGraph.Walk.cons hadjL DL).support] i) ∧
+      (∀ v ∈ γ.support.tail, ![true, false, true] i = true →
+        v ∈ ![(SimpleGraph.Walk.cons hadjR₁ DR).support.tail, [],
+          (SimpleGraph.Walk.cons hadjL DL).support.tail] i) ∧
+      landingPos (x - R) (x + R) (![true, false, true] i) γ =
+        ![landingPos (x - R) (x + R) true (SimpleGraph.Walk.cons hadjR₁ DR),
+          landingPos (x - R) (x + R) false β,
+          landingPos (x - R) (x + R) true (SimpleGraph.Walk.cons hadjL DL)] i := by
+    intro i
+    fin_cases i
+    · exact ⟨_, _, _, hαR, hαRH, fun v hv _ => hv, fun v hv _ => hv, rfl⟩
+    · exact ⟨_, _, β, hβ, fun v hv => hPH v (hβs v hv), fun v _ h => absurd h (by decide),
+        fun v _ h => absurd h (by decide), rfl⟩
+    · exact ⟨_, _, _, hαL, hαLH, fun v hv _ => hv, fun v hv _ => hv, rfl⟩
+  choose a b γ hγ hγH hγs hγt hγL using hfam
+  refine mem_halfArmEvent_iff.2 ⟨a, b, γ, hγ, ⟨fun i k hik hi hk v hv hv' => ?_,
+    fun i k hik hi hk => ?_⟩, hγH, ?_⟩
+  · have h₁ := hγt i v hv hi
+    have h₂ := hγs k v hv' hk
+    fin_cases i <;> fin_cases k
+    all_goals first
+      | exact absurd rfl hik
+      | exact absurd hi (by decide)
+      | exact absurd hk (by decide)
+      | exact hd₀₂ v h₁ h₂
+      | exact hd₂₀ v h₁ h₂
+  · fin_cases i <;> fin_cases k
+    all_goals first
+      | exact absurd rfl hik
+      | exact absurd hi (by decide)
+      | exact absurd hk (by decide)
+  · refine Fin.strictMono_iff_lt_succ.2 fun i => ?_
+    fin_cases i
+    · rw [hγL, hγL]
+      exact hlt₁
+    · rw [hγL, hγL]
+      exact hlt₂
+
+/-- **An open–dual–open point from dual crossing events** (the lower bound, deterministic
+part). Under the crossing events of `exists_lowest_of_mem_crossing` for the dual configuration,
+some face `x` of `[-3R, 3R] × [0, R + 1]` is, once its left, bottom and right edges are opened
+and its top edge is closed, the unique lowest face of a dual cluster reaching far, and its lower
+left corner `x` has three half-plane arms to distance `R ≥ 2`, open, dual, open. -/
+theorem exists_mem_halfArmEvent_three_open_of_mem_crossing {R : ℕ} (hR : 2 ≤ R)
+    (hO : dualConfig ω ∈ crossing 1 ![-(R : ℤ), R + 2] ![(R : ℤ), 4 * R])
+    (hB : dualConfig ω ∉ crossing 1 ![-(4 * (R : ℤ)), 0] ![4 * (R : ℤ), R + 1])
+    (hL : dualConfig ω ∉ crossing 0 ![-(3 * (R : ℤ) + 1), 0] ![-(2 * (R : ℤ)), 4 * R])
+    (hR' : dualConfig ω ∉ crossing 0 ![2 * (R : ℤ), 0] ![3 * (R : ℤ) + 1, 4 * R]) :
+    ∃ i ∈ Finset.Icc (-(3 * (R : ℤ))) (3 * R) ×ˢ Finset.Icc (0 : ℤ) (R + 1),
+      insert s(![i.1, i.2], ![i.1, i.2 + 1]) (insert s(![i.1, i.2], ![i.1 + 1, i.2])
+        (insert s(![i.1 + 1, i.2], ![i.1 + 1, i.2 + 1])
+          (ω \ {s(![i.1, i.2 + 1], ![i.1 + 1, i.2 + 1])}))) ∈
+        halfArmEvent ![true, false, true] ![i.1, i.2] 0 R := by
+  obtain ⟨x', w, lo, hi, hk₁, hk₂, hl₁, hl₂, hlo0, hlo1, hhi0, hhi1, hw1, key⟩ :=
+    exists_dualWalks_of_mem_crossing hR hO hB hL hR'
+  obtain ⟨k, l, rfl⟩ : ∃ k l : ℤ, x' = ![k, l] :=
+    ⟨x' 0, x' 1, funext (Fin.forall_fin_two.2 ⟨rfl, rfl⟩)⟩
+  simp only [Matrix.cons_val_zero, Matrix.cons_val_one] at hk₁ hk₂ hl₁ hl₂ hlo1
+  refine ⟨(k, l), Finset.mem_product.2 ⟨Finset.mem_Icc.2 ⟨hk₁, hk₂⟩,
+    Finset.mem_Icc.2 ⟨hl₁, hl₂⟩⟩, ?_⟩
+  have hv : ∀ a b c d : ℤ, (![a, b] : LatticeSite 2) = ![c, d] ↔ a = c ∧ b = d :=
+    fun a b c d => by rw [eq_vec_two_iff]; simp
+  -- the four sides of the face `x` and their dual edges
+  set eL : Sym2 (LatticeSite 2) := s(![k, l], ![k, l + 1]) with heLdef
+  set eB : Sym2 (LatticeSite 2) := s(![k, l], ![k + 1, l]) with heBdef
+  set eR : Sym2 (LatticeSite 2) := s(![k + 1, l], ![k + 1, l + 1]) with heRdef
+  set eT : Sym2 (LatticeSite 2) := s(![k, l + 1], ![k + 1, l + 1]) with heTdef
+  set ω' := insert eL (insert eB (insert eR (ω \ {eT}))) with hω'
+  have hadj : ∀ a b c d : ℤ, (a = c ∧ (b + 1 = d ∨ d + 1 = b)) ∨ (b = d ∧ (a + 1 = c ∨ c + 1 = a)) →
+      s((![a, b] : LatticeSite 2), ![c, d]) ∈ (zdGraph 2).edgeSet := fun a b c d h => by
+    rw [SimpleGraph.mem_edgeSet, zdGraph_two_adj_iff]; simpa using h
+  have hdual : ∀ a b c d a' b' c' d' : ℤ, (a' ≠ c' ∨ b' ≠ d') →
+      (a' = (a + c - b + d - 1) / 2 ∧ b' = (a - c + b + d - 1) / 2 ∨
+        a' = (c + a - d + b - 1) / 2 ∧ b' = (c - a + d + b - 1) / 2) →
+      (c' = (a + c - b + d - 1) / 2 ∧ d' = (a - c + b + d - 1) / 2 ∨
+        c' = (c + a - d + b - 1) / 2 ∧ d' = (c - a + d + b - 1) / 2) →
+      dualEdge s((![a, b] : LatticeSite 2), ![c, d]) = s(![a', b'], ![c', d']) :=
+    fun a b c d a' b' c' d' hne h₁ h₂ => by
+      refine (Sym2.mem_and_mem_iff (by rw [Ne, hv]; omega)).1 ⟨?_, ?_⟩ <;>
+      · simp only [dualEdge_mk, Sym2.mem_iff, hv, Matrix.cons_val_zero, Matrix.cons_val_one]
+        omega
+  have hdT : dualEdge eT = s(![k, l], ![k, l + 1]) :=
+    hdual _ _ _ _ _ _ _ _ (by omega) (by omega) (by omega)
+  have hdL : dualEdge eL = s(![k - 1, l], ![k, l]) :=
+    hdual _ _ _ _ _ _ _ _ (by omega) (by omega) (by omega)
+  have hdR : dualEdge eR = s(![k, l], ![k + 1, l]) :=
+    hdual _ _ _ _ _ _ _ _ (by omega) (by omega) (by omega)
+  have hdB : dualEdge eB = s(![k, l - 1], ![k, l]) :=
+    hdual _ _ _ _ _ _ _ _ (by omega) (by omega) (by omega)
+  have hTL : eT ≠ eL := by rw [heTdef, heLdef, Ne, Sym2.eq_iff, hv, hv, hv, hv]; omega
+  have hTB : eT ≠ eB := by rw [heTdef, heBdef, Ne, Sym2.eq_iff, hv, hv, hv, hv]; omega
+  have hTR : eT ≠ eR := by rw [heTdef, heRdef, Ne, Sym2.eq_iff, hv, hv, hv, hv]; omega
+  have hLω : eL ∈ ω' := mem_insert _ _
+  have hBω : eB ∈ ω' := mem_insert_of_mem _ (mem_insert _ _)
+  have hRω : eR ∈ ω' := mem_insert_of_mem _ (mem_insert_of_mem _ (mem_insert _ _))
+  have hTω : eT ∉ ω' := by
+    simp only [hω', mem_insert_iff, mem_sdiff, mem_singleton_iff, hTL, hTB, hTR, not_true_eq_false,
+      and_false, or_self, not_false_eq_true]
+  have hedge : ∀ e : Sym2 (LatticeSite 2), e ∈ (zdGraph 2).edgeSet →
+      dualEdge (Sym2.map (· + 1) (dualEdge e)) = e := fun e he =>
+    congrArg Subtype.val (dualEdgeEquiv.right_inv ⟨e, he⟩)
+  obtain ⟨hx'w, gl, δl, gr, δr, ⟨hgl, -, hδls, hδlE⟩, ⟨hgr, -, hδrs, hδrE⟩, hdisj⟩ :=
+    key (dualConfig ω') ![k, l + 1] ![k - 1, l] ![k + 1, l] ![k, l - 1] (by simp) (by simp)
+      (by simp) (by simp) (by simp) (by simp) (by simp) (by simp)
+      ((mem_dualConfig_iff' _ _).2 ⟨eT, hadj _ _ _ _ (by omega), hTω, hdT⟩)
+      (by rw [← hdL, dualEdge_mem_dualConfig_iff (hadj _ _ _ _ (by omega))]; exact not_not.2 hLω)
+      (by rw [← hdR, dualEdge_mem_dualConfig_iff (hadj _ _ _ _ (by omega))]; exact not_not.2 hRω)
+      (by rw [← hdB, dualEdge_mem_dualConfig_iff (hadj _ _ _ _ (by omega))]; exact not_not.2 hBω)
+      (fun e he hx => by
+        rw [mem_dualConfig_iff, mem_dualConfig_iff]
+        have hne : ∀ e' : Sym2 (LatticeSite 2), (![k, l] : LatticeSite 2) ∈ dualEdge e' →
+            Sym2.map (· + 1) (dualEdge e) ≠ e' := fun e' h₁ h₂ => hx (by
+          rw [← hedge e he, h₂]; exact h₁)
+        have h₁ := hne eT (by rw [hdT]; exact Sym2.mem_mk_left _ _)
+        have h₂ := hne eL (by rw [hdL]; exact Sym2.mem_mk_right _ _)
+        have h₃ := hne eR (by rw [hdR]; exact Sym2.mem_mk_left _ _)
+        have h₄ := hne eB (by rw [hdB]; exact Sym2.mem_mk_right _ _)
+        simp only [hω', mem_insert_iff, mem_sdiff, mem_singleton_iff, h₁, h₂, h₃, h₄, false_or,
+          not_false_eq_true, and_true])
+  exact mem_halfArmEvent_three_open_of_dualWalks hR (ω := ω') (lo := lo) (hi := hi)
+    (x := ![k, l]) (xl := ![k - 1, l]) (xu := ![k, l + 1]) (xr := ![k + 1, l])
+    (xur := ![k + 1, l + 1]) (by simp [hlo1])
+    ⟨by simp [hlo0]; omega, by simp [hhi0]; omega, by simp [hhi1]; omega⟩ (by simp) (by simp)
+    (by simp) (by simp) hw1 hx'w hLω hBω hRω δl hgl (fun h hh => (hδls h hh).2)
+    (fun E hE => (hδlE E hE).1) δr hgr (fun h hh => (hδrs h hh).2) (fun E hE => (hδrE E hE).1)
+    hdisj
+
+/-- **Three arms in the half-plane, open–dual–open, lower bound** (lowest faces of dual
+clusters). There is `c₁ > 0` with `c₁ ≤ 336 R² · P(A⁺(R))` for the colours open, dual, open,
+every `R ≥ 2` and every profile equal to `1/2` on the edges of `ℤ²`: the construction of the
+dual–open–dual lower bound, for the dual configuration, whose law at `1/2` is that of the
+configuration (self-duality). -/
+theorem exists_pos_le_mul_sq_law_halfArmEvent_three_open :
+    ∃ c₁ : ℝ≥0∞, 0 < c₁ ∧ c₁ ≠ ∞ ∧ ∀ q : Sym2 (LatticeSite 2) → unitInterval,
+      (∀ e ∈ (zdGraph 2).edgeSet, (q e : ℝ) = 1 / 2) → ∀ R : ℕ, 2 ≤ R →
+        c₁ ≤ 336 * (R : ℝ≥0∞) ^ 2 * law q (halfArmEvent ![true, false, true] 0 0 R) := by
+  obtain ⟨c₀, hc₀, hc₀', hlow⟩ := exists_pos_le_law_crossing_inter_compl
+  refine ⟨c₀, hc₀, hc₀', fun q hq R hR => ?_⟩
+  set S := Finset.Icc (-(3 * (R : ℤ))) (3 * R) ×ˢ Finset.Icc (0 : ℤ) (R + 1) with hS
+  set E := crossing 1 ![-(R : ℤ), R + 2] ![(R : ℤ), 4 * R] ∩
+    ((crossing 1 ![-(4 * (R : ℤ)), 0] ![4 * (R : ℤ), R + 1])ᶜ ∩
+      (crossing 0 ![-(3 * (R : ℤ) + 1), 0] ![-(2 * (R : ℤ)), 4 * R])ᶜ ∩
+      (crossing 0 ![2 * (R : ℤ), 0] ![3 * (R : ℤ) + 1, 4 * R])ᶜ) with hEdef
+  have hedge : ∀ u v : LatticeSite 2, (zdGraph 2).Adj u v → (q s(u, v) : ℝ) = 1 / 2 :=
+    fun u v h => hq _ h
+  have hcard : S.card = (6 * R + 1) * (R + 2) := by
+    rw [hS, Finset.card_product, Int.card_Icc, Int.card_Icc]
+    congr 1; omega
+  have hcard' : (S.card : ℝ≥0∞) ≤ 21 * (R : ℝ≥0∞) ^ 2 := by
+    rw [hcard]
+    exact_mod_cast (show (6 * R + 1) * (R + 2) ≤ 21 * R ^ 2 by nlinarith)
+  have htr : ∀ i : ℤ × ℤ, law q (halfArmEvent ![true, false, true] ![i.1, i.2] 0 R) =
+      law q (halfArmEvent ![true, false, true] 0 0 R) := fun i =>
+    law_halfArmEvent_eq_law_halfArmEvent_zero hq _ _ _ _
+  have hEm : MeasurableSet E := (measurableSet_crossing _ _ _).inter
+    ((((measurableSet_crossing _ _ _).compl).inter (measurableSet_crossing _ _ _).compl).inter
+      (measurableSet_crossing _ _ _).compl)
+  have hself : law q (dualConfig ⁻¹' E) = law q E :=
+    law_preimage_dualConfig_eq hq hEm fun ω => by
+      simp only [hEdef, mem_inter_iff, mem_compl_iff, inter_edgeSet_mem_crossing_iff]
+  calc c₀ ≤ law q E := hlow q hq R (by omega)
+    _ = law q (dualConfig ⁻¹' E) := hself.symm
+    _ ≤ law q (⋃ i ∈ S, {ω : Config (LatticeSite 2) | insert s(![i.1, i.2], ![i.1, i.2 + 1])
+          (insert s(![i.1, i.2], ![i.1 + 1, i.2]) (insert s(![i.1 + 1, i.2], ![i.1 + 1, i.2 + 1])
+            (ω \ {s(![i.1, i.2 + 1], ![i.1 + 1, i.2 + 1])}))) ∈
+          halfArmEvent ![true, false, true] ![i.1, i.2] 0 R}) := measure_mono fun ω hω => by
+        obtain ⟨i, hi, h⟩ := exists_mem_halfArmEvent_three_open_of_mem_crossing hR hω.1
+          hω.2.1.1 hω.2.1.2 hω.2.2
+        exact mem_iUnion₂.2 ⟨i, hi, h⟩
+    _ ≤ ∑ i ∈ S, law q {ω : Config (LatticeSite 2) | insert s(![i.1, i.2], ![i.1, i.2 + 1])
+          (insert s(![i.1, i.2], ![i.1 + 1, i.2]) (insert s(![i.1 + 1, i.2], ![i.1 + 1, i.2 + 1])
+            (ω \ {s(![i.1, i.2 + 1], ![i.1 + 1, i.2 + 1])}))) ∈
+          halfArmEvent ![true, false, true] ![i.1, i.2] 0 R} := measure_biUnion_finset_le _ _
+    _ ≤ ∑ i ∈ S, 16 * law q (halfArmEvent ![true, false, true] ![i.1, i.2] 0 R) :=
+        Finset.sum_le_sum fun i _ => law_setOf_insert_insert_insert_sdiff_mem_le
+          (hedge _ _ (by rw [zdGraph_two_adj_iff]; simp))
+          (hedge _ _ (by rw [zdGraph_two_adj_iff]; simp))
+          (hedge _ _ (by rw [zdGraph_two_adj_iff]; simp))
+          (hedge _ _ (by rw [zdGraph_two_adj_iff]; simp)) _
+    _ = 16 * S.card * law q (halfArmEvent ![true, false, true] 0 0 R) := by
+        simp only [htr, Finset.sum_const, nsmul_eq_mul]
+        ring
+    _ ≤ 16 * (21 * (R : ℝ≥0∞) ^ 2) * law q (halfArmEvent ![true, false, true] 0 0 R) := by
+        gcongr
+    _ = 336 * (R : ℝ≥0∞) ^ 2 * law q (halfArmEvent ![true, false, true] 0 0 R) := by ring
+
+/-- **Three arms in the half-plane, open–dual–open, lower bound** (Nolin, Theorem 24(2), for the
+colours of the arms plan). At `1/2`, the probability that the boundary vertex `0` of the upper
+half-plane has an open arm, counterclockwise after it a dual arm, and after that an open arm, to
+distance `R` in the half-plane, is at least `c / R²`. The matching upper bound is not proved here:
+open arms may run along the line, so the lowest points of open–dual–open configurations are not
+separated points of clusters; it needs arm separation in the half-plane. -/
+theorem exists_halfArmEvent_open_dual_open_lower_bound :
+    ∃ c : ℝ, 0 < c ∧ ∀ q : Sym2 (LatticeSite 2) → unitInterval,
+      (∀ e ∈ (zdGraph 2).edgeSet, (q e : ℝ) = 1 / 2) → ∀ R : ℕ, 1 ≤ R →
+        c / R ^ 2 ≤ (law q).real (halfArmEvent ![true, false, true] 0 0 R) := by
+  obtain ⟨c₁, hc₁, hc₁', hlow⟩ := exists_pos_le_mul_sq_law_halfArmEvent_three_open
+  have hc₁r : 0 < c₁.toReal := ENNReal.toReal_pos hc₁.ne' hc₁'
+  refine ⟨c₁.toReal / 1344, by positivity, fun q hq R hR => ?_⟩
+  have key : ∀ R' : ℕ, 2 ≤ R' → c₁.toReal ≤
+      336 * (R' : ℝ) ^ 2 * (law q).real (halfArmEvent ![true, false, true] 0 0 R') := by
+    intro R' hR'
+    have h := ENNReal.toReal_mono (ENNReal.mul_ne_top (ENNReal.mul_ne_top ENNReal.ofNat_ne_top
+      (ENNReal.pow_ne_top (ENNReal.natCast_ne_top R'))) (measure_ne_top _ _)) (hlow q hq R' hR')
+    rw [ENNReal.toReal_mul, ENNReal.toReal_mul, ENNReal.toReal_pow, ENNReal.toReal_natCast,
+      ENNReal.toReal_ofNat] at h
+    rw [measureReal_def]
+    exact h
+  have hP : ∀ R' : ℕ, 0 ≤ (law q).real (halfArmEvent ![true, false, true] 0 0 R') :=
+    fun R' => measureReal_nonneg
+  rcases (show R = 1 ∨ 2 ≤ R by omega) with rfl | hR2
+  · have hmono : (law q).real (halfArmEvent ![true, false, true] 0 0 2) ≤
+        (law q).real (halfArmEvent ![true, false, true] 0 0 1) :=
+      measureReal_mono (halfArmEventIn_subset_halfArmEventIn_of_le (z := 0) (r := 0)
+        (σ := ![true, false, true]) (J := fun _ => univ) (N := 1) (R := 2) (by norm_num)
+        (by norm_num))
+    have h2 := key 2 le_rfl
+    norm_num at h2 ⊢
+    linarith
+  · have h := key R hR2
+    have hR' : (0 : ℝ) < R := by exact_mod_cast (show 0 < R by omega)
+    rw [div_div, div_le_iff₀ (by positivity)]
+    nlinarith [hP R, sq_nonneg (R : ℝ)]
+
 end HalfPlaneThreeArms
 
 end PercLib.Models.Planar
